@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "node16",
+        "lib": ["ES2021"],
+        "module": "node16",
+        "target": "es2017",
+        "outDir": "dist",
+        "rootDir": "src",
+    },
+    "exclude": ["plinkk-base", "dist"]
+}
