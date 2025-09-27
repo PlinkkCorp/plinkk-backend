@@ -1523,6 +1523,7 @@ export namespace Prisma {
   export type UserMinAggregateOutputType = {
     id: string | null
     userName: string | null
+    password: string | null
     email: string | null
     profileLink: string | null
     profileImage: string | null
@@ -1551,6 +1552,7 @@ export namespace Prisma {
   export type UserMaxAggregateOutputType = {
     id: string | null
     userName: string | null
+    password: string | null
     email: string | null
     profileLink: string | null
     profileImage: string | null
@@ -1579,6 +1581,7 @@ export namespace Prisma {
   export type UserCountAggregateOutputType = {
     id: number
     userName: number
+    password: number
     email: number
     profileLink: number
     profileImage: number
@@ -1645,6 +1648,7 @@ export namespace Prisma {
   export type UserMinAggregateInputType = {
     id?: true
     userName?: true
+    password?: true
     email?: true
     profileLink?: true
     profileImage?: true
@@ -1673,6 +1677,7 @@ export namespace Prisma {
   export type UserMaxAggregateInputType = {
     id?: true
     userName?: true
+    password?: true
     email?: true
     profileLink?: true
     profileImage?: true
@@ -1701,6 +1706,7 @@ export namespace Prisma {
   export type UserCountAggregateInputType = {
     id?: true
     userName?: true
+    password?: true
     email?: true
     profileLink?: true
     profileImage?: true
@@ -1816,6 +1822,7 @@ export namespace Prisma {
   export type UserGroupByOutputType = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink: string | null
     profileImage: string | null
@@ -1863,6 +1870,7 @@ export namespace Prisma {
   export type UserSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userName?: boolean
+    password?: boolean
     email?: boolean
     profileLink?: boolean
     profileImage?: boolean
@@ -1898,6 +1906,7 @@ export namespace Prisma {
   export type UserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userName?: boolean
+    password?: boolean
     email?: boolean
     profileLink?: boolean
     profileImage?: boolean
@@ -1926,6 +1935,7 @@ export namespace Prisma {
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userName?: boolean
+    password?: boolean
     email?: boolean
     profileLink?: boolean
     profileImage?: boolean
@@ -1954,6 +1964,7 @@ export namespace Prisma {
   export type UserSelectScalar = {
     id?: boolean
     userName?: boolean
+    password?: boolean
     email?: boolean
     profileLink?: boolean
     profileImage?: boolean
@@ -1979,7 +1990,7 @@ export namespace Prisma {
     selectedCanvasIndex?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "email" | "profileLink" | "profileImage" | "profileIcon" | "profileSiteText" | "iconUrl" | "description" | "profileHoverColor" | "degBackgroundColor" | "neonEnable" | "buttonThemeEnable" | "EnableAnimationArticle" | "EnableAnimationButton" | "EnableAnimationBackground" | "backgroundSize" | "selectedThemeIndex" | "selectedAnimationIndex" | "selectedAnimationButtonIndex" | "selectedAnimationBackgroundIndex" | "animationDurationBackground" | "delayAnimationButton" | "canvaEnable" | "selectedCanvasIndex", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "password" | "email" | "profileLink" | "profileImage" | "profileIcon" | "profileSiteText" | "iconUrl" | "description" | "profileHoverColor" | "degBackgroundColor" | "neonEnable" | "buttonThemeEnable" | "EnableAnimationArticle" | "EnableAnimationButton" | "EnableAnimationBackground" | "backgroundSize" | "selectedThemeIndex" | "selectedAnimationIndex" | "selectedAnimationButtonIndex" | "selectedAnimationBackgroundIndex" | "animationDurationBackground" | "delayAnimationButton" | "canvaEnable" | "selectedCanvasIndex", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     links?: boolean | User$linksArgs<ExtArgs>
     labels?: boolean | User$labelsArgs<ExtArgs>
@@ -2005,6 +2016,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userName: string
+      password: string
       email: string
       profileLink: string | null
       profileImage: string | null
@@ -2459,6 +2471,7 @@ export namespace Prisma {
   interface UserFieldRefs {
     readonly id: FieldRef<"User", 'String'>
     readonly userName: FieldRef<"User", 'String'>
+    readonly password: FieldRef<"User", 'String'>
     readonly email: FieldRef<"User", 'String'>
     readonly profileLink: FieldRef<"User", 'String'>
     readonly profileImage: FieldRef<"User", 'String'>
@@ -9596,6 +9609,7 @@ export namespace Prisma {
   export const UserScalarFieldEnum: {
     id: 'id',
     userName: 'userName',
+    password: 'password',
     email: 'email',
     profileLink: 'profileLink',
     profileImage: 'profileImage',
@@ -9749,6 +9763,7 @@ export namespace Prisma {
     NOT?: UserWhereInput | UserWhereInput[]
     id?: StringFilter<"User"> | string
     userName?: StringFilter<"User"> | string
+    password?: StringFilter<"User"> | string
     email?: StringFilter<"User"> | string
     profileLink?: StringNullableFilter<"User"> | string | null
     profileImage?: StringNullableFilter<"User"> | string | null
@@ -9783,6 +9798,7 @@ export namespace Prisma {
   export type UserOrderByWithRelationInput = {
     id?: SortOrder
     userName?: SortOrder
+    password?: SortOrder
     email?: SortOrder
     profileLink?: SortOrderInput | SortOrder
     profileImage?: SortOrderInput | SortOrder
@@ -9821,6 +9837,7 @@ export namespace Prisma {
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
     userName?: StringFilter<"User"> | string
+    password?: StringFilter<"User"> | string
     profileLink?: StringNullableFilter<"User"> | string | null
     profileImage?: StringNullableFilter<"User"> | string | null
     profileIcon?: StringNullableFilter<"User"> | string | null
@@ -9854,6 +9871,7 @@ export namespace Prisma {
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
     userName?: SortOrder
+    password?: SortOrder
     email?: SortOrder
     profileLink?: SortOrderInput | SortOrder
     profileImage?: SortOrderInput | SortOrder
@@ -9890,6 +9908,7 @@ export namespace Prisma {
     NOT?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"User"> | string
     userName?: StringWithAggregatesFilter<"User"> | string
+    password?: StringWithAggregatesFilter<"User"> | string
     email?: StringWithAggregatesFilter<"User"> | string
     profileLink?: StringNullableWithAggregatesFilter<"User"> | string | null
     profileImage?: StringNullableWithAggregatesFilter<"User"> | string | null
@@ -10265,6 +10284,7 @@ export namespace Prisma {
   export type UserCreateInput = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink?: string | null
     profileImage?: string | null
@@ -10299,6 +10319,7 @@ export namespace Prisma {
   export type UserUncheckedCreateInput = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink?: string | null
     profileImage?: string | null
@@ -10333,6 +10354,7 @@ export namespace Prisma {
   export type UserUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10367,6 +10389,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10401,6 +10424,7 @@ export namespace Prisma {
   export type UserCreateManyInput = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink?: string | null
     profileImage?: string | null
@@ -10429,6 +10453,7 @@ export namespace Prisma {
   export type UserUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10457,6 +10482,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10925,6 +10951,7 @@ export namespace Prisma {
   export type UserCountOrderByAggregateInput = {
     id?: SortOrder
     userName?: SortOrder
+    password?: SortOrder
     email?: SortOrder
     profileLink?: SortOrder
     profileImage?: SortOrder
@@ -10971,6 +10998,7 @@ export namespace Prisma {
   export type UserMaxOrderByAggregateInput = {
     id?: SortOrder
     userName?: SortOrder
+    password?: SortOrder
     email?: SortOrder
     profileLink?: SortOrder
     profileImage?: SortOrder
@@ -10999,6 +11027,7 @@ export namespace Prisma {
   export type UserMinOrderByAggregateInput = {
     id?: SortOrder
     userName?: SortOrder
+    password?: SortOrder
     email?: SortOrder
     profileLink?: SortOrder
     profileImage?: SortOrder
@@ -12163,6 +12192,7 @@ export namespace Prisma {
   export type UserCreateWithoutLinksInput = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink?: string | null
     profileImage?: string | null
@@ -12196,6 +12226,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutLinksInput = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink?: string | null
     profileImage?: string | null
@@ -12245,6 +12276,7 @@ export namespace Prisma {
   export type UserUpdateWithoutLinksInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12278,6 +12310,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutLinksInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12311,6 +12344,7 @@ export namespace Prisma {
   export type UserCreateWithoutLabelsInput = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink?: string | null
     profileImage?: string | null
@@ -12344,6 +12378,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutLabelsInput = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink?: string | null
     profileImage?: string | null
@@ -12393,6 +12428,7 @@ export namespace Prisma {
   export type UserUpdateWithoutLabelsInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12426,6 +12462,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutLabelsInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12459,6 +12496,7 @@ export namespace Prisma {
   export type UserCreateWithoutSocialIconsInput = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink?: string | null
     profileImage?: string | null
@@ -12492,6 +12530,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutSocialIconsInput = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink?: string | null
     profileImage?: string | null
@@ -12541,6 +12580,7 @@ export namespace Prisma {
   export type UserUpdateWithoutSocialIconsInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12574,6 +12614,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutSocialIconsInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12607,6 +12648,7 @@ export namespace Prisma {
   export type UserCreateWithoutBackgroundInput = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink?: string | null
     profileImage?: string | null
@@ -12640,6 +12682,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutBackgroundInput = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink?: string | null
     profileImage?: string | null
@@ -12689,6 +12732,7 @@ export namespace Prisma {
   export type UserUpdateWithoutBackgroundInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12722,6 +12766,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutBackgroundInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12755,6 +12800,7 @@ export namespace Prisma {
   export type UserCreateWithoutNeonColorsInput = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink?: string | null
     profileImage?: string | null
@@ -12788,6 +12834,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutNeonColorsInput = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink?: string | null
     profileImage?: string | null
@@ -12837,6 +12884,7 @@ export namespace Prisma {
   export type UserUpdateWithoutNeonColorsInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12870,6 +12918,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutNeonColorsInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12903,6 +12952,7 @@ export namespace Prisma {
   export type UserCreateWithoutStatusbarInput = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink?: string | null
     profileImage?: string | null
@@ -12936,6 +12986,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutStatusbarInput = {
     id: string
     userName: string
+    password: string
     email: string
     profileLink?: string | null
     profileImage?: string | null
@@ -12985,6 +13036,7 @@ export namespace Prisma {
   export type UserUpdateWithoutStatusbarInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13018,6 +13070,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutStatusbarInput = {
     id?: StringFieldUpdateOperationsInput | string
     userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null

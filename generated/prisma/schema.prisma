@@ -17,6 +17,7 @@ datasource db {
 model User {
   id                               String  @id @unique // username slug (sans espace)
   userName                         String
+  password                         String
   email                            String  @unique
   profileLink                      String? @default("https://github.com")
   profileImage                     String? @default("https://avatars.githubusercontent.com/u/9919?s=200&v=4")

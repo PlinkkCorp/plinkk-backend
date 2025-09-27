@@ -4,14 +4,25 @@ import Fastify from "fastify";
 import path from "path";
 import ejs from "ejs";
 import { existsSync, readFileSync } from "fs";
-import { PrismaClient } from "../generated/prisma/client";
+import { PrismaClient, User } from "../generated/prisma/client";
 import { generateProfileConfig } from "./generateConfig";
 import { minify } from "uglify-js";
+import fastifyCookie from "@fastify/cookie";
+import fastifyFormbody from "@fastify/formbody";
+import bcrypt from "bcrypt";
+import fastifySecureSession, { Session } from "@fastify/secure-session";
+import z from "zod";
 
 const prisma = new PrismaClient();
 const fastify = Fastify({
   logger: true,
 });
+
+declare module "@fastify/secure-session" {
+  interface SessionData {
+    data?: string;
+  }
+}
 
 fastify.register(fastifyView, {
   engine: {
@@ -25,49 +36,118 @@ fastify.register(fastifyStatic, {
   prefix: "/public/", // optional: default '/'
 });
 
-fastify.get("/createFirst", async function (request, reply) {
-  const user = await prisma.user.create({
-    data: {
-      id: "marvideo",
-      email: "marvideomc.pro@gmail.com",
-      userName: "Marvideo",
-    },
-  });
-  const background = await prisma.backgroundColor.create({
-    data: {
-      userId: user.id,
-    },
-  });
-  const labels = await prisma.label.create({
-    data: {
-      userId: user.id,
-    },
-  });
-  const link = await prisma.link.create({
-    data: {
-      userId: user.id,
-    },
-  });
-  const neonColor = await prisma.neonColor.create({
-    data: {
-      userId: user.id,
-    },
-  });
-  const social = await prisma.socialIcon.create({
-    data: {
-      userId: user.id,
-    },
-  });
-  const bar = await prisma.statusbar.create({
-    data: {
-      userId: user.id,
-    },
-  });
-  reply.send({ user });
+fastify.register(fastifyFormbody);
+fastify.register(fastifyCookie);
+
+fastify.register(fastifySecureSession, {
+  sessionName: "session",
+  cookieName: "plinkk-backend",
+  key: readFileSync(path.join(__dirname, "secret-key")),
+  expiry: 24 * 60 * 60,
+  cookie: {
+    path: "/",
+  },
 });
 
 fastify.get("/", function (request, reply) {
   reply.view("index.ejs");
+});
+
+fastify.get("/login", function (request, reply) {
+  reply.view("connect.ejs");
+});
+
+fastify.post("/register", async (req, reply) => {
+  const { username, email, password, passwordVerif } = req.body as {
+    username: string;
+    email: string;
+    password: string;
+    passwordVerif: string;
+  };
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPasswordVerif = await bcrypt.hash(passwordVerif, 10);
+
+  if (await bcrypt.compare(hashedPassword, hashedPasswordVerif))
+    return reply.redirect(
+      "/login?error=" +
+        encodeURIComponent("Password and Verif Password is not the same")
+    );
+
+  try {
+    const emailVerified = z.email().parse(email);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      reply.redirect(
+        "/login?error=" + encodeURIComponent(error.issues[0].message)
+      );
+    }
+  }
+
+  const user = await prisma.user.create({
+    data: {
+      id: username
+        .replaceAll(" ", "-")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, ""),
+      userName: username,
+      email: email,
+      password: hashedPassword,
+    },
+  });
+
+  reply.redirect("/login");
+});
+
+fastify.post("/login", async (request, reply) => {
+  const { email, password } = request.body as {
+    email: string;
+    password: string;
+  };
+  try {
+    const emailVerified = z.email().parse(email);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      reply.redirect(
+        "/login?error=" + encodeURIComponent(error.issues[0].message)
+      );
+    }
+  }
+  const user = await prisma.user.findFirst({
+    where: {
+      email: email,
+    },
+  });
+
+  if (!user) return reply.send("Utilisateur introuvable");
+  const valid = await bcrypt.compare(password, user.password);
+  if (!valid) return reply.send("Mot de passe incorrect");
+
+  request.session.set("data", user.id);
+  reply.redirect("/dashboard");
+});
+
+fastify.get("/dashboard", async function (request, reply) {
+  const data = request.session.get("data");
+  if (!data) return reply.redirect("/login");
+  const userInfo = await prisma.user.findFirst({
+    where: {
+      id: data
+    },
+    omit: {
+      password: true
+    }
+  })
+  if (userInfo === null) return reply.redirect("/login")
+  return reply.view("/dashboard.ejs", { user: userInfo });
+});
+
+fastify.get("/logout", (req, reply) => {
+  req.session.delete();
+  reply.redirect("/login");
 });
 
 fastify.get("/:username", function (request, reply) {
