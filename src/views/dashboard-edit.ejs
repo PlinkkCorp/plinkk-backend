@@ -49,7 +49,7 @@
                         <li><button data-target="#section-background" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800">Arrière‑plan</button></li>
                         <li><button data-target="#section-links" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800">Liens</button></li>
                         <li><button data-target="#section-animations" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800">Animations</button></li>
-                        <li><button data-target="#section-statusbar" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800">Statusbar</button></li>
+                        <li><button data-target="#section-statusbar" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800">Status & Labels</button></li>
                     </ul>
                 </nav>
 
@@ -128,9 +128,12 @@
                             <div class="mb-2"><h4 class="font-medium">Canvas</h4><p class="text-xs text-slate-400">Choisissez l’animation de fond canvas.</p></div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <label class="block text-sm md:col-span-2">
-                                    <div class="mt-1 flex items-center gap-2">
-                                        <select id="selectedCanvasIndex" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-800"></select>
-                                        <button id="openCanvasPicker" type="button" class="h-10 px-3 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Choisir</button>
+                                    <div class="mt-1">
+                                        <select id="selectedCanvasIndex" class="hidden"></select>
+                                        <div class="relative">
+                                            <input id="selectedCanvasLabel" type="text" class="pl-3 pr-20 py-2 w-full rounded bg-slate-900 border border-slate-800 cursor-pointer" placeholder="Cliquer pour choisir" readonly />
+                                            <button id="openCanvasPicker" type="button" class="absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 border border-slate-700">Choisir</button>
+                                        </div>
                                     </div>
                                 </label>
                             </div>
@@ -258,24 +261,24 @@
                                 <h3 class="font-semibold">Choisir une icône</h3>
                                 <button id="iconModalClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
                             </div>
-
-                                <!-- Modal générique de sélection (thèmes, animations, canvas, bouton thème) -->
-                                <div id="pickerModal" class="fixed inset-0 z-50 hidden">
-                                    <div class="absolute inset-0 bg-black/60"></div>
-                                    <div class="relative mx-auto mt-16 w-[92vw] max-w-5xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl">
-                                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800">
-                                            <h3 id="pickerTitle" class="font-semibold">Sélection</h3>
-                                            <button id="pickerClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
-                                        </div>
-                                        <div class="p-4 space-y-3">
-                                            <input id="pickerSearch" type="text" placeholder="Rechercher..." class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700" />
-                                            <div id="pickerGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[64vh] overflow-auto"></div>
-                                        </div>
-                                    </div>
-                                </div>
                             <div class="p-4 space-y-3">
                                 <input id="iconSearch" type="text" placeholder="Rechercher..." class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700" />
                                 <div id="iconGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal générique de sélection (thèmes, animations, canvas, bouton thème) -->
+                    <div id="pickerModal" class="fixed inset-0 z-50 hidden">
+                        <div class="absolute inset-0 bg-black/60"></div>
+                        <div class="relative mx-auto mt-16 w-[92vw] max-w-5xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl">
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+                                <h3 id="pickerTitle" class="font-semibold">Sélection</h3>
+                                <button id="pickerClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
+                            </div>
+                            <div class="p-4 space-y-3">
+                                <input id="pickerSearch" type="text" placeholder="Rechercher..." class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700" />
+                                <div id="pickerGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[64vh] overflow-auto"></div>
                             </div>
                         </div>
                     </div>
