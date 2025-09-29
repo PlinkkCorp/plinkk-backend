@@ -570,7 +570,7 @@ fastify.get("/:username/images/*", function (request, reply) {
   return reply.code(404).send({ error: "non existant file" });
 });
 
-fastify.listen({ port: 3000 }, function (err, address) {
+fastify.listen({ port: 3001 }, function (err, address) {
   if (err) {
     fastify.log.error(err);
     process.exit(1);
