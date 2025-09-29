@@ -262,6 +262,21 @@
   let iconCatalog = [];
   let iconSelectCallback = null; // (slug) => void
 
+  // Known social platforms for URL picker
+  const SOCIAL_PLATFORMS = [
+    { id: 'github', name: 'GitHub', pattern: 'https://github.com/{handle}', iconSlug: 'github' },
+    { id: 'x', name: 'X (Twitter)', pattern: 'https://x.com/{handle}', iconSlug: 'x' },
+    { id: 'twitter', name: 'Twitter', pattern: 'https://twitter.com/{handle}', iconSlug: 'twitter' },
+    { id: 'youtube', name: 'YouTube', pattern: 'https://youtube.com/@{handle}', iconSlug: 'youtube' },
+    { id: 'twitch', name: 'Twitch', pattern: 'https://twitch.tv/{handle}', iconSlug: 'twitch' },
+    { id: 'instagram', name: 'Instagram', pattern: 'https://instagram.com/{handle}', iconSlug: 'instagram' },
+    { id: 'facebook', name: 'Facebook', pattern: 'https://facebook.com/{handle}', iconSlug: 'facebook' },
+    { id: 'linkedin', name: 'LinkedIn', pattern: 'https://www.linkedin.com/in/{handle}', iconSlug: 'linkedin' },
+    { id: 'discord', name: 'Discord Server', pattern: 'https://discord.gg/{handle}', iconSlug: 'discord' },
+    { id: 'apple-music', name: 'Apple Music', pattern: 'https://music.apple.com/{country}/{path}', iconSlug: 'apple-music' },
+    { id: 'apple-podcasts', name: 'Apple Podcasts', pattern: 'https://podcasts.apple.com/{country}/{path}', iconSlug: 'apple-podcasts' },
+  ];
+
   async function ensureIconCatalog() {
     if (iconCatalog.length) return iconCatalog;
     const res = await fetch('/api/icons');
@@ -315,6 +330,13 @@
   // Garde-fou si on clique directement sur le conteneur
   iconModal?.addEventListener('click', (e) => { if (e.target === iconModal) closeIconModal(); });
   iconSearch?.addEventListener('input', () => populateIconGrid(iconSearch.value));
+
+  // Helpers
+  function isUrlish(v) {
+    if (!v || typeof v !== 'string') return false;
+    const s = v.trim();
+    return s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/') || s.startsWith('data:');
+  }
 
   // Generic picker modal (conservé pour : thèmes de boutons & sélection d'icônes sociales étendue)
   const pickerModal = qs('#pickerModal');
@@ -445,58 +467,177 @@
       );
     } else {
       socials.forEach((s, idx) => {
-        const row = el('div', { class: 'grid grid-cols-1 md:grid-cols-5 gap-2 items-center' });
-        const url = el('input', { type: 'url', value: s.url || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 md:col-span-2' });
+        const row = el('div', { class: 'grid grid-cols-1 md:grid-cols-7 gap-2 items-center' });
+        // URL source: Plateforme (readonly + Choisir) | Custom
+        const urlSourceSel = el('select', { class: 'h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm md:col-span-1' });
+        ;['platform','custom'].forEach(v => urlSourceSel.appendChild(el('option', { value: v, text: v === 'platform' ? 'Plateforme' : 'Personnalisé' })));
+        const urlWrap = el('div', { class: 'relative md:col-span-2' });
+        const url = el('input', { type: 'url', value: s.url || '', class: 'pl-3 pr-20 py-2 w-full rounded bg-slate-900 border border-slate-800' });
+        const urlPickBtn = el('button', { type: 'button', text: 'Choisir', class: 'absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 border border-slate-700 hover:bg-slate-700' });
+        urlWrap.append(url, urlPickBtn);
 
-        // Zone icône avec input en lecture seule et bouton intégré
-        const iconWrap = el('div', { class: 'flex items-center gap-2 md:col-span-2' });
+        // Sélecteur de source + preview + champs dépendants
+        const iconWrap = el('div', { class: 'flex items-center gap-2 md:col-span-3' });
         const iconPreview = el('img', { class: 'h-8 w-8 rounded bg-slate-800 border border-slate-700' });
 
-        const inputWrap = el('div', { class: 'relative flex-1' });
-        const iconName = el('input', {
-          type: 'text',
-          value: s.icon || '',
-          class: 'pl-3 pr-20 py-2 w-full rounded bg-slate-900 border border-slate-800 cursor-pointer',
-          placeholder: 'Cliquer pour choisir',
-          readonly: 'true',
-          tabindex: '0'
+        const sourceSel = el('select', { class: 'h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm' }, []);
+        ;['catalog','url','upload'].forEach(v => {
+          const o = el('option', { value: v, text: v === 'catalog' ? 'Librairie' : v === 'url' ? 'Lien' : 'Importer' });
+          sourceSel.appendChild(o);
         });
-        const pickBtn = el('button', {
-          class: 'absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 border border-slate-700 hover:bg-slate-700',
-          text: 'Choisir',
-          type: 'button'
-        });
+
+        // Catalogue (lecture seule + bouton choisir)
+        const catalogWrap = el('div', { class: 'relative flex-1' });
+        const iconName = el('input', { type: 'text', value: s.icon || '', class: 'pl-3 pr-20 py-2 w-full rounded bg-slate-900 border border-slate-800 cursor-pointer', placeholder: 'Cliquer pour choisir', readonly: 'true', tabindex: '0' });
+        const pickBtn = el('button', { class: 'absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 border border-slate-700 hover:bg-slate-700', text: 'Choisir', type: 'button' });
+        catalogWrap.append(iconName, pickBtn);
+
+  // URL directe
+  const iconUrlWrap = el('div', { class: 'flex-1 hidden' });
+  const iconUrlInput = el('input', { type: 'url', class: 'px-3 py-2 w-full rounded bg-slate-900 border border-slate-800', placeholder: 'https://exemple.com/icone.svg' });
+  iconUrlWrap.append(iconUrlInput);
+
+  // Upload
+  const iconUploadWrap = el('div', { class: 'flex-1 hidden' });
+  const fileInput = el('input', { type: 'file', accept: 'image/*,image/svg+xml', class: 'block w-full text-sm text-slate-300 file:mr-2 file:py-2 file:px-3 file:rounded file:border-0 file:text-sm file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700' });
+  iconUploadWrap.append(fileInput);
 
   const rm = trashButton(() => { socials.splice(idx,1); renderSocial(socials); scheduleAutoSave(); });
-        const rmCell = el('div', { class: 'flex justify-end items-center md:col-span-1' });
+  const rmCell = el('div', { class: 'flex justify-end items-center md:col-span-1' });
 
-        function updatePreview() {
-          const slug = (iconName.value || '').toLowerCase().trim().replace(/\s+/g,'-');
-          iconPreview.src = `/${window.__PLINKK_USER_ID__}/images/icons/${slug}.svg`;
+        function setPreviewByValue(val) {
+          if (isUrlish(val)) {
+            iconPreview.src = val;
+          } else {
+            const slug = (val || '').toLowerCase().trim().replace(/\s+/g,'-');
+            iconPreview.src = `/${window.__PLINKK_USER_ID__}/images/icons/${slug}.svg`;
+          }
+        }
+
+        function updateFromCatalog() {
           s.icon = iconName.value;
+          setPreviewByValue(s.icon);
           scheduleAutoSave();
+        }
+        function updateFromUrl() {
+          s.icon = iconUrlInput.value;
+          setPreviewByValue(s.icon);
+          scheduleAutoSave();
+        }
+        function updateFromUpload(file) {
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            s.icon = String(reader.result || '');
+            setPreviewByValue(s.icon);
+            scheduleAutoSave();
+          };
+          reader.readAsDataURL(file);
         }
 
         function openPickerForIcon() {
           openIconModal((slug) => {
             iconName.value = slug;
-            updatePreview();
+            updateFromCatalog();
           });
         }
 
+        // Déterminer la source initiale selon la valeur
+        const initialSource = s.icon ? (s.icon.startsWith('data:') ? 'upload' : (isUrlish(s.icon) ? 'url' : 'catalog')) : 'catalog';
+        sourceSel.value = initialSource;
+  if (initialSource === 'catalog') { catalogWrap.classList.remove('hidden'); iconName.value = s.icon || ''; }
+  if (initialSource === 'url') { iconUrlWrap.classList.remove('hidden'); iconUrlInput.value = s.icon || ''; }
+  if (initialSource === 'upload') { iconUploadWrap.classList.remove('hidden'); }
+        setPreviewByValue(s.icon || iconName.value);
+
+        // Listeners
         pickBtn.addEventListener('click', openPickerForIcon);
         iconName.addEventListener('click', openPickerForIcon);
-        iconName.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPickerForIcon(); }
+        iconName.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPickerForIcon(); } });
+        iconUrlInput.addEventListener('input', updateFromUrl);
+        fileInput.addEventListener('change', (e) => updateFromUpload(e.target.files?.[0]));
+        sourceSel.addEventListener('change', () => {
+          const v = sourceSel.value;
+          catalogWrap.classList.toggle('hidden', v !== 'catalog');
+          iconUrlWrap.classList.toggle('hidden', v !== 'url');
+          iconUploadWrap.classList.toggle('hidden', v !== 'upload');
+          if (v === 'catalog') updateFromCatalog();
+          if (v === 'url') updateFromUrl();
         });
 
-        updatePreview();
-  url.addEventListener('input', () => { s.url = url.value; scheduleAutoSave(); });
+        function openPlatformPicker() {
+          // Use generic picker
+          openPicker({
+            title: 'Choisir une plateforme',
+            type: 'platform',
+            items: SOCIAL_PLATFORMS,
+            renderCard: (item, i) => {
+              const card = document.createElement('button');
+              card.type = 'button';
+              card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left flex items-center gap-3';
+              const img = document.createElement('img');
+              img.src = `/${window.__PLINKK_USER_ID__}/images/icons/${item.iconSlug}.svg`;
+              img.className = 'h-8 w-8 rounded bg-slate-800 border border-slate-700';
+              const col = document.createElement('div');
+              const title = document.createElement('div');
+              title.className = 'font-medium';
+              title.textContent = item.name;
+              const small = document.createElement('div');
+              small.className = 'text-xs text-slate-400';
+              small.textContent = item.pattern;
+              col.append(title, small);
+              card.append(img, col);
+              card.addEventListener('click', () => { if (pickerOnSelect) pickerOnSelect(i); });
+              return card;
+            },
+            onSelect: (i) => {
+              const plat = SOCIAL_PLATFORMS[i];
+              if (!plat) return;
+              let final = '';
+              if (plat.id === 'apple-music') {
+                const country = (window.prompt('Code pays (ex: fr, us) pour Apple Music ?', 'fr') || 'fr').trim();
+                const path = (window.prompt('Chemin Apple Music (ex: artist/12345-nom, album/..., playlist/...)', '') || '').trim().replace(/^\/+/, '');
+                if (country && path) final = `https://music.apple.com/${country}/${path}`;
+              } else if (plat.id === 'apple-podcasts') {
+                const country = (window.prompt('Code pays (ex: fr, us) pour Apple Podcasts ?', 'fr') || 'fr').trim();
+                const path = (window.prompt('Chemin Podcasts (ex: podcast/id1234567890)', '') || '').trim().replace(/^\/+/, '');
+                if (country && path) final = `https://podcasts.apple.com/${country}/${path}`;
+              } else {
+                // Ask handle via prompt pour les autres plateformes
+                const handle = window.prompt(`Votre identifiant pour ${plat.name} ?`);
+                final = plat.pattern.replace('{handle}', (handle || '').trim());
+              }
+              if (final) {
+                url.value = final;
+                s.url = final;
+              }
+              // Si aucune icône définie (ou en mode catalogue), on suggère l’icône correspondante
+              if (!s.icon || (!isUrlish(s.icon) && s.icon.trim() === '')) {
+                iconName.value = plat.iconSlug;
+                updateFromCatalog();
+              }
+              scheduleAutoSave();
+            }
+          });
+        }
 
-        inputWrap.append(iconName, pickBtn);
-        iconWrap.append(iconPreview, inputWrap);
+        // Initialize URL source mode
+        const initialUrlMode = s.url && !/^https?:\/\//i.test(s.url) && !s.url.startsWith('/') ? 'custom' : 'platform';
+        urlSourceSel.value = initialUrlMode;
+        const applyUrlMode = () => {
+          const isPlatform = urlSourceSel.value === 'platform';
+          url.readOnly = isPlatform;
+          url.classList.toggle('cursor-pointer', isPlatform);
+          urlPickBtn.classList.toggle('hidden', !isPlatform);
+        };
+        applyUrlMode();
+        urlSourceSel.addEventListener('change', () => { applyUrlMode(); });
+        url.addEventListener('input', () => { s.url = url.value; scheduleAutoSave(); });
+        urlPickBtn.addEventListener('click', openPlatformPicker);
+
+  iconWrap.append(iconPreview, sourceSel, catalogWrap, iconUrlWrap, iconUploadWrap);
         rmCell.append(rm);
-        row.append(url, iconWrap, rmCell);
+        row.append(urlSourceSel, urlWrap, iconWrap, rmCell);
         f.socialList.appendChild(row);
       });
     }
@@ -517,42 +658,89 @@
     } else {
       links.forEach((l, idx) => {
   const row = el('div', { class: 'grid grid-cols-1 gap-2 md:gap-3' });
-        // Ligne 1: icône (readonly + bouton intégré) + texte + choisir thème
-        const line1 = el('div', { class: 'grid grid-cols-1 md:grid-cols-6 gap-2 items-center' });
-        const iconWrap = el('div', { class: 'md:col-span-3 relative' });
+  // Ligne 1: source icône + contrôles + texte (le choix de thème sera déplacé en ligne 2)
+  const line1 = el('div', { class: 'grid grid-cols-1 md:grid-cols-7 gap-2 items-center' });
+        const iconWrap = el('div', { class: 'md:col-span-4 flex items-center gap-2' });
+        const iconPreview = el('img', { class: 'h-8 w-8 rounded bg-slate-800 border border-slate-700' });
+        const sourceSel = el('select', { class: 'h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm' }, []);
+        ;['catalog','url','upload'].forEach(v => {
+          const o = el('option', { value: v, text: v === 'catalog' ? 'Librairie' : v === 'url' ? 'Lien' : 'Importer' });
+          sourceSel.appendChild(o);
+        });
+        const catalogWrap = el('div', { class: 'relative flex-1' });
         const icon = el('input', { type: 'text', value: l.icon || '', placeholder: 'Cliquer pour choisir', class: 'pl-3 pr-20 py-2 w-full rounded bg-slate-900 border border-slate-800 cursor-pointer' , readonly: 'true', tabindex: '0'});
         const pickBtnIcon = el('button', { class: 'absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 border border-slate-700 hover:bg-slate-700', text: 'Choisir', type: 'button' });
-        iconWrap.append(icon, pickBtnIcon);
-        const text = el('input', { type: 'text', value: l.text || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 md:col-span-2' });
-        const pickBtnTheme = el('button', { class: 'h-10 px-3 text-sm rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 md:justify-self-end', text: 'Choisir', type: 'button' });
-        line1.append(iconWrap, text, pickBtnTheme);
+        catalogWrap.append(icon, pickBtnIcon);
+        const urlWrap = el('div', { class: 'flex-1 hidden' });
+        const iconUrlInput = el('input', { type: 'url', class: 'px-3 py-2 w-full rounded bg-slate-900 border border-slate-800', placeholder: 'https://exemple.com/icone.svg' });
+        urlWrap.append(iconUrlInput);
+        const uploadWrap = el('div', { class: 'flex-1 hidden' });
+        const fileInput = el('input', { type: 'file', accept: 'image/*,image/svg+xml', class: 'block w-full text-sm text-slate-300 file:mr-2 file:py-2 file:px-3 file:rounded file:border-0 file:text-sm file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700' });
+        uploadWrap.append(fileInput);
+        iconWrap.append(iconPreview, sourceSel, catalogWrap, urlWrap, uploadWrap);
 
-        // Ligne 2: url + name + description + supprimer
+    const text = el('input', { type: 'text', value: l.text || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 md:col-span-3' });
+    line1.append(iconWrap, text);
+
+    // Ligne 2: url + bouton de sélection du thème (remplace le champ name)
   const line2 = el('div', { class: 'grid grid-cols-1 md:grid-cols-7 gap-2 items-center' });
-        const url = el('input', { type: 'url', value: l.url || 'https://', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 md:col-span-3' });
-        const name = el('input', { type: 'text', value: l.name || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 md:col-span-2' });
-        const description = el('input', { type: 'text', value: l.description || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800' });
-  const rm = trashButton(() => { links.splice(idx,1); renderLinks(links); scheduleAutoSave(); });
-  const rmCell = el('div', { class: 'flex justify-end items-center' });
-        rmCell.append(rm);
-        line2.append(url, name, description, rmCell);
+  const url = el('input', { type: 'url', value: l.url || 'https://', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 md:col-span-4' });
+  // Contrôle thème: input readonly + petit bouton "Choisir" intégré
+  const themeWrap = el('div', { class: 'relative md:col-span-3' });
+  const themeDisplay = el('input', { type: 'text', class: 'pl-3 pr-20 py-2 w-full rounded bg-slate-900 border border-slate-800 cursor-pointer', readonly: 'true', placeholder: 'Choisir un thème' });
+  themeDisplay.value = (l.name && String(l.name).trim() !== '') ? String(l.name) : '';
+  const themePickBtn = el('button', { class: 'absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 border border-slate-700 hover:bg-slate-700', text: 'Choisir', type: 'button', title: 'Choisir le thème du bouton' });
+  themeWrap.append(themeDisplay, themePickBtn);
+  line2.append(url, themeWrap);
 
-        row.append(line1, line2);
+    // Ligne 3: description (sur sa propre ligne) + supprimer
+    const line3 = el('div', { class: 'grid grid-cols-1 md:grid-cols-7 gap-2 items-center' });
+    const description = el('input', { type: 'text', value: l.description || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 md:col-span-6' });
+    const rm = trashButton(() => { links.splice(idx,1); renderLinks(links); scheduleAutoSave(); });
+    const rmCell = el('div', { class: 'flex justify-end items-center md:col-span-1' });
+    rmCell.append(rm);
+    line3.append(description, rmCell);
+
+    row.append(line1, line2, line3);
+        function setPreviewByValue(val) {
+          if (isUrlish(val)) iconPreview.src = val; else iconPreview.src = val;
+        }
+
         function openIconPickerForLink() {
           openIconModal((slug) => {
             const replaced = `/${window.__PLINKK_USER_ID__}/images/icons/${slug}.svg`;
             icon.value = replaced;
             l.icon = replaced;
+            setPreviewByValue(l.icon);
+            scheduleAutoSave();
           });
         }
         pickBtnIcon.addEventListener('click', openIconPickerForLink);
         icon.addEventListener('click', openIconPickerForLink);
         icon.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openIconPickerForLink(); } });
+        iconUrlInput.addEventListener('input', () => { l.icon = iconUrlInput.value; setPreviewByValue(l.icon); scheduleAutoSave(); });
+        fileInput.addEventListener('change', (e) => { const file = e.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { l.icon = String(reader.result || ''); setPreviewByValue(l.icon); scheduleAutoSave(); }; reader.readAsDataURL(file); });
+
+        // Source initiale
+        const initialSource = l.icon ? (l.icon.startsWith('data:') ? 'upload' : (isUrlish(l.icon) ? 'url' : 'catalog')) : 'catalog';
+        sourceSel.value = initialSource;
+        if (initialSource === 'catalog') { catalogWrap.classList.remove('hidden'); }
+        if (initialSource === 'url') { urlWrap.classList.remove('hidden'); iconUrlInput.value = l.icon || ''; }
+        if (initialSource === 'upload') { uploadWrap.classList.remove('hidden'); }
+        setPreviewByValue(l.icon || icon.value);
+        sourceSel.addEventListener('change', () => {
+          const v = sourceSel.value;
+          catalogWrap.classList.toggle('hidden', v !== 'catalog');
+          urlWrap.classList.toggle('hidden', v !== 'url');
+          uploadWrap.classList.toggle('hidden', v !== 'upload');
+          if (v === 'catalog') { l.icon = icon.value; setPreviewByValue(l.icon); scheduleAutoSave(); }
+          if (v === 'url') { l.icon = iconUrlInput.value; setPreviewByValue(l.icon); scheduleAutoSave(); }
+        });
         text.addEventListener('input', () => { l.text = text.value; scheduleAutoSave(); });
         url.addEventListener('input', () => { l.url = url.value; scheduleAutoSave(); });
-        name.addEventListener('input', () => { l.name = name.value; scheduleAutoSave(); });
+        // Ouverture du picker via le bouton intégré (themeBtn)
         description.addEventListener('input', () => { l.description = description.value; scheduleAutoSave(); });
-        pickBtnTheme.addEventListener('click', () => {
+        const openThemePicker = () => {
           const items = (window.__PLINKK_CFG__?.btnIconThemeConfig) || [];
           openPicker({
             title: 'Choisir un thème de bouton',
@@ -562,7 +750,7 @@
             onSelect: (i) => {
               const chosen = items[i];
               if (chosen?.name) {
-                name.value = chosen.name;
+                themeDisplay.value = chosen.name;
                 l.name = chosen.name; // mapping par name côté rendu public
               }
               if (chosen?.icon) {
@@ -573,7 +761,10 @@
               scheduleAutoSave();
             }
           });
-        });
+        };
+        themePickBtn.addEventListener('click', openThemePicker);
+        themeDisplay.addEventListener('click', openThemePicker);
+        themeDisplay.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openThemePicker(); } });
         f.linksList.appendChild(row);
       });
     }
