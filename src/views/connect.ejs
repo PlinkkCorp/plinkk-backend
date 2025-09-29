@@ -1,174 +1,119 @@
 <!DOCTYPE html>
 <html lang="fr">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connexion / Inscription - Plinkk</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, sans-serif;
-      background: linear-gradient(135deg, #1e1e2f, #252540);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      color: #fff;
-    }
+  <link rel="icon" href="/public/images/logo.svg" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root{ --ease-out-quad: cubic-bezier(.22,1,.36,1); }
+      @keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+      @keyframes slide-up { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+      .animate-fade-in { animation: fade-in .36s var(--ease-out-quad) both }
+      .animate-slide-up { animation: slide-up .38s var(--ease-out-quad) both }
+    </style>
+  </head>
+  <body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100 grid place-items-center p-4 animate-fade-in">
+    <main class="w-full max-w-md">
+      <div class="mb-6 flex items-center justify-center gap-2 text-slate-200 animate-slide-up">
+        <img src="/public/images/logo.svg" alt="Plinkk" class="h-9 w-9 rounded" />
+        <h1 class="text-xl font-semibold">Plinkk</h1>
+      </div>
 
-    .container {
-      position: relative;
-      width: 365px;
-      height: 50%;
-      padding: 2rem;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 1.2rem;
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 0 25px rgba(0, 255, 200, 0.5);
-      overflow: hidden;
-    }
+      <div class="rounded-2xl border border-slate-800/60 bg-slate-900/60 shadow overflow-hidden animate-slide-up" style="animation-delay:60ms">
+        <nav class="grid grid-cols-2 text-sm">
+          <button id="tabLogin" class="px-4 py-3 font-medium border-b-2 border-indigo-500 text-indigo-300">Connexion</button>
+          <button id="tabSignup" class="px-4 py-3 font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200">Inscription</button>
+        </nav>
 
-    .form-box {
-      position: absolute;
-      top: 0;
-      left: 1.4rem;
-      width: 90%;
-      transition: all 0.5s ease;
-      opacity: 1;
-      transform: translateX(0);
-    }
+        <!-- Connexion -->
+        <section id="loginForm" class="p-5 space-y-4">
+          <form action="/login" method="post" class="space-y-3">
+            <label class="block text-sm">
+              <span class="text-slate-300">Adresse e-mail</span>
+              <input type="email" name="email" required class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="vous@exemple.com" />
+            </label>
+            <label class="block text-sm">
+              <span class="text-slate-300">Mot de passe</span>
+              <input type="password" name="password" required class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="••••••••" />
+            </label>
+            <button type="submit" class="w-full mt-2 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 shadow transition-colors">Se connecter</button>
+          </form>
+          <p class="errorClass"></p>
+          <p class="text-center text-xs text-slate-400">Pas de compte ? <button id="switchToSignup" class="text-indigo-300 hover:text-indigo-200 underline underline-offset-4">Créer un compte</button></p>
+        </section>
 
-    .form-box.hidden {
-      opacity: 0;
-      transform: translateX(100%);
-      pointer-events: none;
-    }
+        <!-- Inscription -->
+        <section id="signupForm" class="p-5 space-y-4 hidden">
+          <form action="/register" method="post" class="space-y-3">
+            <label class="block text-sm">
+              <span class="text-slate-300">Nom d'utilisateur</span>
+              <input type="text" name="username" required class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="votrepseudo" />
+            </label>
+            <label class="block text-sm">
+              <span class="text-slate-300">Adresse e-mail</span>
+              <input type="email" name="email" required class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="vous@exemple.com" />
+            </label>
+            <label class="block text-sm">
+              <span class="text-slate-300">Mot de passe</span>
+              <input type="password" name="password" required class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="••••••••" />
+            </label>
+            <label class="block text-sm">
+              <span class="text-slate-300">Confirmer le mot de passe</span>
+              <input type="password" name="passwordVerif" required class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="••••••••" />
+            </label>
+            <button type="submit" class="w-full mt-2 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 shadow transition-colors">S'inscrire</button>
+          </form>
+          <p class="errorClass"></p>
+          <p class="text-center text-xs text-slate-400">Déjà un compte ? <button id="switchToLogin" class="text-indigo-300 hover:text-indigo-200 underline underline-offset-4">Se connecter</button></p>
+        </section>
+      </div>
+    </main>
 
-    h1 {
-      text-align: center;
-      color: #00ffc8;
-      margin-bottom: 1rem;
-    }
+    <script>
+      function getQueryVariable(variable){
+        const query = window.location.search.substring(1);
+        const vars = query.split('&');
+        for(const v of vars){
+          const pair = v.split('=');
+          if(pair[0] === variable){ return pair[1]; }
+        }
+        return '';
+      }
 
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-
-    input {
-      padding: 0.8rem;
-      border-radius: 8px;
-      border: none;
-      background: rgba(255, 255, 255, 0.12);
-      color: #fff;
-      font-size: 1rem;
-      outline: none;
-    }
-
-    input::placeholder {
-      color: #ccc;
-    }
-
-    button {
-      margin-top: 0.8rem;
-      padding: 0.9rem;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.2s;
-    }
-
-    .submit-btn {
-      background: #00ffc8;
-      color: #111;
-    }
-
-    .toggle-btn {
-      background: rgba(255, 255, 255, 0.15);
-      color: #fff;
-    }
-
-    .submit-btn:hover {
-      box-shadow: 0 0 20px #00ffc8;
-      transform: translateY(-2px);
-    }
-
-    .toggle-btn:hover {
-      background: rgba(255, 255, 255, 0.25);
-    }
-
-    .error {
-      background-color: #ff1f1f;
-      border-radius: 12px;
-      padding: 0.5rem;
-    }
-  </style>
-</head>
-
-<body onload="loadError()">
-
-  <div class="container">
-    <!-- Connexion -->
-    <div class="form-box" id="loginForm">
-      <h1>Connexion</h1>
-      <form action="/login" method="post">
-        <input type="email" name="email" placeholder="Adresse e-mail" required>
-        <input type="password" name="password" placeholder="Mot de passe" required>
-        <button class="submit-btn" type="submit">Se connecter</button>
-      </form>
-      <p class="errorClass"></p>
-      <button class="toggle-btn" onclick="toggleForms()">Créer un compte</button>
-    </div>
-
-    <!-- Inscription -->
-    <div class="form-box hidden" id="signupForm">
-      <h1>Inscription</h1>
-      <form action="/register" method="post">
-        <input type="text" name="username" placeholder="Nom d'utilisateur" required>
-        <input type="email" name="email" placeholder="Adresse e-mail" required>
-        <input type="password" name="password" placeholder="Mot de passe" required>
-        <input type="password" name="passwordVerif" placeholder="Confirmer le mot de passe" required>
-        <button class="submit-btn" type="submit">S'inscrire</button>
-      </form>
-      <p class="errorClass"></p>
-      <button class="toggle-btn" onclick="toggleForms()">Déjà un compte ?</button>
-    </div>
-  </div>
-
-  <script>
-    function loadError() {
-      if (getQueryVariable("error") !== "") {
-        const errorMessage = document.getElementsByClassName("errorClass")
-        for (let i = 0; i < errorMessage.length; i++) {
-          errorMessage[i].innerText = decodeURIComponent(getQueryVariable("error"));
-          errorMessage[i].classList.add("error")
+      function showError(message){
+        const nodes = document.getElementsByClassName('errorClass');
+        for(const el of nodes){
+          el.textContent = message;
+          el.className = 'errorClass mt-1 rounded-lg border border-rose-700 bg-rose-900/40 text-rose-200 text-sm px-3 py-2';
         }
       }
-    }
-    function getQueryVariable(variable) {
-      var query = window.location.search.substring(1);
-      var vars = query.split("&");
-      for (var i = 0; i < vars.length; i++) {
-        var pair = vars[i].split("=");
-        if (pair[0] == variable) {
-          return pair[1];
-        }
+
+      function activateTab(which){
+        const login = document.getElementById('loginForm');
+        const signup = document.getElementById('signupForm');
+        const tabLogin = document.getElementById('tabLogin');
+        const tabSignup = document.getElementById('tabSignup');
+        const isLogin = which === 'login';
+        login.classList.toggle('hidden', !isLogin);
+        signup.classList.toggle('hidden', isLogin);
+        tabLogin.className = isLogin ? 'px-4 py-3 font-medium border-b-2 border-indigo-500 text-indigo-300' : 'px-4 py-3 font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+        tabSignup.className = !isLogin ? 'px-4 py-3 font-medium border-b-2 border-indigo-500 text-indigo-300' : 'px-4 py-3 font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200';
       }
-      return ""
-    }
-    function toggleForms() {
-      const login = document.getElementById('loginForm');
-      const signup = document.getElementById('signupForm');
-      login.classList.toggle('hidden');
-      signup.classList.toggle('hidden');
-    }
-  </script>
 
-</body>
+      document.addEventListener('DOMContentLoaded', () => {
+        const err = getQueryVariable('error');
+        if(err){ showError(decodeURIComponent(err)); }
 
+        document.getElementById('tabLogin').addEventListener('click', ()=> activateTab('login'));
+        document.getElementById('tabSignup').addEventListener('click', ()=> activateTab('signup'));
+        document.getElementById('switchToSignup').addEventListener('click', ()=> activateTab('signup'));
+        document.getElementById('switchToLogin').addEventListener('click', ()=> activateTab('login'));
+
+        // Si l'URL contient #signup, ouvrir directement l'onglet Inscription
+        if(location.hash === '#signup'){ activateTab('signup'); }
+      });
+    </script>
+  </body>
 </html>
