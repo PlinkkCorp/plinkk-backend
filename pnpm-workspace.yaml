@@ -1,6 +1,7 @@
 onlyBuiltDependencies:
   - '@prisma/client'
   - '@prisma/engines'
+  - bcrypt
   - node
   - prisma
   - sqlite3
