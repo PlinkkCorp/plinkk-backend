@@ -4,6 +4,7 @@
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <title>Plinkk · Édition</title>
+            <link rel="icon" href="/public/images/logo.svg" />
             <!-- Tailwind CSS (CDN) -->
             <script src="https://cdn.tailwindcss.com"></script>
             <style>
@@ -19,7 +20,7 @@
     <body class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100 min-h-dvh animate-fade-in">
         <header class="border-b border-indigo-700/30 bg-gradient-to-r from-slate-900/80 via-indigo-900/40 to-slate-900/80 backdrop-blur sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
-                <img src="/<%= user.id %>/images/logo.png" alt="Plinkk" class="h-8 w-8 rounded" onerror="this.src='/public/images/logo.png'" />
+                <img src="/<%= user.id %>/images/logo.svg" alt="Plinkk" class="h-8 w-8 rounded" onerror="this.src='/public/images/logo.svg'" />
                 <div class="flex-1 min-w-0">
                     <h1 class="text-base sm:text-lg font-semibold truncate">
                         Édition du profil · <span class="text-indigo-400"><%= user.userName %></span>
