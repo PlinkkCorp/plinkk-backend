@@ -1,0 +1,11 @@
+FROM mhart/alpine-node:12.16.3
+ARG NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV
+
+RUN NODE_ENV=$NODE_ENV npm install
+RUN NODE_ENV=$NODE_ENV npx @fastify/secure-session > src/secret-key
+RUN NODE_ENV=$NODE_ENV npm run build
+COPY ./dist /
+COPY ./package.json /package.json
+COPY ./package-lock.json /package-lock.json
+CMD ["npm", "run", "start"]
