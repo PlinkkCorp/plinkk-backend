@@ -143,7 +143,12 @@ exports.Prisma.UserScalarFieldEnum = {
   animationDurationBackground: 'animationDurationBackground',
   delayAnimationButton: 'delayAnimationButton',
   canvaEnable: 'canvaEnable',
-  selectedCanvasIndex: 'selectedCanvasIndex'
+  selectedCanvasIndex: 'selectedCanvasIndex',
+  name: 'name',
+  emailVerified: 'emailVerified',
+  image: 'image',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.LinkScalarFieldEnum = {

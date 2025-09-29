@@ -1547,6 +1547,11 @@ export namespace Prisma {
     delayAnimationButton: number | null
     canvaEnable: number | null
     selectedCanvasIndex: number | null
+    name: string | null
+    emailVerified: boolean | null
+    image: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -1576,6 +1581,11 @@ export namespace Prisma {
     delayAnimationButton: number | null
     canvaEnable: number | null
     selectedCanvasIndex: number | null
+    name: string | null
+    emailVerified: boolean | null
+    image: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -1605,6 +1615,11 @@ export namespace Prisma {
     delayAnimationButton: number
     canvaEnable: number
     selectedCanvasIndex: number
+    name: number
+    emailVerified: number
+    image: number
+    createdAt: number
+    updatedAt: number
     _all: number
   }
 
@@ -1672,6 +1687,11 @@ export namespace Prisma {
     delayAnimationButton?: true
     canvaEnable?: true
     selectedCanvasIndex?: true
+    name?: true
+    emailVerified?: true
+    image?: true
+    createdAt?: true
+    updatedAt?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -1701,6 +1721,11 @@ export namespace Prisma {
     delayAnimationButton?: true
     canvaEnable?: true
     selectedCanvasIndex?: true
+    name?: true
+    emailVerified?: true
+    image?: true
+    createdAt?: true
+    updatedAt?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -1730,6 +1755,11 @@ export namespace Prisma {
     delayAnimationButton?: true
     canvaEnable?: true
     selectedCanvasIndex?: true
+    name?: true
+    emailVerified?: true
+    image?: true
+    createdAt?: true
+    updatedAt?: true
     _all?: true
   }
 
@@ -1846,6 +1876,11 @@ export namespace Prisma {
     delayAnimationButton: number | null
     canvaEnable: number
     selectedCanvasIndex: number | null
+    name: string
+    emailVerified: boolean
+    image: string | null
+    createdAt: Date
+    updatedAt: Date
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
     _sum: UserSumAggregateOutputType | null
@@ -1894,6 +1929,11 @@ export namespace Prisma {
     delayAnimationButton?: boolean
     canvaEnable?: boolean
     selectedCanvasIndex?: boolean
+    name?: boolean
+    emailVerified?: boolean
+    image?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
     links?: boolean | User$linksArgs<ExtArgs>
     labels?: boolean | User$labelsArgs<ExtArgs>
     socialIcons?: boolean | User$socialIconsArgs<ExtArgs>
@@ -1930,6 +1970,11 @@ export namespace Prisma {
     delayAnimationButton?: boolean
     canvaEnable?: boolean
     selectedCanvasIndex?: boolean
+    name?: boolean
+    emailVerified?: boolean
+    image?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -1959,6 +2004,11 @@ export namespace Prisma {
     delayAnimationButton?: boolean
     canvaEnable?: boolean
     selectedCanvasIndex?: boolean
+    name?: boolean
+    emailVerified?: boolean
+    image?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
@@ -1988,9 +2038,14 @@ export namespace Prisma {
     delayAnimationButton?: boolean
     canvaEnable?: boolean
     selectedCanvasIndex?: boolean
+    name?: boolean
+    emailVerified?: boolean
+    image?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "password" | "email" | "profileLink" | "profileImage" | "profileIcon" | "profileSiteText" | "iconUrl" | "description" | "profileHoverColor" | "degBackgroundColor" | "neonEnable" | "buttonThemeEnable" | "EnableAnimationArticle" | "EnableAnimationButton" | "EnableAnimationBackground" | "backgroundSize" | "selectedThemeIndex" | "selectedAnimationIndex" | "selectedAnimationButtonIndex" | "selectedAnimationBackgroundIndex" | "animationDurationBackground" | "delayAnimationButton" | "canvaEnable" | "selectedCanvasIndex", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "password" | "email" | "profileLink" | "profileImage" | "profileIcon" | "profileSiteText" | "iconUrl" | "description" | "profileHoverColor" | "degBackgroundColor" | "neonEnable" | "buttonThemeEnable" | "EnableAnimationArticle" | "EnableAnimationButton" | "EnableAnimationBackground" | "backgroundSize" | "selectedThemeIndex" | "selectedAnimationIndex" | "selectedAnimationButtonIndex" | "selectedAnimationBackgroundIndex" | "animationDurationBackground" | "delayAnimationButton" | "canvaEnable" | "selectedCanvasIndex" | "name" | "emailVerified" | "image" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     links?: boolean | User$linksArgs<ExtArgs>
     labels?: boolean | User$labelsArgs<ExtArgs>
@@ -2040,6 +2095,11 @@ export namespace Prisma {
       delayAnimationButton: number | null
       canvaEnable: number
       selectedCanvasIndex: number | null
+      name: string
+      emailVerified: boolean
+      image: string | null
+      createdAt: Date
+      updatedAt: Date
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -2495,6 +2555,11 @@ export namespace Prisma {
     readonly delayAnimationButton: FieldRef<"User", 'Float'>
     readonly canvaEnable: FieldRef<"User", 'Int'>
     readonly selectedCanvasIndex: FieldRef<"User", 'Int'>
+    readonly name: FieldRef<"User", 'String'>
+    readonly emailVerified: FieldRef<"User", 'Boolean'>
+    readonly image: FieldRef<"User", 'String'>
+    readonly createdAt: FieldRef<"User", 'DateTime'>
+    readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
     
 
@@ -9632,7 +9697,12 @@ export namespace Prisma {
     animationDurationBackground: 'animationDurationBackground',
     delayAnimationButton: 'delayAnimationButton',
     canvaEnable: 'canvaEnable',
-    selectedCanvasIndex: 'selectedCanvasIndex'
+    selectedCanvasIndex: 'selectedCanvasIndex',
+    name: 'name',
+    emailVerified: 'emailVerified',
+    image: 'image',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -9752,6 +9822,13 @@ export namespace Prisma {
    */
   export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
+
+
+  /**
+   * Reference to a field of type 'DateTime'
+   */
+  export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
   /**
    * Deep Input Types
    */
@@ -9787,6 +9864,11 @@ export namespace Prisma {
     delayAnimationButton?: FloatNullableFilter<"User"> | number | null
     canvaEnable?: IntFilter<"User"> | number
     selectedCanvasIndex?: IntNullableFilter<"User"> | number | null
+    name?: StringFilter<"User"> | string
+    emailVerified?: BoolFilter<"User"> | boolean
+    image?: StringNullableFilter<"User"> | string | null
+    createdAt?: DateTimeFilter<"User"> | Date | string
+    updatedAt?: DateTimeFilter<"User"> | Date | string
     links?: LinkListRelationFilter
     labels?: LabelListRelationFilter
     socialIcons?: SocialIconListRelationFilter
@@ -9822,6 +9904,11 @@ export namespace Prisma {
     delayAnimationButton?: SortOrderInput | SortOrder
     canvaEnable?: SortOrder
     selectedCanvasIndex?: SortOrderInput | SortOrder
+    name?: SortOrder
+    emailVerified?: SortOrder
+    image?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
     links?: LinkOrderByRelationAggregateInput
     labels?: LabelOrderByRelationAggregateInput
     socialIcons?: SocialIconOrderByRelationAggregateInput
@@ -9860,6 +9947,11 @@ export namespace Prisma {
     delayAnimationButton?: FloatNullableFilter<"User"> | number | null
     canvaEnable?: IntFilter<"User"> | number
     selectedCanvasIndex?: IntNullableFilter<"User"> | number | null
+    name?: StringFilter<"User"> | string
+    emailVerified?: BoolFilter<"User"> | boolean
+    image?: StringNullableFilter<"User"> | string | null
+    createdAt?: DateTimeFilter<"User"> | Date | string
+    updatedAt?: DateTimeFilter<"User"> | Date | string
     links?: LinkListRelationFilter
     labels?: LabelListRelationFilter
     socialIcons?: SocialIconListRelationFilter
@@ -9895,6 +9987,11 @@ export namespace Prisma {
     delayAnimationButton?: SortOrderInput | SortOrder
     canvaEnable?: SortOrder
     selectedCanvasIndex?: SortOrderInput | SortOrder
+    name?: SortOrder
+    emailVerified?: SortOrder
+    image?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
@@ -9932,6 +10029,11 @@ export namespace Prisma {
     delayAnimationButton?: FloatNullableWithAggregatesFilter<"User"> | number | null
     canvaEnable?: IntWithAggregatesFilter<"User"> | number
     selectedCanvasIndex?: IntNullableWithAggregatesFilter<"User"> | number | null
+    name?: StringWithAggregatesFilter<"User"> | string
+    emailVerified?: BoolWithAggregatesFilter<"User"> | boolean
+    image?: StringNullableWithAggregatesFilter<"User"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
 
   export type LinkWhereInput = {
@@ -10308,6 +10410,11 @@ export namespace Prisma {
     delayAnimationButton?: number | null
     canvaEnable?: number
     selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
     links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
@@ -10343,6 +10450,11 @@ export namespace Prisma {
     delayAnimationButton?: number | null
     canvaEnable?: number
     selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
@@ -10378,6 +10490,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     links?: LinkUpdateManyWithoutUserNestedInput
     labels?: LabelUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
@@ -10413,6 +10530,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
@@ -10448,6 +10570,11 @@ export namespace Prisma {
     delayAnimationButton?: number | null
     canvaEnable?: number
     selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type UserUpdateManyMutationInput = {
@@ -10477,6 +10604,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -10506,6 +10638,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type LinkCreateInput = {
@@ -10888,6 +11025,22 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type DateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[]
+    notIn?: Date[] | string[]
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
   export type LinkListRelationFilter = {
     every?: LinkWhereInput
     some?: LinkWhereInput
@@ -10975,6 +11128,11 @@ export namespace Prisma {
     delayAnimationButton?: SortOrder
     canvaEnable?: SortOrder
     selectedCanvasIndex?: SortOrder
+    name?: SortOrder
+    emailVerified?: SortOrder
+    image?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type UserAvgOrderByAggregateInput = {
@@ -11022,6 +11180,11 @@ export namespace Prisma {
     delayAnimationButton?: SortOrder
     canvaEnable?: SortOrder
     selectedCanvasIndex?: SortOrder
+    name?: SortOrder
+    emailVerified?: SortOrder
+    image?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -11051,6 +11214,11 @@ export namespace Prisma {
     delayAnimationButton?: SortOrder
     canvaEnable?: SortOrder
     selectedCanvasIndex?: SortOrder
+    name?: SortOrder
+    emailVerified?: SortOrder
+    image?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type UserSumOrderByAggregateInput = {
@@ -11151,6 +11319,28 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[]
+    notIn?: Date[] | string[]
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
   export type BoolNullableFilter<$PrismaModel = never> = {
@@ -11482,6 +11672,14 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
+  export type DateTimeFieldUpdateOperationsInput = {
+    set?: Date | string
+  }
+
   export type LinkUpdateManyWithoutUserNestedInput = {
     create?: XOR<LinkCreateWithoutUserInput, LinkUncheckedCreateWithoutUserInput> | LinkCreateWithoutUserInput[] | LinkUncheckedCreateWithoutUserInput[]
     connectOrCreate?: LinkCreateOrConnectWithoutUserInput | LinkCreateOrConnectWithoutUserInput[]
@@ -11791,6 +11989,22 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedDateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[]
+    notIn?: Date[] | string[]
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[]
@@ -11882,6 +12096,28 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[]
+    notIn?: Date[] | string[]
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
   export type NestedBoolNullableFilter<$PrismaModel = never> = {
@@ -12216,6 +12452,11 @@ export namespace Prisma {
     delayAnimationButton?: number | null
     canvaEnable?: number
     selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
     labels?: LabelCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
     background?: BackgroundColorCreateNestedManyWithoutUserInput
@@ -12250,6 +12491,11 @@ export namespace Prisma {
     delayAnimationButton?: number | null
     canvaEnable?: number
     selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
     background?: BackgroundColorUncheckedCreateNestedManyWithoutUserInput
@@ -12300,6 +12546,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     labels?: LabelUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUpdateManyWithoutUserNestedInput
@@ -12334,6 +12585,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUncheckedUpdateManyWithoutUserNestedInput
@@ -12368,6 +12624,11 @@ export namespace Prisma {
     delayAnimationButton?: number | null
     canvaEnable?: number
     selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
     links?: LinkCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
     background?: BackgroundColorCreateNestedManyWithoutUserInput
@@ -12402,6 +12663,11 @@ export namespace Prisma {
     delayAnimationButton?: number | null
     canvaEnable?: number
     selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
     background?: BackgroundColorUncheckedCreateNestedManyWithoutUserInput
@@ -12452,6 +12718,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     links?: LinkUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUpdateManyWithoutUserNestedInput
@@ -12486,6 +12757,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUncheckedUpdateManyWithoutUserNestedInput
@@ -12520,6 +12796,11 @@ export namespace Prisma {
     delayAnimationButton?: number | null
     canvaEnable?: number
     selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
     links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
     background?: BackgroundColorCreateNestedManyWithoutUserInput
@@ -12554,6 +12835,11 @@ export namespace Prisma {
     delayAnimationButton?: number | null
     canvaEnable?: number
     selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     background?: BackgroundColorUncheckedCreateNestedManyWithoutUserInput
@@ -12604,6 +12890,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     links?: LinkUpdateManyWithoutUserNestedInput
     labels?: LabelUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUpdateManyWithoutUserNestedInput
@@ -12638,6 +12929,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUncheckedUpdateManyWithoutUserNestedInput
@@ -12672,6 +12968,11 @@ export namespace Prisma {
     delayAnimationButton?: number | null
     canvaEnable?: number
     selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
     links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
@@ -12706,6 +13007,11 @@ export namespace Prisma {
     delayAnimationButton?: number | null
     canvaEnable?: number
     selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
@@ -12756,6 +13062,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     links?: LinkUpdateManyWithoutUserNestedInput
     labels?: LabelUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
@@ -12790,6 +13101,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
@@ -12824,6 +13140,11 @@ export namespace Prisma {
     delayAnimationButton?: number | null
     canvaEnable?: number
     selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
     links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
@@ -12858,6 +13179,11 @@ export namespace Prisma {
     delayAnimationButton?: number | null
     canvaEnable?: number
     selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
@@ -12908,6 +13234,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     links?: LinkUpdateManyWithoutUserNestedInput
     labels?: LabelUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
@@ -12942,6 +13273,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
@@ -12976,6 +13312,11 @@ export namespace Prisma {
     delayAnimationButton?: number | null
     canvaEnable?: number
     selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
     links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
@@ -13010,6 +13351,11 @@ export namespace Prisma {
     delayAnimationButton?: number | null
     canvaEnable?: number
     selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
@@ -13060,6 +13406,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     links?: LinkUpdateManyWithoutUserNestedInput
     labels?: LabelUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
@@ -13094,6 +13445,11 @@ export namespace Prisma {
     delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
     canvaEnable?: IntFieldUpdateOperationsInput | number
     selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput

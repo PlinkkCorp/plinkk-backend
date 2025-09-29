@@ -1,9 +1,10 @@
+ 
 import fastifyStatic from "@fastify/static";
 import fastifyView from "@fastify/view";
 import Fastify from "fastify";
 import path from "path";
 import ejs from "ejs";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync, readdirSync } from "fs";
 import { PrismaClient, User } from "../generated/prisma/client";
 import { generateProfileConfig } from "./generateConfig";
 import { minify } from "uglify-js";
@@ -94,6 +95,7 @@ fastify.post("/register", async (req, reply) => {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, ""),
       userName: username,
+      name: username,
       email: email,
       password: hashedPassword,
     },
@@ -131,23 +133,293 @@ fastify.post("/login", async (request, reply) => {
 });
 
 fastify.get("/dashboard", async function (request, reply) {
-  const data = request.session.get("data");
-  if (!data) return reply.redirect("/login");
+  const userId = request.session.get("data");
+  if (!userId) return reply.redirect("/login");
+
   const userInfo = await prisma.user.findFirst({
-    where: {
-      id: data
+    where: { id: userId },
+    omit: { password: true },
+  });
+  if (!userInfo) return reply.redirect("/login");
+
+  const [linksCount, socialsCount, labelsCount, recentLinks] = await Promise.all([
+    prisma.link.count({ where: { userId: userId as string } }),
+    prisma.socialIcon.count({ where: { userId: userId as string } }),
+    prisma.label.count({ where: { userId: userId as string } }),
+    prisma.link.findMany({ where: { userId: userId as string }, orderBy: { id: "desc" }, take: 10 }),
+  ]);
+
+  return reply.view("dashboard.ejs", {
+    user: userInfo,
+    stats: { links: linksCount, socials: socialsCount, labels: labelsCount },
+    links: recentLinks,
+  });
+});
+
+// Page d'édition du profil (éditeur complet)
+fastify.get("/dashboard/edit", async function (request, reply) {
+  const userId = request.session.get("data");
+  if (!userId) return reply.redirect("/login");
+  const userInfo = await prisma.user.findFirst({
+    where: { id: userId },
+    omit: { password: true },
+  });
+  if (!userInfo) return reply.redirect("/login");
+  return reply.view("dashboard-edit.ejs", { user: userInfo });
+});
+
+// Dashboard: Statistiques (vue dédiée)
+fastify.get("/dashboard/stats", async function (request, reply) {
+  const userId = request.session.get("data");
+  if (!userId) return reply.redirect("/login");
+  const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+  if (!userInfo) return reply.redirect("/login");
+  return reply.view("dashboard-stats.ejs", { user: userInfo });
+});
+
+// Dashboard: Versions (vue dédiée)
+fastify.get("/dashboard/versions", async function (request, reply) {
+  const userId = request.session.get("data");
+  if (!userId) return reply.redirect("/login");
+  const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+  if (!userInfo) return reply.redirect("/login");
+  return reply.view("dashboard-versions.ejs", { user: userInfo });
+});
+
+// API: Récupérer la configuration complète du profil pour l'éditeur
+fastify.get("/api/me/config", async (request, reply) => {
+  const userId = request.session.get("data");
+  if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+
+  const profile = await prisma.user.findFirst({
+    where: { id: userId as string },
+    include: {
+      background: true,
+      labels: true,
+      neonColors: true,
+      socialIcons: true,
+      statusbar: true,
+      links: true,
     },
-    omit: {
-      password: true
+  });
+  if (!profile) return reply.code(404).send({ error: "Not found" });
+
+  const config = {
+    profileLink: profile.profileLink,
+    profileImage: profile.profileImage,
+    profileIcon: profile.profileIcon,
+    profileSiteText: profile.profileSiteText,
+    userName: profile.userName,
+    email: profile.email,
+    iconUrl: profile.iconUrl,
+    description: profile.description,
+    profileHoverColor: profile.profileHoverColor,
+    degBackgroundColor: profile.degBackgroundColor,
+    neonEnable: profile.neonEnable,
+    buttonThemeEnable: profile.buttonThemeEnable,
+    EnableAnimationArticle: profile.EnableAnimationArticle,
+    EnableAnimationButton: profile.EnableAnimationButton,
+    EnableAnimationBackground: profile.EnableAnimationBackground,
+    backgroundSize: profile.backgroundSize,
+    selectedThemeIndex: profile.selectedThemeIndex,
+    selectedAnimationIndex: profile.selectedAnimationIndex,
+    selectedAnimationButtonIndex: profile.selectedAnimationButtonIndex,
+    selectedAnimationBackgroundIndex: profile.selectedAnimationBackgroundIndex,
+    animationDurationBackground: profile.animationDurationBackground,
+    delayAnimationButton: profile.delayAnimationButton,
+    canvaEnable: profile.canvaEnable,
+    selectedCanvasIndex: profile.selectedCanvasIndex,
+    background: profile.background?.map((c) => c.color) ?? [],
+    neonColors: profile.neonColors?.map((c) => c.color) ?? [],
+    labels:
+      profile.labels?.map((l) => ({
+        data: l.data,
+        color: l.color,
+        fontColor: l.fontColor,
+      })) ?? [],
+    socialIcon:
+      profile.socialIcons?.map((s) => ({ url: s.url, icon: s.icon })) ?? [],
+    links:
+      profile.links?.map((l) => ({
+        icon: l.icon,
+        url: l.url,
+        text: l.text,
+        name: l.name,
+        description: l.description,
+        showDescriptionOnHover: l.showDescriptionOnHover,
+        showDescription: l.showDescription,
+      })) ?? [],
+    statusbar: profile.statusbar ?? null,
+  };
+
+  return reply.send(config);
+});
+
+// API: Mettre à jour la configuration du profil depuis l'éditeur
+fastify.put("/api/me/config", async (request, reply) => {
+  const userId = request.session.get("data");
+  if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+
+  const body = (request.body as any) ?? {};
+  const pickDefined = (obj: Record<string, any>) =>
+    Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined));
+
+  await prisma.$transaction(async (tx) => {
+    const userData = pickDefined({
+      profileLink: body.profileLink,
+      profileImage: body.profileImage,
+      profileIcon: body.profileIcon,
+      profileSiteText: body.profileSiteText,
+      userName: body.userName,
+      email: body.email,
+      iconUrl: body.iconUrl,
+      description: body.description,
+      profileHoverColor: body.profileHoverColor,
+      degBackgroundColor: body.degBackgroundColor,
+      neonEnable: body.neonEnable,
+      buttonThemeEnable: body.buttonThemeEnable,
+      EnableAnimationArticle: body.EnableAnimationArticle,
+      EnableAnimationButton: body.EnableAnimationButton,
+      EnableAnimationBackground: body.EnableAnimationBackground,
+      backgroundSize: body.backgroundSize,
+      selectedThemeIndex: body.selectedThemeIndex,
+      selectedAnimationIndex: body.selectedAnimationIndex,
+      selectedAnimationButtonIndex: body.selectedAnimationButtonIndex,
+      selectedAnimationBackgroundIndex: body.selectedAnimationBackgroundIndex,
+      animationDurationBackground: body.animationDurationBackground,
+      delayAnimationButton: body.delayAnimationButton,
+      canvaEnable: body.canvaEnable,
+      selectedCanvasIndex: body.selectedCanvasIndex,
+    });
+    if (Object.keys(userData).length > 0) {
+      await tx.user.update({ where: { id: userId as string }, data: userData });
     }
-  })
-  if (userInfo === null) return reply.redirect("/login")
-  return reply.view("/dashboard.ejs", { user: userInfo });
+
+    if (Array.isArray(body.background)) {
+      await tx.backgroundColor.deleteMany({ where: { userId: userId as string } });
+      if (body.background.length > 0) {
+        await tx.backgroundColor.createMany({
+          data: body.background.map((color: string) => ({ color, userId: userId as string })),
+        });
+      }
+    }
+
+    if (Array.isArray(body.neonColors)) {
+      await tx.neonColor.deleteMany({ where: { userId: userId as string } });
+      if (body.neonColors.length > 0) {
+        await tx.neonColor.createMany({
+          data: body.neonColors.map((color: string) => ({ color, userId: userId as string })),
+        });
+      }
+    }
+
+    if (Array.isArray(body.labels)) {
+      await tx.label.deleteMany({ where: { userId: userId as string } });
+      if (body.labels.length > 0) {
+        await tx.label.createMany({
+          data: body.labels.map((l: any) => ({
+            data: l.data,
+            color: l.color,
+            fontColor: l.fontColor,
+            userId: userId as string,
+          })),
+        });
+      }
+    }
+
+    if (Array.isArray(body.socialIcon)) {
+      await tx.socialIcon.deleteMany({ where: { userId: userId as string } });
+      if (body.socialIcon.length > 0) {
+        await tx.socialIcon.createMany({
+          data: body.socialIcon.map((s: any) => ({
+            url: s.url,
+            icon: s.icon,
+            userId: userId as string,
+          })),
+        });
+      }
+    }
+
+    if (Array.isArray(body.links)) {
+      await tx.link.deleteMany({ where: { userId: userId as string } });
+      if (body.links.length > 0) {
+        await tx.link.createMany({
+          data: body.links.map((l: any) => ({
+            icon: l.icon ?? undefined,
+            url: l.url,
+            text: l.text ?? undefined,
+            name: l.name ?? undefined,
+            description: l.description ?? undefined,
+            showDescriptionOnHover: l.showDescriptionOnHover ?? undefined,
+            showDescription: l.showDescription ?? undefined,
+            userId: userId as string,
+          })),
+        });
+      }
+    }
+
+    if (body.statusbar !== undefined) {
+      const s = body.statusbar;
+      if (s === null) {
+        await tx.statusbar.deleteMany({ where: { userId: userId as string } });
+      } else {
+        await tx.statusbar.upsert({
+          where: { userId: userId as string },
+          create: {
+            userId: userId as string,
+            text: s.text ?? undefined,
+            colorBg: s.colorBg ?? undefined,
+            colorText: s.colorText ?? undefined,
+            fontTextColor: s.fontTextColor ?? undefined,
+            statusText: s.statusText ?? undefined,
+          },
+          update: pickDefined({
+            text: s.text ?? undefined,
+            colorBg: s.colorBg ?? undefined,
+            colorText: s.colorText ?? undefined,
+            fontTextColor: s.fontTextColor ?? undefined,
+            statusText: s.statusText ?? undefined,
+          }),
+        });
+      }
+    }
+  });
+
+  return reply.send({ ok: true });
+});
+
+// Catalogue d'icônes disponibles pour l'éditeur
+fastify.get("/api/icons", async (request, reply) => {
+  const iconsDir = path.join(__dirname, "public", "images", "icons");
+  if (!existsSync(iconsDir)) return reply.send([]);
+  const entries = readdirSync(iconsDir, { withFileTypes: true });
+  const toTitle = (s: string) =>
+    s
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/\b(\w)/g, (_, c: string) => c.toUpperCase());
+  const list = entries
+    .filter((e) => e.isFile() && e.name.toLowerCase().endsWith(".svg"))
+    .map((e) => {
+      const slug = e.name.replace(/\.svg$/i, "");
+      return { slug, displayName: toTitle(slug) };
+    });
+  return reply.send(list);
 });
 
 fastify.get("/logout", (req, reply) => {
   req.session.delete();
   reply.redirect("/login");
+});
+
+// Liste publique de tous les profils
+fastify.get("/users", async (request, reply) => {
+  const users = await prisma.user.findMany({
+    select: { id: true, userName: true, email: true },
+    orderBy: { createdAt: "asc" },
+  });
+  return reply.view("users.ejs", { users });
 });
 
 fastify.get("/:username", function (request, reply) {

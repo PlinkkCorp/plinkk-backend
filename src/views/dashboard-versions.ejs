@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plinkk · Versions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root{ --ease-out-quad: cubic-bezier(.22,1,.36,1); }
+      @keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+      @keyframes slide-up { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+      @keyframes pop-in { from { opacity: 0; transform: scale(.98) } to { opacity: 1; transform: scale(1) } }
+      .animate-fade-in { animation: fade-in .36s var(--ease-out-quad) both }
+      .animate-slide-up { animation: slide-up .38s var(--ease-out-quad) both }
+      .animate-pop-in { animation: pop-in .22s var(--ease-out-quad) both }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100 min-h-dvh animate-fade-in">
+    <header class="border-b border-indigo-700/30 bg-gradient-to-r from-slate-900/80 via-indigo-900/40 to-slate-900/80 backdrop-blur sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
+        <img src="/<%= user.id %>/images/logo.png" alt="Plinkk" class="h-8 w-8 rounded" onerror="this.src='/public/images/logo.png'" />
+        <div class="flex-1 min-w-0">
+          <h1 class="text-base sm:text-lg font-semibold truncate">Versions · <span class="text-indigo-400"><%= user.userName %></span></h1>
+          <p class="text-xs text-slate-400 truncate"><%= user.email %></p>
+        </div>
+        <div class="hidden sm:flex items-center gap-3">
+          <div class="relative" id="profileMenu">
+            <button id="profileMenuBtn" aria-haspopup="menu" aria-expanded="false" class="flex items-center gap-2 px-2 py-1.5 rounded-full bg-slate-800/80 border border-indigo-700/40 hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-600/40">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-700/70 text-sm font-semibold">
+                <%= (user.userName || 'U').charAt(0).toUpperCase() %>
+              </span>
+              <span class="hidden lg:inline text-sm font-medium"><%= user.userName %></span>
+              <svg class="size-4 text-slate-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
+            </button>
+            <div id="profileMenuPanel" class="absolute right-0 mt-2 w-56 rounded-lg border border-slate-700 bg-slate-900/95 backdrop-blur shadow-xl p-1 hidden">
+              <a href="/dashboard" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Accueil</a>
+              <a href="/dashboard/edit" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Éditer</a>
+              <a href="/dashboard/stats" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Statistiques</a>
+              <a href="/dashboard/versions" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Versions</a>
+              <a target="_blank" href="/<%= user.id %>" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Voir mon profil</a>
+              <div class="my-1 border-t border-slate-700"></div>
+              <a href="/logout" class="block px-3 py-2 text-sm rounded-md text-rose-300 hover:bg-rose-900/20">Déconnexion</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 space-y-4">
+      <div class="rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
+        <div class="mb-3"><h3 class="font-medium">Aperçu anciennes versions</h3><p class="text-xs text-slate-400">Choisissez une ancienne version de Plinkk pour prévisualiser (à venir).</p></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label class="block text-sm md:col-span-2">
+            <div class="mt-1 relative">
+              <input type="text" class="pl-3 pr-20 py-2 w-full rounded bg-slate-900/60 border border-slate-800/60" value="Plinkk v1 (à venir)" readonly />
+              <button type="button" class="absolute right-1 top-1 h-8 px-2 text-xs rounded bg-cyan-700/80 border border-cyan-500/40 text-white opacity-60 cursor-not-allowed">Choisir</button>
+            </div>
+          </label>
+          <div class="md:col-span-2">
+            <div class="rounded border border-indigo-800/40 bg-slate-900/40 aspect-[16/10] flex items-center justify-center text-slate-300 text-sm">Prévisualisation désactivée (à venir)</div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      (function(){
+        const btn = document.getElementById('profileMenuBtn');
+        const panel = document.getElementById('profileMenuPanel');
+        if(!btn || !panel) return;
+        const open = () => { panel.classList.remove('hidden'); panel.classList.add('animate-pop-in'); btn.setAttribute('aria-expanded','true'); };
+        const close = () => { panel.classList.add('hidden'); btn.setAttribute('aria-expanded','false'); };
+        btn.addEventListener('click', (e)=>{ e.stopPropagation(); if(panel.classList.contains('hidden')) open(); else close(); });
+        document.addEventListener('click', ()=> close());
+        document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
+      })();
+    </script>
+  </body>
+  </html>

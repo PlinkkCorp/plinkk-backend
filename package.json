@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev src/server.ts",
     "create-key": "pnpx @fastify/secure-session > src/secret-key",
-    "build": "tsc -p tsconfig.json && cp -r src/public dist/public && cp -r src/views dist/views && cp -r src/secret-key dist/secret-key",
+  "build": "tsc -p tsconfig.json && node scripts/copy-static.mjs",
     "start": "node dist/server.js"
   },
   "keywords": [],
