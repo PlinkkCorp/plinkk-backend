@@ -7,6 +7,7 @@
     "dev": "ts-node-dev src/server.ts",
     "create-key": "pnpx @fastify/secure-session > src/secret-key",
     "build": "tsc -p tsconfig.json && node scripts/copy-static.mjs",
+    "build:withoutcp": "tsc -p tsconfig.json",
     "start": "node dist/server.js"
   },
   "keywords": [],
