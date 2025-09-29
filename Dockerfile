@@ -5,7 +5,7 @@ ENV NODE_ENV=$NODE_ENV
 RUN apk add --no-cache openssl libc6-compat bash
 
 COPY . .
-COPY package.json package-lock.json ./
+COPY package.json ./
 RUN npm ci
 RUN npx @fastify/secure-session > src/secret-key
 RUN npx prisma migrate deploy
