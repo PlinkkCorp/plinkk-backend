@@ -3,8 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plinkk · Statistiques</title>
-  <link rel="icon" href="/public/images/logo.svg" />
+    <title>Plinkk · Statistiques</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       :root{ --ease-out-quad: cubic-bezier(.22,1,.36,1); }
@@ -19,7 +18,7 @@
   <body class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100 min-h-dvh animate-fade-in">
     <header class="border-b border-indigo-700/30 bg-gradient-to-r from-slate-900/80 via-indigo-900/40 to-slate-900/80 backdrop-blur sticky top-0 z-40">
       <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
-        <img src="/<%= user.id %>/images/logo.svg" alt="Plinkk" class="h-8 w-8 rounded" onerror="this.src='/public/images/logo.svg'" />
+        <img src="/<%= user.id %>/images/logo.png" alt="Plinkk" class="h-8 w-8 rounded" onerror="this.src='/public/images/logo.png'" />
         <div class="flex-1 min-w-0">
           <h1 class="text-base sm:text-lg font-semibold truncate">Statistiques · <span class="text-indigo-400"><%= user.userName %></span></h1>
           <p class="text-xs text-slate-400 truncate"><%= user.email %></p>

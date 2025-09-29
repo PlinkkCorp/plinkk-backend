@@ -19,14 +19,14 @@ export function generateProfileConfig(
 ) {
   return `
     export const profileData = {
-        profileLink: "${profile.profileLink}", // Lien du profil 
-        profileImage: "${profile.profileImage}", // Image de profil
-        profileIcon: "${profile.profileIcon}", // Icone derrière le profil
-        profileSiteText: "${profile.profileSiteText}", // Nom derrière le profil
+        profileLink: "${profile.profileLink || "https://github.com"}", // Lien du profil 
+        profileImage: "${profile.profileImage || "https://avatars.githubusercontent.com/u/9919?s=200&v=4"}", // Image de profil
+        profileIcon: "${profile.profileIcon || "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"}", // Icone derrière le profil
+        profileSiteText: "${profile.profileSiteText || "Github"}", // Nom derrière le profil
         userName: "${
-          profile.userName
+          profile.userName || "Github"
         }", // Nom affiché sur la page et dans le titre de l'onglet
-        email: "${profile.email}", // Adresse mail affichée sur la page
+        email: "${profile.email || "example@example.fr"}", // Adresse mail affichée sur la page
         links: ${JSON.stringify(
           links.map((l) => ({
             icon: l.icon,
@@ -51,9 +51,9 @@ export function generateProfileConfig(
         neonColors: [${neonColors.map(
           (c) => '"' + c.color + '"'
         )}], // Couleurs du neon de profil
-        iconUrl: "${profile.iconUrl}", // Icone de l'onglet
+        iconUrl: "${profile.iconUrl || "https://avatars.githubusercontent.com/u/9919?s=200&v=4"}", // Icone de l'onglet
         description: "${
-          profile.description
+          profile.description || "Mollit laboris cupidatat do enim nulla ex laborum. Nulla labore reprehenderit nisi non anim aute."
         }", // Description affichée sur la page, display: none si vide
         labels: ${JSON.stringify(
           labels.map((l) => ({
@@ -68,41 +68,41 @@ export function generateProfileConfig(
         statusbar: ${JSON.stringify(
           statusBar
         )}, // Barre de statut , fontTextColor : 1 = borderColor, 0 = colorBg
-        neonEnable: ${profile.neonEnable}, // 1 : Enable, 0 : Disable
+        neonEnable: ${profile.neonEnable || 1}, // 1 : Enable, 0 : Disable
         buttonThemeEnable: ${
-          profile.buttonThemeEnable
+          profile.buttonThemeEnable || 1
         }, // 1 : Enable, 0 : Disable
         EnableAnimationArticle: ${
-          profile.EnableAnimationArticle
+          profile.EnableAnimationArticle || 1
         }, // 1 : Enable, 0 : Disable
         EnableAnimationButton: ${
-          profile.EnableAnimationButton
+          profile.EnableAnimationButton || 1
         }, // 1 : Enable, 0 : Disable
         EnableAnimationBackground: ${
-          profile.EnableAnimationBackground
+          profile.EnableAnimationBackground || 1
         }, // 1 : Enable, 0 : Disable
-        backgroundSize: ${profile.backgroundSize}, // En pourcentage
+        backgroundSize: ${profile.backgroundSize || 50}, // En pourcentage
         selectedThemeIndex: ${
-          profile.selectedThemeIndex
+          profile.selectedThemeIndex || 13
         }, // Thème sélectionné            (voir ci-dessous)
         selectedAnimationIndex: ${
-          profile.selectedAnimationIndex
+          profile.selectedAnimationIndex || 0
         }, // Animation de l'article       (voir ci-dessous)
         selectedAnimationButtonIndex: ${
-          profile.selectedAnimationButtonIndex
+          profile.selectedAnimationButtonIndex || 10
         }, // Animation des boutons        (voir ci-dessous)
         selectedAnimationBackgroundIndex: ${
-          profile.selectedAnimationBackgroundIndex
+          profile.selectedAnimationBackgroundIndex || 10
         }, // Animation de l'arrière-plan  (voir ci-dessous)
         animationDurationBackground: ${
-          profile.animationDurationBackground
+          profile.animationDurationBackground || 30
         }, // Durée de l'animation en secondes
         delayAnimationButton: ${
-          profile.delayAnimationButton
+          profile.delayAnimationButton || 0.1
         }, // Délai de l'animation en secondes
-        canvaEnable: ${profile.canvaEnable}, // 1 : Enable, 0 : Disable
+        canvaEnable: ${profile.canvaEnable || 1}, // 1 : Enable, 0 : Disable
         selectedCanvasIndex: ${
-          profile.selectedCanvasIndex
+          profile.selectedCanvasIndex || 16
         }, // Animation du canva (voir ci-dessous) - Matrix Effect
     };
     export default profileData;

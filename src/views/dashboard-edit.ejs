@@ -3,8 +3,7 @@
         <head>
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Plinkk · Édition</title>
-        <link rel="icon" href="/public/images/logo.svg" />
+            <title>Plinkk · Édition</title>
             <!-- Tailwind CSS (CDN) -->
             <script src="https://cdn.tailwindcss.com"></script>
             <style>
@@ -20,7 +19,7 @@
     <body class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100 min-h-dvh animate-fade-in">
         <header class="border-b border-indigo-700/30 bg-gradient-to-r from-slate-900/80 via-indigo-900/40 to-slate-900/80 backdrop-blur sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
-                <img src="/<%= user.id %>/images/logo.svg" alt="Plinkk" class="h-8 w-8 rounded" onerror="this.src='/public/images/logo.svg'" />
+                <img src="/<%= user.id %>/images/logo.png" alt="Plinkk" class="h-8 w-8 rounded" onerror="this.src='/public/images/logo.png'" />
                 <div class="flex-1 min-w-0">
                     <h1 class="text-base sm:text-lg font-semibold truncate">
                         Édition du profil · <span class="text-indigo-400"><%= user.userName %></span>
@@ -240,6 +239,12 @@
                             <label class="block text-sm md:col-span-2">Texte
                                 <input id="status_text" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
                             </label>
+                            <label class="block text-sm">Couleur texte
+                                <input id="status_colorText" type="color" class="mt-1 h-10 w-full rounded bg-slate-900 border border-slate-800 p-1" />
+                            </label>
+                            <label class="block text-sm">FontTextColor (0 ou 1)
+                                <input id="status_fontTextColor" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+                            </label>
                             <div class="md:col-span-2">
                                 <div class="text-sm mb-1">Statut</div>
                                 <div class="relative inline-block" id="statusDropdown">
@@ -277,6 +282,14 @@
                             </div>
                             <div id="labelsList" class="space-y-3"></div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Barre d’action collante (mobile + bas de page) -->
+                <div class="lg:hidden sticky bottom-3 z-30 flex justify-end">
+                    <div class="flex gap-2 rounded-full border border-indigo-700/40 bg-slate-900/80 backdrop-blur px-2 py-2 shadow-lg">
+                        <button id="resetBtn--fab" class="px-3 py-2 text-sm rounded-full bg-amber-700/80 hover:bg-amber-600 border border-amber-500/40 text-white shadow transition-colors">Réinitialiser</button>
+                        <button id="saveBtn--fab" class="px-3 py-2 text-sm rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Enregistrer</button>
                     </div>
                 </div>
             </section>
