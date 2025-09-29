@@ -7,5 +7,4 @@ RUN NODE_ENV=$NODE_ENV npx @fastify/secure-session > src/secret-key
 RUN NODE_ENV=$NODE_ENV npm run build
 COPY ./dist /
 COPY ./package.json /package.json
-COPY ./package-lock.json /package-lock.json
 CMD ["npm", "run", "start"]
