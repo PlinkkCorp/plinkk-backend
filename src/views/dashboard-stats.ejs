@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plinkk · Statistiques</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-950 text-slate-100 min-h-dvh">
+    <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
+        <img src="/<%= user.id %>/images/logo.png" alt="Plinkk" class="h-8 w-8 rounded" onerror="this.src='/public/images/logo.png'" />
+        <div class="flex-1 min-w-0">
+          <h1 class="text-base sm:text-lg font-semibold truncate">Statistiques · <span class="text-indigo-400"><%= user.userName %></span></h1>
+          <p class="text-xs text-slate-400 truncate"><%= user.email %></p>
+        </div>
+        <nav class="hidden sm:flex items-center gap-2">
+          <a href="/dashboard" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Résumé</a>
+          <a href="/dashboard/edit" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Éditer</a>
+          <a href="/dashboard/versions" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Versions</a>
+          <a target="_blank" href="/<%= user.id %>" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Voir le profil</a>
+          <a href="/logout" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Déconnexion</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 space-y-4">
+      <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+        <div class="mb-3"><h3 class="font-medium">Aperçu</h3><p class="text-xs text-slate-400">Module en développement (vues, clics, tendances).</p></div>
+        <div class="rounded border border-dashed border-slate-700 bg-slate-900/40 p-6 text-sm text-slate-300 text-center">
+          <div class="font-medium mb-1">Bientôt disponible</div>
+          <div class="text-xs text-slate-400">Graphiques et métriques d’engagement arrivent prochainement.</div>
+        </div>
+      </div>
+    </main>
+  </body>
+  </html>

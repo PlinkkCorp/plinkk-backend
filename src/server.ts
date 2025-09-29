@@ -168,6 +168,24 @@ fastify.get("/dashboard/edit", async function (request, reply) {
   return reply.view("dashboard-edit.ejs", { user: userInfo });
 });
 
+// Dashboard: Statistiques (vue dédiée)
+fastify.get("/dashboard/stats", async function (request, reply) {
+  const userId = request.session.get("data");
+  if (!userId) return reply.redirect("/login");
+  const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+  if (!userInfo) return reply.redirect("/login");
+  return reply.view("dashboard-stats.ejs", { user: userInfo });
+});
+
+// Dashboard: Versions (vue dédiée)
+fastify.get("/dashboard/versions", async function (request, reply) {
+  const userId = request.session.get("data");
+  if (!userId) return reply.redirect("/login");
+  const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+  if (!userInfo) return reply.redirect("/login");
+  return reply.view("dashboard-versions.ejs", { user: userInfo });
+});
+
 // API: Récupérer la configuration complète du profil pour l'éditeur
 fastify.get("/api/me/config", async (request, reply) => {
   const userId = request.session.get("data");
@@ -393,6 +411,15 @@ fastify.get("/api/icons", async (request, reply) => {
 fastify.get("/logout", (req, reply) => {
   req.session.delete();
   reply.redirect("/login");
+});
+
+// Liste publique de tous les profils
+fastify.get("/users", async (request, reply) => {
+  const users = await prisma.user.findMany({
+    select: { id: true, userName: true, email: true },
+    orderBy: { createdAt: "asc" },
+  });
+  return reply.view("users.ejs", { users });
 });
 
 fastify.get("/:username", function (request, reply) {

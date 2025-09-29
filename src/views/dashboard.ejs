@@ -16,11 +16,14 @@
                     </h1>
                     <p class="text-xs text-slate-400 truncate"><%= user.email %></p>
                 </div>
-                <nav class="hidden sm:flex items-center gap-2">
-                    <a href="/dashboard/edit" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500">Éditer mon profil</a>
+                <nav class="flex items-center gap-2 flex-wrap justify-end">
+                    <span class="px-3 py-2 text-sm rounded-md bg-slate-800 border border-slate-700 text-slate-300">Résumé</span>
+                    <a href="/dashboard/edit" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500">Éditer</a>
+                    <a href="/dashboard/stats" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Statistiques</a>
+                    <a href="/dashboard/versions" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Versions</a>
                     <a target="_blank" href="/<%= user.id %>" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Voir le profil</a>
+                    <a href="/logout" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Déconnexion</a>
                 </nav>
-                <a href="/logout" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Déconnexion</a>
             </div>
         </header>
 

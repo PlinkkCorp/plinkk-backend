@@ -19,11 +19,13 @@
                 </div>
                 <nav class="hidden sm:flex items-center gap-2">
                     <a href="/dashboard" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Résumé</a>
+                    <a href="/dashboard/stats" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Statistiques</a>
+                    <a href="/dashboard/versions" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Versions</a>
                     <a target="_blank" href="/<%= user.id %>" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Voir le profil</a>
                     <button id="resetBtn" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Réinitialiser</button>
                     <button id="saveBtn" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500">Enregistrer</button>
+                    <a href="/logout" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Déconnexion</a>
                 </nav>
-                <a href="/logout" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Déconnexion</a>
             </div>
         </header>
 
@@ -50,6 +52,7 @@
                         <li><button data-target="#section-links" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800">Liens</button></li>
                         <li><button data-target="#section-animations" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800">Animations</button></li>
                         <li><button data-target="#section-statusbar" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800">Status & Labels</button></li>
+                        
                     </ul>
                 </nav>
 
@@ -197,6 +200,7 @@
 
                     <!-- Statusbar (inclut Labels) -->
                     <div id="section-statusbar" class="card rounded-lg border border-slate-800 bg-slate-900/60 p-4 hidden">
+                    
                         <div class="mb-3"><h3 class="font-medium">Barre de statut</h3><p class="text-xs text-slate-400">Message et couleurs de la barre d’état.</p></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <label class="block text-sm md:col-span-2">Texte
