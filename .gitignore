@@ -4,6 +4,6 @@ node_modules
 
 /src/generated/prisma
 
-/dist
+/dist/secret-key
 
 /src/secret-key

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Plinkk · Dashboard</title>
+        <link rel="icon" href="/public/images/logo.svg" />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            :root { --ease-out-quad: cubic-bezier(.22,1,.36,1); }
+            @keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+            @keyframes slide-up { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+            @keyframes pop-in { from { opacity: 0; transform: scale(.98) } to { opacity: 1; transform: scale(1) } }
+            .animate-fade-in { animation: fade-in .36s var(--ease-out-quad) both }
+            .animate-slide-up { animation: slide-up .38s var(--ease-out-quad) both }
+            .animate-pop-in { animation: pop-in .22s var(--ease-out-quad) both }
+        </style>
+    </head>
+    <body class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100 min-h-dvh animate-fade-in">
+        <!-- Header -->
+        <header class="sticky top-0 z-50 border-b border-indigo-700/30 bg-gradient-to-r from-slate-950/80 via-indigo-900/40 to-slate-950/80 backdrop-blur">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+                <button id="sidebarToggle" class="lg:hidden inline-flex items-center justify-center rounded-md p-2 text-slate-300 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/40" aria-label="Ouvrir la navigation">
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+                </button>
+                <a href="/dashboard" class="flex items-center gap-2">
+                    <img src="/public/images/logo.svg" alt="Plinkk" class="h-8 w-8 rounded" />
+                    <span class="hidden sm:inline text-sm font-semibold tracking-wide text-slate-200">Plinkk</span>
+                </a>
+                <div class="flex-1 min-w-0"></div>
+                <div class="hidden md:flex items-center gap-3">
+                    <a href="https://github.com/Marvideo2009/plinkk-backend" target="_blank" class="px-3 py-1.5 text-xs rounded-md border border-slate-700/60 bg-slate-800/50 hover:bg-slate-700/60">GitHub</a>
+                    <a href="/users" class="px-3 py-1.5 text-xs rounded-md border border-slate-700/60 bg-slate-800/50 hover:bg-slate-700/60">Utilisateurs</a>
+                </div>
+                <div class="relative ml-1" id="profileMenu">
+                    <button id="profileMenuBtn" aria-haspopup="menu" aria-expanded="false" class="flex items-center gap-2 px-2 py-1.5 rounded-full bg-slate-800/80 border border-indigo-700/40 hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-600/40">
+                        <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-700/70 text-sm font-semibold">
+                            <%= (user.userName || 'U').charAt(0).toUpperCase() %>
+                        </span>
+                        <span class="hidden sm:inline text-sm font-medium max-w-28 truncate"><%= user.userName %></span>
+                        <svg class="size-4 text-slate-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <div id="profileMenuPanel" class="absolute right-0 mt-2 w-56 rounded-lg border border-slate-700 bg-slate-900/95 backdrop-blur shadow-xl p-1 hidden">
+                        <a href="/dashboard" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Accueil</a>
+                        <a href="/dashboard/edit" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Éditer</a>
+                        <a href="/dashboard/stats" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Statistiques</a>
+                        <a href="/dashboard/versions" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Versions</a>
+                        <a target="_blank" href="/<%= user.id %>" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Voir mon profil</a>
+                        <div class="my-1 border-t border-slate-700"></div>
+                        <a href="/logout" class="block px-3 py-2 text-sm rounded-md text-rose-300 hover:bg-rose-900/20">Déconnexion</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
+            <!-- Sidebar (desktop) -->
+            <aside class="hidden lg:block col-span-3">
+                <div class="sticky top-[68px] space-y-3">
+                    <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow">
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 rounded-full grid place-items-center bg-indigo-700/70 font-semibold"><%= (user.userName || 'U').charAt(0).toUpperCase() %></div>
+                            <div class="min-w-0">
+                                <p class="font-medium truncate"><%= user.userName %></p>
+                                <p class="text-xs text-slate-400 truncate"><%= user.email %></p>
+                            </div>
+                        </div>
+                        <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+                            <div class="rounded-md border border-indigo-800/40 bg-indigo-950/30 p-2"><p class="text-[10px] text-slate-400">Liens</p><p class="text-lg font-bold text-indigo-300"><%= stats.links %></p></div>
+                            <div class="rounded-md border border-fuchsia-800/40 bg-fuchsia-950/30 p-2"><p class="text-[10px] text-slate-400">Soc.</p><p class="text-lg font-bold text-fuchsia-300"><%= stats.socials %></p></div>
+                            <div class="rounded-md border border-emerald-800/40 bg-emerald-950/30 p-2"><p class="text-[10px] text-slate-400">Labels</p><p class="text-lg font-bold text-emerald-300"><%= stats.labels %></p></div>
+                        </div>
+                    </div>
+
+                    <nav class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-2 shadow">
+                        <a href="/dashboard" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800/60">
+                            <svg class="size-4 text-slate-300 group-hover:text-indigo-300" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l9 8h-3v9h-12v-9h-3z"/></svg>
+                            <span class="text-sm">Accueil</span>
+                        </a>
+                        <a href="/dashboard/edit" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800/60">
+                            <svg class="size-4 text-slate-300 group-hover:text-indigo-300" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm14.71-9.04a1 1 0 000-1.41l-1.5-1.5a1 1 0 00-1.41 0l-1.13 1.13 3.75 3.75 1.29-1.47z"/></svg>
+                            <span class="text-sm">Éditer</span>
+                        </a>
+                        <a href="/dashboard/stats" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800/60">
+                            <svg class="size-4 text-slate-300 group-hover:text-indigo-300" viewBox="0 0 24 24" fill="currentColor"><path d="M5 9h3v10H5V9zm5-4h3v14h-3V5zm5 7h3v7h-3v-7z"/></svg>
+                            <span class="text-sm">Statistiques</span>
+                        </a>
+                        <a href="/dashboard/versions" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800/60">
+                            <svg class="size-4 text-slate-300 group-hover:text-indigo-300" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v2H7V7zm0 4h7v2H7v-2zm0 4h10v2H7v-2z"/></svg>
+                            <span class="text-sm">Versions</span>
+                        </a>
+                        <a href="/users" class="group flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800/60">
+                            <svg class="size-4 text-slate-300 group-hover:text-indigo-300" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V20h14v-3.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V20h7v-3.5c0-2.33-4.67-3.5-8-3.5z"/></svg>
+                            <span class="text-sm">Utilisateurs</span>
+                        </a>
+                    </nav>
+
+                    <div class="rounded-xl border border-slate-800/60 bg-gradient-to-br from-amber-500/10 to-amber-400/5 p-4 shadow">
+                        <p class="text-sm font-medium text-amber-200">Astuce</p>
+                        <p class="text-xs text-amber-100/90 mt-1">Active l’enregistrement automatique dans l’éditeur pour ne jamais perdre tes changements.</p>
+                        <a href="/dashboard/edit" class="mt-2 inline-flex items-center gap-1 text-xs text-amber-200 hover:text-amber-100">Ouvrir l’éditeur
+                            <svg class="size-3" viewBox="0 0 20 20" fill="currentColor"><path d="M12.293 2.293a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L14 5.414V17a1 1 0 11-2 0V5.414L9.707 7.707A1 1 0 018.293 6.293l4-4z"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main -->
+            <main class="col-span-12 lg:col-span-9 space-y-4">
+                <!-- Welcome / actions -->
+                <section class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-5 shadow animate-slide-up">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h1 class="text-lg font-semibold">Bienvenue, <span class="text-indigo-300"><%= user.userName %></span></h1>
+                            <p class="text-xs text-slate-400">Dernière mise à jour: <%= new Date(user.updatedAt).toLocaleString('fr-FR') %></p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <a href="/dashboard/edit" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow">Éditer le profil</a>
+                            <a target="_blank" href="/<%= user.id %>" class="px-3 py-2 text-sm rounded-md bg-emerald-700/80 hover:bg-emerald-600 text-white border border-emerald-500/40 shadow">Voir le profil</a>
+                        </div>
+                    </div>
+
+                    <!-- KPI -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+                        <div class="rounded-lg border border-indigo-800/50 bg-indigo-950/30 p-4 shadow hover:shadow-lg transition hover:-translate-y-0.5">
+                            <p class="text-xs text-slate-300">Liens</p>
+                            <p class="text-3xl font-bold text-indigo-300"><%= stats.links %></p>
+                        </div>
+                        <div class="rounded-lg border border-fuchsia-800/50 bg-fuchsia-950/30 p-4 shadow hover:shadow-lg transition hover:-translate-y-0.5">
+                            <p class="text-xs text-slate-300">Icônes sociales</p>
+                            <p class="text-3xl font-bold text-fuchsia-300"><%= stats.socials %></p>
+                        </div>
+                        <div class="rounded-lg border border-emerald-800/50 bg-emerald-950/30 p-4 shadow hover:shadow-lg transition hover:-translate-y-0.5">
+                            <p class="text-xs text-slate-300">Labels</p>
+                            <p class="text-3xl font-bold text-emerald-300"><%= stats.labels %></p>
+                        </div>
+                    </div>
+
+                    <!-- Progression -->
+                    <%
+                        const kDone = (stats.links>0?1:0) + (stats.socials>0?1:0) + (stats.labels>0?1:0);
+                        const kPct = Math.max(0, Math.min(100, Math.round((kDone/3)*100)));
+                    %>
+                    <div class="mt-4">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-sm font-medium">Complétion du profil</p>
+                            <p class="text-xs text-slate-400"><%= kPct %>%</p>
+                        </div>
+                                    <div class="h-2 rounded-full bg-slate-800 overflow-hidden">
+                                        <div id="progressBar" class="h-full rounded-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-emerald-500" data-pct="<%= kPct %>"></div>
+                                    </div>
+                        <div class="mt-2 flex flex-wrap gap-2 text-xs">
+                            <span class="px-2 py-1 rounded bg-slate-800/70 border border-slate-700/60 <%= stats.links>0?'text-emerald-300':'text-slate-400' %>">Liens</span>
+                            <span class="px-2 py-1 rounded bg-slate-800/70 border border-slate-700/60 <%= stats.socials>0?'text-emerald-300':'text-slate-400' %>">Sociaux</span>
+                            <span class="px-2 py-1 rounded bg-slate-800/70 border border-slate-700/60 <%= stats.labels>0?'text-emerald-300':'text-slate-400' %>">Labels</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Quick actions + Links list -->
+                <section class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+                    <div class="xl:col-span-2 space-y-4">
+                        <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up" style="animation-delay:60ms">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-medium">Mes derniers liens</h3>
+                                <a href="/dashboard/edit#section-links" class="text-sm text-indigo-300 hover:text-indigo-200 underline underline-offset-4">Gérer</a>
+                            </div>
+                            <% if (links && links.length) { %>
+                                <ul class="divide-y divide-slate-800">
+                                    <% links.slice(0,6).forEach(l => { %>
+                                        <li class="py-2 flex items-center gap-3">
+                                            <div class="h-5 w-5 rounded bg-indigo-700/70 flex items-center justify-center text-[10px] shrink-0">🔗</div>
+                                            <div class="min-w-0">
+                                                <p class="truncate font-medium text-slate-100"><%= l.name || l.text || l.url %></p>
+                                                <p class="truncate text-xs text-slate-400"><%= l.url %></p>
+                                            </div>
+                                        </li>
+                                    <% }) %>
+                                </ul>
+                            <% } else { %>
+                                <p class="text-sm text-slate-400">Aucun lien pour le moment.</p>
+                            <% } %>
+                        </div>
+
+                        <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up" style="animation-delay:100ms">
+                            <h3 class="font-medium mb-2">Raccourcis</h3>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <a href="/dashboard/edit#section-links" class="group rounded-lg border border-slate-800/60 bg-slate-800/40 p-3 hover:bg-slate-800/70 transition">
+                                    <div class="h-8 w-8 rounded bg-indigo-700/70 grid place-items-center text-slate-100 mb-2">+</div>
+                                    <p class="text-sm">Ajouter un lien</p>
+                                </a>
+                                <a href="/dashboard/edit#section-social" class="group rounded-lg border border-slate-800/60 bg-slate-800/40 p-3 hover:bg-slate-800/70 transition">
+                                    <div class="h-8 w-8 rounded bg-fuchsia-700/70 grid place-items-center text-slate-100 mb-2">#</div>
+                                    <p class="text-sm">Icône sociale</p>
+                                </a>
+                                <a href="/dashboard/edit#section-appearance" class="group rounded-lg border border-slate-800/60 bg-slate-800/40 p-3 hover:bg-slate-800/70 transition">
+                                    <div class="h-8 w-8 rounded bg-emerald-700/70 grid place-items-center text-slate-100 mb-2">🎨</div>
+                                    <p class="text-sm">Apparence</p>
+                                </a>
+                                <a href="/dashboard/edit#section-labels" class="group rounded-lg border border-slate-800/60 bg-slate-800/40 p-3 hover:bg-slate-800/70 transition">
+                                    <div class="h-8 w-8 rounded bg-amber-700/70 grid place-items-center text-slate-100 mb-2">🏷️</div>
+                                    <p class="text-sm">Gérer les labels</p>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aperçu -->
+                    <div class="xl:col-span-1">
+                        <div class="rounded-xl border border-indigo-800/40 bg-slate-900/60 p-3 shadow animate-slide-up xl:sticky xl:top-[68px]">
+                            <div class="flex items-center justify-between gap-2 mb-2">
+                                <h2 class="text-base font-semibold">Aperçu</h2>
+                                <div class="flex items-center gap-2">
+                                    <button id="previewReload" class="px-3 py-1.5 text-xs rounded-md border border-slate-700/60 bg-slate-800/50 hover:bg-slate-700/60">Recharger</button>
+                                    <a class="px-3 py-1.5 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors" target="_blank" href="/<%= user.id %>">Ouvrir</a>
+                                </div>
+                            </div>
+                            <div class="rounded-lg border border-slate-800 bg-slate-950/60 overflow-hidden">
+                                <div class="flex items-center gap-1 px-3 py-2 border-b border-slate-800 bg-slate-900/60">
+                                    <span class="size-2 rounded-full bg-rose-500/80"></span>
+                                    <span class="size-2 rounded-full bg-amber-500/80"></span>
+                                    <span class="size-2 rounded-full bg-emerald-500/80"></span>
+                                    <span class="ml-2 text-[10px] text-slate-400 truncate">/<%= user.id %></span>
+                                </div>
+                                <iframe id="previewFrame" class="w-full h-[68dvh] bg-white" src="/<%= user.id %>"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Mobile sidebar drawer -->
+        <div id="sidebarBackdrop" class="fixed inset-0 z-50 bg-black/40 hidden"></div>
+        <nav id="sidebarPanel" class="fixed z-50 inset-y-0 left-0 w-72 transform -translate-x-full transition-transform duration-200 ease-out bg-slate-950/95 backdrop-blur border-r border-slate-800/60 p-4 space-y-2 lg:hidden">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="h-8 w-8 rounded-full grid place-items-center bg-indigo-700/70 font-semibold"><%= (user.userName || 'U').charAt(0).toUpperCase() %></div>
+                    <div>
+                        <p class="text-sm font-medium"><%= user.userName %></p>
+                        <p class="text-[10px] text-slate-400"><%= user.email %></p>
+                    </div>
+                </div>
+                <button id="sidebarClose" class="p-2 rounded-md hover:bg-slate-800/60" aria-label="Fermer">
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+                </button>
+            </div>
+            <div class="mt-2 h-px bg-slate-800"></div>
+            <a href="/dashboard" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800/60"><span>Accueil</span></a>
+            <a href="/dashboard/edit" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800/60"><span>Éditer</span></a>
+            <a href="/dashboard/stats" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800/60"><span>Statistiques</span></a>
+            <a href="/dashboard/versions" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800/60"><span>Versions</span></a>
+            <a href="/users" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800/60"><span>Utilisateurs</span></a>
+            <a target="_blank" href="/<%= user.id %>" class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-slate-800/60"><span>Voir mon profil</span></a>
+            <div class="h-px bg-slate-800"></div>
+            <a href="/logout" class="flex items-center gap-3 px-3 py-2 rounded-md text-rose-300 hover:bg-rose-900/20"><span>Déconnexion</span></a>
+        </nav>
+
+        <script>
+            // Menu profil
+            (function(){
+                const btn = document.getElementById('profileMenuBtn');
+                const panel = document.getElementById('profileMenuPanel');
+                if(!btn || !panel) return;
+                const open = () => { panel.classList.remove('hidden'); panel.classList.add('animate-pop-in'); btn.setAttribute('aria-expanded','true'); };
+                const close = () => { panel.classList.add('hidden'); btn.setAttribute('aria-expanded','false'); };
+                btn.addEventListener('click', (e)=>{ e.stopPropagation(); if(panel.classList.contains('hidden')) open(); else close(); });
+                document.addEventListener('click', ()=> close());
+                document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
+            })();
+
+            // Sidebar mobile
+            (function(){
+                const toggle = document.getElementById('sidebarToggle');
+                const backdrop = document.getElementById('sidebarBackdrop');
+                const panel = document.getElementById('sidebarPanel');
+                const closeBtn = document.getElementById('sidebarClose');
+                if(!toggle || !backdrop || !panel) return;
+                const open = () => { backdrop.classList.remove('hidden'); panel.classList.remove('-translate-x-full'); };
+                const close = () => { backdrop.classList.add('hidden'); panel.classList.add('-translate-x-full'); };
+                toggle.addEventListener('click', open);
+                backdrop.addEventListener('click', close);
+                if (closeBtn) closeBtn.addEventListener('click', close);
+                document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
+            })();
+
+            // Reload preview
+            (function(){
+                const btn = document.getElementById('previewReload');
+                const frame = document.getElementById('previewFrame');
+                if(btn && frame){ btn.addEventListener('click', ()=> { frame.src = frame.src; }); }
+            })();
+
+                    // Init progress width from data attribute
+                    (function(){
+                        const el = document.getElementById('progressBar');
+                        if (!el) return;
+                        const pct = Number(el.getAttribute('data-pct')||'0');
+                        const clamped = Math.max(0, Math.min(100, Math.round(pct)));
+                        el.style.width = clamped + '%';
+                    })();
+        </script>
+    </body>
+</html>

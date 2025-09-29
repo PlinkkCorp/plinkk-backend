@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="fr">
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Plinkk · Édition</title>
+            <link rel="icon" href="/public/images/logo.svg" />
+            <!-- Tailwind CSS (CDN) -->
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+                :root{ --ease-out-quad: cubic-bezier(.22,1,.36,1); }
+                @keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+                @keyframes slide-up { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+                @keyframes pop-in { from { opacity: 0; transform: scale(.98) } to { opacity: 1; transform: scale(1) } }
+                .animate-fade-in { animation: fade-in .36s var(--ease-out-quad) both }
+                .animate-slide-up { animation: slide-up .38s var(--ease-out-quad) both }
+                .animate-pop-in { animation: pop-in .22s var(--ease-out-quad) both }
+            </style>
+        </head>
+    <body class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100 min-h-dvh animate-fade-in">
+        <header class="border-b border-indigo-700/30 bg-gradient-to-r from-slate-900/80 via-indigo-900/40 to-slate-900/80 backdrop-blur sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
+                <img src="/<%= user.id %>/images/logo.svg" alt="Plinkk" class="h-8 w-8 rounded" onerror="this.src='/public/images/logo.svg'" />
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-base sm:text-lg font-semibold truncate">
+                        Édition du profil · <span class="text-indigo-400"><%= user.userName %></span>
+                    </h1>
+                    <p class="text-xs text-slate-400 truncate"><%= user.email %></p>
+                </div>
+                <div class="hidden sm:flex items-center gap-3">
+                    <div class="relative" id="profileMenu">
+                        <button id="profileMenuBtn" aria-haspopup="menu" aria-expanded="false" class="flex items-center gap-2 px-2 py-1.5 rounded-full bg-slate-800/80 border border-indigo-700/40 hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-600/40">
+                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-700/70 text-sm font-semibold">
+                                <%= (user.userName || 'U').charAt(0).toUpperCase() %>
+                            </span>
+                            <span class="hidden lg:inline text-sm font-medium"><%= user.userName %></span>
+                            <svg class="size-4 text-slate-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
+                        </button>
+                        <div id="profileMenuPanel" class="absolute right-0 mt-2 w-56 rounded-lg border border-slate-700 bg-slate-900/95 backdrop-blur shadow-xl p-1 hidden">
+                            <a href="/dashboard" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Accueil</a>
+                            <a href="/dashboard/edit" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Éditer</a>
+                            <a href="/dashboard/stats" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Statistiques</a>
+                            <a href="/dashboard/versions" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Versions</a>
+                            <a target="_blank" href="/<%= user.id %>" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Voir mon profil</a>
+                            <div class="my-1 border-t border-slate-700"></div>
+                            <button id="resetBtn" class="w-full text-left block px-3 py-2 text-sm rounded-md hover:bg-amber-900/20">Réinitialiser</button>
+                            <button id="saveBtn" class="w-full text-left block px-3 py-2 text-sm rounded-md hover:bg-indigo-900/20">Enregistrer</button>
+                            <div class="my-1 border-t border-slate-700"></div>
+                            <a href="/logout" class="block px-3 py-2 text-sm rounded-md text-rose-300 hover:bg-rose-900/20">Déconnexion</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto p-4 grid grid-cols-12 gap-4">
+            <!-- Colonne gauche: UI de configuration -->
+            <section class="col-span-12 lg:col-span-7 xl:col-span-8 space-y-4">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="min-w-0">
+                        <h2 class="text-base font-semibold">Configuration</h2>
+                        <div id="status" class="text-xs text-slate-400"></div>
+                    </div>
+                    <div class="flex sm:hidden items-center gap-2">
+                        <button id="resetBtn--mobile" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Reset</button>
+                        <button id="saveBtn--mobile" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500">Save</button>
+                    </div>
+                </div>
+
+                <!-- Onglets -->
+                <nav class="rounded-lg border border-slate-800/60 bg-slate-900/60 p-1 overflow-x-auto shadow animate-slide-up">
+                    <ul class="flex gap-1 text-sm" id="tabs">
+                        <li><button data-target="#section-profile" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800 aria-selected:bg-slate-800" aria-selected="true">Profil</button></li>
+                        <li><button data-target="#section-appearance" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800">Apparence</button></li>
+                        <li><button data-target="#section-background" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800">Arrière‑plan</button></li>
+                        <li><button data-target="#section-links" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800">Liens</button></li>
+                        <li><button data-target="#section-animations" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800">Animations</button></li>
+                        <li><button data-target="#section-statusbar" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800">Status & Labels</button></li>
+                        
+                    </ul>
+                </nav>
+
+                <!-- Sections -->
+                <div class="space-y-4">
+                    <!-- Profil -->
+                    <div id="section-profile" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
+                        <div class="mb-3"><h3 class="font-medium">Profil</h3><p class="text-xs text-slate-400">Informations de base affichées publiquement.</p></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label class="block text-sm">Lien du profil
+                                <input id="profileLink" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="https://..."/>
+                            </label>
+                            <label class="block text-sm">Texte du site
+                                <input id="profileSiteText" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                            </label>
+                            <label class="block text-sm">Nom affiché
+                                <input id="userName" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                            </label>
+                            <label class="block text-sm">Email
+                                <input id="email" type="email" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                            </label>
+                            <label class="block text-sm">Image de profil (URL)
+                                <input id="profileImage" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                            </label>
+                            <label class="block text-sm">Icône de profil (URL)
+                                <input id="profileIcon" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                            </label>
+                            <label class="block text-sm">Icône d’onglet (URL)
+                                <input id="iconUrl" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                            </label>
+                            <label class="block text-sm md:col-span-2">Description
+                                <textarea id="description" rows="3" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50"></textarea>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Apparence -->
+                    <div id="section-appearance" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
+                        <div class="mb-3"><h3 class="font-medium">Apparence</h3><p class="text-xs text-slate-400">Couleurs et options d’affichage.</p></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label class="block text-sm">Couleur hover
+                                <input id="profileHoverColor" type="color" class="mt-1 h-10 w-full rounded bg-slate-900 border border-slate-800 p-1" />
+                            </label>
+                            <label class="block text-sm">Thème
+                                <div class="mt-1 flex items-center gap-2">
+                                    <select id="selectedThemeIndex" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-800"></select>
+                                    <button id="openThemePicker" type="button" class="h-10 px-3 text-sm rounded-md bg-fuchsia-700/80 hover:bg-fuchsia-600 border border-fuchsia-500/40 text-white shadow transition-colors">Choisir</button>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-2 text-sm"><input id="neonEnable" type="checkbox" class="size-4"/> Activer Néon</label>
+                            <label class="flex items-center gap-2 text-sm"><input id="buttonThemeEnable" type="checkbox" class="size-4"/> Activer thème des boutons</label>
+                        </div>
+                        <!-- Néon (déplacé ici) -->
+                        <div class="pt-4 mt-4 border-t border-slate-800">
+                            <div class="mb-3 flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-medium">Couleurs Néon</h4>
+                                    <p class="text-xs text-slate-400">Choisissez les couleurs utilisées par l’effet néon.</p>
+                                </div>
+                                <button id="addNeonColor" type="button" class="px-3 py-2 text-sm rounded-md bg-fuchsia-700/80 hover:bg-fuchsia-600 border border-fuchsia-500/40 text-white shadow transition-colors">+ Ajouter une couleur</button>
+                            </div>
+                            <div id="neonList" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+                        </div>
+                    </div>
+
+                    <!-- Arrière-plan -->
+                    <div id="section-background" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
+                        <div class="mb-3 flex items-center justify-between">
+                            <div>
+                                <h3 class="font-medium">Arrière‑plan (dégradé)</h3>
+                                <p class="text-xs text-slate-400">Définissez les couleurs du dégradé d’arrière‑plan.</p>
+                            </div>
+                            <button id="addBackgroundColor" type="button" class="px-3 py-2 text-sm rounded-md bg-cyan-700/80 hover:bg-cyan-600 border border-cyan-500/40 text-white shadow transition-colors">+ Ajouter une couleur</button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                            <label class="block text-sm">Angle du dégradé
+                                <input id="degBackgroundColor" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+                            </label>
+                        </div>
+                        <div id="backgroundList" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+                        <!-- Canvas (déplacé ici) -->
+                        <div class="pt-4 mt-4 border-t border-slate-800">
+                            <div class="mb-2 flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-medium">Canvas</h4>
+                                    <p class="text-xs text-slate-400">Choisissez l’animation de fond canvas.</p>
+                                </div>
+                                <label class="flex items-center gap-2 text-sm">
+                                    <input id="canvaEnable" type="checkbox" class="size-4"/>
+                                    Activer Canvas
+                                </label>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <label class="block text-sm md:col-span-2">
+                                    <div class="mt-1">
+                                        <select id="selectedCanvasIndex" class="hidden"></select>
+                                        <div class="relative">
+                                            <input id="selectedCanvasLabel" type="text" class="pl-3 pr-20 py-2 w-full rounded bg-slate-900/60 border border-slate-800/60 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="Cliquer pour choisir" readonly />
+                                            <button id="openCanvasPicker" type="button" class="absolute right-1 top-1 h-8 px-2 text-xs rounded bg-cyan-700/80 hover:bg-cyan-600 border border-cyan-500/40 text-white shadow transition-colors">Choisir</button>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liens (inclut Icônes sociales) -->
+                    <div id="section-links" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
+                        <!-- Icônes sociales -->
+                        <div class="mb-3 flex items-center justify-between">
+                            <div>
+                                <h3 class="font-medium">Icônes sociales</h3>
+                                <p class="text-xs text-slate-400">Ajoutez des liens vers vos réseaux et services.</p>
+                            </div>
+                            <button id="addSocial" type="button" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">+ Ajouter</button>
+                        </div>
+                        <div id="socialList" class="space-y-3"></div>
+                        <div class="border-t border-slate-800 my-4"></div>
+
+                        <!-- Liens -->
+                        <div class="mb-3 flex items-center justify-between">
+                            <div>
+                                <h3 class="font-medium">Liens</h3>
+                                <p class="text-xs text-slate-400">Gérez les boutons et liens de votre page.</p>
+                            </div>
+                            <button id="addLink" type="button" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">+ Ajouter un lien</button>
+                        </div>
+                        <div id="linksList" class="space-y-3"></div>
+                    </div>
+
+                    <!-- Animations -->
+                    <div id="section-animations" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
+                        <div class="mb-3"><h3 class="font-medium">Animations</h3><p class="text-xs text-slate-400">Ajustez les animations d’éléments et d’arrière‑plan.</p></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label class="block text-sm">Animation d'article
+                                <select id="selectedAnimationIndex" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800"></select>
+                            </label>
+                            <label class="block text-sm">Animation de bouton
+                                <select id="selectedAnimationButtonIndex" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800"></select>
+                            </label>
+                            <label class="block text-sm">Animation d'arrière-plan
+                                <select id="selectedAnimationBackgroundIndex" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800"></select>
+                            </label>
+                            <label class="block text-sm">Durée anim background (s)
+                                <input id="animationDurationBackground" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+                            </label>
+                            <label class="block text-sm">Délai anim bouton (s)
+                                <input id="delayAnimationButton" step="0.01" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+                            </label>
+                            <label class="block text-sm">Taille background (%)
+                                <input id="backgroundSize" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Statusbar (inclut Labels) -->
+                    <div id="section-statusbar" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
+
+                        <div class="mb-3"><h3 class="font-medium">Barre de statut</h3><p class="text-xs text-slate-400">Message et style du statut affiché sous le profil.</p></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label class="block text-sm md:col-span-2">Texte
+                                <input id="status_text" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+                            </label>
+                            <label class="block text-sm">Couleur texte
+                                <input id="status_colorText" type="color" class="mt-1 h-10 w-full rounded bg-slate-900 border border-slate-800 p-1" />
+                            </label>
+                            <label class="block text-sm">FontTextColor (0 ou 1)
+                                <input id="status_fontTextColor" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+                            </label>
+                            <div class="md:col-span-2">
+                                <div class="text-sm mb-1">Statut</div>
+                                <div class="relative inline-block" id="statusDropdown">
+                                    <button id="statusDropdownBtn" type="button" aria-haspopup="menu" aria-expanded="false" class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-slate-800/80 border border-slate-700/60 hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-600/40 text-sm">
+                                        <span class="inline-block size-2 rounded-full bg-slate-400"></span>
+                                        <span class="status-current-label">Hors‑ligne</span>
+                                        <svg class="size-4 text-slate-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
+                                    </button>
+                                    <div id="statusDropdownPanel" class="absolute z-10 mt-2 w-48 rounded-lg border border-slate-700 bg-slate-900/95 backdrop-blur shadow-xl p-1 hidden" role="menu" aria-label="Choisir un statut">
+                                        <button type="button" class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-slate-800" data-value="online" role="menuitem">
+                                            <span class="inline-block size-2 rounded-full bg-emerald-400"></span> En ligne
+                                        </button>
+                                        <button type="button" class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-slate-800" data-value="busy" role="menuitem">
+                                            <span class="inline-block size-2 rounded-full bg-rose-400"></span> Occupé
+                                        </button>
+                                        <button type="button" class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-slate-800" data-value="away" role="menuitem">
+                                            <span class="inline-block size-2 rounded-full bg-amber-400"></span> Absent
+                                        </button>
+                                        <button type="button" class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-slate-800" data-value="offline" role="menuitem">
+                                            <span class="inline-block size-2 rounded-full bg-slate-400"></span> Hors‑ligne
+                                        </button>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="status_statusText" />
+                            </div>
+                        </div>
+                        <!-- Labels (déplacé ici) -->
+                        <div class="pt-4 mt-4 border-t border-slate-800">
+                            <div class="mb-3 flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-medium">Labels</h4>
+                                    <p class="text-xs text-slate-400">Badges affichés sous votre profil.</p>
+                                </div>
+                                <button id="addLabel" type="button" class="px-3 py-2 text-sm rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors">+ Ajouter un label</button>
+                            </div>
+                            <div id="labelsList" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barre d’action collante (mobile + bas de page) -->
+                <div class="lg:hidden sticky bottom-3 z-30 flex justify-end">
+                    <div class="flex gap-2 rounded-full border border-indigo-700/40 bg-slate-900/80 backdrop-blur px-2 py-2 shadow-lg">
+                        <button id="resetBtn--fab" class="px-3 py-2 text-sm rounded-full bg-amber-700/80 hover:bg-amber-600 border border-amber-500/40 text-white shadow transition-colors">Réinitialiser</button>
+                        <button id="saveBtn--fab" class="px-3 py-2 text-sm rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Enregistrer</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Colonne droite: Aperçu -->
+            <aside class="col-span-12 lg:col-span-5 xl:col-span-4 space-y-3">
+                <div class="rounded-lg border border-indigo-800/40 bg-slate-900/60 p-3 sticky top-[68px] shadow animate-slide-up" style="animation-delay:120ms">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <h2 class="text-base font-semibold">Aperçu</h2>
+                        <div class="flex items-center gap-2">
+                            <button id="refreshPreview" class="px-3 py-2 text-xs rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Rafraîchir</button>
+                            <a class="px-3 py-2 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors" target="_blank" href="/<%= user.id %>">Ouvrir</a>
+                        </div>
+                    </div>
+                    <iframe id="preview" class="w-full h-[72dvh] rounded border border-slate-800 bg-white shadow-inner" src="/<%= user.id %>"></iframe>
+                </div>
+            </aside>
+        </main>
+
+                    <!-- Modal Sélection d'icône sociale -->
+                    <div id="iconModal" class="fixed inset-0 z-50 hidden">
+                        <div class="absolute inset-0 bg-black/60 animate-fade-in"></div>
+                        <div class="relative mx-auto mt-16 w-[92vw] max-w-3xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in">
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+                                <h3 class="font-semibold">Choisir une icône</h3>
+                                <button id="iconModalClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
+                            </div>
+                            <div class="p-4 space-y-3">
+                                <input id="iconSearch" type="text" placeholder="Rechercher..." class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700" />
+                                <div id="iconGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal générique de sélection (thèmes, animations, canvas, bouton thème) -->
+                    <div id="pickerModal" class="fixed inset-0 z-50 hidden">
+                        <div class="absolute inset-0 bg-black/60 animate-fade-in"></div>
+                        <div class="relative mx-auto mt-16 w-[92vw] max-w-5xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in">
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+                                <h3 id="pickerTitle" class="font-semibold">Sélection</h3>
+                                <button id="pickerClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
+                            </div>
+                            <div class="p-4 space-y-3">
+                                <input id="pickerSearch" type="text" placeholder="Rechercher..." class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700" />
+                                <div id="pickerGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[64vh] overflow-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                        <script>
+                                window.__PLINKK_USER_ID__ = "<%= user.id %>";
+                                // Gestion simple des onglets avec hash dans l’URL
+                                (function(){
+                                    const btns = Array.from(document.querySelectorAll('.tab-btn'));
+                                    const sections = Array.from(document.querySelectorAll('[id^="section-"]'));
+                                    const selectTab = (target) => {
+                                        sections.forEach(s => s.classList.toggle('hidden', `#${s.id}` !== target));
+                                        btns.forEach(b => b.setAttribute('aria-selected', b.dataset.target === target ? 'true' : 'false'));
+                                        // Mémoriser dans l’URL
+                                        if (history.replaceState) {
+                                            history.replaceState(null, '', target);
+                                        } else {
+                                            location.hash = target;
+                                        }
+                                    };
+                                    btns.forEach(b => b.addEventListener('click', () => selectTab(b.dataset.target)));
+                                    // Init sur hash ou défaut profil
+                                    const initial = location.hash && sections.some(s => `#${s.id}` === location.hash) ? location.hash : '#section-profile';
+                                    selectTab(initial);
+
+                                    // Relier boutons mobiles aux actions principales
+                                    const save = document.getElementById('saveBtn');
+                                    const reset = document.getElementById('resetBtn');
+                                    ['saveBtn--mobile','saveBtn--fab'].forEach(id=>{
+                                        const el = document.getElementById(id); if(el && save){ el.addEventListener('click', ()=> save.click()); }
+                                    });
+                                    ['resetBtn--mobile','resetBtn--fab'].forEach(id=>{
+                                        const el = document.getElementById(id); if(el && reset){ el.addEventListener('click', ()=> reset.click()); }
+                                    });
+                                })();
+                        </script>
+                <!-- Expose les données de configuration (thèmes, animations, canvas, boutons) au dashboard -->
+                <script type="module">
+                    import { themes } from '/public/config/themeConfig.js';
+                    import canvaData from '/public/config/canvaConfig.js';
+                    import { animations, animationBackground } from '/public/config/animationConfig.js';
+                    import btnIconThemeConfig from '/public/config/btnIconThemeConfig.js';
+                    window.__PLINKK_CFG__ = { themes, canvaData, animations, animationBackground, btnIconThemeConfig };
+                </script>
+            <script src="/public/js/dashboard-ui.js"></script>
+                        <script>
+                                (function(){
+                                    const btn = document.getElementById('profileMenuBtn');
+                                    const panel = document.getElementById('profileMenuPanel');
+                                    if(!btn || !panel) return;
+                                    const open = () => { panel.classList.remove('hidden'); panel.classList.add('animate-pop-in'); btn.setAttribute('aria-expanded','true'); };
+                                    const close = () => { panel.classList.add('hidden'); btn.setAttribute('aria-expanded','false'); };
+                                    btn.addEventListener('click', (e)=>{ e.stopPropagation(); if(panel.classList.contains('hidden')) open(); else close(); });
+                                    document.addEventListener('click', ()=> close());
+                                    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
+                                })();
+                        </script>
+    </body>
+    </html>
