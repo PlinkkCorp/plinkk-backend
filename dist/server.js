@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+require("dotenv/config");
 const static_1 = __importDefault(require("@fastify/static"));
 const view_1 = __importDefault(require("@fastify/view"));
 const fastify_1 = __importDefault(require("fastify"));
@@ -21,6 +22,7 @@ const prisma = new client_1.PrismaClient();
 const fastify = (0, fastify_1.default)({
     logger: true,
 });
+const PORT = Number(process.env.PORT) || 3000;
 fastify.register(view_1.default, {
     engine: {
         ejs: ejs_1.default,
@@ -44,6 +46,46 @@ fastify.register(secure_session_1.default, {
 });
 fastify.get("/", function (request, reply) {
     reply.view("index.ejs");
+});
+// Pages statiques utiles
+fastify.get("/about", (request, reply) => reply.view("about.ejs"));
+fastify.get("/privacy", (request, reply) => reply.view("privacy.ejs"));
+fastify.get("/terms", (request, reply) => reply.view("terms.ejs"));
+fastify.get("/cookies", (request, reply) => reply.view("cookies.ejs"));
+fastify.get("/legal", (request, reply) => reply.view("legal.ejs"));
+// robots.txt
+fastify.get("/robots.txt", async (request, reply) => {
+    const host = request.headers["x-forwarded-host"] || request.headers.host || "localhost:3000";
+    const proto = (request.headers["x-forwarded-proto"] || request.protocol || "http").split(",")[0];
+    const base = `${proto}://${host}`;
+    reply.type("text/plain").send(`User-agent: *\nAllow: /\nSitemap: ${base}/sitemap.xml\n`);
+});
+// sitemap.xml
+fastify.get("/sitemap.xml", async (request, reply) => {
+    const host = request.headers["x-forwarded-host"] || request.headers.host || "localhost:3000";
+    const proto = (request.headers["x-forwarded-proto"] || request.protocol || "http").split(",")[0];
+    const base = `${proto}://${host}`;
+    const staticUrls = [
+        "",
+        "about",
+        "contact",
+        "privacy",
+        "terms",
+        "cookies",
+        "legal",
+        "users",
+        "dashboard",
+    ].map((p) => (p ? `${base}/${p}` : `${base}/`));
+    const users = await prisma.user.findMany({ select: { id: true }, orderBy: { createdAt: "asc" } });
+    const userUrls = users.map((u) => `${base}/${encodeURIComponent(u.id)}`);
+    const urls = [...staticUrls, ...userUrls];
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n` +
+        `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
+        urls
+            .map((loc) => `\n  <url><loc>${loc}</loc></url>`)
+            .join("") +
+        "\n</urlset>\n";
+    reply.type("application/xml").send(xml);
 });
 fastify.get("/login", function (request, reply) {
     reply.view("connect.ejs");
@@ -491,7 +533,24 @@ fastify.get("/:username/images/*", function (request, reply) {
     }
     return reply.code(404).send({ error: "non existant file" });
 });
-fastify.listen({ port: 3000 }, function (err, address) {
+// 404 handler (après routes spécifiques)
+fastify.setNotFoundHandler((request, reply) => {
+    var _a;
+    if ((_a = request.raw.url) === null || _a === void 0 ? void 0 : _a.startsWith("/api")) {
+        return reply.code(404).send({ error: "Not Found" });
+    }
+    return reply.code(404).view("404.ejs");
+});
+// Error handler
+fastify.setErrorHandler((error, request, reply) => {
+    var _a, _b;
+    fastify.log.error(error);
+    if ((_a = request.raw.url) === null || _a === void 0 ? void 0 : _a.startsWith("/api")) {
+        return reply.code(500).send({ error: "Internal Server Error" });
+    }
+    return reply.code(500).view("500.ejs", { message: (_b = error === null || error === void 0 ? void 0 : error.message) !== null && _b !== void 0 ? _b : "" });
+});
+fastify.listen({ port: PORT, host: '0.0.0.0' }, function (err, address) {
     if (err) {
         fastify.log.error(err);
         process.exit(1);

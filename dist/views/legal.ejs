@@ -1,0 +1,42 @@
+<%- include('partials/head', { title: 'Mentions légales', description: 'Mentions légales de Plinkk.' }) %>
+<%- include('partials/header') %>
+<main class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-10">
+  <article class="glass ring-gradient rounded-2xl p-6 prose prose-invert max-w-none">
+    <h1 class="mb-2">Mentions légales</h1>
+    <p class="text-slate-300 !mt-0">Dernière mise à jour : <time datetime="2025-09-29">29 septembre 2025</time></p>
+
+    <nav aria-label="Liens utiles" class="not-prose mt-4">
+      <ul class="flex flex-wrap gap-3 text-sm text-slate-300">
+        <li><a class="underline hover:text-white" href="/privacy">Confidentialité</a></li>
+        <li><a class="underline hover:text-white" href="/cookies">Cookies</a></li>
+        <li><a class="underline hover:text-white" href="/terms">Conditions</a></li>
+      </ul>
+    </nav>
+
+    <hr class="my-4 border-slate-800/60" />
+
+    <h2 id="editeur">Éditeur du site</h2>
+    <p><strong>Plinkk</strong> — Klaynight (Elouan Passereau)<br>
+    Site : <a href="https://klaynight.fr" rel="external">klaynight.fr</a><br>
+    Contact : <a href="mailto:contact@studio.klaynight.fr">contact@studio.klaynight.fr</a></p>
+
+    <h2 id="hebergeur">Hébergeur</h2>
+    <p>Contabo GmbH — Détails disponibles sur <a href="https://contabo.com" rel="external">contabo.com</a>.</p>
+
+    <h2 id="propriete">Propriété intellectuelle</h2>
+    <p>Les éléments du site (textes, images, logos, icônes) sont protégés. Toute reproduction non autorisée est interdite.</p>
+
+    <h2 id="donnees">Données personnelles</h2>
+    <p>Voir la <a href="/privacy">Politique de confidentialité</a> et la <a href="/cookies">Politique des cookies</a>.</p>
+
+    <h2 id="responsabilite">Responsabilité</h2>
+    <p>Nous mettons tout en œuvre pour assurer l’exactitude des informations sans garantie. L’usage du site se fait sous votre responsabilité.</p>
+
+    <h2 id="licence">Licence du code</h2>
+    <p>Le code source est distribué sous licence MIT (voir le fichier <code>LICENSE</code> du dépôt).</p>
+
+    <h2 id="droit">Droit applicable</h2>
+    <p>Droit français. En cas de litige, compétence des tribunaux du ressort du siège de l’éditeur.</p>
+  </article>
+</main>
+<%- include('partials/footer') %>
