@@ -8,7 +8,5 @@ COPY . .
 COPY package.json ./
 RUN npm install
 RUN npx @fastify/secure-session > src/secret-key
-RUN npx prisma migrate deploy
-RUN npx prisma generate
 RUN npm run build
-CMD ["sh", "-c", "npm", "run", "start"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma generate && npm run star"]
