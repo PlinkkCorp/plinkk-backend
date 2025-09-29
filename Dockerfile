@@ -7,6 +7,8 @@ RUN apk add --no-cache openssl libc6-compat bash
 COPY . .
 COPY package.json ./
 RUN npm install
+RUN npx prisma generate
 RUN npx @fastify/secure-session > src/secret-key
 RUN npm run build
-CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma generate && npm run star"]
+RUN npm prune --production
+CMD ["sh", "-c", "npm run start"]
