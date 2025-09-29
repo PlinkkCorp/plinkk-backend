@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev src/server.ts",
     "create-key": "pnpx @fastify/secure-session > src/secret-key",
-  "build": "tsc -p tsconfig.json && node scripts/copy-static.mjs",
+    "build": "tsc -p tsconfig.json && node scripts/copy-static.mjs",
     "start": "node dist/server.js"
   },
   "keywords": [],
@@ -34,7 +34,6 @@
   "devDependencies": {
     "@types/ejs": "^3.1.5",
     "@types/node": "^24.5.2",
-    "node": "^24.9.0",
     "prisma": "^6.16.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.2"
