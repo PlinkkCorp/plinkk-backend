@@ -5,35 +5,71 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Plinkk · Dashboard</title>
         <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            :root{ --ease-out-quad: cubic-bezier(.22,1,.36,1); }
+            @keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+            @keyframes slide-up { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+            @keyframes pop-in { from { opacity: 0; transform: scale(.98) } to { opacity: 1; transform: scale(1) } }
+            .animate-fade-in { animation: fade-in .36s var(--ease-out-quad) both }
+            .animate-slide-up { animation: slide-up .38s var(--ease-out-quad) both }
+            .animate-pop-in { animation: pop-in .22s var(--ease-out-quad) both }
+        </style>
     </head>
-    <body class="bg-slate-950 text-slate-100 min-h-dvh">
-        <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur sticky top-0 z-40">
+    <body class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100 min-h-dvh animate-fade-in">
+        <header class="border-b border-indigo-700/30 bg-gradient-to-r from-slate-900/80 via-indigo-900/40 to-slate-900/80 backdrop-blur sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
-                <img src="/<%= user.id %>/images/logo.png" alt="Plinkk" class="h-8 w-8 rounded" onerror="this.src='/public/images/logo.png'" />
+                <%
+                    let gravatarHash = null;
+                    try {
+                        const email = (user && user.email ? String(user.email) : '').trim().toLowerCase();
+                        if (email) {
+                            const crypto = (typeof require !== 'undefined') ? require('crypto') : null;
+                            if (crypto) gravatarHash = crypto.createHash('md5').update(email).digest('hex');
+                        }
+                    } catch (e) { gravatarHash = null; }
+                %>
+                <% if (gravatarHash) { %>
+                    <img src="https://www.gravatar.com/avatar/<%= gravatarHash %>?s=64&d=identicon" alt="Avatar" class="h-8 w-8 rounded" onerror="this.src='/public/images/logo.png'">
+                <% } else { %>
+                    <img src="/public/images/logo.png" alt="Avatar" class="h-8 w-8 rounded">
+                <% } %>
                 <div class="flex-1 min-w-0">
                     <h1 class="text-base sm:text-lg font-semibold truncate">
                         Tableau de bord · <span class="text-indigo-400"><%= user.userName %></span>
                     </h1>
                     <p class="text-xs text-slate-400 truncate"><%= user.email %></p>
                 </div>
-                <nav class="flex items-center gap-2 flex-wrap justify-end">
-                    <span class="px-3 py-2 text-sm rounded-md bg-slate-800 border border-slate-700 text-slate-300">Résumé</span>
-                    <a href="/dashboard/edit" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500">Éditer</a>
-                    <a href="/dashboard/stats" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Statistiques</a>
-                    <a href="/dashboard/versions" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Versions</a>
-                    <a target="_blank" href="/<%= user.id %>" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Voir le profil</a>
-                    <a href="/logout" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Déconnexion</a>
-                </nav>
+                    <div class="flex items-center gap-3">
+                        <span class="hidden sm:inline px-3 py-2 text-xs rounded-md bg-slate-800/60 border border-slate-700/60 text-slate-300">Accueil</span>
+                        <div class="relative" id="profileMenu">
+                            <button id="profileMenuBtn" aria-haspopup="menu" aria-expanded="false" class="flex items-center gap-2 px-2 py-1.5 rounded-full bg-slate-800/80 border border-indigo-700/40 hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-600/40">
+                                <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-700/70 text-sm font-semibold">
+                                    <%= (user.userName || 'U').charAt(0).toUpperCase() %>
+                                </span>
+                                <span class="hidden sm:inline text-sm font-medium"><%= user.userName %></span>
+                                <svg class="size-4 text-slate-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
+                            </button>
+                            <div id="profileMenuPanel" class="absolute right-0 mt-2 w-56 rounded-lg border border-slate-700 bg-slate-900/95 backdrop-blur shadow-xl p-1 hidden">
+                                <a href="/dashboard" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Accueil</a>
+                                <a href="/dashboard/edit" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Éditer</a>
+                                <a href="/dashboard/stats" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Statistiques</a>
+                                <a href="/dashboard/versions" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Versions</a>
+                                <a target="_blank" href="/<%= user.id %>" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Voir mon profil</a>
+                                <div class="my-1 border-t border-slate-700"></div>
+                                <a href="/logout" class="block px-3 py-2 text-sm rounded-md text-rose-300 hover:bg-rose-900/20">Déconnexion</a>
+                            </div>
+                        </div>
+                    </div>
             </div>
         </header>
 
         <main class="max-w-7xl mx-auto p-4 grid grid-cols-12 gap-4">
             <!-- Colonne gauche: Récapitulatif -->
             <section class="col-span-12 xl:col-span-8 space-y-4">
-                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+                <div class="rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
                     <div class="flex items-center justify-between gap-2 mb-2">
-                        <h2 class="text-base font-semibold">Résumé du compte</h2>
-                        <a href="/dashboard/edit" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500">Modifier le profil</a>
+                        <h2 class="text-base font-semibold">Accueil du compte</h2>
+                        <a href="/dashboard/edit" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Modifier le profil</a>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -56,32 +92,32 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+                    <div class="rounded-lg border border-indigo-800/50 bg-slate-900/60 p-4 shadow hover:shadow-lg transition duration-300 border-l-4 border-l-indigo-500/70 hover:-translate-y-0.5">
                         <p class="text-xs text-slate-400">Liens</p>
-                        <p class="text-3xl font-bold"><%= stats.links %></p>
+                        <p class="text-3xl font-bold text-indigo-300"><%= stats.links %></p>
                     </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+                    <div class="rounded-lg border border-fuchsia-800/50 bg-slate-900/60 p-4 shadow hover:shadow-lg transition duration-300 border-l-4 border-l-fuchsia-500/70 hover:-translate-y-0.5">
                         <p class="text-xs text-slate-400">Icônes sociales</p>
-                        <p class="text-3xl font-bold"><%= stats.socials %></p>
+                        <p class="text-3xl font-bold text-fuchsia-300"><%= stats.socials %></p>
                     </div>
-                    <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+                    <div class="rounded-lg border border-emerald-800/50 bg-slate-900/60 p-4 shadow hover:shadow-lg transition duration-300 border-l-4 border-l-emerald-500/70 hover:-translate-y-0.5">
                         <p class="text-xs text-slate-400">Labels</p>
-                        <p class="text-3xl font-bold"><%= stats.labels %></p>
+                        <p class="text-3xl font-bold text-emerald-300"><%= stats.labels %></p>
                     </div>
                 </div>
 
-                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+                <div class="rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up" style="animation-delay:80ms">
                     <div class="flex items-center justify-between mb-2">
                         <h3 class="font-medium">Aperçu rapide des liens</h3>
-                        <a href="/dashboard/edit#section-links" class="text-sm text-indigo-400 hover:text-indigo-300">Gérer</a>
+                        <a href="/dashboard/edit#section-links" class="text-sm text-indigo-300 hover:text-indigo-200 underline underline-offset-4">Gérer</a>
                     </div>
                     <% if (links && links.length) { %>
                         <ul class="divide-y divide-slate-800">
                             <% links.slice(0, 6).forEach(l => { %>
                                 <li class="py-2 flex items-center gap-3">
-                                    <div class="h-5 w-5 rounded bg-slate-700 flex items-center justify-center text-[10px] shrink-0">🔗</div>
+                                    <div class="h-5 w-5 rounded bg-indigo-700/70 flex items-center justify-center text-[10px] shrink-0">🔗</div>
                                     <div class="min-w-0">
-                                        <p class="truncate font-medium"><%= l.name || l.text || l.url %></p>
+                                        <p class="truncate font-medium text-slate-100"><%= l.name || l.text || l.url %></p>
                                         <p class="truncate text-xs text-slate-400"><%= l.url %></p>
                                     </div>
                                 </li>
@@ -95,17 +131,29 @@
 
             <!-- Colonne droite: Aperçu de la page publique -->
             <aside class="col-span-12 xl:col-span-4 space-y-3">
-                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-3 sticky top-[68px]">
+                <div class="rounded-lg border border-indigo-800/40 bg-slate-900/60 p-3 sticky top-[68px] shadow animate-slide-up" style="animation-delay:120ms">
                     <div class="flex items-center justify-between gap-2 mb-2">
                         <h2 class="text-base font-semibold">Aperçu</h2>
                         <div class="flex items-center gap-2">
-                            <a class="px-3 py-2 text-xs rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700" target="_blank" href="/<%= user.id %>">Ouvrir</a>
+                            <a class="px-3 py-2 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors" target="_blank" href="/<%= user.id %>">Ouvrir</a>
                         </div>
                     </div>
-                    <iframe class="w-full h-[72dvh] rounded border border-slate-800 bg-white" src="/<%= user.id %>"></iframe>
+                    <iframe class="w-full h-[72dvh] rounded border border-slate-800 bg-white shadow-inner" src="/<%= user.id %>"></iframe>
                 </div>
             </aside>
         </main>
 
+                <script>
+                        (function(){
+                            const btn = document.getElementById('profileMenuBtn');
+                            const panel = document.getElementById('profileMenuPanel');
+                            if(!btn || !panel) return;
+                            const open = () => { panel.classList.remove('hidden'); panel.classList.add('animate-pop-in'); btn.setAttribute('aria-expanded','true'); };
+                            const close = () => { panel.classList.add('hidden'); btn.setAttribute('aria-expanded','false'); };
+                            btn.addEventListener('click', (e)=>{ e.stopPropagation(); if(panel.classList.contains('hidden')) open(); else close(); });
+                            document.addEventListener('click', ()=> close());
+                            document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
+                        })();
+                </script>
     </body>
 </html>

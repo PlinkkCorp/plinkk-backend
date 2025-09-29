@@ -8,6 +8,12 @@
   const saveBtn = qs('#saveBtn');
   const resetBtn = qs('#resetBtn');
   const refreshBtn = qs('#refreshPreview');
+  // Autosave state
+  let autoSaveTimer = null;
+  let suspendAutoSave = false;
+  let saving = false;
+  let saveQueued = false;
+  const AUTO_SAVE_DELAY = 800; // ms
 
   // Fields (base profile)
   const f = {
@@ -37,10 +43,13 @@
 
     // statusbar
     status_text: qs('#status_text'),
-    status_colorBg: qs('#status_colorBg'),
     status_colorText: qs('#status_colorText'),
     status_fontTextColor: qs('#status_fontTextColor'),
     status_statusText: qs('#status_statusText'),
+  statusPreviewChip: qs('#statusPreviewChip'),
+  statusDropdown: qs('#statusDropdown'),
+  statusDropdownBtn: qs('#statusDropdownBtn'),
+  statusDropdownPanel: qs('#statusDropdownPanel'),
 
     // lists containers
     backgroundList: qs('#backgroundList'),
@@ -60,9 +69,32 @@
     statusEl.textContent = text || '';
     statusEl.className = 'text-xs ' + (kind === 'error' ? 'text-red-400' : kind === 'success' ? 'text-emerald-400' : 'text-slate-400');
   };
+  const scheduleAutoSave = () => {
+    if (suspendAutoSave) return;
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    setStatus('Enregistrement...');
+    autoSaveTimer = setTimeout(() => { saveNow(false); }, AUTO_SAVE_DELAY);
+  };
 
   const fetchConfig = () => fetch('/api/me/config').then(async r => { if(!r.ok) throw new Error(await r.text()); return r.json(); });
   const putConfig = (obj) => fetch('/api/me/config', { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(obj) }).then(async r => { if(!r.ok) throw new Error(await r.text()); return r.json(); });
+  async function saveNow(manual) {
+    if (autoSaveTimer) { clearTimeout(autoSaveTimer); autoSaveTimer = null; }
+    if (saving) { saveQueued = true; return; }
+    saving = true;
+    const payload = collectPayload();
+    setStatus('Enregistrement...');
+    try {
+      await putConfig(payload);
+      setStatus(manual ? 'Enregistré ✓' : 'Enregistré automatiquement ✓', 'success');
+      refreshPreview();
+    } catch (e) {
+      setStatus('Erreur: ' + (e?.message || ''), 'error');
+    } finally {
+      saving = false;
+      if (saveQueued) { saveQueued = false; scheduleAutoSave(); }
+    }
+  }
 
   function el(tag, attrs = {}, children = []) {
     const e = document.createElement(tag);
@@ -74,6 +106,14 @@
     }
     children.forEach(c => e.appendChild(c));
     return e;
+  }
+
+  function attachAutoSave(el) {
+    if (!el) return;
+    const tag = (el.tagName || '').toUpperCase();
+    const type = (el.type || '').toLowerCase();
+    const isChange = tag === 'SELECT' || type === 'checkbox' || type === 'color' || type === 'number';
+    el.addEventListener(isChange ? 'change' : 'input', scheduleAutoSave);
   }
 
   // Small helpers
@@ -131,15 +171,15 @@
           title: 'Aucune couleur de dégradé',
           description: 'Ajoutez au moins une couleur pour créer le dégradé d’arrière‑plan.',
           actionLabel: '+ Ajouter une couleur',
-          onAction: () => { colors.push('#ffffff'); renderBackground(colors); }
+          onAction: () => { colors.push('#ffffff'); renderBackground(colors); scheduleAutoSave(); }
         })
       );
     } else {
       colors.forEach((c, idx) => {
         const wrap = el('div', { class: 'flex items-center gap-2' });
         const color = el('input', { type: 'color', value: c, class: 'h-10 w-full rounded bg-slate-900 border border-slate-800 p-1 flex-1' });
-        const rm = trashButton(() => { colors.splice(idx, 1); renderBackground(colors); });
-        color.addEventListener('input', () => { colors[idx] = color.value; });
+        const rm = trashButton(() => { colors.splice(idx, 1); renderBackground(colors); scheduleAutoSave(); });
+        color.addEventListener('input', () => { colors[idx] = color.value; scheduleAutoSave(); });
         wrap.append(color, rm);
         f.backgroundList.appendChild(wrap);
       });
@@ -147,6 +187,7 @@
     f.addBackgroundColor.onclick = () => {
       colors.push('#ffffff');
       renderBackground(colors);
+      scheduleAutoSave();
     };
   }
 
@@ -158,20 +199,20 @@
           title: 'Aucune couleur néon',
           description: 'Ajoutez au moins une couleur pour activer l’effet néon.',
           actionLabel: '+ Ajouter une couleur',
-          onAction: () => { colors.push('#7289DA'); renderNeon(colors); }
+          onAction: () => { colors.push('#7289DA'); renderNeon(colors); scheduleAutoSave(); }
         })
       );
     } else {
       colors.forEach((c, idx) => {
         const wrap = el('div', { class: 'flex items-center gap-2' });
         const color = el('input', { type: 'color', value: c, class: 'h-10 w-full rounded bg-slate-900 border border-slate-800 p-1 flex-1' });
-        const rm = trashButton(() => { colors.splice(idx,1); renderNeon(colors); });
-        color.addEventListener('input', () => { colors[idx] = color.value; });
+        const rm = trashButton(() => { colors.splice(idx,1); renderNeon(colors); scheduleAutoSave(); });
+        color.addEventListener('input', () => { colors[idx] = color.value; scheduleAutoSave(); });
         wrap.append(color, rm);
         f.neonList.appendChild(wrap);
       });
     }
-    f.addNeonColor.onclick = () => { colors.push('#7289DA'); renderNeon(colors); };
+    f.addNeonColor.onclick = () => { colors.push('#7289DA'); renderNeon(colors); scheduleAutoSave(); };
 
     // Auto‑disable neon effect when no colors present
     const hasColors = Array.isArray(colors) && colors.length > 0;
@@ -181,6 +222,7 @@
     if (f.neonEnable) {
       f.neonEnable.disabled = !hasColors;
       f.neonEnable.title = hasColors ? '' : 'Ajoutez au moins une couleur pour activer le néon';
+      f.neonEnable.addEventListener('change', scheduleAutoSave);
     }
   }
 
@@ -192,7 +234,7 @@
           title: 'Aucun label',
           description: 'Ajoutez des badges pour mettre en valeur vos informations.',
           actionLabel: '+ Ajouter un label',
-          onAction: () => { labels.push({ data: 'Nouveau', color: '#FF6384', fontColor: '#FFFFFF' }); renderLabels(labels); }
+          onAction: () => { labels.push({ data: 'Nouveau', color: '#FF6384', fontColor: '#FFFFFF' }); renderLabels(labels); scheduleAutoSave(); }
         })
       );
     } else {
@@ -201,15 +243,15 @@
         const data = el('input', { type: 'text', value: l.data || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 md:col-span-2' });
         const color = el('input', { type: 'color', value: l.color || '#ffffff', class: 'h-10 w-full rounded bg-slate-900 border border-slate-800 p-1' });
         const fontColor = el('input', { type: 'color', value: l.fontColor || '#000000', class: 'h-10 w-full rounded bg-slate-900 border border-slate-800 p-1' });
-        const rm = trashButton(() => { labels.splice(idx,1); renderLabels(labels); });
-        data.addEventListener('input', () => { l.data = data.value; });
-        color.addEventListener('input', () => { l.color = color.value; });
-        fontColor.addEventListener('input', () => { l.fontColor = fontColor.value; });
+        const rm = trashButton(() => { labels.splice(idx,1); renderLabels(labels); scheduleAutoSave(); });
+        data.addEventListener('input', () => { l.data = data.value; scheduleAutoSave(); });
+        color.addEventListener('input', () => { l.color = color.value; scheduleAutoSave(); });
+        fontColor.addEventListener('input', () => { l.fontColor = fontColor.value; scheduleAutoSave(); });
         row.append(data, color, fontColor, rm);
         f.labelsList.appendChild(row);
       });
     }
-    f.addLabel.onclick = () => { labels.push({ data: 'Nouveau', color: '#FF6384', fontColor: '#FFFFFF' }); renderLabels(labels); };
+    f.addLabel.onclick = () => { labels.push({ data: 'Nouveau', color: '#FF6384', fontColor: '#FFFFFF' }); renderLabels(labels); scheduleAutoSave(); };
   }
 
   // Social icon modal state
@@ -260,6 +302,7 @@
         card.addEventListener('click', () => {
           if (iconSelectCallback) iconSelectCallback(i.slug);
           closeIconModal();
+          scheduleAutoSave();
         });
         iconGrid.appendChild(card);
       });
@@ -424,13 +467,14 @@
           type: 'button'
         });
 
-        const rm = trashButton(() => { socials.splice(idx,1); renderSocial(socials); });
+  const rm = trashButton(() => { socials.splice(idx,1); renderSocial(socials); scheduleAutoSave(); });
         const rmCell = el('div', { class: 'flex justify-end items-center md:col-span-1' });
 
         function updatePreview() {
           const slug = (iconName.value || '').toLowerCase().trim().replace(/\s+/g,'-');
           iconPreview.src = `/${window.__PLINKK_USER_ID__}/images/icons/${slug}.svg`;
           s.icon = iconName.value;
+          scheduleAutoSave();
         }
 
         function openPickerForIcon() {
@@ -447,7 +491,7 @@
         });
 
         updatePreview();
-        url.addEventListener('input', () => { s.url = url.value; });
+  url.addEventListener('input', () => { s.url = url.value; scheduleAutoSave(); });
 
         inputWrap.append(iconName, pickBtn);
         iconWrap.append(iconPreview, inputWrap);
@@ -456,7 +500,7 @@
         f.socialList.appendChild(row);
       });
     }
-    f.addSocial.onclick = () => { socials.push({ url: 'https://', icon: 'github' }); renderSocial(socials); };
+    f.addSocial.onclick = () => { socials.push({ url: 'https://', icon: 'github' }); renderSocial(socials); scheduleAutoSave(); };
   }
 
   function renderLinks(links) {
@@ -488,7 +532,7 @@
         const url = el('input', { type: 'url', value: l.url || 'https://', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 md:col-span-3' });
         const name = el('input', { type: 'text', value: l.name || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 md:col-span-2' });
         const description = el('input', { type: 'text', value: l.description || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800' });
-        const rm = trashButton(() => { links.splice(idx,1); renderLinks(links); });
+  const rm = trashButton(() => { links.splice(idx,1); renderLinks(links); scheduleAutoSave(); });
   const rmCell = el('div', { class: 'flex justify-end items-center' });
         rmCell.append(rm);
         line2.append(url, name, description, rmCell);
@@ -504,10 +548,10 @@
         pickBtnIcon.addEventListener('click', openIconPickerForLink);
         icon.addEventListener('click', openIconPickerForLink);
         icon.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openIconPickerForLink(); } });
-        text.addEventListener('input', () => { l.text = text.value; });
-        url.addEventListener('input', () => { l.url = url.value; });
-        name.addEventListener('input', () => { l.name = name.value; });
-        description.addEventListener('input', () => { l.description = description.value; });
+        text.addEventListener('input', () => { l.text = text.value; scheduleAutoSave(); });
+        url.addEventListener('input', () => { l.url = url.value; scheduleAutoSave(); });
+        name.addEventListener('input', () => { l.name = name.value; scheduleAutoSave(); });
+        description.addEventListener('input', () => { l.description = description.value; scheduleAutoSave(); });
         pickBtnTheme.addEventListener('click', () => {
           const items = (window.__PLINKK_CFG__?.btnIconThemeConfig) || [];
           openPicker({
@@ -526,13 +570,14 @@
                 icon.value = replaced;
                 l.icon = replaced;
               }
+              scheduleAutoSave();
             }
           });
         });
         f.linksList.appendChild(row);
       });
     }
-    f.addLink.onclick = () => { links.push({ url: 'https://', name: 'Nouveau', text: 'Link' }); renderLinks(links); };
+    f.addLink.onclick = () => { links.push({ url: 'https://', name: 'Nouveau', text: 'Link' }); renderLinks(links); scheduleAutoSave(); };
   }
 
   // State
@@ -545,6 +590,7 @@
   };
 
   async function fillForm(cfg) {
+    suspendAutoSave = true;
     f.profileLink.value = cfg.profileLink || '';
     f.profileSiteText.value = cfg.profileSiteText || '';
     f.userName.value = cfg.userName || '';
@@ -556,8 +602,8 @@
     f.profileHoverColor.value = cfg.profileHoverColor || '#7289DA';
     f.degBackgroundColor.value = cfg.degBackgroundColor ?? 45;
     // neonEnable sera ajusté après rendu des couleurs
-    f.buttonThemeEnable.checked = (cfg.buttonThemeEnable ?? 1) === 1;
-    f.canvaEnable.checked = (cfg.canvaEnable ?? 1) === 1;
+  f.buttonThemeEnable.checked = (cfg.buttonThemeEnable ?? 1) === 1;
+  f.canvaEnable.checked = (cfg.canvaEnable ?? 1) === 1;
 
   // Alimente les listes déroulantes avec les données globales
   const { themes = [], animations: anims = [], animationBackground: animBgs = [], canvaData: canvases = [] } = await ensureCfg();
@@ -583,13 +629,21 @@
     const item = canvases[idx];
     canvasLabelEl.value = item?.animationName ? `#${idx} · ${item.animationName}` : `#${idx}`;
   }
+  // Désactiver les contrôles Canvas si non activé
+  const canvasPickerBtn = qs('#openCanvasPicker');
+  const setCanvasControlsState = (enabled) => {
+    if (canvasPickerBtn) canvasPickerBtn.disabled = !enabled;
+    if (canvasLabelEl) canvasLabelEl.disabled = !enabled;
+  };
+  setCanvasControlsState(f.canvaEnable.checked);
 
-    const sb = cfg.statusbar || {};
-    f.status_text.value = sb.text || '';
-    f.status_colorBg.value = sb.colorBg || '#222222';
-    f.status_colorText.value = sb.colorText || '#cccccc';
-    f.status_fontTextColor.value = sb.fontTextColor ?? 1;
-    f.status_statusText.value = sb.statusText || 'busy';
+  const sb = cfg.statusbar || {};
+  f.status_text.value = sb.text || '';
+  f.status_colorText.value = sb.colorText || '#cccccc';
+  f.status_fontTextColor.value = sb.fontTextColor ?? 1;
+  f.status_statusText.value = sb.statusText || 'busy';
+  applyStatusDropdownFromValue();
+  updateStatusPreview();
 
     state.background = Array.isArray(cfg.background) ? [...cfg.background] : [];
     state.neonColors = Array.isArray(cfg.neonColors) ? [...cfg.neonColors] : [];
@@ -610,6 +664,7 @@
       f.neonEnable.disabled = !hasNeonColors;
       f.neonEnable.title = hasNeonColors ? '' : 'Ajoutez au moins une couleur pour activer le néon';
     }
+    suspendAutoSave = false;
   }
 
   function collectPayload() {
@@ -644,7 +699,6 @@
       links: state.links,
       statusbar: {
         text: vOrNull(f.status_text.value),
-        colorBg: vOrNull(f.status_colorBg.value),
         colorText: vOrNull(f.status_colorText.value),
         fontTextColor: numOrNull(f.status_fontTextColor.value),
         statusText: vOrNull(f.status_statusText.value),
@@ -664,17 +718,7 @@
   }
 
   // Events
-  saveBtn?.addEventListener('click', async () => {
-    const payload = collectPayload();
-    setStatus('Enregistrement...');
-    try {
-      await putConfig(payload);
-      setStatus('Enregistré ✓', 'success');
-      refreshPreview();
-    } catch (e) {
-      setStatus('Erreur: ' + (e?.message || ''), 'error');
-    }
-  });
+  saveBtn?.addEventListener('click', async () => { saveNow(true); });
 
   resetBtn?.addEventListener('click', async () => {
     setStatus('Réinitialisation...');
@@ -688,6 +732,87 @@
   });
 
   refreshBtn?.addEventListener('click', refreshPreview);
+
+  // Brancher autosave sur tous les champs simples
+  [
+    f.profileLink, f.profileSiteText, f.userName, f.email,
+    f.profileImage, f.profileIcon, f.iconUrl, f.description,
+    f.profileHoverColor, f.degBackgroundColor,
+  f.neonEnable, f.buttonThemeEnable, f.canvaEnable,
+    f.selectedThemeIndex, f.selectedAnimationIndex,
+    f.selectedAnimationButtonIndex, f.selectedAnimationBackgroundIndex,
+    f.animationDurationBackground, f.delayAnimationButton, f.backgroundSize,
+    f.selectedCanvasIndex,
+    f.status_text, f.status_colorText,
+    f.status_fontTextColor, f.status_statusText
+  ].forEach(attachAutoSave);
+
+  // Prévisualisation du statut (chip)
+  function updateStatusPreview() {
+    const chip = f.statusPreviewChip;
+    if (!chip) return;
+    const status = (f.status_statusText?.value || 'offline');
+    const map = {
+      online: 'border-emerald-700/50 bg-emerald-800/50 text-emerald-50',
+      busy: 'border-rose-700/50 bg-rose-800/50 text-rose-50',
+      away: 'border-amber-700/50 bg-amber-800/50 text-amber-50',
+      offline: 'border-slate-700/50 bg-slate-800/50 text-slate-200'
+    };
+    chip.className = 'inline-flex items-center gap-1 px-2 py-1 rounded text-xs ' + (map[status] || map.offline);
+    const label = { online: 'En ligne', busy: 'Occupé', away: 'Absent', offline: 'Hors‑ligne' }[status] || 'Hors‑ligne';
+    chip.textContent = '● ' + label;
+  }
+  if (f.status_statusText) {
+    f.status_statusText.addEventListener('change', () => { updateStatusPreview(); });
+  }
+
+  function setStatusButtonVisual(val) {
+    if (!f.statusDropdownBtn) return;
+    const dot = f.statusDropdownBtn.querySelector('span.inline-block.size-2');
+    const label = f.statusDropdownBtn.querySelector('.status-current-label');
+    const colorMap = { online: 'bg-emerald-400', busy: 'bg-rose-400', away: 'bg-amber-400', offline: 'bg-slate-400' };
+    const textMap = { online: 'En ligne', busy: 'Occupé', away: 'Absent', offline: 'Hors‑ligne' };
+    if (dot) {
+      dot.className = 'inline-block size-2 rounded-full ' + (colorMap[val] || colorMap.offline);
+    }
+    if (label) {
+      label.textContent = textMap[val] || textMap.offline;
+    }
+  }
+
+  function applyStatusDropdownFromValue() {
+    const val = (f.status_statusText?.value || 'offline');
+    setStatusButtonVisual(val);
+  }
+
+  // Gestion du menu déroulant de statut
+  if (f.statusDropdown && f.statusDropdownBtn && f.statusDropdownPanel) {
+    const open = () => { f.statusDropdownPanel.classList.remove('hidden'); f.statusDropdownBtn.setAttribute('aria-expanded','true'); };
+    const close = () => { f.statusDropdownPanel.classList.add('hidden'); f.statusDropdownBtn.setAttribute('aria-expanded','false'); };
+    f.statusDropdownBtn.addEventListener('click', (e) => { e.stopPropagation(); if (f.statusDropdownPanel.classList.contains('hidden')) open(); else close(); });
+    document.addEventListener('click', () => close());
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    f.statusDropdownPanel.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-value]');
+      if (!btn) return;
+      const val = btn.getAttribute('data-value');
+      if (!val) return;
+      if (f.status_statusText) f.status_statusText.value = val;
+      applyStatusDropdownFromValue();
+      updateStatusPreview();
+      scheduleAutoSave();
+      close();
+    });
+  }
+  // Canvas enable toggle: also toggle UI state
+  if (f.canvaEnable) {
+    f.canvaEnable.addEventListener('change', () => {
+      const canvasLabelEl2 = qs('#selectedCanvasLabel');
+      const canvasPickerBtn2 = qs('#openCanvasPicker');
+      if (canvasPickerBtn2) canvasPickerBtn2.disabled = !f.canvaEnable.checked;
+      if (canvasLabelEl2) canvasLabelEl2.disabled = !f.canvaEnable.checked;
+    });
+  }
 
   // Picker helpers for Theme and Canvas with preview cards
   function renderThemeCard(theme, idx) {
@@ -753,7 +878,7 @@
         type: 'theme',
         items: cfg.themes || [],
         renderCard: renderThemeCard,
-        onSelect: (i) => { f.selectedThemeIndex.value = String(i); }
+        onSelect: (i) => { f.selectedThemeIndex.value = String(i); scheduleAutoSave(); }
       }));
     }
 
@@ -769,6 +894,7 @@
             const item = (cfg.canvaData || [])[i];
             canvasLabelEl.value = item?.animationName ? `#${i} · ${item.animationName}` : `#${i}`;
           }
+          scheduleAutoSave();
         }
       });
     }
@@ -785,6 +911,6 @@
   // Init
   setStatus('Chargement...');
   fetchConfig()
-    .then(cfg => { fillForm(cfg); setStatus('Prêt', 'success'); })
+    .then(cfg => { fillForm(cfg); setStatus('Prêt — sauvegarde auto activée', 'success'); })
     .catch(e => { setStatus('Impossible de charger: ' + (e?.message || ''), 'error'); });
 })();
