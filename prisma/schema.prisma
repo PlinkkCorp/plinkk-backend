@@ -29,6 +29,7 @@ model User {
   userName                         String
   password                         String
   email                            String  @unique
+  publicEmail                      String? 
   profileLink                      String? @default("https://github.com")
   profileImage                     String? @default("https://avatars.githubusercontent.com/u/9919?s=200&v=4")
   profileIcon                      String? @default("https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png")
