@@ -435,10 +435,7 @@
       const card = pickerRenderCard ? pickerRenderCard(item, idx) : defaultRenderCard(item, idx);
       pickerGrid.appendChild(card);
     });
-    // Lazy‑load previews for canvas picker
-    if (pickerType === 'canvas') {
-      setupCanvasPreviewLazy();
-    }
+    // Pour le picker Canvas, la preview se lance uniquement au survol (géré dans renderCanvasCard)
   }
 
   function setupCanvasPreviewLazy() {
@@ -469,6 +466,69 @@
   pickerSearch?.addEventListener('input', () => renderPickerGrid(pickerSearch.value));
 
   // Les boutons de picker pour thèmes/animations/canvas sont remplacés par des <select>
+
+  // Modal d'aperçu inline pour Canvas
+  let canvasPreviewModal = null; // conteneur principal
+  let canvasPreviewFrame = null; // iframe interne
+  function ensureCanvasPreviewModal() {
+    if (canvasPreviewModal && canvasPreviewFrame) return canvasPreviewModal;
+    // Structure du modal (overlay + contenu centré)
+    const wrapper = document.createElement('div');
+    wrapper.id = 'canvasPreviewModal';
+    wrapper.className = 'fixed inset-0 z-[60] hidden';
+    const overlay = document.createElement('div');
+    overlay.className = 'absolute inset-0 bg-black/60';
+    const center = document.createElement('div');
+    center.className = 'relative z-[1] mx-auto my-8 w-full max-w-5xl p-0';
+    const panel = document.createElement('div');
+    panel.className = 'mx-4 rounded border border-slate-800 bg-slate-900 shadow-lg overflow-hidden';
+    const header = document.createElement('div');
+    header.className = 'flex items-center justify-between px-4 py-2 border-b border-slate-800';
+    const titleEl = document.createElement('div');
+    titleEl.className = 'text-sm text-slate-300';
+    titleEl.textContent = 'Aperçu du canvas';
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'h-8 w-8 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700';
+    closeBtn.setAttribute('aria-label', 'Fermer');
+    closeBtn.innerHTML = '<svg class="h-4 w-4 text-slate-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+    header.append(titleEl, closeBtn);
+    const body = document.createElement('div');
+    body.className = 'w-full';
+    const aspect = document.createElement('div');
+    aspect.className = 'aspect-video w-full';
+    const iframe = document.createElement('iframe');
+    iframe.className = 'w-full h-full block';
+    iframe.src = 'about:blank';
+    aspect.appendChild(iframe);
+    body.appendChild(aspect);
+    panel.append(header, body);
+    center.appendChild(panel);
+    wrapper.append(overlay, center);
+    document.body.appendChild(wrapper);
+    // Références et listeners
+    canvasPreviewModal = wrapper;
+    canvasPreviewFrame = iframe;
+    const close = () => {
+      if (!canvasPreviewModal) return;
+      canvasPreviewModal.classList.add('hidden');
+      if (canvasPreviewFrame) canvasPreviewFrame.src = 'about:blank';
+    };
+    overlay.addEventListener('click', close);
+    closeBtn.addEventListener('click', close);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && canvasPreviewModal && !canvasPreviewModal.classList.contains('hidden')) {
+        close();
+      }
+    });
+    return canvasPreviewModal;
+  }
+  function openCanvasInlinePreview(url) {
+    const modal = ensureCanvasPreviewModal();
+    if (!modal || !canvasPreviewFrame) return;
+    canvasPreviewFrame.src = url;
+    modal.classList.remove('hidden');
+  }
 
   // Helper renderer for button themes with icon preview
   function renderBtnThemeCard(item, idx) {
@@ -1009,14 +1069,34 @@
     f.profileLink, f.profileSiteText, f.userName, f.email,
     f.profileImage, f.profileIcon, f.iconUrl, f.description,
     f.profileHoverColor, f.degBackgroundColor,
-  f.neonEnable, f.buttonThemeEnable, f.canvaEnable,
+    f.neonEnable, f.buttonThemeEnable, f.canvaEnable,
     f.selectedThemeIndex, f.selectedAnimationIndex,
     f.selectedAnimationButtonIndex, f.selectedAnimationBackgroundIndex,
     f.animationDurationBackground, f.delayAnimationButton, f.backgroundSize,
     f.selectedCanvasIndex,
-  f.status_text,
+    f.status_text,
     f.status_fontTextColor, f.status_statusText
   ].forEach(attachAutoSave);
+
+  // Rafraîchir l’aperçu immédiatement pour les champs qui impactent visuellement la page publique
+  [
+    f.profileImage, f.profileIcon, f.iconUrl, f.description,
+    f.userName, f.profileSiteText, f.profileLink,
+    f.selectedThemeIndex, f.selectedAnimationIndex,
+    f.selectedAnimationButtonIndex, f.selectedAnimationBackgroundIndex,
+    f.animationDurationBackground, f.delayAnimationButton,
+    f.profileHoverColor, f.backgroundSize,
+    f.canvaEnable, f.selectedCanvasIndex
+  ].forEach((el) => {
+    if (!el) return;
+    const tag = (el.tagName || '').toUpperCase();
+    const type = (el.type || '').toLowerCase();
+    const evt = (tag === 'SELECT' || type === 'checkbox' || type === 'color' || type === 'number') ? 'change' : 'input';
+    el.addEventListener(evt, () => {
+      // On ne bloque pas l’auto-save: on propose un aperçu rapide même avant la persistance
+      refreshPreview();
+    });
+  });
 
   // Prévisualisation du statut (chip)
   function updateStatusPreview() {
@@ -1168,20 +1248,26 @@
     const card = document.createElement('button');
     card.setAttribute('type', 'button');
     card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left';
-    // Preview 16:9 iframe
-    const frame = document.createElement('iframe');
-    frame.className = 'w-full mb-2 rounded border border-slate-800';
-    frame.style.aspectRatio = '16/9';
-    // Lazy load: don't assign src immediately
-    frame.setAttribute('data-src', buildCanvasPreviewUrl(item));
-    frame.src = 'about:blank';
+    // Remplacement: pas d'aperçu intégré dans la liste, uniquement un bouton "Aperçu"
     const title = document.createElement('div');
     title.className = 'font-medium';
     title.textContent = `#${idx} · ${item?.animationName || 'Canvas'}`;
     const small = document.createElement('div');
     small.className = 'text-xs text-slate-400';
     small.textContent = item?.fileNames ? String(item.fileNames) : '';
-    card.append(frame, title, small);
+    const actions = document.createElement('div');
+    actions.className = 'mt-2 flex items-center gap-2';
+    const previewBtn = document.createElement('button');
+    previewBtn.type = 'button';
+    previewBtn.className = 'h-8 px-3 rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 text-sm';
+    previewBtn.textContent = 'Aperçu';
+    previewBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const url = buildCanvasPreviewUrl(item);
+      openCanvasInlinePreview(url);
+    });
+    actions.appendChild(previewBtn);
+    card.append(title, small, actions);
     card.addEventListener('click', () => { if (pickerOnSelect) pickerOnSelect(idx); closePicker(); });
     return card;
   }

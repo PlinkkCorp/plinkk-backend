@@ -1,0 +1,267 @@
+<%- include('../partials/head.ejs', { title: 'Tableau de bord - Cosmétiques', description: 'Choisis ton flair, cadre, thème et bannière avec aperçu en direct.', robots: 'noindex,nofollow' }) %>
+<%- include('../partials/header-dash.ejs') %>
+
+<main class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
+
+  <%- include('../partials/asside_dash.ejs', { active: 'cosmetics' }) %>
+
+  <section class="col-span-12 lg:col-span-9 space-y-4">
+    <!-- Header -->
+    <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-5 shadow animate-slide-up">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <h1 class="text-lg font-semibold mb-1">Cosmétiques</h1>
+          <p class="text-xs text-slate-400">Aperçu en direct et sélection de ton flair, cadre, thème et bannière.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="resetBtn" class="px-3 py-2 text-sm rounded-md border border-slate-700/80 text-slate-200 bg-slate-800/60 hover:bg-slate-800">Réinitialiser</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
+      <h2 class="font-medium mb-3">Aperçu</h2>
+      <div id="preview" class="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
+        <div class="flex items-center gap-3">
+          <div id="avatar" class="relative shrink-0 h-12 w-12 rounded-full grid place-items-center bg-indigo-700/70 border border-indigo-600/50 text-white font-bold" data-avatar>
+            <div id="frame" class="pointer-events-none absolute inset-0 rounded-full">
+              <%- include('partials/avatar.ejs', { user: user, }) %>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-semibold"><%= user.userName %></span>
+              <span id="flairBadge" class="hidden text-[10px] px-2 py-0.5 rounded-full bg-slate-700/30 border border-slate-600/50 text-slate-300"></span>
+            </div>
+            <p class="text-xs text-slate-400">@<%= user.id %></p>
+          </div>
+        </div>
+        <div id="banner" class="mt-3 rounded-md border border-slate-800 h-16 flex items-center justify-center text-xs text-slate-500">Bannière</div>
+      </div>
+      <div id="initialCosmetics" class="hidden"
+           data-flair="<%= (cosmetics && cosmetics.selected && cosmetics.selected.flair) ? String(cosmetics.selected.flair) : '' %>"
+           data-frame="<%= (cosmetics && cosmetics.selected && cosmetics.selected.frame) ? String(cosmetics.selected.frame) : 'none' %>"
+           data-theme="<%= (cosmetics && cosmetics.selected && cosmetics.selected.theme) ? String(cosmetics.selected.theme) : 'system' %>"
+           data-banner="<%= (cosmetics && cosmetics.selected && cosmetics.selected.banner) ? String(cosmetics.selected.banner) : 'none' %>"
+           data-banner-url="<%= (cosmetics && cosmetics.selected && cosmetics.selected.bannerUrl) ? String(cosmetics.selected.bannerUrl) : '' %>"></div>
+  <!-- Catalog JSON for client-side -->
+  <script id="catalogData" type="application/json"><%- JSON.stringify(catalog) %></script>
+    </div>
+
+    <!-- Selectors -->
+    <form id="formCosmetics" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Flair (affichage uniquement si défini) -->
+      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="font-medium">Flair</h2>
+        </div>
+        <p class="text-sm text-slate-400">Ce tag est attribué par l’équipe/automatisation. Il peut être ajouté via code. Si vous en avez un, il s’affichera dans l’aperçu.</p>
+      </div>
+
+      <!-- Frame -->
+      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
+        <h2 class="font-medium mb-2">Cadre</h2>
+        <div class="flex flex-wrap gap-2" role="listbox" aria-label="Cadre">
+          <% catalog.frames.forEach(fr => { %>
+            <button type="button" data-type="frame" data-value="<%= fr.key %>"
+              class="cos-btn px-3 py-1.5 text-xs rounded-md border border-slate-700 bg-slate-800/80 hover:bg-slate-800 text-slate-200">
+              <%= fr.label %>
+            </button>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Theme -->
+      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
+        <h2 class="font-medium mb-2">Thème</h2>
+        <div class="flex flex-wrap gap-2" role="listbox" aria-label="Thème">
+          <% catalog.themes.forEach(th => { %>
+            <button type="button" data-type="theme" data-value="<%= th.key %>"
+              class="cos-btn px-3 py-1.5 text-xs rounded-md border border-slate-700 bg-slate-800/80 hover:bg-slate-800 text-slate-200">
+              <%= th.label %>
+            </button>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Banner -->
+      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
+        <h2 class="font-medium mb-2">Bannière</h2>
+        <div class="flex flex-wrap gap-2" role="listbox" aria-label="Bannière prédéfinie">
+          <% catalog.banners.forEach(b => { %>
+            <button type="button" data-type="banner" data-value="<%= b.key %>"
+              class="cos-btn px-3 py-1.5 text-xs rounded-md border border-slate-700 bg-slate-800/80 hover:bg-slate-800 text-slate-200 text-left">
+              <%= b.label %>
+            </button>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="sm:col-span-2 flex justify-end gap-2">
+        <button type="button" id="saveBtn" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white">Enregistrer</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<script>
+  // Expose catalog for label lookups in preview (parsed from embedded JSON)
+  const CATALOG = JSON.parse(document.getElementById('catalogData')?.textContent || '{}');
+
+  const initEl = document.getElementById('initialCosmetics');
+  const saved = {
+    flair: (initEl?.dataset.flair || '') || null,
+    frame: initEl?.dataset.frame || 'none',
+    theme: initEl?.dataset.theme || 'system',
+    banner: initEl?.dataset.banner || 'none',
+    bannerUrl: initEl?.dataset.bannerUrl || '',
+  };
+  const state = { ...saved };
+
+  function flairLabel(key) {
+    const f = (CATALOG?.flairs || []).find(x => String(x.key).toUpperCase() === String(key || '').toUpperCase());
+    return f?.label || key || '';
+  }
+
+  function applyPreview(){
+    // Flair
+    const flairBadge = document.getElementById('flairBadge');
+    const showFlair = state.flair && String(state.flair).trim() !== '';
+    if (showFlair) { flairBadge.textContent = flairLabel(state.flair); flairBadge.classList.remove('hidden'); }
+    else { flairBadge.classList.add('hidden'); flairBadge.textContent=''; }
+
+    // Frame
+    const frame = document.getElementById('frame');
+    frame.className = 'pointer-events-none absolute inset-0 rounded-full';
+    frame.style.boxShadow = 'none';
+    switch(state.frame){
+      case 'neon': frame.style.boxShadow = '0 0 0 2px rgba(99,102,241,.6), 0 0 24px rgba(99,102,241,.6)'; break;
+      case 'glow': frame.style.boxShadow = '0 0 0 2px rgba(16,185,129,.6), 0 0 24px rgba(16,185,129,.6)'; break;
+      case 'gold': frame.style.boxShadow = '0 0 0 2px rgba(234,179,8,.7), 0 0 20px rgba(234,179,8,.5)'; break;
+    }
+
+    // Theme (simple aperçu sur la carte preview)
+    const preview = document.getElementById('preview');
+    preview.style.outline = 'none';
+    preview.style.boxShadow = 'none';
+    switch(state.theme){
+      case 'dark-emerald': preview.style.outline = '1px solid rgba(16,185,129,.35)'; break;
+      case 'midnight': preview.style.outline = '1px solid rgba(99,102,241,.35)'; break;
+      case 'plasma': preview.style.outline = '1px solid rgba(244,63,94,.35)'; break;
+      default: preview.style.outline = '1px solid rgba(30,41,59,.6)';
+    }
+
+    // Banner
+    const banner = document.getElementById('banner');
+    banner.style.background = 'transparent';
+    banner.style.color = 'rgb(100 116 139)';
+    if (state.banner === 'gradient-emerald') { banner.style.background = 'linear-gradient(135deg,#10b98133,#111827)'; }
+    else if (state.banner === 'gradient-fuchsia') { banner.style.background = 'linear-gradient(135deg,#d946ef33,#111827)'; }
+    else if (state.bannerUrl) { banner.style.background = `center/cover no-repeat url(${state.bannerUrl})`; banner.style.color = 'transparent'; }
+
+    // Activer visuellement les boutons sélectionnés
+  // plus de sélection d'utilisateur pour le flair
+    updateActiveButtons('frame', state.frame);
+    updateActiveButtons('theme', state.theme);
+    updateActiveButtons('banner', state.banner);
+  }
+
+  function updateActiveButtons(type, value){
+    document.querySelectorAll(`[data-type="${type}"]`).forEach(btn => {
+      const v = btn.getAttribute('data-value');
+      const isActive = String(v) === String(value);
+      btn.classList.toggle('ring-2', isActive);
+      btn.classList.toggle('ring-indigo-500/70', isActive);
+      btn.classList.toggle('bg-slate-800/80', !isActive);
+      btn.classList.toggle('bg-indigo-600', isActive);
+      btn.classList.toggle('text-white', isActive);
+    });
+  }
+
+  // Interactions
+  document.querySelectorAll('[data-type]')?.forEach(b => b.addEventListener('click', () => {
+    const t = b.getAttribute('data-type');
+    const v = b.getAttribute('data-value');
+    if (t==='frame') state.frame = v;
+    if (t==='theme') state.theme = v;
+    if (t==='banner') { state.banner = v; if (v !== 'none') { /* bannière préréglée => on ignore l'URL */ } }
+    applyPreview();
+  }));
+
+  document.getElementById('bannerUrl')?.addEventListener('input', (e)=>{
+    state.bannerUrl = e.currentTarget.value;
+    // Quand une URL est saisie, on annule le choix de bannière préréglée
+    if (state.bannerUrl && state.banner !== 'none') {
+      state.banner = 'none';
+    }
+    applyPreview();
+  });
+  document.getElementById('clearBannerUrl')?.addEventListener('click', ()=>{
+    const inp = document.getElementById('bannerUrl');
+    if (inp) inp.value = '';
+    state.bannerUrl = '';
+    applyPreview();
+  });
+
+  // Actions principales
+  let saving = false;
+  document.getElementById('saveBtn')?.addEventListener('click', async ()=>{
+    if (saving) return; saving = true;
+    const btn = document.getElementById('saveBtn');
+    if (btn) { btn.textContent = 'Enregistrement...'; btn.disabled = true; btn.classList.add('opacity-70'); }
+    try {
+  // Ne pas envoyer le flair: non modifiable par l'utilisateur
+  const payload = { frame: state.frame, theme: state.theme, banner: state.banner, bannerUrl: state.bannerUrl };
+      const res = await fetch('/api/me/cosmetics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (!res.ok) {
+        const j = await res.json().catch(()=>({error:'Erreur'}));
+        alert(j.error || 'Erreur lors de la sauvegarde');
+      } else {
+        const j = await res.json();
+        // snapshot sauvegardé
+        saved.flair = j.cosmetics?.selected?.flair ?? state.flair;
+        saved.frame = j.cosmetics?.selected?.frame ?? state.frame;
+        saved.theme = j.cosmetics?.selected?.theme ?? state.theme;
+        saved.banner = j.cosmetics?.selected?.banner ?? state.banner;
+        saved.bannerUrl = j.cosmetics?.selected?.bannerUrl ?? state.bannerUrl;
+        alert('Cosmétiques enregistrés');
+      }
+    } catch (e) {
+      alert('Erreur réseau');
+    } finally {
+      saving = false;
+      if (btn) { btn.textContent = 'Enregistrer'; btn.disabled = false; btn.classList.remove('opacity-70'); }
+    }
+  });
+
+  document.getElementById('resetBtn')?.addEventListener('click', ()=>{
+    Object.assign(state, saved);
+    // mettre à jour le champ URL
+    const inp = document.getElementById('bannerUrl');
+    if (inp) inp.value = saved.bannerUrl || '';
+    applyPreview();
+  });
+
+  document.getElementById('starterPack')?.addEventListener('click', async ()=>{
+    const res = await fetch('/api/me/cosmetics/starter-pack', { method: 'POST' });
+    if (res.ok) {
+      const j = await res.json();
+      state.flair = j.cosmetics?.selected?.flair || null;
+      state.frame = j.cosmetics?.selected?.frame || 'none';
+      state.theme = j.cosmetics?.selected?.theme || 'system';
+      state.banner = j.cosmetics?.selected?.banner || 'none';
+      state.bannerUrl = j.cosmetics?.selected?.bannerUrl || '';
+      // mettre à jour inputs
+      const inp = document.getElementById('bannerUrl');
+      if (inp) inp.value = state.bannerUrl || '';
+      applyPreview();
+      alert('Starter pack appliqué');
+    } else {
+      alert('Impossible d\'appliquer le starter pack');
+    }
+  });
+
+  applyPreview();
+</script>

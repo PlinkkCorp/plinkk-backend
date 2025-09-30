@@ -20,17 +20,6 @@
       </div>
       </main>
     </div>
-    <script>
-      (function(){
-        const btn = document.getElementById('profileMenuBtn');
-        const panel = document.getElementById('profileMenuPanel');
-        if(!btn || !panel) return;
-        const open = () => { panel.classList.remove('hidden'); panel.classList.add('animate-pop-in'); btn.setAttribute('aria-expanded','true'); };
-        const close = () => { panel.classList.add('hidden'); btn.setAttribute('aria-expanded','false'); };
-        btn.addEventListener('click', (e)=>{ e.stopPropagation(); if(panel.classList.contains('hidden')) open(); else close(); });
-        document.addEventListener('click', ()=> close());
-        document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
-      })();
-    </script>
+    <!-- profileMenuPanel logic is now handled in partials/header-dash.ejs -->
   </body>
   </html>

@@ -1,10 +1,10 @@
-<%- include('partials/head.ejs', { title: 'Tableau de bord - Mon compte', description: 'Gère ton email, mot de passe et confidentialité du profil.', robots: 'noindex,nofollow' }) %>
-<%- include('partials/header-dash.ejs') %>
+<%- include('../partials/head.ejs', { title: 'Tableau de bord - Mon compte', description: 'Gère ton email, mot de passe et confidentialité du profil.', robots: 'noindex,nofollow' }) %>
+<%- include('../partials/header-dash.ejs') %>
 
 
   <main class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
-    
-  <%- include('partials/asside_dash.ejs', { active: 'account' }) %>
+
+  <%- include('../partials/asside_dash.ejs', { active: 'account' }) %>
 
     <section class="col-span-12 lg:col-span-9 space-y-4">
       <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-5 shadow animate-slide-up">
@@ -20,12 +20,8 @@
       <!-- Avatar -->
       <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up grid grid-cols-1 md:grid-cols-[auto,1fr] gap-4 items-start">
         <div>
-          <div class="h-20 w-20 rounded-full overflow-hidden border border-slate-700 bg-slate-800 grid place-items-center text-xl font-semibold text-slate-200" id="avatarPreview">
-            <% if (user.profileImage) { %>
-              <img src="<%= user.profileImage %>" alt="Avatar" class="h-full w-full object-cover" />
-            <% } else { %>
-              <%= (user.userName || user.id).toString().charAt(0).toUpperCase() %>
-            <% } %>
+          <div class="h-20 w-20 rounded-full overflow-hidden border border-slate-700 bg-slate-800 grid place-items-center text-xl font-semibold text-slate-200" id="avatarPreview" data-avatar>
+            <%- include('partials/avatar.ejs', { user: user }) %>
           </div>
         </div>
         <div>
@@ -33,7 +29,6 @@
           <p class="text-xs text-slate-400 mb-3">PNG, JPG ou WebP (max 2 Mo). L’image sera affichée partout où ton avatar apparaît.</p>
           <div class="flex flex-col sm:flex-row gap-2 items-start">
             <input id="avatarInput" type="file" accept="image/*" class="block text-xs text-slate-200 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700" />
-            <button id="uploadAvatarBtn" type="button" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white">Mettre à jour l’avatar</button>
           </div>
           <p id="avatarMsg" class="mt-2 text-xs"></p>
         </div>
@@ -106,7 +101,6 @@
   (function(){
     const $ = (s, r=document) => r.querySelector(s);
     const input = $('#avatarInput');
-    const btn = $('#uploadAvatarBtn');
     const preview = $('#avatarPreview');
     const msg = $('#avatarMsg');
 
@@ -132,8 +126,18 @@
           });
           if (!res.ok) throw new Error('HTTP ' + res.status);
           const json = await res.json();
-          if (json && json.url && preview){
-            preview.innerHTML = '<img src="' + json.url + '" alt="Avatar" class="h-full w-full object-cover" />';
+          if (json && (json.url || json.file) && preview){
+            const raw = json.url || ('/public/uploads/avatars/' + json.file);
+            const url = raw + '?v=' + Date.now();
+            preview.innerHTML = '<img src="' + url + '" alt="Avatar" class="h-full w-full object-cover" />';
+            // mettre à jour les avatars visibles (header/aside) sans recharger
+            document.querySelectorAll('[data-avatar]').forEach(el => {
+              if (el.tagName === 'IMG') {
+                el.setAttribute('src', url);
+              } else {
+                el.innerHTML = '<img data-avatar src="' + url + '" alt="Avatar" class="h-full w-full object-cover" />';
+              }
+            });
           }
           setMsg('Avatar mis à jour.', true);
         } catch(err){
@@ -144,7 +148,7 @@
       reader.readAsDataURL(file);
     }
 
-    btn?.addEventListener('click', uploadAvatar);
+    input?.addEventListener('change', uploadAvatar);
   })();
   </script>
 
