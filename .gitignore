@@ -13,3 +13,8 @@ Dockerfile
 package.json
 
 tsconfig.json
+
+.env
+
+prisma/schema.prisma
+
