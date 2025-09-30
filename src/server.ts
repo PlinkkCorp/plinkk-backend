@@ -153,7 +153,8 @@ fastify.post("/register", async (req, reply) => {
     }
   }
 
-  const user = await prisma.user.create({
+  try {
+    const user = await prisma.user.create({
     data: {
       id: username
         .replaceAll(" ", "-")
@@ -169,6 +170,11 @@ fastify.post("/register", async (req, reply) => {
       password: hashedPassword,
     },
   });
+  } catch (error) {
+    reply.redirect(
+        "/login?error=" + encodeURIComponent("Utilisateur deja existant")
+      );
+  }
 
   reply.redirect("/login");
 });
