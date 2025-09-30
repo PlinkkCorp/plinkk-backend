@@ -11,6 +11,6 @@ RUN npx prisma generate
 
 RUN npm run build
 
-CMD ["sh", "-c", "npx prisma migrate resolve --rolled-back '20250927104336_init' && npx prisma migrate deploy && npm run start"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"]
 
 EXPOSE 3001

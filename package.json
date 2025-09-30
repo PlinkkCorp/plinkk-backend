@@ -7,11 +7,11 @@
     "dev": "ts-node-dev src/server.ts",
     "create-key": "pnpx @fastify/secure-session > src/secret-key",
     "build:withoutcp": "tsc -p tsconfig.json",
-  "build": "tsc -p tsconfig.json && node scripts/copy-static.mjs",
-    "start": "node dist/server.js",
+    "build": "tsc -p tsconfig.json && node scripts/copy-static.mjs",
+    "start:dev": "node dist/server.js",
+    "start:prod": "NODE_ENV=production node dist/server.js",
     "prisma:init": "prisma migrate deploy && prisma generate",
     "postinstall": "prisma generate || true"
-
   },
   "keywords": [],
   "author": "",
