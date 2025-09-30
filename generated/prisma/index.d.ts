@@ -50,6 +50,26 @@ export type NeonColor = $Result.DefaultSelection<Prisma.$NeonColorPayload>
 export type Statusbar = $Result.DefaultSelection<Prisma.$StatusbarPayload>
 
 /**
+ * Enums
+ */
+export namespace $Enums {
+  export const Role: {
+  USER: 'USER',
+  PARTNER: 'PARTNER',
+  ADMIN: 'ADMIN',
+  DEVELOPER: 'DEVELOPER',
+  MODERATOR: 'MODERATOR'
+};
+
+export type Role = (typeof Role)[keyof typeof Role]
+
+}
+
+export type Role = $Enums.Role
+
+export const Role: typeof $Enums.Role
+
+/**
  * ##  Prisma Client ʲˢ
  *
  * Type-safe database client for TypeScript & Node.js
@@ -1500,6 +1520,7 @@ export namespace Prisma {
     delayAnimationButton: number | null
     canvaEnable: number | null
     selectedCanvasIndex: number | null
+    rankScore: number | null
   }
 
   export type UserSumAggregateOutputType = {
@@ -1518,6 +1539,7 @@ export namespace Prisma {
     delayAnimationButton: number | null
     canvaEnable: number | null
     selectedCanvasIndex: number | null
+    rankScore: number | null
   }
 
   export type UserMinAggregateOutputType = {
@@ -1552,6 +1574,12 @@ export namespace Prisma {
     image: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    role: $Enums.Role | null
+    rankScore: number | null
+    bumpedAt: Date | null
+    bumpExpiresAt: Date | null
+    bumpPaidUntil: Date | null
+    isPublic: boolean | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -1586,6 +1614,12 @@ export namespace Prisma {
     image: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    role: $Enums.Role | null
+    rankScore: number | null
+    bumpedAt: Date | null
+    bumpExpiresAt: Date | null
+    bumpPaidUntil: Date | null
+    isPublic: boolean | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -1620,6 +1654,13 @@ export namespace Prisma {
     image: number
     createdAt: number
     updatedAt: number
+    role: number
+    rankScore: number
+    bumpedAt: number
+    bumpExpiresAt: number
+    bumpPaidUntil: number
+    cosmetics: number
+    isPublic: number
     _all: number
   }
 
@@ -1640,6 +1681,7 @@ export namespace Prisma {
     delayAnimationButton?: true
     canvaEnable?: true
     selectedCanvasIndex?: true
+    rankScore?: true
   }
 
   export type UserSumAggregateInputType = {
@@ -1658,6 +1700,7 @@ export namespace Prisma {
     delayAnimationButton?: true
     canvaEnable?: true
     selectedCanvasIndex?: true
+    rankScore?: true
   }
 
   export type UserMinAggregateInputType = {
@@ -1692,6 +1735,12 @@ export namespace Prisma {
     image?: true
     createdAt?: true
     updatedAt?: true
+    role?: true
+    rankScore?: true
+    bumpedAt?: true
+    bumpExpiresAt?: true
+    bumpPaidUntil?: true
+    isPublic?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -1726,6 +1775,12 @@ export namespace Prisma {
     image?: true
     createdAt?: true
     updatedAt?: true
+    role?: true
+    rankScore?: true
+    bumpedAt?: true
+    bumpExpiresAt?: true
+    bumpPaidUntil?: true
+    isPublic?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -1760,6 +1815,13 @@ export namespace Prisma {
     image?: true
     createdAt?: true
     updatedAt?: true
+    role?: true
+    rankScore?: true
+    bumpedAt?: true
+    bumpExpiresAt?: true
+    bumpPaidUntil?: true
+    cosmetics?: true
+    isPublic?: true
     _all?: true
   }
 
@@ -1881,6 +1943,13 @@ export namespace Prisma {
     image: string | null
     createdAt: Date
     updatedAt: Date
+    role: $Enums.Role
+    rankScore: number
+    bumpedAt: Date | null
+    bumpExpiresAt: Date | null
+    bumpPaidUntil: Date | null
+    cosmetics: JsonValue | null
+    isPublic: boolean
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
     _sum: UserSumAggregateOutputType | null
@@ -1934,6 +2003,13 @@ export namespace Prisma {
     image?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    role?: boolean
+    rankScore?: boolean
+    bumpedAt?: boolean
+    bumpExpiresAt?: boolean
+    bumpPaidUntil?: boolean
+    cosmetics?: boolean
+    isPublic?: boolean
     links?: boolean | User$linksArgs<ExtArgs>
     labels?: boolean | User$labelsArgs<ExtArgs>
     socialIcons?: boolean | User$socialIconsArgs<ExtArgs>
@@ -1975,6 +2051,13 @@ export namespace Prisma {
     image?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    role?: boolean
+    rankScore?: boolean
+    bumpedAt?: boolean
+    bumpExpiresAt?: boolean
+    bumpPaidUntil?: boolean
+    cosmetics?: boolean
+    isPublic?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -2009,6 +2092,13 @@ export namespace Prisma {
     image?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    role?: boolean
+    rankScore?: boolean
+    bumpedAt?: boolean
+    bumpExpiresAt?: boolean
+    bumpPaidUntil?: boolean
+    cosmetics?: boolean
+    isPublic?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
@@ -2043,9 +2133,16 @@ export namespace Prisma {
     image?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    role?: boolean
+    rankScore?: boolean
+    bumpedAt?: boolean
+    bumpExpiresAt?: boolean
+    bumpPaidUntil?: boolean
+    cosmetics?: boolean
+    isPublic?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "password" | "email" | "profileLink" | "profileImage" | "profileIcon" | "profileSiteText" | "iconUrl" | "description" | "profileHoverColor" | "degBackgroundColor" | "neonEnable" | "buttonThemeEnable" | "EnableAnimationArticle" | "EnableAnimationButton" | "EnableAnimationBackground" | "backgroundSize" | "selectedThemeIndex" | "selectedAnimationIndex" | "selectedAnimationButtonIndex" | "selectedAnimationBackgroundIndex" | "animationDurationBackground" | "delayAnimationButton" | "canvaEnable" | "selectedCanvasIndex" | "name" | "emailVerified" | "image" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "password" | "email" | "profileLink" | "profileImage" | "profileIcon" | "profileSiteText" | "iconUrl" | "description" | "profileHoverColor" | "degBackgroundColor" | "neonEnable" | "buttonThemeEnable" | "EnableAnimationArticle" | "EnableAnimationButton" | "EnableAnimationBackground" | "backgroundSize" | "selectedThemeIndex" | "selectedAnimationIndex" | "selectedAnimationButtonIndex" | "selectedAnimationBackgroundIndex" | "animationDurationBackground" | "delayAnimationButton" | "canvaEnable" | "selectedCanvasIndex" | "name" | "emailVerified" | "image" | "createdAt" | "updatedAt" | "role" | "rankScore" | "bumpedAt" | "bumpExpiresAt" | "bumpPaidUntil" | "cosmetics" | "isPublic", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     links?: boolean | User$linksArgs<ExtArgs>
     labels?: boolean | User$labelsArgs<ExtArgs>
@@ -2100,6 +2197,13 @@ export namespace Prisma {
       image: string | null
       createdAt: Date
       updatedAt: Date
+      role: $Enums.Role
+      rankScore: number
+      bumpedAt: Date | null
+      bumpExpiresAt: Date | null
+      bumpPaidUntil: Date | null
+      cosmetics: Prisma.JsonValue | null
+      isPublic: boolean
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -2560,6 +2664,13 @@ export namespace Prisma {
     readonly image: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
+    readonly role: FieldRef<"User", 'Role'>
+    readonly rankScore: FieldRef<"User", 'Int'>
+    readonly bumpedAt: FieldRef<"User", 'DateTime'>
+    readonly bumpExpiresAt: FieldRef<"User", 'DateTime'>
+    readonly bumpPaidUntil: FieldRef<"User", 'DateTime'>
+    readonly cosmetics: FieldRef<"User", 'Json'>
+    readonly isPublic: FieldRef<"User", 'Boolean'>
   }
     
 
@@ -9702,7 +9813,14 @@ export namespace Prisma {
     emailVerified: 'emailVerified',
     image: 'image',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    role: 'role',
+    rankScore: 'rankScore',
+    bumpedAt: 'bumpedAt',
+    bumpExpiresAt: 'bumpExpiresAt',
+    bumpPaidUntil: 'bumpPaidUntil',
+    cosmetics: 'cosmetics',
+    isPublic: 'isPublic'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -9783,6 +9901,31 @@ export namespace Prisma {
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+  export const QueryMode: {
+    default: 'default',
+    insensitive: 'insensitive'
+  };
+
+  export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
   export const NullsOrder: {
     first: 'first',
     last: 'last'
@@ -9829,6 +9972,27 @@ export namespace Prisma {
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
     
+
+
+  /**
+   * Reference to a field of type 'Role'
+   */
+  export type EnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Role'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
   /**
    * Deep Input Types
    */
@@ -9869,6 +10033,13 @@ export namespace Prisma {
     image?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    role?: EnumRoleFilter<"User"> | $Enums.Role
+    rankScore?: IntFilter<"User"> | number
+    bumpedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    bumpExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    bumpPaidUntil?: DateTimeNullableFilter<"User"> | Date | string | null
+    cosmetics?: JsonNullableFilter<"User">
+    isPublic?: BoolFilter<"User"> | boolean
     links?: LinkListRelationFilter
     labels?: LabelListRelationFilter
     socialIcons?: SocialIconListRelationFilter
@@ -9909,6 +10080,13 @@ export namespace Prisma {
     image?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    role?: SortOrder
+    rankScore?: SortOrder
+    bumpedAt?: SortOrderInput | SortOrder
+    bumpExpiresAt?: SortOrderInput | SortOrder
+    bumpPaidUntil?: SortOrderInput | SortOrder
+    cosmetics?: SortOrderInput | SortOrder
+    isPublic?: SortOrder
     links?: LinkOrderByRelationAggregateInput
     labels?: LabelOrderByRelationAggregateInput
     socialIcons?: SocialIconOrderByRelationAggregateInput
@@ -9952,6 +10130,13 @@ export namespace Prisma {
     image?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    role?: EnumRoleFilter<"User"> | $Enums.Role
+    rankScore?: IntFilter<"User"> | number
+    bumpedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    bumpExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    bumpPaidUntil?: DateTimeNullableFilter<"User"> | Date | string | null
+    cosmetics?: JsonNullableFilter<"User">
+    isPublic?: BoolFilter<"User"> | boolean
     links?: LinkListRelationFilter
     labels?: LabelListRelationFilter
     socialIcons?: SocialIconListRelationFilter
@@ -9992,6 +10177,13 @@ export namespace Prisma {
     image?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    role?: SortOrder
+    rankScore?: SortOrder
+    bumpedAt?: SortOrderInput | SortOrder
+    bumpExpiresAt?: SortOrderInput | SortOrder
+    bumpPaidUntil?: SortOrderInput | SortOrder
+    cosmetics?: SortOrderInput | SortOrder
+    isPublic?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
@@ -10034,6 +10226,13 @@ export namespace Prisma {
     image?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
+    role?: EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
+    rankScore?: IntWithAggregatesFilter<"User"> | number
+    bumpedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    bumpExpiresAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    bumpPaidUntil?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    cosmetics?: JsonNullableWithAggregatesFilter<"User">
+    isPublic?: BoolWithAggregatesFilter<"User"> | boolean
   }
 
   export type LinkWhereInput = {
@@ -10415,6 +10614,13 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
     links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
@@ -10455,6 +10661,13 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
@@ -10495,6 +10708,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUpdateManyWithoutUserNestedInput
     labels?: LabelUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
@@ -10535,6 +10755,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
@@ -10575,6 +10802,13 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
   }
 
   export type UserUpdateManyMutationInput = {
@@ -10609,6 +10843,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -10643,6 +10884,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type LinkCreateInput = {
@@ -11041,6 +11289,42 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type EnumRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.Role[]
+    notIn?: $Enums.Role[]
+    not?: NestedEnumRoleFilter<$PrismaModel> | $Enums.Role
+  }
+
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
   export type LinkListRelationFilter = {
     every?: LinkWhereInput
     some?: LinkWhereInput
@@ -11133,6 +11417,13 @@ export namespace Prisma {
     image?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    role?: SortOrder
+    rankScore?: SortOrder
+    bumpedAt?: SortOrder
+    bumpExpiresAt?: SortOrder
+    bumpPaidUntil?: SortOrder
+    cosmetics?: SortOrder
+    isPublic?: SortOrder
   }
 
   export type UserAvgOrderByAggregateInput = {
@@ -11151,6 +11442,7 @@ export namespace Prisma {
     delayAnimationButton?: SortOrder
     canvaEnable?: SortOrder
     selectedCanvasIndex?: SortOrder
+    rankScore?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -11185,6 +11477,12 @@ export namespace Prisma {
     image?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    role?: SortOrder
+    rankScore?: SortOrder
+    bumpedAt?: SortOrder
+    bumpExpiresAt?: SortOrder
+    bumpPaidUntil?: SortOrder
+    isPublic?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -11219,6 +11517,12 @@ export namespace Prisma {
     image?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    role?: SortOrder
+    rankScore?: SortOrder
+    bumpedAt?: SortOrder
+    bumpExpiresAt?: SortOrder
+    bumpPaidUntil?: SortOrder
+    isPublic?: SortOrder
   }
 
   export type UserSumOrderByAggregateInput = {
@@ -11237,6 +11541,7 @@ export namespace Prisma {
     delayAnimationButton?: SortOrder
     canvaEnable?: SortOrder
     selectedCanvasIndex?: SortOrder
+    rankScore?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -11341,6 +11646,51 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type EnumRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.Role[]
+    notIn?: $Enums.Role[]
+    not?: NestedEnumRoleWithAggregatesFilter<$PrismaModel> | $Enums.Role
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRoleFilter<$PrismaModel>
+    _max?: NestedEnumRoleFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type BoolNullableFilter<$PrismaModel = never> = {
@@ -11680,6 +12030,14 @@ export namespace Prisma {
     set?: Date | string
   }
 
+  export type EnumRoleFieldUpdateOperationsInput = {
+    set?: $Enums.Role
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
   export type LinkUpdateManyWithoutUserNestedInput = {
     create?: XOR<LinkCreateWithoutUserInput, LinkUncheckedCreateWithoutUserInput> | LinkCreateWithoutUserInput[] | LinkUncheckedCreateWithoutUserInput[]
     connectOrCreate?: LinkCreateOrConnectWithoutUserInput | LinkCreateOrConnectWithoutUserInput[]
@@ -12005,6 +12363,24 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type NestedEnumRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.Role[]
+    notIn?: $Enums.Role[]
+    not?: NestedEnumRoleFilter<$PrismaModel> | $Enums.Role
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[]
@@ -12118,6 +12494,48 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Role | EnumRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.Role[]
+    notIn?: $Enums.Role[]
+    not?: NestedEnumRoleWithAggregatesFilter<$PrismaModel> | $Enums.Role
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRoleFilter<$PrismaModel>
+    _max?: NestedEnumRoleFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type NestedBoolNullableFilter<$PrismaModel = never> = {
@@ -12457,6 +12875,13 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
     labels?: LabelCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
     background?: BackgroundColorCreateNestedManyWithoutUserInput
@@ -12496,6 +12921,13 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
     background?: BackgroundColorUncheckedCreateNestedManyWithoutUserInput
@@ -12551,6 +12983,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
     labels?: LabelUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUpdateManyWithoutUserNestedInput
@@ -12590,6 +13029,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUncheckedUpdateManyWithoutUserNestedInput
@@ -12629,6 +13075,13 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
     links?: LinkCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
     background?: BackgroundColorCreateNestedManyWithoutUserInput
@@ -12668,6 +13121,13 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
     background?: BackgroundColorUncheckedCreateNestedManyWithoutUserInput
@@ -12723,6 +13183,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUpdateManyWithoutUserNestedInput
@@ -12762,6 +13229,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUncheckedUpdateManyWithoutUserNestedInput
@@ -12801,6 +13275,13 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
     links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
     background?: BackgroundColorCreateNestedManyWithoutUserInput
@@ -12840,6 +13321,13 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     background?: BackgroundColorUncheckedCreateNestedManyWithoutUserInput
@@ -12895,6 +13383,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUpdateManyWithoutUserNestedInput
     labels?: LabelUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUpdateManyWithoutUserNestedInput
@@ -12934,6 +13429,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUncheckedUpdateManyWithoutUserNestedInput
@@ -12973,6 +13475,13 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
     links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
@@ -13012,6 +13521,13 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
@@ -13067,6 +13583,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUpdateManyWithoutUserNestedInput
     labels?: LabelUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
@@ -13106,6 +13629,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
@@ -13145,6 +13675,13 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
     links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
@@ -13184,6 +13721,13 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
@@ -13239,6 +13783,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUpdateManyWithoutUserNestedInput
     labels?: LabelUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
@@ -13278,6 +13829,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
@@ -13317,6 +13875,13 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
     links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
@@ -13356,6 +13921,13 @@ export namespace Prisma {
     image?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
@@ -13411,6 +13983,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUpdateManyWithoutUserNestedInput
     labels?: LabelUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
@@ -13450,6 +14029,13 @@ export namespace Prisma {
     image?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput

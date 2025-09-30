@@ -11,6 +11,7 @@
   // Canvas selected preview elements
   const selectedCanvasPreviewFrame = qs('#selectedCanvasPreviewFrame');
   const selectedCanvasPreviewOverlay = qs('#selectedCanvasPreviewOverlay');
+  const canvasPreviewEnable = qs('#canvasPreviewEnable');
   // Autosave state
   let autoSaveTimer = null;
   let suspendAutoSave = false;
@@ -891,6 +892,11 @@
     if (canvasLabelEl) canvasLabelEl.disabled = !enabled;
   };
   setCanvasControlsState(f.canvaEnable.checked);
+  // Gérer l'état du toggle d'aperçu (réduit)
+  if (canvasPreviewEnable) {
+    canvasPreviewEnable.disabled = !f.canvaEnable.checked;
+    if (!f.canvaEnable.checked) canvasPreviewEnable.checked = false;
+  }
   // Render initial selected canvas preview
   refreshSelectedCanvasPreview();
 
@@ -1105,7 +1111,18 @@
       const canvasPickerBtn2 = qs('#openCanvasPicker');
       if (canvasPickerBtn2) canvasPickerBtn2.disabled = !f.canvaEnable.checked;
       if (canvasLabelEl2) canvasLabelEl2.disabled = !f.canvaEnable.checked;
+      // Gérer l'état de la case Aperçu (réduit)
+      if (canvasPreviewEnable) {
+        canvasPreviewEnable.disabled = !f.canvaEnable.checked;
+        if (!f.canvaEnable.checked) canvasPreviewEnable.checked = false;
+      }
       // toggle overlay + refresh preview
+      refreshSelectedCanvasPreview();
+    });
+  }
+  // Clic sur Aperçu (réduit) => rafraîchit l'aperçu sélectionné
+  if (canvasPreviewEnable) {
+    canvasPreviewEnable.addEventListener('change', () => {
       refreshSelectedCanvasPreview();
     });
   }
@@ -1170,7 +1187,7 @@
   }
 
   function buildCanvasPreviewUrl(item) {
-    const base = '/public/canva-preview.html';
+    const base = '/public/html/canva-preview.html';
     const file = item?.fileNames || '';
     const params = new URLSearchParams();
     params.set('file', file);
@@ -1192,6 +1209,12 @@
     const enabled = !!f.canvaEnable?.checked;
     if (selectedCanvasPreviewOverlay) selectedCanvasPreviewOverlay.classList.toggle('hidden', enabled);
     if (!selectedCanvasPreviewFrame || !item) return;
+    const previewOn = !!canvasPreviewEnable?.checked;
+    if (!enabled || !previewOn) {
+      // Économiser les ressources: ne pas charger l'iframe si aperçu désactivé
+      selectedCanvasPreviewFrame.src = 'about:blank';
+      return;
+    }
     selectedCanvasPreviewFrame.src = buildCanvasPreviewUrl(item);
   }
 

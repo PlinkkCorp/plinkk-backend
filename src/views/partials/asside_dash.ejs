@@ -1,0 +1,61 @@
+<aside class="hidden lg:block col-span-3">
+    <div class="sticky top-[68px] space-y-3">
+        <!-- User info card -->
+        <% if (active === 'dashboard') { %>
+        <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow">
+                        <div class="flex items-center gap-3">
+                                <div class="h-10 w-10 rounded-full overflow-hidden grid place-items-center bg-indigo-700/70 font-semibold">
+                                        <% if (user && user.profileImage) { %>
+                                            <img src="<%= user.profileImage %>" alt="Avatar" class="h-full w-full object-cover" />
+                                        <% } else { %>
+                                            <%= ((user && (user.userName || user.id)) ? (user.userName || user.id).toString().charAt(0).toUpperCase() : 'U') %>
+                                        <% } %>
+                                </div>
+                <div class="min-w-0">
+                    <p class="font-medium truncate"><%= user && (user.userName || user.id) %></p>
+                    <% if (user && user.email) { %>
+                        <p class="text-xs text-slate-400 truncate"><%= user.email %></p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- Navigation -->
+        <% const isActive = (k) => (typeof active !== 'undefined' && active === k); %>
+        <nav class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-2 shadow">
+            <a href="/dashboard" class="group flex items-center gap-3 px-3 py-2 rounded-md <%= isActive('dashboard') ? 'bg-slate-800/60 text-white' : 'hover:bg-slate-800/60' %>" aria-current="<%= isActive('dashboard') ? 'page' : 'false' %>">
+                <span class="text-sm">Accueil</span>
+            </a>
+            <a href="/dashboard/edit" class="group flex items-center gap-3 px-3 py-2 rounded-md <%= isActive('edit') ? 'bg-slate-800/60 text-white' : 'hover:bg-slate-800/60' %>" aria-current="<%= isActive('edit') ? 'page' : 'false' %>">
+                <span class="text-sm">Éditer</span>
+            </a>
+            <a href="/dashboard/stats" class="group flex items-center gap-3 px-3 py-2 rounded-md <%= isActive('stats') ? 'bg-slate-800/60 text-white' : 'hover:bg-slate-800/60' %>" aria-current="<%= isActive('stats') ? 'page' : 'false' %>">
+                <span class="text-sm">Statistiques</span>
+            </a>
+            <a href="/dashboard/versions" class="group flex items-center gap-3 px-3 py-2 rounded-md <%= isActive('versions') ? 'bg-slate-800/60 text-white' : 'hover:bg-slate-800/60' %>" aria-current="<%= isActive('versions') ? 'page' : 'false' %>">
+                <span class="text-sm">Versions</span>
+            </a>
+            <a href="/dashboard/cosmetics" class="group flex items-center gap-3 px-3 py-2 rounded-md <%= isActive('cosmetics') ? 'bg-slate-800/60 text-white' : 'hover:bg-slate-800/60' %>" aria-current="<%= isActive('cosmetics') ? 'page' : 'false' %>">
+                <span class="text-sm">Cosmétiques</span>
+            </a>
+            <a href="/dashboard/account" class="group flex items-center gap-3 px-3 py-2 rounded-md <%= isActive('account') ? 'bg-slate-800/60 text-white' : 'hover:bg-slate-800/60' %>" aria-current="<%= isActive('account') ? 'page' : 'false' %>">
+                <span class="text-sm">Compte</span>
+            </a>
+            <a href="/users" class="group flex items-center gap-3 px-3 py-2 rounded-md <%= isActive('users') ? 'bg-slate-800/60 text-white' : 'hover:bg-slate-800/60' %>" aria-current="<%= isActive('users') ? 'page' : 'false' %>">
+                <span class="text-sm">Utilisateurs</span>
+            </a>
+        </nav>
+
+        <% if (active === 'dashboard') { %>
+        <!-- Tip block -->
+        <div class="rounded-xl border border-slate-800/60 bg-gradient-to-br from-amber-500/10 to-amber-400/5 p-4 shadow">
+            <p class="text-sm font-medium text-amber-200">Astuce</p>
+            <p class="text-xs text-amber-100/90 mt-1">Active l’enregistrement automatique dans l’éditeur pour ne jamais perdre tes changements.</p>
+            <a href="/dashboard/edit" class="mt-2 inline-flex items-center gap-1 text-xs text-amber-200 hover:text-amber-100">Ouvrir l’éditeur
+                <svg class="size-3" viewBox="0 0 20 20" fill="currentColor"><path d="M12.293 2.293a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L14 5.414V17a1 1 0 11-2 0V5.414L9.707 7.707A1 1 0 018.293 6.293l4-4z"/></svg>
+            </a>
+        </div>
+        <% } %>
+    </div>
+</aside>

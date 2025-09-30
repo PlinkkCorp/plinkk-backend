@@ -1,0 +1,183 @@
+<%- include('partials/head.ejs', { title: 'Tableau de bord - Mon compte', description: 'Gère ton email, mot de passe et confidentialité du profil.', robots: 'noindex,nofollow' }) %>
+<%- include('partials/header-dash.ejs') %>
+
+
+  <main class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
+    
+  <%- include('partials/asside_dash.ejs', { active: 'account' }) %>
+
+    <section class="col-span-12 lg:col-span-9 space-y-4">
+      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-5 shadow animate-slide-up">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-lg font-semibold mb-1">Mon compte</h1>
+            <p class="text-xs text-slate-400">Gère ton email, ton mot de passe et la confidentialité.</p>
+          </div>
+          <a href="/dashboard/cosmetics" class="px-3 py-2 text-sm rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200">Cosmétiques ➜</a>
+        </div>
+      </div>
+
+      <!-- Avatar -->
+      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up grid grid-cols-1 md:grid-cols-[auto,1fr] gap-4 items-start">
+        <div>
+          <div class="h-20 w-20 rounded-full overflow-hidden border border-slate-700 bg-slate-800 grid place-items-center text-xl font-semibold text-slate-200" id="avatarPreview">
+            <% if (user.profileImage) { %>
+              <img src="<%= user.profileImage %>" alt="Avatar" class="h-full w-full object-cover" />
+            <% } else { %>
+              <%= (user.userName || user.id).toString().charAt(0).toUpperCase() %>
+            <% } %>
+          </div>
+        </div>
+        <div>
+          <h2 class="font-medium mb-2">Photo de profil</h2>
+          <p class="text-xs text-slate-400 mb-3">PNG, JPG ou WebP (max 2 Mo). L’image sera affichée partout où ton avatar apparaît.</p>
+          <div class="flex flex-col sm:flex-row gap-2 items-start">
+            <input id="avatarInput" type="file" accept="image/*" class="block text-xs text-slate-200 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700" />
+            <button id="uploadAvatarBtn" type="button" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white">Mettre à jour l’avatar</button>
+          </div>
+          <p id="avatarMsg" class="mt-2 text-xs"></p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <!-- Email -->
+        <form id="formEmail" class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
+          <h2 class="font-medium mb-3">Email</h2>
+          <label class="block text-xs text-slate-300 mb-1">Adresse email</label>
+          <input name="email" type="email" value="<%= user.email %>" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm mb-3" />
+          <button class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white" type="submit">Mettre à jour l'email</button>
+        </form>
+
+        <!-- Mot de passe -->
+        <form id="formPassword" class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
+          <h2 class="font-medium mb-3">Mot de passe</h2>
+          <label class="block text-xs text-slate-300 mb-1">Mot de passe actuel</label>
+          <input name="currentPassword" type="password" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm mb-2" />
+          <label class="block text-xs text-slate-300 mb-1">Nouveau mot de passe</label>
+          <input name="newPassword" type="password" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm mb-2" />
+          <label class="block text-xs text-slate-300 mb-1">Confirmer le mot de passe</label>
+          <input name="confirmPassword" type="password" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm mb-3" />
+          <button class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white" type="submit">Changer le mot de passe</button>
+        </form>
+
+        <!-- Confidentialité -->
+        <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
+          <h2 class="font-medium mb-3">Confidentialité</h2>
+          <div class="flex items-center justify-between py-2">
+            <div>
+              <p class="text-sm font-medium">Profil public</p>
+              <p class="text-xs text-slate-400">Autoriser l'apparition dans la page Utilisateurs.</p>
+            </div>
+            <label class="inline-flex items-center cursor-pointer">
+              <input id="togglePublic" type="checkbox" class="sr-only peer" <%= user.isPublic ? 'checked' : '' %> />
+              <span class="w-10 h-6 bg-slate-700/80 rounded-full p-1 peer-checked:bg-emerald-600 transition relative">
+                <span class="absolute top-1 left-1 size-4 rounded-full bg-white transition peer-checked:translate-x-4"></span>
+              </span>
+            </label>
+          </div>
+          <div class="flex items-center justify-between py-2">
+            <div>
+              <p class="text-sm font-medium">Afficher mon email</p>
+              <p class="text-xs text-slate-400">Rendre l'email visible sur la page Utilisateurs.</p>
+            </div>
+            <label class="inline-flex items-center cursor-pointer">
+              <input id="toggleEmailPublic" type="checkbox" class="sr-only peer" <%= isEmailPublic ? 'checked' : '' %> />
+              <span class="w-10 h-6 bg-slate-700/80 rounded-full p-1 peer-checked:bg-emerald-600 transition relative">
+                <span class="absolute top-1 left-1 size-4 rounded-full bg-white transition peer-checked:translate-x-4"></span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- fin colonne -->
+      </div>
+
+      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
+        <h2 class="font-medium mb-2">Liens rapides</h2>
+        <div class="flex flex-wrap gap-2">
+          <a href="/<%= user.id %>" target="_blank" class="px-3 py-2 text-sm rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white">Voir mon profil</a>
+          <a href="/users" class="px-3 py-2 text-sm rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200">Utilisateurs</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  (function(){
+    const $ = (s, r=document) => r.querySelector(s);
+    const input = $('#avatarInput');
+    const btn = $('#uploadAvatarBtn');
+    const preview = $('#avatarPreview');
+    const msg = $('#avatarMsg');
+
+    function setMsg(text, ok){
+      if (!msg) return;
+      msg.textContent = text || '';
+      msg.className = 'mt-2 text-xs ' + (ok ? 'text-emerald-300' : 'text-amber-300');
+    }
+
+    async function uploadAvatar(){
+      if (!input || !input.files || !input.files[0]) { setMsg('Choisis une image.', false); return; }
+      const file = input.files[0];
+      if (!/^image\//i.test(file.type)) { setMsg('Fichier non valide (image requise).', false); return; }
+      if (file.size > 2 * 1024 * 1024) { setMsg('Image trop lourde (max 2 Mo).', false); return; }
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const dataUrl = reader.result;
+          const res = await fetch('/api/me/avatar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dataUrl })
+          });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const json = await res.json();
+          if (json && json.url && preview){
+            preview.innerHTML = '<img src="' + json.url + '" alt="Avatar" class="h-full w-full object-cover" />';
+          }
+          setMsg('Avatar mis à jour.', true);
+        } catch(err){
+          setMsg('Échec de l’upload.', false);
+        }
+      };
+      reader.onerror = () => setMsg('Lecture du fichier impossible.', false);
+      reader.readAsDataURL(file);
+    }
+
+    btn?.addEventListener('click', uploadAvatar);
+  })();
+  </script>
+
+  <script>
+    // Email
+    document.getElementById('formEmail')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.currentTarget);
+      const payload = Object.fromEntries(fd.entries());
+      const res = await fetch('/api/me/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const j = await res.json().catch(()=>({}));
+      if (res.ok) alert('Email mis à jour'); else alert(j.error || 'Erreur');
+    });
+
+    // Toggle profil public
+    document.getElementById('togglePublic')?.addEventListener('change', async (e) => {
+      const checked = e.currentTarget.checked;
+      await fetch('/api/me/visibility', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isPublic: checked }) });
+    });
+
+    // Toggle email public
+    document.getElementById('toggleEmailPublic')?.addEventListener('change', async (e) => {
+      const checked = e.currentTarget.checked;
+      await fetch('/api/me/email-visibility', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isEmailPublic: checked }) });
+    });
+
+    // Mot de passe
+    document.getElementById('formPassword')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.currentTarget);
+      const payload = Object.fromEntries(fd.entries());
+      const res = await fetch('/api/me/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const j = await res.json().catch(()=>({}));
+      if (res.ok) alert('Mot de passe mis à jour'); else alert(j.error || 'Erreur');
+    });
+  </script>

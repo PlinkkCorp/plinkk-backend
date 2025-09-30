@@ -1,0 +1,37 @@
+<!-- Header -->
+<header class="sticky top-0 z-50 border-b border-indigo-700/30 bg-gradient-to-r from-slate-950/80 via-indigo-900/40 to-slate-950/80 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+        <button id="sidebarToggle" class="lg:hidden inline-flex items-center justify-center rounded-md p-2 text-slate-300 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/40" aria-label="Ouvrir la navigation">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <a href="/dashboard" class="flex items-center gap-2">
+            <img src="/public/images/logo.svg" alt="Plinkk" class="h-8 w-8 rounded" />
+            <span class="hidden sm:inline text-sm font-semibold tracking-wide text-slate-200">Plinkk</span>
+        </a>
+        <div class="flex-1 min-w-0"></div>
+        <div class="hidden md:flex items-center gap-3">
+            <a href="https://github.com/Marvideo2009/plinkk-backend" target="_blank" class="px-3 py-1.5 text-xs rounded-md border border-slate-700/60 bg-slate-800/50 hover:bg-slate-700/60">GitHub</a>
+            <a href="/users" class="px-3 py-1.5 text-xs rounded-md border border-slate-700/60 bg-slate-800/50 hover:bg-slate-700/60">Utilisateurs</a>
+        </div>
+        <div class="relative ml-1" id="profileMenu">
+            <button id="profileMenuBtn" aria-haspopup="menu" aria-expanded="false" class="flex items-center gap-2 px-2 py-1.5 rounded-full bg-slate-800/80 border border-indigo-700/40 hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-600/40">
+                <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-700/70 text-sm font-semibold">
+                    <%= (user.userName || 'U').charAt(0).toUpperCase() %>
+                </span>
+                <span class="hidden sm:inline text-sm font-medium max-w-28 truncate"><%= user.userName %></span>
+                <svg class="size-4 text-slate-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
+            </button>
+            <div id="profileMenuPanel" class="absolute right-0 mt-2 w-56 rounded-lg border border-slate-700 bg-slate-900/95 backdrop-blur shadow-xl p-1 hidden">
+                <a href="/dashboard" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Accueil</a>
+                <a href="/dashboard/edit" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Éditer</a>
+                <a href="/dashboard/stats" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Statistiques</a>
+                <a href="/dashboard/versions" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Versions</a>
+                <a href="/dashboard/cosmetics" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Cosmétiques</a>
+                <a href="/dashboard/account" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Compte</a>
+                <a target="_blank" href="/<%= user.id %>" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Voir mon profil</a>
+                <div class="my-1 border-t border-slate-700"></div>
+                <a href="/logout" class="block px-3 py-2 text-sm rounded-md text-rose-300 hover:bg-rose-900/20">Déconnexion</a>
+            </div>
+        </div>
+    </div>
+</header>

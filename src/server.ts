@@ -5,8 +5,8 @@ import fastifyView from "@fastify/view";
 import Fastify from "fastify";
 import path from "path";
 import ejs from "ejs";
-import { existsSync, readFileSync, readdirSync } from "fs";
-import { PrismaClient, User } from "../generated/prisma/client";
+import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from "fs";
+import { PrismaClient, Role } from "../generated/prisma/client";
 import { generateProfileConfig } from "./generateConfig";
 import { minify } from "uglify-js";
 import fastifyCookie from "@fastify/cookie";
@@ -52,16 +52,38 @@ fastify.register(fastifySecureSession, {
   },
 });
 
-fastify.get("/", function (request, reply) {
-  reply.view("index.ejs");
+fastify.get("/", async function (request, reply) {
+  const currentUserId = request.session.get("data") as string | undefined;
+  const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true } }) : null;
+  return reply.view("index.ejs", { currentUser });
 });
 
 // Pages statiques utiles
-fastify.get("/about", (request, reply) => reply.view("about.ejs"));
-fastify.get("/privacy", (request, reply) => reply.view("privacy.ejs"));
-fastify.get("/terms", (request, reply) => reply.view("terms.ejs"));
-fastify.get("/cookies", (request, reply) => reply.view("cookies.ejs"));
-fastify.get("/legal", (request, reply) => reply.view("legal.ejs"));
+fastify.get("/about", async (request, reply) => {
+  const currentUserId = request.session.get("data") as string | undefined;
+  const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true } }) : null;
+  return reply.view("about.ejs", { currentUser });
+});
+fastify.get("/privacy", async (request, reply) => {
+  const currentUserId = request.session.get("data") as string | undefined;
+  const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true } }) : null;
+  return reply.view("privacy.ejs", { currentUser });
+});
+fastify.get("/terms", async (request, reply) => {
+  const currentUserId = request.session.get("data") as string | undefined;
+  const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true } }) : null;
+  return reply.view("terms.ejs", { currentUser });
+});
+fastify.get("/cookies", async (request, reply) => {
+  const currentUserId = request.session.get("data") as string | undefined;
+  const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true } }) : null;
+  return reply.view("cookies.ejs", { currentUser });
+});
+fastify.get("/legal", async (request, reply) => {
+  const currentUserId = request.session.get("data") as string | undefined;
+  const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true } }) : null;
+  return reply.view("legal.ejs", { currentUser });
+});
 
 // robots.txt
 fastify.get("/robots.txt", async (request, reply) => {
@@ -99,8 +121,10 @@ fastify.get("/sitemap.xml", async (request, reply) => {
   reply.type("application/xml").send(xml);
 });
 
-fastify.get("/login", function (request, reply) {
-  reply.view("connect.ejs");
+fastify.get("/login", async function (request, reply) {
+  const currentUserId = request.session.get("data") as string | undefined;
+  const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true } }) : null;
+  return reply.view("connect.ejs", { currentUser });
 });
 
 fastify.post("/register", async (req, reply) => {
@@ -199,6 +223,56 @@ fastify.get("/dashboard", async function (request, reply) {
     stats: { links: linksCount, socials: socialsCount, labels: labelsCount },
     links: recentLinks,
   });
+});
+
+// Dashboard: Compte (gestion infos, confidentialité, cosmétiques)
+fastify.get("/dashboard/account", async function (request, reply) {
+  const userId = request.session.get("data");
+  if (!userId) return reply.redirect("/login");
+  const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+  if (!userInfo) return reply.redirect("/login");
+  // Dérive les préférences depuis cosmetics json (pour éviter une migration)
+  const cosmetics = (userInfo.cosmetics as any) || {};
+  const privacy = cosmetics.settings || {};
+  const isEmailPublic = Boolean(privacy.isEmailPublic);
+  return reply.view("dashboard-account.ejs", { user: userInfo, isEmailPublic });
+});
+
+// Dashboard: Cosmétiques (aperçu et sélection)
+fastify.get("/dashboard/cosmetics", async function (request, reply) {
+  const userId = request.session.get("data");
+  if (!userId) return reply.redirect("/login");
+  const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+  if (!userInfo) return reply.redirect("/login");
+  const cosmetics = (userInfo.cosmetics as any) || {};
+  // Petit catalogue par défaut (certaines entrées "verrouillées" selon le rôle)
+  const catalog = {
+    flairs: [
+      { key: "OG", label: "OG", locked: false },
+      { key: "PARTNER", label: "PARTNER", locked: false },
+      { key: "ADMIN", label: "ADMIN", locked: !(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER) },
+      { key: "DEVELOPER", label: "DEVELOPER", locked: !(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER) },
+      { key: "FOUNDER", label: "FOUNDER", locked: !(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER) },
+    ],
+    frames: [
+      { key: "none", label: "Aucun", locked: false },
+      { key: "neon", label: "Néon", locked: false },
+      { key: "glow", label: "Glow", locked: false },
+      { key: "gold", label: "Gold", locked: false },
+    ],
+    themes: [
+      { key: "system", label: "Système", locked: false },
+      { key: "dark-emerald", label: "Dark Emerald", locked: false },
+      { key: "midnight", label: "Midnight", locked: false },
+      { key: "plasma", label: "Plasma", locked: false },
+    ],
+    banners: [
+      { key: "none", label: "Aucune", url: "", locked: false },
+      { key: "gradient-emerald", label: "Dégradé Émeraude", url: "", locked: false },
+      { key: "gradient-fuchsia", label: "Dégradé Fuchsia", url: "", locked: false },
+    ],
+  };
+  return reply.view("dashboard-cosmetics.ejs", { user: userInfo, cosmetics, catalog });
 });
 
 // Page d'édition du profil (éditeur complet)
@@ -458,11 +532,64 @@ fastify.get("/logout", (req, reply) => {
 
 // Liste publique de tous les profils
 fastify.get("/users", async (request, reply) => {
+  const currentUserId = request.session.get("data") as string | undefined;
+  const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true } }) : null;
   const users = await prisma.user.findMany({
-    select: { id: true, userName: true, email: true },
+    where: { isPublic: true },
+    select: { id: true, userName: true, email: true, role: true, cosmetics: true, profileImage: true },
     orderBy: { createdAt: "asc" },
   });
-  return reply.view("users.ejs", { users });
+  return reply.view("users.ejs", { users, currentUser });
+});
+
+// API: uploader/remplacer la photo de profil (avatar) via data URL (base64)
+fastify.post("/api/me/avatar", async (request, reply) => {
+  const userId = request.session.get("data");
+  if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+  const { dataUrl } = (request.body as any) || {};
+  if (typeof dataUrl !== "string" || !dataUrl.startsWith("data:")) {
+    return reply.code(400).send({ error: "Invalid payload" });
+  }
+  try {
+    const match = /^data:(image\/(png|jpeg|jpg|webp));base64,(.+)$/i.exec(dataUrl);
+    if (!match) return reply.code(400).send({ error: "Unsupported image format" });
+    const mime = match[1].toLowerCase();
+    const base64 = match[3];
+    const buf = Buffer.from(base64, "base64");
+    // Limite: 2 Mo
+    if (buf.byteLength > 2 * 1024 * 1024) {
+      return reply.code(413).send({ error: "Image trop lourde (max 2Mo)" });
+    }
+    const ext = mime.endsWith("png") ? "png" : mime.endsWith("webp") ? "webp" : "jpg";
+    const dir = path.join(__dirname, "public", "uploads", "avatars");
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+    const fileName = `${userId}-${Date.now()}.${ext}`;
+    const filePath = path.join(dir, fileName);
+    writeFileSync(filePath, buf);
+    const publicUrl = `/public/uploads/avatars/${fileName}`;
+    await prisma.user.update({ where: { id: userId as string }, data: { profileImage: publicUrl } });
+    return reply.send({ ok: true, url: publicUrl });
+  } catch (e) {
+    request.log.error(e);
+    return reply.code(500).send({ error: "Upload failed" });
+  }
+});
+
+// API: mise à jour de rôle (admin only - garde-fou minimal à compléter)
+fastify.post("/api/users/:id/role", async (request, reply) => {
+  const { id } = request.params as { id: string };
+  const { role } = (request.body as any) || {};
+  if (!Object.values(Role).includes(role)) return reply.code(400).send({ error: "Invalid role" });
+  const updated = await prisma.user.update({ where: { id }, data: { role } });
+  return reply.send({ id: updated.id, role: updated.role });
+});
+
+// API: régler les cosmétiques (ex: flair, bannerUrl, frame)
+fastify.post("/api/users/:id/cosmetics", async (request, reply) => {
+  const { id } = request.params as { id: string };
+  const cosmetics = (request.body as any) ?? null;
+  const updated = await prisma.user.update({ where: { id }, data: { cosmetics } });
+  return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
 });
 
 fastify.get("/:username", function (request, reply) {
@@ -618,7 +745,8 @@ fastify.setNotFoundHandler((request, reply) => {
   if (request.raw.url?.startsWith("/api")) {
     return reply.code(404).send({ error: "Not Found" });
   }
-  return reply.code(404).view("404.ejs");
+  const userId = request.session.get("data");
+  return reply.code(404).view("404.ejs", { currentUser: userId ? { id: userId } : null });
 });
 
 // Error handler
@@ -627,7 +755,114 @@ fastify.setErrorHandler((error, request, reply) => {
   if (request.raw.url?.startsWith("/api")) {
     return reply.code(500).send({ error: "Internal Server Error" });
   }
-  return reply.code(500).view("500.ejs", { message: error?.message ?? "" });
+  const userId = request.session.get("data");
+  return reply.code(500).view("500.ejs", { message: error?.message ?? "", currentUser: userId ? { id: userId } : null });
+});
+
+// API: basculer la visibilité publique/privée de son profil
+fastify.post("/api/me/visibility", async (request, reply) => {
+  const userId = request.session.get("data");
+  if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+  const { isPublic } = (request.body as any) ?? {};
+  const updated = await prisma.user.update({ where: { id: userId as string }, data: { isPublic: Boolean(isPublic) }, select: { id: true, isPublic: true } });
+  return reply.send(updated);
+});
+
+// API: changer l'email
+fastify.post("/api/me/email", async (request, reply) => {
+  const userId = request.session.get("data");
+  if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+  const { email } = (request.body as any) || {};
+  try {
+    z.email().parse(email);
+  } catch (e) {
+    return reply.code(400).send({ error: "Email invalide" });
+  }
+  // vérifier unicité
+  const exists = await prisma.user.findFirst({ where: { email, NOT: { id: userId as string } }, select: { id: true } });
+  if (exists) return reply.code(409).send({ error: "Email déjà utilisé" });
+  const updated = await prisma.user.update({ where: { id: userId as string }, data: { email }, select: { id: true, email: true } });
+  return reply.send(updated);
+});
+
+// API: changer le mot de passe
+fastify.post("/api/me/password", async (request, reply) => {
+  const userId = request.session.get("data");
+  if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+  const { currentPassword, newPassword, confirmPassword } = (request.body as any) || {};
+  if (!currentPassword || !newPassword || !confirmPassword) return reply.code(400).send({ error: "Champs manquants" });
+  if (newPassword !== confirmPassword) return reply.code(400).send({ error: "Les mots de passe ne correspondent pas" });
+  const user = await prisma.user.findUnique({ where: { id: userId as string } });
+  if (!user) return reply.code(404).send({ error: "Utilisateur introuvable" });
+  const ok = await bcrypt.compare(currentPassword, user.password);
+  if (!ok) return reply.code(403).send({ error: "Mot de passe actuel incorrect" });
+  if (await bcrypt.compare(newPassword, user.password)) return reply.code(400).send({ error: "Nouveau mot de passe identique à l'actuel" });
+  const hashed = await bcrypt.hash(newPassword, 10);
+  await prisma.user.update({ where: { id: userId as string }, data: { password: hashed } });
+  return reply.send({ ok: true });
+});
+
+// API: basculer la visibilité publique de l'email (stockée dans cosmetics.settings.isEmailPublic)
+fastify.post("/api/me/email-visibility", async (request, reply) => {
+  const userId = request.session.get("data");
+  if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+  const { isEmailPublic } = (request.body as any) ?? {};
+  const u = await prisma.user.findUnique({ where: { id: userId as string }, select: { cosmetics: true } });
+  const cosmetics: any = (u?.cosmetics as any) || {};
+  cosmetics.settings = { ...(cosmetics.settings || {}), isEmailPublic: Boolean(isEmailPublic) };
+  const updated = await prisma.user.update({ where: { id: userId as string }, data: { cosmetics }, select: { id: true, cosmetics: true } });
+  return reply.send({ id: updated.id, isEmailPublic: Boolean((updated.cosmetics as any)?.settings?.isEmailPublic) });
+});
+
+// API: mettre à jour des infos de base du compte (username, name, description)
+fastify.post("/api/me/profile", async (request, reply) => {
+  const userId = request.session.get("data");
+  if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+  const body = (request.body as any) || {};
+  const data: any = {};
+  if (typeof body.userName === 'string' && body.userName.trim()) data.userName = body.userName.trim();
+  if (typeof body.name === 'string' && body.name.trim()) data.name = body.name.trim();
+  if (typeof body.description === 'string') data.description = body.description;
+  const updated = await prisma.user.update({ where: { id: userId as string }, data, select: { id: true, userName: true, name: true, description: true } });
+  return reply.send(updated);
+});
+
+// API: sélectionner des cosmétiques (flair, bannerUrl, frame, theme)
+fastify.post("/api/me/cosmetics", async (request, reply) => {
+  const userId = request.session.get("data");
+  if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+  const body = (request.body as any) || {};
+  const u = await prisma.user.findUnique({ where: { id: userId as string }, select: { cosmetics: true, role: true } });
+  // Réservation de certains flairs pour rôles spécifiques
+  const reservedFlairs = ["ADMIN", "DEVELOPER", "FOUNDER"];
+  const requestedFlair = body.flair ? String(body.flair).toUpperCase().trim() : undefined;
+  if (requestedFlair && reservedFlairs.includes(requestedFlair)) {
+    if (!(u?.role === Role.ADMIN || u?.role === Role.DEVELOPER)) {
+      return reply.code(403).send({ error: "Flair réservé aux rôles privilégiés" });
+    }
+  }
+  const cosmetics: any = (u?.cosmetics as any) || {};
+  cosmetics.selected = {
+    flair: requestedFlair ?? cosmetics.selected?.flair ?? null,
+    bannerUrl: body.bannerUrl ?? cosmetics.selected?.bannerUrl ?? null,
+    frame: body.frame ?? cosmetics.selected?.frame ?? null,
+    theme: body.theme ?? cosmetics.selected?.theme ?? null,
+  };
+  const updated = await prisma.user.update({ where: { id: userId as string }, data: { cosmetics }, select: { id: true, cosmetics: true } });
+  return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
+});
+
+// API: appliquer un starter pack de cosmétiques
+fastify.post("/api/me/cosmetics/starter-pack", async (request, reply) => {
+  const userId = request.session.get("data");
+  if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+  const u = await prisma.user.findUnique({ where: { id: userId as string }, select: { role: true, cosmetics: true } });
+  if (!u) return reply.code(404).send({ error: "Utilisateur introuvable" });
+  const baseFlair = u.role === Role.ADMIN || u.role === Role.DEVELOPER ? "DEVELOPER" : "OG";
+  const cosmetics: any = (u.cosmetics as any) || {};
+  cosmetics.selected = { flair: baseFlair, frame: "neon", theme: "dark-emerald", bannerUrl: "" };
+  const updated = await prisma.user.update({ where: { id: userId as string }, data: { cosmetics }, select: { id: true, cosmetics: true } });
+  return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
 });
 
 fastify.listen({ port: PORT, host: '0.0.0.0' }, function (err, address) {

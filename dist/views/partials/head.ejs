@@ -4,12 +4,30 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= ((typeof title !== 'undefined' && title) ? title + ' — ' : '') %>Plinkk</title>
-    <% if (typeof description !== 'undefined' && description) { %>
-      <meta name="description" content="<%= description %>" />
-    <% } %>
+  <% const desc = (typeof description !== 'undefined' && description) ? description : 'Crée ta page de liens élégante et personnalisée avec Plinkk.'; %>
+  <% const robotsVal = (typeof robots !== 'undefined' && robots) ? robots : 'index,follow'; %>
+  <% const img = (typeof image !== 'undefined' && image) ? image : '/public/images/logo.svg'; %>
+  <% const canon = (typeof canonical !== 'undefined' && canonical) ? canonical : null; %>
+  <meta name="description" content="<%= desc %>" />
+  <meta name="robots" content="<%= robotsVal %>" />
     <meta name="theme-color" content="#0B1020" />
     <link rel="icon" href="/public/images/logo.svg" />
-  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="Plinkk" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="<%= ((typeof title !== 'undefined' && title) ? title + ' — ' : '') %>Plinkk" />
+    <meta property="og:description" content="<%= desc %>" />
+    <meta property="og:image" content="<%= img %>" />
+    <% if (canon) { %>
+      <meta property="og:url" content="<%= canon %>" />
+      <link rel="canonical" href="<%= canon %>" />
+    <% } %>
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="<%= ((typeof title !== 'undefined' && title) ? title + ' — ' : '') %>Plinkk" />
+  <meta name="twitter:description" content="<%= desc %>" />
+  <meta name="twitter:image" content="<%= img %>" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <style>
       :root{ 
         --ease-out-quad: cubic-bezier(.22,1,.36,1);
@@ -54,4 +72,4 @@
     </style>
     <%- (typeof extraHead !== 'undefined' ? extraHead : '') %>
   </head>
-  <body class="min-h-screen bg-gradient-to-br from-[#0B1020] via-slate-950 to-[#0b1324] text-slate-100">
+  <body class="min-h-screen bg-gradient-to-br from-[#0B1020] via-slate-950 to-[#0b1324] text-slate-100 animate-fade-in">

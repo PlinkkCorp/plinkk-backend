@@ -4,6 +4,8 @@ node_modules
 
 /generated/prisma
 
+/prisma/migrations/migration_lock.toml
+
 /dist/**
 
 /src/secret-key

@@ -15,6 +15,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Rôles de compte (prépare avantages partenaires/admin/développeur...)
+enum Role {
+  USER
+  PARTNER
+  ADMIN
+  DEVELOPER
+  MODERATOR
+}
+
 model User {
   id                               String  @id @unique // username slug (sans espace)
   userName                         String
@@ -55,6 +64,19 @@ model User {
   image         String?
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @default(now()) @updatedAt
+
+  // Découverte et référencement
+  role          Role      @default(USER)
+  rankScore     Int       @default(0) // score pour classement/trending
+  bumpedAt      DateTime? // dernier bump gratuit
+  bumpExpiresAt DateTime? // fin d’effet du bump gratuit
+  bumpPaidUntil DateTime? // bump payant actif jusqu’à
+
+  // Cosmétiques et avantages visuels
+  cosmetics Json? // { flair, bannerUrl, frame, theme, ... }
+
+  // Visibilité répertoire public Plinkk
+  isPublic Boolean @default(true)
 }
 
 model Link {
