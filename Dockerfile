@@ -4,10 +4,20 @@ ENV NODE_ENV=$NODE_ENV
 
 RUN apk add --no-cache openssl libc6-compat bash
 
-COPY . .
+WORKDIR /app
+
+# Installer les dépendances (inclut dev pour TypeScript et @types/node)
 COPY package.json ./
-RUN npm install
+RUN npm install --include=dev
+
+# Copier le reste du code
+COPY . .
+
+# Générer une clé de session pour l'app
 RUN npx @fastify/secure-session > src/secret-key
 
+# Build (tsc + copie des assets via script)
 RUN npm run build
+
+# Lancer l'app avec migrations Prisma au démarrage
 CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma generate && npm run start"]
