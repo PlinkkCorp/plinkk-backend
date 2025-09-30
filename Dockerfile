@@ -12,7 +12,7 @@ COPY . .
 # Générer une clé de session pour l'app
 RUN npx @fastify/secure-session > src/secret-key
 
-RUN npx Prisma migrate deploy
+# RUN npx Prisma migrate deploy
 
 # Build (tsc + copie des assets via script)
 RUN npm run build
