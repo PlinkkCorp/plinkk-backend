@@ -68,41 +68,41 @@ export function generateProfileConfig(
         statusbar: ${JSON.stringify(
           statusBar
         )}, // Barre de statut , fontTextColor : 1 = borderColor, 0 = colorBg
-        neonEnable: ${profile.neonEnable || 1}, // 1 : Enable, 0 : Disable
+        neonEnable: ${profile.neonEnable ?? 1}, // 1 : Enable, 0 : Disable
         buttonThemeEnable: ${
-          profile.buttonThemeEnable || 1
+          profile.buttonThemeEnable ?? 1
         }, // 1 : Enable, 0 : Disable
         EnableAnimationArticle: ${
-          profile.EnableAnimationArticle || 1
+          profile.EnableAnimationArticle ?? 1
         }, // 1 : Enable, 0 : Disable
         EnableAnimationButton: ${
-          profile.EnableAnimationButton || 1
+          profile.EnableAnimationButton ?? 1
         }, // 1 : Enable, 0 : Disable
         EnableAnimationBackground: ${
-          profile.EnableAnimationBackground || 1
+          profile.EnableAnimationBackground ?? 1
         }, // 1 : Enable, 0 : Disable
-        backgroundSize: ${profile.backgroundSize || 50}, // En pourcentage
+        backgroundSize: ${profile.backgroundSize ?? 50}, // En pourcentage
         selectedThemeIndex: ${
-          profile.selectedThemeIndex || 13
+          profile.selectedThemeIndex ?? 13
         }, // Thème sélectionné            (voir ci-dessous)
         selectedAnimationIndex: ${
-          profile.selectedAnimationIndex || 0
+          profile.selectedAnimationIndex ?? 0
         }, // Animation de l'article       (voir ci-dessous)
         selectedAnimationButtonIndex: ${
-          profile.selectedAnimationButtonIndex || 10
+          profile.selectedAnimationButtonIndex ?? 10
         }, // Animation des boutons        (voir ci-dessous)
         selectedAnimationBackgroundIndex: ${
-          profile.selectedAnimationBackgroundIndex || 10
+          profile.selectedAnimationBackgroundIndex ?? 10
         }, // Animation de l'arrière-plan  (voir ci-dessous)
         animationDurationBackground: ${
-          profile.animationDurationBackground || 30
+          profile.animationDurationBackground ?? 30
         }, // Durée de l'animation en secondes
         delayAnimationButton: ${
-          profile.delayAnimationButton || 0.1
+          profile.delayAnimationButton ?? 0.1
         }, // Délai de l'animation en secondes
-        canvaEnable: ${profile.canvaEnable || 1}, // 1 : Enable, 0 : Disable
+        canvaEnable: ${profile.canvaEnable ?? 1}, // 1 : Enable, 0 : Disable
         selectedCanvasIndex: ${
-          profile.selectedCanvasIndex || 16
+          profile.selectedCanvasIndex ?? 16
         }, // Animation du canva (voir ci-dessous) - Matrix Effect
     };
     export default profileData;

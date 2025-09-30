@@ -65,7 +65,7 @@ fastify.get("/legal", (request, reply) => reply.view("legal.ejs"));
 
 // robots.txt
 fastify.get("/robots.txt", async (request, reply) => {
-  const host = (request.headers["x-forwarded-host"] as string) || (request.headers.host as string) || "localhost:3000";
+  const host = (request.headers["x-forwarded-host"] as string) || (request.headers.host as string) || "0.0.0.0:3001";
   const proto = ((request.headers["x-forwarded-proto"] as string) || (request.protocol as string) || "http").split(",")[0];
   const base = `${proto}://${host}`;
   reply.type("text/plain").send(`User-agent: *\nAllow: /\nSitemap: ${base}/sitemap.xml\n`);
@@ -73,7 +73,7 @@ fastify.get("/robots.txt", async (request, reply) => {
 
 // sitemap.xml
 fastify.get("/sitemap.xml", async (request, reply) => {
-  const host = (request.headers["x-forwarded-host"] as string) || (request.headers.host as string) || "localhost:3000";
+  const host = (request.headers["x-forwarded-host"] as string) || (request.headers.host as string) || "0.0.0.0:3001";
   const proto = ((request.headers["x-forwarded-proto"] as string) || (request.protocol as string) || "http").split(",")[0];
   const base = `${proto}://${host}`;
   const staticUrls = [
