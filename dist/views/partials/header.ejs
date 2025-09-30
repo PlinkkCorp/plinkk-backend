@@ -1,0 +1,35 @@
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-[#0B1020]/60 backdrop-blur border-b border-slate-800/50">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2">
+          <img src="/public/images/logo.svg" alt="Plinkk" class="h-8 w-8 rounded" />
+          <span class="font-semibold brand-gradient">Plinkk</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-6 text-sm text-slate-300">
+          <a href="/about" class="hover:text-white">À propos</a>
+          
+          <a href="/users" class="hover:text-white">Utilisateurs</a>
+          <a href="/dashboard" class="hover:text-white">Dashboard</a>
+        </nav>
+        <div class="hidden md:flex items-center gap-3">
+          <a href="/login" class="px-3 py-2 text-sm text-slate-200 hover:text-white btn-ghost rounded-md">Se connecter</a>
+          <a href="/login#signup" class="px-3 py-2 text-sm rounded-md btn-brand shadow">S'inscrire</a>
+        </div>
+        <!-- Mobile -->
+        <button id="menuBtn" class="md:hidden inline-flex items-center justify-center h-9 w-9 rounded-md border border-slate-800/60 text-slate-300 hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5"><path d="M3.75 6.75h16.5v1.5H3.75v-1.5Zm0 4.5h16.5v1.5H3.75v-1.5Zm0 4.5h16.5v1.5H3.75v-1.5Z"/></svg>
+        </button>
+      </div>
+      <div id="mobileMenu" class="md:hidden hidden border-t border-slate-800/60">
+        <div class="px-4 py-3 space-y-2 text-sm">
+          <a href="/about" class="block py-1 text-slate-300 hover:text-white">À propos</a>
+          
+          <a href="/users" class="block py-1 text-slate-300 hover:text-white">Utilisateurs</a>
+          <a href="/dashboard" class="block py-1 text-slate-300 hover:text-white">Dashboard</a>
+          <div class="pt-2 flex gap-2">
+            <a href="/login" class="flex-1 text-center px-3 py-2 text-slate-200 hover:text-white border border-slate-800/60 rounded btn-ghost">Connexion</a>
+            <a href="/login#signup" class="flex-1 text-center px-3 py-2 rounded text-white btn-brand">Inscription</a>
+          </div>
+        </div>
+      </div>
+    </header>

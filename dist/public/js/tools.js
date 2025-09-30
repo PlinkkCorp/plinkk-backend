@@ -383,7 +383,7 @@ export function createLinkBoxes(profileData) {
             else {
                 discordBox.className = "discord-box";
                 discordIcon.className = "link-icon";
-                discordIcon.src = link.icon;
+                discordIcon.src = String(link.icon || '').trim();
                 discordIcon.alt = link.text;
                 discordIcon.loading = "lazy";
             }
@@ -391,7 +391,7 @@ export function createLinkBoxes(profileData) {
         else {
             discordBox.className = "discord-box";
             discordIcon.className = "link-icon";
-            discordIcon.src = link.icon;
+            discordIcon.src = String(link.icon || '').trim();
             discordIcon.alt = link.text;
             discordIcon.loading = "lazy";
         }
@@ -639,11 +639,17 @@ export function createIconList(profileData) {
     else if (profileData.socialIcon.length > maxIconNumber) {
         console.warn(`Too many social icons found in profile data, only the first ${maxIconNumber} will be displayed.`);
     }
-    profileData.socialIcon.slice(0, maxIconNumber).forEach(iconData => {
+        profileData.socialIcon.slice(0, maxIconNumber).forEach(iconData => {
         const iconItem = document.createElement("div");
         iconItem.className = "icon-item";
         const iconImg = document.createElement("img");
-        iconImg.src = `{{username}}/images/icons/${iconData.icon.toLowerCase().replace(/ /g, '-')}.svg`;
+            // Supporte slug (catalogue), URL absolue et data URI
+            const iconVal = String(iconData.icon || '').trim();
+            if (/^(https?:\/\/|\/|data:)/i.test(iconVal)) {
+                iconImg.src = iconVal;
+            } else {
+                iconImg.src = `{{username}}/images/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
+            }
         setSafeText(iconImg, iconData.icon);
         iconImg.alt = iconData.icon;
         iconImg.loading = "lazy";
@@ -691,21 +697,17 @@ export function createStatusBar(profileData) {
     }
     // Cercle de statut avec état automatique
     const circleStatusBar = document.createElement("div");
-    circleStatusBar.className = "circle-status-bar";
     // Déterminer automatiquement l'état basé sur le texte ou couleur
-    const statusText = profileData.statusbar.text.toLowerCase();
-    const status = profileData.statusbar.statusText.toLowerCase();
+    const statusText = (profileData.statusbar.text || '').toLowerCase();
+    const status = (profileData.statusbar.statusText || '').toLowerCase();
     let statusClass = "status-online"; // Par défaut
     if (status.includes("busy") || status.includes("occupé") || status.includes("work")) {
         statusClass = "status-busy";
-    }
-    else if (status.includes("away") || status.includes("absent") || status.includes("afk")) {
+    } else if (status.includes("away") || status.includes("absent") || status.includes("afk")) {
         statusClass = "status-away";
-    }
-    else if (status.includes("offline") || status.includes("off") || status.includes("déconnecté")) {
+    } else if (status.includes("offline") || status.includes("off") || status.includes("déconnecté")) {
         statusClass = "status-offline";
-    }
-    else if (status.includes("online") || status.includes("disponible") || status.includes("actif")) {
+    } else if (status.includes("online") || status.includes("disponible") || status.includes("actif")) {
         statusClass = "status-online";
     }
     circleStatusBar.classList.add(statusClass);

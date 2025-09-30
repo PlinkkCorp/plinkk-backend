@@ -203,7 +203,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\Elouan\\Documents\\GitHub\\plinkk-backend\\generated\\prisma",
+      "value": "C:\\Users\\Elouan\\Documents\\GitHub\\2048 auto\\plinkk-backend\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -221,7 +221,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\Elouan\\Documents\\GitHub\\plinkk-backend\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\Elouan\\Documents\\GitHub\\2048 auto\\plinkk-backend\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
