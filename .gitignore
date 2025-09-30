@@ -1,8 +1,8 @@
 node_modules
 
-/src/generated/prisma
+/generated/prisma
 
-/src/generated/prisma
+/generated/prisma
 
 /dist/secret-key
 
