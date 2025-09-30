@@ -8,6 +8,10 @@
   const saveBtn = qs('#saveBtn');
   const resetBtn = qs('#resetBtn');
   const refreshBtn = qs('#refreshPreview');
+  // Canvas selected preview elements
+  const selectedCanvasPreviewFrame = qs('#selectedCanvasPreviewFrame');
+  const selectedCanvasPreviewOverlay = qs('#selectedCanvasPreviewOverlay');
+  const canvasPreviewEnable = qs('#canvasPreviewEnable');
   // Autosave state
   let autoSaveTimer = null;
   let suspendAutoSave = false;
@@ -43,7 +47,7 @@
 
     // statusbar
     status_text: qs('#status_text'),
-    status_colorText: qs('#status_colorText'),
+  // status_colorText removed
     status_fontTextColor: qs('#status_fontTextColor'),
     status_statusText: qs('#status_statusText'),
   statusPreviewChip: qs('#statusPreviewChip'),
@@ -239,15 +243,53 @@
       );
     } else {
       labels.forEach((l, idx) => {
-  const row = el('div', { class: 'grid grid-cols-1 md:grid-cols-5 gap-2 items-center' });
+        const row = el('div', { class: 'grid grid-cols-1 md:grid-cols-6 gap-2 items-center' });
         const data = el('input', { type: 'text', value: l.data || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 md:col-span-2' });
         const color = el('input', { type: 'color', value: l.color || '#ffffff', class: 'h-10 w-full rounded bg-slate-900 border border-slate-800 p-1' });
         const fontColor = el('input', { type: 'color', value: l.fontColor || '#000000', class: 'h-10 w-full rounded bg-slate-900 border border-slate-800 p-1' });
+        // Bouton Choisir (presets)
+        const pickBtn = el('button', { type: 'button', text: 'Choisir', class: 'h-9 px-3 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 text-sm' });
         const rm = trashButton(() => { labels.splice(idx,1); renderLabels(labels); scheduleAutoSave(); });
+
+        function openLabelPresetPicker() {
+          const presets = (window.__PLINKK_CFG__?.labelPresets) || [];
+          openPicker({
+            title: 'Choisir un preset de label',
+            type: 'label-preset',
+            items: presets,
+            renderCard: (item, i) => {
+              const card = document.createElement('button');
+              card.type = 'button';
+              card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left flex items-center gap-3';
+              const swatch = document.createElement('span');
+              swatch.className = 'inline-block h-6 w-6 rounded border border-slate-700';
+              swatch.style.background = item.color;
+              const col = document.createElement('div');
+              const title = document.createElement('div'); title.className = 'font-medium'; title.textContent = item.name || `Preset ${i}`;
+              const small = document.createElement('div'); small.className = 'text-xs text-slate-400'; small.textContent = `${item.color} / ${item.fontColor}`;
+              col.append(title, small);
+              card.append(swatch, col);
+              card.addEventListener('click', () => { if (pickerOnSelect) pickerOnSelect(i); });
+              return card;
+            },
+            onSelect: (i) => {
+              const chosen = presets[i];
+              if (!chosen) return;
+              l.color = chosen.color;
+              l.fontColor = chosen.fontColor;
+              color.value = chosen.color;
+              fontColor.value = chosen.fontColor;
+              scheduleAutoSave();
+            }
+          });
+        }
+
+        pickBtn.addEventListener('click', openLabelPresetPicker);
         data.addEventListener('input', () => { l.data = data.value; scheduleAutoSave(); });
         color.addEventListener('input', () => { l.color = color.value; scheduleAutoSave(); });
         fontColor.addEventListener('input', () => { l.fontColor = fontColor.value; scheduleAutoSave(); });
-        row.append(data, color, fontColor, rm);
+
+        row.append(data, color, fontColor, pickBtn, rm);
         f.labelsList.appendChild(row);
       });
     }
@@ -393,6 +435,29 @@
       const card = pickerRenderCard ? pickerRenderCard(item, idx) : defaultRenderCard(item, idx);
       pickerGrid.appendChild(card);
     });
+    // Lazy‑load previews for canvas picker
+    if (pickerType === 'canvas') {
+      setupCanvasPreviewLazy();
+    }
+  }
+
+  function setupCanvasPreviewLazy() {
+    const frames = Array.from(pickerGrid.querySelectorAll('iframe[data-src]'));
+    if (!frames.length) return;
+    const obs = new IntersectionObserver((entries, io) => {
+      entries.forEach(entry => {
+        const f = entry.target;
+        if (entry.isIntersecting) {
+          const ds = f.getAttribute('data-src');
+          const cur = f.getAttribute('src') || '';
+          if (ds && (!cur || cur === 'about:blank')) {
+            f.setAttribute('src', ds);
+          }
+          io.unobserve(f);
+        }
+      });
+    }, { root: pickerGrid, rootMargin: '100px 0px', threshold: 0.1 });
+    frames.forEach(f => obs.observe(f));
   }
 
   pickerClose?.addEventListener('click', closePicker);
@@ -827,14 +892,23 @@
     if (canvasLabelEl) canvasLabelEl.disabled = !enabled;
   };
   setCanvasControlsState(f.canvaEnable.checked);
+  // Gérer l'état du toggle d'aperçu (réduit)
+  if (canvasPreviewEnable) {
+    canvasPreviewEnable.disabled = !f.canvaEnable.checked;
+    if (!f.canvaEnable.checked) canvasPreviewEnable.checked = false;
+  }
+  // Render initial selected canvas preview
+  refreshSelectedCanvasPreview();
 
   const sb = cfg.statusbar || {};
   f.status_text.value = sb.text || '';
-  f.status_colorText.value = sb.colorText || '#cccccc';
+  // status_colorText removed from UI
   f.status_fontTextColor.value = sb.fontTextColor ?? 1;
   f.status_statusText.value = sb.statusText || 'busy';
   applyStatusDropdownFromValue();
   updateStatusPreview();
+  // Init disabled state depending on status text
+  setTimeout(() => updateStatusControlsDisabled(), 0);
 
     state.background = Array.isArray(cfg.background) ? [...cfg.background] : [];
     state.neonColors = Array.isArray(cfg.neonColors) ? [...cfg.neonColors] : [];
@@ -860,12 +934,12 @@
 
   function collectPayload() {
     // Préparer statusbar: si le texte est vide => envoyer null pour supprimer
-    const sbText = vOrNull(f.status_text.value);
+  const sbText = vOrNull(f.status_text.value);
     const statusbar = sbText === null
       ? null
       : {
           text: sbText,
-          colorText: vOrNull(f.status_colorText.value),
+          // colorText removed from UI
           fontTextColor: numOrNull(f.status_fontTextColor.value),
           statusText: vOrNull(f.status_statusText.value),
         };
@@ -940,7 +1014,7 @@
     f.selectedAnimationButtonIndex, f.selectedAnimationBackgroundIndex,
     f.animationDurationBackground, f.delayAnimationButton, f.backgroundSize,
     f.selectedCanvasIndex,
-    f.status_text, f.status_colorText,
+  f.status_text,
     f.status_fontTextColor, f.status_statusText
   ].forEach(attachAutoSave);
 
@@ -962,6 +1036,35 @@
   if (f.status_statusText) {
     f.status_statusText.addEventListener('change', () => { updateStatusPreview(); });
   }
+
+  // Griser/désactiver le dropdown de statut si pas de texte
+  function updateStatusControlsDisabled() {
+    const hasText = !!(f.status_text?.value || '').trim();
+    // Disable hidden input logically not needed, but keep dropdown inactive visually
+    if (f.statusDropdownBtn) {
+      f.statusDropdownBtn.disabled = !hasText;
+      f.statusDropdownBtn.classList.toggle('opacity-50', !hasText);
+      f.statusDropdownBtn.classList.toggle('cursor-not-allowed', !hasText);
+    }
+    if (f.statusDropdownPanel) {
+      // Close if open when disabled
+      if (!hasText) {
+        f.statusDropdownPanel.classList.add('hidden');
+        f.statusDropdownBtn?.setAttribute('aria-expanded','false');
+      }
+    }
+    // Preview chip if exists
+    if (f.statusPreviewChip) {
+      f.statusPreviewChip.classList.toggle('opacity-50', !hasText);
+    }
+    // Disable FontTextColor too
+    if (f.status_fontTextColor) {
+      f.status_fontTextColor.disabled = !hasText;
+      f.status_fontTextColor.classList.toggle('opacity-50', !hasText);
+      f.status_fontTextColor.classList.toggle('cursor-not-allowed', !hasText);
+    }
+  }
+  f.status_text?.addEventListener('input', () => { updateStatusControlsDisabled(); scheduleAutoSave(); });
 
   function setStatusButtonVisual(val) {
     if (!f.statusDropdownBtn) return;
@@ -1008,6 +1111,19 @@
       const canvasPickerBtn2 = qs('#openCanvasPicker');
       if (canvasPickerBtn2) canvasPickerBtn2.disabled = !f.canvaEnable.checked;
       if (canvasLabelEl2) canvasLabelEl2.disabled = !f.canvaEnable.checked;
+      // Gérer l'état de la case Aperçu (réduit)
+      if (canvasPreviewEnable) {
+        canvasPreviewEnable.disabled = !f.canvaEnable.checked;
+        if (!f.canvaEnable.checked) canvasPreviewEnable.checked = false;
+      }
+      // toggle overlay + refresh preview
+      refreshSelectedCanvasPreview();
+    });
+  }
+  // Clic sur Aperçu (réduit) => rafraîchit l'aperçu sélectionné
+  if (canvasPreviewEnable) {
+    canvasPreviewEnable.addEventListener('change', () => {
+      refreshSelectedCanvasPreview();
     });
   }
 
@@ -1052,15 +1168,54 @@
     const card = document.createElement('button');
     card.setAttribute('type', 'button');
     card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left';
+    // Preview 16:9 iframe
+    const frame = document.createElement('iframe');
+    frame.className = 'w-full mb-2 rounded border border-slate-800';
+    frame.style.aspectRatio = '16/9';
+    // Lazy load: don't assign src immediately
+    frame.setAttribute('data-src', buildCanvasPreviewUrl(item));
+    frame.src = 'about:blank';
     const title = document.createElement('div');
-    title.className = 'font-medium mb-1';
+    title.className = 'font-medium';
     title.textContent = `#${idx} · ${item?.animationName || 'Canvas'}`;
     const small = document.createElement('div');
     small.className = 'text-xs text-slate-400';
     small.textContent = item?.fileNames ? String(item.fileNames) : '';
-    card.append(title, small);
+    card.append(frame, title, small);
     card.addEventListener('click', () => { if (pickerOnSelect) pickerOnSelect(idx); closePicker(); });
     return card;
+  }
+
+  function buildCanvasPreviewUrl(item) {
+    const base = '/public/html/canva-preview.html';
+    const file = item?.fileNames || '';
+    const params = new URLSearchParams();
+    params.set('file', file);
+    // extension may be string or array
+    const ext = item?.extension;
+    if (Array.isArray(ext)) {
+      ext.forEach(e => params.append('ext', e));
+    } else if (typeof ext === 'string' && ext && ext !== 'none') {
+      params.append('ext', ext);
+    }
+    return `${base}?${params.toString()}`;
+  }
+
+  function refreshSelectedCanvasPreview() {
+    const cfg = window.__PLINKK_CFG__ || {};
+    const canvases = cfg.canvaData || [];
+    const idx = Math.max(0, Math.min(Number(f.selectedCanvasIndex?.value || 0), canvases.length - 1));
+    const item = canvases[idx];
+    const enabled = !!f.canvaEnable?.checked;
+    if (selectedCanvasPreviewOverlay) selectedCanvasPreviewOverlay.classList.toggle('hidden', enabled);
+    if (!selectedCanvasPreviewFrame || !item) return;
+    const previewOn = !!canvasPreviewEnable?.checked;
+    if (!enabled || !previewOn) {
+      // Économiser les ressources: ne pas charger l'iframe si aperçu désactivé
+      selectedCanvasPreviewFrame.src = 'about:blank';
+      return;
+    }
+    selectedCanvasPreviewFrame.src = buildCanvasPreviewUrl(item);
   }
 
   // Brancher les boutons Choisir (thème/canvas) si présents
@@ -1091,6 +1246,8 @@
             const item = (cfg.canvaData || [])[i];
             canvasLabelEl.value = item?.animationName ? `#${i} · ${item.animationName}` : `#${i}`;
           }
+          // refresh preview immediately
+          refreshSelectedCanvasPreview();
           scheduleAutoSave();
         }
       });
@@ -1103,6 +1260,8 @@
       canvasLabelEl.addEventListener('click', openCanvasPicker);
       canvasLabelEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCanvasPicker(); } });
     }
+    // When select changes (e.g., user typed or programmatic), refresh preview
+    f.selectedCanvasIndex?.addEventListener('change', refreshSelectedCanvasPreview);
   })();
 
   // Init

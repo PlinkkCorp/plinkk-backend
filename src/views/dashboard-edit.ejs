@@ -207,6 +207,20 @@
                                         </div>
                                     </div>
                                 </label>
+                                <div class="flex items-center gap-2 md:col-span-2 -mt-2">
+                                  <label class="inline-flex items-center text-xs">
+                                    <input id="canvasPreviewEnable" type="checkbox" class="form-checkbox mr-2" />
+                                    Aperçu (réduit)
+                                  </label>
+                                  <span class="text-[11px] text-slate-400">Désactive pour économiser les ressources</span>
+                                </div>
+                                <!-- Aperçu sélectionné 16:9 -->
+                                <div class="md:col-span-2">
+                                    <div id="selectedCanvasPreview" class="relative rounded-lg border border-slate-800 overflow-hidden bg-slate-900/60 max-w-[440px] mx-auto">
+                                        <div id="selectedCanvasPreviewOverlay" class="absolute inset-0 bg-black/50 text-slate-200 text-xs flex items-center justify-center hidden">Canvas désactivé</div>
+                                        <iframe id="selectedCanvasPreviewFrame" class="block w-full" style="aspect-ratio: 16/9;" src="about:blank" title="Aperçu Canvas"></iframe>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -268,13 +282,10 @@
                             <label class="block text-sm md:col-span-2">Texte
                                 <input id="status_text" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
                             </label>
-                            <label class="block text-sm">Couleur texte
-                                <input id="status_colorText" type="color" class="mt-1 h-10 w-full rounded bg-slate-900 border border-slate-800 p-1" />
-                            </label>
                             <label class="block text-sm">FontTextColor (0 ou 1)
                                 <input id="status_fontTextColor" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
                             </label>
-                            <div class="md:col-span-2">
+                            <div class="md:col-span-1">
                                 <div class="text-sm mb-1">Statut</div>
                                 <div class="relative inline-block" id="statusDropdown">
                                     <button id="statusDropdownBtn" type="button" aria-haspopup="menu" aria-expanded="false" class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-slate-800/80 border border-slate-700/60 hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-600/40 text-sm">
@@ -417,7 +428,8 @@
                     import canvaData from '/public/config/canvaConfig.js';
                     import { animations, animationBackground } from '/public/config/animationConfig.js';
                     import btnIconThemeConfig from '/public/config/btnIconThemeConfig.js';
-                    window.__PLINKK_CFG__ = { themes, canvaData, animations, animationBackground, btnIconThemeConfig };
+                    import labelPresets from '/public/config/labelPresets.js';
+                    window.__PLINKK_CFG__ = { themes, canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
                 </script>
                 <!-- Initialisation de l'UI du dashboard (formulaire, listes, pickers) -->
                 <script src="/public/js/dashboard-ui.js"></script>

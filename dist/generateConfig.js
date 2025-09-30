@@ -32,7 +32,7 @@ function generateProfileConfig(profile, links, backgroundColors, labels, neonCol
         fontColor: l.fontColor,
     })))},
         socialIcon: ${JSON.stringify(socialIcons.map((l) => ({ url: l.url, icon: l.icon })))},
-        statusbar: ${JSON.stringify(statusBar ?? { text: "", colorBg: "#222222", colorText: "#cccccc", fontTextColor: 1, statusText: "offline" })}, // Barre de statut , fontTextColor : 1 = borderColor, 0 = colorBg
+        statusbar: ${JSON.stringify(statusBar ?? { text: "", colorBg: "#222222", fontTextColor: 1, statusText: "offline" })}, // Barre de statut , fontTextColor : 1 = borderColor, 0 = colorBg
         neonEnable: ${profile.neonEnable ?? 1}, // 1 : Enable, 0 : Disable
         buttonThemeEnable: ${profile.buttonThemeEnable ?? 1}, // 1 : Enable, 0 : Disable
         EnableAnimationArticle: ${profile.EnableAnimationArticle ?? 1}, // 1 : Enable, 0 : Disable
