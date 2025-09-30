@@ -19,7 +19,7 @@ const prisma = new PrismaClient();
 const fastify = Fastify({
   logger: true,
 });
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = Number(process.env.PORT) || 3001;
 
 declare module "@fastify/secure-session" {
   interface SessionData {

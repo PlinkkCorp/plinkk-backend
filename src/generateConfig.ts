@@ -66,7 +66,7 @@ export function generateProfileConfig(
           socialIcons.map((l) => ({ url: l.url, icon: l.icon }))
         )},
         statusbar: ${JSON.stringify(
-          statusBar
+          statusBar ?? { text: "", colorBg: "#222222", colorText: "#cccccc", fontTextColor: 1, statusText: "offline" }
         )}, // Barre de statut , fontTextColor : 1 = borderColor, 0 = colorBg
         neonEnable: ${profile.neonEnable ?? 1}, // 1 : Enable, 0 : Disable
         buttonThemeEnable: ${
