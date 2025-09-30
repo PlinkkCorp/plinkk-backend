@@ -17,3 +17,5 @@ RUN npm run build
 
 # Lancer l'app avec migrations Prisma au démarrage
 CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma generate && npm run start"]
+
+EXPOSE 3001
