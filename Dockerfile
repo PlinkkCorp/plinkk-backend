@@ -9,10 +9,8 @@ RUN npx @fastify/secure-session > src/secret-key
 
 RUN npx prisma generate
 
-RUN npx prisma migrate deploy
-
 RUN npm run build
 
-CMD ["sh", "-c", "npm run start"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]
 
 EXPOSE 3001
