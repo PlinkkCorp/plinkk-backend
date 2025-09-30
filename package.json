@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "ts-node-dev src/server.ts",
     "create-key": "pnpx @fastify/secure-session > src/secret-key",
-    "build:withoutcp": "tsc -p tsconfig.json",
     "build": "tsc -p tsconfig.json && node scripts/copy-static.mjs",
     "start": "node dist/server.js",
     "prisma:init": "prisma migrate deploy && prisma generate",
