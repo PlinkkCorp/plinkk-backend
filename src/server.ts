@@ -633,6 +633,7 @@ fastify.setErrorHandler((error, request, reply) => {
 });
 
 fastify.listen({ port: PORT, host: '0.0.0.0' }, function (err, address) {
+
   if (err) {
     fastify.log.error(err);
     process.exit(1);

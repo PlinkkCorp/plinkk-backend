@@ -63,9 +63,6 @@ importers:
       '@types/node':
         specifier: ^24.5.2
         version: 24.5.2
-      node:
-        specifier: ^24.9.0
-        version: 24.9.0
       prisma:
         specifier: ^6.16.2
         version: 6.16.2(typescript@5.9.2)
@@ -952,9 +949,6 @@ packages:
     resolution: {integrity: sha512-/bRZty2mXUIFY/xU5HLvveNHlswNJej+RnxBjOMkidWfwZzgTbPG1E3K5TOxRLOR+5hX7bSofy8yf1hZevMS8A==}
     engines: {node: ^18 || ^20 || >= 21}
 
-  node-bin-setup@1.1.4:
-    resolution: {integrity: sha512-vWNHOne0ZUavArqPP5LJta50+S8R261Fr5SvGul37HbEDcowvLjwdvd0ZeSr0r2lTSrPxl6okq9QUw8BFGiAxA==}
-
   node-fetch-native@1.6.7:
     resolution: {integrity: sha512-g9yhqoedzIUm0nTnTqAQvueMPVOuIY16bqgAJJC8XOOubYFNwz6IER9qs0Gq2Xd0+CecCKFjtdDTMA4u4xG06Q==}
 
@@ -965,11 +959,6 @@ packages:
   node-gyp@8.4.1:
     resolution: {integrity: sha512-olTJRgUtAb/hOXG0E93wZDs5YiJlgbXxTwQAFHyNlRsXQnYzUaF2aGgujZbw+hR8aF4ZG/rST57bWMWD16jr9w==}
     engines: {node: '>= 10.12.0'}
-    hasBin: true
-
-  node@24.9.0:
-    resolution: {integrity: sha512-cczSuf6uJejZ+dR+BAUEd6t2TxW31GvSexzEEvUKKRT59E/oYxUk3fixnUUqMG4tCtjg2wpZp3hfPdGuSg4pgw==}
-    engines: {npm: '>=5.0.0'}
     hasBin: true
 
   nopt@5.0.0:
@@ -2415,8 +2404,6 @@ snapshots:
 
   node-addon-api@8.5.0: {}
 
-  node-bin-setup@1.1.4: {}
-
   node-fetch-native@1.6.7: {}
 
   node-gyp-build@4.8.4: {}
@@ -2437,10 +2424,6 @@ snapshots:
       - bluebird
       - supports-color
     optional: true
-
-  node@24.9.0:
-    dependencies:
-      node-bin-setup: 1.1.4
 
   nopt@5.0.0:
     dependencies:
