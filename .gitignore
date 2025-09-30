@@ -7,3 +7,9 @@ node_modules
 /dist/secret-key
 
 /src/secret-key
+
+Dockerfile
+
+package.json
+
+tsconfig.json
