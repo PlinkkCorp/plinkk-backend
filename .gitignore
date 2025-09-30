@@ -1,20 +1,9 @@
 node_modules
 
-/generated/prisma
+generated
 
-/generated/prisma
+dist
 
-/dist/**
-
-/src/secret-key
-
-Dockerfile
-
-package.json
-
-tsconfig.json
+src/secret-key
 
 .env
-
-prisma/schema.prisma
-
