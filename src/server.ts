@@ -235,7 +235,7 @@ fastify.get("/dashboard", async function (request, reply) {
 fastify.get("/dashboard/account", async function (request, reply) {
   const userId = request.session.get("data");
   if (!userId) return reply.redirect("/login");
-  const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+  const userInfo = await prisma.user.findFirst({ where: { id: userId }, include: { cosmetics: true }, omit: { password: true } });
   if (!userInfo) return reply.redirect("/login");
   // Dérive les préférences depuis cosmetics json (pour éviter une migration)
   const cosmetics = (userInfo.cosmetics as any) || {};
@@ -248,7 +248,7 @@ fastify.get("/dashboard/account", async function (request, reply) {
 fastify.get("/dashboard/cosmetics", async function (request, reply) {
   const userId = request.session.get("data");
   if (!userId) return reply.redirect("/login");
-  const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+  const userInfo = await prisma.user.findFirst({ where: { id: userId }, include: { cosmetics: true }, omit: { password: true } });
   if (!userInfo) return reply.redirect("/login");
   const cosmetics = (userInfo.cosmetics as any) || {};
   // Petit catalogue par défaut (certaines entrées "verrouillées" selon le rôle)
@@ -594,7 +594,7 @@ fastify.post("/api/users/:id/role", async (request, reply) => {
 fastify.post("/api/users/:id/cosmetics", async (request, reply) => {
   const { id } = request.params as { id: string };
   const cosmetics = (request.body as any) ?? null;
-  const updated = await prisma.user.update({ where: { id }, data: { cosmetics } });
+  const updated = await prisma.user.update({ where: { id }, include: { cosmetics: true }, data: { cosmetics } });
   return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
 });
 

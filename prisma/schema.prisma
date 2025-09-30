@@ -73,10 +73,21 @@ model User {
   bumpPaidUntil   DateTime?         // bump payant actif jusqu’à
 
   // Cosmétiques et avantages visuels
-  cosmetics       Json?             // { flair, bannerUrl, frame, theme, ... }
+  cosmetics       Cosmetic?             // { flair, bannerUrl, frame, theme, ... }
 
   // Visibilité répertoire public Plinkk
   isPublic        Boolean   @default(true)
+}
+
+model Cosmetic {
+  id            Int     @id @default(autoincrement())
+  flair         String? @default("OG")
+  frame         String? @default("none")
+  theme         String? @default("system")
+  bannerUrl     String? @default("")
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 model Link {
