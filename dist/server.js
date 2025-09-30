@@ -22,7 +22,7 @@ const prisma = new client_1.PrismaClient();
 const fastify = (0, fastify_1.default)({
     logger: true,
 });
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = Number(process.env.PORT) || 3001;
 fastify.register(view_1.default, {
     engine: {
         ejs: ejs_1.default,
@@ -55,14 +55,14 @@ fastify.get("/cookies", (request, reply) => reply.view("cookies.ejs"));
 fastify.get("/legal", (request, reply) => reply.view("legal.ejs"));
 // robots.txt
 fastify.get("/robots.txt", async (request, reply) => {
-    const host = request.headers["x-forwarded-host"] || request.headers.host || "localhost:3000";
+    const host = request.headers["x-forwarded-host"] || request.headers.host || "0.0.0.0:3001";
     const proto = (request.headers["x-forwarded-proto"] || request.protocol || "http").split(",")[0];
     const base = `${proto}://${host}`;
     reply.type("text/plain").send(`User-agent: *\nAllow: /\nSitemap: ${base}/sitemap.xml\n`);
 });
 // sitemap.xml
 fastify.get("/sitemap.xml", async (request, reply) => {
-    const host = request.headers["x-forwarded-host"] || request.headers.host || "localhost:3000";
+    const host = request.headers["x-forwarded-host"] || request.headers.host || "0.0.0.0:3001";
     const proto = (request.headers["x-forwarded-proto"] || request.protocol || "http").split(",")[0];
     const base = `${proto}://${host}`;
     const staticUrls = [
@@ -203,7 +203,6 @@ fastify.get("/dashboard/versions", async function (request, reply) {
 });
 // API: Récupérer la configuration complète du profil pour l'éditeur
 fastify.get("/api/me/config", async (request, reply) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     const userId = request.session.get("data");
     if (!userId)
         return reply.code(401).send({ error: "Unauthorized" });
@@ -245,15 +244,15 @@ fastify.get("/api/me/config", async (request, reply) => {
         delayAnimationButton: profile.delayAnimationButton,
         canvaEnable: profile.canvaEnable,
         selectedCanvasIndex: profile.selectedCanvasIndex,
-        background: (_b = (_a = profile.background) === null || _a === void 0 ? void 0 : _a.map((c) => c.color)) !== null && _b !== void 0 ? _b : [],
-        neonColors: (_d = (_c = profile.neonColors) === null || _c === void 0 ? void 0 : _c.map((c) => c.color)) !== null && _d !== void 0 ? _d : [],
-        labels: (_f = (_e = profile.labels) === null || _e === void 0 ? void 0 : _e.map((l) => ({
+        background: profile.background?.map((c) => c.color) ?? [],
+        neonColors: profile.neonColors?.map((c) => c.color) ?? [],
+        labels: profile.labels?.map((l) => ({
             data: l.data,
             color: l.color,
             fontColor: l.fontColor,
-        }))) !== null && _f !== void 0 ? _f : [],
-        socialIcon: (_h = (_g = profile.socialIcons) === null || _g === void 0 ? void 0 : _g.map((s) => ({ url: s.url, icon: s.icon }))) !== null && _h !== void 0 ? _h : [],
-        links: (_k = (_j = profile.links) === null || _j === void 0 ? void 0 : _j.map((l) => ({
+        })) ?? [],
+        socialIcon: profile.socialIcons?.map((s) => ({ url: s.url, icon: s.icon })) ?? [],
+        links: profile.links?.map((l) => ({
             icon: l.icon,
             url: l.url,
             text: l.text,
@@ -261,21 +260,19 @@ fastify.get("/api/me/config", async (request, reply) => {
             description: l.description,
             showDescriptionOnHover: l.showDescriptionOnHover,
             showDescription: l.showDescription,
-        }))) !== null && _k !== void 0 ? _k : [],
-        statusbar: (_l = profile.statusbar) !== null && _l !== void 0 ? _l : null,
+        })) ?? [],
+        statusbar: profile.statusbar ?? null,
     };
     return reply.send(config);
 });
 // API: Mettre à jour la configuration du profil depuis l'éditeur
 fastify.put("/api/me/config", async (request, reply) => {
-    var _a;
     const userId = request.session.get("data");
     if (!userId)
         return reply.code(401).send({ error: "Unauthorized" });
-    const body = (_a = request.body) !== null && _a !== void 0 ? _a : {};
+    const body = request.body ?? {};
     const pickDefined = (obj) => Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined));
     await prisma.$transaction(async (tx) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         const userData = pickDefined({
             profileLink: body.profileLink,
             profileImage: body.profileImage,
@@ -350,19 +347,16 @@ fastify.put("/api/me/config", async (request, reply) => {
             await tx.link.deleteMany({ where: { userId: userId } });
             if (body.links.length > 0) {
                 await tx.link.createMany({
-                    data: body.links.map((l) => {
-                        var _a, _b, _c, _d, _e, _f;
-                        return ({
-                            icon: (_a = l.icon) !== null && _a !== void 0 ? _a : undefined,
-                            url: l.url,
-                            text: (_b = l.text) !== null && _b !== void 0 ? _b : undefined,
-                            name: (_c = l.name) !== null && _c !== void 0 ? _c : undefined,
-                            description: (_d = l.description) !== null && _d !== void 0 ? _d : undefined,
-                            showDescriptionOnHover: (_e = l.showDescriptionOnHover) !== null && _e !== void 0 ? _e : undefined,
-                            showDescription: (_f = l.showDescription) !== null && _f !== void 0 ? _f : undefined,
-                            userId: userId,
-                        });
-                    }),
+                    data: body.links.map((l) => ({
+                        icon: l.icon ?? undefined,
+                        url: l.url,
+                        text: l.text ?? undefined,
+                        name: l.name ?? undefined,
+                        description: l.description ?? undefined,
+                        showDescriptionOnHover: l.showDescriptionOnHover ?? undefined,
+                        showDescription: l.showDescription ?? undefined,
+                        userId: userId,
+                    })),
                 });
             }
         }
@@ -376,18 +370,18 @@ fastify.put("/api/me/config", async (request, reply) => {
                     where: { userId: userId },
                     create: {
                         userId: userId,
-                        text: (_a = s.text) !== null && _a !== void 0 ? _a : undefined,
-                        colorBg: (_b = s.colorBg) !== null && _b !== void 0 ? _b : undefined,
-                        colorText: (_c = s.colorText) !== null && _c !== void 0 ? _c : undefined,
-                        fontTextColor: (_d = s.fontTextColor) !== null && _d !== void 0 ? _d : undefined,
-                        statusText: (_e = s.statusText) !== null && _e !== void 0 ? _e : undefined,
+                        text: s.text ?? undefined,
+                        colorBg: s.colorBg ?? undefined,
+                        colorText: s.colorText ?? undefined,
+                        fontTextColor: s.fontTextColor ?? undefined,
+                        statusText: s.statusText ?? undefined,
                     },
                     update: pickDefined({
-                        text: (_f = s.text) !== null && _f !== void 0 ? _f : undefined,
-                        colorBg: (_g = s.colorBg) !== null && _g !== void 0 ? _g : undefined,
-                        colorText: (_h = s.colorText) !== null && _h !== void 0 ? _h : undefined,
-                        fontTextColor: (_j = s.fontTextColor) !== null && _j !== void 0 ? _j : undefined,
-                        statusText: (_k = s.statusText) !== null && _k !== void 0 ? _k : undefined,
+                        text: s.text ?? undefined,
+                        colorBg: s.colorBg ?? undefined,
+                        colorText: s.colorText ?? undefined,
+                        fontTextColor: s.fontTextColor ?? undefined,
+                        statusText: s.statusText ?? undefined,
                     }),
                 });
             }
@@ -535,20 +529,18 @@ fastify.get("/:username/images/*", function (request, reply) {
 });
 // 404 handler (après routes spécifiques)
 fastify.setNotFoundHandler((request, reply) => {
-    var _a;
-    if ((_a = request.raw.url) === null || _a === void 0 ? void 0 : _a.startsWith("/api")) {
+    if (request.raw.url?.startsWith("/api")) {
         return reply.code(404).send({ error: "Not Found" });
     }
     return reply.code(404).view("404.ejs");
 });
 // Error handler
 fastify.setErrorHandler((error, request, reply) => {
-    var _a, _b;
     fastify.log.error(error);
-    if ((_a = request.raw.url) === null || _a === void 0 ? void 0 : _a.startsWith("/api")) {
+    if (request.raw.url?.startsWith("/api")) {
         return reply.code(500).send({ error: "Internal Server Error" });
     }
-    return reply.code(500).view("500.ejs", { message: (_b = error === null || error === void 0 ? void 0 : error.message) !== null && _b !== void 0 ? _b : "" });
+    return reply.code(500).view("500.ejs", { message: error?.message ?? "" });
 });
 fastify.listen({ port: PORT, host: '0.0.0.0' }, function (err, address) {
     if (err) {

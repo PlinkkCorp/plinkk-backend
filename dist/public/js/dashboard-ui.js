@@ -859,6 +859,17 @@
   }
 
   function collectPayload() {
+    // Préparer statusbar: si le texte est vide => envoyer null pour supprimer
+    const sbText = vOrNull(f.status_text.value);
+    const statusbar = sbText === null
+      ? null
+      : {
+          text: sbText,
+          colorText: vOrNull(f.status_colorText.value),
+          fontTextColor: numOrNull(f.status_fontTextColor.value),
+          statusText: vOrNull(f.status_statusText.value),
+        };
+
     const payload = {
       profileLink: vOrNull(f.profileLink.value),
       profileSiteText: vOrNull(f.profileSiteText.value),
@@ -888,12 +899,7 @@
       labels: state.labels,
       socialIcon: state.socialIcon,
       links: state.links,
-      statusbar: {
-        text: vOrNull(f.status_text.value),
-        colorText: vOrNull(f.status_colorText.value),
-        fontTextColor: numOrNull(f.status_fontTextColor.value),
-        statusText: vOrNull(f.status_statusText.value),
-      },
+      statusbar,
     };
     return payload;
   }

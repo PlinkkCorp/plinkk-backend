@@ -683,23 +683,27 @@ export function createStatusBar(profileData) {
         console.warn("Profile container not found for status bar");
         return;
     }
+    // Données statut robustes (gèrent null/undefined)
+    const sb = (profileData && typeof profileData === 'object' && profileData.statusbar) ? profileData.statusbar : {};
+    const rawText = typeof sb.text === 'string' ? sb.text : '';
+    const text = rawText.substring(0, maxCaracter);
+    // Si pas de texte: ne rien rendre (désactivé)
+    if (!text.trim()) {
+        return;
+    }
     // Conteneur principal de la barre de statut
     const statusBarContainer = document.createElement("div");
     statusBarContainer.className = "status-bar-container";
     statusBarContainer.style.opacity = "0";
-    statusBarContainer.style.transform = "translate(25%, 75%)";
     // Texte de statut (ordre -1 pour apparaître à gauche)
     const statusBarText = document.createElement("div");
     statusBarText.className = "statusBarText";
-    statusBarText.textContent = profileData.statusbar.text.substring(0, maxCaracter);
-    if (profileData.statusbar.text.length > maxCaracter) {
-        statusBarText.textContent += "...";
-    }
+    statusBarText.textContent = text + (rawText.length > maxCaracter ? "..." : "");
     // Cercle de statut avec état automatique
     const circleStatusBar = document.createElement("div");
-    // Déterminer automatiquement l'état basé sur le texte ou couleur
-    const statusText = (profileData.statusbar.text || '').toLowerCase();
-    const status = (profileData.statusbar.statusText || '').toLowerCase();
+    circleStatusBar.className = 'circle-status-bar';
+    // Déterminer automatiquement l'état basé sur la valeur explicite, sinon heuristique
+    const status = String(sb.statusText || '').toLowerCase();
     let statusClass = "status-online"; // Par défaut
     if (status.includes("busy") || status.includes("occupé") || status.includes("work")) {
         statusClass = "status-busy";
@@ -714,11 +718,6 @@ export function createStatusBar(profileData) {
     // Assemblage du conteneur (texte puis cercle pour position gauche)
     statusBarContainer.appendChild(statusBarText);
     statusBarContainer.appendChild(circleStatusBar);
-    // Masquer si pas de texte
-    if (!profileData.statusbar.text.trim()) {
-        statusBarContainer.style.display = "none";
-        return;
-    }
     // Ajouter au conteneur de profil (position relative)
     profileContainer.appendChild(statusBarContainer);
     // Interactions style Discord
