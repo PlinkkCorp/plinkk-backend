@@ -9,9 +9,8 @@
     "build:withoutcp": "tsc -p tsconfig.json",
   "build": "tsc -p tsconfig.json && node scripts/copy-static.mjs",
     "start": "node dist/server.js",
-    "prisma:clean": "node -e \"try{require('fs').rmSync('generated/prisma',{recursive:true,force:true})}catch(e){}\"",
-    "prisma:init": "prisma migrate deploy && npm run prisma:clean && prisma generate",
-    "postinstall": "npm run prisma:clean && prisma generate || true"
+    "prisma:init": "prisma migrate deploy && prisma generate",
+    "postinstall": "prisma generate || true"
 
   },
   "keywords": [],
