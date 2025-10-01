@@ -1163,18 +1163,27 @@ fastify.post("/api/me/cosmetics", async (request, reply) => {
     where: { id: userId as string },
     select: { cosmetics: true },
   });
-  const cosmetics: any = (u?.cosmetics as any) || {};
-  cosmetics.selected = {
-    // Le flair n'est plus modifiable par l'utilisateur (uniquement via code/admin)
-    flair: cosmetics.selected?.flair ?? null,
-    bannerUrl: body.bannerUrl ?? cosmetics.selected?.bannerUrl ?? null,
-    banner: body.banner ?? cosmetics.selected?.banner ?? null,
-    frame: body.frame ?? cosmetics.selected?.frame ?? null,
-    theme: body.theme ?? cosmetics.selected?.theme ?? null,
-  };
+  const cosmetics = u?.cosmetics;
+
   const updated = await prisma.user.update({
     where: { id: userId as string },
-    data: { cosmetics },
+    data: { cosmetics: {
+      upsert: {
+        where: { userId: userId },
+        create: {
+          bannerUrl: body.bannerUrl ?? cosmetics?.bannerUrl ?? null,
+          banner: body.banner ?? cosmetics?.banner ?? null,
+          frame: body.frame ?? cosmetics?.frame ?? null,
+          theme: body.theme ?? cosmetics?.theme ?? null
+        },
+        update: {
+          bannerUrl: body.bannerUrl ?? cosmetics?.bannerUrl ?? null,
+          banner: body.banner ?? cosmetics?.banner ?? null,
+          frame: body.frame ?? cosmetics?.frame ?? null,
+          theme: body.theme ?? cosmetics?.theme ?? null
+        }
+      }
+    } },
     select: { id: true, cosmetics: true },
   });
   return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
