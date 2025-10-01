@@ -867,6 +867,7 @@ fastify.post("/api/users/:id/cosmetics", async (request, reply) => {
   const updated = await prisma.user.update({
     where: { id },
     data: { cosmetics },
+    include: { cosmetics: true }
   });
   return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
 });
