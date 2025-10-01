@@ -243,10 +243,9 @@ fastify.post("/register", async (req, reply) => {
   const rawPasswordVerif = passwordVerif || "";
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const hashedPasswordVerif = await bcrypt.hash(rawPasswordVerif, 10);
 
   // Vérif mots de passe
-  if (hashedPassword !== hashedPasswordVerif) {
+  if (password !== passwordVerif) {
     const emailParam = encodeURIComponent(rawEmail);
     const userParam = encodeURIComponent(rawUsername);
     return reply.redirect(
@@ -336,8 +335,7 @@ fastify.post("/login", async (request, reply) => {
         "Utilisateur introuvable"
       )}&email=${encodeURIComponent(emailTrim)}`
     );
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const valid = await bcrypt.compare(hashedPassword, user.password);
+  const valid = await bcrypt.compare(password, user.password);
   if (!valid)
     return reply.redirect(
       `/login?error=${encodeURIComponent(
