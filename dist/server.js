@@ -16,6 +16,7 @@ const generateConfig_1 = require("./generateConfig");
 const uglify_js_1 = require("uglify-js");
 const cookie_1 = __importDefault(require("@fastify/cookie"));
 const formbody_1 = __importDefault(require("@fastify/formbody"));
+const multipart_1 = __importDefault(require("@fastify/multipart"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const secure_session_1 = __importDefault(require("@fastify/secure-session"));
 const zod_1 = __importDefault(require("zod"));
@@ -35,6 +36,8 @@ fastify.register(static_1.default, {
     prefix: "/public/", // optional: default '/'
 });
 fastify.register(formbody_1.default);
+// support file uploads via multipart/form-data
+fastify.register(multipart_1.default, { attachFieldsToBody: true });
 fastify.register(cookie_1.default);
 fastify.register(secure_session_1.default, {
     sessionName: "session",
@@ -313,15 +316,18 @@ fastify.get("/dashboard/account", async function (request, reply) {
         return reply.redirect("/login");
     const userInfo = await prisma.user.findFirst({
         where: { id: userId },
-        omit: { password: true },
+        include: { cosmetics: true },
     });
     if (!userInfo)
         return reply.redirect("/login");
-    // Dérive les préférences depuis cosmetics json (pour éviter une migration)
-    const cosmetics = userInfo.cosmetics || {};
+    // Supprime le mot de passe côté serveur avant d'envoyer à la vue
+    const userInfoSafe = { ...userInfo };
+    delete userInfoSafe.password;
+    // Dérive les préférences depuis cosmetics (relation Cosmetic)
+    const cosmetics = userInfoSafe.cosmetics || {};
     const privacy = cosmetics.settings || {};
     const isEmailPublic = Boolean(privacy.isEmailPublic);
-    return reply.view("dashboard/account.ejs", { user: userInfo, isEmailPublic });
+    return reply.view("dashboard/account.ejs", { user: userInfoSafe, isEmailPublic });
 });
 // Dashboard: Cosmétiques (aperçu et sélection)
 fastify.get("/dashboard/cosmetics", async function (request, reply) {
@@ -330,11 +336,13 @@ fastify.get("/dashboard/cosmetics", async function (request, reply) {
         return reply.redirect("/login");
     const userInfo = await prisma.user.findFirst({
         where: { id: userId },
-        omit: { password: true },
+        include: { cosmetics: true },
     });
     if (!userInfo)
         return reply.redirect("/login");
-    const cosmetics = userInfo.cosmetics || {};
+    const userInfoSafe = { ...userInfo };
+    delete userInfoSafe.password;
+    const cosmetics = userInfoSafe.cosmetics || {};
     // Petit catalogue par défaut (certaines entrées "verrouillées" selon le rôle)
     const catalog = {
         flairs: [
@@ -434,66 +442,73 @@ fastify.get("/api/me/config", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId)
         return reply.code(401).send({ error: "Unauthorized" });
-    const profile = await prisma.user.findFirst({
-        where: { id: userId },
-        include: {
-            background: true,
-            labels: true,
-            neonColors: true,
-            socialIcons: true,
-            statusbar: true,
-            links: true,
-        },
-    });
-    if (!profile)
-        return reply.code(404).send({ error: "Not found" });
-    const config = {
-        profileLink: profile.profileLink,
-        profileImage: profile.profileImage,
-        profileIcon: profile.profileIcon,
-        profileSiteText: profile.profileSiteText,
-        userName: profile.userName,
-        // Email public (découplé de l'email de connexion): stocké dans User.publicEmail
-        // Fallback vers l'email de compte pour compat rétro (affichage uniquement)
-        email: profile.publicEmail ?? profile.email ?? "",
-        iconUrl: profile.iconUrl,
-        description: profile.description,
-        profileHoverColor: profile.profileHoverColor,
-        degBackgroundColor: profile.degBackgroundColor,
-        neonEnable: profile.neonEnable,
-        buttonThemeEnable: profile.buttonThemeEnable,
-        EnableAnimationArticle: profile.EnableAnimationArticle,
-        EnableAnimationButton: profile.EnableAnimationButton,
-        EnableAnimationBackground: profile.EnableAnimationBackground,
-        backgroundSize: profile.backgroundSize,
-        selectedThemeIndex: profile.selectedThemeIndex,
-        selectedAnimationIndex: profile.selectedAnimationIndex,
-        selectedAnimationButtonIndex: profile.selectedAnimationButtonIndex,
-        selectedAnimationBackgroundIndex: profile.selectedAnimationBackgroundIndex,
-        animationDurationBackground: profile.animationDurationBackground,
-        delayAnimationButton: profile.delayAnimationButton,
-        canvaEnable: profile.canvaEnable,
-        selectedCanvasIndex: profile.selectedCanvasIndex,
-        background: profile.background?.map((c) => c.color) ?? [],
-        neonColors: profile.neonColors?.map((c) => c.color) ?? [],
-        labels: profile.labels?.map((l) => ({
-            data: l.data,
-            color: l.color,
-            fontColor: l.fontColor,
-        })) ?? [],
-        socialIcon: profile.socialIcons?.map((s) => ({ url: s.url, icon: s.icon })) ?? [],
-        links: profile.links?.map((l) => ({
-            icon: l.icon,
-            url: l.url,
-            text: l.text,
-            name: l.name,
-            description: l.description,
-            showDescriptionOnHover: l.showDescriptionOnHover,
-            showDescription: l.showDescription,
-        })) ?? [],
-        statusbar: profile.statusbar ?? null,
-    };
-    return reply.send(config);
+    try {
+        const profile = await prisma.user.findFirst({
+            where: { id: userId },
+            include: {
+                background: true,
+                labels: true,
+                neonColors: true,
+                socialIcons: true,
+                statusbar: true,
+                links: true,
+            },
+        });
+        if (!profile)
+            return reply.code(404).send({ error: "Not found" });
+        const config = {
+            profileLink: profile.profileLink,
+            profileImage: profile.profileImage,
+            profileIcon: profile.profileIcon,
+            profileSiteText: profile.profileSiteText,
+            userName: profile.userName,
+            // Email public (découplé de l'email de connexion): stocké dans User.publicEmail
+            // Fallback vers l'email de compte pour compat rétro (affichage uniquement)
+            email: profile.publicEmail ?? profile.email ?? "",
+            iconUrl: profile.iconUrl,
+            description: profile.description,
+            profileHoverColor: profile.profileHoverColor,
+            degBackgroundColor: profile.degBackgroundColor,
+            neonEnable: profile.neonEnable,
+            buttonThemeEnable: profile.buttonThemeEnable,
+            EnableAnimationArticle: profile.EnableAnimationArticle,
+            EnableAnimationButton: profile.EnableAnimationButton,
+            EnableAnimationBackground: profile.EnableAnimationBackground,
+            backgroundSize: profile.backgroundSize,
+            selectedThemeIndex: profile.selectedThemeIndex,
+            selectedAnimationIndex: profile.selectedAnimationIndex,
+            selectedAnimationButtonIndex: profile.selectedAnimationButtonIndex,
+            selectedAnimationBackgroundIndex: profile.selectedAnimationBackgroundIndex,
+            animationDurationBackground: profile.animationDurationBackground,
+            delayAnimationButton: profile.delayAnimationButton,
+            canvaEnable: profile.canvaEnable,
+            selectedCanvasIndex: profile.selectedCanvasIndex,
+            background: profile.background?.map((c) => c.color) ?? [],
+            neonColors: profile.neonColors?.map((c) => c.color) ?? [],
+            labels: profile.labels?.map((l) => ({
+                data: l.data,
+                color: l.color,
+                fontColor: l.fontColor,
+            })) ?? [],
+            socialIcon: profile.socialIcons?.map((s) => ({ url: s.url, icon: s.icon })) ?? [],
+            links: profile.links?.map((l) => ({
+                icon: l.icon,
+                url: l.url,
+                text: l.text,
+                name: l.name,
+                description: l.description,
+                showDescriptionOnHover: l.showDescriptionOnHover,
+                showDescription: l.showDescription,
+            })) ?? [],
+            statusbar: profile.statusbar ?? null,
+        };
+        return reply.send(config);
+    }
+    catch (e) {
+        request.log.error(e);
+        // Return a minimal error payload to help identify the problem from the browser
+        return reply.code(500).send({ error: "Internal Server Error", detail: String(e) });
+    }
 });
 // API: Mettre à jour la configuration du profil depuis l'éditeur
 fastify.put("/api/me/config", async (request, reply) => {
@@ -752,6 +767,67 @@ fastify.post("/api/me/avatar", async (request, reply) => {
         return reply.code(500).send({ error: "Upload failed" });
     }
 });
+// API: uploader via multipart/form-data (file input)
+fastify.post('/api/me/avatar-file', async (request, reply) => {
+    const userId = request.session.get('data');
+    if (!userId)
+        return reply.code(401).send({ error: 'Unauthorized' });
+    try {
+        // Diagnostic helpers: log content-type for debugging multipart issues
+        const contentType = request.headers['content-type'] || request.headers['Content-Type'];
+        request.log.debug({ contentType }, 'avatar-file upload: content-type');
+        // @ts-ignore - fastify multipart typings
+        // Try to obtain multipart file using recommended API
+        let mp = null;
+        try {
+            mp = await request.file();
+        }
+        catch (e) {
+            // ignore - will try fallbacks
+        }
+        // If plugin attached fields to body, a file might be available at request.body.avatar
+        if (!mp && request.body && request.body.avatar) {
+            mp = request.body.avatar;
+        }
+        // If still no mp, provide a clearer 400 including content-type to help debugging
+        if (!mp) {
+            const ct = Array.isArray(contentType) ? contentType[0] : contentType;
+            // If it's clearly not multipart/form-data, hint that client should send FormData
+            if (!ct || String(ct).indexOf('multipart/form-data') === -1) {
+                return reply.code(400).send({ error: 'No file uploaded (expected multipart/form-data)', contentType: ct });
+            }
+            return reply.code(400).send({ error: 'No file uploaded' });
+        }
+        const { file, filename, mimetype } = mp;
+        if (!/^image\//i.test(mimetype))
+            return reply.code(400).send({ error: 'Invalid file type' });
+        // limit size: 2MB
+        const chunks = [];
+        for await (const chunk of file)
+            chunks.push(Buffer.from(chunk));
+        const buf = Buffer.concat(chunks);
+        if (buf.length > 2 * 1024 * 1024)
+            return reply.code(413).send({ error: 'Image too large' });
+        const extMatch = (filename || '').match(/\.([a-zA-Z0-9]+)$/);
+        const ext = extMatch ? extMatch[1].toLowerCase() : (mimetype.includes('png') ? 'png' : mimetype.includes('webp') ? 'webp' : 'jpg');
+        const dir = path_1.default.join(__dirname, 'public', 'uploads', 'plinkk');
+        if (!(0, fs_1.existsSync)(dir))
+            (0, fs_1.mkdirSync)(dir, { recursive: true });
+        const hash = crypto_1.default.createHash('sha256').update(buf).digest('hex');
+        const name = `${hash}.${ext}`;
+        const filePath = path_1.default.join(dir, name);
+        const publicUrl = `/public/uploads/plinkk/${name}`;
+        if (!(0, fs_1.existsSync)(filePath))
+            (0, fs_1.writeFileSync)(filePath, buf);
+        // update user image to new path for compatibility
+        await prisma.user.update({ where: { id: userId }, data: { image: publicUrl } });
+        return reply.send({ ok: true, url: publicUrl, file: name });
+    }
+    catch (err) {
+        request.log.error(err);
+        return reply.code(500).send({ error: 'Upload failed' });
+    }
+});
 // API: mise à jour de rôle (admin only - garde-fou minimal à compléter)
 fastify.post("/api/users/:id/role", async (request, reply) => {
     const { id } = request.params;
@@ -768,6 +844,7 @@ fastify.post("/api/users/:id/cosmetics", async (request, reply) => {
     const updated = await prisma.user.update({
         where: { id },
         data: { cosmetics },
+        select: { id: true, cosmetics: true },
     });
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
 });
@@ -985,6 +1062,16 @@ fastify.post("/api/me/email-visibility", async (request, reply) => {
         ...(cosmetics.settings || {}),
         isEmailPublic: Boolean(isEmailPublic),
     };
+    // If the user enables public email but doesn't have publicEmail set,
+    // promote the account email to publicEmail so it becomes visible in the users list.
+    if (isEmailPublic) {
+        // use any to avoid strict generated Prisma types mismatch for publicEmail
+        const me = await prisma.user.findUnique({ where: { id: userId }, select: { publicEmail: true, email: true } });
+        if (me && (!me.publicEmail || String(me.publicEmail).trim() === "")) {
+            // set publicEmail to current account email
+            await prisma.user.update({ where: { id: userId }, data: { publicEmail: me.email } });
+        }
+    }
     const updated = await prisma.user.update({
         where: { id: userId },
         data: { cosmetics },

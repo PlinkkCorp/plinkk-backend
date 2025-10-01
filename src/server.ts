@@ -809,11 +809,11 @@ fastify.post("/api/me/avatar", async (request, reply) => {
       : "jpg";
     const dir = path.join(__dirname, "public", "uploads", "avatars");
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-    // Déduplication par hash
-    const hash = crypto.createHash("sha256").update(buf).digest("hex");
-    const dedupName = `${hash}.${ext}`;
-    const filePath = path.join(dir, dedupName);
-    const publicUrl = `/public/uploads/avatars/${dedupName}`;
+  // Use a unique filename (timestamp + random) instead of hashing content
+  const randomSuffix = crypto.randomBytes(6).toString("hex");
+  const dedupName = `${Date.now()}-${randomSuffix}.${ext}`;
+  const filePath = path.join(dir, dedupName);
+  const publicUrl = `/public/uploads/avatars/${dedupName}`;
 
     // Récupérer l'ancienne image du compte (stockée comme nom de fichier ou ancienne URL)
     const me = await prisma.user.findUnique({
@@ -864,17 +864,63 @@ fastify.post('/api/me/avatar-file', async (request, reply) => {
   const userId = request.session.get('data');
   if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
   try {
+    // Log basic context to help debugging (no secrets)
+    request.log.info({ hasSessionCookie: !!(request.cookies && request.cookies['plinkk-backend']), userId: !!userId }, 'avatar-file upload attempt');
+
     // @ts-ignore - fastify multipart typings
-    const parts = request.files || request.raw.files;
-    // Fastify's multipart exposes a file stream via request.file() but depending on config we may read from request.body
-    const mp = await (request as any).file();
+    // Try multiple ways to obtain the uploaded file depending on Fastify/multipart config:
+    //  - request.file() (recommended)
+    //  - request.body.avatar when `attachFieldsToBody: true` is used
+    let mp: any = null;
+    try {
+      mp = await (request as any).file();
+    } catch (e) {
+      // ignore - fallback below
+      mp = null;
+    }
+    if (!mp && (request.body as any)?.avatar) {
+      mp = (request.body as any).avatar;
+    }
     if (!mp) return reply.code(400).send({ error: 'No file uploaded' });
     const { file, filename, mimetype } = mp;
+    request.log.info({ filename, mimetype }, 'received multipart file');
     if (!/^image\//i.test(mimetype)) return reply.code(400).send({ error: 'Invalid file type' });
     // limit size: 2MB
-    const chunks: Buffer[] = [];
-    for await (const chunk of file) chunks.push(Buffer.from(chunk));
-    const buf = Buffer.concat(chunks);
+    let buf: Buffer;
+    // mp may be one of several shapes depending on Fastify config:
+    // - { file: AsyncIterable } (standard request.file())
+    // - { data: Buffer } when attachFieldsToBody true (some setups)
+    // - { file: string } path to temp file
+    // - mp may itself be a Buffer
+    if (Buffer.isBuffer(mp)) {
+      buf = mp;
+    } else if (mp.data && Buffer.isBuffer(mp.data)) {
+      buf = mp.data;
+    } else if (typeof mp === 'string' && existsSync(mp)) {
+      buf = readFileSync(mp);
+    } else if (mp.file && typeof mp.file === 'string' && existsSync(mp.file)) {
+      buf = readFileSync(mp.file);
+    } else if (mp.file && Symbol.asyncIterator in mp.file) {
+      const chunks: Buffer[] = [];
+      for await (const chunk of mp.file) chunks.push(Buffer.from(chunk));
+      buf = Buffer.concat(chunks);
+    } else if (mp.file && typeof mp.file.pipe === 'function') {
+      // stream with pipe - read manually
+      const chunks: Buffer[] = [];
+      for await (const chunk of mp.file) chunks.push(Buffer.from(chunk));
+      buf = Buffer.concat(chunks);
+    } else {
+      // Last resort: try to coerce any `mp` property that looks like content
+      if ((mp as any).toBuffer && typeof (mp as any).toBuffer === 'function') {
+        buf = (mp as any).toBuffer();
+      } else if ((mp as any).buffer && Buffer.isBuffer((mp as any).buffer)) {
+        buf = (mp as any).buffer;
+      } else {
+        request.log.warn({ mp }, 'Unknown multipart payload shape');
+        return reply.code(400).send({ error: 'Unable to read uploaded file' });
+      }
+    }
+    request.log.info({ incomingSize: buf.length }, 'multipart buffer size');
     if (buf.length > 2 * 1024 * 1024) return reply.code(413).send({ error: 'Image too large' });
 
     const extMatch = (filename || '').match(/\.([a-zA-Z0-9]+)$/);
@@ -882,10 +928,13 @@ fastify.post('/api/me/avatar-file', async (request, reply) => {
 
     const dir = path.join(__dirname, 'public', 'uploads', 'plinkk');
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-    const hash = crypto.createHash('sha256').update(buf).digest('hex');
-    const name = `${hash}.${ext}`;
-    const filePath = path.join(dir, name);
-    const publicUrl = `/public/uploads/plinkk/${name}`;
+  // Use a readable unique filename: timestamp-rand-originalname (sanitized)
+  const randomSuffix = crypto.randomBytes(6).toString('hex');
+  const safeOrig = (filename || '').replace(/[^a-zA-Z0-9.\-_]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  const baseName = safeOrig ? `${Date.now()}-${randomSuffix}-${safeOrig}` : `${Date.now()}-${randomSuffix}`;
+  const name = `${baseName}.${ext}`;
+  const filePath = path.join(dir, name);
+  const publicUrl = `/public/uploads/plinkk/${name}`;
 
     if (!existsSync(filePath)) writeFileSync(filePath, buf);
 
