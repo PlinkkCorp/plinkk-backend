@@ -9,7 +9,7 @@ function generateProfileConfig(profile, links, backgroundColors, labels, neonCol
         profileIcon: "${profile.profileIcon || "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"}", // Icone derrière le profil
         profileSiteText: "${profile.profileSiteText || "Github"}", // Nom derrière le profil
         userName: "${profile.userName || "Github"}", // Nom affiché sur la page et dans le titre de l'onglet
-        email: "${profile.email || "example@example.fr"}", // Adresse mail affichée sur la page
+  email: "${profile.publicEmail || ""}", // Adresse mail publique affichée sur la page (découplée)
         links: ${JSON.stringify(links.map((l) => ({
         icon: l.icon,
         url: l.url,

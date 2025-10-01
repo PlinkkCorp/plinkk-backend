@@ -3,14 +3,10 @@
         <!-- User info card -->
         <% if (active === 'dashboard') { %>
         <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow">
-                        <div class="flex items-center gap-3">
-                                <div class="h-10 w-10 rounded-full overflow-hidden grid place-items-center bg-indigo-700/70 font-semibold">
-                                        <% if (user && user.profileImage) { %>
-                                            <img src="<%= user.profileImage %>" alt="Avatar" class="h-full w-full object-cover" />
-                                        <% } else { %>
-                                            <%= ((user && (user.userName || user.id)) ? (user.userName || user.id).toString().charAt(0).toUpperCase() : 'U') %>
-                                        <% } %>
-                                </div>
+                <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-full overflow-hidden grid place-items-center bg-indigo-700/70 font-semibold" data-avatar>
+                                <%- include('./avatar.ejs', { user }) %>
+            </div>
                 <div class="min-w-0">
                     <p class="font-medium truncate"><%= user && (user.userName || user.id) %></p>
                     <% if (user && user.email) { %>

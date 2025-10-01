@@ -1,0 +1,20 @@
+<% 
+  // Rendu d'un avatar: image user.image (URL complète ou nom de fichier) sinon user.profileImage, sinon initiale
+  const entity = typeof user !== 'undefined' && user ? user : (typeof currentUser !== 'undefined' ? currentUser : null);
+  let imgUrl = null;
+  if (entity && entity.image) {
+    imgUrl = String(entity.image);
+    // normalisation: si ce n'est pas une URL absolue et ne commence pas par '/', on reconstruit le chemin public
+    if (!/^https?:\/\//i.test(imgUrl) && imgUrl[0] !== '/') {
+      imgUrl = '/public/uploads/avatars/' + imgUrl;
+    }
+  }
+  const initial = entity && (entity.userName || entity.id) ? String(entity.userName || entity.id).charAt(0).toUpperCase() : 'U';
+%>
+<% if (imgUrl) { %>
+  <img data-avatar src="<%= imgUrl %>" alt="Avatar" class="h-full w-full object-cover rounded-full" />
+<% } else if (entity && entity.profileImage) { %>
+  <img data-avatar src="<%= entity.profileImage %>" alt="Avatar" class="h-full w-full object-cover rounded-full" />
+<% } else { %>
+  <%= initial %>
+<% } %>

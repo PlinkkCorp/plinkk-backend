@@ -33,7 +33,7 @@
                         <li>
                             <button data-target="#section-background" role="tab" aria-controls="section-background" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800 flex items-center gap-2">
                                 <svg class="size-4 text-slate-300" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v12H4zM7 9h10v6H7z"/></svg>
-                                Arrière‑plan
+                                Arrière-plan
                             </button>
                         </li>
                         <li>
@@ -383,16 +383,6 @@
                 <!-- Initialisation de l'UI du dashboard (formulaire, listes, pickers) -->
                 <script src="/public/js/dashboard-ui.js"></script>
                 <script>
-                        (function(){
-                            const btn = document.getElementById('profileMenuBtn');
-                            const panel = document.getElementById('profileMenuPanel');
-                            if(!btn || !panel) return;
-                            const open = () => { panel.classList.remove('hidden'); panel.classList.add('animate-pop-in'); btn.setAttribute('aria-expanded','true'); };
-                            const close = () => { panel.classList.add('hidden'); btn.setAttribute('aria-expanded','false'); };
-                            btn.addEventListener('click', (e)=>{ e.stopPropagation(); if(panel.classList.contains('hidden')) open(); else close(); });
-                            document.addEventListener('click', ()=> close());
-                            document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
-                        })();
                         // Toggle preview viewport (desktop/mobile)
                         (function(){
                             const frame = document.getElementById('preview');

@@ -324,14 +324,14 @@
       return '';
     }
 
-    function showError(message) {
-      const nodes = document.getElementsByClassName('errorClass');
-      for (const el of nodes) {
-        el.textContent = message;
-        el.className = 'errorClass mt-1 rounded-lg border border-rose-700 bg-rose-900/40 text-rose-200 text-sm px-3 py-2 animate-shake';
-        el.addEventListener('animationend', () => el.classList.remove('animate-shake'), { once: true });
+      function showError(message){
+        const nodes = document.getElementsByClassName('errorClass');
+        for(const el of nodes){
+          el.textContent = message;
+          el.className = 'errorClass mt-1 rounded-lg border border-rose-700 bg-rose-900/40 text-rose-200 text-sm px-3 py-2 animate-shake';
+          el.addEventListener('animationend', ()=> el.classList.remove('animate-shake'), { once:true });
+        }
       }
-    }
 
     const state = { current: 'login' };
 
@@ -392,39 +392,38 @@
       });
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const err = getQueryVariable('error');
-      if (err) { showError(decodeURIComponent(err)); }
+      document.addEventListener('DOMContentLoaded', () => {
+        const err = getQueryVariable('error');
+        if(err){ showError(decodeURIComponent(err)); }
 
       document.getElementById('tabLogin').addEventListener('click', () => activateTab('login'));
       document.getElementById('tabSignup').addEventListener('click', () => activateTab('signup'));
       document.getElementById('switchToSignup').addEventListener('click', () => activateTab('signup'));
       document.getElementById('switchToLogin').addEventListener('click', () => activateTab('login'));
 
-      if (location.hash === '#signup') { activateTab('signup'); }
-      updateTabsUI(state.current);
-      attachPasswordToggles();
+        if(location.hash === '#signup'){ activateTab('signup'); }
+        updateTabsUI(state.current);
+        attachPasswordToggles();
 
-      // Animation de passage "Inscription" -> "Enregistrement"
-      const signupFormEl = document.querySelector('#signupForm form');
-      const overlay = document.getElementById('loadingOverlay');
-      const card = document.getElementById('authCard');
-      /* if (signupFormEl) {
-        signupFormEl.addEventListener('submit', (e) => {
-          // Met le bouton en état "loading" et désactive le formulaire
-          const btn = signupFormEl.querySelector('button[type="submit"]');
-          btn.disabled = true;
-          signupFormEl.querySelectorAll('input, button').forEach(el => { el.disabled = true; });
-          btn.innerHTML = '<span class="inline-flex items-center gap-2"><svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>Enregistrement...</span>';
+        // Animation de passage "Inscription" -> "Enregistrement"
+        const signupFormEl = document.querySelector('#signupForm form');
+        const overlay = document.getElementById('loadingOverlay');
+        const card = document.getElementById('authCard');
+        if(signupFormEl){
+          signupFormEl.addEventListener('submit', (e)=>{
+            // Met le bouton en état "loading" et désactive le formulaire
+            const btn = signupFormEl.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            signupFormEl.querySelectorAll('input, button').forEach(el => { el.disabled = true; });
+            btn.innerHTML = '<span class="inline-flex items-center gap-2"><svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>Enregistrement...</span>';
 
-          // Affiche l'overlay et anime la carte
-          overlay.classList.remove('hidden');
-          overlay.classList.add('animate-fade-in');
-          card.classList.add('loading');
-        }, { once: true });
-      } */
-    });
-  </script>
-</body>
-
+            // Affiche l'overlay et anime la carte
+            overlay.classList.remove('hidden');
+            overlay.classList.add('animate-fade-in');
+            card.classList.add('loading');
+          }, { once:true });
+        }
+      });
+    </script>
+  </body>
 </html>

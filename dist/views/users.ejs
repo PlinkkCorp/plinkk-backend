@@ -50,30 +50,21 @@
        const bannerUrl = selected.bannerUrl ? String(selected.bannerUrl) : '';
        const theme = selected.theme ? String(selected.theme) : 'system';
      %>
-      <% const isEmailPublic = u.cosmetics && u.cosmetics.settings && u.cosmetics.settings.isEmailPublic; %>
+  <% const isEmailPublic = u.cosmetics && u.cosmetics.settings && u.cosmetics.settings.isEmailPublic; %>
+  <% const publicEmail = u.publicEmail || u.email; %>
       <li class="group rounded-xl border border-slate-800/80 bg-slate-900/70 hover:bg-slate-900 transition-colors shadow-sm hover:shadow-md animate-slide-up overflow-hidden"
         data-name="<%- (u.userName||'').toLowerCase() %>"
         data-id="<%- (u.id||'').toLowerCase() %>"
-        data-search="<%- (u.userName+' '+u.id + (isEmailPublic?(' '+u.email):'')).toLowerCase() %>">
+  data-search="<%- (u.userName+' '+u.id + (isEmailPublic && publicEmail ? (' '+publicEmail) : '')).toLowerCase() %>">
             <% if (bannerUrl) { %>
               <div class="h-12 w-full border-b border-slate-800" style="background: center/cover no-repeat url('<%= bannerUrl %>')"></div>
             <% } %>
             <div class="p-4 flex items-start gap-3">
-              <div class="relative shrink-0 h-11 w-11 rounded-full border border-indigo-600/50 overflow-hidden grid place-items-center bg-indigo-700/70 text-sm font-semibold text-white">
-                <% if (u.profileImage) { %>
-                  <img src="<%= u.profileImage %>" alt="Avatar de <%= u.userName %>" class="h-full w-full object-cover" loading="lazy" />
-                <% } else { %>
-                  <span><%= initials %></span>
-                <% } %>
-                <% if (frame && frame !== 'none') { 
-                     let frameStyle = '';
-                     if (frame === 'neon') frameStyle = 'box-shadow: 0 0 0 2px rgba(99,102,241,.6), 0 0 24px rgba(99,102,241,.6);';
-                     else if (frame === 'glow') frameStyle = 'box-shadow: 0 0 0 2px rgba(16,185,129,.6), 0 0 24px rgba(16,185,129,.6);';
-                     else if (frame === 'gold') frameStyle = 'box-shadow: 0 0 0 2px rgba(234,179,8,.7), 0 0 20px rgba(234,179,8,.5)';
-                %>
-                  <div class="pointer-events-none absolute inset-0 rounded-full" style="<%= frameStyle %>"></div>
-                <% } %>
-                <div class="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-emerald-600 grid place-items-center text-[10px] border border-emerald-400/60" title="Actif">✓</div>
+              <div class="relative ">
+                <div class="relative shrink-0 h-11 w-11 rounded-full border border-indigo-600/50 overflow-hidden grid place-items-center bg-indigo-700/70 text-sm font-semibold text-white">
+                  <%- include('partials/avatar.ejs', { u }) %>
+                </div>
+                <!-- Mettre ici une puce perso si voulu -->
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2 min-w-0">
@@ -87,7 +78,7 @@
                   <% } %>
                 </div>
                 <% if (isEmailPublic) { %>
-                  <a href="mailto:<%= u.email %>" class="text-xs text-slate-400 hover:text-slate-300 truncate" title="Envoyer un email"><%= u.email %></a>
+                  <span class="text-xs text-slate-400 truncate"><%= publicEmail %></span>
                 <% } else { %>
                   <span class="text-xs text-slate-500 italic">Email privé</span>
                 <% } %>

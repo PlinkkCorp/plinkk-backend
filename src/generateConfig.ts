@@ -26,7 +26,7 @@ export function generateProfileConfig(
         userName: "${
           profile.userName || "Github"
         }", // Nom affiché sur la page et dans le titre de l'onglet
-        email: "${profile.email || "example@example.fr"}", // Adresse mail affichée sur la page
+  email: "${(profile as any).publicEmail || ""}", // Adresse mail publique affichée sur la page (découplée)
         links: ${JSON.stringify(
           links.map((l) => ({
             icon: l.icon,

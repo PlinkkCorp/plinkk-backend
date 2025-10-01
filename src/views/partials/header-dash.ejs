@@ -14,14 +14,14 @@
             <a href="/users" class="px-3 py-1.5 text-xs rounded-md border border-slate-700/60 bg-slate-800/50 hover:bg-slate-700/60">Utilisateurs</a>
         </div>
         <div class="relative ml-1" id="profileMenu">
-            <button id="profileMenuBtn" aria-haspopup="menu" aria-expanded="false" class="flex items-center gap-2 px-2 py-1.5 rounded-full bg-slate-800/80 border border-indigo-700/40 hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-600/40">
-                <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-700/70 text-sm font-semibold">
-                    <%= (user.userName || 'U').charAt(0).toUpperCase() %>
-                </span>
-                <span class="hidden sm:inline text-sm font-medium max-w-28 truncate"><%= user.userName %></span>
-                <svg class="size-4 text-slate-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
+            <button id="profileMenuBtn" aria-haspopup="menu" aria-controls="profileMenuPanel" aria-expanded="false" class="flex items-center gap-2 px-2 py-1.5 rounded-full bg-slate-800/80 border border-indigo-700/40 hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-600/40">
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-700/70 text-sm font-semibold overflow-hidden" data-avatar>
+                        <%- include('avatar.ejs', { user }) %>
+                    </span>
+                    <span class="hidden sm:inline text-sm font-medium max-w-28 truncate"><%= user.userName %></span>
+                    <svg class="size-4 text-slate-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
             </button>
-            <div id="profileMenuPanel" class="absolute right-0 mt-2 w-56 rounded-lg border border-slate-700 bg-slate-900/95 backdrop-blur shadow-xl p-1 hidden">
+                <div id="profileMenuPanel" class="absolute right-0 mt-2 w-56 rounded-lg border border-slate-700 bg-slate-900/95 backdrop-blur shadow-xl p-1 hidden" role="menu">
                 <a href="/dashboard" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Accueil</a>
                 <a href="/dashboard/edit" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Éditer</a>
                 <a href="/dashboard/stats" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Statistiques</a>
@@ -35,3 +35,33 @@
         </div>
     </div>
 </header>
+<script>
+    (function(){
+        const root = document.getElementById('profileMenu');
+        const btn = document.getElementById('profileMenuBtn');
+        const panel = document.getElementById('profileMenuPanel');
+        if (!root || !btn || !panel) return;
+        // Empêche le double-binding si une page attache déjà des listeners
+        if (btn.dataset.bound === '1') return;
+        btn.dataset.bound = '1';
+
+        const open = () => {
+            panel.classList.remove('hidden');
+            panel.classList.add('animate-pop-in');
+            btn.setAttribute('aria-expanded','true');
+        };
+        const close = () => {
+            panel.classList.add('hidden');
+            btn.setAttribute('aria-expanded','false');
+        };
+
+        btn.addEventListener('click', (e)=>{
+            e.stopPropagation();
+            if (panel.classList.contains('hidden')) open(); else close();
+        });
+        document.addEventListener('click', (e)=>{
+            if (!root.contains(e.target)) close();
+        });
+        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') close(); });
+    })();
+</script>
