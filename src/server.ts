@@ -246,7 +246,7 @@ fastify.post("/register", async (req, reply) => {
   const hashedPasswordVerif = await bcrypt.hash(rawPasswordVerif, 10);
 
   // Vérif mots de passe
-  if (await bcrypt.compare(hashedPassword, hashedPasswordVerif)) {
+  if (!await bcrypt.compare(hashedPassword, hashedPasswordVerif)) {
     const emailParam = encodeURIComponent(rawEmail);
     const userParam = encodeURIComponent(rawUsername);
     return reply.redirect(
