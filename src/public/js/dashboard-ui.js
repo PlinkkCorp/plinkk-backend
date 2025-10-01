@@ -249,6 +249,7 @@
         const fontColor = el('input', { type: 'color', value: l.fontColor || '#000000', class: 'h-10 w-full rounded bg-slate-900 border border-slate-800 p-1' });
         // Bouton Choisir (presets)
         const pickBtn = el('button', { type: 'button', text: 'Choisir', class: 'h-9 px-3 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 text-sm' });
+        const pickInput = el('input', { type: 'text', class: 'sr-only', 'aria-label': 'Ouvrir le sélecteur de presets de label',  });
         const rm = trashButton(() => { labels.splice(idx,1); renderLabels(labels); scheduleAutoSave(); });
 
         function openLabelPresetPicker() {
@@ -308,15 +309,14 @@
   const SOCIAL_PLATFORMS = [
     { id: 'github', name: 'GitHub', pattern: 'https://github.com/{handle}', iconSlug: 'github' },
     { id: 'x', name: 'X (Twitter)', pattern: 'https://x.com/{handle}', iconSlug: 'x' },
-    { id: 'twitter', name: 'Twitter', pattern: 'https://twitter.com/{handle}', iconSlug: 'twitter' },
-    { id: 'youtube', name: 'YouTube', pattern: 'https://youtube.com/@{handle}', iconSlug: 'youtube' },
+    { id: 'youtube', name: 'YouTube', pattern: 'https://youtube.com/@{handle}', iconSlug: 'youtube-alt' },
     { id: 'twitch', name: 'Twitch', pattern: 'https://twitch.tv/{handle}', iconSlug: 'twitch' },
     { id: 'instagram', name: 'Instagram', pattern: 'https://instagram.com/{handle}', iconSlug: 'instagram' },
     { id: 'facebook', name: 'Facebook', pattern: 'https://facebook.com/{handle}', iconSlug: 'facebook' },
     { id: 'linkedin', name: 'LinkedIn', pattern: 'https://www.linkedin.com/in/{handle}', iconSlug: 'linkedin' },
     { id: 'discord', name: 'Discord Server', pattern: 'https://discord.gg/{handle}', iconSlug: 'discord' },
-    { id: 'apple-music', name: 'Apple Music', pattern: 'https://music.apple.com/{country}/{path}', iconSlug: 'apple-music' },
-    { id: 'apple-podcasts', name: 'Apple Podcasts', pattern: 'https://podcasts.apple.com/{country}/{path}', iconSlug: 'apple-podcasts' },
+    { id: 'apple-music', name: 'Apple Music', pattern: 'https://music.apple.com/{country}/{path}', iconSlug: 'apple-music-alt' },
+    { id: 'apple-podcasts', name: 'Apple Podcasts', pattern: 'https://podcasts.apple.com/{country}/{path}', iconSlug: 'apple-podcasts-alt' },
   ];
 
   async function ensureIconCatalog() {
@@ -759,6 +759,25 @@
         urlSourceSel.addEventListener('change', () => { applyUrlMode(); });
         url.addEventListener('input', () => { s.url = url.value; scheduleAutoSave(); });
         urlPickBtn.addEventListener('click', openPlatformPicker);
+        // Ouvrir aussi le sélecteur quand on clique sur le container/url (pas seulement le petit bouton)
+        // et activer via le clavier (Espace/Entrée) pour l'accessibilité — seulement en mode 'platform'.
+        urlWrap.addEventListener('click', (e) => {
+          // éviter de ré-ouvrir si le bouton intégré a été cliqué
+          if (e.target === urlPickBtn) return;
+          if (urlSourceSel.value === 'platform') openPlatformPicker();
+        });
+
+        url.addEventListener('click', () => {
+          if (urlSourceSel.value === 'platform') openPlatformPicker();
+        });
+
+        url.addEventListener('keydown', (e) => {
+          if (urlSourceSel.value !== 'platform') return;
+          if (e.key === 'Enter' || e.key === ' ' || e.code === 'Space') {
+            e.preventDefault();
+            openPlatformPicker();
+          }
+        });
 
   iconWrap.append(iconPreview, sourceSel, catalogWrap, iconUrlWrap, iconUploadWrap);
         rmCell.append(rm);
