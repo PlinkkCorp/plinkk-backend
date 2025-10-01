@@ -243,7 +243,7 @@ fastify.post("/register", async (req, reply) => {
   const rawPasswordVerif = passwordVerif || "";
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const hashedPasswordVerif = await bcrypt.hash(passwordVerif, 10);
+  const hashedPasswordVerif = await bcrypt.hash(rawPasswordVerif, 10);
 
   // Vérif mots de passe
   if (await bcrypt.compare(hashedPassword, hashedPasswordVerif)) {
