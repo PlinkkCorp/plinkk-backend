@@ -94,6 +94,7 @@
     <% } %>
   </main>
 
+  <script src="/public/js/pagination.js"></script>
   <script>
     (function(){
       const $ = (s, r=document) => r.querySelector(s);
@@ -105,27 +106,31 @@
       const visibleCount = $('#visibleCount');
       const resetBtn = $('#resetBtn');
 
-      if (!grid) return; // rien à faire s'il n'y a pas de liste
+      if (!grid || !window.__PlinkkPaginator) return;
 
-      function applyFilter() {
+      const paginator = window.__PlinkkPaginator.createPaginator(grid, { pageSize: 21, selectors: { items: 'li' }, onRender: (pageItems, meta) => {
+        // mettre à jour visibleCount (nombre total match)
+        if (visibleCount) visibleCount.textContent = String(meta.totalItems);
+      }});
+
+      // initial total count
+      if (totalCount) totalCount.textContent = String(paginator.getAll().length);
+
+      function applyFilter(){
         const q = (search?.value || '').trim().toLowerCase();
-        let visible = 0;
-        $$('#usersGrid > li').forEach(li => {
+        const all = paginator.getAll();
+        const filtered = all.filter(li => {
           const hay = li.dataset.search || '';
-          const show = !q || hay.includes(q);
-          li.style.display = show ? '' : 'none';
-          if (show) visible++;
+          return !q || hay.includes(q);
         });
-        if (visibleCount) visibleCount.textContent = String(visible);
+        paginator.setFiltered(filtered);
       }
 
-      function applySort() {
-        if (!sort) return;
-        const val = sort.value;
-        const items = $$('#usersGrid > li');
+      function applySort(){
+        const val = sort?.value;
         const collator = new Intl.Collator('fr', { sensitivity: 'base' });
         const getKey = (li, key) => (li.dataset[key] || '').toString();
-        items.sort((a,b) => {
+        paginator.sort((a,b) => {
           switch(val){
             case 'name-asc': return collator.compare(getKey(a,'name'), getKey(b,'name'));
             case 'name-desc': return collator.compare(getKey(b,'name'), getKey(a,'name'));
@@ -134,20 +139,8 @@
             default: return 0;
           }
         });
-        // réinjection dans le DOM
-        const frag = document.createDocumentFragment();
-        items.forEach(li => frag.appendChild(li));
-        grid.appendChild(frag);
       }
 
-      function copyLink(id){
-        const url = (window.location && window.location.origin ? window.location.origin : '') + '/' + id;
-        navigator.clipboard?.writeText(url).then(() => {
-          // petit feedback visuel
-        }).catch(()=>{});
-      }
-
-      // Events
       search?.addEventListener('input', () => applyFilter());
       sort?.addEventListener('change', () => applySort());
       resetBtn?.addEventListener('click', () => {
@@ -156,16 +149,17 @@
         applySort();
         applyFilter();
       });
+
+      // Copier le lien
       grid.addEventListener('click', (e) => {
         const btn = e.target.closest('.copyBtn');
         if (btn) {
-          e.preventDefault();
-          copyLink(btn.dataset.id);
+          const url = (window.location && window.location.origin ? window.location.origin : '') + '/' + btn.dataset.id;
+          navigator.clipboard?.writeText(url).catch(()=>{});
         }
-        // Rien d'autre ici
       });
 
-      // Animation sur le bouton "Copier le lien"
+      // Animation des boutons copier
       const style = document.createElement('style');
       style.textContent = `
         .copy-anim { position: relative; }
@@ -193,9 +187,8 @@
       // Init
       applySort();
       applyFilter();
-      if (totalCount && visibleCount) visibleCount.textContent = totalCount.textContent;
 
-      // Raccourci clavier ⌘K / Ctrl+K pour focus la recherche
+      // shortcut
       document.addEventListener('keydown', (ev) => {
         const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
         const meta = isMac ? ev.metaKey : ev.ctrlKey;

@@ -47,46 +47,122 @@ fastify.register(secure_session_1.default, {
 });
 fastify.get("/", async function (request, reply) {
     const currentUserId = request.session.get("data");
-    const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true, email: true, image: true } }) : null;
+    const currentUser = currentUserId
+        ? await prisma.user.findUnique({
+            where: { id: currentUserId },
+            select: {
+                id: true,
+                userName: true,
+                isPublic: true,
+                email: true,
+                image: true,
+            },
+        })
+        : null;
     return reply.view("index.ejs", { currentUser });
 });
 // Pages statiques utiles
 fastify.get("/about", async (request, reply) => {
     const currentUserId = request.session.get("data");
-    const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true, email: true, image: true } }) : null;
+    const currentUser = currentUserId
+        ? await prisma.user.findUnique({
+            where: { id: currentUserId },
+            select: {
+                id: true,
+                userName: true,
+                isPublic: true,
+                email: true,
+                image: true,
+            },
+        })
+        : null;
     return reply.view("about.ejs", { currentUser });
 });
 fastify.get("/privacy", async (request, reply) => {
     const currentUserId = request.session.get("data");
-    const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true, email: true, image: true } }) : null;
+    const currentUser = currentUserId
+        ? await prisma.user.findUnique({
+            where: { id: currentUserId },
+            select: {
+                id: true,
+                userName: true,
+                isPublic: true,
+                email: true,
+                image: true,
+            },
+        })
+        : null;
     return reply.view("privacy.ejs", { currentUser });
 });
 fastify.get("/terms", async (request, reply) => {
     const currentUserId = request.session.get("data");
-    const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true, email: true, image: true } }) : null;
+    const currentUser = currentUserId
+        ? await prisma.user.findUnique({
+            where: { id: currentUserId },
+            select: {
+                id: true,
+                userName: true,
+                isPublic: true,
+                email: true,
+                image: true,
+            },
+        })
+        : null;
     return reply.view("terms.ejs", { currentUser });
 });
 fastify.get("/cookies", async (request, reply) => {
     const currentUserId = request.session.get("data");
-    const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true, email: true, image: true } }) : null;
+    const currentUser = currentUserId
+        ? await prisma.user.findUnique({
+            where: { id: currentUserId },
+            select: {
+                id: true,
+                userName: true,
+                isPublic: true,
+                email: true,
+                image: true,
+            },
+        })
+        : null;
     return reply.view("cookies.ejs", { currentUser });
 });
 fastify.get("/legal", async (request, reply) => {
     const currentUserId = request.session.get("data");
-    const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true, email: true, image: true } }) : null;
+    const currentUser = currentUserId
+        ? await prisma.user.findUnique({
+            where: { id: currentUserId },
+            select: {
+                id: true,
+                userName: true,
+                isPublic: true,
+                email: true,
+                image: true,
+            },
+        })
+        : null;
     return reply.view("legal.ejs", { currentUser });
 });
 // robots.txt
 fastify.get("/robots.txt", async (request, reply) => {
-    const host = request.headers["x-forwarded-host"] || request.headers.host || "0.0.0.0:3001";
-    const proto = (request.headers["x-forwarded-proto"] || request.protocol || "http").split(",")[0];
+    const host = request.headers["x-forwarded-host"] ||
+        request.headers.host ||
+        "0.0.0.0:3001";
+    const proto = (request.headers["x-forwarded-proto"] ||
+        request.protocol ||
+        "http").split(",")[0];
     const base = `${proto}://${host}`;
-    reply.type("text/plain").send(`User-agent: *\nAllow: /\nSitemap: ${base}/sitemap.xml\n`);
+    reply
+        .type("text/plain")
+        .send(`User-agent: *\nAllow: /\nSitemap: ${base}/sitemap.xml\n`);
 });
 // sitemap.xml
 fastify.get("/sitemap.xml", async (request, reply) => {
-    const host = request.headers["x-forwarded-host"] || request.headers.host || "0.0.0.0:3001";
-    const proto = (request.headers["x-forwarded-proto"] || request.protocol || "http").split(",")[0];
+    const host = request.headers["x-forwarded-host"] ||
+        request.headers.host ||
+        "0.0.0.0:3001";
+    const proto = (request.headers["x-forwarded-proto"] ||
+        request.protocol ||
+        "http").split(",")[0];
     const base = `${proto}://${host}`;
     const staticUrls = [
         "",
@@ -99,20 +175,32 @@ fastify.get("/sitemap.xml", async (request, reply) => {
         "users",
         "dashboard",
     ].map((p) => (p ? `${base}/${p}` : `${base}/`));
-    const users = await prisma.user.findMany({ select: { id: true }, orderBy: { createdAt: "asc" } });
+    const users = await prisma.user.findMany({
+        select: { id: true },
+        orderBy: { createdAt: "asc" },
+    });
     const userUrls = users.map((u) => `${base}/${encodeURIComponent(u.id)}`);
     const urls = [...staticUrls, ...userUrls];
     const xml = `<?xml version="1.0" encoding="UTF-8"?>\n` +
         `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
-        urls
-            .map((loc) => `\n  <url><loc>${loc}</loc></url>`)
-            .join("") +
+        urls.map((loc) => `\n  <url><loc>${loc}</loc></url>`).join("") +
         "\n</urlset>\n";
     reply.type("application/xml").send(xml);
 });
 fastify.get("/login", async function (request, reply) {
     const currentUserId = request.session.get("data");
-    const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true, email: true, image: true } }) : null;
+    const currentUser = currentUserId
+        ? await prisma.user.findUnique({
+            where: { id: currentUserId },
+            select: {
+                id: true,
+                userName: true,
+                isPublic: true,
+                email: true,
+                image: true,
+            },
+        })
+        : null;
     return reply.view("connect.ejs", { currentUser });
 });
 fastify.post("/register", async (req, reply) => {
@@ -122,8 +210,9 @@ fastify.post("/register", async (req, reply) => {
     const rawEmail = (email || "").trim();
     const rawPassword = password || "";
     const rawPasswordVerif = passwordVerif || "";
+    const hashedPassword = await bcrypt_1.default.hash(password, 10);
     // Vérif mots de passe
-    if (rawPassword !== rawPasswordVerif) {
+    if (password !== passwordVerif) {
         const emailParam = encodeURIComponent(rawEmail);
         const userParam = encodeURIComponent(rawUsername);
         return reply.redirect(`/login?error=${encodeURIComponent("Les mots de passe ne correspondent pas")}&email=${emailParam}&username=${userParam}#signup`);
@@ -143,46 +232,29 @@ fastify.post("/register", async (req, reply) => {
             return reply.redirect(`/login?error=${encodeURIComponent("Email invalide")}&email=${emailParam}&username=${userParam}#signup`);
         }
     }
-    // Générer le slug id basé sur le username
-    const normalizedId = rawUsername
-        .replaceAll(" ", "-")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-    if (!normalizedId) {
-        const emailParam = encodeURIComponent(rawEmail);
-        const userParam = encodeURIComponent(rawUsername);
-        return reply.redirect(`/login?error=${encodeURIComponent("Nom d'utilisateur invalide")}&email=${emailParam}&username=${userParam}#signup`);
+    try {
+        const user = await prisma.user.create({
+            data: {
+                id: username
+                    .replaceAll(" ", "-")
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[^a-z0-9]+/g, "-")
+                    .replace(/^-+|-+$/g, ""),
+                userName: username,
+                name: username,
+                email: email,
+                password: hashedPassword,
+            },
+        });
     }
-    // Vérifier doublons (email et id)
-    const [emailExists, idExists] = await Promise.all([
-        prisma.user.findFirst({ where: { email: rawEmail }, select: { id: true } }),
-        prisma.user.findUnique({ where: { id: normalizedId }, select: { id: true } }),
-    ]);
-    if (emailExists) {
-        const emailParam = encodeURIComponent(rawEmail);
-        const userParam = encodeURIComponent(rawUsername);
-        return reply.redirect(`/login?error=${encodeURIComponent("Email déjà utilisé")}&email=${emailParam}&username=${userParam}#signup`);
+    catch (error) {
+        reply.redirect("/login?error=" + encodeURIComponent("Utilisateur deja existant"));
     }
-    if (idExists) {
-        const emailParam = encodeURIComponent(rawEmail);
-        const userParam = encodeURIComponent(rawUsername);
-        return reply.redirect(`/login?error=${encodeURIComponent("Nom d'utilisateur déjà pris")}&email=${emailParam}&username=${userParam}#signup`);
-    }
-    const hashedPassword = await bcrypt_1.default.hash(rawPassword, 10);
-    await prisma.user.create({
-        data: {
-            id: normalizedId,
-            userName: rawUsername,
-            name: rawUsername,
-            email: rawEmail,
-            password: hashedPassword,
-        },
-    });
-    return reply.redirect("/login?success=" + encodeURIComponent("Compte créé. Vous pouvez vous connecter."));
+    return reply.redirect("/login?success=" +
+        encodeURIComponent("Compte créé. Vous pouvez vous connecter."));
 });
 fastify.post("/login", async (request, reply) => {
     const { email, password } = request.body;
@@ -222,7 +294,11 @@ fastify.get("/dashboard", async function (request, reply) {
         prisma.link.count({ where: { userId: userId } }),
         prisma.socialIcon.count({ where: { userId: userId } }),
         prisma.label.count({ where: { userId: userId } }),
-        prisma.link.findMany({ where: { userId: userId }, orderBy: { id: "desc" }, take: 10 }),
+        prisma.link.findMany({
+            where: { userId: userId },
+            orderBy: { id: "desc" },
+            take: 10,
+        }),
     ]);
     return reply.view("dashboard.ejs", {
         user: userInfo,
@@ -235,21 +311,27 @@ fastify.get("/dashboard/account", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId)
         return reply.redirect("/login");
-    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    const userInfo = await prisma.user.findFirst({
+        where: { id: userId },
+        omit: { password: true },
+    });
     if (!userInfo)
         return reply.redirect("/login");
     // Dérive les préférences depuis cosmetics json (pour éviter une migration)
     const cosmetics = userInfo.cosmetics || {};
     const privacy = cosmetics.settings || {};
     const isEmailPublic = Boolean(privacy.isEmailPublic);
-    return reply.view("dashboard-account.ejs", { user: userInfo, isEmailPublic });
+    return reply.view("dashboard/account.ejs", { user: userInfo, isEmailPublic });
 });
 // Dashboard: Cosmétiques (aperçu et sélection)
 fastify.get("/dashboard/cosmetics", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId)
         return reply.redirect("/login");
-    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    const userInfo = await prisma.user.findFirst({
+        where: { id: userId },
+        omit: { password: true },
+    });
     if (!userInfo)
         return reply.redirect("/login");
     const cosmetics = userInfo.cosmetics || {};
@@ -258,9 +340,21 @@ fastify.get("/dashboard/cosmetics", async function (request, reply) {
         flairs: [
             { key: "OG", label: "OG", locked: false },
             { key: "PARTNER", label: "PARTNER", locked: false },
-            { key: "ADMIN", label: "ADMIN", locked: !(userInfo.role === client_1.Role.ADMIN || userInfo.role === client_1.Role.DEVELOPER) },
-            { key: "DEVELOPER", label: "DEVELOPER", locked: !(userInfo.role === client_1.Role.ADMIN || userInfo.role === client_1.Role.DEVELOPER) },
-            { key: "FOUNDER", label: "FOUNDER", locked: !(userInfo.role === client_1.Role.ADMIN || userInfo.role === client_1.Role.DEVELOPER) },
+            {
+                key: "ADMIN",
+                label: "ADMIN",
+                locked: !(userInfo.role === client_1.Role.ADMIN || userInfo.role === client_1.Role.DEVELOPER),
+            },
+            {
+                key: "DEVELOPER",
+                label: "DEVELOPER",
+                locked: !(userInfo.role === client_1.Role.ADMIN || userInfo.role === client_1.Role.DEVELOPER),
+            },
+            {
+                key: "FOUNDER",
+                label: "FOUNDER",
+                locked: !(userInfo.role === client_1.Role.ADMIN || userInfo.role === client_1.Role.DEVELOPER),
+            },
         ],
         frames: [
             { key: "none", label: "Aucun", locked: false },
@@ -276,11 +370,25 @@ fastify.get("/dashboard/cosmetics", async function (request, reply) {
         ],
         banners: [
             { key: "none", label: "Aucune", url: "", locked: false },
-            { key: "gradient-emerald", label: "Dégradé Émeraude", url: "", locked: false },
-            { key: "gradient-fuchsia", label: "Dégradé Fuchsia", url: "", locked: false },
+            {
+                key: "gradient-emerald",
+                label: "Dégradé Émeraude",
+                url: "",
+                locked: false,
+            },
+            {
+                key: "gradient-fuchsia",
+                label: "Dégradé Fuchsia",
+                url: "",
+                locked: false,
+            },
         ],
     };
-    return reply.view("dashboard-cosmetics.ejs", { user: userInfo, cosmetics, catalog });
+    return reply.view("dashboard/cosmetics.ejs", {
+        user: userInfo,
+        cosmetics,
+        catalog,
+    });
 });
 // Page d'édition du profil (éditeur complet)
 fastify.get("/dashboard/edit", async function (request, reply) {
@@ -293,27 +401,33 @@ fastify.get("/dashboard/edit", async function (request, reply) {
     });
     if (!userInfo)
         return reply.redirect("/login");
-    return reply.view("dashboard-edit.ejs", { user: userInfo });
+    return reply.view("dashboard/edit.ejs", { user: userInfo });
 });
 // Dashboard: Statistiques (vue dédiée)
 fastify.get("/dashboard/stats", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId)
         return reply.redirect("/login");
-    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    const userInfo = await prisma.user.findFirst({
+        where: { id: userId },
+        omit: { password: true },
+    });
     if (!userInfo)
         return reply.redirect("/login");
-    return reply.view("dashboard-stats.ejs", { user: userInfo });
+    return reply.view("dashboard/stats.ejs", { user: userInfo });
 });
 // Dashboard: Versions (vue dédiée)
 fastify.get("/dashboard/versions", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId)
         return reply.redirect("/login");
-    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    const userInfo = await prisma.user.findFirst({
+        where: { id: userId },
+        omit: { password: true },
+    });
     if (!userInfo)
         return reply.redirect("/login");
-    return reply.view("dashboard-versions.ejs", { user: userInfo });
+    return reply.view("dashboard/versions.ejs", { user: userInfo });
 });
 // API: Récupérer la configuration complète du profil pour l'éditeur
 fastify.get("/api/me/config", async (request, reply) => {
@@ -421,10 +535,15 @@ fastify.put("/api/me/config", async (request, reply) => {
         }
         // Plus de persistance dans cosmetics: publicEmail est un champ dédié.
         if (Array.isArray(body.background)) {
-            await tx.backgroundColor.deleteMany({ where: { userId: userId } });
+            await tx.backgroundColor.deleteMany({
+                where: { userId: userId },
+            });
             if (body.background.length > 0) {
                 await tx.backgroundColor.createMany({
-                    data: body.background.map((color) => ({ color, userId: userId })),
+                    data: body.background.map((color) => ({
+                        color,
+                        userId: userId,
+                    })),
                 });
             }
         }
@@ -432,7 +551,10 @@ fastify.put("/api/me/config", async (request, reply) => {
             await tx.neonColor.deleteMany({ where: { userId: userId } });
             if (body.neonColors.length > 0) {
                 await tx.neonColor.createMany({
-                    data: body.neonColors.map((color) => ({ color, userId: userId })),
+                    data: body.neonColors.map((color) => ({
+                        color,
+                        userId: userId,
+                    })),
                 });
             }
         }
@@ -531,10 +653,28 @@ fastify.get("/logout", (req, reply) => {
 // Liste publique de tous les profils
 fastify.get("/users", async (request, reply) => {
     const currentUserId = request.session.get("data");
-    const currentUser = currentUserId ? await prisma.user.findUnique({ where: { id: currentUserId }, select: { id: true, userName: true, isPublic: true, email: true, image: true } }) : null;
+    const currentUser = currentUserId
+        ? await prisma.user.findUnique({
+            where: { id: currentUserId },
+            select: {
+                id: true,
+                userName: true,
+                isPublic: true,
+                email: true,
+                image: true,
+            },
+        })
+        : null;
     const users = await prisma.user.findMany({
         where: { isPublic: true },
-        select: { id: true, userName: true, email: true, role: true, cosmetics: true, profileImage: true },
+        select: {
+            id: true,
+            userName: true,
+            email: true,
+            role: true,
+            cosmetics: true,
+            profileImage: true,
+        },
         orderBy: { createdAt: "asc" },
     });
     return reply.view("users.ejs", { users, currentUser });
@@ -559,7 +699,11 @@ fastify.post("/api/me/avatar", async (request, reply) => {
         if (buf.byteLength > 128 * 1024) {
             return reply.code(413).send({ error: "Image trop lourde (max 128 Ko)" });
         }
-        const ext = mime.endsWith("png") ? "png" : mime.endsWith("webp") ? "webp" : "jpg";
+        const ext = mime.endsWith("png")
+            ? "png"
+            : mime.endsWith("webp")
+                ? "webp"
+                : "jpg";
         const dir = path_1.default.join(__dirname, "public", "uploads", "avatars");
         if (!(0, fs_1.existsSync)(dir))
             (0, fs_1.mkdirSync)(dir, { recursive: true });
@@ -569,13 +713,19 @@ fastify.post("/api/me/avatar", async (request, reply) => {
         const filePath = path_1.default.join(dir, dedupName);
         const publicUrl = `/public/uploads/avatars/${dedupName}`;
         // Récupérer l'ancienne image du compte (stockée comme nom de fichier ou ancienne URL)
-        const me = await prisma.user.findUnique({ where: { id: userId }, select: { image: true } });
+        const me = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { image: true },
+        });
         const oldVal = me?.image || null;
         if (!(0, fs_1.existsSync)(filePath)) {
             (0, fs_1.writeFileSync)(filePath, buf);
         }
         // Mettre à jour l'utilisateur avec l'URL publique complète (compat templates/UI)
-        await prisma.user.update({ where: { id: userId }, data: { image: publicUrl } });
+        await prisma.user.update({
+            where: { id: userId },
+            data: { image: publicUrl },
+        });
         // Nettoyage: tenter de supprimer l'ancienne image si non référencée par d'autres
         if (oldVal && oldVal !== publicUrl) {
             const refs = await prisma.user.count({ where: { image: oldVal } });
@@ -615,7 +765,10 @@ fastify.post("/api/users/:id/role", async (request, reply) => {
 fastify.post("/api/users/:id/cosmetics", async (request, reply) => {
     const { id } = request.params;
     const cosmetics = request.body ?? null;
-    const updated = await prisma.user.update({ where: { id }, data: { cosmetics } });
+    const updated = await prisma.user.update({
+        where: { id },
+        data: { cosmetics },
+    });
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
 });
 fastify.get("/:username", function (request, reply) {
@@ -731,7 +884,9 @@ fastify.setNotFoundHandler((request, reply) => {
         return reply.code(404).send({ error: "Not Found" });
     }
     const userId = request.session.get("data");
-    return reply.code(404).view("404.ejs", { currentUser: userId ? { id: userId } : null });
+    return reply
+        .code(404)
+        .view("erreurs/404.ejs", { currentUser: userId ? { id: userId } : null });
 });
 // Error handler
 fastify.setErrorHandler((error, request, reply) => {
@@ -740,7 +895,10 @@ fastify.setErrorHandler((error, request, reply) => {
         return reply.code(500).send({ error: "Internal Server Error" });
     }
     const userId = request.session.get("data");
-    return reply.code(500).view("500.ejs", { message: error?.message ?? "", currentUser: userId ? { id: userId } : null });
+    return reply.code(500).view("erreurs/500.ejs", {
+        message: error?.message ?? "",
+        currentUser: userId ? { id: userId } : null,
+    });
 });
 // API: basculer la visibilité publique/privée de son profil
 fastify.post("/api/me/visibility", async (request, reply) => {
@@ -748,7 +906,11 @@ fastify.post("/api/me/visibility", async (request, reply) => {
     if (!userId)
         return reply.code(401).send({ error: "Unauthorized" });
     const { isPublic } = request.body ?? {};
-    const updated = await prisma.user.update({ where: { id: userId }, data: { isPublic: Boolean(isPublic) }, select: { id: true, isPublic: true } });
+    const updated = await prisma.user.update({
+        where: { id: userId },
+        data: { isPublic: Boolean(isPublic) },
+        select: { id: true, isPublic: true },
+    });
     return reply.send(updated);
 });
 // API: changer l'email
@@ -764,10 +926,17 @@ fastify.post("/api/me/email", async (request, reply) => {
         return reply.code(400).send({ error: "Email invalide" });
     }
     // vérifier unicité
-    const exists = await prisma.user.findFirst({ where: { email, NOT: { id: userId } }, select: { id: true } });
+    const exists = await prisma.user.findFirst({
+        where: { email, NOT: { id: userId } },
+        select: { id: true },
+    });
     if (exists)
         return reply.code(409).send({ error: "Email déjà utilisé" });
-    const updated = await prisma.user.update({ where: { id: userId }, data: { email }, select: { id: true, email: true } });
+    const updated = await prisma.user.update({
+        where: { id: userId },
+        data: { email },
+        select: { id: true, email: true },
+    });
     return reply.send(updated);
 });
 // API: changer le mot de passe
@@ -779,17 +948,26 @@ fastify.post("/api/me/password", async (request, reply) => {
     if (!currentPassword || !newPassword || !confirmPassword)
         return reply.code(400).send({ error: "Champs manquants" });
     if (newPassword !== confirmPassword)
-        return reply.code(400).send({ error: "Les mots de passe ne correspondent pas" });
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+        return reply
+            .code(400)
+            .send({ error: "Les mots de passe ne correspondent pas" });
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+    });
     if (!user)
         return reply.code(404).send({ error: "Utilisateur introuvable" });
     const ok = await bcrypt_1.default.compare(currentPassword, user.password);
     if (!ok)
         return reply.code(403).send({ error: "Mot de passe actuel incorrect" });
     if (await bcrypt_1.default.compare(newPassword, user.password))
-        return reply.code(400).send({ error: "Nouveau mot de passe identique à l'actuel" });
+        return reply
+            .code(400)
+            .send({ error: "Nouveau mot de passe identique à l'actuel" });
     const hashed = await bcrypt_1.default.hash(newPassword, 10);
-    await prisma.user.update({ where: { id: userId }, data: { password: hashed } });
+    await prisma.user.update({
+        where: { id: userId },
+        data: { password: hashed },
+    });
     return reply.send({ ok: true });
 });
 // API: basculer la visibilité publique de l'email (stockée dans cosmetics.settings.isEmailPublic)
@@ -798,11 +976,24 @@ fastify.post("/api/me/email-visibility", async (request, reply) => {
     if (!userId)
         return reply.code(401).send({ error: "Unauthorized" });
     const { isEmailPublic } = request.body ?? {};
-    const u = await prisma.user.findUnique({ where: { id: userId }, select: { cosmetics: true } });
+    const u = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { cosmetics: true },
+    });
     const cosmetics = u?.cosmetics || {};
-    cosmetics.settings = { ...(cosmetics.settings || {}), isEmailPublic: Boolean(isEmailPublic) };
-    const updated = await prisma.user.update({ where: { id: userId }, data: { cosmetics }, select: { id: true, cosmetics: true } });
-    return reply.send({ id: updated.id, isEmailPublic: Boolean(updated.cosmetics?.settings?.isEmailPublic) });
+    cosmetics.settings = {
+        ...(cosmetics.settings || {}),
+        isEmailPublic: Boolean(isEmailPublic),
+    };
+    const updated = await prisma.user.update({
+        where: { id: userId },
+        data: { cosmetics },
+        select: { id: true, cosmetics: true },
+    });
+    return reply.send({
+        id: updated.id,
+        isEmailPublic: Boolean(updated.cosmetics?.settings?.isEmailPublic),
+    });
 });
 // API: mettre à jour des infos de base du compte (username, name, description)
 fastify.post("/api/me/profile", async (request, reply) => {
@@ -811,13 +1002,17 @@ fastify.post("/api/me/profile", async (request, reply) => {
         return reply.code(401).send({ error: "Unauthorized" });
     const body = request.body || {};
     const data = {};
-    if (typeof body.userName === 'string' && body.userName.trim())
+    if (typeof body.userName === "string" && body.userName.trim())
         data.userName = body.userName.trim();
-    if (typeof body.name === 'string' && body.name.trim())
+    if (typeof body.name === "string" && body.name.trim())
         data.name = body.name.trim();
-    if (typeof body.description === 'string')
+    if (typeof body.description === "string")
         data.description = body.description;
-    const updated = await prisma.user.update({ where: { id: userId }, data, select: { id: true, userName: true, name: true, description: true } });
+    const updated = await prisma.user.update({
+        where: { id: userId },
+        data,
+        select: { id: true, userName: true, name: true, description: true },
+    });
     return reply.send(updated);
 });
 // API: sélectionner des cosmétiques (flair, bannerUrl, frame, theme)
@@ -826,7 +1021,10 @@ fastify.post("/api/me/cosmetics", async (request, reply) => {
     if (!userId)
         return reply.code(401).send({ error: "Unauthorized" });
     const body = request.body || {};
-    const u = await prisma.user.findUnique({ where: { id: userId }, select: { cosmetics: true } });
+    const u = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { cosmetics: true },
+    });
     const cosmetics = u?.cosmetics || {};
     cosmetics.selected = {
         // Le flair n'est plus modifiable par l'utilisateur (uniquement via code/admin)
@@ -836,7 +1034,11 @@ fastify.post("/api/me/cosmetics", async (request, reply) => {
         frame: body.frame ?? cosmetics.selected?.frame ?? null,
         theme: body.theme ?? cosmetics.selected?.theme ?? null,
     };
-    const updated = await prisma.user.update({ where: { id: userId }, data: { cosmetics }, select: { id: true, cosmetics: true } });
+    const updated = await prisma.user.update({
+        where: { id: userId },
+        data: { cosmetics },
+        select: { id: true, cosmetics: true },
+    });
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
 });
 // API: appliquer un starter pack de cosmétiques
@@ -844,17 +1046,30 @@ fastify.post("/api/me/cosmetics/starter-pack", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId)
         return reply.code(401).send({ error: "Unauthorized" });
-    const u = await prisma.user.findUnique({ where: { id: userId }, select: { role: true, cosmetics: true } });
+    const u = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true, cosmetics: true },
+    });
     if (!u)
         return reply.code(404).send({ error: "Utilisateur introuvable" });
     const baseFlair = u.role === client_1.Role.ADMIN || u.role === client_1.Role.DEVELOPER ? "DEVELOPER" : "OG";
     const cosmetics = u.cosmetics || {};
     // Le starter pack n'attribue plus de flair automatiquement (laisse tel quel)
-    cosmetics.selected = { flair: cosmetics.selected?.flair ?? null, frame: "neon", theme: "dark-emerald", banner: "gradient-emerald", bannerUrl: "" };
-    const updated = await prisma.user.update({ where: { id: userId }, data: { cosmetics }, select: { id: true, cosmetics: true } });
+    cosmetics.selected = {
+        flair: cosmetics.selected?.flair ?? null,
+        frame: "neon",
+        theme: "dark-emerald",
+        banner: "gradient-emerald",
+        bannerUrl: "",
+    };
+    const updated = await prisma.user.update({
+        where: { id: userId },
+        data: { cosmetics },
+        select: { id: true, cosmetics: true },
+    });
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
 });
-fastify.listen({ port: PORT, host: '0.0.0.0' }, function (err, address) {
+fastify.listen({ port: PORT, host: "0.0.0.0" }, function (err, address) {
     if (err) {
         fastify.log.error(err);
         process.exit(1);

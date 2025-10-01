@@ -44,9 +44,17 @@
       </div>
     </footer>
     <script>
-      const btn = document.getElementById('menuBtn');
-      const menu = document.getElementById('mobileMenu');
-      if(btn){ btn.addEventListener('click', ()=> { menu?.classList.toggle('hidden'); }); }
+      (function(){
+        const btn = document.getElementById('menuBtn');
+        const menu = document.getElementById('mobileMenu');
+        if (!btn || !menu) return;
+        if (btn.dataset.bound === '1') return; btn.dataset.bound = '1';
+        const open = () => { menu.classList.remove('hidden'); btn.setAttribute('aria-expanded','true'); };
+        const close = () => { menu.classList.add('hidden'); btn.setAttribute('aria-expanded','false'); };
+        btn.addEventListener('click', (e)=>{ e.stopPropagation(); if (menu.classList.contains('hidden')) open(); else close(); });
+        document.addEventListener('click', (e)=>{ if (!menu.contains(e.target) && e.target !== btn) close(); });
+        document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') close(); });
+      })();
     </script>
   </body>
 </html>

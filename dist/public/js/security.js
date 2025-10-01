@@ -1,5 +1,12 @@
 export function isSafeUrl(url) {
-    return typeof url === "string" && /^https?:\/\//i.test(url);
+    if (typeof url !== "string") return false;
+    const s = url.trim();
+    // Autoriser les data URLs d'images (avatar, favicon, etc.)
+    if (/^data:image\/(png|jpe?g|webp|gif);base64,/i.test(s)) return true;
+    // Autoriser les URLs relatives au même domaine (ex: /public/uploads/...)
+    if (s.startsWith('/')) return true;
+    // Autoriser http/https explicites
+    return /^https?:\/\//i.test(s);
 }
 // Empêche l'injection de HTML (XSS) en forçant l'utilisation de textContent
 export function setSafeText(element, text) {
@@ -24,7 +31,11 @@ export function disableDrag(imgElement) {
 // Nettoie une URL pour éviter les caractères spéciaux dangereux
 export function sanitizeUrl(url) {
     try {
-        const u = new URL(url);
+        if (typeof url !== 'string') return '#';
+        const s = url.trim();
+        // Conserver les chemins relatifs et data URLs tels quels
+        if (s.startsWith('/') || s.startsWith('data:')) return s;
+        const u = new URL(s);
         return u.href;
     }
     catch (_a) {

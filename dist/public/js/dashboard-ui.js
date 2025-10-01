@@ -1069,14 +1069,34 @@
     f.profileLink, f.profileSiteText, f.userName, f.email,
     f.profileImage, f.profileIcon, f.iconUrl, f.description,
     f.profileHoverColor, f.degBackgroundColor,
-  f.neonEnable, f.buttonThemeEnable, f.canvaEnable,
+    f.neonEnable, f.buttonThemeEnable, f.canvaEnable,
     f.selectedThemeIndex, f.selectedAnimationIndex,
     f.selectedAnimationButtonIndex, f.selectedAnimationBackgroundIndex,
     f.animationDurationBackground, f.delayAnimationButton, f.backgroundSize,
     f.selectedCanvasIndex,
-  f.status_text,
+    f.status_text,
     f.status_fontTextColor, f.status_statusText
   ].forEach(attachAutoSave);
+
+  // Rafraîchir l’aperçu immédiatement pour les champs qui impactent visuellement la page publique
+  [
+    f.profileImage, f.profileIcon, f.iconUrl, f.description,
+    f.userName, f.profileSiteText, f.profileLink,
+    f.selectedThemeIndex, f.selectedAnimationIndex,
+    f.selectedAnimationButtonIndex, f.selectedAnimationBackgroundIndex,
+    f.animationDurationBackground, f.delayAnimationButton,
+    f.profileHoverColor, f.backgroundSize,
+    f.canvaEnable, f.selectedCanvasIndex
+  ].forEach((el) => {
+    if (!el) return;
+    const tag = (el.tagName || '').toUpperCase();
+    const type = (el.type || '').toLowerCase();
+    const evt = (tag === 'SELECT' || type === 'checkbox' || type === 'color' || type === 'number') ? 'change' : 'input';
+    el.addEventListener(evt, () => {
+      // On ne bloque pas l’auto-save: on propose un aperçu rapide même avant la persistance
+      refreshPreview();
+    });
+  });
 
   // Prévisualisation du statut (chip)
   function updateStatusPreview() {

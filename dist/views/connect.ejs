@@ -1,295 +1,430 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Connexion / Inscription - Plinkk</title>
-    <link rel="icon" href="/public/images/logo.svg"/>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      :root{ --ease-out-quad: cubic-bezier(.22,1,.36,1); }
 
-      /* Page + card */
-      @keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
-      @keyframes slide-up { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
-      @keyframes bg-pan {
-        0%{ background-position: 0% 50% }
-        50%{ background-position: 100% 50% }
-        100%{ background-position: 0% 50% }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion / Inscription - Plinkk</title>
+  <link rel="icon" href="/public/images/logo.svg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --ease-out-quad: cubic-bezier(.22, 1, .36, 1);
+    }
+
+    /* Page + card */
+    @keyframes fade-in {
+      from {
+        opacity: 0
       }
-      .animate-fade-in { animation: fade-in .36s var(--ease-out-quad) both }
-      .animate-slide-up { animation: slide-up .4s var(--ease-out-quad) both }
 
-      /* Section switching */
-      @keyframes in-right { from{ opacity:0; transform: translateX(16px) } to{ opacity:1; transform: translateX(0) } }
-      @keyframes in-left  { from{ opacity:0; transform: translateX(-16px) } to{ opacity:1; transform: translateX(0) } }
-      @keyframes out-right{ from{ opacity:1; transform: translateX(0) } to{ opacity:0; transform: translateX(16px) } }
-      @keyframes out-left { from{ opacity:1; transform: translateX(0) } to{ opacity:0; transform: translateX(-16px) } }
-      .animate-in-right { animation: in-right .28s var(--ease-out-quad) both }
-      .animate-in-left  { animation: in-left  .28s var(--ease-out-quad) both }
-      .animate-out-right{ animation: out-right.24s var(--ease-out-quad) both }
-      .animate-out-left { animation: out-left .24s var(--ease-out-quad) both }
-
-      /* Micro-animations */
-      @keyframes shake {
-        0%,100%{ transform: translateX(0) }
-        20%{ transform: translateX(-6px) }
-        40%{ transform: translateX(6px) }
-        60%{ transform: translateX(-4px) }
-        80%{ transform: translateX(4px) }
+      to {
+        opacity: 1
       }
-      .animate-shake{ animation: shake .36s cubic-bezier(.36,.07,.19,.97) both }
+    }
 
-      /* Carte: effet léger au chargement */
-      #authCard{ transition: transform .18s var(--ease-out-quad), filter .18s var(--ease-out-quad) }
-      #authCard.loading{ transform: scale(.995); filter: saturate(.95) brightness(.98) }
-
-      @media (prefers-reduced-motion: reduce){
-        *{ animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: 0s !important; scroll-behavior: auto !important }
+    @keyframes slide-up {
+      from {
+        opacity: 0;
+        transform: translateY(8px)
       }
-    </style>
-  </head>
-  <body class="min-h-screen text-slate-100 grid place-items-center p-4 animate-fade-in"
-        style="background: radial-gradient(1200px 800px at 10% 10%, rgba(79,70,229,.25), transparent 60%),
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes bg-pan {
+      0% {
+        background-position: 0% 50%
+      }
+
+      50% {
+        background-position: 100% 50%
+      }
+
+      100% {
+        background-position: 0% 50%
+      }
+    }
+
+    .animate-fade-in {
+      animation: fade-in .36s var(--ease-out-quad) both
+    }
+
+    .animate-slide-up {
+      animation: slide-up .4s var(--ease-out-quad) both
+    }
+
+    /* Section switching */
+    @keyframes in-right {
+      from {
+        opacity: 0;
+        transform: translateX(16px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
+
+    @keyframes in-left {
+      from {
+        opacity: 0;
+        transform: translateX(-16px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
+
+    @keyframes out-right {
+      from {
+        opacity: 1;
+        transform: translateX(0)
+      }
+
+      to {
+        opacity: 0;
+        transform: translateX(16px)
+      }
+    }
+
+    @keyframes out-left {
+      from {
+        opacity: 1;
+        transform: translateX(0)
+      }
+
+      to {
+        opacity: 0;
+        transform: translateX(-16px)
+      }
+    }
+
+    .animate-in-right {
+      animation: in-right .28s var(--ease-out-quad) both
+    }
+
+    .animate-in-left {
+      animation: in-left .28s var(--ease-out-quad) both
+    }
+
+    .animate-out-right {
+      animation: out-right.24s var(--ease-out-quad) both
+    }
+
+    .animate-out-left {
+      animation: out-left .24s var(--ease-out-quad) both
+    }
+
+    /* Micro-animations */
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0)
+      }
+
+      20% {
+        transform: translateX(-6px)
+      }
+
+      40% {
+        transform: translateX(6px)
+      }
+
+      60% {
+        transform: translateX(-4px)
+      }
+
+      80% {
+        transform: translateX(4px)
+      }
+    }
+
+    .animate-shake {
+      animation: shake .36s cubic-bezier(.36, .07, .19, .97) both
+    }
+
+    /* Carte: effet léger au chargement */
+    #authCard {
+      transition: transform .18s var(--ease-out-quad), filter .18s var(--ease-out-quad)
+    }
+
+    #authCard.loading {
+      transform: scale(.995);
+      filter: saturate(.95) brightness(.98)
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0s !important;
+        scroll-behavior: auto !important
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen text-slate-100 grid place-items-center p-4 animate-fade-in" style="background: radial-gradient(1200px 800px at 10% 10%, rgba(79,70,229,.25), transparent 60%),
                        radial-gradient(1200px 800px at 90% 90%, rgba(2,132,199,.25), transparent 60%),
                        linear-gradient(120deg, #0f172a, #0b1220 35%, #111827 70%, #0b1022);
                background-size: 200% 200%;
                animation: bg-pan 18s ease infinite;">
-    <main class="w-full max-w-md">
-      <div class="mb-6 flex items-center justify-center gap-2 text-slate-200 animate-slide-up">
-        <img src="/public/images/logo.svg" alt="Plinkk" class="h-9 w-9 rounded shadow"/>
-        <h1 class="text-xl font-semibold tracking-tight">Plinkk</h1>
+  <main class="w-full max-w-md">
+    <div class="mb-6 flex items-center justify-center gap-2 text-slate-200 animate-slide-up">
+      <img src="/public/images/logo.svg" alt="Plinkk" class="h-9 w-9 rounded shadow" />
+      <h1 class="text-xl font-semibold tracking-tight">Plinkk</h1>
+    </div>
+
+    <!-- Ajout de 'relative' et d'un id pour animer la carte -->
+    <div id="authCard"
+      class="relative rounded-2xl border border-slate-800/60 bg-slate-900/60 backdrop-blur-md shadow-2xl overflow-hidden animate-slide-up ring-1 ring-white/5"
+      style="animation-delay:60ms">
+      <nav id="tabs" class="relative grid grid-cols-2 text-sm">
+        <button id="tabLogin" type="button" class="px-4 py-3 font-medium text-indigo-300 focus:outline-none"
+          aria-selected="true">Connexion</button>
+        <button id="tabSignup" type="button"
+          class="px-4 py-3 font-medium text-slate-400 hover:text-slate-200 focus:outline-none"
+          aria-selected="false">Inscription</button>
+        <span id="tabIndicator"
+          class="pointer-events-none absolute bottom-0 left-0 h-0.5 w-1/2 bg-indigo-500 transition-transform duration-300 ease-out"></span>
+      </nav>
+
+      <!-- Connexion -->
+      <section id="loginForm" class="p-5 space-y-4">
+        <form action="/login" method="post" class="space-y-3">
+          <label class="block text-sm">
+            <span class="text-slate-300">Adresse e-mail</span>
+            <input type="email" name="email" required
+              class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 outline-none ring-0 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-600/30 transition"
+              placeholder="vous@exemple.com" />
+          </label>
+          <label class="block text-sm">
+            <span class="text-slate-300">Mot de passe</span>
+            <div class="relative mt-1">
+              <input id="loginPassword" type="password" name="password" required
+                class="w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 pr-10 outline-none ring-0 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-600/30 transition"
+                placeholder="••••••••" />
+              <button type="button"
+                class="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-200 focus:outline-none"
+                data-toggle="#loginPassword" aria-label="Afficher/masquer le mot de passe">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M2.036 12.322a1.012 1.012 0 010-.644C3.423 7.51 7.36 5 12 5c4.64 0 8.577 2.51 9.964 6.678.07.214.07.45 0 .644C20.577 16.49 16.64 19 12 19c-4.64 0-8.577-2.51-9.964-6.678z" />
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none" />
+                </svg>
+              </button>
+            </div>
+          </label>
+          <button type="submit"
+            class="w-full mt-2 rounded-md bg-indigo-600 hover:bg-indigo-500 active:scale-[.99] text-white font-medium py-2.5 shadow transition">
+            Se connecter
+          </button>
+        </form>
+        <p class="errorClass"></p>
+        <p class="text-center text-xs text-slate-400">
+          Pas de compte ?
+          <button id="switchToSignup" type="button"
+            class="text-indigo-300 hover:text-indigo-200 underline underline-offset-4">Créer un compte</button>
+        </p>
+      </section>
+
+      <!-- Inscription -->
+      <section id="signupForm" class="p-5 space-y-4 hidden">
+        <form action="/register" method="post" class="space-y-3">
+          <label class="block text-sm">
+            <span class="text-slate-300">Nom d'utilisateur</span>
+            <input type="text" name="username" required
+              class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 outline-none ring-0 focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-600/30 transition"
+              placeholder="votrepseudo" />
+          </label>
+          <label class="block text-sm">
+            <span class="text-slate-300">Adresse e-mail</span>
+            <input type="email" name="email" required
+              class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 outline-none ring-0 focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-600/30 transition"
+              placeholder="vous@exemple.com" />
+          </label>
+          <label class="block text-sm">
+            <span class="text-slate-300">Mot de passe</span>
+            <div class="relative mt-1">
+              <input id="signupPassword" type="password" name="password" required
+                class="w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 pr-10 outline-none ring-0 focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-600/30 transition"
+                placeholder="••••••••" />
+              <button type="button"
+                class="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-200 focus:outline-none"
+                data-toggle="#signupPassword" aria-label="Afficher/masquer le mot de passe">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M2.036 12.322a1.012 1.012 0 010-.644C3.423 7.51 7.36 5 12 5c4.64 0 8.577 2.51 9.964 6.678.07.214.07.45 0 .644C20.577 16.49 16.64 19 12 19c-4.64 0-8.577-2.51-9.964-6.678z" />
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none" />
+                </svg>
+              </button>
+            </div>
+          </label>
+          <label class="block text-sm">
+            <span class="text-slate-300">Confirmer le mot de passe</span>
+            <div class="relative mt-1">
+              <input id="signupPasswordVerif" type="password" name="passwordVerif" required
+                class="w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 pr-10 outline-none ring-0 focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-600/30 transition"
+                placeholder="••••••••" />
+              <button type="button"
+                class="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-200 focus:outline-none"
+                data-toggle="#signupPasswordVerif" aria-label="Afficher/masquer le mot de passe">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M2.036 12.322a1.012 1.012 0 010-.644C3.423 7.51 7.36 5 12 5c4.64 0 8.577 2.51 9.964 6.678.07.214.07.45 0 .644C20.577 16.49 16.64 19 12 19c-4.64 0-8.577-2.51-9.964-6.678z" />
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none" />
+                </svg>
+              </button>
+            </div>
+          </label>
+          <button type="submit"
+            class="w-full mt-2 rounded-md bg-emerald-600 hover:bg-emerald-500 active:scale-[.99] text-white font-medium py-2.5 shadow transition">
+            S'inscrire
+          </button>
+        </form>
+        <p class="errorClass"></p>
+        <p class="text-center text-xs text-slate-400">
+          Déjà un compte ?
+          <button id="switchToLogin" type="button"
+            class="text-indigo-300 hover:text-indigo-200 underline underline-offset-4">Se connecter</button>
+        </p>
+      </section>
+
+      <!-- Overlay de chargement (inscription) -->
+      <div id="loadingOverlay"
+        class="hidden absolute inset-0 bg-slate-900/70 backdrop-blur-sm flex flex-col items-center justify-center gap-3 text-slate-200">
+        <svg class="h-6 w-6 text-indigo-300 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+        </svg>
+        <div class="text-sm font-medium">Enregistrement...</div>
       </div>
+    </div>
+  </main>
 
-      <!-- Ajout de 'relative' et d'un id pour animer la carte -->
-      <div id="authCard" class="relative rounded-2xl border border-slate-800/60 bg-slate-900/60 backdrop-blur-md shadow-2xl overflow-hidden animate-slide-up ring-1 ring-white/5" style="animation-delay:60ms">
-        <nav id="tabs" class="relative grid grid-cols-2 text-sm">
-          <button id="tabLogin" type="button" class="px-4 py-3 font-medium text-indigo-300 focus:outline-none" aria-selected="true">Connexion</button>
-          <button id="tabSignup" type="button" class="px-4 py-3 font-medium text-slate-400 hover:text-slate-200 focus:outline-none" aria-selected="false">Inscription</button>
-          <span id="tabIndicator" class="pointer-events-none absolute bottom-0 left-0 h-0.5 w-1/2 bg-indigo-500 transition-transform duration-300 ease-out"></span>
-        </nav>
-
-        <!-- Connexion -->
-        <section id="loginForm" class="p-5 space-y-4">
-          <form action="/login" method="post" class="space-y-3">
-            <label class="block text-sm">
-              <span class="text-slate-300">Adresse e-mail</span>
-              <input type="email" name="email" required
-                     class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 outline-none ring-0 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-600/30 transition"
-                     placeholder="vous@exemple.com"/>
-            </label>
-            <label class="block text-sm">
-              <span class="text-slate-300">Mot de passe</span>
-              <div class="relative mt-1">
-                <input id="loginPassword" type="password" name="password" required
-                       class="w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 pr-10 outline-none ring-0 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-600/30 transition"
-                       placeholder="••••••••"/>
-                <button type="button" class="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-200 focus:outline-none"
-                        data-toggle="#loginPassword" aria-label="Afficher/masquer le mot de passe">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                          d="M2.036 12.322a1.012 1.012 0 010-.644C3.423 7.51 7.36 5 12 5c4.64 0 8.577 2.51 9.964 6.678.07.214.07.45 0 .644C20.577 16.49 16.64 19 12 19c-4.64 0-8.577-2.51-9.964-6.678z"/>
-                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                  </svg>
-                </button>
-              </div>
-            </label>
-            <button type="submit"
-                    class="w-full mt-2 rounded-md bg-indigo-600 hover:bg-indigo-500 active:scale-[.99] text-white font-medium py-2.5 shadow transition">
-              Se connecter
-            </button>
-          </form>
-          <p class="errorClass"></p>
-          <p class="text-center text-xs text-slate-400">
-            Pas de compte ?
-            <button id="switchToSignup" type="button" class="text-indigo-300 hover:text-indigo-200 underline underline-offset-4">Créer un compte</button>
-          </p>
-        </section>
-
-        <!-- Inscription -->
-        <section id="signupForm" class="p-5 space-y-4 hidden">
-          <form action="/register" method="post" class="space-y-3">
-            <label class="block text-sm">
-              <span class="text-slate-300">Nom d'utilisateur</span>
-              <input type="text" name="username" required
-                     class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 outline-none ring-0 focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-600/30 transition"
-                     placeholder="votrepseudo"/>
-            </label>
-            <label class="block text-sm">
-              <span class="text-slate-300">Adresse e-mail</span>
-              <input type="email" name="email" required
-                     class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 outline-none ring-0 focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-600/30 transition"
-                     placeholder="vous@exemple.com"/>
-            </label>
-            <label class="block text-sm">
-              <span class="text-slate-300">Mot de passe</span>
-              <div class="relative mt-1">
-                <input id="signupPassword" type="password" name="password" required
-                       class="w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 pr-10 outline-none ring-0 focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-600/30 transition"
-                       placeholder="••••••••"/>
-                <button type="button" class="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-200 focus:outline-none"
-                        data-toggle="#signupPassword" aria-label="Afficher/masquer le mot de passe">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                          d="M2.036 12.322a1.012 1.012 0 010-.644C3.423 7.51 7.36 5 12 5c4.64 0 8.577 2.51 9.964 6.678.07.214.07.45 0 .644C20.577 16.49 16.64 19 12 19c-4.64 0-8.577-2.51-9.964-6.678z"/>
-                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                  </svg>
-                </button>
-              </div>
-            </label>
-            <label class="block text-sm">
-              <span class="text-slate-300">Confirmer le mot de passe</span>
-              <div class="relative mt-1">
-                <input id="signupPasswordVerif" type="password" name="passwordVerif" required
-                       class="w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 pr-10 outline-none ring-0 focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-600/30 transition"
-                       placeholder="••••••••"/>
-                <button type="button" class="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-200 focus:outline-none"
-                        data-toggle="#signupPasswordVerif" aria-label="Afficher/masquer le mot de passe">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                          d="M2.036 12.322a1.012 1.012 0 010-.644C3.423 7.51 7.36 5 12 5c4.64 0 8.577 2.51 9.964 6.678.07.214.07.45 0 .644C20.577 16.49 16.64 19 12 19c-4.64 0-8.577-2.51-9.964-6.678z"/>
-                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                  </svg>
-                </button>
-              </div>
-            </label>
-            <button type="submit"
-                    class="w-full mt-2 rounded-md bg-emerald-600 hover:bg-emerald-500 active:scale-[.99] text-white font-medium py-2.5 shadow transition">
-              S'inscrire
-            </button>
-          </form>
-          <p class="errorClass"></p>
-          <p class="text-center text-xs text-slate-400">
-            Déjà un compte ?
-            <button id="switchToLogin" type="button" class="text-indigo-300 hover:text-indigo-200 underline underline-offset-4">Se connecter</button>
-          </p>
-        </section>
-
-        <!-- Overlay de chargement (inscription) -->
-        <div id="loadingOverlay" class="hidden absolute inset-0 bg-slate-900/70 backdrop-blur-sm flex flex-col items-center justify-center gap-3 text-slate-200">
-          <svg class="h-6 w-6 text-indigo-300 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
-          </svg>
-          <div class="text-sm font-medium">Enregistrement...</div>
-        </div>
-      </div>
-    </main>
-
-    <script>
-      function getQueryVariable(variable){
-        const query = window.location.search.substring(1);
-        const vars = query.split('&');
-        for(const v of vars){
-          const pair = v.split('=');
-          if(pair[0] === variable){ return pair[1]; }
-        }
-        return '';
+  <script>
+    function getQueryVariable(variable) {
+      const query = window.location.search.substring(1);
+      const vars = query.split('&');
+      for (const v of vars) {
+        const pair = v.split('=');
+        if (pair[0] === variable) { return pair[1]; }
       }
+      return '';
+    }
 
-      function showError(message){
-        const nodes = document.getElementsByClassName('errorClass');
-        for(const el of nodes){
-          el.textContent = message;
-          el.className = 'errorClass mt-1 rounded-lg border border-rose-700 bg-rose-900/40 text-rose-200 text-sm px-3 py-2 animate-shake';
-          el.addEventListener('animationend', ()=> el.classList.remove('animate-shake'), { once:true });
-        }
+    function showError(message) {
+      const nodes = document.getElementsByClassName('errorClass');
+      for (const el of nodes) {
+        el.textContent = message;
+        el.className = 'errorClass mt-1 rounded-lg border border-rose-700 bg-rose-900/40 text-rose-200 text-sm px-3 py-2 animate-shake';
+        el.addEventListener('animationend', () => el.classList.remove('animate-shake'), { once: true });
       }
+    }
 
-      function showSuccess(message){
-        const nodes = document.getElementsByClassName('errorClass');
-        for(const el of nodes){
-          el.textContent = message;
-          el.className = 'errorClass mt-1 rounded-lg border border-emerald-700 bg-emerald-900/40 text-emerald-200 text-sm px-3 py-2';
-        }
-      }
+    const state = { current: 'login' };
 
-      const state = { current: 'login' };
+    function updateTabsUI(which) {
+      const tabLogin = document.getElementById('tabLogin');
+      const tabSignup = document.getElementById('tabSignup');
+      const indicator = document.getElementById('tabIndicator');
+      const isLogin = which === 'login';
 
-      function updateTabsUI(which){
-        const tabLogin = document.getElementById('tabLogin');
-        const tabSignup = document.getElementById('tabSignup');
-        const indicator = document.getElementById('tabIndicator');
-        const isLogin = which === 'login';
+      tabLogin.className = 'px-4 py-3 font-medium ' + (isLogin ? 'text-indigo-300' : 'text-slate-400 hover:text-slate-200');
+      tabSignup.className = 'px-4 py-3 font-medium ' + (!isLogin ? 'text-indigo-300' : 'text-slate-400 hover:text-slate-200');
+      tabLogin.setAttribute('aria-selected', isLogin ? 'true' : 'false');
+      tabSignup.setAttribute('aria-selected', !isLogin ? 'true' : 'false');
 
-        tabLogin.className = 'px-4 py-3 font-medium ' + (isLogin ? 'text-indigo-300' : 'text-slate-400 hover:text-slate-200');
-        tabSignup.className = 'px-4 py-3 font-medium ' + (!isLogin ? 'text-indigo-300' : 'text-slate-400 hover:text-slate-200');
-        tabLogin.setAttribute('aria-selected', isLogin ? 'true' : 'false');
-        tabSignup.setAttribute('aria-selected', !isLogin ? 'true' : 'false');
+      indicator.style.transform = isLogin ? 'translateX(0%)' : 'translateX(100%)';
+    }
 
-        indicator.style.transform = isLogin ? 'translateX(0%)' : 'translateX(100%)';
-      }
+    function activateTab(which) {
+      if (which === state.current) return;
 
-      function activateTab(which){
-        if(which === state.current) return;
+      const login = document.getElementById('loginForm');
+      const signup = document.getElementById('signupForm');
+      const fromEl = state.current === 'login' ? login : signup;
+      const toEl = which === 'login' ? login : signup;
+      const direction = which === 'login' ? 'left' : 'right';
 
-        const login = document.getElementById('loginForm');
-        const signup = document.getElementById('signupForm');
-        const fromEl = state.current === 'login' ? login : signup;
-        const toEl = which === 'login' ? login : signup;
-        const direction = which === 'login' ? 'left' : 'right';
+      // Prepare incoming section
+      toEl.classList.remove('hidden');
+      toEl.classList.remove('animate-out-left', 'animate-out-right', 'animate-in-left', 'animate-in-right');
+      fromEl.classList.remove('animate-out-left', 'animate-out-right', 'animate-in-left', 'animate-in-right');
 
-        // Prepare incoming section
-        toEl.classList.remove('hidden');
-        toEl.classList.remove('animate-out-left','animate-out-right','animate-in-left','animate-in-right');
-        fromEl.classList.remove('animate-out-left','animate-out-right','animate-in-left','animate-in-right');
+      // Animate
+      toEl.classList.add(direction === 'right' ? 'animate-in-right' : 'animate-in-left');
+      fromEl.classList.add(direction === 'right' ? 'animate-out-left' : 'animate-out-right');
 
-        // Animate
-        toEl.classList.add(direction === 'right' ? 'animate-in-right' : 'animate-in-left');
-        fromEl.classList.add(direction === 'right' ? 'animate-out-left' : 'animate-out-right');
+      fromEl.addEventListener('animationend', () => {
+        fromEl.classList.add('hidden');
+        fromEl.classList.remove('animate-out-left', 'animate-out-right');
+      }, { once: true });
 
-        fromEl.addEventListener('animationend', ()=>{
-          fromEl.classList.add('hidden');
-          fromEl.classList.remove('animate-out-left','animate-out-right');
-        }, { once:true });
+      toEl.addEventListener('animationend', () => {
+        toEl.classList.remove('animate-in-left', 'animate-in-right');
+      }, { once: true });
 
-        toEl.addEventListener('animationend', ()=>{
-          toEl.classList.remove('animate-in-left','animate-in-right');
-        }, { once:true });
+      state.current = which;
+      updateTabsUI(which);
+    }
 
-        state.current = which;
-        updateTabsUI(which);
-      }
-
-      function attachPasswordToggles(){
-        document.querySelectorAll('[data-toggle]').forEach(btn=>{
-          const target = document.querySelector(btn.getAttribute('data-toggle'));
-          if(!target) return;
-          btn.addEventListener('click', ()=>{
-            const isPwd = target.type === 'password';
-            target.type = isPwd ? 'text' : 'password';
-            btn.classList.toggle('text-indigo-300', isPwd);
-          });
+    function attachPasswordToggles() {
+      document.querySelectorAll('[data-toggle]').forEach(btn => {
+        const target = document.querySelector(btn.getAttribute('data-toggle'));
+        if (!target) return;
+        btn.addEventListener('click', () => {
+          const isPwd = target.type === 'password';
+          target.type = isPwd ? 'text' : 'password';
+          btn.classList.toggle('text-indigo-300', isPwd);
         });
-      }
-
-      document.addEventListener('DOMContentLoaded', () => {
-        const err = getQueryVariable('error');
-  if(err){ showError(decodeURIComponent(err)); }
-  const ok = getQueryVariable('success');
-  if(ok){ showSuccess(decodeURIComponent(ok)); }
-
-        // Pré-remplir les champs depuis l'URL
-        const urlEmail = getQueryVariable('email');
-        const urlUsername = getQueryVariable('username');
-        if(urlEmail){
-          const emailInputs = document.querySelectorAll('input[type=email][name=email]');
-          emailInputs.forEach(i => i.value = decodeURIComponent(urlEmail));
-        }
-        if(urlUsername){
-          const userInputs = document.querySelectorAll('input[type=text][name=username]');
-          userInputs.forEach(i => i.value = decodeURIComponent(urlUsername));
-        }
-
-        document.getElementById('tabLogin').addEventListener('click', ()=> activateTab('login'));
-        document.getElementById('tabSignup').addEventListener('click', ()=> activateTab('signup'));
-        document.getElementById('switchToSignup').addEventListener('click', ()=> activateTab('signup'));
-        document.getElementById('switchToLogin').addEventListener('click', ()=> activateTab('login'));
-
-        if(location.hash === '#signup'){ activateTab('signup'); }
-        updateTabsUI(state.current);
-        attachPasswordToggles();
       });
-    </script>
-  </body>
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const err = getQueryVariable('error');
+      if (err) { showError(decodeURIComponent(err)); }
+
+      document.getElementById('tabLogin').addEventListener('click', () => activateTab('login'));
+      document.getElementById('tabSignup').addEventListener('click', () => activateTab('signup'));
+      document.getElementById('switchToSignup').addEventListener('click', () => activateTab('signup'));
+      document.getElementById('switchToLogin').addEventListener('click', () => activateTab('login'));
+
+      if (location.hash === '#signup') { activateTab('signup'); }
+      updateTabsUI(state.current);
+      attachPasswordToggles();
+
+      // Animation de passage "Inscription" -> "Enregistrement"
+      const signupFormEl = document.querySelector('#signupForm form');
+      const overlay = document.getElementById('loadingOverlay');
+      const card = document.getElementById('authCard');
+      /* if (signupFormEl) {
+        signupFormEl.addEventListener('submit', (e) => {
+          // Met le bouton en état "loading" et désactive le formulaire
+          const btn = signupFormEl.querySelector('button[type="submit"]');
+          btn.disabled = true;
+          signupFormEl.querySelectorAll('input, button').forEach(el => { el.disabled = true; });
+          btn.innerHTML = '<span class="inline-flex items-center gap-2"><svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>Enregistrement...</span>';
+
+          // Affiche l'overlay et anime la carte
+          overlay.classList.remove('hidden');
+          overlay.classList.add('animate-fade-in');
+          card.classList.add('loading');
+        }, { once: true });
+      } */
+    });
+  </script>
+</body>
+
 </html>
