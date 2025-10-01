@@ -246,7 +246,7 @@ fastify.post("/register", async (req, reply) => {
   const hashedPasswordVerif = await bcrypt.hash(rawPasswordVerif, 10);
 
   // Vérif mots de passe
-  if (!await bcrypt.compare(hashedPassword, hashedPasswordVerif)) {
+  if (hashedPassword !== hashedPasswordVerif) {
     const emailParam = encodeURIComponent(rawEmail);
     const userParam = encodeURIComponent(rawUsername);
     return reply.redirect(
@@ -336,7 +336,7 @@ fastify.post("/login", async (request, reply) => {
         "Utilisateur introuvable"
       )}&email=${encodeURIComponent(emailTrim)}`
     );
-    const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(password, 10);
   const valid = await bcrypt.compare(hashedPassword, user.password);
   if (!valid)
     return reply.redirect(
@@ -867,7 +867,7 @@ fastify.post("/api/users/:id/cosmetics", async (request, reply) => {
   const updated = await prisma.user.update({
     where: { id },
     data: { cosmetics },
-    include: { cosmetics: true }
+    include: { cosmetics: true },
   });
   return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
 });
@@ -1038,12 +1038,10 @@ fastify.setErrorHandler((error, request, reply) => {
     return reply.code(500).send({ error: "Internal Server Error" });
   }
   const userId = request.session.get("data");
-  return reply
-    .code(500)
-    .view("erreurs/500.ejs", {
-      message: error?.message ?? "",
-      currentUser: userId ? { id: userId } : null,
-    });
+  return reply.code(500).view("erreurs/500.ejs", {
+    message: error?.message ?? "",
+    currentUser: userId ? { id: userId } : null,
+  });
 });
 
 // API: basculer la visibilité publique/privée de son profil
