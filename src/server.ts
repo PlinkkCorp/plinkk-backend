@@ -356,7 +356,6 @@ fastify.get("/dashboard", async function (request, reply) {
 
   const userInfo = await prisma.user.findFirst({
     where: { id: userId },
-    select: { cosmetics: true },
     omit: { password: true },
   });
   if (!userInfo) return reply.redirect("/login");
@@ -386,15 +385,17 @@ fastify.get("/dashboard/account", async function (request, reply) {
   if (!userId) return reply.redirect("/login");
   const userInfo = await prisma.user.findFirst({
     where: { id: userId },
-    select: { cosmetics: true },
-    omit: { password: true },
+    include: { cosmetics: true },
   });
   if (!userInfo) return reply.redirect("/login");
-  // Dérive les préférences depuis cosmetics json (pour éviter une migration)
-  const cosmetics = (userInfo.cosmetics as any) || {};
+  // Supprime le mot de passe côté serveur avant d'envoyer à la vue
+  const userInfoSafe: any = { ...(userInfo as any) };
+  delete userInfoSafe.password;
+  // Dérive les préférences depuis cosmetics (relation Cosmetic)
+  const cosmetics = (userInfoSafe.cosmetics as any) || {};
   const privacy = cosmetics.settings || {};
   const isEmailPublic = Boolean(privacy.isEmailPublic);
-  return reply.view("dashboard/account.ejs", { user: userInfo, isEmailPublic });
+  return reply.view("dashboard/account.ejs", { user: userInfoSafe, isEmailPublic });
 });
 
 // Dashboard: Cosmétiques (aperçu et sélection)
@@ -403,11 +404,12 @@ fastify.get("/dashboard/cosmetics", async function (request, reply) {
   if (!userId) return reply.redirect("/login");
   const userInfo = await prisma.user.findFirst({
     where: { id: userId },
-  select: { cosmetics: true },
-    omit: { password: true },
+    include: { cosmetics: true },
   });
   if (!userInfo) return reply.redirect("/login");
-  const cosmetics = (userInfo.cosmetics as any) || {};
+  const userInfoSafe: any = { ...(userInfo as any) };
+  delete userInfoSafe.password;
+  const cosmetics = (userInfoSafe.cosmetics as any) || {};
   // Petit catalogue par défaut (certaines entrées "verrouillées" selon le rôle)
   const catalog = {
     flairs: [
@@ -914,7 +916,7 @@ fastify.post("/api/users/:id/cosmetics", async (request, reply) => {
   const updated = await prisma.user.update({
     where: { id },
     data: { cosmetics },
-  select: { cosmetics: true },
+  select: { id: true, cosmetics: true },
   });
   return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
 });
@@ -1176,10 +1178,11 @@ fastify.post("/api/me/email-visibility", async (request, reply) => {
   // If the user enables public email but doesn't have publicEmail set,
   // promote the account email to publicEmail so it becomes visible in the users list.
   if (isEmailPublic) {
-    const me = await prisma.user.findUnique({ where: { id: userId as string }, select: { publicEmail: true, email: true } });
-    if (me && (!me.publicEmail || String(me.publicEmail).trim() === '')) {
+    // use any to avoid strict generated Prisma types mismatch for publicEmail
+    const me: any = await prisma.user.findUnique({ where: { id: userId as string }, select: { publicEmail: true, email: true } as any } as any);
+    if (me && (!me.publicEmail || String(me.publicEmail).trim() === "")) {
       // set publicEmail to current account email
-      await prisma.user.update({ where: { id: userId as string }, data: { publicEmail: me.email } });
+      await prisma.user.update({ where: { id: userId as string }, data: { publicEmail: me.email } as any } as any);
     }
   }
   const updated = await prisma.user.update({
