@@ -5,21 +5,14 @@ import Fastify from "fastify";
 import path from "path";
 import ejs from "ejs";
 import {
-  existsSync,
   readFileSync,
-  readdirSync,
-  writeFileSync,
-  mkdirSync,
-  unlinkSync,
 } from "fs";
-import { PrismaClient, Role } from "../generated/prisma/client";
-import { generateProfileConfig } from "./generateConfig";
-import { minify } from "uglify-js";
+import { PrismaClient } from "../generated/prisma/client";
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
 import bcrypt from "bcrypt";
-import fastifySecureSession, { Session } from "@fastify/secure-session";
+import fastifySecureSession from "@fastify/secure-session";
 import z from "zod";
 import { apiRoutes } from "./server/apiRoutes";
 import { staticPagesRoutes } from "./server/staticPagesRoutes";
