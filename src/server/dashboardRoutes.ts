@@ -33,26 +33,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // Dashboard: Compte (gestion infos, confidentialité, cosmétiques)
-  fastify.get("/account", async function (request, reply) {
-    const userId = request.session.get("data");
-    if (!userId) return reply.redirect("/login");
-    const userInfo = await prisma.user.findFirst({
-      where: { id: userId },
-      include: { cosmetics: true },
-      omit: { password: true },
-    });
-    if (!userInfo) return reply.redirect("/login");
-    // Dérive les préférences depuis cosmetics json (pour éviter une migration)
-    const cosmetics = (userInfo.cosmetics as any) || {};
-    const privacy = cosmetics.settings || {};
-    const isEmailPublic = Boolean(privacy.isEmailPublic);
-    return reply.view("dashboard/account.ejs", {
-      user: userInfo,
-      isEmailPublic,
-    });
-  });
-
   // Dashboard: Cosmétiques (aperçu et sélection)
   fastify.get("/cosmetics", async function (request, reply) {
     const userId = request.session.get("data");
