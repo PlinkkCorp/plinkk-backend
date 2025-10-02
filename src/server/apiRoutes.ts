@@ -118,7 +118,7 @@ export function apiRoutes(fastify: FastifyInstance) {
   });
 
   // API: Récupérer la configuration complète du profil pour l'éditeur
-  fastify.get("/api/me/config", async (request, reply) => {
+  fastify.get("/me/config", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
 
@@ -190,7 +190,7 @@ export function apiRoutes(fastify: FastifyInstance) {
   });
 
   // API: Mettre à jour la configuration du profil depuis l'éditeur
-  fastify.put("/api/me/config", async (request, reply) => {
+  fastify.put("/me/config", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
 
@@ -339,7 +339,7 @@ export function apiRoutes(fastify: FastifyInstance) {
   });
 
   // Catalogue d'icônes disponibles pour l'éditeur
-  fastify.get("/api/icons", async (request, reply) => {
+  fastify.get("/icons", async (request, reply) => {
     const iconsDir = path.join(__dirname, "public", "images", "icons");
     if (!existsSync(iconsDir)) return reply.send([]);
     const entries = readdirSync(iconsDir, { withFileTypes: true });
