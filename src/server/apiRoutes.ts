@@ -112,91 +112,85 @@ export function apiRoutes(fastify: FastifyInstance) {
     const updated = await prisma.user.update({
       where: { id },
       data: { cosmetics },
+      include: { cosmetics: true },
     });
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
   });
 
   // API: Récupérer la configuration complète du profil pour l'éditeur
-  fastify.get("/me/config", async (request, reply) => {
+  fastify.get("/api/me/config", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    try {
-      const profile = await prisma.user.findFirst({
-        where: { id: userId as string },
-        include: {
-          background: true,
-          labels: true,
-          neonColors: true,
-          socialIcons: true,
-          statusbar: true,
-          links: true,
-        },
-      });
-      if (!profile) return reply.code(404).send({ error: "Not found" });
 
-      const config = {
-        profileLink: profile.profileLink,
-        profileImage: profile.profileImage,
-        profileIcon: profile.profileIcon,
-        profileSiteText: profile.profileSiteText,
-        userName: profile.userName,
-        // Email public (découplé de l'email de connexion): stocké dans User.publicEmail
-        // Fallback vers l'email de compte pour compat rétro (affichage uniquement)
-        email: (profile as any).publicEmail ?? profile.email ?? "",
-        iconUrl: profile.iconUrl,
-        description: profile.description,
-        profileHoverColor: profile.profileHoverColor,
-        degBackgroundColor: profile.degBackgroundColor,
-        neonEnable: profile.neonEnable,
-        buttonThemeEnable: profile.buttonThemeEnable,
-        EnableAnimationArticle: profile.EnableAnimationArticle,
-        EnableAnimationButton: profile.EnableAnimationButton,
-        EnableAnimationBackground: profile.EnableAnimationBackground,
-        backgroundSize: profile.backgroundSize,
-        selectedThemeIndex: profile.selectedThemeIndex,
-        selectedAnimationIndex: profile.selectedAnimationIndex,
-        selectedAnimationButtonIndex: profile.selectedAnimationButtonIndex,
-        selectedAnimationBackgroundIndex:
-          profile.selectedAnimationBackgroundIndex,
-        animationDurationBackground: profile.animationDurationBackground,
-        delayAnimationButton: profile.delayAnimationButton,
-        canvaEnable: profile.canvaEnable,
-        selectedCanvasIndex: profile.selectedCanvasIndex,
-        background: profile.background?.map((c) => c.color) ?? [],
-        neonColors: profile.neonColors?.map((c) => c.color) ?? [],
-        labels:
-          profile.labels?.map((l) => ({
-            data: l.data,
-            color: l.color,
-            fontColor: l.fontColor,
-          })) ?? [],
-        socialIcon:
-          profile.socialIcons?.map((s) => ({ url: s.url, icon: s.icon })) ?? [],
-        links:
-          profile.links?.map((l) => ({
-            icon: l.icon,
-            url: l.url,
-            text: l.text,
-            name: l.name,
-            description: l.description,
-            showDescriptionOnHover: l.showDescriptionOnHover,
-            showDescription: l.showDescription,
-          })) ?? [],
-        statusbar: profile.statusbar ?? null,
-      };
+    const profile = await prisma.user.findFirst({
+      where: { id: userId as string },
+      include: {
+        background: true,
+        labels: true,
+        neonColors: true,
+        socialIcons: true,
+        statusbar: true,
+        links: true,
+      },
+    });
+    if (!profile) return reply.code(404).send({ error: "Not found" });
 
-      return reply.send(config);
-    } catch (e) {
-      request.log.error(e);
-      // Return a minimal error payload to help identify the problem from the browser
-      return reply
-        .code(500)
-        .send({ error: "Internal Server Error", detail: String(e) });
-    }
+    const config = {
+      profileLink: profile.profileLink,
+      profileImage: profile.profileImage,
+      profileIcon: profile.profileIcon,
+      profileSiteText: profile.profileSiteText,
+      userName: profile.userName,
+      // Email public (découplé de l'email de connexion): stocké dans User.publicEmail
+      // Fallback vers l'email de compte pour compat rétro (affichage uniquement)
+      email: (profile as any).publicEmail ?? profile.email ?? "",
+      iconUrl: profile.iconUrl,
+      description: profile.description,
+      profileHoverColor: profile.profileHoverColor,
+      degBackgroundColor: profile.degBackgroundColor,
+      neonEnable: profile.neonEnable,
+      buttonThemeEnable: profile.buttonThemeEnable,
+      EnableAnimationArticle: profile.EnableAnimationArticle,
+      EnableAnimationButton: profile.EnableAnimationButton,
+      EnableAnimationBackground: profile.EnableAnimationBackground,
+      backgroundSize: profile.backgroundSize,
+      selectedThemeIndex: profile.selectedThemeIndex,
+      selectedAnimationIndex: profile.selectedAnimationIndex,
+      selectedAnimationButtonIndex: profile.selectedAnimationButtonIndex,
+      selectedAnimationBackgroundIndex:
+        profile.selectedAnimationBackgroundIndex,
+      animationDurationBackground: profile.animationDurationBackground,
+      delayAnimationButton: profile.delayAnimationButton,
+      canvaEnable: profile.canvaEnable,
+      selectedCanvasIndex: profile.selectedCanvasIndex,
+      background: profile.background?.map((c) => c.color) ?? [],
+      neonColors: profile.neonColors?.map((c) => c.color) ?? [],
+      labels:
+        profile.labels?.map((l) => ({
+          data: l.data,
+          color: l.color,
+          fontColor: l.fontColor,
+        })) ?? [],
+      socialIcon:
+        profile.socialIcons?.map((s) => ({ url: s.url, icon: s.icon })) ?? [],
+      links:
+        profile.links?.map((l) => ({
+          icon: l.icon,
+          url: l.url,
+          text: l.text,
+          name: l.name,
+          description: l.description,
+          showDescriptionOnHover: l.showDescriptionOnHover,
+          showDescription: l.showDescription,
+        })) ?? [],
+      statusbar: profile.statusbar ?? null,
+    };
+
+    return reply.send(config);
   });
 
   // API: Mettre à jour la configuration du profil depuis l'éditeur
-  fastify.put("/me/config", async (request, reply) => {
+  fastify.put("/api/me/config", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
 
@@ -345,7 +339,7 @@ export function apiRoutes(fastify: FastifyInstance) {
   });
 
   // Catalogue d'icônes disponibles pour l'éditeur
-  fastify.get("/icons", async (request, reply) => {
+  fastify.get("/api/icons", async (request, reply) => {
     const iconsDir = path.join(__dirname, "public", "images", "icons");
     if (!existsSync(iconsDir)) return reply.send([]);
     const entries = readdirSync(iconsDir, { withFileTypes: true });

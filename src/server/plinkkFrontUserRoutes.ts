@@ -30,7 +30,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       reply.code(404).send({ error: "please specify a js file" });
       return;
     }
-    if (existsSync(path.join(__dirname, "..", "public", "css", cssFileName))) {
+    if (existsSync(path.join(__dirname, "public", "css", cssFileName))) {
       return reply.sendFile(`css/${cssFileName}`);
     }
     return reply.code(404).send({ error: "non existant file" });
@@ -49,9 +49,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       reply.code(404).send({ error: "please specify a css file" });
       return;
     }
-    if (existsSync(path.join(__dirname, "..", "public", "js", jsFileName))) {
+    if (existsSync(path.join(__dirname, "public", "js", jsFileName))) {
       const file = readFileSync(
-        path.join(__dirname, "..", "public", "js", jsFileName),
+        path.join(__dirname, "public", "js", jsFileName),
         { encoding: "utf-8" }
       );
       const mini = minify(file.replaceAll("{{username}}", username));
@@ -76,7 +76,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     }
     if (
       existsSync(
-        path.join(__dirname, "..", "public", "canvaAnimation", animationFileName)
+        path.join(__dirname, "public", "canvaAnimation", animationFileName)
       )
     ) {
       return reply.sendFile(`canvaAnimation/${animationFileName}`);
@@ -127,10 +127,10 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         return reply.type("text/javascript").send(mini.code);
       }
       if (
-        existsSync(path.join(__dirname, "..", "public", "config", configFileName))
+        existsSync(path.join(__dirname, "public", "config", configFileName))
       ) {
         const file = readFileSync(
-          path.join(__dirname, "..", "public", "config", configFileName),
+          path.join(__dirname, "public", "config", configFileName),
           { encoding: "utf-8" }
         );
         return reply
@@ -152,7 +152,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       reply.code(404).send({ error: "please specify a css file" });
       return;
     }
-    if (existsSync(path.join(__dirname, "..", "public", "images", image))) {
+    if (existsSync(path.join(__dirname, "public", "images", image))) {
       return reply.sendFile(`images/${image}`);
     }
     return reply.code(404).send({ error: "non existant file" });
