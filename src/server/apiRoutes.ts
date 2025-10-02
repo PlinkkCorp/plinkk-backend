@@ -11,6 +11,8 @@ import {
 import crypto from "crypto";
 import z from "zod";
 import bcrypt from "bcrypt";
+import { authenticator } from "otplib";
+import QRCode from "qrcode"
 
 const prisma = new PrismaClient();
 
@@ -452,6 +454,43 @@ export function apiRoutes(fastify: FastifyInstance) {
         (updated.cosmetics as any)?.settings?.isEmailPublic
       ),
     });
+  });
+
+  // API: basculer la 2FA
+  fastify.post("/me/2fa", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+
+    const user = await prisma.user.findUnique({ where: { id: userId } })
+
+    if (user.totpSecret === "") {
+      const secret = authenticator.generateSecret();
+      const otpauth = authenticator.keyuri(user.userName, "Plinkk", secret);
+      const qrCode = await QRCode.toDataURL(otpauth);
+  
+      const update = prisma.user.update({
+        where: {
+          id: userId
+        },
+        data: {
+          totpSecret: secret
+        }
+      })
+  
+      return { qrCode, otpauth };
+    } else {
+      const update = prisma.user.update({
+        where: {
+          id: userId
+        },
+        data: {
+          totpSecret: ""
+        }
+      })
+  
+      return { "successful": true };
+    }
+
   });
 
   // API: mettre à jour des infos de base du compte (username, name, description)

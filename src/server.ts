@@ -17,7 +17,7 @@ import { generateProfileConfig } from "./generateConfig";
 import { minify } from "uglify-js";
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
-import fastifyMultipart from '@fastify/multipart';
+import fastifyMultipart from "@fastify/multipart";
 import bcrypt from "bcrypt";
 import fastifySecureSession, { Session } from "@fastify/secure-session";
 import z from "zod";
@@ -25,6 +25,7 @@ import { apiRoutes } from "./server/apiRoutes";
 import { staticPagesRoutes } from "./server/staticPagesRoutes";
 import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
+import { authenticator } from "otplib";
 
 export const prisma = new PrismaClient();
 export const fastify = Fastify({
@@ -65,10 +66,10 @@ fastify.register(fastifySecureSession, {
   },
 });
 
-fastify.register(apiRoutes, { prefix: "/api" })
-fastify.register(staticPagesRoutes)
-fastify.register(dashboardRoutes, { prefix: "/dashboard" })
-fastify.register(plinkkFrontUserRoutes)
+fastify.register(apiRoutes, { prefix: "/api" });
+fastify.register(staticPagesRoutes);
+fastify.register(dashboardRoutes, { prefix: "/dashboard" });
+fastify.register(plinkkFrontUserRoutes);
 
 fastify.get("/", async function (request, reply) {
   const currentUserId = request.session.get("data") as string | undefined;
@@ -218,8 +219,43 @@ fastify.post("/login", async (request, reply) => {
       )}&email=${encodeURIComponent(emailTrim)}`
     );
 
+  if (user.totpSecret !== "") {
+    request.session.set("data", user.id + "__totp");
+    return reply.redirect("/totp");
+  }
   request.session.set("data", user.id);
   reply.redirect("/dashboard");
+});
+
+fastify.get("/totp", (request, reply) => {
+  const currentUserIdTotp = request.session.get("data") as string | undefined;
+  if (
+    currentUserIdTotp.split("__").length === 2 &&
+    currentUserIdTotp.split("__")[1] === "totp"
+  ) {
+    reply.view("totp.ejs");
+  }
+});
+
+fastify.post("/totp", async (request, reply) => {
+  const { totp } = request.body as { totp: string }
+  const currentUserIdTotp = request.session.get("data") as string | undefined;
+  console.log(totp, currentUserIdTotp)
+  if (
+    currentUserIdTotp.split("__").length === 2 &&
+    currentUserIdTotp.split("__")[1] === "totp"
+  ) {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: currentUserIdTotp.split("__")[0]
+      }
+    })
+    const isValid = authenticator.check(totp, user.totpSecret);
+    if (!isValid) return reply.code(401).send({ error: "Invalid TOTP code" });
+
+    request.session.set("data", user.id)
+    return reply.redirect("/dashboard");
+  }
 });
 
 fastify.get("/logout", (req, reply) => {

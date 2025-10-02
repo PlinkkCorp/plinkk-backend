@@ -52,6 +52,7 @@ model User {
   delayAnimationButton             Float?  @default(0.1)
   canvaEnable                      Int     @default(1)
   selectedCanvasIndex              Int?    @default(16)
+  totpSecret                       String? @default("")
 
   // Relations
   links         Link[]
