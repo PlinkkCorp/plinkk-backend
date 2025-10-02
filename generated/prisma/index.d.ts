@@ -19,6 +19,11 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  */
 export type User = $Result.DefaultSelection<Prisma.$UserPayload>
 /**
+ * Model Cosmetic
+ * 
+ */
+export type Cosmetic = $Result.DefaultSelection<Prisma.$CosmeticPayload>
+/**
  * Model Link
  * 
  */
@@ -196,6 +201,16 @@ export class PrismaClient<
     * ```
     */
   get user(): Prisma.UserDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.cosmetic`: Exposes CRUD operations for the **Cosmetic** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Cosmetics
+    * const cosmetics = await prisma.cosmetic.findMany()
+    * ```
+    */
+  get cosmetic(): Prisma.CosmeticDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.link`: Exposes CRUD operations for the **Link** model.
@@ -697,6 +712,7 @@ export namespace Prisma {
 
   export const ModelName: {
     User: 'User',
+    Cosmetic: 'Cosmetic',
     Link: 'Link',
     Label: 'Label',
     SocialIcon: 'SocialIcon',
@@ -721,7 +737,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "link" | "label" | "socialIcon" | "backgroundColor" | "neonColor" | "statusbar"
+      modelProps: "user" | "cosmetic" | "link" | "label" | "socialIcon" | "backgroundColor" | "neonColor" | "statusbar"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -796,6 +812,80 @@ export namespace Prisma {
           count: {
             args: Prisma.UserCountArgs<ExtArgs>
             result: $Utils.Optional<UserCountAggregateOutputType> | number
+          }
+        }
+      }
+      Cosmetic: {
+        payload: Prisma.$CosmeticPayload<ExtArgs>
+        fields: Prisma.CosmeticFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CosmeticFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CosmeticPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CosmeticFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CosmeticPayload>
+          }
+          findFirst: {
+            args: Prisma.CosmeticFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CosmeticPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CosmeticFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CosmeticPayload>
+          }
+          findMany: {
+            args: Prisma.CosmeticFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CosmeticPayload>[]
+          }
+          create: {
+            args: Prisma.CosmeticCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CosmeticPayload>
+          }
+          createMany: {
+            args: Prisma.CosmeticCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CosmeticCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CosmeticPayload>[]
+          }
+          delete: {
+            args: Prisma.CosmeticDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CosmeticPayload>
+          }
+          update: {
+            args: Prisma.CosmeticUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CosmeticPayload>
+          }
+          deleteMany: {
+            args: Prisma.CosmeticDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CosmeticUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CosmeticUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CosmeticPayload>[]
+          }
+          upsert: {
+            args: Prisma.CosmeticUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CosmeticPayload>
+          }
+          aggregate: {
+            args: Prisma.CosmeticAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCosmetic>
+          }
+          groupBy: {
+            args: Prisma.CosmeticGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CosmeticGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CosmeticCountArgs<ExtArgs>
+            result: $Utils.Optional<CosmeticCountAggregateOutputType> | number
           }
         }
       }
@@ -1340,6 +1430,7 @@ export namespace Prisma {
   }
   export type GlobalOmitConfig = {
     user?: UserOmit
+    cosmetic?: CosmeticOmit
     link?: LinkOmit
     label?: LabelOmit
     socialIcon?: SocialIconOmit
@@ -1547,6 +1638,7 @@ export namespace Prisma {
     userName: string | null
     password: string | null
     email: string | null
+    publicEmail: string | null
     profileLink: string | null
     profileImage: string | null
     profileIcon: string | null
@@ -1587,6 +1679,7 @@ export namespace Prisma {
     userName: string | null
     password: string | null
     email: string | null
+    publicEmail: string | null
     profileLink: string | null
     profileImage: string | null
     profileIcon: string | null
@@ -1627,6 +1720,7 @@ export namespace Prisma {
     userName: number
     password: number
     email: number
+    publicEmail: number
     profileLink: number
     profileImage: number
     profileIcon: number
@@ -1659,7 +1753,6 @@ export namespace Prisma {
     bumpedAt: number
     bumpExpiresAt: number
     bumpPaidUntil: number
-    cosmetics: number
     isPublic: number
     _all: number
   }
@@ -1708,6 +1801,7 @@ export namespace Prisma {
     userName?: true
     password?: true
     email?: true
+    publicEmail?: true
     profileLink?: true
     profileImage?: true
     profileIcon?: true
@@ -1748,6 +1842,7 @@ export namespace Prisma {
     userName?: true
     password?: true
     email?: true
+    publicEmail?: true
     profileLink?: true
     profileImage?: true
     profileIcon?: true
@@ -1788,6 +1883,7 @@ export namespace Prisma {
     userName?: true
     password?: true
     email?: true
+    publicEmail?: true
     profileLink?: true
     profileImage?: true
     profileIcon?: true
@@ -1820,7 +1916,6 @@ export namespace Prisma {
     bumpedAt?: true
     bumpExpiresAt?: true
     bumpPaidUntil?: true
-    cosmetics?: true
     isPublic?: true
     _all?: true
   }
@@ -1916,6 +2011,7 @@ export namespace Prisma {
     userName: string
     password: string
     email: string
+    publicEmail: string | null
     profileLink: string | null
     profileImage: string | null
     profileIcon: string | null
@@ -1948,7 +2044,6 @@ export namespace Prisma {
     bumpedAt: Date | null
     bumpExpiresAt: Date | null
     bumpPaidUntil: Date | null
-    cosmetics: JsonValue | null
     isPublic: boolean
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
@@ -1976,6 +2071,7 @@ export namespace Prisma {
     userName?: boolean
     password?: boolean
     email?: boolean
+    publicEmail?: boolean
     profileLink?: boolean
     profileImage?: boolean
     profileIcon?: boolean
@@ -2008,7 +2104,6 @@ export namespace Prisma {
     bumpedAt?: boolean
     bumpExpiresAt?: boolean
     bumpPaidUntil?: boolean
-    cosmetics?: boolean
     isPublic?: boolean
     links?: boolean | User$linksArgs<ExtArgs>
     labels?: boolean | User$labelsArgs<ExtArgs>
@@ -2016,6 +2111,7 @@ export namespace Prisma {
     background?: boolean | User$backgroundArgs<ExtArgs>
     neonColors?: boolean | User$neonColorsArgs<ExtArgs>
     statusbar?: boolean | User$statusbarArgs<ExtArgs>
+    cosmetics?: boolean | User$cosmeticsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -2024,6 +2120,7 @@ export namespace Prisma {
     userName?: boolean
     password?: boolean
     email?: boolean
+    publicEmail?: boolean
     profileLink?: boolean
     profileImage?: boolean
     profileIcon?: boolean
@@ -2056,7 +2153,6 @@ export namespace Prisma {
     bumpedAt?: boolean
     bumpExpiresAt?: boolean
     bumpPaidUntil?: boolean
-    cosmetics?: boolean
     isPublic?: boolean
   }, ExtArgs["result"]["user"]>
 
@@ -2065,6 +2161,7 @@ export namespace Prisma {
     userName?: boolean
     password?: boolean
     email?: boolean
+    publicEmail?: boolean
     profileLink?: boolean
     profileImage?: boolean
     profileIcon?: boolean
@@ -2097,7 +2194,6 @@ export namespace Prisma {
     bumpedAt?: boolean
     bumpExpiresAt?: boolean
     bumpPaidUntil?: boolean
-    cosmetics?: boolean
     isPublic?: boolean
   }, ExtArgs["result"]["user"]>
 
@@ -2106,6 +2202,7 @@ export namespace Prisma {
     userName?: boolean
     password?: boolean
     email?: boolean
+    publicEmail?: boolean
     profileLink?: boolean
     profileImage?: boolean
     profileIcon?: boolean
@@ -2138,11 +2235,10 @@ export namespace Prisma {
     bumpedAt?: boolean
     bumpExpiresAt?: boolean
     bumpPaidUntil?: boolean
-    cosmetics?: boolean
     isPublic?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "password" | "email" | "profileLink" | "profileImage" | "profileIcon" | "profileSiteText" | "iconUrl" | "description" | "profileHoverColor" | "degBackgroundColor" | "neonEnable" | "buttonThemeEnable" | "EnableAnimationArticle" | "EnableAnimationButton" | "EnableAnimationBackground" | "backgroundSize" | "selectedThemeIndex" | "selectedAnimationIndex" | "selectedAnimationButtonIndex" | "selectedAnimationBackgroundIndex" | "animationDurationBackground" | "delayAnimationButton" | "canvaEnable" | "selectedCanvasIndex" | "name" | "emailVerified" | "image" | "createdAt" | "updatedAt" | "role" | "rankScore" | "bumpedAt" | "bumpExpiresAt" | "bumpPaidUntil" | "cosmetics" | "isPublic", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userName" | "password" | "email" | "publicEmail" | "profileLink" | "profileImage" | "profileIcon" | "profileSiteText" | "iconUrl" | "description" | "profileHoverColor" | "degBackgroundColor" | "neonEnable" | "buttonThemeEnable" | "EnableAnimationArticle" | "EnableAnimationButton" | "EnableAnimationBackground" | "backgroundSize" | "selectedThemeIndex" | "selectedAnimationIndex" | "selectedAnimationButtonIndex" | "selectedAnimationBackgroundIndex" | "animationDurationBackground" | "delayAnimationButton" | "canvaEnable" | "selectedCanvasIndex" | "name" | "emailVerified" | "image" | "createdAt" | "updatedAt" | "role" | "rankScore" | "bumpedAt" | "bumpExpiresAt" | "bumpPaidUntil" | "isPublic", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     links?: boolean | User$linksArgs<ExtArgs>
     labels?: boolean | User$labelsArgs<ExtArgs>
@@ -2150,6 +2246,7 @@ export namespace Prisma {
     background?: boolean | User$backgroundArgs<ExtArgs>
     neonColors?: boolean | User$neonColorsArgs<ExtArgs>
     statusbar?: boolean | User$statusbarArgs<ExtArgs>
+    cosmetics?: boolean | User$cosmeticsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2164,12 +2261,14 @@ export namespace Prisma {
       background: Prisma.$BackgroundColorPayload<ExtArgs>[]
       neonColors: Prisma.$NeonColorPayload<ExtArgs>[]
       statusbar: Prisma.$StatusbarPayload<ExtArgs> | null
+      cosmetics: Prisma.$CosmeticPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userName: string
       password: string
       email: string
+      publicEmail: string | null
       profileLink: string | null
       profileImage: string | null
       profileIcon: string | null
@@ -2202,7 +2301,6 @@ export namespace Prisma {
       bumpedAt: Date | null
       bumpExpiresAt: Date | null
       bumpPaidUntil: Date | null
-      cosmetics: Prisma.JsonValue | null
       isPublic: boolean
     }, ExtArgs["result"]["user"]>
     composites: {}
@@ -2604,6 +2702,7 @@ export namespace Prisma {
     background<T extends User$backgroundArgs<ExtArgs> = {}>(args?: Subset<T, User$backgroundArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BackgroundColorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     neonColors<T extends User$neonColorsArgs<ExtArgs> = {}>(args?: Subset<T, User$neonColorsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NeonColorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     statusbar<T extends User$statusbarArgs<ExtArgs> = {}>(args?: Subset<T, User$statusbarArgs<ExtArgs>>): Prisma__StatusbarClient<$Result.GetResult<Prisma.$StatusbarPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    cosmetics<T extends User$cosmeticsArgs<ExtArgs> = {}>(args?: Subset<T, User$cosmeticsArgs<ExtArgs>>): Prisma__CosmeticClient<$Result.GetResult<Prisma.$CosmeticPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2637,6 +2736,7 @@ export namespace Prisma {
     readonly userName: FieldRef<"User", 'String'>
     readonly password: FieldRef<"User", 'String'>
     readonly email: FieldRef<"User", 'String'>
+    readonly publicEmail: FieldRef<"User", 'String'>
     readonly profileLink: FieldRef<"User", 'String'>
     readonly profileImage: FieldRef<"User", 'String'>
     readonly profileIcon: FieldRef<"User", 'String'>
@@ -2669,7 +2769,6 @@ export namespace Prisma {
     readonly bumpedAt: FieldRef<"User", 'DateTime'>
     readonly bumpExpiresAt: FieldRef<"User", 'DateTime'>
     readonly bumpPaidUntil: FieldRef<"User", 'DateTime'>
-    readonly cosmetics: FieldRef<"User", 'Json'>
     readonly isPublic: FieldRef<"User", 'Boolean'>
   }
     
@@ -3196,6 +3295,25 @@ export namespace Prisma {
   }
 
   /**
+   * User.cosmetics
+   */
+  export type User$cosmeticsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cosmetic
+     */
+    select?: CosmeticSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cosmetic
+     */
+    omit?: CosmeticOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CosmeticInclude<ExtArgs> | null
+    where?: CosmeticWhereInput
+  }
+
+  /**
    * User without action
    */
   export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3211,6 +3329,1109 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Cosmetic
+   */
+
+  export type AggregateCosmetic = {
+    _count: CosmeticCountAggregateOutputType | null
+    _avg: CosmeticAvgAggregateOutputType | null
+    _sum: CosmeticSumAggregateOutputType | null
+    _min: CosmeticMinAggregateOutputType | null
+    _max: CosmeticMaxAggregateOutputType | null
+  }
+
+  export type CosmeticAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type CosmeticSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type CosmeticMinAggregateOutputType = {
+    id: number | null
+    flair: string | null
+    frame: string | null
+    theme: string | null
+    bannerUrl: string | null
+    userId: string | null
+  }
+
+  export type CosmeticMaxAggregateOutputType = {
+    id: number | null
+    flair: string | null
+    frame: string | null
+    theme: string | null
+    bannerUrl: string | null
+    userId: string | null
+  }
+
+  export type CosmeticCountAggregateOutputType = {
+    id: number
+    flair: number
+    frame: number
+    theme: number
+    bannerUrl: number
+    userId: number
+    _all: number
+  }
+
+
+  export type CosmeticAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type CosmeticSumAggregateInputType = {
+    id?: true
+  }
+
+  export type CosmeticMinAggregateInputType = {
+    id?: true
+    flair?: true
+    frame?: true
+    theme?: true
+    bannerUrl?: true
+    userId?: true
+  }
+
+  export type CosmeticMaxAggregateInputType = {
+    id?: true
+    flair?: true
+    frame?: true
+    theme?: true
+    bannerUrl?: true
+    userId?: true
+  }
+
+  export type CosmeticCountAggregateInputType = {
+    id?: true
+    flair?: true
+    frame?: true
+    theme?: true
+    bannerUrl?: true
+    userId?: true
+    _all?: true
+  }
+
+  export type CosmeticAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Cosmetic to aggregate.
+     */
+    where?: CosmeticWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Cosmetics to fetch.
+     */
+    orderBy?: CosmeticOrderByWithRelationInput | CosmeticOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CosmeticWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Cosmetics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Cosmetics.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Cosmetics
+    **/
+    _count?: true | CosmeticCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CosmeticAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CosmeticSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CosmeticMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CosmeticMaxAggregateInputType
+  }
+
+  export type GetCosmeticAggregateType<T extends CosmeticAggregateArgs> = {
+        [P in keyof T & keyof AggregateCosmetic]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCosmetic[P]>
+      : GetScalarType<T[P], AggregateCosmetic[P]>
+  }
+
+
+
+
+  export type CosmeticGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CosmeticWhereInput
+    orderBy?: CosmeticOrderByWithAggregationInput | CosmeticOrderByWithAggregationInput[]
+    by: CosmeticScalarFieldEnum[] | CosmeticScalarFieldEnum
+    having?: CosmeticScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CosmeticCountAggregateInputType | true
+    _avg?: CosmeticAvgAggregateInputType
+    _sum?: CosmeticSumAggregateInputType
+    _min?: CosmeticMinAggregateInputType
+    _max?: CosmeticMaxAggregateInputType
+  }
+
+  export type CosmeticGroupByOutputType = {
+    id: number
+    flair: string | null
+    frame: string | null
+    theme: string | null
+    bannerUrl: string | null
+    userId: string
+    _count: CosmeticCountAggregateOutputType | null
+    _avg: CosmeticAvgAggregateOutputType | null
+    _sum: CosmeticSumAggregateOutputType | null
+    _min: CosmeticMinAggregateOutputType | null
+    _max: CosmeticMaxAggregateOutputType | null
+  }
+
+  type GetCosmeticGroupByPayload<T extends CosmeticGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CosmeticGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CosmeticGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CosmeticGroupByOutputType[P]>
+            : GetScalarType<T[P], CosmeticGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CosmeticSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    flair?: boolean
+    frame?: boolean
+    theme?: boolean
+    bannerUrl?: boolean
+    userId?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cosmetic"]>
+
+  export type CosmeticSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    flair?: boolean
+    frame?: boolean
+    theme?: boolean
+    bannerUrl?: boolean
+    userId?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cosmetic"]>
+
+  export type CosmeticSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    flair?: boolean
+    frame?: boolean
+    theme?: boolean
+    bannerUrl?: boolean
+    userId?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cosmetic"]>
+
+  export type CosmeticSelectScalar = {
+    id?: boolean
+    flair?: boolean
+    frame?: boolean
+    theme?: boolean
+    bannerUrl?: boolean
+    userId?: boolean
+  }
+
+  export type CosmeticOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "flair" | "frame" | "theme" | "bannerUrl" | "userId", ExtArgs["result"]["cosmetic"]>
+  export type CosmeticInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type CosmeticIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type CosmeticIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $CosmeticPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Cosmetic"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      flair: string | null
+      frame: string | null
+      theme: string | null
+      bannerUrl: string | null
+      userId: string
+    }, ExtArgs["result"]["cosmetic"]>
+    composites: {}
+  }
+
+  type CosmeticGetPayload<S extends boolean | null | undefined | CosmeticDefaultArgs> = $Result.GetResult<Prisma.$CosmeticPayload, S>
+
+  type CosmeticCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CosmeticFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CosmeticCountAggregateInputType | true
+    }
+
+  export interface CosmeticDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Cosmetic'], meta: { name: 'Cosmetic' } }
+    /**
+     * Find zero or one Cosmetic that matches the filter.
+     * @param {CosmeticFindUniqueArgs} args - Arguments to find a Cosmetic
+     * @example
+     * // Get one Cosmetic
+     * const cosmetic = await prisma.cosmetic.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CosmeticFindUniqueArgs>(args: SelectSubset<T, CosmeticFindUniqueArgs<ExtArgs>>): Prisma__CosmeticClient<$Result.GetResult<Prisma.$CosmeticPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Cosmetic that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CosmeticFindUniqueOrThrowArgs} args - Arguments to find a Cosmetic
+     * @example
+     * // Get one Cosmetic
+     * const cosmetic = await prisma.cosmetic.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CosmeticFindUniqueOrThrowArgs>(args: SelectSubset<T, CosmeticFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CosmeticClient<$Result.GetResult<Prisma.$CosmeticPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Cosmetic that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CosmeticFindFirstArgs} args - Arguments to find a Cosmetic
+     * @example
+     * // Get one Cosmetic
+     * const cosmetic = await prisma.cosmetic.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CosmeticFindFirstArgs>(args?: SelectSubset<T, CosmeticFindFirstArgs<ExtArgs>>): Prisma__CosmeticClient<$Result.GetResult<Prisma.$CosmeticPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Cosmetic that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CosmeticFindFirstOrThrowArgs} args - Arguments to find a Cosmetic
+     * @example
+     * // Get one Cosmetic
+     * const cosmetic = await prisma.cosmetic.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CosmeticFindFirstOrThrowArgs>(args?: SelectSubset<T, CosmeticFindFirstOrThrowArgs<ExtArgs>>): Prisma__CosmeticClient<$Result.GetResult<Prisma.$CosmeticPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Cosmetics that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CosmeticFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Cosmetics
+     * const cosmetics = await prisma.cosmetic.findMany()
+     * 
+     * // Get first 10 Cosmetics
+     * const cosmetics = await prisma.cosmetic.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const cosmeticWithIdOnly = await prisma.cosmetic.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CosmeticFindManyArgs>(args?: SelectSubset<T, CosmeticFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CosmeticPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Cosmetic.
+     * @param {CosmeticCreateArgs} args - Arguments to create a Cosmetic.
+     * @example
+     * // Create one Cosmetic
+     * const Cosmetic = await prisma.cosmetic.create({
+     *   data: {
+     *     // ... data to create a Cosmetic
+     *   }
+     * })
+     * 
+     */
+    create<T extends CosmeticCreateArgs>(args: SelectSubset<T, CosmeticCreateArgs<ExtArgs>>): Prisma__CosmeticClient<$Result.GetResult<Prisma.$CosmeticPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Cosmetics.
+     * @param {CosmeticCreateManyArgs} args - Arguments to create many Cosmetics.
+     * @example
+     * // Create many Cosmetics
+     * const cosmetic = await prisma.cosmetic.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CosmeticCreateManyArgs>(args?: SelectSubset<T, CosmeticCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Cosmetics and returns the data saved in the database.
+     * @param {CosmeticCreateManyAndReturnArgs} args - Arguments to create many Cosmetics.
+     * @example
+     * // Create many Cosmetics
+     * const cosmetic = await prisma.cosmetic.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Cosmetics and only return the `id`
+     * const cosmeticWithIdOnly = await prisma.cosmetic.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CosmeticCreateManyAndReturnArgs>(args?: SelectSubset<T, CosmeticCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CosmeticPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Cosmetic.
+     * @param {CosmeticDeleteArgs} args - Arguments to delete one Cosmetic.
+     * @example
+     * // Delete one Cosmetic
+     * const Cosmetic = await prisma.cosmetic.delete({
+     *   where: {
+     *     // ... filter to delete one Cosmetic
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CosmeticDeleteArgs>(args: SelectSubset<T, CosmeticDeleteArgs<ExtArgs>>): Prisma__CosmeticClient<$Result.GetResult<Prisma.$CosmeticPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Cosmetic.
+     * @param {CosmeticUpdateArgs} args - Arguments to update one Cosmetic.
+     * @example
+     * // Update one Cosmetic
+     * const cosmetic = await prisma.cosmetic.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CosmeticUpdateArgs>(args: SelectSubset<T, CosmeticUpdateArgs<ExtArgs>>): Prisma__CosmeticClient<$Result.GetResult<Prisma.$CosmeticPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Cosmetics.
+     * @param {CosmeticDeleteManyArgs} args - Arguments to filter Cosmetics to delete.
+     * @example
+     * // Delete a few Cosmetics
+     * const { count } = await prisma.cosmetic.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CosmeticDeleteManyArgs>(args?: SelectSubset<T, CosmeticDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Cosmetics.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CosmeticUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Cosmetics
+     * const cosmetic = await prisma.cosmetic.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CosmeticUpdateManyArgs>(args: SelectSubset<T, CosmeticUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Cosmetics and returns the data updated in the database.
+     * @param {CosmeticUpdateManyAndReturnArgs} args - Arguments to update many Cosmetics.
+     * @example
+     * // Update many Cosmetics
+     * const cosmetic = await prisma.cosmetic.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Cosmetics and only return the `id`
+     * const cosmeticWithIdOnly = await prisma.cosmetic.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CosmeticUpdateManyAndReturnArgs>(args: SelectSubset<T, CosmeticUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CosmeticPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Cosmetic.
+     * @param {CosmeticUpsertArgs} args - Arguments to update or create a Cosmetic.
+     * @example
+     * // Update or create a Cosmetic
+     * const cosmetic = await prisma.cosmetic.upsert({
+     *   create: {
+     *     // ... data to create a Cosmetic
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Cosmetic we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CosmeticUpsertArgs>(args: SelectSubset<T, CosmeticUpsertArgs<ExtArgs>>): Prisma__CosmeticClient<$Result.GetResult<Prisma.$CosmeticPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Cosmetics.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CosmeticCountArgs} args - Arguments to filter Cosmetics to count.
+     * @example
+     * // Count the number of Cosmetics
+     * const count = await prisma.cosmetic.count({
+     *   where: {
+     *     // ... the filter for the Cosmetics we want to count
+     *   }
+     * })
+    **/
+    count<T extends CosmeticCountArgs>(
+      args?: Subset<T, CosmeticCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CosmeticCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Cosmetic.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CosmeticAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CosmeticAggregateArgs>(args: Subset<T, CosmeticAggregateArgs>): Prisma.PrismaPromise<GetCosmeticAggregateType<T>>
+
+    /**
+     * Group by Cosmetic.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CosmeticGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CosmeticGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CosmeticGroupByArgs['orderBy'] }
+        : { orderBy?: CosmeticGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CosmeticGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCosmeticGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Cosmetic model
+   */
+  readonly fields: CosmeticFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Cosmetic.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CosmeticClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Cosmetic model
+   */
+  interface CosmeticFieldRefs {
+    readonly id: FieldRef<"Cosmetic", 'Int'>
+    readonly flair: FieldRef<"Cosmetic", 'String'>
+    readonly frame: FieldRef<"Cosmetic", 'String'>
+    readonly theme: FieldRef<"Cosmetic", 'String'>
+    readonly bannerUrl: FieldRef<"Cosmetic", 'String'>
+    readonly userId: FieldRef<"Cosmetic", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Cosmetic findUnique
+   */
+  export type CosmeticFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cosmetic
+     */
+    select?: CosmeticSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cosmetic
+     */
+    omit?: CosmeticOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CosmeticInclude<ExtArgs> | null
+    /**
+     * Filter, which Cosmetic to fetch.
+     */
+    where: CosmeticWhereUniqueInput
+  }
+
+  /**
+   * Cosmetic findUniqueOrThrow
+   */
+  export type CosmeticFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cosmetic
+     */
+    select?: CosmeticSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cosmetic
+     */
+    omit?: CosmeticOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CosmeticInclude<ExtArgs> | null
+    /**
+     * Filter, which Cosmetic to fetch.
+     */
+    where: CosmeticWhereUniqueInput
+  }
+
+  /**
+   * Cosmetic findFirst
+   */
+  export type CosmeticFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cosmetic
+     */
+    select?: CosmeticSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cosmetic
+     */
+    omit?: CosmeticOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CosmeticInclude<ExtArgs> | null
+    /**
+     * Filter, which Cosmetic to fetch.
+     */
+    where?: CosmeticWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Cosmetics to fetch.
+     */
+    orderBy?: CosmeticOrderByWithRelationInput | CosmeticOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Cosmetics.
+     */
+    cursor?: CosmeticWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Cosmetics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Cosmetics.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Cosmetics.
+     */
+    distinct?: CosmeticScalarFieldEnum | CosmeticScalarFieldEnum[]
+  }
+
+  /**
+   * Cosmetic findFirstOrThrow
+   */
+  export type CosmeticFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cosmetic
+     */
+    select?: CosmeticSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cosmetic
+     */
+    omit?: CosmeticOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CosmeticInclude<ExtArgs> | null
+    /**
+     * Filter, which Cosmetic to fetch.
+     */
+    where?: CosmeticWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Cosmetics to fetch.
+     */
+    orderBy?: CosmeticOrderByWithRelationInput | CosmeticOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Cosmetics.
+     */
+    cursor?: CosmeticWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Cosmetics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Cosmetics.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Cosmetics.
+     */
+    distinct?: CosmeticScalarFieldEnum | CosmeticScalarFieldEnum[]
+  }
+
+  /**
+   * Cosmetic findMany
+   */
+  export type CosmeticFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cosmetic
+     */
+    select?: CosmeticSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cosmetic
+     */
+    omit?: CosmeticOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CosmeticInclude<ExtArgs> | null
+    /**
+     * Filter, which Cosmetics to fetch.
+     */
+    where?: CosmeticWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Cosmetics to fetch.
+     */
+    orderBy?: CosmeticOrderByWithRelationInput | CosmeticOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Cosmetics.
+     */
+    cursor?: CosmeticWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Cosmetics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Cosmetics.
+     */
+    skip?: number
+    distinct?: CosmeticScalarFieldEnum | CosmeticScalarFieldEnum[]
+  }
+
+  /**
+   * Cosmetic create
+   */
+  export type CosmeticCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cosmetic
+     */
+    select?: CosmeticSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cosmetic
+     */
+    omit?: CosmeticOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CosmeticInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Cosmetic.
+     */
+    data: XOR<CosmeticCreateInput, CosmeticUncheckedCreateInput>
+  }
+
+  /**
+   * Cosmetic createMany
+   */
+  export type CosmeticCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Cosmetics.
+     */
+    data: CosmeticCreateManyInput | CosmeticCreateManyInput[]
+  }
+
+  /**
+   * Cosmetic createManyAndReturn
+   */
+  export type CosmeticCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cosmetic
+     */
+    select?: CosmeticSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cosmetic
+     */
+    omit?: CosmeticOmit<ExtArgs> | null
+    /**
+     * The data used to create many Cosmetics.
+     */
+    data: CosmeticCreateManyInput | CosmeticCreateManyInput[]
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CosmeticIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Cosmetic update
+   */
+  export type CosmeticUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cosmetic
+     */
+    select?: CosmeticSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cosmetic
+     */
+    omit?: CosmeticOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CosmeticInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Cosmetic.
+     */
+    data: XOR<CosmeticUpdateInput, CosmeticUncheckedUpdateInput>
+    /**
+     * Choose, which Cosmetic to update.
+     */
+    where: CosmeticWhereUniqueInput
+  }
+
+  /**
+   * Cosmetic updateMany
+   */
+  export type CosmeticUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Cosmetics.
+     */
+    data: XOR<CosmeticUpdateManyMutationInput, CosmeticUncheckedUpdateManyInput>
+    /**
+     * Filter which Cosmetics to update
+     */
+    where?: CosmeticWhereInput
+    /**
+     * Limit how many Cosmetics to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Cosmetic updateManyAndReturn
+   */
+  export type CosmeticUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cosmetic
+     */
+    select?: CosmeticSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cosmetic
+     */
+    omit?: CosmeticOmit<ExtArgs> | null
+    /**
+     * The data used to update Cosmetics.
+     */
+    data: XOR<CosmeticUpdateManyMutationInput, CosmeticUncheckedUpdateManyInput>
+    /**
+     * Filter which Cosmetics to update
+     */
+    where?: CosmeticWhereInput
+    /**
+     * Limit how many Cosmetics to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CosmeticIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Cosmetic upsert
+   */
+  export type CosmeticUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cosmetic
+     */
+    select?: CosmeticSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cosmetic
+     */
+    omit?: CosmeticOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CosmeticInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Cosmetic to update in case it exists.
+     */
+    where: CosmeticWhereUniqueInput
+    /**
+     * In case the Cosmetic found by the `where` argument doesn't exist, create a new Cosmetic with this data.
+     */
+    create: XOR<CosmeticCreateInput, CosmeticUncheckedCreateInput>
+    /**
+     * In case the Cosmetic was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CosmeticUpdateInput, CosmeticUncheckedUpdateInput>
+  }
+
+  /**
+   * Cosmetic delete
+   */
+  export type CosmeticDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cosmetic
+     */
+    select?: CosmeticSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cosmetic
+     */
+    omit?: CosmeticOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CosmeticInclude<ExtArgs> | null
+    /**
+     * Filter which Cosmetic to delete.
+     */
+    where: CosmeticWhereUniqueInput
+  }
+
+  /**
+   * Cosmetic deleteMany
+   */
+  export type CosmeticDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Cosmetics to delete
+     */
+    where?: CosmeticWhereInput
+    /**
+     * Limit how many Cosmetics to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Cosmetic without action
+   */
+  export type CosmeticDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cosmetic
+     */
+    select?: CosmeticSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cosmetic
+     */
+    omit?: CosmeticOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CosmeticInclude<ExtArgs> | null
   }
 
 
@@ -9787,6 +11008,7 @@ export namespace Prisma {
     userName: 'userName',
     password: 'password',
     email: 'email',
+    publicEmail: 'publicEmail',
     profileLink: 'profileLink',
     profileImage: 'profileImage',
     profileIcon: 'profileIcon',
@@ -9819,11 +11041,22 @@ export namespace Prisma {
     bumpedAt: 'bumpedAt',
     bumpExpiresAt: 'bumpExpiresAt',
     bumpPaidUntil: 'bumpPaidUntil',
-    cosmetics: 'cosmetics',
     isPublic: 'isPublic'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+  export const CosmeticScalarFieldEnum: {
+    id: 'id',
+    flair: 'flair',
+    frame: 'frame',
+    theme: 'theme',
+    bannerUrl: 'bannerUrl',
+    userId: 'userId'
+  };
+
+  export type CosmeticScalarFieldEnum = (typeof CosmeticScalarFieldEnum)[keyof typeof CosmeticScalarFieldEnum]
 
 
   export const LinkScalarFieldEnum: {
@@ -9901,31 +11134,6 @@ export namespace Prisma {
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
-  export const NullableJsonNullValueInput: {
-    DbNull: typeof DbNull,
-    JsonNull: typeof JsonNull
-  };
-
-  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
-
-
-  export const JsonNullValueFilter: {
-    DbNull: typeof DbNull,
-    JsonNull: typeof JsonNull,
-    AnyNull: typeof AnyNull
-  };
-
-  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-
-
-  export const QueryMode: {
-    default: 'default',
-    insensitive: 'insensitive'
-  };
-
-  export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
-
-
   export const NullsOrder: {
     first: 'first',
     last: 'last'
@@ -9979,20 +11187,6 @@ export namespace Prisma {
    */
   export type EnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Role'>
     
-
-
-  /**
-   * Reference to a field of type 'Json'
-   */
-  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-  /**
-   * Reference to a field of type 'QueryMode'
-   */
-  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-    
   /**
    * Deep Input Types
    */
@@ -10006,6 +11200,7 @@ export namespace Prisma {
     userName?: StringFilter<"User"> | string
     password?: StringFilter<"User"> | string
     email?: StringFilter<"User"> | string
+    publicEmail?: StringNullableFilter<"User"> | string | null
     profileLink?: StringNullableFilter<"User"> | string | null
     profileImage?: StringNullableFilter<"User"> | string | null
     profileIcon?: StringNullableFilter<"User"> | string | null
@@ -10038,7 +11233,6 @@ export namespace Prisma {
     bumpedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     bumpExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
     bumpPaidUntil?: DateTimeNullableFilter<"User"> | Date | string | null
-    cosmetics?: JsonNullableFilter<"User">
     isPublic?: BoolFilter<"User"> | boolean
     links?: LinkListRelationFilter
     labels?: LabelListRelationFilter
@@ -10046,6 +11240,7 @@ export namespace Prisma {
     background?: BackgroundColorListRelationFilter
     neonColors?: NeonColorListRelationFilter
     statusbar?: XOR<StatusbarNullableScalarRelationFilter, StatusbarWhereInput> | null
+    cosmetics?: XOR<CosmeticNullableScalarRelationFilter, CosmeticWhereInput> | null
   }
 
   export type UserOrderByWithRelationInput = {
@@ -10053,6 +11248,7 @@ export namespace Prisma {
     userName?: SortOrder
     password?: SortOrder
     email?: SortOrder
+    publicEmail?: SortOrderInput | SortOrder
     profileLink?: SortOrderInput | SortOrder
     profileImage?: SortOrderInput | SortOrder
     profileIcon?: SortOrderInput | SortOrder
@@ -10085,7 +11281,6 @@ export namespace Prisma {
     bumpedAt?: SortOrderInput | SortOrder
     bumpExpiresAt?: SortOrderInput | SortOrder
     bumpPaidUntil?: SortOrderInput | SortOrder
-    cosmetics?: SortOrderInput | SortOrder
     isPublic?: SortOrder
     links?: LinkOrderByRelationAggregateInput
     labels?: LabelOrderByRelationAggregateInput
@@ -10093,6 +11288,7 @@ export namespace Prisma {
     background?: BackgroundColorOrderByRelationAggregateInput
     neonColors?: NeonColorOrderByRelationAggregateInput
     statusbar?: StatusbarOrderByWithRelationInput
+    cosmetics?: CosmeticOrderByWithRelationInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -10103,6 +11299,7 @@ export namespace Prisma {
     NOT?: UserWhereInput | UserWhereInput[]
     userName?: StringFilter<"User"> | string
     password?: StringFilter<"User"> | string
+    publicEmail?: StringNullableFilter<"User"> | string | null
     profileLink?: StringNullableFilter<"User"> | string | null
     profileImage?: StringNullableFilter<"User"> | string | null
     profileIcon?: StringNullableFilter<"User"> | string | null
@@ -10135,7 +11332,6 @@ export namespace Prisma {
     bumpedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     bumpExpiresAt?: DateTimeNullableFilter<"User"> | Date | string | null
     bumpPaidUntil?: DateTimeNullableFilter<"User"> | Date | string | null
-    cosmetics?: JsonNullableFilter<"User">
     isPublic?: BoolFilter<"User"> | boolean
     links?: LinkListRelationFilter
     labels?: LabelListRelationFilter
@@ -10143,6 +11339,7 @@ export namespace Prisma {
     background?: BackgroundColorListRelationFilter
     neonColors?: NeonColorListRelationFilter
     statusbar?: XOR<StatusbarNullableScalarRelationFilter, StatusbarWhereInput> | null
+    cosmetics?: XOR<CosmeticNullableScalarRelationFilter, CosmeticWhereInput> | null
   }, "id" | "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -10150,6 +11347,7 @@ export namespace Prisma {
     userName?: SortOrder
     password?: SortOrder
     email?: SortOrder
+    publicEmail?: SortOrderInput | SortOrder
     profileLink?: SortOrderInput | SortOrder
     profileImage?: SortOrderInput | SortOrder
     profileIcon?: SortOrderInput | SortOrder
@@ -10182,7 +11380,6 @@ export namespace Prisma {
     bumpedAt?: SortOrderInput | SortOrder
     bumpExpiresAt?: SortOrderInput | SortOrder
     bumpPaidUntil?: SortOrderInput | SortOrder
-    cosmetics?: SortOrderInput | SortOrder
     isPublic?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
@@ -10199,6 +11396,7 @@ export namespace Prisma {
     userName?: StringWithAggregatesFilter<"User"> | string
     password?: StringWithAggregatesFilter<"User"> | string
     email?: StringWithAggregatesFilter<"User"> | string
+    publicEmail?: StringNullableWithAggregatesFilter<"User"> | string | null
     profileLink?: StringNullableWithAggregatesFilter<"User"> | string | null
     profileImage?: StringNullableWithAggregatesFilter<"User"> | string | null
     profileIcon?: StringNullableWithAggregatesFilter<"User"> | string | null
@@ -10231,8 +11429,69 @@ export namespace Prisma {
     bumpedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     bumpExpiresAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     bumpPaidUntil?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
-    cosmetics?: JsonNullableWithAggregatesFilter<"User">
     isPublic?: BoolWithAggregatesFilter<"User"> | boolean
+  }
+
+  export type CosmeticWhereInput = {
+    AND?: CosmeticWhereInput | CosmeticWhereInput[]
+    OR?: CosmeticWhereInput[]
+    NOT?: CosmeticWhereInput | CosmeticWhereInput[]
+    id?: IntFilter<"Cosmetic"> | number
+    flair?: StringNullableFilter<"Cosmetic"> | string | null
+    frame?: StringNullableFilter<"Cosmetic"> | string | null
+    theme?: StringNullableFilter<"Cosmetic"> | string | null
+    bannerUrl?: StringNullableFilter<"Cosmetic"> | string | null
+    userId?: StringFilter<"Cosmetic"> | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type CosmeticOrderByWithRelationInput = {
+    id?: SortOrder
+    flair?: SortOrderInput | SortOrder
+    frame?: SortOrderInput | SortOrder
+    theme?: SortOrderInput | SortOrder
+    bannerUrl?: SortOrderInput | SortOrder
+    userId?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type CosmeticWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    userId?: string
+    AND?: CosmeticWhereInput | CosmeticWhereInput[]
+    OR?: CosmeticWhereInput[]
+    NOT?: CosmeticWhereInput | CosmeticWhereInput[]
+    flair?: StringNullableFilter<"Cosmetic"> | string | null
+    frame?: StringNullableFilter<"Cosmetic"> | string | null
+    theme?: StringNullableFilter<"Cosmetic"> | string | null
+    bannerUrl?: StringNullableFilter<"Cosmetic"> | string | null
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id" | "userId">
+
+  export type CosmeticOrderByWithAggregationInput = {
+    id?: SortOrder
+    flair?: SortOrderInput | SortOrder
+    frame?: SortOrderInput | SortOrder
+    theme?: SortOrderInput | SortOrder
+    bannerUrl?: SortOrderInput | SortOrder
+    userId?: SortOrder
+    _count?: CosmeticCountOrderByAggregateInput
+    _avg?: CosmeticAvgOrderByAggregateInput
+    _max?: CosmeticMaxOrderByAggregateInput
+    _min?: CosmeticMinOrderByAggregateInput
+    _sum?: CosmeticSumOrderByAggregateInput
+  }
+
+  export type CosmeticScalarWhereWithAggregatesInput = {
+    AND?: CosmeticScalarWhereWithAggregatesInput | CosmeticScalarWhereWithAggregatesInput[]
+    OR?: CosmeticScalarWhereWithAggregatesInput[]
+    NOT?: CosmeticScalarWhereWithAggregatesInput | CosmeticScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"Cosmetic"> | number
+    flair?: StringNullableWithAggregatesFilter<"Cosmetic"> | string | null
+    frame?: StringNullableWithAggregatesFilter<"Cosmetic"> | string | null
+    theme?: StringNullableWithAggregatesFilter<"Cosmetic"> | string | null
+    bannerUrl?: StringNullableWithAggregatesFilter<"Cosmetic"> | string | null
+    userId?: StringWithAggregatesFilter<"Cosmetic"> | string
   }
 
   export type LinkWhereInput = {
@@ -10587,6 +11846,7 @@ export namespace Prisma {
     userName: string
     password: string
     email: string
+    publicEmail?: string | null
     profileLink?: string | null
     profileImage?: string | null
     profileIcon?: string | null
@@ -10619,7 +11879,6 @@ export namespace Prisma {
     bumpedAt?: Date | string | null
     bumpExpiresAt?: Date | string | null
     bumpPaidUntil?: Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: boolean
     links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
@@ -10627,6 +11886,7 @@ export namespace Prisma {
     background?: BackgroundColorCreateNestedManyWithoutUserInput
     neonColors?: NeonColorCreateNestedManyWithoutUserInput
     statusbar?: StatusbarCreateNestedOneWithoutUserInput
+    cosmetics?: CosmeticCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -10634,6 +11894,7 @@ export namespace Prisma {
     userName: string
     password: string
     email: string
+    publicEmail?: string | null
     profileLink?: string | null
     profileImage?: string | null
     profileIcon?: string | null
@@ -10666,7 +11927,6 @@ export namespace Prisma {
     bumpedAt?: Date | string | null
     bumpExpiresAt?: Date | string | null
     bumpPaidUntil?: Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: boolean
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
@@ -10674,6 +11934,7 @@ export namespace Prisma {
     background?: BackgroundColorUncheckedCreateNestedManyWithoutUserInput
     neonColors?: NeonColorUncheckedCreateNestedManyWithoutUserInput
     statusbar?: StatusbarUncheckedCreateNestedOneWithoutUserInput
+    cosmetics?: CosmeticUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -10681,6 +11942,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10713,7 +11975,6 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUpdateManyWithoutUserNestedInput
     labels?: LabelUpdateManyWithoutUserNestedInput
@@ -10721,6 +11982,7 @@ export namespace Prisma {
     background?: BackgroundColorUpdateManyWithoutUserNestedInput
     neonColors?: NeonColorUpdateManyWithoutUserNestedInput
     statusbar?: StatusbarUpdateOneWithoutUserNestedInput
+    cosmetics?: CosmeticUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -10728,6 +11990,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10760,7 +12023,6 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
@@ -10768,6 +12030,7 @@ export namespace Prisma {
     background?: BackgroundColorUncheckedUpdateManyWithoutUserNestedInput
     neonColors?: NeonColorUncheckedUpdateManyWithoutUserNestedInput
     statusbar?: StatusbarUncheckedUpdateOneWithoutUserNestedInput
+    cosmetics?: CosmeticUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -10775,6 +12038,7 @@ export namespace Prisma {
     userName: string
     password: string
     email: string
+    publicEmail?: string | null
     profileLink?: string | null
     profileImage?: string | null
     profileIcon?: string | null
@@ -10807,7 +12071,6 @@ export namespace Prisma {
     bumpedAt?: Date | string | null
     bumpExpiresAt?: Date | string | null
     bumpPaidUntil?: Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: boolean
   }
 
@@ -10816,6 +12079,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10848,7 +12112,6 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
   }
 
@@ -10857,6 +12120,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10889,8 +12153,66 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type CosmeticCreateInput = {
+    flair?: string | null
+    frame?: string | null
+    theme?: string | null
+    bannerUrl?: string | null
+    user: UserCreateNestedOneWithoutCosmeticsInput
+  }
+
+  export type CosmeticUncheckedCreateInput = {
+    id?: number
+    flair?: string | null
+    frame?: string | null
+    theme?: string | null
+    bannerUrl?: string | null
+    userId: string
+  }
+
+  export type CosmeticUpdateInput = {
+    flair?: NullableStringFieldUpdateOperationsInput | string | null
+    frame?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    user?: UserUpdateOneRequiredWithoutCosmeticsNestedInput
+  }
+
+  export type CosmeticUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    flair?: NullableStringFieldUpdateOperationsInput | string | null
+    frame?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type CosmeticCreateManyInput = {
+    id?: number
+    flair?: string | null
+    frame?: string | null
+    theme?: string | null
+    bannerUrl?: string | null
+    userId: string
+  }
+
+  export type CosmeticUpdateManyMutationInput = {
+    flair?: NullableStringFieldUpdateOperationsInput | string | null
+    frame?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerUrl?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type CosmeticUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    flair?: NullableStringFieldUpdateOperationsInput | string | null
+    frame?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type LinkCreateInput = {
@@ -11306,24 +12628,6 @@ export namespace Prisma {
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
-  export type JsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type LinkListRelationFilter = {
     every?: LinkWhereInput
@@ -11360,6 +12664,11 @@ export namespace Prisma {
     isNot?: StatusbarWhereInput | null
   }
 
+  export type CosmeticNullableScalarRelationFilter = {
+    is?: CosmeticWhereInput | null
+    isNot?: CosmeticWhereInput | null
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -11390,6 +12699,7 @@ export namespace Prisma {
     userName?: SortOrder
     password?: SortOrder
     email?: SortOrder
+    publicEmail?: SortOrder
     profileLink?: SortOrder
     profileImage?: SortOrder
     profileIcon?: SortOrder
@@ -11422,7 +12732,6 @@ export namespace Prisma {
     bumpedAt?: SortOrder
     bumpExpiresAt?: SortOrder
     bumpPaidUntil?: SortOrder
-    cosmetics?: SortOrder
     isPublic?: SortOrder
   }
 
@@ -11450,6 +12759,7 @@ export namespace Prisma {
     userName?: SortOrder
     password?: SortOrder
     email?: SortOrder
+    publicEmail?: SortOrder
     profileLink?: SortOrder
     profileImage?: SortOrder
     profileIcon?: SortOrder
@@ -11490,6 +12800,7 @@ export namespace Prisma {
     userName?: SortOrder
     password?: SortOrder
     email?: SortOrder
+    publicEmail?: SortOrder
     profileLink?: SortOrder
     profileImage?: SortOrder
     profileIcon?: SortOrder
@@ -11671,36 +12982,50 @@ export namespace Prisma {
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
 
-  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedJsonNullableFilter<$PrismaModel>
-    _max?: NestedJsonNullableFilter<$PrismaModel>
+  export type UserScalarRelationFilter = {
+    is?: UserWhereInput
+    isNot?: UserWhereInput
+  }
+
+  export type CosmeticCountOrderByAggregateInput = {
+    id?: SortOrder
+    flair?: SortOrder
+    frame?: SortOrder
+    theme?: SortOrder
+    bannerUrl?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type CosmeticAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type CosmeticMaxOrderByAggregateInput = {
+    id?: SortOrder
+    flair?: SortOrder
+    frame?: SortOrder
+    theme?: SortOrder
+    bannerUrl?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type CosmeticMinOrderByAggregateInput = {
+    id?: SortOrder
+    flair?: SortOrder
+    frame?: SortOrder
+    theme?: SortOrder
+    bannerUrl?: SortOrder
+    userId?: SortOrder
+  }
+
+  export type CosmeticSumOrderByAggregateInput = {
+    id?: SortOrder
   }
 
   export type BoolNullableFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
     not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
-  }
-
-  export type UserScalarRelationFilter = {
-    is?: UserWhereInput
-    isNot?: UserWhereInput
   }
 
   export type LinkCountOrderByAggregateInput = {
@@ -11949,6 +13274,12 @@ export namespace Prisma {
     connect?: StatusbarWhereUniqueInput
   }
 
+  export type CosmeticCreateNestedOneWithoutUserInput = {
+    create?: XOR<CosmeticCreateWithoutUserInput, CosmeticUncheckedCreateWithoutUserInput>
+    connectOrCreate?: CosmeticCreateOrConnectWithoutUserInput
+    connect?: CosmeticWhereUniqueInput
+  }
+
   export type LinkUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<LinkCreateWithoutUserInput, LinkUncheckedCreateWithoutUserInput> | LinkCreateWithoutUserInput[] | LinkUncheckedCreateWithoutUserInput[]
     connectOrCreate?: LinkCreateOrConnectWithoutUserInput | LinkCreateOrConnectWithoutUserInput[]
@@ -11988,6 +13319,12 @@ export namespace Prisma {
     create?: XOR<StatusbarCreateWithoutUserInput, StatusbarUncheckedCreateWithoutUserInput>
     connectOrCreate?: StatusbarCreateOrConnectWithoutUserInput
     connect?: StatusbarWhereUniqueInput
+  }
+
+  export type CosmeticUncheckedCreateNestedOneWithoutUserInput = {
+    create?: XOR<CosmeticCreateWithoutUserInput, CosmeticUncheckedCreateWithoutUserInput>
+    connectOrCreate?: CosmeticCreateOrConnectWithoutUserInput
+    connect?: CosmeticWhereUniqueInput
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -12118,6 +13455,16 @@ export namespace Prisma {
     update?: XOR<XOR<StatusbarUpdateToOneWithWhereWithoutUserInput, StatusbarUpdateWithoutUserInput>, StatusbarUncheckedUpdateWithoutUserInput>
   }
 
+  export type CosmeticUpdateOneWithoutUserNestedInput = {
+    create?: XOR<CosmeticCreateWithoutUserInput, CosmeticUncheckedCreateWithoutUserInput>
+    connectOrCreate?: CosmeticCreateOrConnectWithoutUserInput
+    upsert?: CosmeticUpsertWithoutUserInput
+    disconnect?: CosmeticWhereInput | boolean
+    delete?: CosmeticWhereInput | boolean
+    connect?: CosmeticWhereUniqueInput
+    update?: XOR<XOR<CosmeticUpdateToOneWithWhereWithoutUserInput, CosmeticUpdateWithoutUserInput>, CosmeticUncheckedUpdateWithoutUserInput>
+  }
+
   export type LinkUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<LinkCreateWithoutUserInput, LinkUncheckedCreateWithoutUserInput> | LinkCreateWithoutUserInput[] | LinkUncheckedCreateWithoutUserInput[]
     connectOrCreate?: LinkCreateOrConnectWithoutUserInput | LinkCreateOrConnectWithoutUserInput[]
@@ -12196,6 +13543,30 @@ export namespace Prisma {
     delete?: StatusbarWhereInput | boolean
     connect?: StatusbarWhereUniqueInput
     update?: XOR<XOR<StatusbarUpdateToOneWithWhereWithoutUserInput, StatusbarUpdateWithoutUserInput>, StatusbarUncheckedUpdateWithoutUserInput>
+  }
+
+  export type CosmeticUncheckedUpdateOneWithoutUserNestedInput = {
+    create?: XOR<CosmeticCreateWithoutUserInput, CosmeticUncheckedCreateWithoutUserInput>
+    connectOrCreate?: CosmeticCreateOrConnectWithoutUserInput
+    upsert?: CosmeticUpsertWithoutUserInput
+    disconnect?: CosmeticWhereInput | boolean
+    delete?: CosmeticWhereInput | boolean
+    connect?: CosmeticWhereUniqueInput
+    update?: XOR<XOR<CosmeticUpdateToOneWithWhereWithoutUserInput, CosmeticUpdateWithoutUserInput>, CosmeticUncheckedUpdateWithoutUserInput>
+  }
+
+  export type UserCreateNestedOneWithoutCosmeticsInput = {
+    create?: XOR<UserCreateWithoutCosmeticsInput, UserUncheckedCreateWithoutCosmeticsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCosmeticsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutCosmeticsNestedInput = {
+    create?: XOR<UserCreateWithoutCosmeticsInput, UserUncheckedCreateWithoutCosmeticsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCosmeticsInput
+    upsert?: UserUpsertWithoutCosmeticsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCosmeticsInput, UserUpdateWithoutCosmeticsInput>, UserUncheckedUpdateWithoutCosmeticsInput>
   }
 
   export type UserCreateNestedOneWithoutLinksInput = {
@@ -12519,24 +13890,6 @@ export namespace Prisma {
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
-  export type NestedJsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type NestedBoolNullableFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
@@ -12679,6 +14032,26 @@ export namespace Prisma {
   export type StatusbarCreateOrConnectWithoutUserInput = {
     where: StatusbarWhereUniqueInput
     create: XOR<StatusbarCreateWithoutUserInput, StatusbarUncheckedCreateWithoutUserInput>
+  }
+
+  export type CosmeticCreateWithoutUserInput = {
+    flair?: string | null
+    frame?: string | null
+    theme?: string | null
+    bannerUrl?: string | null
+  }
+
+  export type CosmeticUncheckedCreateWithoutUserInput = {
+    id?: number
+    flair?: string | null
+    frame?: string | null
+    theme?: string | null
+    bannerUrl?: string | null
+  }
+
+  export type CosmeticCreateOrConnectWithoutUserInput = {
+    where: CosmeticWhereUniqueInput
+    create: XOR<CosmeticCreateWithoutUserInput, CosmeticUncheckedCreateWithoutUserInput>
   }
 
   export type LinkUpsertWithWhereUniqueWithoutUserInput = {
@@ -12843,11 +14216,38 @@ export namespace Prisma {
     statusText?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type UserCreateWithoutLinksInput = {
+  export type CosmeticUpsertWithoutUserInput = {
+    update: XOR<CosmeticUpdateWithoutUserInput, CosmeticUncheckedUpdateWithoutUserInput>
+    create: XOR<CosmeticCreateWithoutUserInput, CosmeticUncheckedCreateWithoutUserInput>
+    where?: CosmeticWhereInput
+  }
+
+  export type CosmeticUpdateToOneWithWhereWithoutUserInput = {
+    where?: CosmeticWhereInput
+    data: XOR<CosmeticUpdateWithoutUserInput, CosmeticUncheckedUpdateWithoutUserInput>
+  }
+
+  export type CosmeticUpdateWithoutUserInput = {
+    flair?: NullableStringFieldUpdateOperationsInput | string | null
+    frame?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerUrl?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type CosmeticUncheckedUpdateWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    flair?: NullableStringFieldUpdateOperationsInput | string | null
+    frame?: NullableStringFieldUpdateOperationsInput | string | null
+    theme?: NullableStringFieldUpdateOperationsInput | string | null
+    bannerUrl?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type UserCreateWithoutCosmeticsInput = {
     id: string
     userName: string
     password: string
     email: string
+    publicEmail?: string | null
     profileLink?: string | null
     profileImage?: string | null
     profileIcon?: string | null
@@ -12880,8 +14280,8 @@ export namespace Prisma {
     bumpedAt?: Date | string | null
     bumpExpiresAt?: Date | string | null
     bumpPaidUntil?: Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: boolean
+    links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
     background?: BackgroundColorCreateNestedManyWithoutUserInput
@@ -12889,11 +14289,12 @@ export namespace Prisma {
     statusbar?: StatusbarCreateNestedOneWithoutUserInput
   }
 
-  export type UserUncheckedCreateWithoutLinksInput = {
+  export type UserUncheckedCreateWithoutCosmeticsInput = {
     id: string
     userName: string
     password: string
     email: string
+    publicEmail?: string | null
     profileLink?: string | null
     profileImage?: string | null
     profileIcon?: string | null
@@ -12926,13 +14327,217 @@ export namespace Prisma {
     bumpedAt?: Date | string | null
     bumpExpiresAt?: Date | string | null
     bumpPaidUntil?: Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
+    isPublic?: boolean
+    links?: LinkUncheckedCreateNestedManyWithoutUserInput
+    labels?: LabelUncheckedCreateNestedManyWithoutUserInput
+    socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
+    background?: BackgroundColorUncheckedCreateNestedManyWithoutUserInput
+    neonColors?: NeonColorUncheckedCreateNestedManyWithoutUserInput
+    statusbar?: StatusbarUncheckedCreateNestedOneWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutCosmeticsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutCosmeticsInput, UserUncheckedCreateWithoutCosmeticsInput>
+  }
+
+  export type UserUpsertWithoutCosmeticsInput = {
+    update: XOR<UserUpdateWithoutCosmeticsInput, UserUncheckedUpdateWithoutCosmeticsInput>
+    create: XOR<UserCreateWithoutCosmeticsInput, UserUncheckedCreateWithoutCosmeticsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutCosmeticsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutCosmeticsInput, UserUncheckedUpdateWithoutCosmeticsInput>
+  }
+
+  export type UserUpdateWithoutCosmeticsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    profileLink?: NullableStringFieldUpdateOperationsInput | string | null
+    profileImage?: NullableStringFieldUpdateOperationsInput | string | null
+    profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
+    profileSiteText?: NullableStringFieldUpdateOperationsInput | string | null
+    iconUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    profileHoverColor?: NullableStringFieldUpdateOperationsInput | string | null
+    degBackgroundColor?: NullableIntFieldUpdateOperationsInput | number | null
+    neonEnable?: IntFieldUpdateOperationsInput | number
+    buttonThemeEnable?: IntFieldUpdateOperationsInput | number
+    EnableAnimationArticle?: IntFieldUpdateOperationsInput | number
+    EnableAnimationButton?: IntFieldUpdateOperationsInput | number
+    EnableAnimationBackground?: IntFieldUpdateOperationsInput | number
+    backgroundSize?: NullableIntFieldUpdateOperationsInput | number | null
+    selectedThemeIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    selectedAnimationIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    selectedAnimationButtonIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    selectedAnimationBackgroundIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    animationDurationBackground?: NullableIntFieldUpdateOperationsInput | number | null
+    delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
+    canvaEnable?: IntFieldUpdateOperationsInput | number
+    selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    links?: LinkUpdateManyWithoutUserNestedInput
+    labels?: LabelUpdateManyWithoutUserNestedInput
+    socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
+    background?: BackgroundColorUpdateManyWithoutUserNestedInput
+    neonColors?: NeonColorUpdateManyWithoutUserNestedInput
+    statusbar?: StatusbarUpdateOneWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutCosmeticsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userName?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    profileLink?: NullableStringFieldUpdateOperationsInput | string | null
+    profileImage?: NullableStringFieldUpdateOperationsInput | string | null
+    profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
+    profileSiteText?: NullableStringFieldUpdateOperationsInput | string | null
+    iconUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    profileHoverColor?: NullableStringFieldUpdateOperationsInput | string | null
+    degBackgroundColor?: NullableIntFieldUpdateOperationsInput | number | null
+    neonEnable?: IntFieldUpdateOperationsInput | number
+    buttonThemeEnable?: IntFieldUpdateOperationsInput | number
+    EnableAnimationArticle?: IntFieldUpdateOperationsInput | number
+    EnableAnimationButton?: IntFieldUpdateOperationsInput | number
+    EnableAnimationBackground?: IntFieldUpdateOperationsInput | number
+    backgroundSize?: NullableIntFieldUpdateOperationsInput | number | null
+    selectedThemeIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    selectedAnimationIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    selectedAnimationButtonIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    selectedAnimationBackgroundIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    animationDurationBackground?: NullableIntFieldUpdateOperationsInput | number | null
+    delayAnimationButton?: NullableFloatFieldUpdateOperationsInput | number | null
+    canvaEnable?: IntFieldUpdateOperationsInput | number
+    selectedCanvasIndex?: NullableIntFieldUpdateOperationsInput | number | null
+    name?: StringFieldUpdateOperationsInput | string
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    rankScore?: IntFieldUpdateOperationsInput | number
+    bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isPublic?: BoolFieldUpdateOperationsInput | boolean
+    links?: LinkUncheckedUpdateManyWithoutUserNestedInput
+    labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
+    socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
+    background?: BackgroundColorUncheckedUpdateManyWithoutUserNestedInput
+    neonColors?: NeonColorUncheckedUpdateManyWithoutUserNestedInput
+    statusbar?: StatusbarUncheckedUpdateOneWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutLinksInput = {
+    id: string
+    userName: string
+    password: string
+    email: string
+    publicEmail?: string | null
+    profileLink?: string | null
+    profileImage?: string | null
+    profileIcon?: string | null
+    profileSiteText?: string | null
+    iconUrl?: string | null
+    description?: string | null
+    profileHoverColor?: string | null
+    degBackgroundColor?: number | null
+    neonEnable?: number
+    buttonThemeEnable?: number
+    EnableAnimationArticle?: number
+    EnableAnimationButton?: number
+    EnableAnimationBackground?: number
+    backgroundSize?: number | null
+    selectedThemeIndex?: number | null
+    selectedAnimationIndex?: number | null
+    selectedAnimationButtonIndex?: number | null
+    selectedAnimationBackgroundIndex?: number | null
+    animationDurationBackground?: number | null
+    delayAnimationButton?: number | null
+    canvaEnable?: number
+    selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
+    isPublic?: boolean
+    labels?: LabelCreateNestedManyWithoutUserInput
+    socialIcons?: SocialIconCreateNestedManyWithoutUserInput
+    background?: BackgroundColorCreateNestedManyWithoutUserInput
+    neonColors?: NeonColorCreateNestedManyWithoutUserInput
+    statusbar?: StatusbarCreateNestedOneWithoutUserInput
+    cosmetics?: CosmeticCreateNestedOneWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutLinksInput = {
+    id: string
+    userName: string
+    password: string
+    email: string
+    publicEmail?: string | null
+    profileLink?: string | null
+    profileImage?: string | null
+    profileIcon?: string | null
+    profileSiteText?: string | null
+    iconUrl?: string | null
+    description?: string | null
+    profileHoverColor?: string | null
+    degBackgroundColor?: number | null
+    neonEnable?: number
+    buttonThemeEnable?: number
+    EnableAnimationArticle?: number
+    EnableAnimationButton?: number
+    EnableAnimationBackground?: number
+    backgroundSize?: number | null
+    selectedThemeIndex?: number | null
+    selectedAnimationIndex?: number | null
+    selectedAnimationButtonIndex?: number | null
+    selectedAnimationBackgroundIndex?: number | null
+    animationDurationBackground?: number | null
+    delayAnimationButton?: number | null
+    canvaEnable?: number
+    selectedCanvasIndex?: number | null
+    name: string
+    emailVerified?: boolean
+    image?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role?: $Enums.Role
+    rankScore?: number
+    bumpedAt?: Date | string | null
+    bumpExpiresAt?: Date | string | null
+    bumpPaidUntil?: Date | string | null
     isPublic?: boolean
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
     background?: BackgroundColorUncheckedCreateNestedManyWithoutUserInput
     neonColors?: NeonColorUncheckedCreateNestedManyWithoutUserInput
     statusbar?: StatusbarUncheckedCreateNestedOneWithoutUserInput
+    cosmetics?: CosmeticUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutLinksInput = {
@@ -12956,6 +14561,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12988,13 +14594,13 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     labels?: LabelUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUpdateManyWithoutUserNestedInput
     neonColors?: NeonColorUpdateManyWithoutUserNestedInput
     statusbar?: StatusbarUpdateOneWithoutUserNestedInput
+    cosmetics?: CosmeticUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutLinksInput = {
@@ -13002,6 +14608,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13034,13 +14641,13 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUncheckedUpdateManyWithoutUserNestedInput
     neonColors?: NeonColorUncheckedUpdateManyWithoutUserNestedInput
     statusbar?: StatusbarUncheckedUpdateOneWithoutUserNestedInput
+    cosmetics?: CosmeticUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateWithoutLabelsInput = {
@@ -13048,6 +14655,7 @@ export namespace Prisma {
     userName: string
     password: string
     email: string
+    publicEmail?: string | null
     profileLink?: string | null
     profileImage?: string | null
     profileIcon?: string | null
@@ -13080,13 +14688,13 @@ export namespace Prisma {
     bumpedAt?: Date | string | null
     bumpExpiresAt?: Date | string | null
     bumpPaidUntil?: Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: boolean
     links?: LinkCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
     background?: BackgroundColorCreateNestedManyWithoutUserInput
     neonColors?: NeonColorCreateNestedManyWithoutUserInput
     statusbar?: StatusbarCreateNestedOneWithoutUserInput
+    cosmetics?: CosmeticCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutLabelsInput = {
@@ -13094,6 +14702,7 @@ export namespace Prisma {
     userName: string
     password: string
     email: string
+    publicEmail?: string | null
     profileLink?: string | null
     profileImage?: string | null
     profileIcon?: string | null
@@ -13126,13 +14735,13 @@ export namespace Prisma {
     bumpedAt?: Date | string | null
     bumpExpiresAt?: Date | string | null
     bumpPaidUntil?: Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: boolean
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
     background?: BackgroundColorUncheckedCreateNestedManyWithoutUserInput
     neonColors?: NeonColorUncheckedCreateNestedManyWithoutUserInput
     statusbar?: StatusbarUncheckedCreateNestedOneWithoutUserInput
+    cosmetics?: CosmeticUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutLabelsInput = {
@@ -13156,6 +14765,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13188,13 +14798,13 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUpdateManyWithoutUserNestedInput
     neonColors?: NeonColorUpdateManyWithoutUserNestedInput
     statusbar?: StatusbarUpdateOneWithoutUserNestedInput
+    cosmetics?: CosmeticUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutLabelsInput = {
@@ -13202,6 +14812,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13234,13 +14845,13 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUncheckedUpdateManyWithoutUserNestedInput
     neonColors?: NeonColorUncheckedUpdateManyWithoutUserNestedInput
     statusbar?: StatusbarUncheckedUpdateOneWithoutUserNestedInput
+    cosmetics?: CosmeticUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateWithoutSocialIconsInput = {
@@ -13248,6 +14859,7 @@ export namespace Prisma {
     userName: string
     password: string
     email: string
+    publicEmail?: string | null
     profileLink?: string | null
     profileImage?: string | null
     profileIcon?: string | null
@@ -13280,13 +14892,13 @@ export namespace Prisma {
     bumpedAt?: Date | string | null
     bumpExpiresAt?: Date | string | null
     bumpPaidUntil?: Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: boolean
     links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
     background?: BackgroundColorCreateNestedManyWithoutUserInput
     neonColors?: NeonColorCreateNestedManyWithoutUserInput
     statusbar?: StatusbarCreateNestedOneWithoutUserInput
+    cosmetics?: CosmeticCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSocialIconsInput = {
@@ -13294,6 +14906,7 @@ export namespace Prisma {
     userName: string
     password: string
     email: string
+    publicEmail?: string | null
     profileLink?: string | null
     profileImage?: string | null
     profileIcon?: string | null
@@ -13326,13 +14939,13 @@ export namespace Prisma {
     bumpedAt?: Date | string | null
     bumpExpiresAt?: Date | string | null
     bumpPaidUntil?: Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: boolean
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     background?: BackgroundColorUncheckedCreateNestedManyWithoutUserInput
     neonColors?: NeonColorUncheckedCreateNestedManyWithoutUserInput
     statusbar?: StatusbarUncheckedCreateNestedOneWithoutUserInput
+    cosmetics?: CosmeticUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSocialIconsInput = {
@@ -13356,6 +14969,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13388,13 +15002,13 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUpdateManyWithoutUserNestedInput
     labels?: LabelUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUpdateManyWithoutUserNestedInput
     neonColors?: NeonColorUpdateManyWithoutUserNestedInput
     statusbar?: StatusbarUpdateOneWithoutUserNestedInput
+    cosmetics?: CosmeticUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSocialIconsInput = {
@@ -13402,6 +15016,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13434,13 +15049,13 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUncheckedUpdateManyWithoutUserNestedInput
     neonColors?: NeonColorUncheckedUpdateManyWithoutUserNestedInput
     statusbar?: StatusbarUncheckedUpdateOneWithoutUserNestedInput
+    cosmetics?: CosmeticUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateWithoutBackgroundInput = {
@@ -13448,6 +15063,7 @@ export namespace Prisma {
     userName: string
     password: string
     email: string
+    publicEmail?: string | null
     profileLink?: string | null
     profileImage?: string | null
     profileIcon?: string | null
@@ -13480,13 +15096,13 @@ export namespace Prisma {
     bumpedAt?: Date | string | null
     bumpExpiresAt?: Date | string | null
     bumpPaidUntil?: Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: boolean
     links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
     neonColors?: NeonColorCreateNestedManyWithoutUserInput
     statusbar?: StatusbarCreateNestedOneWithoutUserInput
+    cosmetics?: CosmeticCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutBackgroundInput = {
@@ -13494,6 +15110,7 @@ export namespace Prisma {
     userName: string
     password: string
     email: string
+    publicEmail?: string | null
     profileLink?: string | null
     profileImage?: string | null
     profileIcon?: string | null
@@ -13526,13 +15143,13 @@ export namespace Prisma {
     bumpedAt?: Date | string | null
     bumpExpiresAt?: Date | string | null
     bumpPaidUntil?: Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: boolean
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
     neonColors?: NeonColorUncheckedCreateNestedManyWithoutUserInput
     statusbar?: StatusbarUncheckedCreateNestedOneWithoutUserInput
+    cosmetics?: CosmeticUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutBackgroundInput = {
@@ -13556,6 +15173,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13588,13 +15206,13 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUpdateManyWithoutUserNestedInput
     labels?: LabelUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
     neonColors?: NeonColorUpdateManyWithoutUserNestedInput
     statusbar?: StatusbarUpdateOneWithoutUserNestedInput
+    cosmetics?: CosmeticUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutBackgroundInput = {
@@ -13602,6 +15220,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13634,13 +15253,13 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
     neonColors?: NeonColorUncheckedUpdateManyWithoutUserNestedInput
     statusbar?: StatusbarUncheckedUpdateOneWithoutUserNestedInput
+    cosmetics?: CosmeticUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateWithoutNeonColorsInput = {
@@ -13648,6 +15267,7 @@ export namespace Prisma {
     userName: string
     password: string
     email: string
+    publicEmail?: string | null
     profileLink?: string | null
     profileImage?: string | null
     profileIcon?: string | null
@@ -13680,13 +15300,13 @@ export namespace Prisma {
     bumpedAt?: Date | string | null
     bumpExpiresAt?: Date | string | null
     bumpPaidUntil?: Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: boolean
     links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
     background?: BackgroundColorCreateNestedManyWithoutUserInput
     statusbar?: StatusbarCreateNestedOneWithoutUserInput
+    cosmetics?: CosmeticCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutNeonColorsInput = {
@@ -13694,6 +15314,7 @@ export namespace Prisma {
     userName: string
     password: string
     email: string
+    publicEmail?: string | null
     profileLink?: string | null
     profileImage?: string | null
     profileIcon?: string | null
@@ -13726,13 +15347,13 @@ export namespace Prisma {
     bumpedAt?: Date | string | null
     bumpExpiresAt?: Date | string | null
     bumpPaidUntil?: Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: boolean
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
     background?: BackgroundColorUncheckedCreateNestedManyWithoutUserInput
     statusbar?: StatusbarUncheckedCreateNestedOneWithoutUserInput
+    cosmetics?: CosmeticUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutNeonColorsInput = {
@@ -13756,6 +15377,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13788,13 +15410,13 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUpdateManyWithoutUserNestedInput
     labels?: LabelUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUpdateManyWithoutUserNestedInput
     statusbar?: StatusbarUpdateOneWithoutUserNestedInput
+    cosmetics?: CosmeticUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNeonColorsInput = {
@@ -13802,6 +15424,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13834,13 +15457,13 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUncheckedUpdateManyWithoutUserNestedInput
     statusbar?: StatusbarUncheckedUpdateOneWithoutUserNestedInput
+    cosmetics?: CosmeticUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateWithoutStatusbarInput = {
@@ -13848,6 +15471,7 @@ export namespace Prisma {
     userName: string
     password: string
     email: string
+    publicEmail?: string | null
     profileLink?: string | null
     profileImage?: string | null
     profileIcon?: string | null
@@ -13880,13 +15504,13 @@ export namespace Prisma {
     bumpedAt?: Date | string | null
     bumpExpiresAt?: Date | string | null
     bumpPaidUntil?: Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: boolean
     links?: LinkCreateNestedManyWithoutUserInput
     labels?: LabelCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconCreateNestedManyWithoutUserInput
     background?: BackgroundColorCreateNestedManyWithoutUserInput
     neonColors?: NeonColorCreateNestedManyWithoutUserInput
+    cosmetics?: CosmeticCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutStatusbarInput = {
@@ -13894,6 +15518,7 @@ export namespace Prisma {
     userName: string
     password: string
     email: string
+    publicEmail?: string | null
     profileLink?: string | null
     profileImage?: string | null
     profileIcon?: string | null
@@ -13926,13 +15551,13 @@ export namespace Prisma {
     bumpedAt?: Date | string | null
     bumpExpiresAt?: Date | string | null
     bumpPaidUntil?: Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: boolean
     links?: LinkUncheckedCreateNestedManyWithoutUserInput
     labels?: LabelUncheckedCreateNestedManyWithoutUserInput
     socialIcons?: SocialIconUncheckedCreateNestedManyWithoutUserInput
     background?: BackgroundColorUncheckedCreateNestedManyWithoutUserInput
     neonColors?: NeonColorUncheckedCreateNestedManyWithoutUserInput
+    cosmetics?: CosmeticUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutStatusbarInput = {
@@ -13956,6 +15581,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -13988,13 +15614,13 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUpdateManyWithoutUserNestedInput
     labels?: LabelUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUpdateManyWithoutUserNestedInput
     neonColors?: NeonColorUpdateManyWithoutUserNestedInput
+    cosmetics?: CosmeticUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStatusbarInput = {
@@ -14002,6 +15628,7 @@ export namespace Prisma {
     userName?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    publicEmail?: NullableStringFieldUpdateOperationsInput | string | null
     profileLink?: NullableStringFieldUpdateOperationsInput | string | null
     profileImage?: NullableStringFieldUpdateOperationsInput | string | null
     profileIcon?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14034,13 +15661,13 @@ export namespace Prisma {
     bumpedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bumpPaidUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    cosmetics?: NullableJsonNullValueInput | InputJsonValue
     isPublic?: BoolFieldUpdateOperationsInput | boolean
     links?: LinkUncheckedUpdateManyWithoutUserNestedInput
     labels?: LabelUncheckedUpdateManyWithoutUserNestedInput
     socialIcons?: SocialIconUncheckedUpdateManyWithoutUserNestedInput
     background?: BackgroundColorUncheckedUpdateManyWithoutUserNestedInput
     neonColors?: NeonColorUncheckedUpdateManyWithoutUserNestedInput
+    cosmetics?: CosmeticUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type LinkCreateManyUserInput = {

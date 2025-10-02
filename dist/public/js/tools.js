@@ -302,6 +302,7 @@ export function createEmailAndDescription(profileData) {
     // Affichage conditionnel
     if (!profileData.description.trim())
         descriptionDiv.style.display = "none";
+        container.style.background = "none";
     if (!profileData.email.trim())
         emailDiv.style.display = "none";
     return container;

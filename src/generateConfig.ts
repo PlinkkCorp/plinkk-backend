@@ -53,7 +53,7 @@ export function generateProfileConfig(
         )}], // Couleurs du neon de profil
         iconUrl: "${profile.iconUrl || "https://avatars.githubusercontent.com/u/9919?s=200&v=4"}", // Icone de l'onglet
         description: "${
-          profile.description || "Mollit laboris cupidatat do enim nulla ex laborum. Nulla labore reprehenderit nisi non anim aute."
+          profile.description || ""
         }", // Description affichée sur la page, display: none si vide
         labels: ${JSON.stringify(
           labels.map((l) => ({

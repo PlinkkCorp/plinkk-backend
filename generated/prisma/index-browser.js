@@ -122,6 +122,7 @@ exports.Prisma.UserScalarFieldEnum = {
   userName: 'userName',
   password: 'password',
   email: 'email',
+  publicEmail: 'publicEmail',
   profileLink: 'profileLink',
   profileImage: 'profileImage',
   profileIcon: 'profileIcon',
@@ -154,8 +155,16 @@ exports.Prisma.UserScalarFieldEnum = {
   bumpedAt: 'bumpedAt',
   bumpExpiresAt: 'bumpExpiresAt',
   bumpPaidUntil: 'bumpPaidUntil',
-  cosmetics: 'cosmetics',
   isPublic: 'isPublic'
+};
+
+exports.Prisma.CosmeticScalarFieldEnum = {
+  id: 'id',
+  flair: 'flair',
+  frame: 'frame',
+  theme: 'theme',
+  bannerUrl: 'bannerUrl',
+  userId: 'userId'
 };
 
 exports.Prisma.LinkScalarFieldEnum = {
@@ -212,22 +221,6 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
-exports.Prisma.NullableJsonNullValueInput = {
-  DbNull: Prisma.DbNull,
-  JsonNull: Prisma.JsonNull
-};
-
-exports.Prisma.JsonNullValueFilter = {
-  DbNull: Prisma.DbNull,
-  JsonNull: Prisma.JsonNull,
-  AnyNull: Prisma.AnyNull
-};
-
-exports.Prisma.QueryMode = {
-  default: 'default',
-  insensitive: 'insensitive'
-};
-
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
@@ -242,6 +235,7 @@ exports.Role = exports.$Enums.Role = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  Cosmetic: 'Cosmetic',
   Link: 'Link',
   Label: 'Label',
   SocialIcon: 'SocialIcon',

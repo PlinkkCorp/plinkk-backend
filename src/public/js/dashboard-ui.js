@@ -249,6 +249,7 @@
         const fontColor = el('input', { type: 'color', value: l.fontColor || '#000000', class: 'h-10 w-full rounded bg-slate-900 border border-slate-800 p-1' });
         // Bouton Choisir (presets)
         const pickBtn = el('button', { type: 'button', text: 'Choisir', class: 'h-9 px-3 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 text-sm' });
+        const pickInput = el('input', { type: 'text', class: 'sr-only', 'aria-label': 'Ouvrir le sélecteur de presets de label',  });
         const rm = trashButton(() => { labels.splice(idx,1); renderLabels(labels); scheduleAutoSave(); });
 
         function openLabelPresetPicker() {
@@ -308,15 +309,14 @@
   const SOCIAL_PLATFORMS = [
     { id: 'github', name: 'GitHub', pattern: 'https://github.com/{handle}', iconSlug: 'github' },
     { id: 'x', name: 'X (Twitter)', pattern: 'https://x.com/{handle}', iconSlug: 'x' },
-    { id: 'twitter', name: 'Twitter', pattern: 'https://twitter.com/{handle}', iconSlug: 'twitter' },
-    { id: 'youtube', name: 'YouTube', pattern: 'https://youtube.com/@{handle}', iconSlug: 'youtube' },
+    { id: 'youtube', name: 'YouTube', pattern: 'https://youtube.com/@{handle}', iconSlug: 'youtube-alt' },
     { id: 'twitch', name: 'Twitch', pattern: 'https://twitch.tv/{handle}', iconSlug: 'twitch' },
     { id: 'instagram', name: 'Instagram', pattern: 'https://instagram.com/{handle}', iconSlug: 'instagram' },
     { id: 'facebook', name: 'Facebook', pattern: 'https://facebook.com/{handle}', iconSlug: 'facebook' },
     { id: 'linkedin', name: 'LinkedIn', pattern: 'https://www.linkedin.com/in/{handle}', iconSlug: 'linkedin' },
     { id: 'discord', name: 'Discord Server', pattern: 'https://discord.gg/{handle}', iconSlug: 'discord' },
-    { id: 'apple-music', name: 'Apple Music', pattern: 'https://music.apple.com/{country}/{path}', iconSlug: 'apple-music' },
-    { id: 'apple-podcasts', name: 'Apple Podcasts', pattern: 'https://podcasts.apple.com/{country}/{path}', iconSlug: 'apple-podcasts' },
+    { id: 'apple-music', name: 'Apple Music', pattern: 'https://music.apple.com/{country}/{path}', iconSlug: 'apple-music-alt' },
+    { id: 'apple-podcasts', name: 'Apple Podcasts', pattern: 'https://podcasts.apple.com/{country}/{path}', iconSlug: 'apple-podcasts-alt' },
   ];
 
   async function ensureIconCatalog() {
@@ -372,6 +372,123 @@
   // Garde-fou si on clique directement sur le conteneur
   iconModal?.addEventListener('click', (e) => { if (e.target === iconModal) closeIconModal(); });
   iconSearch?.addEventListener('input', () => populateIconGrid(iconSearch.value));
+
+  // Modal pour entrer les informations d'une plateforme (remplace les window.prompt)
+  let platformEntryModal = null;
+  function ensurePlatformEntryModal() {
+    if (platformEntryModal) return platformEntryModal;
+    const wrapper = document.createElement('div');
+    wrapper.id = 'platformEntryModal';
+    wrapper.className = 'fixed inset-0 z-[70] hidden';
+    const overlay = document.createElement('div');
+    overlay.className = 'absolute inset-0 bg-black/60';
+    const center = document.createElement('div');
+    center.className = 'relative z-[1] mx-auto my-8 w-full max-w-lg p-4';
+    const panel = document.createElement('div');
+    panel.className = 'mx-4 rounded border border-slate-800 bg-slate-900 shadow-lg overflow-hidden';
+    const header = document.createElement('div');
+    header.className = 'flex items-center justify-between px-4 py-2 border-b border-slate-800';
+    const titleEl = document.createElement('div');
+    titleEl.className = 'text-sm text-slate-300';
+    titleEl.textContent = 'Détails de la plateforme';
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'h-8 w-8 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700';
+    closeBtn.setAttribute('aria-label', 'Fermer');
+    closeBtn.innerHTML = '<svg class="h-4 w-4 text-slate-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+    header.append(titleEl, closeBtn);
+    const body = document.createElement('div');
+    body.className = 'p-4 space-y-3';
+
+    const info = document.createElement('div');
+    info.className = 'text-xs text-slate-400';
+    info.textContent = '';
+
+    const fieldHandle = document.createElement('input');
+    fieldHandle.type = 'text';
+    fieldHandle.placeholder = "Identifiant / handle";
+    fieldHandle.className = 'w-full px-3 py-2 rounded bg-slate-800 border border-slate-700 text-sm';
+
+    const fieldCountry = document.createElement('input');
+    fieldCountry.type = 'text';
+    fieldCountry.placeholder = 'Code pays (ex: fr, us)';
+    fieldCountry.className = 'w-full px-3 py-2 rounded bg-slate-800 border border-slate-700 text-sm';
+
+    const fieldPath = document.createElement('input');
+    fieldPath.type = 'text';
+    fieldPath.placeholder = 'Chemin / identifiant (ex: artist/12345-nom)';
+    fieldPath.className = 'w-full px-3 py-2 rounded bg-slate-800 border border-slate-700 text-sm';
+
+    const actions = document.createElement('div');
+    actions.className = 'flex justify-end gap-2';
+    const btnCancel = document.createElement('button');
+    btnCancel.type = 'button';
+    btnCancel.className = 'h-9 px-3 rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 text-sm';
+    btnCancel.textContent = 'Annuler';
+    const btnOk = document.createElement('button');
+    btnOk.type = 'button';
+    btnOk.className = 'h-9 px-3 rounded bg-emerald-600 hover:bg-emerald-500 text-sm text-white';
+    btnOk.textContent = 'Valider';
+    actions.append(btnCancel, btnOk);
+
+    body.append(info, fieldHandle, fieldCountry, fieldPath, actions);
+    panel.append(header, body);
+    center.appendChild(panel);
+    wrapper.append(overlay, center);
+    document.body.appendChild(wrapper);
+
+    // state
+    let currentPlatform = null;
+    let submitCb = null;
+
+    function open(platform, cb) {
+      currentPlatform = platform;
+      submitCb = cb;
+      titleEl.textContent = `Plateforme — ${platform?.name || ''}`;
+      info.textContent = platform?.pattern || '';
+      // reset fields
+      fieldHandle.value = '';
+      fieldCountry.value = '';
+      fieldPath.value = '';
+      // show/hide fields depending on platform
+      if (platform?.id === 'apple-music' || platform?.id === 'apple-podcasts') {
+        fieldHandle.classList.add('hidden');
+        fieldCountry.classList.remove('hidden');
+        fieldPath.classList.remove('hidden');
+      } else {
+        fieldHandle.classList.remove('hidden');
+        fieldCountry.classList.add('hidden');
+        fieldPath.classList.add('hidden');
+      }
+      wrapper.classList.remove('hidden');
+      fieldHandle.focus();
+    }
+
+    function close() {
+      wrapper.classList.add('hidden');
+      currentPlatform = null;
+      submitCb = null;
+    }
+
+    btnCancel.addEventListener('click', () => { close(); });
+    overlay.addEventListener('click', () => { close(); });
+    closeBtn.addEventListener('click', () => { close(); });
+    btnOk.addEventListener('click', () => {
+      if (!submitCb || !currentPlatform) { close(); return; }
+      const payload = { handle: fieldHandle.value.trim(), country: fieldCountry.value.trim(), path: fieldPath.value.trim() };
+      try { submitCb(payload); } catch (e) { /* ignore */ }
+      close();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !wrapper.classList.contains('hidden')) close(); });
+
+    platformEntryModal = { open, close };
+    return platformEntryModal;
+  }
+
+  function openPlatformEntryModal(platform, cb) {
+    const m = ensurePlatformEntryModal();
+    m.open(platform, cb);
+  }
 
   // Helpers
   function isUrlish(v) {
@@ -718,30 +835,33 @@
             onSelect: (i) => {
               const plat = SOCIAL_PLATFORMS[i];
               if (!plat) return;
-              let final = '';
-              if (plat.id === 'apple-music') {
-                const country = (window.prompt('Code pays (ex: fr, us) pour Apple Music ?', 'fr') || 'fr').trim();
-                const path = (window.prompt('Chemin Apple Music (ex: artist/12345-nom, album/..., playlist/...)', '') || '').trim().replace(/^\/+/, '');
-                if (country && path) final = `https://music.apple.com/${country}/${path}`;
-              } else if (plat.id === 'apple-podcasts') {
-                const country = (window.prompt('Code pays (ex: fr, us) pour Apple Podcasts ?', 'fr') || 'fr').trim();
-                const path = (window.prompt('Chemin Podcasts (ex: podcast/id1234567890)', '') || '').trim().replace(/^\/+/, '');
-                if (country && path) final = `https://podcasts.apple.com/${country}/${path}`;
-              } else {
-                // Ask handle via prompt pour les autres plateformes
-                const handle = window.prompt(`Votre identifiant pour ${plat.name} ?`);
-                final = plat.pattern.replace('{handle}', (handle || '').trim());
-              }
-              if (final) {
-                url.value = final;
-                s.url = final;
-              }
-              // Si aucune icône définie (ou en mode catalogue), on suggère l’icône correspondante
-              if (!s.icon || (!isUrlish(s.icon) && s.icon.trim() === '')) {
-                iconName.value = plat.iconSlug;
-                updateFromCatalog();
-              }
-              scheduleAutoSave();
+              // open platform entry modal to collect necessary inputs instead of window.prompt
+              openPlatformEntryModal(plat, ({ handle, country, path }) => {
+                let final = '';
+                if (plat.id === 'apple-music') {
+                  const c = (country || 'fr').trim();
+                  const p = (path || '').trim().replace(/^\/+/, '');
+                  if (c && p) final = `https://music.apple.com/${c}/${p}`;
+                } else if (plat.id === 'apple-podcasts') {
+                  const c = (country || 'fr').trim();
+                  const p = (path || '').trim().replace(/^\/+/, '');
+                  if (c && p) final = `https://podcasts.apple.com/${c}/${p}`;
+                } else {
+                  const h = (handle || '').trim();
+                  final = plat.pattern.replace('{handle}', h);
+                }
+                if (final) {
+                  url.value = final;
+                  s.url = final;
+                }
+                // If no icon set, or if the current source is the catalog, set suggested icon from platform
+                // (previous logic incorrectly required an empty trimmed string and didn't honor 'catalog' mode)
+                if (!s.icon || sourceSel.value === 'catalog') {
+                  iconName.value = plat.iconSlug;
+                  updateFromCatalog();
+                }
+                scheduleAutoSave();
+              });
             }
           });
         }
@@ -759,6 +879,25 @@
         urlSourceSel.addEventListener('change', () => { applyUrlMode(); });
         url.addEventListener('input', () => { s.url = url.value; scheduleAutoSave(); });
         urlPickBtn.addEventListener('click', openPlatformPicker);
+        // Ouvrir aussi le sélecteur quand on clique sur le container/url (pas seulement le petit bouton)
+        // et activer via le clavier (Espace/Entrée) pour l'accessibilité — seulement en mode 'platform'.
+        urlWrap.addEventListener('click', (e) => {
+          // éviter de ré-ouvrir si le bouton intégré a été cliqué
+          if (e.target === urlPickBtn) return;
+          if (urlSourceSel.value === 'platform') openPlatformPicker();
+        });
+
+        url.addEventListener('click', () => {
+          if (urlSourceSel.value === 'platform') openPlatformPicker();
+        });
+
+        url.addEventListener('keydown', (e) => {
+          if (urlSourceSel.value !== 'platform') return;
+          if (e.key === 'Enter' || e.key === ' ' || e.code === 'Space') {
+            e.preventDefault();
+            openPlatformPicker();
+          }
+        });
 
   iconWrap.append(iconPreview, sourceSel, catalogWrap, iconUrlWrap, iconUploadWrap);
         rmCell.append(rm);

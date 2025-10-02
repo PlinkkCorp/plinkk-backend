@@ -7,7 +7,7 @@
 generator client {
   provider      = "prisma-client-js"
   output        = "../generated/prisma"
-  binaryTargets = ["native", "windows"]
+  binaryTargets = ["native", "windows", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -29,7 +29,7 @@ model User {
   userName                         String
   password                         String
   email                            String  @unique
-  publicEmail                      String? @default("email")
+  publicEmail                      String?
   profileLink                      String? @default("https://github.com")
   profileImage                     String? @default("https://avatars.githubusercontent.com/u/9919?s=200&v=4")
   profileIcon                      String? @default("https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png")
@@ -74,10 +74,21 @@ model User {
   bumpPaidUntil DateTime? // bump payant actif jusqu’à
 
   // Cosmétiques et avantages visuels
-  cosmetics Json? // { flair, bannerUrl, frame, theme, ... }
+  cosmetics Cosmetic? // { flair, bannerUrl, frame, theme, ... }
 
   // Visibilité répertoire public Plinkk
   isPublic Boolean @default(true)
+}
+
+model Cosmetic {
+  id        Int     @id @default(autoincrement())
+  flair     String? @default("OG")
+  frame     String? @default("none")
+  theme     String? @default("system")
+  bannerUrl String? @default("")
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 model Link {

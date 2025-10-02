@@ -63,11 +63,11 @@
               <p class="text-sm font-medium">Profil public</p>
               <p class="text-xs text-slate-400">Autoriser l'apparition dans la page Utilisateurs.</p>
             </div>
-            <label class="inline-flex items-center cursor-pointer">
+            <label class="inline-flex items-center cursor-pointer relative">
               <input id="togglePublic" type="checkbox" class="sr-only peer" <%= user.isPublic ? 'checked' : '' %> />
-              <span class="w-10 h-6 bg-slate-700/80 rounded-full p-1 peer-checked:bg-emerald-600 transition relative">
-                <span class="absolute top-1 left-1 size-4 rounded-full bg-white transition peer-checked:translate-x-4"></span>
-              </span>
+              <span class="w-10 h-6 bg-slate-700/80 rounded-full p-1 peer-checked:bg-emerald-600 transition"></span>
+              <!-- knob: must be a sibling of the input for Tailwind's peer-checked selector to work -->
+              <span class="absolute top-1 left-1 size-4 rounded-full bg-white transition peer-checked:translate-x-4"></span>
             </label>
           </div>
           <div class="flex items-center justify-between py-2">
@@ -75,24 +75,15 @@
               <p class="text-sm font-medium">Afficher mon email</p>
               <p class="text-xs text-slate-400">Rendre l'email visible sur la page Utilisateurs.</p>
             </div>
-            <label class="inline-flex items-center cursor-pointer">
+            <label class="inline-flex items-center cursor-pointer relative">
               <input id="toggleEmailPublic" type="checkbox" class="sr-only peer" <%= isEmailPublic ? 'checked' : '' %> />
-              <span class="w-10 h-6 bg-slate-700/80 rounded-full p-1 peer-checked:bg-emerald-600 transition relative">
-                <span class="absolute top-1 left-1 size-4 rounded-full bg-white transition peer-checked:translate-x-4"></span>
-              </span>
+              <span class="w-10 h-6 bg-slate-700/80 rounded-full p-1 peer-checked:bg-emerald-600 transition"></span>
+              <span class="absolute top-1 left-1 size-4 rounded-full bg-white transition peer-checked:translate-x-4"></span>
             </label>
           </div>
         </div>
 
         <!-- fin colonne -->
-      </div>
-
-      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-        <h2 class="font-medium mb-2">Liens rapides</h2>
-        <div class="flex flex-wrap gap-2">
-          <a href="/<%= user.id %>" target="_blank" class="px-3 py-2 text-sm rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white">Voir mon profil</a>
-          <a href="/users" class="px-3 py-2 text-sm rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200">Utilisateurs</a>
-        </div>
       </div>
     </section>
   </main>
@@ -115,37 +106,36 @@
       const file = input.files[0];
       if (!/^image\//i.test(file.type)) { setMsg('Fichier non valide (image requise).', false); return; }
       if (file.size > 2 * 1024 * 1024) { setMsg('Image trop lourde (max 2 Mo).', false); return; }
-      const reader = new FileReader();
-      reader.onload = async () => {
-        try {
-          const dataUrl = reader.result;
-          const res = await fetch('/api/me/avatar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ dataUrl })
-          });
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          const json = await res.json();
-          if (json && (json.url || json.file) && preview){
-            const raw = json.url || ('/public/uploads/avatars/' + json.file);
-            const url = raw + '?v=' + Date.now();
-            preview.innerHTML = '<img src="' + url + '" alt="Avatar" class="h-full w-full object-cover" />';
-            // mettre à jour les avatars visibles (header/aside) sans recharger
-            document.querySelectorAll('[data-avatar]').forEach(el => {
+      try {
+        const fd = new FormData();
+        fd.append('avatar', file, file.name);
+        const res = await fetch('/api/me/avatar-file', {
+          method: 'POST',
+          body: fd
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        if (json && (json.url || json.file) && preview){
+          const raw = json.url || ('/public/uploads/plinkk/' + json.file);
+          const url = raw + '?v=' + Date.now();
+          preview.innerHTML = '<img src="' + url + '" alt="Avatar" class="h-full w-full object-cover" />';
+          const currentId = '<%= user.id %>';
+          document.querySelectorAll('[data-avatar]').forEach(el => {
+            const elUser = el.getAttribute && el.getAttribute('data-avatar-user');
+            if (elUser && elUser === currentId) {
               if (el.tagName === 'IMG') {
                 el.setAttribute('src', url);
               } else {
-                el.innerHTML = '<img data-avatar src="' + url + '" alt="Avatar" class="h-full w-full object-cover" />';
+                el.innerHTML = '<img data-avatar data-avatar-user="' + currentId + '" src="' + url + '" alt="Avatar" class="h-full w-full object-cover" />';
               }
-            });
-          }
-          setMsg('Avatar mis à jour.', true);
-        } catch(err){
-          setMsg('Échec de l’upload.', false);
+            }
+          });
         }
-      };
-      reader.onerror = () => setMsg('Lecture du fichier impossible.', false);
-      reader.readAsDataURL(file);
+        setMsg('Avatar mis à jour.', true);
+      } catch(err){
+        console.error(err);
+        setMsg('Échec de l’upload.', false);
+      }
     }
 
     input?.addEventListener('change', uploadAvatar);
