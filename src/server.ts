@@ -12,7 +12,6 @@ import {
   mkdirSync,
   unlinkSync,
 } from "fs";
-import crypto from "crypto";
 import { PrismaClient, Role } from "../generated/prisma/client";
 import { generateProfileConfig } from "./generateConfig";
 import { minify } from "uglify-js";
@@ -22,9 +21,13 @@ import fastifyMultipart from '@fastify/multipart';
 import bcrypt from "bcrypt";
 import fastifySecureSession, { Session } from "@fastify/secure-session";
 import z from "zod";
+import { apiRoutes } from "./server/apiRoutes";
+import { staticPagesRoutes } from "./server/staticPagesRoutes";
+import { dashboardRoutes } from "./server/dashboardRoutes";
+import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
 
-const prisma = new PrismaClient();
-const fastify = Fastify({
+export const prisma = new PrismaClient();
+export const fastify = Fastify({
   logger: true,
 });
 const PORT = Number(process.env.PORT) || 3001;
@@ -62,6 +65,11 @@ fastify.register(fastifySecureSession, {
   },
 });
 
+fastify.register(apiRoutes, { prefix: "/api" })
+fastify.register(staticPagesRoutes)
+fastify.register(dashboardRoutes, { prefix: "/dashboard" })
+fastify.register(plinkkFrontUserRoutes)
+
 fastify.get("/", async function (request, reply) {
   const currentUserId = request.session.get("data") as string | undefined;
   const currentUser = currentUserId
@@ -77,142 +85,6 @@ fastify.get("/", async function (request, reply) {
       })
     : null;
   return reply.view("index.ejs", { currentUser });
-});
-
-// Pages statiques utiles
-fastify.get("/about", async (request, reply) => {
-  const currentUserId = request.session.get("data") as string | undefined;
-  const currentUser = currentUserId
-    ? await prisma.user.findUnique({
-        where: { id: currentUserId },
-        select: {
-          id: true,
-          userName: true,
-          isPublic: true,
-          email: true,
-          image: true,
-        },
-      })
-    : null;
-  return reply.view("about.ejs", { currentUser });
-});
-fastify.get("/privacy", async (request, reply) => {
-  const currentUserId = request.session.get("data") as string | undefined;
-  const currentUser = currentUserId
-    ? await prisma.user.findUnique({
-        where: { id: currentUserId },
-        select: {
-          id: true,
-          userName: true,
-          isPublic: true,
-          email: true,
-          image: true,
-        },
-      })
-    : null;
-  return reply.view("privacy.ejs", { currentUser });
-});
-fastify.get("/terms", async (request, reply) => {
-  const currentUserId = request.session.get("data") as string | undefined;
-  const currentUser = currentUserId
-    ? await prisma.user.findUnique({
-        where: { id: currentUserId },
-        select: {
-          id: true,
-          userName: true,
-          isPublic: true,
-          email: true,
-          image: true,
-        },
-      })
-    : null;
-  return reply.view("terms.ejs", { currentUser });
-});
-fastify.get("/cookies", async (request, reply) => {
-  const currentUserId = request.session.get("data") as string | undefined;
-  const currentUser = currentUserId
-    ? await prisma.user.findUnique({
-        where: { id: currentUserId },
-        select: {
-          id: true,
-          userName: true,
-          isPublic: true,
-          email: true,
-          image: true,
-        },
-      })
-    : null;
-  return reply.view("cookies.ejs", { currentUser });
-});
-fastify.get("/legal", async (request, reply) => {
-  const currentUserId = request.session.get("data") as string | undefined;
-  const currentUser = currentUserId
-    ? await prisma.user.findUnique({
-        where: { id: currentUserId },
-        select: {
-          id: true,
-          userName: true,
-          isPublic: true,
-          email: true,
-          image: true,
-        },
-      })
-    : null;
-  return reply.view("legal.ejs", { currentUser });
-});
-
-// robots.txt
-fastify.get("/robots.txt", async (request, reply) => {
-  const host =
-    (request.headers["x-forwarded-host"] as string) ||
-    (request.headers.host as string) ||
-    "0.0.0.0:3001";
-  const proto = (
-    (request.headers["x-forwarded-proto"] as string) ||
-    (request.protocol as string) ||
-    "http"
-  ).split(",")[0];
-  const base = `${proto}://${host}`;
-  reply
-    .type("text/plain")
-    .send(`User-agent: *\nAllow: /\nSitemap: ${base}/sitemap.xml\n`);
-});
-
-// sitemap.xml
-fastify.get("/sitemap.xml", async (request, reply) => {
-  const host =
-    (request.headers["x-forwarded-host"] as string) ||
-    (request.headers.host as string) ||
-    "0.0.0.0:3001";
-  const proto = (
-    (request.headers["x-forwarded-proto"] as string) ||
-    (request.protocol as string) ||
-    "http"
-  ).split(",")[0];
-  const base = `${proto}://${host}`;
-  const staticUrls = [
-    "",
-    "about",
-    "contact",
-    "privacy",
-    "terms",
-    "cookies",
-    "legal",
-    "users",
-    "dashboard",
-  ].map((p) => (p ? `${base}/${p}` : `${base}/`));
-  const users = await prisma.user.findMany({
-    select: { id: true },
-    orderBy: { createdAt: "asc" },
-  });
-  const userUrls = users.map((u) => `${base}/${encodeURIComponent(u.id)}`);
-  const urls = [...staticUrls, ...userUrls];
-  const xml =
-    `<?xml version="1.0" encoding="UTF-8"?>\n` +
-    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
-    urls.map((loc) => `\n  <url><loc>${loc}</loc></url>`).join("") +
-    "\n</urlset>\n";
-  reply.type("application/xml").send(xml);
 });
 
 fastify.get("/login", async function (request, reply) {
@@ -386,16 +258,14 @@ fastify.get("/dashboard/account", async function (request, reply) {
   const userInfo = await prisma.user.findFirst({
     where: { id: userId },
     include: { cosmetics: true },
+    omit: { password: true },
   });
   if (!userInfo) return reply.redirect("/login");
-  // Supprime le mot de passe côté serveur avant d'envoyer à la vue
-  const userInfoSafe: any = { ...(userInfo as any) };
-  delete userInfoSafe.password;
-  // Dérive les préférences depuis cosmetics (relation Cosmetic)
-  const cosmetics = (userInfoSafe.cosmetics as any) || {};
+  // Dérive les préférences depuis cosmetics json (pour éviter une migration)
+  const cosmetics = (userInfo.cosmetics as any) || {};
   const privacy = cosmetics.settings || {};
   const isEmailPublic = Boolean(privacy.isEmailPublic);
-  return reply.view("dashboard/account.ejs", { user: userInfoSafe, isEmailPublic });
+  return reply.view("dashboard/account.ejs", { user: userInfo, isEmailPublic });
 });
 
 // Dashboard: Cosmétiques (aperçu et sélection)
@@ -405,11 +275,10 @@ fastify.get("/dashboard/cosmetics", async function (request, reply) {
   const userInfo = await prisma.user.findFirst({
     where: { id: userId },
     include: { cosmetics: true },
+    omit: { password: true },
   });
   if (!userInfo) return reply.redirect("/login");
-  const userInfoSafe: any = { ...(userInfo as any) };
-  delete userInfoSafe.password;
-  const cosmetics = (userInfoSafe.cosmetics as any) || {};
+  const cosmetics = (userInfo.cosmetics as any) || {};
   // Petit catalogue par défaut (certaines entrées "verrouillées" selon le rôle)
   const catalog = {
     flairs: [
@@ -512,76 +381,71 @@ fastify.get("/dashboard/versions", async function (request, reply) {
 fastify.get("/api/me/config", async (request, reply) => {
   const userId = request.session.get("data");
   if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-  try {
-    const profile = await prisma.user.findFirst({
-      where: { id: userId as string },
-      include: {
-        background: true,
-        labels: true,
-        neonColors: true,
-        socialIcons: true,
-        statusbar: true,
-        links: true,
-      },
-    });
-    if (!profile) return reply.code(404).send({ error: "Not found" });
 
-    const config = {
-      profileLink: profile.profileLink,
-      profileImage: profile.profileImage,
-      profileIcon: profile.profileIcon,
-      profileSiteText: profile.profileSiteText,
-      userName: profile.userName,
-      // Email public (découplé de l'email de connexion): stocké dans User.publicEmail
-      // Fallback vers l'email de compte pour compat rétro (affichage uniquement)
-      email: (profile as any).publicEmail ?? profile.email ?? "",
-      iconUrl: profile.iconUrl,
-      description: profile.description,
-      profileHoverColor: profile.profileHoverColor,
-      degBackgroundColor: profile.degBackgroundColor,
-      neonEnable: profile.neonEnable,
-      buttonThemeEnable: profile.buttonThemeEnable,
-      EnableAnimationArticle: profile.EnableAnimationArticle,
-      EnableAnimationButton: profile.EnableAnimationButton,
-      EnableAnimationBackground: profile.EnableAnimationBackground,
-      backgroundSize: profile.backgroundSize,
-      selectedThemeIndex: profile.selectedThemeIndex,
-      selectedAnimationIndex: profile.selectedAnimationIndex,
-      selectedAnimationButtonIndex: profile.selectedAnimationButtonIndex,
-      selectedAnimationBackgroundIndex: profile.selectedAnimationBackgroundIndex,
-      animationDurationBackground: profile.animationDurationBackground,
-      delayAnimationButton: profile.delayAnimationButton,
-      canvaEnable: profile.canvaEnable,
-      selectedCanvasIndex: profile.selectedCanvasIndex,
-      background: profile.background?.map((c) => c.color) ?? [],
-      neonColors: profile.neonColors?.map((c) => c.color) ?? [],
-      labels:
-        profile.labels?.map((l) => ({
-          data: l.data,
-          color: l.color,
-          fontColor: l.fontColor,
-        })) ?? [],
-      socialIcon:
-        profile.socialIcons?.map((s) => ({ url: s.url, icon: s.icon })) ?? [],
-      links:
-        profile.links?.map((l) => ({
-          icon: l.icon,
-          url: l.url,
-          text: l.text,
-          name: l.name,
-          description: l.description,
-          showDescriptionOnHover: l.showDescriptionOnHover,
-          showDescription: l.showDescription,
-        })) ?? [],
-      statusbar: profile.statusbar ?? null,
-    };
+  const profile = await prisma.user.findFirst({
+    where: { id: userId as string },
+    include: {
+      background: true,
+      labels: true,
+      neonColors: true,
+      socialIcons: true,
+      statusbar: true,
+      links: true,
+    },
+  });
+  if (!profile) return reply.code(404).send({ error: "Not found" });
 
-    return reply.send(config);
-  } catch (e) {
-    request.log.error(e);
-    // Return a minimal error payload to help identify the problem from the browser
-    return reply.code(500).send({ error: "Internal Server Error", detail: String(e) });
-  }
+  const config = {
+    profileLink: profile.profileLink,
+    profileImage: profile.profileImage,
+    profileIcon: profile.profileIcon,
+    profileSiteText: profile.profileSiteText,
+    userName: profile.userName,
+    // Email public (découplé de l'email de connexion): stocké dans User.publicEmail
+    // Fallback vers l'email de compte pour compat rétro (affichage uniquement)
+    email: (profile as any).publicEmail ?? profile.email ?? "",
+    iconUrl: profile.iconUrl,
+    description: profile.description,
+    profileHoverColor: profile.profileHoverColor,
+    degBackgroundColor: profile.degBackgroundColor,
+    neonEnable: profile.neonEnable,
+    buttonThemeEnable: profile.buttonThemeEnable,
+    EnableAnimationArticle: profile.EnableAnimationArticle,
+    EnableAnimationButton: profile.EnableAnimationButton,
+    EnableAnimationBackground: profile.EnableAnimationBackground,
+    backgroundSize: profile.backgroundSize,
+    selectedThemeIndex: profile.selectedThemeIndex,
+    selectedAnimationIndex: profile.selectedAnimationIndex,
+    selectedAnimationButtonIndex: profile.selectedAnimationButtonIndex,
+    selectedAnimationBackgroundIndex: profile.selectedAnimationBackgroundIndex,
+    animationDurationBackground: profile.animationDurationBackground,
+    delayAnimationButton: profile.delayAnimationButton,
+    canvaEnable: profile.canvaEnable,
+    selectedCanvasIndex: profile.selectedCanvasIndex,
+    background: profile.background?.map((c) => c.color) ?? [],
+    neonColors: profile.neonColors?.map((c) => c.color) ?? [],
+    labels:
+      profile.labels?.map((l) => ({
+        data: l.data,
+        color: l.color,
+        fontColor: l.fontColor,
+      })) ?? [],
+    socialIcon:
+      profile.socialIcons?.map((s) => ({ url: s.url, icon: s.icon })) ?? [],
+    links:
+      profile.links?.map((l) => ({
+        icon: l.icon,
+        url: l.url,
+        text: l.text,
+        name: l.name,
+        description: l.description,
+        showDescriptionOnHover: l.showDescriptionOnHover,
+        showDescription: l.showDescription,
+      })) ?? [],
+    statusbar: profile.statusbar ?? null,
+  };
+
+  return reply.send(config);
 });
 
 // API: Mettre à jour la configuration du profil depuis l'éditeur
@@ -809,11 +673,11 @@ fastify.post("/api/me/avatar", async (request, reply) => {
       : "jpg";
     const dir = path.join(__dirname, "public", "uploads", "avatars");
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-  // Use a unique filename (timestamp + random) instead of hashing content
-  const randomSuffix = crypto.randomBytes(6).toString("hex");
-  const dedupName = `${Date.now()}-${randomSuffix}.${ext}`;
-  const filePath = path.join(dir, dedupName);
-  const publicUrl = `/public/uploads/avatars/${dedupName}`;
+    // Déduplication par hash
+    const hash = crypto.createHash("sha256").update(buf).digest("hex");
+    const dedupName = `${hash}.${ext}`;
+    const filePath = path.join(dir, dedupName);
+    const publicUrl = `/public/uploads/avatars/${dedupName}`;
 
     // Récupérer l'ancienne image du compte (stockée comme nom de fichier ou ancienne URL)
     const me = await prisma.user.findUnique({
@@ -859,95 +723,6 @@ fastify.post("/api/me/avatar", async (request, reply) => {
   }
 });
 
-// API: uploader via multipart/form-data (file input)
-fastify.post('/api/me/avatar-file', async (request, reply) => {
-  const userId = request.session.get('data');
-  if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
-  try {
-    // Log basic context to help debugging (no secrets)
-    request.log.info({ hasSessionCookie: !!(request.cookies && request.cookies['plinkk-backend']), userId: !!userId }, 'avatar-file upload attempt');
-
-    // @ts-ignore - fastify multipart typings
-    // Try multiple ways to obtain the uploaded file depending on Fastify/multipart config:
-    //  - request.file() (recommended)
-    //  - request.body.avatar when `attachFieldsToBody: true` is used
-    let mp: any = null;
-    try {
-      mp = await (request as any).file();
-    } catch (e) {
-      // ignore - fallback below
-      mp = null;
-    }
-    if (!mp && (request.body as any)?.avatar) {
-      mp = (request.body as any).avatar;
-    }
-    if (!mp) return reply.code(400).send({ error: 'No file uploaded' });
-    const { file, filename, mimetype } = mp;
-    request.log.info({ filename, mimetype }, 'received multipart file');
-    if (!/^image\//i.test(mimetype)) return reply.code(400).send({ error: 'Invalid file type' });
-    // limit size: 2MB
-    let buf: Buffer;
-    // mp may be one of several shapes depending on Fastify config:
-    // - { file: AsyncIterable } (standard request.file())
-    // - { data: Buffer } when attachFieldsToBody true (some setups)
-    // - { file: string } path to temp file
-    // - mp may itself be a Buffer
-    if (Buffer.isBuffer(mp)) {
-      buf = mp;
-    } else if (mp.data && Buffer.isBuffer(mp.data)) {
-      buf = mp.data;
-    } else if (typeof mp === 'string' && existsSync(mp)) {
-      buf = readFileSync(mp);
-    } else if (mp.file && typeof mp.file === 'string' && existsSync(mp.file)) {
-      buf = readFileSync(mp.file);
-    } else if (mp.file && Symbol.asyncIterator in mp.file) {
-      const chunks: Buffer[] = [];
-      for await (const chunk of mp.file) chunks.push(Buffer.from(chunk));
-      buf = Buffer.concat(chunks);
-    } else if (mp.file && typeof mp.file.pipe === 'function') {
-      // stream with pipe - read manually
-      const chunks: Buffer[] = [];
-      for await (const chunk of mp.file) chunks.push(Buffer.from(chunk));
-      buf = Buffer.concat(chunks);
-    } else {
-      // Last resort: try to coerce any `mp` property that looks like content
-      if ((mp as any).toBuffer && typeof (mp as any).toBuffer === 'function') {
-        buf = (mp as any).toBuffer();
-      } else if ((mp as any).buffer && Buffer.isBuffer((mp as any).buffer)) {
-        buf = (mp as any).buffer;
-      } else {
-        request.log.warn({ mp }, 'Unknown multipart payload shape');
-        return reply.code(400).send({ error: 'Unable to read uploaded file' });
-      }
-    }
-    request.log.info({ incomingSize: buf.length }, 'multipart buffer size');
-    if (buf.length > 2 * 1024 * 1024) return reply.code(413).send({ error: 'Image too large' });
-
-    const extMatch = (filename || '').match(/\.([a-zA-Z0-9]+)$/);
-    const ext = extMatch ? extMatch[1].toLowerCase() : (mimetype.includes('png') ? 'png' : mimetype.includes('webp') ? 'webp' : 'jpg');
-
-    const dir = path.join(__dirname, 'public', 'uploads', 'plinkk');
-    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-  // Use a readable unique filename: timestamp-rand-originalname (sanitized)
-  const randomSuffix = crypto.randomBytes(6).toString('hex');
-  const safeOrig = (filename || '').replace(/[^a-zA-Z0-9.\-_]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-  const baseName = safeOrig ? `${Date.now()}-${randomSuffix}-${safeOrig}` : `${Date.now()}-${randomSuffix}`;
-  const name = `${baseName}.${ext}`;
-  const filePath = path.join(dir, name);
-  const publicUrl = `/public/uploads/plinkk/${name}`;
-
-    if (!existsSync(filePath)) writeFileSync(filePath, buf);
-
-    // update user image to new path for compatibility
-    await prisma.user.update({ where: { id: userId as string }, data: { image: publicUrl } });
-
-    return reply.send({ ok: true, url: publicUrl, file: name });
-  } catch (err) {
-    request.log.error(err);
-    return reply.code(500).send({ error: 'Upload failed' });
-  }
-});
-
 // API: mise à jour de rôle (admin only - garde-fou minimal à compléter)
 fastify.post("/api/users/:id/role", async (request, reply) => {
   const { id } = request.params as { id: string };
@@ -965,7 +740,7 @@ fastify.post("/api/users/:id/cosmetics", async (request, reply) => {
   const updated = await prisma.user.update({
     where: { id },
     data: { cosmetics },
-  select: { id: true, cosmetics: true },
+    include: { cosmetics: true },
   });
   return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
 });
@@ -1224,16 +999,6 @@ fastify.post("/api/me/email-visibility", async (request, reply) => {
     ...(cosmetics.settings || {}),
     isEmailPublic: Boolean(isEmailPublic),
   };
-  // If the user enables public email but doesn't have publicEmail set,
-  // promote the account email to publicEmail so it becomes visible in the users list.
-  if (isEmailPublic) {
-    // use any to avoid strict generated Prisma types mismatch for publicEmail
-    const me: any = await prisma.user.findUnique({ where: { id: userId as string }, select: { publicEmail: true, email: true } as any } as any);
-    if (me && (!me.publicEmail || String(me.publicEmail).trim() === "")) {
-      // set publicEmail to current account email
-      await prisma.user.update({ where: { id: userId as string }, data: { publicEmail: me.email } as any } as any);
-    }
-  }
   const updated = await prisma.user.update({
     where: { id: userId as string },
     data: { cosmetics },

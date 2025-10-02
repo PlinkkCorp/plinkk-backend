@@ -86,6 +86,7 @@ model Cosmetic {
   frame         String? @default("none")
   theme         String? @default("system")
   bannerUrl     String? @default("")
+  banner        String? @default("")
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])

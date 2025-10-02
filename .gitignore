@@ -1,9 +1,5 @@
 node_modules
 
-/generated/prisma
-
-/generated/prisma
-
 /dist/**
 
 /src/secret-key
@@ -15,7 +11,4 @@ package.json
 tsconfig.json
 
 .env
-
-prisma/schema.prisma
-
-prisma/migrations
+generated/prisma/
