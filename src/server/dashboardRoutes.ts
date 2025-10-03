@@ -162,7 +162,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // Dashboard: Admin (gestion user)
+  // Dashboard: Admin (gestion avancée)
   fastify.get("/admin", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.redirect("/login");
@@ -175,20 +175,32 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
       return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
     }
-    const users = await prisma.user.findMany({
-        where: { isPublic: true },
+    const [users, totals] = await Promise.all([
+      prisma.user.findMany({
+        // Voir tous les utilisateurs pour l'admin (pas seulement isPublic)
         select: {
           id: true,
           userName: true,
           email: true,
           role: true,
+          isPublic: true,
           cosmetics: true,
-          profileImage: true,
+          createdAt: true,
         },
-        orderBy: { createdAt: "asc" },
-      });
+        orderBy: { createdAt: "desc" },
+      }),
+      (async () => {
+        const totalUsers = await prisma.user.count();
+        const totalPublic = await prisma.user.count({ where: { isPublic: true } });
+        const totalPrivate = totalUsers - totalPublic;
+        const moderators = await prisma.user.count({ where: { role: { in: ["ADMIN", "DEVELOPER", "MODERATOR"] as any } as any } });
+        return { totalUsers, totalPublic, totalPrivate, moderators };
+      })(),
+    ]);
+
     return reply.view("dashboard/admin.ejs", {
-      users: users,
+      users,
+      totals,
       user: userInfo,
     });
   });
