@@ -161,4 +161,33 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       isEmailPublic,
     });
   });
+
+  // Dashboard: Admin (gestion user)
+  fastify.get("/admin", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.redirect("/login");
+
+    const userInfo = await prisma.user.findFirst({
+      where: { id: userId },
+      omit: { password: true },
+    });
+    if (!userInfo) return reply.redirect("/login");
+    // if (userInfo.role !== Role.ADMIN) return reply.redirect("/login");
+    const users = await prisma.user.findMany({
+        where: { isPublic: true },
+        select: {
+          id: true,
+          userName: true,
+          email: true,
+          role: true,
+          cosmetics: true,
+          profileImage: true,
+        },
+        orderBy: { createdAt: "asc" },
+      });
+    return reply.view("dashboard/admin.ejs", {
+      users: users,
+      user: userInfo,
+    });
+  });
 }
