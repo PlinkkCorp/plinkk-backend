@@ -5,8 +5,8 @@
 <main class="max-w-7xl mx-auto p-4 space-y-5">
     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 animate-slide-up">
         <div class="space-y-1">
-            <h1 class="text-2xl font-bold tracking-tight">Tous les profils hébergés</h1>
-            <p class="text-xs text-slate-400">Découvrez les comptes publics Plinkk.</p>
+            <h1 class="text-2xl font-bold tracking-tight">Administration · Utilisateurs</h1>
+            <p class="text-xs text-slate-400">Rechercher, trier et gérer les comptes publics et privés.</p>
         </div>
 
         <% if (users.length> 0) { %>
@@ -115,11 +115,10 @@
                                                                     href="/<%= u.id %>">Voir le profil</a>
                                                                 <button type="button"
                                                                     class="px-3 py-1.5 text-xs rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200 transition-colors copyBtn"
-                                                                    data-id="<%= u.id %>">Copier le
-                                                                    lien</button>
+                                                                    data-id="<%= u.id %>">Copier le lien</button>
                                                                 <button type="button"
-                                                                    class="px-3 py-1.5 text-xs rounded-md bg-red-800/80 hover:bg-red-800 border border-slate-700 text-slate-200 transition-colors copyBtn"
-                                                                    data-id="<%= u.id %>">Supprimer l'utilisateur</button>
+                                                                    class="px-3 py-1.5 text-xs rounded-md bg-red-700/80 hover:bg-red-700 border border-red-500/40 text-white transition-colors deleteBtn"
+                                                                    data-id="<%= u.id %>" data-name="<%= u.userName %>">Supprimer</button>
                                                             </div>
                                             </div>
                                         </div>
@@ -218,6 +217,31 @@
                 btn.classList.add('copy-anim');
                 setTimeout(() => btn.classList.add('copied'), 10);
                 setTimeout(() => btn.classList.remove('copied'), 1000);
+            }
+        });
+
+        // Supprimer un utilisateur (admin)
+        grid.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.deleteBtn');
+            if (!btn) return;
+            const id = btn.dataset.id;
+            const name = btn.dataset.name || id;
+            const ok = confirm(`Supprimer le compte "${name}" (@${id}) ? Cette action est irréversible.`);
+            if (!ok) return;
+            btn.disabled = true; btn.textContent = 'Suppression...';
+            try {
+                const res = await fetch(`/api/users/${encodeURIComponent(id)}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const li = btn.closest('li');
+                if (li) li.remove();
+                // refresh paginator source & counts
+                paginator.setFiltered(paginator.getAll());
+                if (totalCount) totalCount.textContent = String(paginator.getAll().length);
+            } catch (err) {
+                console.error(err);
+                alert('Impossible de supprimer cet utilisateur.');
+            } finally {
+                btn.disabled = false; btn.textContent = 'Supprimer';
             }
         });
 

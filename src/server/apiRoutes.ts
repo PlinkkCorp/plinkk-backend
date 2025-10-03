@@ -97,8 +97,14 @@ export function apiRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // API: mise à jour de rôle (admin only - garde-fou minimal à compléter)
+  // API: mise à jour de rôle (admin/dev/moderator)
   fastify.post("/users/:id/role", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
     const { id } = request.params as { id: string };
     const { role } = (request.body as any) || {};
     if (!Object.values(Role).includes(role))
@@ -107,8 +113,14 @@ export function apiRoutes(fastify: FastifyInstance) {
     return reply.send({ id: updated.id, role: updated.role });
   });
 
-  // API: régler les cosmétiques (ex: flair, bannerUrl, frame)
+  // API: régler les cosmétiques (ex: flair, bannerUrl, frame) — admin/dev/moderator
   fastify.post("/users/:id/cosmetics", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
     const { id } = request.params as { id: string };
     const cosmetics = (request.body as any) ?? null;
     const updated = await prisma.user.update({
@@ -117,6 +129,28 @@ export function apiRoutes(fastify: FastifyInstance) {
       include: { cosmetics: true },
     });
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
+  });
+
+  // API: suppression d'un utilisateur (admin/dev/moderator)
+  fastify.delete("/users/:id", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+    const { id } = request.params as { id: string };
+    await prisma.$transaction([
+      prisma.link.deleteMany({ where: { userId: id } }),
+      prisma.label.deleteMany({ where: { userId: id } }),
+      prisma.socialIcon.deleteMany({ where: { userId: id } }),
+      prisma.backgroundColor.deleteMany({ where: { userId: id } }),
+      prisma.neonColor.deleteMany({ where: { userId: id } }),
+      prisma.statusbar.deleteMany({ where: { userId: id } }),
+      prisma.cosmetic.deleteMany({ where: { userId: id } }),
+      prisma.user.delete({ where: { id } }),
+    ]);
+    return reply.send({ ok: true });
   });
 
   // API: Récupérer la configuration complète du profil pour l'éditeur
@@ -426,6 +460,35 @@ export function apiRoutes(fastify: FastifyInstance) {
       where: { id: userId as string },
       data: { password: hashed },
     });
+    return reply.send({ ok: true });
+  });
+
+  // API: supprimer mon compte (mdp + TOTP si activé)
+  fastify.post("/me/delete", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { password, otp } = (request.body as any) || {};
+    if (!password) return reply.code(400).send({ error: "Mot de passe requis" });
+    const me = await prisma.user.findUnique({ where: { id: userId as string } });
+    if (!me) return reply.code(404).send({ error: "Utilisateur introuvable" });
+    const ok = await bcrypt.compare(password, me.password);
+    if (!ok) return reply.code(403).send({ error: "Mot de passe incorrect" });
+    if (me.totpSecret && me.totpSecret !== "") {
+      if (!otp || typeof otp !== "string") return reply.code(400).send({ error: "Code 2FA requis" });
+      const valid = authenticator.check(otp, me.totpSecret);
+      if (!valid) return reply.code(403).send({ error: "Code 2FA invalide" });
+    }
+    await prisma.$transaction([
+      prisma.link.deleteMany({ where: { userId: userId as string } }),
+      prisma.label.deleteMany({ where: { userId: userId as string } }),
+      prisma.socialIcon.deleteMany({ where: { userId: userId as string } }),
+      prisma.backgroundColor.deleteMany({ where: { userId: userId as string } }),
+      prisma.neonColor.deleteMany({ where: { userId: userId as string } }),
+      prisma.statusbar.deleteMany({ where: { userId: userId as string } }),
+      prisma.cosmetic.deleteMany({ where: { userId: userId as string } }),
+      prisma.user.delete({ where: { id: userId as string } }),
+    ]);
+    request.session.delete();
     return reply.send({ ok: true });
   });
 

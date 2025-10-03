@@ -7,7 +7,8 @@ import ejs from "ejs";
 import {
   readFileSync,
 } from "fs";
-import { PrismaClient } from "../generated/prisma/client";
+import { PrismaClient } from '@prisma/client/edge'
+import { withAccelerate } from '@prisma/extension-accelerate'
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
@@ -20,7 +21,7 @@ import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
 import { authenticator } from "otplib";
 
-export const prisma = new PrismaClient();
+const prisma = new PrismaClient().$extends(withAccelerate())
 export const fastify = Fastify({
   logger: true,
 });

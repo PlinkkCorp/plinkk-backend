@@ -172,7 +172,9 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       omit: { password: true },
     });
     if (!userInfo) return reply.redirect("/login");
-    // if (userInfo.role !== Role.ADMIN) return reply.redirect("/login");
+    if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
+      return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
+    }
     const users = await prisma.user.findMany({
         where: { isPublic: true },
         select: {
