@@ -498,27 +498,20 @@ export function apiRoutes(fastify: FastifyInstance) {
   fastify.post("/me/email-visibility", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    // New behavior: use the dedicated `publicEmail` column on User to
+    // control whether the account email is publicly visible. This avoids
+    // coupling visibility to a cosmetics JSON object which doesn't exist
+    // in the Prisma schema.
     const { isEmailPublic } = (request.body as any) ?? {};
-    const u = await prisma.user.findUnique({
-      where: { id: userId as string },
-      select: { cosmetics: true },
-    });
-    const cosmetics: any = (u?.cosmetics as any) || {};
-    cosmetics.settings = {
-      ...(cosmetics.settings || {}),
-      isEmailPublic: Boolean(isEmailPublic),
-    };
+    const me = await prisma.user.findUnique({ where: { id: userId as string }, select: { email: true, publicEmail: true } });
+    if (!me) return reply.code(404).send({ error: 'Utilisateur introuvable' });
+    const newPublicEmail = Boolean(isEmailPublic) ? (me.publicEmail || me.email) : null;
     const updated = await prisma.user.update({
       where: { id: userId as string },
-      data: { cosmetics },
-      select: { id: true, cosmetics: true },
+      data: { publicEmail: newPublicEmail },
+      select: { id: true, publicEmail: true },
     });
-    return reply.send({
-      id: updated.id,
-      isEmailPublic: Boolean(
-        (updated.cosmetics as any)?.settings?.isEmailPublic
-      ),
-    });
+    return reply.send({ id: updated.id, isEmailPublic: Boolean(updated.publicEmail) });
   });
 
   // API: basculer la 2FA

@@ -75,6 +75,7 @@ fastify.get("/", async function (request, reply) {
           userName: true,
           isPublic: true,
           email: true,
+          publicEmail: true,
           image: true,
         },
       })
@@ -277,6 +278,7 @@ fastify.get("/users", async (request, reply) => {
       id: true,
       userName: true,
       email: true,
+      publicEmail: true,
       role: true,
       cosmetics: true,
       profileImage: true,

@@ -50,7 +50,7 @@
        const bannerUrl = selected.bannerUrl ? String(selected.bannerUrl) : '';
        const theme = selected.theme ? String(selected.theme) : 'system';
      %>
-  <% const isEmailPublic = u.cosmetics && u.cosmetics.settings && u.cosmetics.settings.isEmailPublic; %>
+  <% const isEmailPublic = Boolean(u.publicEmail); %>
   <% const publicEmail = u.publicEmail || u.email; %>
       <li class="group rounded-xl border border-slate-800/80 bg-slate-900/70 hover:bg-slate-900 transition-colors shadow-sm hover:shadow-md animate-slide-up overflow-hidden"
         data-name="<%- (u.userName||'').toLowerCase() %>"

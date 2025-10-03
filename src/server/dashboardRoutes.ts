@@ -152,10 +152,9 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       omit: { password: true },
     });
     if (!userInfo) return reply.redirect("/login");
-    // Dérive les préférences depuis cosmetics json (pour éviter une migration)
-    const cosmetics = (userInfo.cosmetics as any) || {};
-    const privacy = cosmetics.settings || {};
-    const isEmailPublic = Boolean(privacy.isEmailPublic);
+    // Dérive la visibilité d'email depuis le champ `publicEmail` (présent
+    // dans le schéma Prisma). Si publicEmail est défini -> l'email est public.
+    const isEmailPublic = Boolean((userInfo as any).publicEmail);
     return reply.view("dashboard/account.ejs", {
       user: userInfo,
       isEmailPublic,
@@ -182,6 +181,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
           id: true,
           userName: true,
           email: true,
+          publicEmail: true,
           role: true,
           isPublic: true,
           cosmetics: true,
