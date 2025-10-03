@@ -32,6 +32,9 @@ importers:
       '@prisma/client':
         specifier: ^6.16.2
         version: 6.16.3(prisma@6.16.3(typescript@5.9.2))(typescript@5.9.2)
+      '@prisma/extension-accelerate':
+        specifier: ^2.0.2
+        version: 2.0.2(@prisma/client@6.16.3(prisma@6.16.3(typescript@5.9.2))(typescript@5.9.2))
       '@types/uglify-js':
         specifier: ^3.17.5
         version: 3.17.5
@@ -239,6 +242,12 @@ packages:
 
   '@prisma/engines@6.16.3':
     resolution: {integrity: sha512-b+Rl4nzQDcoqe6RIpSHv8f5lLnwdDGvXhHjGDiokObguAAv/O1KaX1Oc69mBW/GFWKQpCkOraobLjU6s1h8HGg==}
+
+  '@prisma/extension-accelerate@2.0.2':
+    resolution: {integrity: sha512-yZK6/k7uOEFpEsKoZezQS1CKDboPtBCQ0NyI70e1Un8tDiRgg80iWGyjsJmRpps2ZIut3MroHP+dyR3wVKh8lA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@prisma/client': '>=4.16.1'
 
   '@prisma/fetch-engine@6.16.3':
     resolution: {integrity: sha512-bUoRIkVaI+CCaVGrSfcKev0/Mk4ateubqWqGZvQ9uCqFv2ENwWIR3OeNuGin96nZn5+SkebcD7RGgKr/+mJelw==}
@@ -1754,6 +1763,10 @@ snapshots:
       '@prisma/engines-version': 6.16.1-1.bb420e667c1820a8c05a38023385f6cc7ef8e83a
       '@prisma/fetch-engine': 6.16.3
       '@prisma/get-platform': 6.16.3
+
+  '@prisma/extension-accelerate@2.0.2(@prisma/client@6.16.3(prisma@6.16.3(typescript@5.9.2))(typescript@5.9.2))':
+    dependencies:
+      '@prisma/client': 6.16.3(prisma@6.16.3(typescript@5.9.2))(typescript@5.9.2)
 
   '@prisma/fetch-engine@6.16.3':
     dependencies:

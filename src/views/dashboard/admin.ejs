@@ -226,7 +226,40 @@
             if (!btn) return;
             const id = btn.dataset.id;
             const name = btn.dataset.name || id;
-            const ok = confirm(`Supprimer le compte "${name}" (@${id}) ? Cette action est irréversible.`);
+            const confirmWithInput = (displayName, userId) => new Promise(resolve => {
+                const overlay = document.createElement('div');
+                overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
+                overlay.innerHTML = `
+                                    <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
+                                        <div class="mb-3">Pour confirmer la suppression du compte "<strong>${displayName}</strong>" (@${userId}), tapez <strong>${userId}</strong> ci‑dessous :</div>
+                                        <input type="text" class="w-full mb-3 px-3 py-2 rounded bg-slate-800 border border-slate-700 text-sm" aria-label="Confirmation input" />
+                                        <div class="flex justify-end gap-2">
+                                        <button class="cancel px-3 py-1.5 rounded-md bg-slate-700 text-sm">Annuler</button>
+                                        <button class="ok px-3 py-1.5 rounded-md bg-red-600 text-white text-sm">Supprimer</button>
+                                        </div>
+                                    </div>`;
+                const input = overlay.querySelector('input');
+                const btnOk = overlay.querySelector('.ok');
+                const btnCancel = overlay.querySelector('.cancel');
+
+                document.body.appendChild(overlay);
+                input.focus();
+
+                const cleanup = (res) => {
+                    overlay.remove();
+                    resolve(res);
+                };
+
+                btnCancel.addEventListener('click', () => cleanup(false));
+                overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(false); });
+                btnOk.addEventListener('click', () => cleanup((input.value || '').trim() === String(userId)));
+                input.addEventListener('keydown', (ev) => {
+                    if (ev.key === 'Enter') { ev.preventDefault(); btnOk.click(); }
+                    if (ev.key === 'Escape') { btnCancel.click(); }
+                });
+            });
+
+            const ok = await confirmWithInput(name, id);
             if (!ok) return;
             btn.disabled = true; btn.textContent = 'Suppression...';
             try {

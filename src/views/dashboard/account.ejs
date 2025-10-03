@@ -84,20 +84,51 @@
         </div>
 
         <!-- Danger zone: supprimer mon compte -->
-        <form id="formDeleteAccount" class="rounded-xl border border-red-900/50 bg-red-950/40 p-4 shadow animate-slide-up">
+        <div id="deleteZone" class="rounded-xl border border-red-900/50 bg-red-950/40 p-4 shadow animate-slide-up">
           <h2 class="font-medium mb-2 text-red-200">Supprimer mon compte</h2>
           <p class="text-xs text-red-300 mb-3">Cette action est définitive. Toutes vos données (liens, labels, icônes sociales, couleurs, etc.) seront supprimées.</p>
-          <label class="block text-xs text-red-100 mb-1">Mot de passe</label>
-          <input name="password" type="password" class="w-full rounded-md bg-slate-950/40 border border-red-800 px-3 py-2 text-sm mb-2 text-red-50 placeholder:text-red-300/60" placeholder="Votre mot de passe" />
-          <label class="block text-xs text-red-100 mb-1">Code 2FA (si activé)</label>
-          <input name="otp" type="text" inputmode="numeric" pattern="[0-9]*" class="w-full rounded-md bg-slate-950/40 border border-red-800 px-3 py-2 text-sm mb-3 text-red-50 placeholder:text-red-300/60" placeholder="123456" />
-          <button class="px-3 py-2 text-sm rounded-md bg-red-700 hover:bg-red-600 text-white border border-red-500/60" type="submit">Supprimer définitivement</button>
-        </form>
+
+          <!-- Bouton initial unique qui ouvre un modal popup -->
+          <div id="deleteAction" class="">
+            <button id="btnShowDelete" class="px-3 py-2 text-sm rounded-md bg-red-700 hover:bg-red-600 text-white border border-red-500/60" type="button">Supprimer le compte</button>
+          </div>
+        </div>
 
         <!-- fin colonne -->
       </div>
     </section>
   </main>
+
+  <!-- Modal popup (initialement caché) -->
+  <div id="deleteModal" class="fixed inset-0 hidden z-50 grid place-items-center">
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black/60 modal-overlay"></div>
+
+    <!-- Contenu du modal -->
+    <div class="relative w-full max-w-lg mx-4">
+      <div class="rounded-lg bg-slate-900/95 border border-slate-800/60 p-6 shadow-lg">
+        <h3 class="text-lg font-semibold mb-2 text-red-200">Confirmer la suppression du compte</h3>
+        <p class="text-xs text-red-300 mb-4">Cette action est définitive et irréversible. Entrez votre mot de passe pour confirmer.</p>
+
+        <div id="deleteError" class="hidden mb-3 text-sm text-amber-300"></div>
+
+        <form id="formDeleteAccount" autocomplete="off">
+          <label class="block text-xs text-red-100 mb-1">Mot de passe</label>
+          <input id="deletePassword" name="password" type="password" required class="w-full rounded-md bg-slate-950/40 border border-red-800 px-3 py-2 text-sm mb-3 text-red-50 placeholder:text-red-300/60" placeholder="Votre mot de passe" />
+
+          <% if (user && user.twoFactorEnabled) { %>
+            <label class="block text-xs text-red-100 mb-1">Code 2FA</label>
+            <input id="deleteOtp" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" required class="w-full rounded-md bg-slate-950/40 border border-red-800 px-3 py-2 text-sm mb-3 text-red-50 placeholder:text-red-300/60" placeholder="123456" />
+          <% } %>
+
+          <div class="flex items-center justify-end gap-2 mt-4">
+            <button id="btnCancelDelete" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 text-white border border-slate-700" type="button">Annuler</button>
+            <button id="btnConfirmDelete" class="px-3 py-2 text-sm rounded-md bg-red-700 hover:bg-red-600 text-white border border-red-500/60" type="submit">Supprimer définitivement</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <script>
   (function(){
@@ -154,6 +185,8 @@
   </script>
 
   <script>
+    // Expose si la 2FA est activée (valeur server-side) au JS client
+    const twoFactorEnabled = <%= (user && user.twoFactorEnabled) ? 'true' : 'false' %>;
     // Email
     document.getElementById('formEmail')?.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -186,19 +219,100 @@
       if (res.ok) alert('Mot de passe mis à jour'); else alert(j.error || 'Erreur');
     });
 
-    // Supprimer mon compte
-    document.getElementById('formDeleteAccount')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const c = confirm('Confirmer la suppression définitive de votre compte ? Cette action est irréversible.');
-      if (!c) return;
-      const fd = new FormData(e.currentTarget);
-      const payload = Object.fromEntries(fd.entries());
-      try {
-        const res = await fetch('/api/me/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
-        const j = await res.json().catch(()=>({}));
-        if (!res.ok) { alert(j.error || 'Suppression impossible'); return; }
-        alert('Compte supprimé.');
-        window.location.href = '/';
-      } catch(err){ alert('Erreur réseau'); }
-    });
+    // Supprimer mon compte: nouveau flux avec bouton unique -> affiche formulaire
+    (function(){
+      const btnShow = document.getElementById('btnShowDelete');
+      const modal = document.getElementById('deleteModal');
+      const form = document.getElementById('formDeleteAccount');
+      const btnCancel = document.getElementById('btnCancelDelete');
+      const btnConfirm = document.getElementById('btnConfirmDelete');
+      const errorMsg = document.getElementById('deleteError');
+
+      if (!btnShow || !modal || !form) return;
+
+      // Ouvre le modal
+      btnShow.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          const pwd = document.getElementById('deletePassword');
+          pwd && pwd.focus();
+        }, 100);
+      });
+
+      // Ferme le modal (annuler)
+      btnCancel?.addEventListener('click', () => {
+        form.reset();
+        modal.classList.add('hidden');
+        if (errorMsg) { errorMsg.classList.add('hidden'); errorMsg.textContent = ''; }
+      });
+
+      // Ferme le modal si on clique sur l'overlay
+      modal.querySelector('.modal-overlay')?.addEventListener('click', () => {
+        form.reset();
+        modal.classList.add('hidden');
+        if (errorMsg) { errorMsg.classList.add('hidden'); errorMsg.textContent = ''; }
+      });
+
+      // Submit
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (btnConfirm) btnConfirm.disabled = true;
+        if (errorMsg) { errorMsg.classList.add('hidden'); errorMsg.textContent = ''; }
+
+        const fd = new FormData(form);
+        const payload = Object.fromEntries(fd.entries());
+
+        // Validation minimale côté client
+        if (!payload.password || String(payload.password).trim() === '') {
+          if (errorMsg) { errorMsg.textContent = 'Entrez votre mot de passe.'; errorMsg.classList.remove('hidden'); }
+          btnConfirm && (btnConfirm.disabled = false);
+          return;
+        }
+        if (twoFactorEnabled) {
+          if (!payload.otp || String(payload.otp).trim().length < 6) {
+            if (errorMsg) { errorMsg.textContent = 'Entrez votre code 2FA (6 chiffres).'; errorMsg.classList.remove('hidden'); }
+            btnConfirm && (btnConfirm.disabled = false);
+            return;
+          }
+        }
+
+        try {
+          const res = await fetch('/api/me/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+          const j = await res.json().catch(()=>({}));
+          if (!res.ok) {
+            if (errorMsg) { errorMsg.textContent = j.error || 'Suppression impossible'; errorMsg.classList.remove('hidden'); }
+            btnConfirm && (btnConfirm.disabled = false);
+            return;
+          }
+          // Succès : fermer le modal et rediriger
+          modal.classList.add('hidden');
+          // Affiche une notification dans le site puis redirige
+          const toast = document.createElement('div');
+          toast.className = 'rounded-md bg-emerald-600 text-white px-4 py-2 text-sm shadow';
+          Object.assign(toast.style, {
+            position: 'fixed',
+            top: '1rem',
+            right: '1rem',
+            zIndex: '99999',
+            transition: 'opacity .3s',
+            opacity: '1'
+          });
+          toast.textContent = 'Compte supprimé. Redirection...';
+          document.body.appendChild(toast);
+
+          // Faire disparaître puis rediriger
+          setTimeout(() => { toast.style.opacity = '0'; }, 1500);
+          setTimeout(() => {
+            if (toast.parentNode) toast.parentNode.removeChild(toast);
+            window.location.href = '/';
+          }, 1800);
+          window.location.href = '/';
+        } catch(err){
+          console.error(err);
+          if (errorMsg) { errorMsg.textContent = 'Erreur réseau'; errorMsg.classList.remove('hidden'); }
+        } finally {
+          btnConfirm && (btnConfirm.disabled = false);
+        }
+      });
+    })();
   </script>
