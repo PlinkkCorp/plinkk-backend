@@ -1,3 +1,3 @@
-[submodule "plinkk-base"]
-	path = plinkk-base
+[submodule "plinkk-front-end"]
+	path = plinkk-front-end
 	url = https://github.com/Klaynight-dev/plinkk
