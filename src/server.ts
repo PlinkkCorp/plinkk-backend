@@ -7,7 +7,7 @@ import ejs from "ejs";
 import {
   readFileSync,
 } from "fs";
-import { PrismaClient } from '../generated/prisma/edge';
+import { PrismaClient } from "../generated/prisma/client";
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
