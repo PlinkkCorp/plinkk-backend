@@ -1,6 +1,6 @@
 # Plinkk Backend
 
-Backend Node.js/TypeScript pour le projet [Plinkk](https://github.com/Klaynight-dev/plinkk), une alternative moderne à Linktree.
+Backend Node.js/TypeScript pour le projet [Plinkk](https://github.com/PlinkkCorp/plinkk), une alternative moderne à Linktree.
 
 ## 🚀 Fonctionnalités
 
@@ -26,7 +26,7 @@ Backend Node.js/TypeScript pour le projet [Plinkk](https://github.com/Klaynight-
 1. **Cloner le repo**
 
    ```bash
-   git clone https://github.com/Marvideo2009/plinkk-backend.git
+   git clone https://github.com/PlinkkCorp/plinkk-backend.git
    cd plinkk-backend
    ```
 
@@ -79,8 +79,8 @@ Backend Node.js/TypeScript pour le projet [Plinkk](https://github.com/Klaynight-
 
 ## 📚 Liens utiles
 
-- Frontend Plinkk : [github.com/Klaynight-dev/plinkk](https://github.com/Klaynight-dev/plinkk)
-- Documentation Plinkk : [github.com/Klaynight-dev/plinkk/docs.md](https://github.com/Klaynight-dev/plinkk/blob/main/.md/docs.md)
+- Frontend Plinkk : [github.com/Klaynight-dev/plinkk](https://github.com/PlinkkCorp/plinkk)
+- Documentation Plinkk : [github.com/Klaynight-dev/plinkk/docs.md](https://github.com/PlinkkCorp/plinkk/blob/main/.md/docs.md)
 
 ## 📝 Licence
 
