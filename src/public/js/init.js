@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.head.appendChild(link);
     const footer = document.createElement("footer");
     const themeIndex = profileData.selectedThemeIndex % themes.length;
-    footer.innerHTML = `Design with ❤️ by <a href="http://plinkk.fr" target="_blank" rel="noopener noreferrer"><p style="color:${((_a = themes[themeIndex]) === null || _a === void 0 ? void 0 : _a.buttonTextColor) || 'defaultColor'};display:inline;padding:2px 2px 2px 4px;border-radius:5px;background-color:${((_b = themes[themeIndex]) === null || _b === void 0 ? void 0 : _b.buttonBackground) || 'defaultColor'};">PlinkkCorp Studio©</p></a>`;
+    footer.innerHTML = `Design with ❤️ by <a href="http://plinkk.fr" target="_blank" rel="noopener noreferrer"><p style="color:${((_a = themes[themeIndex]) === null || _a === void 0 ? void 0 : _a.buttonTextColor) || 'defaultColor'};display:inline;padding:2px 2px 2px 4px;border-radius:5px;background-color:${((_b = themes[themeIndex]) === null || _b === void 0 ? void 0 : _b.buttonBackground) || 'defaultColor'};">PlinkkCorp©</p></a>`;
     footer.style.zIndex = "9999";
     document.body.appendChild(footer);
     initEasterEggs();
