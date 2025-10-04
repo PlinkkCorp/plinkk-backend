@@ -378,7 +378,7 @@ export function apiRoutes(fastify: FastifyInstance) {
 
   // Catalogue d'icônes disponibles pour l'éditeur
   fastify.get("/icons", async (request, reply) => {
-    const iconsDir = path.join(__dirname, "public", "images", "icons");
+    const iconsDir = path.join(__dirname, "..", "public", "images", "icons");
     if (!existsSync(iconsDir)) return reply.send([]);
     const entries = readdirSync(iconsDir, { withFileTypes: true });
     const toTitle = (s: string) =>
