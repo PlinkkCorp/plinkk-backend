@@ -20,6 +20,27 @@ import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
 import { authenticator } from "otplib";
 
+<<<<<<< Updated upstream
+=======
+// Debug helper: show whether DATABASE_URL is present and looks like a prisma Accelerate URL.
+// We mask any API key to avoid leaking secrets in logs.
+const _rawDatabaseUrl = process.env.DATABASE_URL;
+if (!_rawDatabaseUrl) {
+  console.warn('DATABASE_URL is not set in environment');
+} else {
+  try {
+    // Mask api_key param if present
+    const masked = _rawDatabaseUrl.replace(/(api_key=)[^&]+/i, '$1[REDACTED]');
+    const looksLikePrisma = _rawDatabaseUrl.startsWith('prisma://') || _rawDatabaseUrl.startsWith('prisma+postgres://');
+    console.info('DATABASE_URL present:', !!_rawDatabaseUrl);
+    console.info('DATABASE_URL looksLikePrismaAccelerate:', looksLikePrisma);
+    console.info('DATABASE_URL preview (masked):', masked.slice(0, 200));
+  } catch (err) {
+    console.warn('Failed to parse/mask DATABASE_URL for debug');
+  }
+}
+
+>>>>>>> Stashed changes
 export const prisma = new PrismaClient();
 export const fastify = Fastify({
   logger: true,
