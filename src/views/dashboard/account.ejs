@@ -7,86 +7,243 @@
   <%- include('../partials/asside_dash.ejs', { active: 'account' }) %>
 
     <section class="col-span-12 lg:col-span-9 space-y-4">
-      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-5 shadow animate-slide-up">
+      <!-- Title simple (sans fond ni description) -->
+      <div class="mb-4">
         <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-lg font-semibold mb-1">Mon compte</h1>
-            <p class="text-xs text-slate-400">Gère ton email, ton mot de passe et la confidentialité.</p>
-          </div>
+          <h1 class="text-2xl font-semibold">Mon compte</h1>
           <a href="/dashboard/cosmetics" class="px-3 py-2 text-sm rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200">Cosmétiques ➜</a>
         </div>
       </div>
 
-      <!-- Avatar -->
-      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up grid grid-cols-1 md:grid-cols-[auto,1fr] gap-4 items-start">
-        <div>
-          <div class="h-20 w-20 rounded-full overflow-hidden border border-slate-700 bg-slate-800 grid place-items-center text-xl font-semibold text-slate-200" id="avatarPreview" data-avatar>
-            <%- include('../partials/avatar.ejs', { user: user }) %>
+      <!-- Nouvelle interface: barre de catégories en haut + contenu en dessous (style édition) -->
+      <div id="accountRoot" data-twofactor="<%= !!(user && ((user.totpSecret && user.totpSecret !== '') || user.twoFactorEnabled)) %>">
+        <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-0">
+          <!-- Top bar catégories -->
+          <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-800/40 bg-transparent">
+            <nav class="flex gap-2 w-full" role="tablist" aria-label="Sections du compte">
+              <button class="tab-btn px-3 py-2 rounded-md text-sm font-medium bg-transparent text-slate-300" data-tab="profile" aria-selected="true">Profil</button>
+              <button class="tab-btn px-3 py-2 rounded-md text-sm font-medium bg-transparent text-slate-300" data-tab="security" aria-selected="false">Confidentialité &amp; Sécurité</button>
+              <button class="tab-btn px-3 py-2 rounded-md text-sm font-medium bg-transparent text-slate-300" data-tab="settings" aria-selected="false">Paramètres</button>
+            </nav>
           </div>
-        </div>
-        <div>
-          <h2 class="font-medium mb-2">Photo de profil</h2>
-          <p class="text-xs text-slate-400 mb-3">PNG, JPG ou WebP (max 2 Mo). L’image sera affichée partout où ton avatar apparaît.</p>
-          <div class="flex flex-col sm:flex-row gap-2 items-start">
-            <input id="avatarInput" type="file" accept="image/*" class="block text-xs text-slate-200 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700" />
+
+          <!-- Contenu des panneaux -->
+          <div class="p-4">
+            <div id="panel-profile" class="tab-panel">
+              <div class="flex items-start gap-4">
+                <div class="h-20 w-20 rounded-full overflow-hidden border border-slate-700 bg-slate-800 grid place-items-center text-xl font-semibold text-slate-200" id="avatarPreview" data-avatar>
+                  <%- include('../partials/avatar.ejs', { user: user }) %>
+                </div>
+                <div class="flex-1">
+                  <h4 class="font-medium mb-1">Photo de profil</h4>
+                  <p class="text-xs text-slate-400 mb-2">PNG, JPG ou WebP (max 2 Mo).</p>
+                  <input id="avatarInput" type="file" accept="image/*" class="block text-xs text-slate-200 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700" />
+                  <p id="avatarMsg" class="mt-2 text-xs"></p>
+                </div>
+              </div>
+            </div>
+
+            <div id="panel-security" class="tab-panel hidden">
+              <% const tfEnabled = (user && ((user.twoFactorEnabled) || (user.totpSecret && user.totpSecret !== '')) ) %>
+              <div class="space-y-4">
+                <div>
+                  <h4 class="text-lg font-semibold mb-2">Confidentialité</h4>
+                  <div class="flex items-center justify-between py-2">
+                    <div>
+                      <p class="text-sm font-medium">Profil public</p>
+                      <p class="text-xs text-slate-400">Autoriser l'apparition dans la page Utilisateurs.</p>
+                    </div>
+                    <label class="inline-flex items-center cursor-pointer relative">
+                      <input id="togglePublic" type="checkbox" class="sr-only peer" <%= user.isPublic ? 'checked' : '' %> />
+                      <span class="w-10 h-6 bg-slate-700/80 rounded-full p-1 peer-checked:bg-emerald-600 transition"></span>
+                      <span class="absolute top-1 left-1 size-4 rounded-full bg-white transition peer-checked:translate-x-4"></span>
+                    </label>
+                  </div>
+                  <div class="flex items-center justify-between py-2">
+                    <div>
+                      <p class="text-sm font-medium">Afficher mon email</p>
+                      <p class="text-xs text-slate-400">Rendre l'email visible sur la page Utilisateurs.</p>
+                    </div>
+                    <label class="inline-flex items-center cursor-pointer relative">
+                      <input id="toggleEmailPublic" type="checkbox" class="sr-only peer" <%= isEmailPublic ? 'checked' : '' %> />
+                      <span class="w-10 h-6 bg-slate-700/80 rounded-full p-1 peer-checked:bg-emerald-600 transition"></span>
+                      <span class="absolute top-1 left-1 size-4 rounded-full bg-white transition peer-checked:translate-x-4"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="border-t border-slate-800/40 my-2"></div>
+
+                <div>
+                  <h4 class="text-lg font-semibold mb-2">Sécurité</h4>
+                  <div class="space-y-2">
+                    <h4 class="font-medium mb-1">Authentification à 2 facteurs (2FA)</h4>
+                    <p class="text-xs text-slate-400 mb-2">État: <span class="font-medium"><%= tfEnabled ? 'Activée' : 'Désactivée' %></span></p>
+                    <div class="flex items-center gap-2">
+                      <% if (!tfEnabled) { %>
+                        <button id="btnEnable2fa" class="px-3 py-2 text-sm rounded-md bg-emerald-600 hover:bg-emerald-500 text-white">Activer la 2FA</button>
+                      <% } else { %>
+                        <button id="btnDisable2fa" class="px-3 py-2 text-sm rounded-md bg-amber-600 hover:bg-amber-500 text-white">Désactiver la 2FA</button>
+                      <% } %>
+                      <button id="btnLearn2fa" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 text-white">Comment ça marche</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 class="font-medium mb-1 text-red-200">Supprimer le compte</h4>
+                  <p class="text-xs text-red-300 mb-2">Cette action est définitive.</p>
+                  <div id="deleteAction">
+                    <button id="btnShowDelete" class="w-full px-3 py-2 text-sm rounded-md bg-red-700 hover:bg-red-600 text-white border border-red-500/60" type="button">Supprimer le compte</button>
+                  </div>
+                </div>
+                
+                
+              </div>
+            </div>
+
+            <div id="panel-settings" class="tab-panel hidden">
+              <div class="space-y-4">
+                <form id="formEmail">
+                  <h4 class="font-medium mb-2">Email</h4>
+                  <label class="block text-xs text-slate-300 mb-1">Adresse email</label>
+                  <div class="flex items-center gap-2 ">
+                    <input name="email" type="email" value="<%= user.email %>" class="flex-1 min-w-0 rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" />
+                    <button class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white whitespace-nowrap" type="submit">Mettre à jour l'email</button>
+                  </div>
+                </form>
+
+                <div class="border-t border-slate-800/40 my-2"></div>
+
+                <form id="formPassword">
+                  <h4 class="font-medium mb-2">Mot de passe</h4>
+                  <label class="block text-xs text-slate-300 mb-1">Mot de passe actuel</label>
+                  <input name="currentPassword" type="password" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm mb-2" />
+                  <label class="block text-xs text-slate-300 mb-1">Nouveau mot de passe</label>
+                  <input name="newPassword" type="password" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm mb-2" />
+                  <label class="block text-xs text-slate-300 mb-1">Confirmer le mot de passe</label>
+                  <input name="confirmPassword" type="password" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm mb-3" />
+                  <div class="flex items-center justify-end">
+                    <button class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white" type="submit">Changer le mot de passe</button>
+                  </div>
+                </form>
+
+                <!-- Confidentialité déplacée dans Sécurité & confidentialité -->
+              </div>
+            </div>
           </div>
-          <p id="avatarMsg" class="mt-2 text-xs"></p>
         </div>
       </div>
-
-      <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <!-- Email -->
-        <form id="formEmail" class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-          <h2 class="font-medium mb-3">Email</h2>
-          <label class="block text-xs text-slate-300 mb-1">Adresse email</label>
-          <input name="email" type="email" value="<%= user.email %>" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm mb-3" />
-          <button class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white" type="submit">Mettre à jour l'email</button>
-        </form>
-
-        <!-- Mot de passe -->
-        <form id="formPassword" class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-          <h2 class="font-medium mb-3">Mot de passe</h2>
-          <label class="block text-xs text-slate-300 mb-1">Mot de passe actuel</label>
-          <input name="currentPassword" type="password" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm mb-2" />
-          <label class="block text-xs text-slate-300 mb-1">Nouveau mot de passe</label>
-          <input name="newPassword" type="password" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm mb-2" />
-          <label class="block text-xs text-slate-300 mb-1">Confirmer le mot de passe</label>
-          <input name="confirmPassword" type="password" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm mb-3" />
-          <button class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white" type="submit">Changer le mot de passe</button>
-        </form>
-
-        <!-- Confidentialité -->
-        <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-          <h2 class="font-medium mb-3">Confidentialité</h2>
-          <div class="flex items-center justify-between py-2">
-            <div>
-              <p class="text-sm font-medium">Profil public</p>
-              <p class="text-xs text-slate-400">Autoriser l'apparition dans la page Utilisateurs.</p>
-            </div>
-            <label class="inline-flex items-center cursor-pointer relative">
-              <input id="togglePublic" type="checkbox" class="sr-only peer" <%= user.isPublic ? 'checked' : '' %> />
-              <span class="w-10 h-6 bg-slate-700/80 rounded-full p-1 peer-checked:bg-emerald-600 transition"></span>
-              <!-- knob: must be a sibling of the input for Tailwind's peer-checked selector to work -->
-              <span class="absolute top-1 left-1 size-4 rounded-full bg-white transition peer-checked:translate-x-4"></span>
-            </label>
-          </div>
-          <div class="flex items-center justify-between py-2">
-            <div>
-              <p class="text-sm font-medium">Afficher mon email</p>
-              <p class="text-xs text-slate-400">Rendre l'email visible sur la page Utilisateurs.</p>
-            </div>
-            <label class="inline-flex items-center cursor-pointer relative">
-              <input id="toggleEmailPublic" type="checkbox" class="sr-only peer" <%= isEmailPublic ? 'checked' : '' %> />
-              <span class="w-10 h-6 bg-slate-700/80 rounded-full p-1 peer-checked:bg-emerald-600 transition"></span>
-              <span class="absolute top-1 left-1 size-4 rounded-full bg-white transition peer-checked:translate-x-4"></span>
-            </label>
-          </div>
-        </div>
 
         <!-- fin colonne -->
       </div>
     </section>
   </main>
+
+  <!-- Modal popup (initialement caché) -->
+  <div id="deleteModal" class="fixed inset-0 hidden z-50 grid place-items-center">
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black/60 modal-overlay"></div>
+
+    <!-- Contenu du modal -->
+    <div class="relative w-full max-w-lg mx-4">
+      <div class="rounded-lg bg-slate-900/95 border border-slate-800/60 p-6 shadow-lg">
+        <h3 class="text-lg font-semibold mb-2 text-red-200">Confirmer la suppression du compte</h3>
+        <p class="text-xs text-red-300 mb-4">Cette action est définitive et irréversible. Entrez votre mot de passe pour confirmer.</p>
+
+        <div id="deleteError" class="hidden mb-3 text-sm text-amber-300"></div>
+
+        <form id="formDeleteAccount" autocomplete="off">
+          <label class="block text-xs text-red-100 mb-1">Mot de passe</label>
+          <input id="deletePassword" name="password" type="password" required class="w-full rounded-md bg-slate-950/40 border border-red-800 px-3 py-2 text-sm mb-3 text-red-50 placeholder:text-red-300/60" placeholder="Votre mot de passe" />
+
+          <% if (user && user.twoFactorEnabled) { %>
+            <label class="block text-xs text-red-100 mb-1">Code 2FA</label>
+            <input id="deleteOtp" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" required class="w-full rounded-md bg-slate-950/40 border border-red-800 px-3 py-2 text-sm mb-3 text-red-50 placeholder:text-red-300/60" placeholder="123456" />
+          <% } %>
+
+          <div class="flex items-center justify-end gap-2 mt-4">
+            <button id="btnCancelDelete" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 text-white border border-slate-700" type="button">Annuler</button>
+            <button id="btnConfirmDelete" class="px-3 py-2 text-sm rounded-md bg-red-700 hover:bg-red-600 text-white border border-red-500/60" type="submit">Supprimer définitivement</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2FA Modal (utilisé par le JS d'activation) -->
+  <div id="twoFactorModal" class="fixed inset-0 hidden z-50 grid place-items-center">
+    <div id="twoFactorOverlay" class="absolute inset-0 bg-black/60"></div>
+    <div class="relative w-full max-w-md mx-4">
+      <div class="rounded-lg bg-slate-900/95 border border-slate-800/60 p-6 shadow-lg">
+        <h3 class="text-lg font-semibold mb-2">Activer la 2FA</h3>
+        <p class="text-sm text-slate-300 mb-3">Scannez le QR avec votre application d'authentification ou copiez la clé.</p>
+
+        <div id="twoFactorQrWrap" class="mb-4 text-center"></div>
+        <div class="mb-3">
+          <label class="block text-xs text-slate-400 mb-1">Clé / otpauth</label>
+          <input id="twoFactorOtpauth" readonly class="w-full rounded-md bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-200" />
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-xs text-slate-400 mb-1">Code de confirmation (6 chiffres)</label>
+          <input id="twoFactorConfirmOtp" inputmode="numeric" pattern="[0-9]*" maxlength="6" class="w-full rounded-md bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-200" placeholder="123456" />
+        </div>
+
+        <div class="flex items-center justify-end gap-2">
+          <button id="btnClose2faModal" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 text-white border border-slate-700">Fermer</button>
+          <button id="btnConfirm2fa" class="px-3 py-2 text-sm rounded-md bg-emerald-600 hover:bg-emerald-500 text-white">Confirmer l'activation</button>
+          <button id="btnReloadAfter2fa" class="px-3 py-2 text-sm rounded-md bg-emerald-500/30 hover:bg-emerald-500/40 text-white hidden">J'ai scanné — Recharger</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Disable 2FA Modal (collect OTP instead of prompt) -->
+  <div id="disable2faModal" class="fixed inset-0 hidden z-50 grid place-items-center">
+    <div class="absolute inset-0 bg-black/60" data-disable-overlay></div>
+    <div class="relative w-full max-w-md mx-4">
+      <div class="rounded-lg bg-slate-900/95 border border-slate-800/60 p-6 shadow-lg">
+        <h3 class="text-lg font-semibold mb-2">Désactiver la 2FA</h3>
+        <p class="text-sm text-slate-300 mb-3">Saisis le code 2FA pour confirmer la désactivation.</p>
+        <div id="disable2faError" class="hidden mb-3 text-sm text-amber-300"></div>
+        <label class="block text-xs text-slate-400 mb-1">Code 2FA (6 chiffres)</label>
+        <input id="disable2faOtp" inputmode="numeric" pattern="[0-9]*" maxlength="6" class="w-full rounded-md bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-200 mb-4" placeholder="123456" />
+        <div class="flex items-center justify-end gap-2">
+          <button id="btnCancelDisable2fa" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 text-white border border-slate-700">Annuler</button>
+          <button id="btnConfirmDisable2fa" class="px-3 py-2 text-sm rounded-md bg-amber-600 hover:bg-amber-500 text-white">Confirmer la désactivation</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toasts container pour les alertes in-page -->
+  <div id="toasts" class="fixed top-4 right-4 z-50 flex flex-col items-end gap-2 pointer-events-none"></div>
+
+  <script>
+    // helper: afficher un toast/in-page alert
+    function showAlert(message, type = 'info', opts = {}) {
+      const container = document.getElementById('toasts');
+      if (!container) return console.log(message);
+      const el = document.createElement('div');
+      el.className = 'pointer-events-auto max-w-sm w-full rounded-md px-4 py-2 text-sm shadow';
+      const bg = type === 'success' ? 'bg-emerald-600 text-white' : type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-200';
+      el.classList.add(...bg.split(' '));
+      el.textContent = message;
+      el.style.opacity = '0';
+      el.style.transition = 'opacity .2s, transform .2s';
+      container.appendChild(el);
+      // force reflow
+      void el.offsetWidth;
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+      const timeout = opts.timeout || 3500;
+      const remove = () => { el.style.opacity = '0'; setTimeout(()=>{ if (el.parentNode) el.parentNode.removeChild(el); }, 220); };
+      el.addEventListener('click', remove);
+      setTimeout(remove, timeout);
+      return el;
+    }
+  </script>
 
   <script>
   (function(){
@@ -143,6 +300,45 @@
   </script>
 
   <script>
+  // Simple tab switching pour la barre de catégories
+  (function(){
+    const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
+    const panels = {
+      profile: document.getElementById('panel-profile'),
+      security: document.getElementById('panel-security'),
+      settings: document.getElementById('panel-settings')
+    };
+
+    function setActive(key){
+      tabButtons.forEach(btn => {
+        const t = btn.getAttribute('data-tab');
+        const selected = t === key;
+        btn.setAttribute('aria-selected', selected ? 'true' : 'false');
+        btn.classList.toggle('bg-slate-800/50', selected);
+        btn.classList.toggle('text-white', selected);
+        btn.classList.toggle('text-slate-300', !selected);
+      });
+      Object.keys(panels).forEach(k => {
+        const el = panels[k];
+        if (!el) return;
+        if (k === key) el.classList.remove('hidden'); else el.classList.add('hidden');
+      });
+    }
+
+    // initial
+    setActive('profile');
+
+    tabButtons.forEach(btn => btn.addEventListener('click', () => {
+      const key = btn.getAttribute('data-tab'); if (!key) return; setActive(key);
+    }));
+  })();
+  </script>
+
+  <script>
+  // Expose si la 2FA est activée (valeur server-side) au JS client
+    // Expose si la 2FA est activée (valeur server-side) au JS via data-attribute pour éviter l'injection directe
+    const accountRoot = document.getElementById('accountRoot');
+    const twoFactorEnabled = accountRoot ? accountRoot.getAttribute('data-twofactor') === 'true' : false;
     // Email
     document.getElementById('formEmail')?.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -150,7 +346,7 @@
       const payload = Object.fromEntries(fd.entries());
       const res = await fetch('/api/me/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const j = await res.json().catch(()=>({}));
-      if (res.ok) alert('Email mis à jour'); else alert(j.error || 'Erreur');
+  if (res.ok) showAlert('Email mis à jour', 'success'); else showAlert(j.error || 'Erreur', 'error');
     });
 
     // Toggle profil public
@@ -172,6 +368,289 @@
       const payload = Object.fromEntries(fd.entries());
       const res = await fetch('/api/me/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const j = await res.json().catch(()=>({}));
-      if (res.ok) alert('Mot de passe mis à jour'); else alert(j.error || 'Erreur');
+  if (res.ok) showAlert('Mot de passe mis à jour', 'success'); else showAlert(j.error || 'Erreur', 'error');
     });
+
+    // Supprimer mon compte: nouveau flux avec bouton unique -> affiche formulaire
+    (function(){
+      const btnShow = document.getElementById('btnShowDelete');
+      const modal = document.getElementById('deleteModal');
+      const form = document.getElementById('formDeleteAccount');
+      const btnCancel = document.getElementById('btnCancelDelete');
+      const btnConfirm = document.getElementById('btnConfirmDelete');
+      const errorMsg = document.getElementById('deleteError');
+
+      if (!btnShow || !modal || !form) return;
+
+      // Ouvre le modal
+      btnShow.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          const pwd = document.getElementById('deletePassword');
+          pwd && pwd.focus();
+        }, 100);
+      });
+
+      // Ferme le modal (annuler)
+      btnCancel?.addEventListener('click', () => {
+        form.reset();
+        modal.classList.add('hidden');
+        if (errorMsg) { errorMsg.classList.add('hidden'); errorMsg.textContent = ''; }
+      });
+
+      // Ferme le modal si on clique sur l'overlay
+      modal.querySelector('.modal-overlay')?.addEventListener('click', () => {
+        form.reset();
+        modal.classList.add('hidden');
+        if (errorMsg) { errorMsg.classList.add('hidden'); errorMsg.textContent = ''; }
+      });
+
+      // Submit
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (btnConfirm) btnConfirm.disabled = true;
+        if (errorMsg) { errorMsg.classList.add('hidden'); errorMsg.textContent = ''; }
+
+        const fd = new FormData(form);
+        const payload = Object.fromEntries(fd.entries());
+
+        // Validation minimale côté client
+        if (!payload.password || String(payload.password).trim() === '') {
+          if (errorMsg) { errorMsg.textContent = 'Entrez votre mot de passe.'; errorMsg.classList.remove('hidden'); }
+          btnConfirm && (btnConfirm.disabled = false);
+          return;
+        }
+        if (twoFactorEnabled) {
+          if (!payload.otp || String(payload.otp).trim().length < 6) {
+            if (errorMsg) { errorMsg.textContent = 'Entrez votre code 2FA (6 chiffres).'; errorMsg.classList.remove('hidden'); }
+            btnConfirm && (btnConfirm.disabled = false);
+            return;
+          }
+        }
+
+        try {
+          const res = await fetch('/api/me/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+          const j = await res.json().catch(()=>({}));
+          if (!res.ok) {
+            if (errorMsg) { errorMsg.textContent = j.error || 'Suppression impossible'; errorMsg.classList.remove('hidden'); }
+            btnConfirm && (btnConfirm.disabled = false);
+            return;
+          }
+          // Succès : fermer le modal et rediriger
+          modal.classList.add('hidden');
+          showAlert('Compte supprimé. Redirection...', 'success');
+          setTimeout(() => { window.location.href = '/'; }, 1400);
+        } catch(err){
+          console.error(err);
+          if (errorMsg) { errorMsg.textContent = 'Erreur réseau'; errorMsg.classList.remove('hidden'); }
+        } finally {
+          btnConfirm && (btnConfirm.disabled = false);
+        }
+      });
+    })();
+
+    // Handlers for disable 2FA modal (confirm/cancel/overlay)
+    (function(){
+      const disableModal = document.getElementById('disable2faModal');
+      const btnCancel = document.getElementById('btnCancelDisable2fa');
+      const btnConfirm = document.getElementById('btnConfirmDisable2fa');
+      const inputOtp = document.getElementById('disable2faOtp');
+      const errEl = document.getElementById('disable2faError');
+
+      if (!disableModal) return;
+
+      const close = () => { disableModal.classList.add('hidden'); if (errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; } };
+
+      btnCancel?.addEventListener('click', () => { close(); });
+      disableModal.querySelector('[data-disable-overlay]')?.addEventListener('click', () => { close(); });
+
+      btnConfirm?.addEventListener('click', async () => {
+        const val = inputOtp?.value?.trim();
+        if (!val || val.length < 6) { if (errEl) { errEl.textContent = 'Entrez un code 2FA valide (6 chiffres)'; errEl.classList.remove('hidden'); } return; }
+        try {
+          btnConfirm.disabled = true;
+          const res = await fetch('/api/me/2fa', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ otp: val }) });
+          const j = await res.json().catch(()=>({}));
+          if (!res.ok) {
+            if (errEl) { errEl.textContent = j.error || 'Erreur lors de la désactivation'; errEl.classList.remove('hidden'); }
+            else showAlert(j.error || 'Erreur lors de la désactivation', 'error');
+            return;
+          }
+          if (j.successful) {
+            showAlert('2FA désactivée', 'success');
+            close();
+            setTimeout(()=>location.reload(), 600);
+          } else {
+            if (errEl) { errEl.textContent = 'Erreur lors de la désactivation'; errEl.classList.remove('hidden'); } else showAlert('Erreur lors de la désactivation', 'error');
+          }
+        } catch(err){ console.error(err); showAlert('Erreur réseau', 'error'); } finally { btnConfirm.disabled = false; }
+      });
+    })();
+
+    // 2FA: gestion activation / désactivation
+    (function(){
+      const btnEnable = document.getElementById('btnEnable2fa');
+      const btnDisable = document.getElementById('btnDisable2fa');
+      console.debug('2FA buttons found', { btnEnable: !!btnEnable, btnDisable: !!btnDisable });
+      const btnLearn = document.getElementById('btnLearn2fa');
+      const modal = document.getElementById('twoFactorModal');
+      const overlay = document.getElementById('twoFactorOverlay');
+      const qrWrap = document.getElementById('twoFactorQrWrap');
+      const otpauthEl = document.getElementById('twoFactorOtpauth');
+      const btnClose = document.getElementById('btnClose2faModal');
+      const btnReload = document.getElementById('btnReloadAfter2fa');
+
+      async function open2faModalWith(data){
+        if (!modal) return;
+        qrWrap.innerHTML = '';
+        if (otpauthEl) otpauthEl.value = '';
+        if (data.qrCode) {
+          const img = document.createElement('img');
+          img.src = data.qrCode;
+          img.alt = 'QR 2FA';
+          img.className = 'mx-auto';
+          qrWrap.appendChild(img);
+        }
+        if (data.otpauth) {
+          if (otpauthEl) otpauthEl.value = data.otpauth;
+        }
+        modal.classList.remove('hidden');
+        // focus on close button for accessibility
+        setTimeout(() => { btnClose?.focus(); }, 50);
+      }
+
+      btnLearn?.addEventListener('click', () => {
+        let tips = document.getElementById('twoFactorTipsModal');
+        if (!tips) {
+          tips = document.createElement('div');
+          tips.id = 'twoFactorTipsModal';
+          tips.className = 'fixed inset-0 hidden z-50 grid place-items-center';
+          tips.innerHTML = `
+            <div class="absolute inset-0 bg-black/60" data-tips-overlay></div>
+            <div class="relative w-full max-w-lg mx-4">
+              <div class="rounded-lg bg-slate-900/95 border border-slate-800/60 p-6 shadow-lg">
+                <h3 class="text-lg font-semibold mb-2">Comment fonctionne la 2FA</h3>
+                <p class="text-sm text-slate-300 mb-3">Installe une application d'authentification (Google Authenticator, Authy, etc.). Pour activer : clique sur "Activer la 2FA", scanne le QR et entre le code généré pour confirmer.</p>
+                <ul class="text-xs text-slate-400 mb-4 list-disc list-inside space-y-1">
+                  <li>Télécharge une app d'authentification sur ton téléphone.</li>
+                  <li>Scanne le QR fourni lors de l'activation.</li>
+                  <li>Saisis le code à 6 chiffres pour terminer l'activation.</li>
+                </ul>
+                <div class="flex items-center justify-end gap-2 mt-4">
+                  <button data-tips-close class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 text-white border border-slate-700">Fermer</button>
+                  <button data-tips-open-2fa class="px-3 py-2 text-sm rounded-md bg-emerald-600 hover:bg-emerald-500 text-white">Activer la 2FA</button>
+                </div>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(tips);
+
+          const overlayEl = tips.querySelector('[data-tips-overlay]');
+          const closeBtn = tips.querySelector('[data-tips-close]');
+          const open2faBtn = tips.querySelector('[data-tips-open-2fa]');
+
+          const closeTips = () => { tips.classList.add('hidden'); };
+
+          overlayEl?.addEventListener('click', closeTips);
+          closeBtn?.addEventListener('click', closeTips);
+          open2faBtn?.addEventListener('click', () => { closeTips(); btnEnable?.click(); });
+
+          // bind Esc once
+          if (!tips.dataset.bound) {
+            const escHandler = (e) => { if (e.key === 'Escape') closeTips(); };
+            document.addEventListener('keydown', escHandler);
+            tips.dataset.bound = 'true';
+          }
+        }
+
+        // show modal and focus first actionable element
+        tips.classList.remove('hidden');
+        setTimeout(() => {
+          const cb = tips.querySelector('[data-tips-open-2fa]');
+          cb?.focus();
+        }, 50);
+      });
+
+      btnEnable?.addEventListener('click', async () => {
+        try {
+          btnEnable.disabled = true;
+          const res = await fetch('/api/me/2fa', { method: 'POST' });
+          const j = await res.json().catch(()=>({}));
+          if (!res.ok) {
+            // afficher l'erreur sous l'input de confirmation (texte rouge)
+            (function(){
+              const inputConfirmOtp = document.getElementById('twoFactorConfirmOtp');
+              let errEl = document.getElementById('twoFactorError');
+              if (!errEl) {
+              errEl = document.createElement('div');
+              errEl.id = 'twoFactorError';
+              errEl.className = 'mt-2 text-xs text-red-300';
+              if (inputConfirmOtp && inputConfirmOtp.parentNode) {
+                inputConfirmOtp.parentNode.insertBefore(errEl, inputConfirmOtp.nextSibling);
+              } else {
+                const modal = document.getElementById('twoFactorModal');
+                modal && modal.querySelector('.p-6')?.appendChild(errEl);
+              }
+              }
+              errEl.textContent = j.error || 'Erreur lors de la génération de la 2FA';
+            })();
+            return;
+          }
+          // API retourne { qrCode, otpauth } si activation (totpSecret was empty), else { successful: true }
+          if (j.qrCode || j.otpauth) {
+            await open2faModalWith(j);
+          } else if (j.successful) {
+            // Désactivation côté serveur (rare ici)
+            location.reload();
+            } else {
+            showAlert('Réponse inattendue', 'error');
+          }
+        } catch(err) {
+          console.error(err);
+          showAlert('Erreur réseau lors de la génération du QR', 'error');
+        } finally {
+          btnEnable.disabled = false;
+        }
+      });
+
+      // Désactivation : demander OTP et l'envoyer
+      // Désactivation : ouvre un modal pour saisir l'OTP au lieu d'utiliser prompt()
+      btnDisable?.addEventListener('click', async () => {
+        const disableModal = document.getElementById('disable2faModal');
+        const disableOtp = document.getElementById('disable2faOtp');
+        const disableErr = document.getElementById('disable2faError');
+        if (!disableModal) return;
+        if (disableErr) { disableErr.classList.add('hidden'); disableErr.textContent = ''; }
+        disableOtp && (disableOtp.value = '');
+        disableModal.classList.remove('hidden');
+        setTimeout(() => { disableOtp && disableOtp.focus(); }, 50);
+      });
+
+      // Confirmer l'activation via le OTP saisi dans la modal
+      const btnConfirm2fa = document.getElementById('btnConfirm2fa');
+      const inputConfirmOtp = document.getElementById('twoFactorConfirmOtp');
+      btnConfirm2fa?.addEventListener('click', async () => {
+        const value = inputConfirmOtp?.value?.trim();
+        if (!value || value.length < 6) { showAlert('Entrez un code 2FA valide (6 chiffres)', 'error'); return; }
+        try {
+          btnConfirm2fa.disabled = true;
+          const res = await fetch('/api/me/2fa/confirm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ otp: value }) });
+          const j = await res.json().catch(()=>({}));
+          if (!res.ok) { showAlert(j.error || 'Code invalide', 'error'); return; }
+          if (j.successful) {
+            showAlert('2FA activée avec succès', 'success');
+            // masquer le bouton confirmer et montrer le bouton reload
+            document.getElementById('btnReloadAfter2fa')?.classList.remove('hidden');
+            btnConfirm2fa.classList.add('hidden');
+          } else {
+            showAlert('Erreur lors de la confirmation', 'error');
+          }
+        } catch(err){ console.error(err); showAlert('Erreur réseau', 'error'); } finally { btnConfirm2fa.disabled = false; }
+      });
+
+      // Fermeture modal
+      btnClose?.addEventListener('click', () => { modal.classList.add('hidden'); });
+      overlay?.addEventListener('click', () => { modal.classList.add('hidden'); });
+      btnReload?.addEventListener('click', () => { location.reload(); });
+    })();
   </script>
