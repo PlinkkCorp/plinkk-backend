@@ -7,7 +7,7 @@ import ejs from "ejs";
 import {
   readFileSync,
 } from "fs";
-import { PrismaClient } from "../generated/prisma/client";
+import { PrismaClient } from '../generated/prisma/edge';
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
@@ -20,7 +20,7 @@ import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
 import { authenticator } from "otplib";
 
-export const prisma = new PrismaClient();
+const prisma = new PrismaClient();
 export const fastify = Fastify({
   logger: true,
 });
@@ -74,6 +74,7 @@ fastify.get("/", async function (request, reply) {
           userName: true,
           isPublic: true,
           email: true,
+          publicEmail: true,
           image: true,
         },
       })
@@ -163,16 +164,15 @@ fastify.post("/register", async (req, reply) => {
         password: hashedPassword,
       },
     });
+    // Auto-login: set session and redirect to dashboard
+    req.session.set("data", user.id);
+    return reply.redirect("/dashboard");
   } catch (error) {
     reply.redirect(
       "/login?error=" + encodeURIComponent("Utilisateur deja existant")
     );
   }
-
-  return reply.redirect(
-    "/login?success=" +
-      encodeURIComponent("Compte créé. Vous pouvez vous connecter.")
-  );
+  // note: on error above we redirected; otherwise we've already redirected to /dashboard
 });
 
 fastify.post("/login", async (request, reply) => {
@@ -277,6 +277,7 @@ fastify.get("/users", async (request, reply) => {
       id: true,
       userName: true,
       email: true,
+      publicEmail: true,
       role: true,
       cosmetics: true,
       profileImage: true,

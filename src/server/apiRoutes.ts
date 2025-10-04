@@ -15,6 +15,8 @@ import { authenticator } from "otplib";
 import QRCode from "qrcode"
 
 const prisma = new PrismaClient();
+// In-memory store for pending 2FA secrets awaiting user confirmation (keyed by userId)
+const pending2fa = new Map<string, { secret: string; otpauth: string; createdAt: number }>();
 
 export function apiRoutes(fastify: FastifyInstance) {
   // API: uploader/remplacer la photo de profil (avatar) via data URL (base64)
@@ -97,8 +99,14 @@ export function apiRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // API: mise à jour de rôle (admin only - garde-fou minimal à compléter)
+  // API: mise à jour de rôle (admin/dev/moderator)
   fastify.post("/users/:id/role", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
     const { id } = request.params as { id: string };
     const { role } = (request.body as any) || {};
     if (!Object.values(Role).includes(role))
@@ -107,8 +115,14 @@ export function apiRoutes(fastify: FastifyInstance) {
     return reply.send({ id: updated.id, role: updated.role });
   });
 
-  // API: régler les cosmétiques (ex: flair, bannerUrl, frame)
+  // API: régler les cosmétiques (ex: flair, bannerUrl, frame) — admin/dev/moderator
   fastify.post("/users/:id/cosmetics", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
     const { id } = request.params as { id: string };
     const cosmetics = (request.body as any) ?? null;
     const updated = await prisma.user.update({
@@ -117,6 +131,28 @@ export function apiRoutes(fastify: FastifyInstance) {
       include: { cosmetics: true },
     });
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
+  });
+
+  // API: suppression d'un utilisateur (admin/dev/moderator)
+  fastify.delete("/users/:id", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+    const { id } = request.params as { id: string };
+    await prisma.$transaction([
+      prisma.link.deleteMany({ where: { userId: id } }),
+      prisma.label.deleteMany({ where: { userId: id } }),
+      prisma.socialIcon.deleteMany({ where: { userId: id } }),
+      prisma.backgroundColor.deleteMany({ where: { userId: id } }),
+      prisma.neonColor.deleteMany({ where: { userId: id } }),
+      prisma.statusbar.deleteMany({ where: { userId: id } }),
+      prisma.cosmetic.deleteMany({ where: { userId: id } }),
+      prisma.user.delete({ where: { id } }),
+    ]);
+    return reply.send({ ok: true });
   });
 
   // API: Récupérer la configuration complète du profil pour l'éditeur
@@ -342,7 +378,7 @@ export function apiRoutes(fastify: FastifyInstance) {
 
   // Catalogue d'icônes disponibles pour l'éditeur
   fastify.get("/icons", async (request, reply) => {
-    const iconsDir = path.join(__dirname, "public", "images", "icons");
+    const iconsDir = path.join(__dirname, "..", "public", "images", "icons");
     if (!existsSync(iconsDir)) return reply.send([]);
     const entries = readdirSync(iconsDir, { withFileTypes: true });
     const toTitle = (s: string) =>
@@ -429,31 +465,53 @@ export function apiRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
+  // API: supprimer mon compte (mdp + TOTP si activé)
+  fastify.post("/me/delete", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { password, otp } = (request.body as any) || {};
+    if (!password) return reply.code(400).send({ error: "Mot de passe requis" });
+    const me = await prisma.user.findUnique({ where: { id: userId as string } });
+    if (!me) return reply.code(404).send({ error: "Utilisateur introuvable" });
+    const ok = await bcrypt.compare(password, me.password);
+    if (!ok) return reply.code(403).send({ error: "Mot de passe incorrect" });
+    if (me.totpSecret && me.totpSecret !== "") {
+      if (!otp || typeof otp !== "string") return reply.code(400).send({ error: "Code 2FA requis" });
+      const valid = authenticator.check(otp, me.totpSecret);
+      if (!valid) return reply.code(403).send({ error: "Code 2FA invalide" });
+    }
+    await prisma.$transaction([
+      prisma.link.deleteMany({ where: { userId: userId as string } }),
+      prisma.label.deleteMany({ where: { userId: userId as string } }),
+      prisma.socialIcon.deleteMany({ where: { userId: userId as string } }),
+      prisma.backgroundColor.deleteMany({ where: { userId: userId as string } }),
+      prisma.neonColor.deleteMany({ where: { userId: userId as string } }),
+      prisma.statusbar.deleteMany({ where: { userId: userId as string } }),
+      prisma.cosmetic.deleteMany({ where: { userId: userId as string } }),
+      prisma.user.delete({ where: { id: userId as string } }),
+    ]);
+    request.session.delete();
+    return reply.send({ ok: true });
+  });
+
   // API: basculer la visibilité publique de l'email (stockée dans cosmetics.settings.isEmailPublic)
   fastify.post("/me/email-visibility", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    // New behavior: use the dedicated `publicEmail` column on User to
+    // control whether the account email is publicly visible. This avoids
+    // coupling visibility to a cosmetics JSON object which doesn't exist
+    // in the Prisma schema.
     const { isEmailPublic } = (request.body as any) ?? {};
-    const u = await prisma.user.findUnique({
-      where: { id: userId as string },
-      select: { cosmetics: true },
-    });
-    const cosmetics: any = (u?.cosmetics as any) || {};
-    cosmetics.settings = {
-      ...(cosmetics.settings || {}),
-      isEmailPublic: Boolean(isEmailPublic),
-    };
+    const me = await prisma.user.findUnique({ where: { id: userId as string }, select: { email: true, publicEmail: true } });
+    if (!me) return reply.code(404).send({ error: 'Utilisateur introuvable' });
+    const newPublicEmail = Boolean(isEmailPublic) ? (me.publicEmail || me.email) : null;
     const updated = await prisma.user.update({
       where: { id: userId as string },
-      data: { cosmetics },
-      select: { id: true, cosmetics: true },
+      data: { publicEmail: newPublicEmail },
+      select: { id: true, publicEmail: true },
     });
-    return reply.send({
-      id: updated.id,
-      isEmailPublic: Boolean(
-        (updated.cosmetics as any)?.settings?.isEmailPublic
-      ),
-    });
+    return reply.send({ id: updated.id, isEmailPublic: Boolean(updated.publicEmail) });
   });
 
   // API: basculer la 2FA
@@ -462,35 +520,63 @@ export function apiRoutes(fastify: FastifyInstance) {
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
 
     const user = await prisma.user.findUnique({ where: { id: userId } })
-
-    if (user.totpSecret === "") {
-      const secret = authenticator.generateSecret();
-      const otpauth = authenticator.keyuri(user.userName, "Plinkk", secret);
-      const qrCode = await QRCode.toDataURL(otpauth);
-  
-      const update = prisma.user.update({
-        where: {
-          id: userId
-        },
-        data: {
-          totpSecret: secret
-        }
-      })
-  
+    // If no secret yet -> generate a temporary secret stored in session, return qr/otpauth
+    if (!user.totpSecret || user.totpSecret === "") {
+      // Reuse a pending secret stored in session if present and not expired
+  const pending: any = pending2fa.get(userId as string) || null;
+      const now = Date.now();
+      let secret: string | null = null;
+      let otpauth: string | null = null;
+      if (pending && pending.secret && pending.createdAt && (now - pending.createdAt) < (10 * 60 * 1000)) {
+        secret = pending.secret;
+        otpauth = pending.otpauth;
+      } else {
+        secret = authenticator.generateSecret();
+        otpauth = authenticator.keyuri(user.userName, "Plinkk", secret);
+        // store pending secret in session for confirmation step (expires after 10min)
+  pending2fa.set(userId as string, { secret, otpauth, createdAt: now });
+      }
+      const qrCode = await QRCode.toDataURL(otpauth as string);
       return { qrCode, otpauth };
-    } else {
-      const update = prisma.user.update({
-        where: {
-          id: userId
-        },
-        data: {
-          totpSecret: ""
-        }
-      })
-  
-      return { "successful": true };
     }
 
+    // If secret exists in DB -> expect an OTP to disable 2FA
+    const { otp } = (request.body as any) || {};
+    if (!otp || typeof otp !== 'string') {
+      return reply.code(400).send({ error: 'OTP requis pour désactiver la 2FA' });
+    }
+    const valid = authenticator.check(otp, user.totpSecret);
+    if (!valid) return reply.code(403).send({ error: 'Code 2FA invalide' });
+
+    await prisma.user.update({ where: { id: userId }, data: { totpSecret: '' } });
+    return { successful: true };
+
+
+  // API: confirmer l'activation 2FA en vérifiant un OTP (ne désactive pas)
+  fastify.post('/me/2fa/confirm', async (request, reply) => {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+    const { otp } = (request.body as any) || {};
+    if (!otp || typeof otp !== 'string') return reply.code(400).send({ error: 'OTP requis' });
+
+    // Retrieve pending secret from session
+  const pending: any = pending2fa.get(userId as string) || null;
+  if (!pending || !pending.secret) return reply.code(400).send({ error: 'Aucune clé 2FA en attente' });
+    // optional expiry check
+    const now = Date.now();
+    if (!pending.createdAt || (now - pending.createdAt) > (10 * 60 * 1000)) {
+      pending2fa.delete(userId as string);
+      return reply.code(400).send({ error: 'La clé 2FA a expiré, régénère le QR' });
+    }
+
+    const valid = authenticator.check(otp, pending.secret);
+    if (!valid) return reply.code(403).send({ error: 'Code 2FA invalide' });
+
+  // Persist to DB and clear pending
+  await prisma.user.update({ where: { id: userId }, data: { totpSecret: pending.secret } });
+  pending2fa.delete(userId as string);
+    return reply.send({ successful: true });
+  });
   });
 
   // API: mettre à jour des infos de base du compte (username, name, description)

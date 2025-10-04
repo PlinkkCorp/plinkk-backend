@@ -152,17 +152,16 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       omit: { password: true },
     });
     if (!userInfo) return reply.redirect("/login");
-    // Dérive les préférences depuis cosmetics json (pour éviter une migration)
-    const cosmetics = (userInfo.cosmetics as any) || {};
-    const privacy = cosmetics.settings || {};
-    const isEmailPublic = Boolean(privacy.isEmailPublic);
+    // Dérive la visibilité d'email depuis le champ `publicEmail` (présent
+    // dans le schéma Prisma). Si publicEmail est défini -> l'email est public.
+    const isEmailPublic = Boolean((userInfo as any).publicEmail);
     return reply.view("dashboard/account.ejs", {
       user: userInfo,
       isEmailPublic,
     });
   });
 
-  // Dashboard: Admin (gestion user)
+  // Dashboard: Admin (gestion avancée)
   fastify.get("/admin", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.redirect("/login");
@@ -172,21 +171,36 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       omit: { password: true },
     });
     if (!userInfo) return reply.redirect("/login");
-    // if (userInfo.role !== Role.ADMIN) return reply.redirect("/login");
-    const users = await prisma.user.findMany({
-        where: { isPublic: true },
+    if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
+      return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
+    }
+    const [users, totals] = await Promise.all([
+      prisma.user.findMany({
+        // Voir tous les utilisateurs pour l'admin (pas seulement isPublic)
         select: {
           id: true,
           userName: true,
           email: true,
+          publicEmail: true,
           role: true,
+          isPublic: true,
           cosmetics: true,
-          profileImage: true,
+          createdAt: true,
         },
-        orderBy: { createdAt: "asc" },
-      });
+        orderBy: { createdAt: "desc" },
+      }),
+      (async () => {
+        const totalUsers = await prisma.user.count();
+        const totalPublic = await prisma.user.count({ where: { isPublic: true } });
+        const totalPrivate = totalUsers - totalPublic;
+        const moderators = await prisma.user.count({ where: { role: { in: ["ADMIN", "DEVELOPER", "MODERATOR"] as any } as any } });
+        return { totalUsers, totalPublic, totalPrivate, moderators };
+      })(),
+    ]);
+
     return reply.view("dashboard/admin.ejs", {
-      users: users,
+      users,
+      totals,
       user: userInfo,
     });
   });
