@@ -20,6 +20,7 @@ import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
 import { authenticator } from "otplib";
 
+
 // Debug helper: show whether DATABASE_URL is present and looks like a prisma Accelerate URL.
 // We mask any API key to avoid leaking secrets in logs.
 const _rawDatabaseUrl = process.env.DATABASE_URL;
@@ -38,7 +39,7 @@ if (!_rawDatabaseUrl) {
   }
 }
 
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 export const fastify = Fastify({
   logger: true,
 });
