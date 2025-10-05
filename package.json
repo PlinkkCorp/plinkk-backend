@@ -10,7 +10,9 @@
     "start": "node dist/server.js",
     "prisma:init": "prisma migrate dev --name deploy && prisma migrate deploy && prisma generate",
     "postinstall": "prisma generate || true",
-    "set-admin:klaynight": "node scripts/set-admin.cjs"
+    "set-admin:klaynight": "node scripts/set-admin.cjs klaynight",
+    "set-admin:marvideo": "node scripts/set-admin.cjs marvideo",
+    "set-admin": "node scripts/set-admin.cjs"
   },
   "keywords": [],
   "author": "",
