@@ -320,9 +320,40 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
           card.type = 'button';
           card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left space-y-2';
           const head = document.createElement('div'); head.className = 'flex items-center justify-between';
-          const title = document.createElement('div'); title.className = 'font-medium'; title.textContent = `#${idx} · ${theme?.name || 'Thème'}`;
-          const badge = document.createElement('span'); badge.className = 'text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300'; badge.textContent = theme?.darkTheme ? 'Sombre' : 'Clair';
-          head.append(title, badge);
+          const title = document.createElement('div'); title.className = 'font-medium truncate'; title.textContent = `#${idx} · ${theme?.name || 'Thème'}`;
+          const meta = document.createElement('div'); meta.className = 'flex items-center gap-2';
+          // Creator tag
+          const creator = document.createElement('span'); creator.className = 'text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300';
+          if (theme?.author && theme.author.userName) {
+            creator.textContent = `par ${theme.author.userName}`;
+          } else {
+            creator.textContent = 'original';
+          }
+          // Info button
+          const infoBtn = document.createElement('button'); infoBtn.type = 'button'; infoBtn.className = 'size-6 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700'; infoBtn.title = 'Infos';
+          infoBtn.innerHTML = '<svg class="h-3.5 w-3.5 text-slate-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+          infoBtn.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            const d = document.createElement('div');
+            d.className = 'z-[80] fixed inset-0';
+            d.innerHTML = `
+              <div class="absolute inset-0 bg-black/60"></div>
+              <div class="relative z-[1] mx-auto mt-20 w-[92vw] max-w-md rounded-lg border border-slate-800 bg-slate-900 shadow-xl p-4 space-y-2">
+                <div class="flex items-center justify-between">
+                  <div class="font-medium">Détails du thème</div>
+                  <button class="h-8 w-8 rounded bg-slate-800 hover:bg-slate-700" data-close>✕</button>
+                </div>
+                <div class="text-sm text-slate-300"><b>${theme?.name || ''}</b></div>
+                ${theme?.description ? `<div class="text-xs text-slate-400">${theme.description}</div>` : ''}
+                ${theme?.author && theme.author.id ? `<div class="text-xs">Créateur: <a class="text-indigo-400 hover:underline" href="/${theme.author.id}" target="_blank">@${theme.author.userName || theme.author.id}</a></div>` : '<div class="text-xs text-slate-400">Créateur: original</div>'}
+              </div>`;
+            document.body.appendChild(d);
+            const close = () => d.remove();
+            d.addEventListener('click', (e) => { if (e.target === d.firstElementChild) close(); });
+            d.querySelector('[data-close]')?.addEventListener('click', close);
+          });
+          meta.append(creator, infoBtn);
+          head.append(title, meta);
           const previewBox = document.createElement('div'); previewBox.className = 'rounded p-3 border border-slate-800';
           previewBox.style.background = theme?.background || '#111827'; previewBox.style.color = theme?.textColor || '#e5e7eb';
           const btns = document.createElement('div'); btns.className = 'flex gap-2';

@@ -22,6 +22,14 @@ enum Role {
   MODERATOR
 }
 
+// Statut de publication d'un thème utilisateur
+enum ThemeStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
 model User {
   id                               String  @id @unique // username slug (sans espace)
   userName                         String
@@ -80,6 +88,9 @@ model User {
   // Visibilité répertoire public Plinkk
   isPublic        Boolean   @default(true)
   views           Int       @default(0)
+
+  // Thèmes créés par l'utilisateur
+  themes          Theme[]
 }
 
 model Cosmetic {
@@ -154,4 +165,39 @@ model Statusbar {
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
+}
+
+// Thème personnalisable soumis par un utilisateur, validé par un admin
+model Theme {
+  id        String      @id @default(nanoid(16))
+  name      String
+  description String?
+  data      Json        // structure compatible avec src/public/config/themeConfig.js
+  status    ThemeStatus @default(DRAFT)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @default(now()) @updatedAt
+
+  // Auteur
+  authorId String
+  author   User        @relation(fields: [authorId], references: [id])
+}
+
+/// Table analytique gérée en dehors de Prisma (créée dynamiquement) — ne pas migrer
+model UserViewDaily {
+  userId String
+  date   String
+  count  Int
+
+  @@id([userId, date])
+  @@map("UserViewDaily")
+}
+
+/// Table analytique gérée en dehors de Prisma (créée dynamiquement) — ne pas migrer
+model LinkClickDaily {
+  linkId String
+  date   String
+  count  Int
+
+  @@id([linkId, date])
+  @@map("LinkClickDaily")
 }

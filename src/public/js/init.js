@@ -3,6 +3,19 @@ import { createProfileContainer, createUserName, createStatusBar, createLabelBut
 import { initEasterEggs } from './easterEggs.js';
 import { profileData } from './config/profileConfig.js';
 import { themes } from './config/themeConfig.js';
+// Étendre avec les thèmes approuvés (communauté)
+(async () => {
+    try {
+        const res = await fetch('/api/themes/approved', { cache: 'no-store' });
+        if (res.ok) {
+            const extra = await res.json();
+            if (Array.isArray(extra) && extra.length) {
+                // Muter le tableau importé pour conserver les index existants
+                extra.forEach(t => themes.push(t));
+            }
+        }
+    } catch {}
+})();
 import { animations, styleSheet } from './config/animationConfig.js';
 import { canvaData } from './config/canvaConfig.js';
 document.addEventListener("DOMContentLoaded", function () {

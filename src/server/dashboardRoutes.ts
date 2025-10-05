@@ -322,4 +322,49 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       user: userInfo,
     });
   });
+
+  // Dashboard: Mes thèmes (création / soumission)
+  fastify.get("/themes", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.redirect("/login");
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    if (!userInfo) return reply.redirect("/login");
+    const myThemes = await prisma.theme.findMany({
+      where: { authorId: userId as string }, orderBy: { updatedAt: "desc" },
+      select: { id: true, name: true, description: true, status: true, updatedAt: true, data: true }
+    });
+    return reply.view("dashboard/themes.ejs", { user: userInfo, myThemes });
+  });
+
+  // Admin: Liste des thèmes soumis
+  fastify.get("/admin/themes", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.redirect("/login");
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    if (!userInfo) return reply.redirect("/login");
+    if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
+      return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
+    }
+    const submitted = await prisma.theme.findMany({
+      where: { status: "SUBMITTED" as any },
+      select: { id: true, name: true, description: true, author: { select: { id: true, userName: true } }, updatedAt: true },
+      orderBy: { updatedAt: "desc" }
+    });
+    return reply.view("dashboard/admin-themes.ejs", { user: userInfo, themes: submitted });
+  });
+
+  // Admin: Prévisualisation d'un thème
+  fastify.get("/admin/themes/:id", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.redirect("/login");
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    if (!userInfo) return reply.redirect("/login");
+    if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
+      return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
+    }
+    const { id } = request.params as { id: string };
+    const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, name: true, description: true, data: true, author: { select: { id: true, userName: true } }, status: true } });
+    if (!t) return reply.code(404).view("erreurs/404.ejs", { currentUser: userInfo });
+    return reply.view("dashboard/admin-theme-preview.ejs", { user: userInfo, theme: t });
+  });
 }

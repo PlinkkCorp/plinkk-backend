@@ -348,13 +348,18 @@
                     <div id="pickerModal" class="fixed inset-0 z-50 hidden">
                         <div class="absolute inset-0 bg-black/60 animate-fade-in"></div>
                         <div class="relative mx-auto mt-16 w-[92vw] max-w-5xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in">
-                            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800">
-                                <h3 id="pickerTitle" class="font-semibold">Sélection</h3>
-                                <button id="pickerClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
-                            </div>
+                                                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+                                                                <div class="flex items-center gap-3">
+                                                                    <a id="pickerCreateBtn" href="/dashboard/themes" target="_blank" class="hidden px-3 py-1.5 text-sm rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors">Créer mon propre thème</a>
+                                                                    <h3 id="pickerTitle" class="font-semibold">Sélection</h3>
+                                                                </div>
+                                                                <div class="flex items-center gap-2">
+                                                                    <button id="pickerClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
+                                                                </div>
+                                                        </div>
                             <div class="p-4 space-y-3">
                                 <input id="pickerSearch" type="text" placeholder="Rechercher..." class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700" />
-                                <div id="pickerGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[64vh] overflow-auto"></div>
+                                                                <div id="pickerGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[64vh] overflow-auto"></div>
                             </div>
                         </div>
                     </div>
@@ -398,7 +403,14 @@
                     import { animations, animationBackground } from '/public/config/animationConfig.js';
                     import btnIconThemeConfig from '/public/config/btnIconThemeConfig.js';
                     import labelPresets from '/public/config/labelPresets.js';
-                    window.__PLINKK_CFG__ = { themes, canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
+                                        // Charger thèmes approuvés (communauté) et les ajouter à la suite
+                                        let communityThemes = [];
+                                        try {
+                                            const res = await fetch('/api/themes/approved');
+                                            if (res.ok) communityThemes = await res.json();
+                                        } catch {}
+                                        const mergedThemes = Array.isArray(communityThemes) && communityThemes.length ? themes.concat(communityThemes) : themes;
+                                        window.__PLINKK_CFG__ = { themes: mergedThemes, canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
                 </script>
                 <!-- Initialisation de l'UI du dashboard (formulaire, listes, pickers) -->
                 <script type="module" src="/public/js/dashboard-ui/index.js"></script>

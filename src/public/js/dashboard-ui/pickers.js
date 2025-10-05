@@ -77,6 +77,8 @@ export function openPicker({ title, type, items, renderCard, onSelect }) {
   pickerOnSelect = onSelect;
   pickerRenderCard = renderCard || null;
   pickerSearch.value = '';
+  const createBtn = document.getElementById('pickerCreateBtn');
+  if (createBtn) createBtn.classList.toggle('hidden', type !== 'theme');
   pickerModal.classList.remove('hidden');
   renderPickerGrid('');
 }
