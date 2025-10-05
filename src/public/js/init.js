@@ -54,12 +54,18 @@ document.addEventListener("DOMContentLoaded", function () {
         console.warn("Icon URL is not defined.");
     }
     document.head.appendChild(link);
-    const footer = document.createElement("footer");
-    const themeIndex = profileData.selectedThemeIndex % themes.length;
-    footer.innerHTML = `Design with ❤️ by <a href="http://plinkk.fr" target="_blank" rel="noopener noreferrer"><p style="color:${((_a = themes[themeIndex]) === null || _a === void 0 ? void 0 : _a.buttonTextColor) || 'defaultColor'};display:inline;padding:2px 2px 2px 4px;border-radius:5px;background-color:${((_b = themes[themeIndex]) === null || _b === void 0 ? void 0 : _b.buttonBackground) || 'defaultColor'};">PlinkkCorp©</p></a>`;
-    footer.style.zIndex = "9999";
-    document.body.appendChild(footer);
+    // N'ajoute pas le footer en mode aperçu (?preview=1)
+    const isPreview = new URLSearchParams(window.location.search).get('preview') === '1';
+    if (!isPreview) {
+        const footer = document.createElement("footer");
+        const themeIndex = profileData.selectedThemeIndex % themes.length;
+        footer.innerHTML = `Design with ❤️ by <a href="http://plinkk.fr" target="_blank" rel="noopener noreferrer"><p style="color:${((_a = themes[themeIndex]) === null || _a === void 0 ? void 0 : _a.buttonTextColor) || 'defaultColor'};display:inline;padding:2px 2px 2px 4px;border-radius:5px;background-color:${((_b = themes[themeIndex]) === null || _b === void 0 ? void 0 : _b.buttonBackground) || 'defaultColor'};">PlinkkCorp©</p></a>`;
+        footer.style.zIndex = "9999";
+        document.body.appendChild(footer);
+    }
     initEasterEggs();
+    // Désactiver le néon globalement (override temporaire)
+    try { profileData.neonEnable = 0; } catch(_) {}
     if (!animations || !animations.length) {
         console.warn("Animations array is empty or not defined.");
     }

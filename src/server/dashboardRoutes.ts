@@ -130,7 +130,120 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       }
     });
     if (!userInfo) return reply.redirect("/login");
-    return reply.view("dashboard/stats.ejs", { user: userInfo, links: userInfo.links });
+    // Précharger la série par jour pour 30 derniers jours en fallback (si fetch échoue côté client)
+    const now = new Date();
+    const end = now;
+    const start = new Date(end.getTime() - 29 * 86400000);
+    const fmt = (dt: Date) => {
+      const y = dt.getUTCFullYear();
+      const m = String(dt.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(dt.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+    const s = fmt(start);
+    const e = fmt(end);
+    let preSeries: { date: string; count: number }[] = [];
+    try {
+      await prisma.$executeRawUnsafe(
+        'CREATE TABLE IF NOT EXISTS "UserViewDaily" ("userId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("userId","date"))'
+      );
+      const rows = (await prisma.$queryRaw<Array<{ date: string; count: number }>>`
+        SELECT "date", "count" FROM "UserViewDaily" WHERE "userId" = ${String(userId)} AND "date" BETWEEN ${s} AND ${e} ORDER BY "date" ASC
+      `);
+      const byDate = new Map(rows.map((r) => [r.date, r.count]));
+      for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
+        const key = fmt(t);
+        preSeries.push({ date: key, count: byDate.get(key) || 0 });
+      }
+    } catch (e) {
+      request.log?.warn({ err: e }, 'Failed to preload daily series');
+    }
+    return reply.view("dashboard/stats.ejs", { user: userInfo, links: userInfo.links, viewsDaily30d: preSeries });
+  });
+
+  // API: Vues journalières (pour graphiques)
+  fastify.get("/stats/views", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const { from, to } = request.query as { from?: string; to?: string };
+    // bornes par défaut: 30 derniers jours (UTC)
+    const now = new Date();
+    const end = to ? new Date(to) : now;
+    const start = from ? new Date(from) : new Date(end.getTime() - 29 * 86400000);
+    const fmt = (dt: Date) => {
+      const y = dt.getUTCFullYear();
+      const m = String(dt.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(dt.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+    const s = fmt(start);
+    const e = fmt(end);
+    try {
+      // Assurer l'existence de la table
+      await prisma.$executeRawUnsafe(
+        'CREATE TABLE IF NOT EXISTS "UserViewDaily" ("userId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("userId","date"))'
+      );
+      const rows = (await prisma.$queryRaw<Array<{ date: string; count: number }>>`
+        SELECT "date", "count"
+        FROM "UserViewDaily"
+        WHERE "userId" = ${String(userId)} AND "date" BETWEEN ${s} AND ${e}
+        ORDER BY "date" ASC
+      `);
+
+      // Remplir les jours manquants à 0
+      const byDate = new Map(rows.map((r) => [r.date, r.count]));
+      const series: { date: string; count: number }[] = [];
+      for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
+        const key = fmt(t);
+        series.push({ date: key, count: byDate.get(key) || 0 });
+      }
+      return reply.send({ from: s, to: e, series });
+    } catch (e) {
+      request.log?.error({ err: e }, 'Failed to query daily views');
+      return reply.code(500).send({ error: 'internal_error' });
+    }
+  });
+
+  // API: Clics journaliers (somme de tous les liens de l'utilisateur)
+  fastify.get("/stats/clicks", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const { from, to } = request.query as { from?: string; to?: string };
+    const now = new Date();
+    const end = to ? new Date(to) : now;
+    const start = from ? new Date(from) : new Date(end.getTime() - 29 * 86400000);
+    const fmt = (dt: Date) => {
+      const y = dt.getUTCFullYear();
+      const m = String(dt.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(dt.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+    const s = fmt(start);
+    const e = fmt(end);
+    try {
+      await prisma.$executeRawUnsafe(
+        'CREATE TABLE IF NOT EXISTS "LinkClickDaily" ("linkId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("linkId","date"))'
+      );
+      // agréger par jour pour tous les liens de l'utilisateur (via sous-sélection des linkId)
+      const linkIds = (await prisma.link.findMany({ where: { userId: String(userId) }, select: { id: true } })).map(x => x.id);
+      if (linkIds.length === 0) return reply.send({ from: s, to: e, series: [] });
+      // Construire la liste pour clause IN
+      const placeholders = linkIds.map(() => '?').join(',');
+      const rows = (await prisma.$queryRawUnsafe(
+        `SELECT "date", SUM("count") as count FROM "LinkClickDaily" WHERE "linkId" IN (${placeholders}) AND "date" BETWEEN ? AND ? GROUP BY "date" ORDER BY "date" ASC`,
+        ...linkIds, s, e
+      )) as Array<{ date: string; count: number }>;
+      const byDate = new Map(rows.map((r) => [r.date, Number(r.count)]));
+      const series: { date: string; count: number }[] = [];
+      for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
+        const key = fmt(t);
+        series.push({ date: key, count: byDate.get(key) || 0 });
+      }
+      return reply.send({ from: s, to: e, series });
+    } catch (e) {
+      request.log?.error({ err: e }, 'Failed to query daily clicks');
+      return reply.code(500).send({ error: 'internal_error' });
+    }
   });
 
   // Dashboard: Versions (vue dédiée)
@@ -189,6 +302,8 @@ export function dashboardRoutes(fastify: FastifyInstance) {
           isPublic: true,
           cosmetics: true,
           createdAt: true,
+          twoFactorEnabled: true,
+          twoFactorSecret: true,
         },
         orderBy: { createdAt: "desc" },
       }),

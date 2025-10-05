@@ -1,3 +1,6 @@
+<%- include('partials/head', { title: 'Activer l’authentification à deux facteurs (TOTP)', description: 'Sécurisez votre compte avec l\'authentification à deux facteurs (TOTP).' }) %>
+<%- include('partials/header') %>
+
 <div class="totp-root" style="max-width:720px;margin:24px auto;padding:20px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;">
     <h1 style="font-size:20px;margin-bottom:12px;">Activer l’authentification à deux facteurs (TOTP)</h1>
 
@@ -82,3 +85,5 @@
         })();
     </script>
 </div>
+
+<%- include('partials/footer') %>

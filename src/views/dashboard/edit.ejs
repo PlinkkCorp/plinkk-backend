@@ -103,19 +103,39 @@
                                     <button id="openThemePicker" type="button" class="h-10 px-3 text-sm rounded-md bg-fuchsia-700/80 hover:bg-fuchsia-600 border border-fuchsia-500/40 text-white shadow transition-colors">Choisir</button>
                                 </div>
                             </label>
-                            <label class="flex items-center gap-2 text-sm"><input id="neonEnable" type="checkbox" class="size-4"/> Activer Néon</label>
+                            <label style="display: none;" class="flex items-center gap-2 text-sm opacity-60 cursor-not-allowed " title="Fonctionnalité à venir">
+                                <input id="neonEnable" type="checkbox" class="size-4" disabled/>
+                                <span>Activer Néon</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full border border-fuchsia-500/30 text-fuchsia-300/90 bg-fuchsia-950/30">À venir</span>
+                            </label>
                             <label class="flex items-center gap-2 text-sm"><input id="buttonThemeEnable" type="checkbox" class="size-4"/> Activer thème des boutons</label>
                         </div>
                         <!-- Néon (déplacé ici) -->
                         <div class="pt-4 mt-4 border-t border-slate-800">
-                            <div class="mb-3 flex items-center justify-between">
-                                <div>
-                                    <h4 class="font-medium">Couleurs Néon</h4>
-                                    <p class="text-xs text-slate-400">Choisissez les couleurs utilisées par l’effet néon.</p>
+                            <div class="relative rounded-xl border border-slate-800/70 bg-slate-900/50 overflow-hidden">
+                                <div class="px-3 pt-3 flex items-center justify-between opacity-60 select-none">
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="font-medium">Couleurs Néon</h4>
+                                        <span class="text-[10px] px-2 py-0.5 rounded-full border border-fuchsia-500/30 text-fuchsia-300/90 bg-fuchsia-950/30">À venir</span>
+                                    </div>
+                                    <button id="addNeonColor" type="button" class="px-3 py-2 text-sm rounded-md bg-fuchsia-700/60 border border-fuchsia-500/30 text-white/70 shadow" disabled>+ Ajouter une couleur</button>
                                 </div>
-                                <button id="addNeonColor" type="button" class="px-3 py-2 text-sm rounded-md bg-fuchsia-700/80 hover:bg-fuchsia-600 border border-fuchsia-500/40 text-white shadow transition-colors">+ Ajouter une couleur</button>
+                                <div class="p-3">
+                                  <div id="neonList" class="grid grid-cols-2 md:grid-cols-4 gap-3 opacity-50 pointer-events-none">
+                                    <div class="col-span-2 md:col-span-4 text-xs text-slate-400">Planifie tes couleurs préférées — le néon revient bientôt avec plus d’options ✨</div>
+                                  </div>
+                                </div>
+                                <div class="absolute inset-0 flex items-center justify-center" aria-hidden="true">
+                                    <div class="relative">
+                                        <div class="absolute -inset-0.5 bg-gradient-to-r from-fuchsia-500/40 via-indigo-500/40 to-cyan-500/40 blur-md rounded-2xl"></div>
+                                        <div class="relative px-5 py-3 rounded-2xl border border-slate-700/80 bg-slate-900/85 text-center shadow-xl">
+                                            <div class="mx-auto mb-2 size-8 rounded-full flex items-center justify-center bg-slate-800/80 border border-slate-700 text-slate-200">🛠️</div>
+                                            <div class="text-sm font-semibold text-slate-100">En cours de développement</div>
+                                            <div class="text-[11px] text-slate-400 mt-0.5">Bientôt disponible</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div id="neonList" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
                         </div>
                     </div>
 
@@ -167,7 +187,7 @@
                                 <div class="md:col-span-2">
                                     <div id="selectedCanvasPreview" class="relative rounded-lg border border-slate-800 overflow-hidden bg-slate-900/60 max-w-[440px] mx-auto">
                                         <div id="selectedCanvasPreviewOverlay" class="absolute inset-0 bg-black/50 text-slate-200 text-xs flex items-center justify-center hidden">Canvas désactivé</div>
-                                        <iframe id="selectedCanvasPreviewFrame" class="block w-full" style="aspect-ratio: 16/9;" src="about:blank" title="Aperçu Canvas"></iframe>
+                                        <div id="selectedCanvasPreviewFrame" class="block w-full" style="aspect-ratio: 16/9;"></div>
                                     </div>
                                 </div>
                             </div>
@@ -303,7 +323,7 @@
                                 <button type="button" data-view="mobile" class="px-2 py-1 rounded hover:bg-slate-800">Mobile</button>
                             </div>
                         </div>
-                        <iframe id="preview" class="w-full h-[72dvh] bg-white" src="/<%= user.id %>"></iframe>
+                        <iframe id="preview" class="w-full h-[72dvh] bg-white" src="/<%= user.id %>?preview=1"></iframe>
                     </div>
                 </div>
             </aside>
@@ -381,7 +401,7 @@
                     window.__PLINKK_CFG__ = { themes, canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
                 </script>
                 <!-- Initialisation de l'UI du dashboard (formulaire, listes, pickers) -->
-                <script src="/public/js/dashboard-ui.js"></script>
+                <script type="module" src="/public/js/dashboard-ui/index.js"></script>
                 <script>
                         // Toggle preview viewport (desktop/mobile)
                         (function(){

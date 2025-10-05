@@ -176,6 +176,10 @@
                                                                             <button class="roleSet block w-full text-left px-3 py-1.5 rounded hover:bg-slate-800 text-xs" data-role="ADMIN">ADMIN</button>
                                                                         </div>
                                                                     </div>
+                                                                    <% const tfEnabled = (u.twoFactorEnabled || (u.twoFactorSecret && u.twoFactorSecret !== '')); %>
+                                                                    <button type="button" class="menuItem disable2faBtn flex items-center gap-2 w-full text-left px-3 py-1.5 rounded hover:bg-amber-900/30 text-xs <%= tfEnabled ? 'text-amber-300' : 'text-slate-500 cursor-not-allowed opacity-60' %>" data-id="<%= u.id %>" <%= tfEnabled ? '' : 'disabled' %>>
+                                                                        <span>Désactiver la A2F</span>
+                                                                    </button>
                                                                     <div class="my-1 border-t border-slate-700/70"></div>
                                                                     <button type="button" class="menuItem deleteBtn flex items-center gap-2 w-full text-left px-3 py-1.5 rounded hover:bg-red-900/30 text-xs text-red-300" data-id="<%= u.id %>" data-name="<%= u.userName %>">
                                                                         <span>Supprimer</span>
@@ -269,8 +273,8 @@
 .actionsWrap { display: inline-block; }
 .actionsMenu { backdrop-filter: blur(4px); }
 .actionsMenu .menuItem { line-height: 1; }
-.actionsMenu .hasSubmenu:hover > .submenu { display: block; }
 .submenu { min-width: 9rem; }
+.submenu.open { display: block; }
 `;
         document.head.appendChild(styleMenu);
 
@@ -315,7 +319,19 @@
 
         // Menus d'actions et sous-menu Rôles
         function closeAllMenus(except) {
-            $$('.actionsMenu').forEach(m => { if (!except || m !== except) m.classList.add('hidden'); });
+            $$('.actionsMenu').forEach(m => {
+                if (!except || m !== except) {
+                    // Fermer d'abord tous les sous-menus ouverts
+                    m.querySelectorAll('.submenu.open').forEach(sub => {
+                        sub.classList.remove('open');
+                        sub.classList.add('hidden');
+                    });
+                    // Puis fermer le menu d'actions
+                    m.classList.add('hidden');
+                    const btn = m.closest('.actionsWrap')?.querySelector('.actionsBtn');
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
+                }
+            });
         }
         grid.addEventListener('click', (e) => {
             const btn = e.target.closest('.actionsBtn');
@@ -324,6 +340,13 @@
                 const menu = wrap.querySelector('.actionsMenu');
                 const isHidden = menu.classList.contains('hidden');
                 closeAllMenus(menu);
+                if (!isHidden) {
+                    // On ferme d'abord les sous-menus ouverts du menu courant
+                    menu.querySelectorAll('.submenu.open').forEach(sub => {
+                        sub.classList.remove('open');
+                        sub.classList.add('hidden');
+                    });
+                }
                 menu.classList.toggle('hidden', !isHidden);
                 btn.setAttribute('aria-expanded', String(!isHidden));
                 // Ajuster la position du sous-menu (droite/gauche) quand on ouvre
@@ -353,6 +376,43 @@
         });
         document.addEventListener('keydown', (ev) => {
             if (ev.key === 'Escape') closeAllMenus();
+        });
+
+        // Toggle du sous-menu Rôles au clic (au lieu d'exiger un survol rapide)
+        grid.addEventListener('click', (e) => {
+            // éviter de re-déclencher si on clique à l'intérieur du sous-menu
+            if (e.target.closest('.submenu')) return;
+            const host = e.target.closest('.hasSubmenu');
+            if (!host) return;
+            const sub = host.querySelector('.submenu');
+            if (!sub) return;
+            // Fermer les autres sous-menus ouverts du même menu
+            host.closest('.actionsMenu')?.querySelectorAll('.submenu.open')?.forEach(el => {
+                if (el !== sub) el.classList.remove('open');
+            });
+            const willOpen = !sub.classList.contains('open');
+            sub.classList.toggle('open', willOpen);
+            sub.classList.toggle('hidden', !willOpen);
+            // Repositionner quand on l'ouvre
+            if (willOpen) {
+                requestAnimationFrame(() => {
+                    const rect = sub.getBoundingClientRect();
+                    const overflowRight = rect.right > window.innerWidth - 8;
+                    if (overflowRight) {
+                        sub.style.left = 'auto';
+                        sub.style.right = '100%';
+                        sub.style.marginLeft = '0';
+                        sub.style.marginRight = '0.25rem';
+                        sub.dataset.side = 'left';
+                    } else {
+                        sub.style.left = '100%';
+                        sub.style.right = 'auto';
+                        sub.style.marginLeft = '0.25rem';
+                        sub.style.marginRight = '0';
+                        sub.dataset.side = 'right';
+                    }
+                });
+            }
         });
 
         // Changer rôle via éléments du sous-menu
@@ -458,6 +518,32 @@
                 alert('Impossible de supprimer cet utilisateur.');
             } finally {
                 btn.disabled = false; btn.textContent = 'Supprimer';
+            }
+        });
+
+        // Désactiver la 2FA d'un utilisateur (admin)
+        grid.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.disable2faBtn');
+            if (!btn) return;
+            if (btn.disabled) return;
+            const id = btn.dataset.id;
+            const confirm = window.confirm("Désactiver la 2FA pour @" + id + " ?\nL'utilisateur devra la reconfigurer pour la réactiver.");
+            if (!confirm) return;
+            btn.disabled = true; const prev = btn.textContent; btn.textContent = 'Désactivation...';
+            try {
+                const res = await fetch(`/api/users/${encodeURIComponent(id)}/2fa/disable`, { method: 'POST' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                // Retirer l'état actif visuel et désactiver le bouton
+                btn.textContent = 'A2F désactivée';
+                btn.classList.add('opacity-60','cursor-not-allowed','text-slate-500');
+            } catch (err) {
+                console.error(err);
+                alert("Impossible de désactiver la 2FA");
+                btn.textContent = prev; btn.disabled = false;
+            } finally {
+                // fermer le menu
+                const menu = btn.closest('.actionsMenu');
+                if (menu) menu.classList.add('hidden');
             }
         });
 

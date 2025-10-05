@@ -188,6 +188,41 @@ export function apiRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
+  // API: désactiver la 2FA d'un utilisateur (admin/dev/moderator)
+  fastify.post("/users/:id/2fa/disable", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({
+      where: { id: meId as string },
+      select: { role: true },
+    });
+    if (
+      !(
+        me &&
+        (me.role === Role.ADMIN ||
+          me.role === Role.DEVELOPER ||
+          me.role === Role.MODERATOR)
+      )
+    ) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+    const { id } = request.params as { id: string };
+    const target = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, twoFactorEnabled: true, twoFactorSecret: true },
+    });
+    if (!target) return reply.code(404).send({ error: "Utilisateur introuvable" });
+
+    const alreadyDisabled = !target.twoFactorEnabled && !target.twoFactorSecret;
+    if (alreadyDisabled) return reply.send({ ok: true, changed: false });
+
+    await prisma.user.update({
+      where: { id },
+      data: { twoFactorSecret: "", twoFactorEnabled: false },
+    });
+    return reply.send({ ok: true, changed: true });
+  });
+
   // API: Récupérer la configuration complète du profil pour l'éditeur
   fastify.get("/me/config", async (request, reply) => {
     const userId = request.session.get("data");
