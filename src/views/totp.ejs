@@ -1,6 +1,84 @@
-<div>
-    <form action="/totp" method="post">
-        <input type="text" name="totp" maxlength="6" required>
-        <button type="submit">Envoyer</button>
-    </form>
+<div class="totp-root" style="max-width:720px;margin:24px auto;padding:20px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;">
+    <h1 style="font-size:20px;margin-bottom:12px;">Activer l’authentification à deux facteurs (TOTP)</h1>
+
+    <% if (typeof message !== 'undefined' && message) { %>
+        <div style="padding:10px;border-radius:6px;background:#ecfeff;margin-bottom:12px;"> <%= message %> </div>
+    <% } %>
+
+        <div id="totpRoot" style="display:flex;gap:18px;align-items:flex-start;" data-otpauth="<%= typeof otpauth !== 'undefined' && otpauth ? otpauth : '' %>">
+        <div style="flex:0 0 220px;">
+            <% if (typeof qrCode !== 'undefined' && qrCode) { %>
+                <img src="<%= qrCode %>" alt="QR code TOTP" style="width:220px;height:220px;object-fit:contain;border-radius:6px;border:1px solid #ddd;" />
+            <% } else { %>
+                <div style="width:220px;height:220px;display:flex;align-items:center;justify-content:center;background:#f3f4f6;border-radius:6px;border:1px dashed #e5e7eb;color:#6b7280">QR indisponible</div>
+            <% } %>
+        </div>
+
+        <div style="flex:1;min-width:0;">
+            <p style="margin:0 0 8px;color:#374151">Scannez ce QR code avec une application d’authentification (Google Authenticator, Authy, Microsoft Authenticator, etc.).</p>
+
+                    <% if (typeof otpauth !== 'undefined' && otpauth) { %>
+                        <div id="otpauthText" style="margin:10px 0;padding:10px;background:#f9fafb;border-radius:6px;border:1px solid #eef2ff;color:#111827;font-family:monospace;word-break:break-all;"> <%= otpauth %> </div>
+                        <button id="copyOtpauth" type="button" style="padding:8px 12px;border-radius:6px;border:1px solid #e5e7eb;background:#ffffff;cursor:pointer;">Copier l’URI</button>
+                    <% } %>
+
+            <ol style="margin-top:12px;padding-left:20px;color:#4b5563">
+                <li>Ouvrez votre application d’authentification.</li>
+                <li>Scannez le QR code ou ajoutez l’URI manuellement.</li>
+                <li>Saisissez le code à 6 chiffres généré ci-dessous puis cliquez sur « Confirmer ».</li>
+            </ol>
+
+            <form id="totpForm" action="/totp" method="post" style="margin-top:14px;display:flex;gap:8px;align-items:center;">
+                <input id="totpInput" name="totp" type="text" inputmode="numeric" maxlength="6" required placeholder="000000" style="font-size:18px;padding:8px 10px;border-radius:6px;border:1px solid #e5e7eb;width:160px;">
+                <button type="submit" style="padding:8px 12px;border-radius:6px;border:0;background:#2563eb;color:#fff;cursor:pointer;">Confirmer</button>
+                <button id="cancelBtn" type="button" style="padding:8px 12px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;color:#111827;cursor:pointer;">Annuler</button>
+            </form>
+
+            <div id="codeInfo" style="margin-top:10px;color:#6b7280;font-size:13px;display:flex;align-items:center;gap:8px;">
+                <span id="clockIndicator">—</span>
+                <small>Le code se renouvelle toutes les 30s</small>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function(){
+            const totpInput = document.getElementById('totpInput');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const copyBtn = document.getElementById('copyOtpauth');
+            const clockIndicator = document.getElementById('clockIndicator');
+
+            cancelBtn?.addEventListener('click', ()=>{
+                // Simple cancel: redirect back
+                window.location.href = '/dashboard';
+            });
+
+                    copyBtn?.addEventListener('click', async ()=>{
+                        try{
+                            const root = document.getElementById('totpRoot');
+                            const otpauth = root?.dataset?.otpauth ?? document.getElementById('otpauthText')?.textContent ?? '';
+                            await navigator.clipboard.writeText(otpauth);
+                            copyBtn.textContent = 'Copié';
+                            setTimeout(()=>copyBtn.textContent = 'Copier l’URI', 2000);
+                        }catch(e){
+                            alert('Impossible de copier l’URI');
+                        }
+                    });
+
+            // Countdown for TOTP 30s window
+            function updateClock(){
+                const now = Math.floor(Date.now()/1000);
+                const seconds = now % 30;
+                const remaining = 30 - seconds;
+                clockIndicator.textContent = remaining + 's';
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            // Auto-format numeric only
+            totpInput?.addEventListener('input', (e)=>{
+                e.target.value = e.target.value.replace(/[^0-9]/g,'').slice(0,6);
+            });
+        })();
+    </script>
 </div>
