@@ -31,6 +31,7 @@ export function generateProfileConfig(
           links.map((l) => ({
             icon: l.icon,
             url: l.url,
+            id: l.id,
             text: l.text,
             name: l.name,
             description: l.description,

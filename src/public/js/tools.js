@@ -363,7 +363,7 @@ export function createLinkBoxes(profileData) {
         // Créer le lien principal qui englobe tout le contenu
         const discordLink = document.createElement("a");
         if (isSafeUrl(link.url)) {
-            discordLink.href = link.url;
+            discordLink.href = "/click/" + link.id;
             discordLink.target = "_blank";
             discordLink.rel = "noopener noreferrer";
         }

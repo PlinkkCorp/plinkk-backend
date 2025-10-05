@@ -80,10 +80,11 @@ model User {
 
   // Visibilité répertoire public Plinkk
   isPublic        Boolean   @default(true)
+  views           Int       @default(0)
 }
 
 model Cosmetic {
-  id            Int     @id @default(autoincrement())
+  id            String  @id @default(nanoid(16))
   flair         String? @default("OG")
   frame         String? @default("none")
   theme         String? @default("system")
@@ -95,7 +96,7 @@ model Cosmetic {
 }
 
 model Link {
-  id                     Int      @id @default(autoincrement())
+  id                     String   @id @default(nanoid(16))
   icon                   String?  @default("https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png")
   url                    String   @default("https://github.com/link")
   text                   String?  @default("Link")
@@ -103,13 +104,14 @@ model Link {
   description            String?  @default("Ma description")
   showDescriptionOnHover Boolean? @default(true)
   showDescription        Boolean? @default(true)
+  clicks                 Int      @default(0)
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
 }
 
 model Label {
-  id        Int    @id @default(autoincrement())
+  id        String @id @default(nanoid(16))
   data      String @default("Developer")
   color     String @default("#FF6384")
   fontColor String @default("#FFFFFF")
@@ -119,7 +121,7 @@ model Label {
 }
 
 model SocialIcon {
-  id   Int    @id @default(autoincrement())
+  id   String @id @default(nanoid(16))
   url  String @default("https://github.com")
   icon String @default("Github")
 
@@ -128,7 +130,7 @@ model SocialIcon {
 }
 
 model BackgroundColor {
-  id    Int    @id @default(autoincrement())
+  id    String @id @default(nanoid(16))
   color String @default("#FF5733")
 
   userId String
@@ -136,7 +138,7 @@ model BackgroundColor {
 }
 
 model NeonColor {
-  id    Int    @id @default(autoincrement())
+  id    String @id @default(nanoid(16))
   color String @default("#7289DA")
 
   userId String
@@ -144,7 +146,7 @@ model NeonColor {
 }
 
 model Statusbar {
-  id            Int     @id @default(autoincrement())
+  id            String  @id @default(nanoid(16))
   text          String? @default("Hello World!")
   colorBg       String? @default("#222222")
   colorText     String? @default("#cccccc")
