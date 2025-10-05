@@ -539,10 +539,10 @@ export function apiRoutes(fastify: FastifyInstance) {
     if (!me) return reply.code(404).send({ error: "Utilisateur introuvable" });
     const ok = await bcrypt.compare(password, me.password);
     if (!ok) return reply.code(403).send({ error: "Mot de passe incorrect" });
-    if (me.totpSecret && me.totpSecret !== "") {
+    if (me.twoFactorSecret && me.twoFactorSecret !== "") {
       if (!otp || typeof otp !== "string")
         return reply.code(400).send({ error: "Code 2FA requis" });
-      const valid = authenticator.check(otp, me.totpSecret);
+      const valid = authenticator.check(otp, me.twoFactorSecret);
       if (!valid) return reply.code(403).send({ error: "Code 2FA invalide" });
     }
     await prisma.$transaction([
@@ -596,7 +596,7 @@ export function apiRoutes(fastify: FastifyInstance) {
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     // If no secret yet -> generate a temporary secret stored in session, return qr/otpauth
-    if (!user.totpSecret || user.totpSecret === "") {
+    if (!user.twoFactorSecret || user.twoFactorSecret === "") {
       // Reuse a pending secret stored in session if present and not expired
       const pending: any = pending2fa.get(userId as string) || null;
       const now = Date.now();
@@ -627,12 +627,12 @@ export function apiRoutes(fastify: FastifyInstance) {
         .code(400)
         .send({ error: "OTP requis pour désactiver la 2FA" });
     }
-    const valid = authenticator.check(otp, user.totpSecret);
+    const valid = authenticator.check(otp, user.twoFactorSecret);
     if (!valid) return reply.code(403).send({ error: "Code 2FA invalide" });
 
     await prisma.user.update({
       where: { id: userId },
-      data: { totpSecret: "" },
+      data: { twoFactorSecret: "" },
     });
     return { successful: true };
 
@@ -663,7 +663,7 @@ export function apiRoutes(fastify: FastifyInstance) {
       // Persist to DB and clear pending
       await prisma.user.update({
         where: { id: userId },
-        data: { totpSecret: pending.secret },
+        data: { twoFactorSecret: pending.secret },
       });
       pending2fa.delete(userId as string);
       return reply.send({ successful: true });

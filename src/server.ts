@@ -243,7 +243,7 @@ fastify.post("/totp", async (request, reply) => {
         id: currentUserIdTotp.split("__")[0]
       }
     })
-    const isValid = authenticator.check(totp, user.totpSecret);
+    const isValid = authenticator.check(totp, user.twoFactorSecret);
     if (!isValid) return reply.code(401).send({ error: "Invalid TOTP code" });
 
     request.session.set("data", user.id)
