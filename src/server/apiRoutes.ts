@@ -164,7 +164,7 @@ export function apiRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
     const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, authorId: true, status: true } });
     if (!t || t.authorId !== userId) return reply.code(404).send({ error: "Thème introuvable" });
-    if (!(["DRAFT","REJECTED"] as any).includes(t.status)) return reply.code(400).send({ error: "Statut non supprimable" });
+    // Allow the owner to delete their theme at any status (DRAFT/SUBMITTED/APPROVED/REJECTED)
     await prisma.theme.delete({ where: { id } });
     return reply.send({ ok: true });
   });
@@ -178,6 +178,75 @@ export function apiRoutes(fastify: FastifyInstance) {
     if (!theme || theme.authorId !== userId) return reply.code(404).send({ error: "Thème introuvable" });
     const updated = await prisma.theme.update({ where: { id }, data: { status: "SUBMITTED" as any }, select: { id: true, status: true } });
     return reply.send(updated);
+  });
+
+  // Submit an update for an approved theme (store as pendingUpdate)
+  fastify.post("/me/themes/:id/update", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, authorId: true, status: true } });
+    if (!t || t.authorId !== userId) return reply.code(404).send({ error: "Thème introuvable" });
+    if (t.status !== ("APPROVED" as any)) return reply.code(400).send({ error: "Seuls les thèmes approuvés peuvent proposer une mise à jour" });
+    const body = (request.body as any) || {};
+    if (!body.data || typeof body.data !== 'object') return reply.code(400).send({ error: 'Données invalides' });
+    let normalized: any;
+    try { normalized = coerceThemeData(body.data); } catch { return reply.code(400).send({ error: 'Données du thème invalides (format)' }); }
+    const message = typeof body.message === 'string' ? body.message.slice(0, 280) : null;
+    const updated = await prisma.theme.update({ where: { id }, data: { pendingUpdate: normalized as any, pendingUpdateAt: new Date(), pendingUpdateMessage: message } });
+    return reply.send({ id: updated.id, pending: true });
+  });
+
+  // Admin: approve a pending update -> replace data and clear pending
+  fastify.post("/themes/:id/approve-update", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+    const { id } = request.params as { id: string };
+    const t = await prisma.theme.findUnique({ where: { id }, select: { pendingUpdate: true } });
+    if (!t || !t.pendingUpdate) return reply.code(400).send({ error: 'Aucune mise à jour en attente' });
+    await prisma.theme.update({ where: { id }, data: { data: t.pendingUpdate as any, pendingUpdate: null, pendingUpdateAt: null, pendingUpdateMessage: null } });
+    return reply.send({ ok: true });
+  });
+
+  // Archive (owner hides from public list) -> sets status ARCHIVED
+  fastify.post("/me/themes/:id/archive", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, authorId: true } });
+    if (!t || t.authorId !== userId) return reply.code(404).send({ error: "Thème introuvable" });
+    await prisma.theme.update({ where: { id }, data: { status: "ARCHIVED" as any } });
+    return reply.send({ ok: true });
+  });
+
+  // Admin: unarchive (republish) -> sets status APPROVED
+  fastify.post("/themes/:id/unarchive", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+    const { id } = request.params as { id: string };
+    await prisma.theme.update({ where: { id }, data: { status: "APPROVED" as any } });
+    return reply.send({ ok: true });
+  });
+
+  // Admin: archive a theme (any status) -> sets status ARCHIVED
+  fastify.post("/themes/:id/archive", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+    const { id } = request.params as { id: string };
+    await prisma.theme.update({ where: { id }, data: { status: "ARCHIVED" as any } });
+    return reply.send({ ok: true });
   });
 
   // Admin: approve / reject
@@ -203,6 +272,23 @@ export function apiRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
     const updated = await prisma.theme.update({ where: { id }, data: { status: "REJECTED" as any }, select: { id: true, status: true } });
     return reply.send(updated);
+  });
+
+  // Admin: delete a theme (any status)
+  fastify.delete("/themes/:id", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+    const { id } = request.params as { id: string };
+    try {
+      await prisma.theme.delete({ where: { id } });
+      return reply.send({ ok: true });
+    } catch (e) {
+      return reply.code(404).send({ error: 'Not found' });
+    }
   });
   // API: uploader/remplacer la photo de profil (avatar) via data URL (base64)
   fastify.post("/me/avatar", async (request, reply) => {

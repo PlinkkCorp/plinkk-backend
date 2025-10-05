@@ -22,10 +22,10 @@
             <p class="text-xs text-slate-400">Tableau de bord d'administration — actions rapides, statistiques et modération.</p>
         </div>
         <div class="flex gap-2 flex-wrap">
-            <a href="/dashboard/admin/themes/validate" class="px-3 py-2 rounded-md bg-indigo-600 text-white text-sm">Validation des thèmes</a>
+            <a class="px-3 py-2 rounded-md bg-indigo-600 text-white text-sm opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true" tabindex="-1">Validation des thèmes</a>
             <a href="/dashboard/admin/themes" class="px-3 py-2 rounded-md bg-slate-800 border border-slate-700 text-white text-sm">Tous les thèmes</a>
-            <a href="/dashboard/admin/reports" class="px-3 py-2 rounded-md bg-rose-600 text-white text-sm">Signalements</a>
-            <a href="/dashboard/admin/logs" class="px-3 py-2 rounded-md bg-slate-700 text-white text-sm">Logs</a>
+            <a class="px-3 py-2 rounded-md bg-rose-600 text-white text-sm opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true" tabindex="-1">Signalements</a>
+            <a class="px-3 py-2 rounded-md bg-slate-700 text-white text-sm opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true" tabindex="-1">Logs</a>
         </div>
     </div>
 
@@ -177,7 +177,10 @@
 
         <!-- Pending themes (1/3) -->
         <aside class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
-            <h2 class="font-medium mb-2">Thèmes en attente</h2>
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="font-medium">Thèmes en attente</h2>
+                <a href="/dashboard/admin/themes" class="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white">Voir tout</a>
+            </div>
             <% if (typeof pendingThemes === 'undefined' || !pendingThemes || pendingThemes.length === 0) { %>
                 <p class="text-sm text-slate-400">Aucun thème en attente.</p>
             <% } else { %>

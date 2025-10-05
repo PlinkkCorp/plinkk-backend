@@ -1,8 +1,8 @@
-<%- include('../partials/head.ejs', { title: 'Admin - Thèmes soumis', description: '', robots: 'noindex,nofollow' }) %>
+<%- include('../partials/head.ejs', { title: 'Admin - Thèmes', description: '', robots: 'noindex,nofollow' }) %>
 <%- include('../partials/header-dash.ejs') %>
 
 <main class="max-w-7xl mx-auto p-4 space-y-5">
-  <h1 class="text-2xl font-semibold">Thèmes soumis</h1>
+  <h1 class="text-2xl font-semibold">Gestion des thèmes</h1>
   <div class="flex items-center justify-between gap-3">
     <div class="flex-1">
       <input id="themeSearch" type="search" placeholder="Rechercher un thème ou auteur..." class="w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-700 text-sm" />
@@ -12,36 +12,115 @@
     </div>
   </div>
 
-  <% if ((themes||[]).length === 0) { %>
-    <p class="text-sm text-slate-400 mt-3">Aucun thème en attente.</p>
-  <% } else { %>
-    <ul id="themesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
-      <% themes.forEach(t => { %>
-        <li class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
-          <div class="flex items-start gap-3">
-            <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
-            <div class="min-w-0 flex-1">
-              <div class="font-medium truncate"><%= t.name %></div>
-              <div class="text-xs text-slate-400 truncate">par @<%= t.author.userName %></div>
-              <% if (t.description) { %>
-                <div class="text-xs text-slate-400 mt-2 truncate"><%= t.description %></div>
-              <% } %>
-              <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+  <!-- À valider -->
+  <section>
+    <h2 class="text-lg font-semibold mt-4">À valider</h2>
+    <% if ((submitted||[]).length === 0) { %>
+      <p class="text-sm text-slate-400 mt-2">Aucun thème en attente.</p>
+    <% } else { %>
+      <ul id="gridSubmitted" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
+        <% submitted.forEach(t => { %>
+          <li class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
+            <div class="flex items-start gap-3">
+              <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
+              <div class="min-w-0 flex-1">
+                <div class="font-medium truncate"><%= t.name %></div>
+                <div class="text-xs text-slate-400 truncate">par @<%= t.author.userName %></div>
+                <% if (t.description) { %>
+                  <div class="text-xs text-slate-400 mt-2 truncate"><%= t.description %></div>
+                <% } %>
+                <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+              </div>
             </div>
-          </div>
-          <div class="mt-3 flex items-center justify-end gap-2">
-            <button class="approveBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs">Approuver</button>
-            <button class="rejectBtn px-3 py-1.5 rounded bg-rose-600 text-white text-xs">Rejeter</button>
-            <a class="px-3 py-1.5 rounded bg-indigo-600 text-white text-xs" href="/dashboard/admin/themes/<%= t.id %>">Prévisualiser</a>
-          </div>
-        </li>
-      <% }) %>
-    </ul>
-  <% } %>
+            <div class="mt-3 flex items-center justify-end gap-2">
+              <button class="approveBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs">Approuver</button>
+              <button class="rejectBtn px-3 py-1.5 rounded bg-rose-600 text-white text-xs">Rejeter</button>
+              <button class="archiveBtn px-3 py-1.5 rounded bg-slate-700 text-white text-xs">Archiver</button>
+              <a class="px-3 py-1.5 rounded bg-indigo-600 text-white text-xs" href="/dashboard/admin/themes/<%= t.id %>">Prévisualiser</a>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+
+  <!-- Validés -->
+  <section>
+    <h2 class="text-lg font-semibold mt-6">Validés</h2>
+    <% if ((approved||[]).length === 0) { %>
+      <p class="text-sm text-slate-400 mt-2">Aucun thème validé.</p>
+    <% } else { %>
+      <ul id="gridApproved" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
+        <% approved.forEach(t => { %>
+          <li class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
+            <div class="flex items-start gap-3">
+              <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
+              <div class="min-w-0 flex-1">
+                <div class="font-medium truncate"><%= t.name %></div>
+                <div class="text-xs text-slate-400 truncate">par @<%= t.author.userName %></div>
+                <% if (t.description) { %>
+                  <div class="text-xs text-slate-400 mt-2 truncate"><%= t.description %></div>
+                <% } %>
+                <div class="flex items-center gap-2 mt-1">
+                  <div class="text-[11px] text-slate-500">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+                  <% if (t.pendingUpdate) { %>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-amber-700/40 border border-amber-600/50 text-amber-200">MAJ en attente</span>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 flex items-center justify-end gap-2">
+              <% if (t.pendingUpdate) { %>
+                <button class="approveUpdateBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs">Approuver la MAJ</button>
+              <% } %>
+              <button class="archiveBtn px-3 py-1.5 rounded bg-slate-700 text-white text-xs">Archiver</button>
+              <a class="px-3 py-1.5 rounded bg-indigo-600 text-white text-xs" href="/dashboard/admin/themes/<%= t.id %>">Prévisualiser</a>
+              <button class="deleteBtn px-3 py-1.5 rounded bg-rose-700 text-white text-xs">Supprimer</button>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+
+  <!-- Archivés -->
+  <section>
+    <h2 class="text-lg font-semibold mt-6">Archivés</h2>
+    <% if ((archived||[]).length === 0) { %>
+      <p class="text-sm text-slate-400 mt-2">Aucun thème archivé.</p>
+    <% } else { %>
+      <ul id="gridArchived" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
+        <% archived.forEach(t => { %>
+          <li class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
+            <div class="flex items-start gap-3">
+              <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
+              <div class="min-w-0 flex-1">
+                <div class="font-medium truncate"><%= t.name %></div>
+                <div class="text-xs text-slate-400 truncate">par @<%= t.author.userName %></div>
+                <% if (t.description) { %>
+                  <div class="text-xs text-slate-400 mt-2 truncate"><%= t.description %></div>
+                <% } %>
+                <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+              </div>
+            </div>
+            <div class="mt-3 flex items-center justify-end gap-2">
+              <button class="unarchiveBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs">Republier</button>
+              <a class="px-3 py-1.5 rounded bg-indigo-600 text-white text-xs" href="/dashboard/admin/themes/<%= t.id %>">Prévisualiser</a>
+              <button class="deleteBtn px-3 py-1.5 rounded bg-rose-700 text-white text-xs">Supprimer</button>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
 
   <script>
   (function(){
-    const grid = document.getElementById('themesGrid');
+    const grids = [
+      document.getElementById('gridSubmitted'),
+      document.getElementById('gridApproved'),
+      document.getElementById('gridArchived')
+    ].filter(Boolean);
     const search = document.getElementById('themeSearch');
     function extractColors(raw){
       try{ if(!raw) return null; const d = raw;
@@ -54,8 +133,8 @@
       }catch(e){ return { bg:'#111827', button:'#4f46e5', hover:'#22c55e' }; }
     }
     function renderPreviews(){
-      if(!grid) return;
-      Array.from(grid.querySelectorAll('.themeCard')).forEach(card=>{
+      grids.forEach(grid => {
+        Array.from(grid.querySelectorAll('.themeCard')).forEach(card=>{
         const box = card.querySelector('.themePreview');
         const raw = card.getAttribute('data-json');
         let parsed = {};
@@ -66,34 +145,64 @@
           `<div style=\"height:28px;width:60%;background:${c.button};border-radius:6px;margin:0 auto;\"></div>`+
           `<div style=\"height:28px;width:40%;background:${c.hover};border-radius:6px;margin:0 auto;\"></div>`+
           `</div>`;
+        });
       });
     }
     function wireActions(){
-      if(!grid) return;
-      grid.addEventListener('click', async (e)=>{
-        const approve = e.target.closest('.approveBtn');
-        const reject = e.target.closest('.rejectBtn');
-        if (approve || reject){
-          const li = (approve||reject).closest('.themeCard');
-          const id = li?.dataset?.id; if(!id) return;
-          const action = approve ? 'approve' : 'reject';
-          (approve||reject).disabled = true; (approve||reject).textContent = 'En cours...';
+      grids.forEach(grid => {
+        grid.addEventListener('click', async (e)=>{
+          const li = e.target.closest('.themeCard');
+          if (!li) return;
+          const id = li.dataset.id;
+          const approve = e.target.closest('.approveBtn');
+          const reject = e.target.closest('.rejectBtn');
+          const archive = e.target.closest('.archiveBtn');
+          const unarchive = e.target.closest('.unarchiveBtn');
+          const approveUpdate = e.target.closest('.approveUpdateBtn');
+          const del = e.target.closest('.deleteBtn');
+          const actBtn = approve||reject||archive||unarchive||approveUpdate||del;
+          if (!actBtn) return;
+          const prev = actBtn.textContent; actBtn.disabled = true; actBtn.textContent = 'En cours...';
           try{
-            const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/'+action, { method: 'POST' });
-            if (!res.ok) throw new Error('HTTP '+res.status);
-            li.remove();
-          }catch(err){ alert('Erreur'); (approve||reject).disabled = false; (approve||reject).textContent = approve? 'Approuver':'Rejeter'; }
-        }
+            if (approve || reject){
+              const action = approve ? 'approve' : 'reject';
+              const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/'+action, { method: 'POST' });
+              if (!res.ok) throw new Error('HTTP '+res.status);
+              li.remove();
+            } else if (archive){
+              const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/archive', { method: 'POST' });
+              if (!res.ok) throw new Error('HTTP '+res.status);
+              document.getElementById('gridArchived')?.appendChild(li);
+            } else if (unarchive){
+              const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/unarchive', { method: 'POST' });
+              if (!res.ok) throw new Error('HTTP '+res.status);
+              document.getElementById('gridApproved')?.appendChild(li);
+            } else if (approveUpdate){
+              const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/approve-update', { method: 'POST' });
+              if (!res.ok) throw new Error('HTTP '+res.status);
+              // retirer le badge MAJ
+              li.querySelector('.badge-pending-update')?.remove?.();
+            } else if (del){
+              const ok = window.confirm('Supprimer définitivement ce thème ?');
+              if (!ok) { actBtn.disabled = false; actBtn.textContent = prev; return; }
+              const res = await fetch('/api/themes/'+encodeURIComponent(id), { method: 'DELETE' });
+              if (!res.ok) throw new Error('HTTP '+res.status);
+              li.remove();
+            }
+          }catch(err){ alert('Erreur'); }
+          finally { if (document.body.contains(li)) { actBtn.disabled = false; actBtn.textContent = prev; } }
+        });
       });
     }
     function applyFilter(){
-      if(!grid) return;
       const q = (search?.value||'').trim().toLowerCase();
-      Array.from(grid.querySelectorAll('.themeCard')).forEach(card=>{
-        const name = card.dataset.name||'';
-        const author = card.dataset.author||'';
-        const ok = !q || name.includes(q) || author.includes(q);
-        card.style.display = ok ? '' : 'none';
+      grids.forEach(grid => {
+        Array.from(grid.querySelectorAll('.themeCard')).forEach(card=>{
+          const name = card.dataset.name||'';
+          const author = card.dataset.author||'';
+          const ok = !q || name.includes(q) || author.includes(q);
+          card.style.display = ok ? '' : 'none';
+        });
       });
     }
     search?.addEventListener('input', applyFilter);

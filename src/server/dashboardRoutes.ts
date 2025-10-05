@@ -316,10 +316,19 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       })(),
     ]);
 
+    // Also fetch recent submitted themes for quick moderation view
+    const pendingThemes = await prisma.theme.findMany({
+      where: { status: "SUBMITTED" as any },
+      select: { id: true, name: true, description: true, authorId: true, data: true, updatedAt: true },
+      orderBy: { updatedAt: "desc" },
+      take: 10,
+    });
+
     return reply.view("dashboard/admin.ejs", {
       users,
       totals,
       user: userInfo,
+      pendingThemes,
     });
   });
 
@@ -331,7 +340,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (!userInfo) return reply.redirect("/login");
     const myThemes = await prisma.theme.findMany({
       where: { authorId: userId as string }, orderBy: { updatedAt: "desc" },
-      select: { id: true, name: true, description: true, status: true, updatedAt: true, data: true }
+      select: { id: true, name: true, description: true, status: true, updatedAt: true, data: true, pendingUpdate: true, pendingUpdateAt: true, pendingUpdateMessage: true }
     });
     return reply.view("dashboard/themes.ejs", { user: userInfo, myThemes });
   });
@@ -345,12 +354,24 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
       return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
     }
-    const submitted = await prisma.theme.findMany({
-      where: { status: "SUBMITTED" as any },
-      select: { id: true, name: true, description: true, author: { select: { id: true, userName: true } }, updatedAt: true },
-      orderBy: { updatedAt: "desc" }
-    });
-    return reply.view("dashboard/admin-themes.ejs", { user: userInfo, themes: submitted });
+    const [submitted, approved, archived] = await Promise.all([
+      prisma.theme.findMany({
+        where: { status: "SUBMITTED" as any },
+        select: { id: true, name: true, description: true, author: { select: { id: true, userName: true } }, updatedAt: true, data: true },
+        orderBy: { updatedAt: "desc" }
+      }),
+      prisma.theme.findMany({
+        where: { status: "APPROVED" as any },
+        select: { id: true, name: true, description: true, author: { select: { id: true, userName: true } }, updatedAt: true, data: true, pendingUpdate: true, pendingUpdateAt: true },
+        orderBy: { updatedAt: "desc" }
+      }),
+      prisma.theme.findMany({
+        where: { status: "ARCHIVED" as any },
+        select: { id: true, name: true, description: true, author: { select: { id: true, userName: true } }, updatedAt: true, data: true },
+        orderBy: { updatedAt: "desc" }
+      })
+    ]);
+    return reply.view("dashboard/admin-themes.ejs", { user: userInfo, submitted, approved, archived });
   });
 
   // Admin: Prévisualisation d'un thème
