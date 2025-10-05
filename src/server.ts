@@ -213,7 +213,7 @@ fastify.post("/login", async (request, reply) => {
       )}&email=${encodeURIComponent(emailTrim)}`
     );
 
-  if (user.twoFactorSecret !== "") {
+  if (user.twoFactorEnabled) {
     request.session.set("data", user.id + "__totp");
     return reply.redirect("/totp");
   }
