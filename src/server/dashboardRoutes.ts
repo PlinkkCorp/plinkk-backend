@@ -318,7 +318,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
 
     // Also fetch recent submitted themes for quick moderation view
     const pendingThemes = await prisma.theme.findMany({
-      where: { status: "SUBMITTED" as any },
+      where: { status: "SUBMITTED" as any, isPrivate: false },
       select: { id: true, name: true, description: true, authorId: true, data: true, updatedAt: true },
       orderBy: { updatedAt: "desc" },
       take: 10,
@@ -340,9 +340,9 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (!userInfo) return reply.redirect("/login");
     const myThemes = await prisma.theme.findMany({
       where: { authorId: userId as string }, orderBy: { updatedAt: "desc" },
-      select: { id: true, name: true, description: true, status: true, updatedAt: true, data: true, pendingUpdate: true, pendingUpdateAt: true, pendingUpdateMessage: true }
+      select: { id: true, name: true, description: true, status: true, updatedAt: true, data: true, pendingUpdate: true, pendingUpdateAt: true, pendingUpdateMessage: true, isPrivate: true }
     });
-    return reply.view("dashboard/themes.ejs", { user: userInfo, myThemes });
+    return reply.view("dashboard/themes.ejs", { user: userInfo, myThemes, selectedCustomThemeId: (userInfo as any).selectedCustomThemeId || null });
   });
 
   // Admin: Liste des thèmes soumis
@@ -356,17 +356,17 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     }
     const [submitted, approved, archived] = await Promise.all([
       prisma.theme.findMany({
-        where: { status: "SUBMITTED" as any },
+        where: { status: "SUBMITTED" as any, isPrivate: false },
         select: { id: true, name: true, description: true, author: { select: { id: true, userName: true } }, updatedAt: true, data: true },
         orderBy: { updatedAt: "desc" }
       }),
       prisma.theme.findMany({
-        where: { status: "APPROVED" as any },
+        where: { status: "APPROVED" as any, isPrivate: false },
         select: { id: true, name: true, description: true, author: { select: { id: true, userName: true } }, updatedAt: true, data: true, pendingUpdate: true, pendingUpdateAt: true },
         orderBy: { updatedAt: "desc" }
       }),
       prisma.theme.findMany({
-        where: { status: "ARCHIVED" as any },
+        where: { status: "ARCHIVED" as any, isPrivate: false },
         select: { id: true, name: true, description: true, author: { select: { id: true, userName: true } }, updatedAt: true, data: true },
         orderBy: { updatedAt: "desc" }
       })

@@ -150,6 +150,19 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             links: true,
           },
         });
+        if (!profile) return reply.code(404).send({ error: 'Profil introuvable' });
+        // Si un thème privé est sélectionné, récupérer ses données et l'injecter comme thème 0
+        let injectedThemeVar = '';
+        try {
+          if ((profile as any).selectedCustomThemeId) {
+            const t = await prisma.theme.findUnique({ where: { id: (profile as any).selectedCustomThemeId }, select: { data: true, isPrivate: true, authorId: true } });
+            if (t && t.isPrivate && t.authorId === profile.id) {
+              // sérialiser la structure pour front (format complet attendu par themeConfig)
+              const safe = JSON.stringify(t.data);
+              injectedThemeVar = `window.__PLINKK_PRIVATE_THEME__ = ${safe};`;
+            }
+          }
+        } catch {}
         const mini = minify(
           generateProfileConfig(
             profile,
@@ -161,7 +174,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             profile.statusbar
           ).replaceAll("{{username}}", username)
         );
-        return reply.type("text/javascript").send(mini.code);
+        // préfixer avec un bloc optionnel définissant un thème privé
+        const prefix = injectedThemeVar ? `${injectedThemeVar}\n` : '';
+        return reply.type("text/javascript").send(prefix + (mini.code || ''));
       }
       if (
         existsSync(

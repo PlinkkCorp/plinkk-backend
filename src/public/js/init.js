@@ -46,6 +46,17 @@ document.addEventListener("DOMContentLoaded", function () {
     createLabelButtons(profileData);
     createIconList(profileData);
     article.appendChild(createEmailAndDescription(profileData));
+    // S'il existe un thème privé injecté, l'insérer en tête de liste et pointer selectedThemeIndex=0
+    try {
+        if (window.__PLINKK_PRIVATE_THEME__) {
+            // Ne pas dupliquer si déjà présent
+            if (!themes.length || JSON.stringify(themes[0]) !== JSON.stringify(window.__PLINKK_PRIVATE_THEME__)) {
+                themes.unshift(window.__PLINKK_PRIVATE_THEME__);
+            }
+            try { profileData.selectedThemeIndex = 0; } catch (_) { }
+        }
+    }
+    catch (_c) { }
     if (!themes || !themes.length) {
         console.warn("Themes array is empty or not defined.");
     }

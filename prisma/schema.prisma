@@ -92,6 +92,9 @@ model User {
 
   // Thèmes créés par l'utilisateur
   themes          Theme[]
+
+  // Thème personnalisé sélectionné pour usage privé
+  selectedCustomThemeId String?
 }
 
 model Cosmetic {
@@ -175,6 +178,7 @@ model Theme {
   description String?
   data      Json        // structure compatible avec src/public/config/themeConfig.js
   status    ThemeStatus @default(DRAFT)
+  isPrivate Boolean     @default(false)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @default(now()) @updatedAt
 

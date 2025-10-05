@@ -99,7 +99,7 @@ export function apiRoutes(fastify: FastifyInstance) {
   // List approved themes (public)
   fastify.get("/themes/approved", async (request, reply) => {
     const themes = await prisma.theme.findMany({
-      where: { status: "APPROVED" as any },
+      where: { status: "APPROVED" as any, isPrivate: false },
       select: { id: true, name: true, description: true, data: true, author: { select: { id: true, userName: true } } },
       orderBy: { createdAt: "desc" },
     });
@@ -131,8 +131,9 @@ export function apiRoutes(fastify: FastifyInstance) {
     if (!raw || typeof raw !== "object") return reply.code(400).send({ error: "Données du thème invalides" });
     let data: any;
     try { data = coerceThemeData(raw); } catch { return reply.code(400).send({ error: "Données du thème invalides (format)" }); }
+    const isPrivate = Boolean(body.isPrivate);
     const created = await prisma.theme.create({
-      data: { name, description, data, authorId: userId as string, status: "DRAFT" as any },
+      data: { name, description, data, authorId: userId as string, status: "DRAFT" as any, isPrivate },
       select: { id: true, name: true, status: true },
     });
     return reply.send(created);
@@ -153,6 +154,7 @@ export function apiRoutes(fastify: FastifyInstance) {
     if (body.data) {
       try { patch.data = coerceThemeData(body.data); } catch { return reply.code(400).send({ error: "Données du thème invalides (format)" }); }
     }
+    if (typeof body.isPrivate === 'boolean') patch.isPrivate = Boolean(body.isPrivate);
     const updated = await prisma.theme.update({ where: { id }, data: patch, select: { id: true, name: true, status: true } });
     return reply.send(updated);
   });
@@ -178,6 +180,32 @@ export function apiRoutes(fastify: FastifyInstance) {
     if (!theme || theme.authorId !== userId) return reply.code(404).send({ error: "Thème introuvable" });
     const updated = await prisma.theme.update({ where: { id }, data: { status: "SUBMITTED" as any }, select: { id: true, status: true } });
     return reply.send(updated);
+  });
+
+  // Toggle private flag on my theme (owner only)
+  fastify.post('/me/themes/:id/privacy', async (request, reply) => {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+    const { id } = request.params as { id: string };
+    const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, authorId: true } });
+    if (!t || t.authorId !== userId) return reply.code(404).send({ error: 'Thème introuvable' });
+    const { isPrivate } = (request.body as any) ?? {};
+    const updated = await prisma.theme.update({ where: { id }, data: { isPrivate: Boolean(isPrivate) }, select: { id: true, isPrivate: true } });
+    return reply.send(updated);
+  });
+
+  // Select a private theme to use on my profile (doesn't publish it)
+  fastify.post('/me/themes/select', async (request, reply) => {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+    const { themeId } = (request.body as any) ?? {};
+    if (!themeId || typeof themeId !== 'string') return reply.code(400).send({ error: 'themeId requis' });
+    const t = await prisma.theme.findUnique({ where: { id: themeId }, select: { id: true, authorId: true, isPrivate: true, status: true } });
+    if (!t || t.authorId !== userId) return reply.code(404).send({ error: 'Thème introuvable' });
+    // on autorise l’utilisation si le thème est privé (ou même brouillon privé pour usage perso)
+    if (!t.isPrivate) return reply.code(400).send({ error: 'Ce thème n\'est pas privé' });
+    await prisma.user.update({ where: { id: userId as string }, data: { selectedCustomThemeId: t.id } });
+    return reply.send({ ok: true });
   });
 
   // Submit an update for an approved theme (store as pendingUpdate)
