@@ -6,3 +6,4 @@ dist
 .gitignore
 *.db
 *.sql
+/.vscode/
