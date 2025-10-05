@@ -125,9 +125,12 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
       omit: { password: true },
+      include: {
+        links: true
+      }
     });
     if (!userInfo) return reply.redirect("/login");
-    return reply.view("dashboard/stats.ejs", { user: userInfo });
+    return reply.view("dashboard/stats.ejs", { user: userInfo, links: userInfo.links });
   });
 
   // Dashboard: Versions (vue dédiée)

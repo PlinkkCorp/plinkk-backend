@@ -8,13 +8,19 @@ import { PrismaClient } from "../../generated/prisma/client";
 const prisma = new PrismaClient();
 
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
-  fastify.get("/:username", function (request, reply) {
+  fastify.get("/:username", async function (request, reply) {
     const { username } = request.params as { username: string };
     if (username === "") {
       reply.code(404).send({ error: "please specify a username" });
       return;
     }
-    reply.view("links.ejs", { username: username });
+
+    await prisma.user.update({
+      where: { id: username },
+      data: { views: { increment: 1 } },
+    });
+
+    return reply.view("links.ejs", { username: username });
   });
 
   fastify.get("/:username/css/:cssFileName", function (request, reply) {
@@ -76,7 +82,13 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     }
     if (
       existsSync(
-        path.join(__dirname, "..", "public", "canvaAnimation", animationFileName)
+        path.join(
+          __dirname,
+          "..",
+          "public",
+          "canvaAnimation",
+          animationFileName
+        )
       )
     ) {
       return reply.sendFile(`canvaAnimation/${animationFileName}`);
@@ -127,7 +139,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         return reply.type("text/javascript").send(mini.code);
       }
       if (
-        existsSync(path.join(__dirname, "..", "public", "config", configFileName))
+        existsSync(
+          path.join(__dirname, "..", "public", "config", configFileName)
+        )
       ) {
         const file = readFileSync(
           path.join(__dirname, "..", "public", "config", configFileName),
@@ -156,5 +170,19 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       return reply.sendFile(`images/${image}`);
     }
     return reply.code(404).send({ error: "non existant file" });
+  });
+
+  fastify.get("/click/:linkId", async (req, reply) => {
+    const linkId = String((req.params as { linkId: string }).linkId);
+
+    const link = await prisma.link.findUnique({ where: { id: linkId } });
+    if (!link) return reply.code(404).send({ error: "Lien introuvable" });
+
+    await prisma.link.update({
+      where: { id: linkId },
+      data: { clicks: { increment: 1 } },
+    });
+
+    return reply.redirect(link.url);
   });
 }
