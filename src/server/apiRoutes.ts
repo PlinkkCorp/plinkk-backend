@@ -539,7 +539,7 @@ export function apiRoutes(fastify: FastifyInstance) {
     if (!me) return reply.code(404).send({ error: "Utilisateur introuvable" });
     const ok = await bcrypt.compare(password, me.password);
     if (!ok) return reply.code(403).send({ error: "Mot de passe incorrect" });
-    if (me.twoFactorSecret && me.twoFactorSecret !== "") {
+    if (me.twoFactorEnabled) {
       if (!otp || typeof otp !== "string")
         return reply.code(400).send({ error: "Code 2FA requis" });
       const valid = authenticator.check(otp, me.twoFactorSecret);
@@ -596,7 +596,7 @@ export function apiRoutes(fastify: FastifyInstance) {
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     // If no secret yet -> generate a temporary secret stored in session, return qr/otpauth
-    if (!user.twoFactorSecret || user.twoFactorSecret === "") {
+    if (!user.twoFactorEnabled) {
       // Reuse a pending secret stored in session if present and not expired
       const pending: any = pending2fa.get(userId as string) || null;
       const now = Date.now();
@@ -632,42 +632,42 @@ export function apiRoutes(fastify: FastifyInstance) {
 
     await prisma.user.update({
       where: { id: userId },
-      data: { twoFactorSecret: "" },
+      data: { twoFactorSecret: "", twoFactorEnabled: false },
     });
     return { successful: true };
+  });
 
-    // API: confirmer l'activation 2FA en vérifiant un OTP (ne désactive pas)
-    fastify.post("/me/2fa/confirm", async (request, reply) => {
-      const userId = request.session.get("data");
-      if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-      const { otp } = (request.body as any) || {};
-      if (!otp || typeof otp !== "string")
-        return reply.code(400).send({ error: "OTP requis" });
+  // API: confirmer l'activation 2FA en vérifiant un OTP (ne désactive pas)
+  fastify.post("/me/2fa/confirm", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { otp } = (request.body as any) || {};
+    if (!otp || typeof otp !== "string")
+      return reply.code(400).send({ error: "OTP requis" });
 
-      // Retrieve pending secret from session
-      const pending: any = pending2fa.get(userId as string) || null;
-      if (!pending || !pending.secret)
-        return reply.code(400).send({ error: "Aucune clé 2FA en attente" });
-      // optional expiry check
-      const now = Date.now();
-      if (!pending.createdAt || now - pending.createdAt > 10 * 60 * 1000) {
-        pending2fa.delete(userId as string);
-        return reply
-          .code(400)
-          .send({ error: "La clé 2FA a expiré, régénère le QR" });
-      }
-
-      const valid = authenticator.check(otp, pending.secret);
-      if (!valid) return reply.code(403).send({ error: "Code 2FA invalide" });
-
-      // Persist to DB and clear pending
-      await prisma.user.update({
-        where: { id: userId },
-        data: { twoFactorSecret: pending.secret },
-      });
+    // Retrieve pending secret from session
+    const pending: any = pending2fa.get(userId as string) || null;
+    if (!pending || !pending.secret)
+      return reply.code(400).send({ error: "Aucune clé 2FA en attente" });
+    // optional expiry check
+    const now = Date.now();
+    if (!pending.createdAt || now - pending.createdAt > 10 * 60 * 1000) {
       pending2fa.delete(userId as string);
-      return reply.send({ successful: true });
+      return reply
+        .code(400)
+        .send({ error: "La clé 2FA a expiré, régénère le QR" });
+    }
+
+    const valid = authenticator.check(otp, pending.secret);
+    if (!valid) return reply.code(403).send({ error: "Code 2FA invalide" });
+
+    // Persist to DB and clear pending
+    await prisma.user.update({
+      where: { id: userId },
+      data: { twoFactorSecret: pending.secret },
     });
+    pending2fa.delete(userId as string);
+    return reply.send({ successful: true });
   });
 
   // API: mettre à jour des infos de base du compte (username, name, description)
