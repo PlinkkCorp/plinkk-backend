@@ -79,8 +79,8 @@ Backend Node.js/TypeScript pour le projet [Plinkk](https://github.com/PlinkkCorp
 
 ## 📚 Liens utiles
 
-- Frontend Plinkk : [github.com/Klaynight-dev/plinkk](https://github.com/PlinkkCorp/plinkk)
-- Documentation Plinkk : [github.com/Klaynight-dev/plinkk/docs.md](https://github.com/PlinkkCorp/plinkk/blob/main/.md/docs.md)
+- Frontend Plinkk : [github.com/PlinkkCorp/plinkk](https://github.com/PlinkkCorp/plinkk)
+- Documentation Plinkk : [github.com/PlinkkCorp/plinkk/docs.md](https://github.com/PlinkkCorp/plinkk/blob/main/.md/docs.md)
 
 ## 📝 Licence
 
