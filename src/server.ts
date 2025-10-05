@@ -213,7 +213,7 @@ fastify.post("/login", async (request, reply) => {
       )}&email=${encodeURIComponent(emailTrim)}`
     );
 
-  if (user.totpSecret !== "") {
+  if (user.twoFactorSecret !== "") {
     request.session.set("data", user.id + "__totp");
     return reply.redirect("/totp");
   }
@@ -234,7 +234,6 @@ fastify.get("/totp", (request, reply) => {
 fastify.post("/totp", async (request, reply) => {
   const { totp } = request.body as { totp: string }
   const currentUserIdTotp = request.session.get("data") as string | undefined;
-  console.log(totp, currentUserIdTotp)
   if (
     currentUserIdTotp.split("__").length === 2 &&
     currentUserIdTotp.split("__")[1] === "totp"
