@@ -1,15 +1,46 @@
 <%- include('../../partials/head.ejs', { title: 'Admin - Thèmes', description: '', robots: 'noindex,nofollow' }) %>
 <%- include('../../partials/header-dash.ejs') %>
+<%- include('../../partials/admin-nav.ejs', { user: user }) %>
 
 <main class="max-w-7xl mx-auto p-4 space-y-5">
   <h1 class="text-2xl font-semibold">Gestion des thèmes</h1>
+  <style>
+    .searchWrap { display:flex; gap:.5rem; }
+    .searchInput { display:flex; align-items:center; gap:.5rem; background:rgba(15,23,42,.6); padding:.25rem .5rem; border-radius:.5rem; border:1px solid rgba(63,63,70,.6); }
+    .searchInput input { background:transparent; border:0; padding:.5rem .25rem; outline:none; color:inherit; width:18rem }
+    .clearBtn { background:transparent; border:0; color:rgba(148,163,184,0.9); cursor:pointer }
+    @media (max-width:640px){ .searchInput input{ width: 100%; } }
+  </style>
+
   <div class="flex items-center justify-between gap-3">
     <div class="flex-1">
-      <input id="themeSearch" type="search" placeholder="Rechercher un thème ou auteur..." class="w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-700 text-sm" />
+      <div class="searchWrap">
+        <div class="searchInput" role="search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-slate-400" aria-hidden="true"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <input id="themeSearch" type="search" placeholder="Rechercher un thème ou auteur..." class="text-sm" />
+          <button id="clearSearch" class="clearBtn" title="Effacer la recherche" aria-label="Effacer la recherche">✕</button>
+        </div>
+        <select id="themeCategoryFilter" class="px-3 py-2 rounded bg-slate-900/60 border border-slate-700 text-sm" aria-label="Filtrer par catégorie de chat">
+          <option value="">Toutes catégories</option>
+        </select>
+      </div>
     </div>
     <div class="ml-3">
-      <a href="/dashboard/themes" class="px-3 py-1.5 rounded bg-emerald-600 text-white text-xs">Créer un thème</a>
+      <a href="/dashboard/themes" class="px-3 py-2 rounded bg-emerald-600 text-white text-sm">Créer un thème</a>
     </div>
+  </div>
+
+  <style>
+    .tabs { display:flex; gap:.5rem; margin-top:.75rem }
+    .tabBtn { padding:.5rem .75rem; border-radius:.5rem; background:transparent; border:1px solid transparent; color:inherit; cursor:pointer }
+    .tabBtn.active { background:rgba(99,102,241,.12); border-color:rgba(99,102,241,.25); }
+    .section-hidden { display:none !important; }
+  </style>
+
+  <div class="tabs" role="tablist" aria-label="Sections des thèmes">
+    <button class="tabBtn active" data-tab="submitted" role="tab" aria-selected="true">À valider <span class="tab-count ml-2 text-xs text-slate-400">(<span>0</span>)</span></button>
+    <button class="tabBtn" data-tab="approved" role="tab" aria-selected="false">Validés <span class="tab-count ml-2 text-xs text-slate-400">(<span>0</span>)</span></button>
+    <button class="tabBtn" data-tab="archived" role="tab" aria-selected="false">Archivés <span class="tab-count ml-2 text-xs text-slate-400">(<span>0</span>)</span></button>
   </div>
 
   <!-- À valider -->
@@ -17,21 +48,12 @@
     <h2 class="text-lg font-semibold mt-4">À valider</h2>
     <ul id="gridSubmitted" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
         <% if ((submitted||[]).length === 0) { %>
-          <li class="col-span-full text-sm text-slate-400">Aucun thème en attente.</li>
+          <li class="server-empty-placeholder col-span-full text-sm text-slate-400">Aucun thème en attente.</li>
         <% } else { %>
         <% submitted.forEach(t => { %>
           <li draggable="true" class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
             <div class="flex items-start gap-3">
-              <div class="dragHandle flex items-center" title="Déplacer" aria-hidden="true" style="margin-right:6px;align-self:flex-start;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color:rgba(148,163,184,0.9);">
-                  <circle cx="5" cy="6" r="1.5" fill="currentColor" />
-                  <circle cx="12" cy="6" r="1.5" fill="currentColor" />
-                  <circle cx="19" cy="6" r="1.5" fill="currentColor" />
-                  <circle cx="5" cy="13" r="1.5" fill="currentColor" />
-                  <circle cx="12" cy="13" r="1.5" fill="currentColor" />
-                  <circle cx="19" cy="13" r="1.5" fill="currentColor" />
-                </svg>
-              </div>
+              <!-- drag handle removed: themes are categorized, not manually draggable -->
               <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
               <div class="min-w-0 flex-1">
                 <div class="font-medium truncate"><%= t.name %>
@@ -59,8 +81,7 @@
           </li>
         <% }) %>
       </ul>
-        <% } %>
-    </ul>
+    <% } %>
   </section>
 
   <!-- Validés -->
@@ -68,21 +89,12 @@
     <h2 class="text-lg font-semibold mt-6">Validés</h2>
     <ul id="gridApproved" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
         <% if ((approved||[]).length === 0) { %>
-          <li class="col-span-full text-sm text-slate-400">Aucun thème validé.</li>
+          <li class="server-empty-placeholder col-span-full text-sm text-slate-400">Aucun thème validé.</li>
         <% } else { %>
         <% approved.forEach(t => { %>
           <li draggable="true" class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
             <div class="flex items-start gap-3">
-              <div class="dragHandle flex items-center" title="Déplacer" aria-hidden="true" style="margin-right:6px;align-self:flex-start;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color:rgba(148,163,184,0.9);">
-                  <circle cx="5" cy="6" r="1.5" fill="currentColor" />
-                  <circle cx="12" cy="6" r="1.5" fill="currentColor" />
-                  <circle cx="19" cy="6" r="1.5" fill="currentColor" />
-                  <circle cx="5" cy="13" r="1.5" fill="currentColor" />
-                  <circle cx="12" cy="13" r="1.5" fill="currentColor" />
-                  <circle cx="19" cy="13" r="1.5" fill="currentColor" />
-                </svg>
-              </div>
+              <!-- drag handle removed: themes are categorized, not manually draggable -->
               <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
               <div class="min-w-0 flex-1">
                 <div class="font-medium truncate"><%= t.name %></div>
@@ -109,8 +121,7 @@
           </li>
         <% }) %>
       </ul>
-        <% } %>
-    </ul>
+    <% } %>
   </section>
 
   <!-- Archivés -->
@@ -118,21 +129,12 @@
     <h2 class="text-lg font-semibold mt-6">Archivés</h2>
     <ul id="gridArchived" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
         <% if ((archived||[]).length === 0) { %>
-          <li class="col-span-full text-sm text-slate-400">Aucun thème archivé.</li>
+          <li class="server-empty-placeholder col-span-full text-sm text-slate-400">Aucun thème archivé.</li>
         <% } else { %>
         <% archived.forEach(t => { %>
           <li draggable="true" class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
             <div class="flex items-start gap-3">
-              <div class="dragHandle flex items-center" title="Déplacer" aria-hidden="true" style="margin-right:6px;align-self:flex-start;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color:rgba(148,163,184,0.9);">
-                  <circle cx="5" cy="6" r="1.5" fill="currentColor" />
-                  <circle cx="12" cy="6" r="1.5" fill="currentColor" />
-                  <circle cx="19" cy="6" r="1.5" fill="currentColor" />
-                  <circle cx="5" cy="13" r="1.5" fill="currentColor" />
-                  <circle cx="12" cy="13" r="1.5" fill="currentColor" />
-                  <circle cx="19" cy="13" r="1.5" fill="currentColor" />
-                </svg>
-              </div>
+              <!-- drag handle removed: themes are categorized, not manually draggable -->
               <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
               <div class="min-w-0 flex-1">
                 <div class="font-medium truncate"><%= t.name %></div>
@@ -151,8 +153,7 @@
           </li>
         <% }) %>
       </ul>
-        <% } %>
-    </ul>
+    <% } %>
   </section>
 
   <script>
@@ -228,6 +229,46 @@
         });
       });
     }
+    // Remove or restore server-side "Aucun thème" placeholders depending on DOM state
+    function tidyServerEmptyPlaceholders(){
+      ['gridSubmitted','gridApproved','gridArchived'].forEach(id => {
+        const grid = document.getElementById(id);
+        if (!grid) return;
+        const hasItem = grid.querySelectorAll('.themeCard').length > 0;
+        const serverMsg = grid.querySelector('.server-empty-placeholder');
+        if (hasItem) {
+          if (serverMsg) serverMsg.remove();
+        } else {
+          if (!serverMsg) {
+            const li = document.createElement('li');
+            li.className = 'server-empty-placeholder col-span-full text-sm text-slate-400';
+            if (id === 'gridSubmitted') li.textContent = 'Aucun thème en attente.';
+            if (id === 'gridApproved') li.textContent = 'Aucun thème validé.';
+            if (id === 'gridArchived') li.textContent = 'Aucun thème archivé.';
+            grid.appendChild(li);
+          }
+        }
+      });
+    }
+
+    // Update the small counts shown on the tab buttons from actual DOM counts
+    function updateTabCounts(){
+      try{
+        const map = {
+          submitted: document.getElementById('gridSubmitted'),
+          approved: document.getElementById('gridApproved'),
+          archived: document.getElementById('gridArchived')
+        };
+        Object.keys(map).forEach(k => {
+          const root = map[k];
+          const btn = tabButtons.find(tb => tb.dataset.tab === k);
+          if (!btn) return;
+          const span = btn.querySelector('.tab-count span');
+          const count = root ? Array.from(root.querySelectorAll('.themeCard')).filter(el=>el.style.display !== 'none').length : 0;
+          if (span) span.textContent = String(count);
+        });
+      }catch(e){}
+    }
     function wireActions(){
       grids.forEach(grid => {
         grid.addEventListener('click', async (e)=>{
@@ -247,13 +288,49 @@
           const originalParent = li.parentElement;
           const originalNext = li.nextElementSibling;
           let tempMoved = false;
+          // helper to change action buttons depending on target grid
+          function transformCardForGrid(card, target){
+            try{
+              const id = card.dataset.id;
+              const actions = Array.from(card.querySelectorAll('div')).find(d=>d.className && d.className.indexOf('mt-3')!==-1) || card.querySelector('div.mt-3') || card.querySelector('.actions');
+              if (!actions) return;
+              // Normalize: remove existing action nodes
+              actions.innerHTML = '';
+              if (target === 'approved'){
+                // approved grid actions: archive, preview, delete
+                const archive = document.createElement('button'); archive.className = 'archiveBtn px-3 py-1.5 rounded bg-slate-700 text-white text-xs'; archive.textContent = 'Archiver';
+                const preview = document.createElement('a'); preview.className = 'px-3 py-1.5 rounded bg-indigo-600 text-white text-xs'; preview.href = '/dashboard/admin/themes/'+encodeURIComponent(id); preview.textContent = 'Prévisualiser';
+                const del = document.createElement('button'); del.className = 'deleteBtn px-3 py-1.5 rounded bg-rose-700 text-white text-xs'; del.textContent = 'Supprimer';
+                actions.appendChild(archive); actions.appendChild(preview); actions.appendChild(del);
+              } else if (target === 'submitted'){
+                // submitted: approve/reject or approveUpdate if pending
+                const pending = card.querySelector('.badge-pending-update');
+                if (pending){
+                  const approveUpd = document.createElement('button'); approveUpd.className = 'approveUpdateBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs'; approveUpd.textContent = 'Approuver la MAJ';
+                  actions.appendChild(approveUpd);
+                } else {
+                  const approve = document.createElement('button'); approve.className = 'approveBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs'; approve.textContent = 'Approuver';
+                  const reject = document.createElement('button'); reject.className = 'rejectBtn px-3 py-1.5 rounded bg-rose-600 text-white text-xs'; reject.textContent = 'Rejeter';
+                  actions.appendChild(approve); actions.appendChild(reject);
+                }
+                const archive = document.createElement('button'); archive.className = 'archiveBtn px-3 py-1.5 rounded bg-slate-700 text-white text-xs'; archive.textContent = 'Archiver';
+                const preview = document.createElement('a'); preview.className = 'px-3 py-1.5 rounded bg-indigo-600 text-white text-xs'; preview.href = '/dashboard/admin/themes/'+encodeURIComponent(id); preview.textContent = 'Prévisualiser';
+                actions.appendChild(archive); actions.appendChild(preview);
+              } else if (target === 'archived'){
+                const unarchive = document.createElement('button'); unarchive.className = 'unarchiveBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs'; unarchive.textContent = 'Republier';
+                const preview = document.createElement('a'); preview.className = 'px-3 py-1.5 rounded bg-indigo-600 text-white text-xs'; preview.href = '/dashboard/admin/themes/'+encodeURIComponent(id); preview.textContent = 'Prévisualiser';
+                const del = document.createElement('button'); del.className = 'deleteBtn px-3 py-1.5 rounded bg-rose-700 text-white text-xs'; del.textContent = 'Supprimer';
+                actions.appendChild(unarchive); actions.appendChild(preview); actions.appendChild(del);
+              }
+            }catch(e){}
+          }
           try{
             if (approve || reject){
               const action = approve ? 'approve' : 'reject';
               // optimistic: move/ remove UI immediately for snappiness
               if (approve) {
                 const target = document.getElementById('gridApproved');
-                if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); target.appendChild(li); }
+                if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); transformCardForGrid(li, 'approved'); target.appendChild(li); }
                 li.querySelector('.badge-pending-update')?.remove?.();
                 tempMoved = true;
               } else {
@@ -263,26 +340,30 @@
               const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/'+action, { method: 'POST' });
               if (!res.ok) throw new Error('HTTP '+res.status);
               showToast(approve ? 'Thème approuvé' : 'Thème rejeté', 'success');
+              try{ window.__refreshThemePaginators && window.__refreshThemePaginators(); }catch(e){}
             } else if (archive){
-              const target = document.getElementById('gridArchived'); if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); target.appendChild(li); }
+              const target = document.getElementById('gridArchived'); if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); transformCardForGrid(li, 'archived'); target.appendChild(li); }
               tempMoved = true;
               const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/archive', { method: 'POST' });
               if (!res.ok) throw new Error('HTTP '+res.status);
               showToast('Thème archivé', 'success');
+              try{ window.__refreshThemePaginators && window.__refreshThemePaginators(); }catch(e){}
             } else if (unarchive){
-              const target = document.getElementById('gridApproved'); if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); target.appendChild(li); }
+              const target = document.getElementById('gridApproved'); if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); transformCardForGrid(li, 'approved'); target.appendChild(li); }
               tempMoved = true;
               const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/unarchive', { method: 'POST' });
               if (!res.ok) throw new Error('HTTP '+res.status);
               showToast('Thème republié', 'success');
+              try{ window.__refreshThemePaginators && window.__refreshThemePaginators(); }catch(e){}
             } else if (approveUpdate){
               // optimistic visual update: remove badge and move to approved
               li.querySelector('.badge-pending-update')?.remove?.();
-              const target = document.getElementById('gridApproved'); if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); target.appendChild(li); }
+              const target = document.getElementById('gridApproved'); if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); transformCardForGrid(li, 'approved'); target.appendChild(li); }
               tempMoved = true;
               const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/approve-update', { method: 'POST' });
               if (!res.ok) throw new Error('HTTP '+res.status);
               showToast('MAJ approuvée', 'success');
+              try{ window.__refreshThemePaginators && window.__refreshThemePaginators(); }catch(e){}
             } else if (del){
               const ok = window.confirm('Supprimer définitivement ce thème ?');
               if (!ok) { actBtn.disabled = false; actBtn.textContent = prev; return; }
@@ -291,6 +372,7 @@
               const res = await fetch('/api/themes/'+encodeURIComponent(id), { method: 'DELETE' });
               if (!res.ok) throw new Error('HTTP '+res.status);
               showToast('Thème supprimé', 'success');
+              try{ window.__refreshThemePaginators && window.__refreshThemePaginators(); }catch(e){}
             }
           }catch(err){
             // rollback optimistic UI change
@@ -323,37 +405,145 @@
     }
     search?.addEventListener('input', applyFilter);
     renderPreviews(); wireActions();
-    // Drag & Drop: allow moving theme cards between columns via the left grip
-    function setupDragAndDrop(){
-      let dragged = null;
-      function ensurePlaceholderRemoved(target){ const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); }
-      function getDragAfterElement(container, y) {
-        const draggableElements = [...container.querySelectorAll('.themeCard:not(.dragging)')];
-        return draggableElements.reduce((closest, child) => {
-          const box = child.getBoundingClientRect();
-          const offset = y - box.top - box.height / 2;
-          if (offset < 0 && offset > closest.offset) {
-            return { offset: offset, element: child };
-          } else return closest;
-        }, { offset: Number.NEGATIVE_INFINITY }).element || null;
-      }
-      // start only when handle is pressed
-      window.__dragStartFromHandle = false;
-      document.addEventListener('mouseup', ()=>{ window.__dragStartFromHandle = false; });
-      document.querySelectorAll('.themeCard').forEach(card => {
-        const handle = card.querySelector('.dragHandle');
-        if (handle) { handle.style.cursor='grab'; handle.addEventListener('mousedown', ()=>{ window.__dragStartFromHandle = true; }); }
-        card.addEventListener('dragstart', (e)=>{ if (!window.__dragStartFromHandle) { e.preventDefault(); return; } dragged = card; card.classList.add('dragging'); try{ e.dataTransfer.setData('text/plain', card.dataset.id); }catch(_){} e.dataTransfer.effectAllowed='move'; });
-        card.addEventListener('dragend', ()=>{ if (dragged) { dragged.classList.remove('dragging'); dragged = null; } });
-      });
-      grids.forEach(grid => {
-        grid.addEventListener('dragover', (e)=>{ e.preventDefault(); if (!dragged) return; const after = getDragAfterElement(grid, e.clientY); ensurePlaceholderRemoved(grid); if (after == null) grid.appendChild(dragged); else grid.insertBefore(dragged, after); });
-        grid.addEventListener('drop', (e)=>{ e.preventDefault(); if (!dragged) return; ensurePlaceholderRemoved(grid); showToast('Thème déplacé', 'success', 1400); });
-      });
-      const observer = new MutationObserver((mut)=>{ mut.forEach(m=>{ if (m.addedNodes.length){ m.addedNodes.forEach(n=>{ if (n.nodeType===1 && n.classList.contains('themeCard')){ const handle = n.querySelector('.dragHandle'); if (handle) { handle.style.cursor='grab'; handle.addEventListener('mousedown', ()=>{ window.__dragStartFromHandle = true; }); } n.addEventListener('dragstart', (e)=>{ if (!window.__dragStartFromHandle) { e.preventDefault(); return; } dragged = n; n.classList.add('dragging'); try{ e.dataTransfer.setData('text/plain', n.dataset.id); }catch(_){} e.dataTransfer.effectAllowed='move'; }); n.addEventListener('dragend', ()=>{ n.classList.remove('dragging'); dragged = null; }); } }); } }); });
-      grids.forEach(g=>observer.observe(g, { childList: true }));
-    }
+    // Drag & Drop removed: themes are categorized. Provide a noop for compatibility.
+    function setupDragAndDrop(){ /* intentionally empty */ }
     setupDragAndDrop();
+
+    // Refresh helpers: re-evaluate paginators and update tab counts after DOM changes
+    window.__refreshThemePaginators = function(){
+      try{
+        const container = window.__themeAdminPaginators || {};
+        Object.keys(container).forEach(k=>{
+          const p = container[k]; if (!p) return;
+          // rebuild internals from DOM (re-reading items)
+          const root = (k === 'submitted') ? document.getElementById('gridSubmitted') : (k === 'approved' ? document.getElementById('gridApproved') : document.getElementById('gridArchived'));
+          if (!root) return;
+          // Force paginator to re-scan items by calling setFiltered with the current DOM items
+          const items = Array.from(root.querySelectorAll('.themeCard'));
+          try{ p.setFiltered(items); }catch(e){}
+        });
+      }catch(e){}
+      // Always try to refresh other UI pieces (categories, previews, filters, placeholders)
+      try{ if (window.__onThemesUpdated) window.__onThemesUpdated(); }catch(e){}
+      try{ tidyServerEmptyPlaceholders(); }catch(e){}
+      try{ updateTabCounts(); }catch(e){}
+    };
+  })();
+  </script>
+  <script src="/public/js/pagination.js"></script>
+  <script>
+  (function(){
+    // Pagination + filtre par catégorie pour chaque grille
+    const grids = {
+      submitted: document.getElementById('gridSubmitted'),
+      approved: document.getElementById('gridApproved'),
+      archived: document.getElementById('gridArchived')
+    };
+    const search = document.getElementById('themeSearch');
+    const catSelect = document.getElementById('themeCategoryFilter');
+    // collect categories from data-json of all themeCards
+    function collectCategories(){
+      const cats = new Set();
+      Object.values(grids).forEach(g=>{
+        if (!g) return;
+        Array.from(g.querySelectorAll('.themeCard')).forEach(card=>{
+          try{ const raw = card.getAttribute('data-json')||'{}'; const parsed = JSON.parse(raw); const cat = (parsed.chat && parsed.chat.category) || parsed.category || parsed.chatCategory || ''; if (cat) cats.add(String(cat)); }catch(e){}
+        });
+      });
+      return Array.from(cats).sort();
+    }
+
+    function populateCategorySelect(){
+      if (!catSelect) return;
+      const prev = catSelect.value;
+      // remove existing dynamic options (keep first default option)
+      while (catSelect.options.length > 1) catSelect.remove(1);
+      const cats = collectCategories();
+      cats.forEach(c=>{
+        const o = document.createElement('option'); o.value = c; o.textContent = c; catSelect.appendChild(o);
+      });
+      // restore previous selection if still available
+      try{ if (prev) catSelect.value = prev; }catch(e){}
+    }
+
+    // Called after DOM changes (optimistic moves / server ops) to refresh UI pieces
+    window.__onThemesUpdated = function(){
+      try{ populateCategorySelect(); }catch(e){}
+      try{ renderPreviews(); }catch(e){}
+      try{ applyFilter(); }catch(e){}
+      try{ updateTabCounts(); }catch(e){}
+    };
+
+    // helper to ensure a message when no items
+    function ensureEmptyMessage(grid){
+      let m = grid.querySelector('.no-match-msg');
+      if (!m){ m = document.createElement('div'); m.className = 'no-match-msg col-span-full text-sm text-slate-400'; m.style.display='none'; m.textContent = 'Aucun thème correspondant.'; grid.appendChild(m);} return m;
+    }
+
+    // create paginators if available and wire tab updates
+  const paginators = {};
+  // expose for external refreshes
+  window.__themeAdminPaginators = window.__themeAdminPaginators || {};
+    const tabButtons = Array.from(document.querySelectorAll('.tabBtn'));
+    function showTab(name){
+      ['submitted','approved','archived'].forEach(s=>{
+        const sec = document.getElementById('grid'+(s==='submitted'?'Submitted': s==='approved'?'Approved':'Archived'))?.closest('section') || document.querySelector('[data-section="'+s+'"]');
+        if (sec) sec.classList.toggle('section-hidden', s!==name);
+      });
+      tabButtons.forEach(b=>{ const is = b.dataset.tab === name; b.classList.toggle('active', is); b.setAttribute('aria-selected', String(is)); });
+    }
+    tabButtons.forEach(b=> b.addEventListener('click', ()=> showTab(b.dataset.tab)));
+
+    Object.keys(grids).forEach(k=>{
+      const g = grids[k]; if (!g) return;
+      if (!window.__PlinkkPaginator) return;
+      const p = window.__PlinkkPaginator.createPaginator(g, { pageSize: 9, selectors: { items: '.themeCard' }, onRender: (pageItems, meta) => {
+        // show empty message when no matches
+        const em = ensureEmptyMessage(g);
+        if (!meta || meta.totalItems === 0) { em.style.display = ''; } else { em.style.display = 'none'; }
+        // update tab button count
+        try{
+          const btn = tabButtons.find(tb => tb.dataset.tab === k);
+          if (btn) { const span = btn.querySelector('.tab-count span'); if (span) span.textContent = String(meta.totalItems); }
+        }catch(e){}
+      }});
+  paginators[k] = p;
+  try{ window.__themeAdminPaginators[k] = p; }catch(e){}
+      p.render();
+    });
+
+    // show only submitted by default
+    showTab('submitted');
+
+    function applyFilter(){
+      const q = (search?.value||'').trim().toLowerCase();
+      const cat = (catSelect?.value||'').trim();
+      Object.keys(paginators).forEach(k=>{
+        const p = paginators[k];
+        const all = p.getAll();
+        const filtered = all.filter(li => {
+          const name = (li.dataset.name||'') + ' ' + (li.dataset.author||'');
+          const matchesQ = !q || name.toLowerCase().includes(q);
+          if (!matchesQ) return false;
+          if (!cat) return true;
+          try{ const raw = li.getAttribute('data-json')||'{}'; const parsed = JSON.parse(raw);
+            const c = (parsed.chat && parsed.chat.category) || parsed.category || parsed.chatCategory || '';
+            return String(c) === String(cat);
+          }catch(e){ return false; }
+        });
+        p.setFiltered(filtered);
+      });
+    }
+
+  // wire events
+  search?.addEventListener('input', applyFilter);
+  catSelect?.addEventListener('change', applyFilter);
+  const clearBtn = document.getElementById('clearSearch');
+  clearBtn?.addEventListener('click', (e)=>{ e.preventDefault(); if (search) search.value=''; applyFilter(); if (search) search.focus(); });
+
+    populateCategorySelect();
+    // initial filter to sync pagination
+    applyFilter();
   })();
   </script>
 </main>

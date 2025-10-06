@@ -21,14 +21,12 @@ export function generateProfileConfig(
   return `
     export const injectedTheme = ${injectedTheme ? JSON.stringify(injectedTheme) : 'null'};
     export const profileData = {
-        profileLink: "${profile.profileLink || ""}", // Lien du profil 
-        profileImage: "${profile.profileImage || ""}", // Image de profil
-        profileIcon: "${profile.profileIcon || ""}", // Icone derrière le profil
-        profileSiteText: "${profile.profileSiteText || ""}", // Nom derrière le profil
-        userName: "${
-          profile.userName || "User"
-        }", // Nom affiché sur la page et dans le titre de l'onglet
-  email: "${(profile as any).publicEmail || ""}", // Adresse mail publique affichée sur la page (découplée)
+        profileLink: ${JSON.stringify(profile.profileLink || "")}, // Lien du profil 
+        profileImage: ${JSON.stringify(profile.profileImage || "")}, // Image de profil
+        profileIcon: ${JSON.stringify(profile.profileIcon || "")}, // Icone derrière le profil
+        profileSiteText: ${JSON.stringify(profile.profileSiteText || "")}, // Nom derrière le profil
+        userName: ${JSON.stringify(profile.userName || "User")}, // Nom affiché sur la page et dans le titre de l'onglet
+  email: ${JSON.stringify((profile as any).publicEmail || "")}, // Adresse mail publique affichée sur la page (découplée)
         links: ${JSON.stringify(
           links.map((l) => ({
             icon: l.icon,
@@ -42,22 +40,14 @@ export function generateProfileConfig(
           }))
         )},
         // Fond de la page si une liste est utilisée alors le fond sera via les couleurs que vous mettez dedans
-        background: [${backgroundColors.map(
-          (c) => '"' + c.color + '"'
-        )}], //"https://static.vecteezy.com/ti/vecteur-libre/p1/12697876-motif-geometriquele-continue-noir-et-blanc-motif-repetitif-monochrome-arriere-plan-abstrait-optique-tridimensionnel-avec-cubes-troues-vectoriel.jpg",
+        background: ${JSON.stringify(backgroundColors.map((c) => c.color))}, //"https://static.vecteezy.com/ti/vecteur-libre/p1/12697876-motif-geometriquele-continue-noir-et-blanc-motif-repetitif-monochrome-arriere-plan-abstrait-optique-tridimensionnel-avec-cubes-troues-vectoriel.jpg",
         degBackgroundColor: ${
           profile.degBackgroundColor
         }, // inclinaison du degradé
-        profileHoverColor: "${
-          profile.profileHoverColor
-        }", // Couleur de hover sur l'article (l'élément principal)
-        neonColors: [${neonColors.map(
-          (c) => '"' + c.color + '"'
-        )}], // Couleurs du neon de profil
-        iconUrl: "${profile.iconUrl || ""}", // Icone de l'onglet
-        description: "${
-          profile.description || ""
-        }", // Description affichée sur la page, display: none si vide
+        profileHoverColor: ${JSON.stringify(profile.profileHoverColor)}, // Couleur de hover sur l'article (l'élément principal)
+        neonColors: ${JSON.stringify(neonColors.map((c) => c.color))}, // Couleurs du neon de profil
+        iconUrl: ${JSON.stringify(profile.iconUrl || "")}, // Icone de l'onglet
+        description: ${JSON.stringify(profile.description || "")}, // Description affichée sur la page, display: none si vide
         labels: ${JSON.stringify(
           labels.map((l) => ({
             data: l.data,

@@ -200,6 +200,7 @@
       <!-- Connexion -->
       <section id="loginForm" class="p-5 space-y-4">
         <form action="/login" method="post" class="space-y-3">
+          <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
           <label class="block text-sm">
             <span class="text-slate-300">Adresse e-mail</span>
             <input type="email" name="email" required
@@ -240,6 +241,7 @@
       <!-- Inscription -->
       <section id="signupForm" class="p-5 space-y-4 hidden">
         <form action="/register" method="post" class="space-y-3">
+          <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
           <label class="block text-sm">
             <span class="text-slate-300">Nom d'utilisateur</span>
             <input type="text" name="username" required
