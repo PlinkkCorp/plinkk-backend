@@ -140,6 +140,18 @@ fastify.post("/register", async (req, reply) => {
   const rawPassword = password || "";
   const rawPasswordVerif = passwordVerif || "";
 
+  // Username length constraints (client and server must agree)
+  const USERNAME_MIN = 3;
+  const USERNAME_MAX = 30;
+  if (rawUsername.length < USERNAME_MIN || rawUsername.length > USERNAME_MAX) {
+    const emailParam = encodeURIComponent(rawEmail);
+    const userParam = encodeURIComponent(rawUsername);
+    return reply.redirect(
+      `/login?error=${encodeURIComponent(
+        `Le nom d'utilisateur doit contenir entre ${USERNAME_MIN} et ${USERNAME_MAX} caractères`
+      )}&email=${emailParam}&username=${userParam}#signup`
+    );
+  }
   const hashedPassword = await bcrypt.hash(password, 10);
 
   // Vérif mots de passe
@@ -176,16 +188,29 @@ fastify.post("/register", async (req, reply) => {
     }
   }
   try {
+    // generate slug/id from username
+    const generatedId = username
+      .replaceAll(" ", "-")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+    if (!generatedId || generatedId.length === 0) {
+      const emailParam = encodeURIComponent(rawEmail);
+      const userParam = encodeURIComponent(rawUsername);
+      return reply.redirect(
+        `/login?error=${encodeURIComponent(
+          "Nom d'utilisateur invalide"
+        )}&email=${emailParam}&username=${userParam}#signup`
+      );
+    }
+
     const user = await prisma.user.create({
       data: {
-        id: username
-          .replaceAll(" ", "-")
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .toLowerCase()
-          .trim()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-+|-+$/g, ""),
+        id: generatedId,
         userName: username,
         name: username,
         email: email,

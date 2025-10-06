@@ -69,7 +69,7 @@
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2 min-w-0">
                   <div class="font-semibold truncate"><%= u.userName %></div>
-                  <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 truncate">@<%= u.id %></span>
+                  <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 max-w-[7.5rem] truncate inline-block">@<%= u.id %></span>
                   <% if (role && role !== 'USER') { %>
                     <span class="text-[10px] px-2 py-0.5 rounded-full border truncate <%= role === 'ADMIN' ? 'bg-red-600/20 border-red-500/40 text-red-300' : role === 'PARTNER' ? 'bg-indigo-600/20 border-indigo-500/40 text-indigo-300' : role === 'DEVELOPER' ? 'bg-emerald-600/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-700/30 border-slate-600/50 text-slate-300' %>"><%= role %></span>
                   <% } %>
