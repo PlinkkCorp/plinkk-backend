@@ -1,24 +1,32 @@
 import { createToggleThemeButton, applyAnimation, applyAnimationButton, applyDynamicStyles, applyFirstTheme } from './styleTools.js';
 import { createProfileContainer, createUserName, createStatusBar, createLabelButtons, createIconList, createEmailAndDescription, createLinkBoxes } from './tools.js';
 import { initEasterEggs } from './easterEggs.js';
-import { profileData } from './config/profileConfig.js';
-import { themes } from './config/themeConfig.js';
-// Étendre avec les thèmes approuvés (communauté)
-(async () => {
+import { profileData, injectedTheme } from './config/profileConfig.js';
+import { loadThemes } from './themesStore.js';
+// We'll load built-ins + community themes from the server. We first handle
+// injectedTheme (exported by profileConfig) then append the built-ins/themes
+// returned by the API so indices remain stable.
+// Start with an empty themes array; it will be populated below.
+export const themes = [];
+// Start loading themes immediately and expose a promise to await completion.
+export const themesLoaded = (async () => {
     try {
-        const res = await fetch('/api/themes/approved', { cache: 'no-store' });
-        if (res.ok) {
-            const extra = await res.json();
-            if (Array.isArray(extra) && extra.length) {
-                // Muter le tableau importé pour conserver les index existants
-                extra.forEach(t => themes.push(t));
-            }
+        const payload = await loadThemes();
+        if (payload && Array.isArray(payload.builtIns) && payload.builtIns.length) {
+            // Copy built-ins into themes (they will be appended after injected)
+            payload.builtIns.forEach(t => themes.push(t));
         }
-    } catch {}
+        if (payload && Array.isArray(payload.themes) && payload.themes.length) {
+            // community/mine themes appended after built-ins
+            payload.themes.forEach(t => themes.push(t));
+        }
+    } catch (e) {
+        // ignore
+    }
 })();
 import { animations, styleSheet } from './config/animationConfig.js';
 import { canvaData } from './config/canvaConfig.js';
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
     var _a, _b;
     let parsedProfileData = profileData;
     if (typeof profileData === 'string') {
@@ -46,17 +54,46 @@ document.addEventListener("DOMContentLoaded", function () {
     createLabelButtons(profileData);
     createIconList(profileData);
     article.appendChild(createEmailAndDescription(profileData));
-    // S'il existe un thème privé injecté, l'insérer en tête de liste et pointer selectedThemeIndex=0
+    // Wait for themes to be loaded (built-ins + community). This ensures
+    // selectedThemeIndex refers to the final ordering and that applyFirstTheme
+    // receives a real theme object.
     try {
-        if (window.__PLINKK_PRIVATE_THEME__) {
-            // Ne pas dupliquer si déjà présent
-            if (!themes.length || JSON.stringify(themes[0]) !== JSON.stringify(window.__PLINKK_PRIVATE_THEME__)) {
-                themes.unshift(window.__PLINKK_PRIVATE_THEME__);
+        await themesLoaded;
+    } catch (_) { }
+
+    // If the server exported an injectedTheme in profileConfig.js, insert it
+    // into the themes array (avoid duplicates) and update selectedThemeIndex if needed.
+    try {
+        if (injectedTheme && typeof injectedTheme === 'object') {
+            // Avoid duplicates by shallow compare
+            const same = (a, b) => a && b && a.background === b.background && a.buttonBackground === b.buttonBackground && a.textColor === b.textColor;
+            const existing = themes.findIndex(t => same(t, injectedTheme));
+            if (existing === -1) {
+                // Place injected theme at the start so it has priority
+                themes.unshift(injectedTheme);
+                // If user previously selected a theme by index and it was >=0,
+                // leave it as-is; injectedTheme becomes index 0.
+                profileData.selectedThemeIndex = 0;
+            } else {
+                profileData.selectedThemeIndex = existing;
             }
-            try { profileData.selectedThemeIndex = 0; } catch (_) { }
         }
+    } catch (e) { console.warn('injectedTheme handling failed', e); }
+
+    // Ensure selectedThemeIndex is a valid integer and within the available range
+    try {
+        let idx = Number(profileData.selectedThemeIndex);
+        if (!Number.isFinite(idx) || isNaN(idx)) idx = 0;
+        if (!Array.isArray(themes) || themes.length === 0) {
+            idx = 0;
+        } else {
+            // Normalize to [0 .. themes.length-1]
+            idx = ((Math.floor(idx) % themes.length) + themes.length) % themes.length;
+        }
+        profileData.selectedThemeIndex = idx;
+    } catch (e) {
+        profileData.selectedThemeIndex = 0;
     }
-    catch (_c) { }
     if (!themes || !themes.length) {
         console.warn("Themes array is empty or not defined.");
     }
@@ -88,6 +125,22 @@ document.addEventListener("DOMContentLoaded", function () {
         document.body.appendChild(footer);
     }
     initEasterEggs();
+
+    // Réagir aux modifications externes du thème injecté (console / bookmarklet)
+    try {
+        window.addEventListener('plinkk:theme-updated', (ev) => {
+            try {
+                const detail = ev && ev.detail ? ev.detail : null;
+                const idx = detail && typeof detail.index === 'number' ? detail.index : window.__PLINKK_INJECTED_THEME_INDEX__;
+                const theme = (typeof idx === 'number') ? themes[idx % themes.length] : (window.__PLINKK_INJECTED_THEME__ || null);
+                if (theme) {
+                    // Recréation du bouton si nécessaire
+                    try { createToggleThemeButton(theme); } catch (e) { }
+                    try { applyFirstTheme(theme); } catch (e) { }
+                }
+            } catch (e) { }
+        });
+    } catch (e) { }
     // Désactiver le néon globalement (override temporaire)
     try { profileData.neonEnable = 0; } catch(_) {}
     if (!animations || !animations.length) {

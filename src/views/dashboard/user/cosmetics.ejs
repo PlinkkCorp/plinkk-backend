@@ -1,9 +1,9 @@
-<%- include('../partials/head.ejs', { title: 'Tableau de bord - Cosmétiques', description: 'Choisis ton flair, cadre, thème et bannière avec aperçu en direct.', robots: 'noindex,nofollow' }) %>
-<%- include('../partials/header-dash.ejs') %>
+<%- include('../../partials/head.ejs', { title: 'Tableau de bord - Cosmétiques', description: 'Choisis ton flair, cadre, thème et bannière avec aperçu en direct.', robots: 'noindex,nofollow' }) %>
+<%- include('../../partials/header-dash.ejs') %>
 
 <main class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
 
-  <%- include('../partials/asside_dash.ejs', { active: 'cosmetics' }) %>
+  <%- include('../../partials/asside_dash.ejs', { active: 'cosmetics' }) %>
 
   <section class="col-span-12 lg:col-span-9 space-y-4">
     <!-- Header (style Mon compte) -->
@@ -23,7 +23,7 @@
         <div class="flex items-center gap-3">
           <div id="avatar" class="relative shrink-0 h-12 w-12 rounded-full grid place-items-center bg-indigo-700/70 border border-indigo-600/50 text-white font-bold" data-avatar>
             <div id="frame" class="pointer-events-none absolute inset-0 rounded-full">
-              <%- include('../partials/avatar.ejs', { user: user, }) %>
+              <%- include('../../partials/avatar.ejs', { user: user, }) %>
             </div>
           </div>
           <div>

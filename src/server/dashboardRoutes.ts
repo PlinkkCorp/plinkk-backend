@@ -99,7 +99,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         },
       ],
     };
-    return reply.view("dashboard/cosmetics.ejs", {
+    return reply.view("dashboard/user/cosmetics.ejs", {
       user: userInfo,
       cosmetics,
       catalog,
@@ -115,7 +115,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       omit: { password: true },
     });
     if (!userInfo) return reply.redirect("/login");
-    return reply.view("dashboard/edit.ejs", { user: userInfo });
+    return reply.view("dashboard/user/edit.ejs", { user: userInfo });
   });
 
   // Dashboard: Statistiques (vue dédiée)
@@ -158,7 +158,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     } catch (e) {
       request.log?.warn({ err: e }, 'Failed to preload daily series');
     }
-    return reply.view("dashboard/stats.ejs", { user: userInfo, links: userInfo.links, viewsDaily30d: preSeries });
+    return reply.view("dashboard/user/stats.ejs", { user: userInfo, links: userInfo.links, viewsDaily30d: preSeries });
   });
 
   // API: Vues journalières (pour graphiques)
@@ -255,7 +255,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       omit: { password: true },
     });
     if (!userInfo) return reply.redirect("/login");
-    return reply.view("dashboard/versions.ejs", { user: userInfo });
+    return reply.view("dashboard/user/versions.ejs", { user: userInfo });
   });
 
   // Dashboard: Compte (gestion infos, confidentialité, cosmétiques)
@@ -271,7 +271,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     // Dérive la visibilité d'email depuis le champ `publicEmail` (présent
     // dans le schéma Prisma). Si publicEmail est défini -> l'email est public.
     const isEmailPublic = Boolean((userInfo as any).publicEmail);
-    return reply.view("dashboard/account.ejs", {
+    return reply.view("dashboard/user/account.ejs", {
       user: userInfo,
       isEmailPublic,
     });
@@ -324,7 +324,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       take: 10,
     });
 
-    return reply.view("dashboard/admin.ejs", {
+    return reply.view("dashboard/admin/dash.ejs", {
       users,
       totals,
       user: userInfo,
@@ -342,7 +342,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       where: { authorId: userId as string }, orderBy: { updatedAt: "desc" },
       select: { id: true, name: true, description: true, status: true, updatedAt: true, data: true, pendingUpdate: true, pendingUpdateAt: true, pendingUpdateMessage: true, isPrivate: true }
     });
-    return reply.view("dashboard/themes.ejs", { user: userInfo, myThemes, selectedCustomThemeId: (userInfo as any).selectedCustomThemeId || null });
+    return reply.view("dashboard/user/themes.ejs", { user: userInfo, myThemes, selectedCustomThemeId: (userInfo as any).selectedCustomThemeId || null });
   });
 
   // Admin: Liste des thèmes soumis
@@ -371,7 +371,13 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         orderBy: { updatedAt: "desc" }
       })
     ]);
-    return reply.view("dashboard/admin-themes.ejs", { user: userInfo, submitted, approved, archived });
+  // Move approved themes that have pending updates into submitted list so admins
+  // can validate updates from the top "À valider" section.
+  const approvedWithPending = (approved as any[]).filter(t => t.pendingUpdate);
+  const approvedFiltered = (approved as any[]).filter(t => !t.pendingUpdate);
+  const submittedNormalized = (submitted as any[]).map(s => ({ ...s, pendingUpdate: false }));
+  const mergedSubmitted = [...submittedNormalized, ...approvedWithPending];
+  return reply.view("dashboard/admin/themes.ejs", { user: userInfo, submitted: mergedSubmitted, approved: approvedFiltered, archived });
   });
 
   // Admin: Prévisualisation d'un thème
@@ -386,6 +392,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
     const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, name: true, description: true, data: true, author: { select: { id: true, userName: true } }, status: true } });
     if (!t) return reply.code(404).view("erreurs/404.ejs", { currentUser: userInfo });
-    return reply.view("dashboard/admin-theme-preview.ejs", { user: userInfo, theme: t });
+    return reply.view("dashboard/admin/preview.ejs", { user: userInfo, theme: t });
   });
 }

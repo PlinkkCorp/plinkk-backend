@@ -1,5 +1,5 @@
 <!-- Header -->
-<header class="sticky top-0 z-50 border-b border-indigo-700/30 bg-gradient-to-r from-slate-950/80 via-indigo-900/40 to-slate-950/80 backdrop-blur">
+<header class="sticky top-0 z-50 border-b border-fuchsia-600/30 bg-gradient-to-r from-slate-950/80 via-fuchsia-900/35 to-slate-950/80 backdrop-blur">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
         <a href="/dashboard" class="flex items-center gap-2">
             <img src="/public/images/logo.svg" alt="Plinkk" class="h-8 w-8 rounded" />
@@ -14,8 +14,8 @@
                         <% } %>
         </div>
         <div class="relative ml-1" id="profileMenu">
-            <button id="profileMenuBtn" aria-haspopup="menu" aria-controls="profileMenuPanel" aria-expanded="false" class="flex items-center gap-2 px-2 py-1.5 rounded-full bg-slate-800/80 border border-indigo-700/40 hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-600/40">
-                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-700/70 text-sm font-semibold overflow-hidden" data-avatar>
+            <button id="profileMenuBtn" aria-haspopup="menu" aria-controls="profileMenuPanel" aria-expanded="false" class="flex items-center gap-2 px-2 py-1.5 rounded-full bg-slate-800/80 border border-fuchsia-700/40 hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-fuchsia-600/40">
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-fuchsia-700/70 text-sm font-semibold overflow-hidden" data-avatar>
                         <%- include('avatar.ejs', { user }) %>
                     </span>
                     <span class="hidden sm:inline text-sm font-medium max-w-28 truncate"><%= user.userName %></span>

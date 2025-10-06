@@ -42,6 +42,69 @@
 				"$tsc"
 			],
 			"group": "build"
+		},
+		{
+			"label": "prisma-migrate-dev",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"prisma:devdb"
+			],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "prisma-db-push",
+			"type": "shell",
+			"command": "npx",
+			"args": [
+				"-y",
+				"prisma",
+				"db",
+				"push"
+			],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "prisma-generate",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"postinstall"
+			],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "prisma-db-push-force",
+			"type": "shell",
+			"command": "npx",
+			"args": [
+				"-y",
+				"prisma",
+				"db",
+				"push",
+				"--accept-data-loss"
+			],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "build",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-s",
+				"build"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
 		}
 	]
 }

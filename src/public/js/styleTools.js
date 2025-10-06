@@ -1,7 +1,10 @@
 import { getCookie, setCookie } from './cookies.js';
 import { canvaData } from './config/canvaConfig.js';
 import { profileData } from './config/profileConfig.js';
-import { themes } from './config/themeConfig.js';
+// `themes` is exported/populated by src/public/js/init.js at runtime. We avoid
+// a static import to prevent circular imports and allow themes to come from
+// the DB via the server API.
+import { themes } from './init.js';
 import { animationBackground } from './config/animationConfig.js';
 export function applyFirstTheme(theme) {
     const darkThemeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');

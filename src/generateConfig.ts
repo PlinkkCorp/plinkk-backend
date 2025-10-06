@@ -16,8 +16,10 @@ export function generateProfileConfig(
   neonColors: NeonColor[],
   socialIcons: SocialIcon[],
   statusBar: Statusbar
+  , injectedTheme?: any
 ) {
   return `
+    export const injectedTheme = ${injectedTheme ? JSON.stringify(injectedTheme) : 'null'};
     export const profileData = {
         profileLink: "${profile.profileLink || ""}", // Lien du profil 
         profileImage: "${profile.profileImage || ""}", // Image de profil
