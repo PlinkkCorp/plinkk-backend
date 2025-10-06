@@ -2,193 +2,278 @@
     robots: 'noindex,nofollow' }) %>
 <%- include('../partials/header-dash.ejs') %>
 
+<%
+    // safe fallbacks: totals or pendingThemes might be undefined depending on controller
+    const pendingCount = (typeof totals !== 'undefined' && totals && totals.pendingThemes != null)
+        ? totals.pendingThemes
+        : (typeof pendingThemes !== 'undefined' && pendingThemes ? pendingThemes.length : 0);
+    const totalUsersCount = (typeof totals !== 'undefined' && totals && totals.totalUsers != null) ? totals.totalUsers : users.length;
+    const totalPublicCount = (typeof totals !== 'undefined' && totals && totals.totalPublic != null) ? totals.totalPublic : 0;
+    const moderatorsCount = (typeof totals !== 'undefined' && totals && totals.moderators != null) ? totals.moderators : 0;
+    const privateCount = (typeof totals !== 'undefined' && totals && totals.totalPrivate != null)
+        ? totals.totalPrivate
+        : (Array.isArray(users) ? users.filter(u => !u.isPublic).length : 0);
+%>
 <main class="max-w-7xl mx-auto p-4 space-y-5">
-    <!-- Stats header -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 animate-slide-up">
-        <div class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
-            <p class="text-xs text-slate-400">Utilisateurs</p>
-            <p class="text-xl font-semibold"><%= totals?.totalUsers ?? users.length %></p>
+    <!-- Quick actions -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight">Administration</h1>
+            <p class="text-xs text-slate-400">Tableau de bord d'administration — actions rapides, statistiques et modération.</p>
         </div>
-        <div class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
-            <p class="text-xs text-slate-400">Publics</p>
-            <p class="text-xl font-semibold"><%= totals?.totalPublic ?? 0 %></p>
-        </div>
-        <div class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
-            <p class="text-xs text-slate-400">Privés</p>
-            <p class="text-xl font-semibold"><%= totals?.totalPrivate ?? 0 %></p>
-        </div>
-        <div class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
-            <p class="text-xs text-slate-400">Modération</p>
-            <p class="text-xl font-semibold"><%= totals?.moderators ?? 0 %></p>
+        <div class="flex gap-2 flex-wrap">
+            <a class="px-3 py-2 rounded-md bg-indigo-600 text-white text-sm opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true" tabindex="-1">Validation des thèmes</a>
+            <a href="/dashboard/admin/themes" class="px-3 py-2 rounded-md bg-slate-800 border border-slate-700 text-white text-sm">Tous les thèmes</a>
+            <a class="px-3 py-2 rounded-md bg-rose-600 text-white text-sm opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true" tabindex="-1">Signalements</a>
+            <a class="px-3 py-2 rounded-md bg-slate-700 text-white text-sm opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true" tabindex="-1">Logs</a>
         </div>
     </div>
 
-    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 animate-slide-up">
-        <div class="space-y-1">
-            <h1 class="text-2xl font-bold tracking-tight">Administration · Utilisateurs</h1>
-            <p class="text-xs text-slate-400">Rechercher, trier, changer de rôle, gérer confidentialité et suppression.</p>
+    <!-- Stats cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
+            <p class="text-xs text-slate-400">Utilisateurs</p>
+            <p class="text-xl font-semibold"><%= totalUsersCount %></p>
         </div>
+        <div class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
+            <p class="text-xs text-slate-400">Thèmes en attente</p>
+            <p class="text-xl font-semibold"><%= pendingCount %></p>
+        </div>
+        <div class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
+            <p class="text-xs text-slate-400">Publics</p>
+            <p class="text-xl font-semibold"><%= totalPublicCount %></p>
+        </div>
+        <div class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
+            <p class="text-xs text-slate-400">Privés</p>
+            <p class="text-xl font-semibold"><%= privateCount %></p>
+        </div>
+    </div>
 
-        <% if (users.length> 0) { %>
-        <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2">
-            <label class="relative block flex-1">
-                <input id="searchInput" type="text" placeholder="Rechercher (nom, @id, email)"
-                             class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 pr-10 text-sm outline-none focus:ring-2 focus:ring-indigo-600 placeholder:text-slate-500" />
-                <span class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 text-xs">⌘K</span>
-            </label>
-            <div class="flex gap-2">
-                <select id="roleFilter" class="rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-600">
+    <!-- Main grid: Users + Pending Themes -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Users list (2/3) -->
+        <section class="lg:col-span-2 rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="font-medium">Utilisateurs</h2>
+                <div class="text-xs text-slate-400">Total: <span id="totalCount"><%= users.length %></span></div>
+            </div>
+
+            <div class="mb-3 flex gap-2 flex-wrap">
+                <input id="searchInput" type="text" placeholder="Rechercher (nom, @id, email)" class="flex-1 rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" />
+                <select id="roleFilter" class="rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm">
                     <option value="all">Tous rôles</option>
                     <option value="USER">USER</option>
                     <option value="MODERATOR">MODERATOR</option>
                     <option value="DEVELOPER">DEVELOPER</option>
                     <option value="ADMIN">ADMIN</option>
                 </select>
-                <select id="visibilityFilter" class="rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-600">
+                <select id="visibilityFilter" class="rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm">
                     <option value="all">Toutes Visibilités</option>
                     <option value="public">Public</option>
                     <option value="private">Privé</option>
                 </select>
-                <select id="sortSelect" class="rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-600">
+                <select id="sortSelect" class="rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm">
                     <option value="date-desc">Plus récents</option>
                     <option value="date-asc">Plus anciens</option>
                     <option value="name-asc">Nom (A→Z)</option>
                     <option value="name-desc">Nom (Z→A)</option>
-                    <option value="id-asc">@Id (A→Z)</option>
-                    <option value="id-desc">@Id (Z→A)</option>
                 </select>
-                <button id="resetBtn" class="rounded-md bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm hover:bg-slate-800">Réinitialiser</button>
+                <button id="resetBtn" class="rounded-md bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm">Réinitialiser</button>
             </div>
-        </div>
-        <% } %>
-    </div>
 
-    <div class="flex items-center justify-between animate-slide-up">
-        <p class="text-xs text-slate-400">Total: <span id="totalCount"><%= users.length %></span></p>
-        <p class="text-xs text-slate-400 hidden sm:block"><span id="visibleCount"><%= users.length %></span> affiché(s)</p>
-    </div>
-
-    <% if (users.length===0) { %>
-        <div
-            class="rounded-lg border border-dashed border-slate-700 bg-slate-900/50 p-10 text-center space-y-2 animate-slide-up">
-            <div class="text-2xl">🫥</div>
-            <p class="text-sm text-slate-300 font-medium">Aucun utilisateur pour le moment</p>
-            <p class="text-xs text-slate-500">Les comptes publics s’afficheront ici.</p>
-        </div>
-        <% } else { %>
-            <ul id="usersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <% users.forEach(u=> {
-                    const initials = (u.userName || u.id || '?').trim().charAt(0).toUpperCase();
-                    const role = u.role || 'USER';
-                    const cosmetics = (u.cosmetics || {});
-                    const selected = (cosmetics.selected || {});
-                    const flair = selected.flair ? String(selected.flair) : null;
-                    const frame = selected.frame ? String(selected.frame) : 'none';
-                    const bannerUrl = selected.bannerUrl ? String(selected.bannerUrl) : '';
-                    const theme = selected.theme ? String(selected.theme) : 'system';
-                    %>
-                    <% const isEmailPublic = Boolean(u.publicEmail); %>
-                    <% const publicEmail = u.publicEmail || u.email; %>
-                            <li class="relative group rounded-xl border border-slate-800/80 bg-slate-900/70 hover:bg-slate-900 transition-colors shadow-sm hover:shadow-md animate-slide-up overflow-visible"
-                                data-name="<%- (u.userName||'').toLowerCase() %>"
-                                data-id="<%- (u.id||'').toLowerCase() %>"
-                                data-role="<%- (u.role||'USER') %>"
-                                data-visible="<%- u.isPublic ? 'public' : 'private' %>"
-                                data-created="<%- +new Date(u.createdAt) %>"
-                                data-search="<%- (u.userName+' '+u.id + (isEmailPublic && publicEmail ? (' '+publicEmail) : '')).toLowerCase() %>">
-                                <% if (bannerUrl) { %>
-                                    <div class="h-12 w-full border-b border-slate-800"
-                                        style="background: center/cover no-repeat url('<%= bannerUrl %>')">
+            <% if (users.length===0) { %>
+                <p class="text-sm text-slate-400">Aucun utilisateur pour le moment.</p>
+            <% } else { %>
+                <ul id="usersGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <% users.forEach(u => { %>
+                        <li class="relative rounded border border-slate-800 p-3 bg-slate-900 text-sm overflow-visible pr-12" data-name="<%- (u.userName||'').toLowerCase() %>" data-id="<%- (u.id||'').toLowerCase() %>" data-role="<%- (u.role||'USER') %>" data-visible="<%- u.isPublic ? 'public' : 'private' %>" data-created="<%- +new Date(u.createdAt) %>" data-search="<%- (u.userName+' '+u.id+' '+(u.publicEmail||u.email||'')).toLowerCase() %>">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-full bg-indigo-700/60 flex items-center justify-center text-white font-semibold"> <%= (u.userName||u.id||'?').charAt(0).toUpperCase() %> </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <div class="font-semibold truncate"><%= u.userName %></div>
+                                        <span class="text-xs px-2 py-0.5 rounded bg-slate-800/80 border border-slate-700 text-slate-300">@<%= u.id %></span>
                                     </div>
+                                    <% const isEmailPublic = Boolean(u.publicEmail); %>
+                                    <% const publicEmail = u.publicEmail || u.email; %>
+                                    <% const canReveal = (user && (user.role === 'ADMIN' || user.role === 'DEVELOPER' || user.role === 'MODERATOR')); %>
+                                    <% if (isEmailPublic) { %>
+                                        <span class="text-xs text-slate-400 truncate"><%= publicEmail %></span>
+                                    <% } else { %>
+                                        <span class="emailContainer inline-flex items-center gap-2 text-xs">
+                                          <span class="text-xs text-slate-500 italic privateEmailLabel">Email privé</span>
+                                          <% if (canReveal) { %>
+                                            <span class="privateEmailWrap ml-3 inline-flex items-center gap-2 text-xs">
+                                                <button type="button" class="revealEmailBtn inline-flex items-center gap-2 px-2 py-0.5 rounded-md bg-indigo-600/85 hover:bg-indigo-500 text-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400" aria-label="Afficher l'email">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-3 w-3 text-white"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8.5v7A2.5 2.5 0 0 0 5.5 18h13A2.5 2.5 0 0 0 21 15.5v-7A2.5 2.5 0 0 0 18.5 6h-13A2.5 2.5 0 0 0 3 8.5z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.5l-9 5-9-5"/></svg>
+                                                    <span>Afficher</span>
+                                                </button>
+                                                <span class="emailValue hidden"><%= u.email %></span>
+                                            </span>
+                                          <% } %>
+                                        </span>
                                     <% } %>
-                                        <div class="p-4 flex items-start gap-3">
-                                            <div class="relative ">
-                                                <div
-                                                    class="relative shrink-0 h-11 w-11 rounded-full border border-indigo-600/50 overflow-hidden grid place-items-center bg-indigo-700/70 text-sm font-semibold text-white">
-                                                    <%- include('../partials/avatar.ejs', { u }) %>
-                                                </div>
-                                                <!-- Mettre ici une puce perso si voulu -->
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div class="flex items-center gap-2 min-w-0">
-                                                    <div class="font-semibold truncate">
-                                                        <%= u.userName %>
-                                                    </div>
-                                                    <span
-                                                        class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 truncate">@
-                                                        <%= u.id %>
-                                                    </span>
-                                                    <% if (role && role !=='USER' ) { %>
-                                                        <span
-                                                            class="text-[10px] px-2 py-0.5 rounded-full border truncate <%= role === 'ADMIN' ? 'bg-red-600/20 border-red-500/40 text-red-300' : role === 'PARTNER' ? 'bg-indigo-600/20 border-indigo-500/40 text-indigo-300' : role === 'DEVELOPER' ? 'bg-emerald-600/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-700/30 border-slate-600/50 text-slate-300' %>">
-                                                            <%= role %>
-                                                        </span>
-                                                        <% } %>
-                                                            <% if (flair) { %>
-                                                                <span
-                                                                    class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 truncate"
-                                                                    title="Flair">
-                                                                    <%= flair %>
-                                                                </span>
-                                                                <% } %>
-                                                </div>
-                                                <% const canReveal = (user && (user.role === 'ADMIN' || user.role === 'DEVELOPER' || user.role === 'MODERATOR')); %>
-                                                <% if (isEmailPublic) { %>
-                                                    <span class="text-xs text-slate-400 truncate">
-                                                        <%= publicEmail %>
-                                                    </span>
-                                                <% } else { %>
-                                                    <span class="emailContainer inline-flex items-center gap-2 text-xs">
-                                                      <span class="text-xs text-slate-500 italic privateEmailLabel">Email privé</span>
-                                                      <% if (canReveal) { %>
-                                                        <span class="privateEmailWrap ml-3 inline-flex items-center gap-2 text-xs">
-                                                            <button type="button" class="revealEmailBtn inline-flex items-center gap-2 px-2 py-0.5 rounded-md bg-indigo-600/85 hover:bg-indigo-500 text-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400" aria-label="Afficher l'email">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-3 w-3 text-white"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8.5v7A2.5 2.5 0 0 0 5.5 18h13A2.5 2.5 0 0 0 21 15.5v-7A2.5 2.5 0 0 0 18.5 6h-13A2.5 2.5 0 0 0 3 8.5z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.5l-9 5-9-5"/></svg>
-                                                                <span>Afficher</span>
-                                                            </button>
-                                                            <span class="emailValue hidden"> <%= u.email %> </span>
-                                                        </span>
-                                                      <% } %>
-                                                    </span>
-                                                <% } %>
-                                                            <div class="actionsWrap absolute top-3 right-3 z-20">
-                                                                <button type="button" class="actionsBtn inline-flex items-center justify-center h-8 w-8 rounded-md border border-slate-700 bg-slate-800/70 text-slate-200 hover:bg-slate-800 hover:text-white transition-colors" aria-haspopup="menu" aria-expanded="false" title="Actions">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
-                                                                        <path d="M12 6.75a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z" />
-                                                                    </svg>
-                                                                </button>
-                                                                <div class="actionsMenu hidden absolute right-0 z-999 mt-2 min-w-[12rem] rounded-md border border-slate-700 bg-slate-900/95 p-1 shadow-xl">
-                                                                    <a href="/<%= u.id %>" class="menuItem flex items-center gap-2 w-full text-left px-3 py-1.5 rounded hover:bg-slate-800 text-xs text-slate-200">
-                                                                        <span>Voir le profil</span>
-                                                                    </a>
-                                                                    <button type="button" class="menuItem copyBtn flex items-center gap-2 w-full text-left px-3 py-1.5 rounded hover:bg-slate-800 text-xs text-slate-200" data-id="<%= u.id %>">
-                                                                        <span>Copier le lien</span>
-                                                                    </button>
-                                                                    <div class="menuItem hasSubmenu relative group flex items-center gap-2 w-full text-left px-3 py-1.5 rounded hover:bg-slate-800 text-xs text-slate-200 cursor-default select-none">
-                                                                        <span>Rôles</span>
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="ml-auto h-3.5 w-3.5 opacity-80">
-                                                                            <path d="M9 5l7 7-7 7" />
-                                                                        </svg>
-                                                                        <div class="submenu hidden absolute top-0 left-full ml-1 z-50 w-40 rounded-md border border-slate-700 bg-slate-900/95 p-1" data-side="right">
-                                                                            <button class="roleSet block w-full text-left px-3 py-1.5 rounded hover:bg-slate-800 text-xs" data-role="USER">USER</button>
-                                                                            <button class="roleSet block w-full text-left px-3 py-1.5 rounded hover:bg-slate-800 text-xs" data-role="MODERATOR">MODERATOR</button>
-                                                                            <button class="roleSet block w-full text-left px-3 py-1.5 rounded hover:bg-slate-800 text-xs" data-role="DEVELOPER">DEVELOPER</button>
-                                                                            <button class="roleSet block w-full text-left px-3 py-1.5 rounded hover:bg-slate-800 text-xs" data-role="ADMIN">ADMIN</button>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="my-1 border-t border-slate-700/70"></div>
-                                                                    <button type="button" class="menuItem deleteBtn flex items-center gap-2 w-full text-left px-3 py-1.5 rounded hover:bg-red-900/30 text-xs text-red-300" data-id="<%= u.id %>" data-name="<%= u.userName %>">
-                                                                        <span>Supprimer</span>
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                            </div>
+                                </div>
+                                <div class="ml-auto text-xs text-slate-400"> <%= u.role || 'USER' %> </div>
+                            </div>
+
+                            <div class="actionsWrap absolute top-3 right-3 z-20">
+                                <button type="button" class="actionsBtn inline-flex items-center justify-center h-8 w-8 rounded-md border border-slate-700 bg-slate-800/70 text-slate-200 hover:bg-slate-800 hover:text-white transition-colors" aria-haspopup="menu" aria-expanded="false" title="Actions">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                        <path d="M12 6.75a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z" />
+                                    </svg>
+                                </button>
+                                <div class="actionsMenu hidden absolute right-0 z-999 mt-2 min-w-[12rem] rounded-md border border-slate-700 bg-slate-900/95 p-1 shadow-xl">
+                                    <a href="/<%= u.id %>" class="menuItem flex items-center gap-2 w-full text-left px-3 py-1.5 rounded hover:bg-slate-800 text-xs text-slate-200">
+                                        <span>Voir le profil</span>
+                                    </a>
+                                    <button type="button" class="menuItem copyBtn flex items-center gap-2 w-full text-left px-3 py-1.5 rounded hover:bg-slate-800 text-xs text-slate-200" data-id="<%= u.id %>">
+                                        <span>Copier le lien</span>
+                                    </button>
+                                        <div class="menuItem hasSubmenu relative group flex items-center gap-2 w-full text-left px-3 py-1.5 rounded hover:bg-slate-800 text-xs text-slate-200 cursor-default select-none">
+                                        <span>Rôles</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="ml-auto h-3.5 w-3.5 opacity-80">
+                                            <path d="M9 5l7 7-7 7" />
+                                        </svg>
+                                        <div class="submenu hidden absolute top-0 left-full ml-1 z-50 w-40 rounded-md border border-slate-700 bg-slate-900/95 p-1" data-side="right">
+                                            <% // Determine which role buttons should be disabled based on current user role %>
+                                            <% const myRole = (user && user.role) ? String(user.role) : 'USER'; %>
+                                            <% const disableRoleBtn = (target) => {
+                                                 if (myRole === 'ADMIN') return false;
+                                                 if (myRole === 'DEVELOPER') return (target === 'ADMIN');
+                                                 // moderators and others cannot set equal or higher role
+                                                 const ranks = { USER:0, MODERATOR:1, DEVELOPER:2, ADMIN:3 };
+                                                 return ranks[target] >= ranks[myRole];
+                                            } %>
+                                    <% const renderRoleBtn = (r) => {
+                                        const d = disableRoleBtn(r);
+                                        const base = 'roleSet block w-full text-left px-3 py-1.5 rounded text-xs';
+                                        const enabledClass = ' hover:bg-slate-800 text-slate-200';
+                                        const disabledClass = ' opacity-60 cursor-not-allowed text-slate-500';
+                                        const cls = base + (d ? disabledClass : enabledClass);
+                                        const title = d ? 'Vous ne pouvez pas attribuer ce rôle' : '';
+                                        return `<button class="${cls}" data-role="${r}" ${d? 'disabled':''} title="${title}">${r}</button>`;
+                                    } %>
+                                    <%- renderRoleBtn('USER') %>
+                                    <%- renderRoleBtn('MODERATOR') %>
+                                    <%- renderRoleBtn('DEVELOPER') %>
+                                    <%- renderRoleBtn('ADMIN') %>
                                         </div>
-                            </li>
-                            <% }) %>
-            </ul>
+                                    </div>
+                                    <button type="button" class="menuItem disable2faBtn flex items-center gap-2 w-full text-left px-3 py-1.5 rounded hover:bg-amber-900/30 text-xs text-<%= (u.twoFactorEnabled || (u.twoFactorSecret && u.twoFactorSecret !== '')) ? 'amber-300' : 'slate-500 cursor-not-allowed opacity-60' %>" data-id="<%= u.id %>" <%= (u.twoFactorEnabled || (u.twoFactorSecret && u.twoFactorSecret !== '')) ? '' : 'disabled' %>>
+                                        <span>Désactiver la A2F</span>
+                                    </button>
+                                    <div class="my-1 border-t border-slate-700/70"></div>
+                                    <button type="button" class="menuItem deleteBtn flex items-center gap-2 w-full text-left px-3 py-1.5 rounded hover:bg-red-900/30 text-xs text-red-300" data-id="<%= u.id %>" data-name="<%= u.userName %>">
+                                        <span>Supprimer</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </li>
+                    <% }) %>
+                </ul>
             <% } %>
+        </section>
+
+        <!-- Pending themes (1/3) -->
+        <aside class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="font-medium">Thèmes en attente</h2>
+                <a href="/dashboard/admin/themes" class="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white">Voir tout</a>
+            </div>
+            <% if (typeof pendingThemes === 'undefined' || !pendingThemes || pendingThemes.length === 0) { %>
+                <p class="text-sm text-slate-400">Aucun thème en attente.</p>
+            <% } else { %>
+                <ul class="space-y-2">
+                    <% pendingThemes.forEach(t => { %>
+                        <li class="rounded border border-slate-800 p-2 flex items-center gap-2 bg-slate-900 text-sm">
+                            <div class="w-12 h-12 rounded overflow-hidden previewMini"></div>
+                            <div class="min-w-0 flex-1">
+                                <div class="font-semibold truncate"><%= t.name %></div>
+                                <div class="text-xs text-slate-400 truncate"><%= t.description || '' %></div>
+                                <div class="text-[11px] text-slate-500 mt-1">Par @<%= t.authorId %></div>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <a class="px-2 py-1 rounded bg-indigo-600 text-white text-xs" href="/dashboard/admin/themes/validate/<%= t.id %>">Valider</a>
+                                <a class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white text-xs" href="/dashboard/admin/themes/<%= t.id %>">Détails</a>
+                            </div>
+                        </li>
+                    <% }) %>
+                </ul>
+            <% } %>
+        </aside>
+    </div>
+
 </main>
+
+<script>
+    (function(){
+        const $ = (s, r=document) => r.querySelector(s);
+        const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+        const search = $('#searchInput');
+        const sort = $('#sortSelect');
+        const roleFilter = $('#roleFilter');
+        const visFilter = $('#visibilityFilter');
+        const grid = $('#usersGrid');
+        const resetBtn = $('#resetBtn');
+
+        function applyFilter(){
+            if (!grid) return;
+            const q = (search?.value||'').trim().toLowerCase();
+            const rf = (roleFilter?.value||'all');
+            const vf = (visFilter?.value||'all');
+            const items = Array.from(grid.children);
+            let visible = 0;
+            items.forEach(li=>{
+                const hay = (li.dataset.search||'');
+                const role = li.dataset.role || 'USER';
+                const vis = li.dataset.visible || 'private';
+                const okQ = !q || hay.includes(q);
+                const okR = rf === 'all' || role === rf;
+                const okV = vf === 'all' || vis === vf;
+                const show = okQ && okR && okV;
+                li.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            const totalCount = document.getElementById('totalCount'); if (totalCount) totalCount.textContent = String(visible);
+        }
+        function applySort(){
+            if (!grid) return;
+            const val = sort?.value || 'date-desc';
+            const arr = Array.from(grid.children);
+            arr.sort((a,b)=>{
+                if (val === 'name-asc') return a.dataset.name.localeCompare(b.dataset.name,'fr');
+                if (val === 'name-desc') return b.dataset.name.localeCompare(a.dataset.name,'fr');
+                if (val === 'date-asc') return Number(a.dataset.created) - Number(b.dataset.created);
+                return Number(b.dataset.created) - Number(a.dataset.created);
+            });
+            arr.forEach(n=>grid.appendChild(n));
+        }
+
+        [search, roleFilter, visFilter].forEach(el=>el?.addEventListener('input', applyFilter));
+        sort?.addEventListener('change', ()=>{ applySort(); applyFilter(); });
+        resetBtn?.addEventListener('click', ()=>{ if (search) search.value=''; if (sort) sort.value='date-desc'; if (roleFilter) roleFilter.value='all'; if (visFilter) visFilter.value='all'; applySort(); applyFilter(); });
+
+        // render mini previews for pending themes
+        (function renderPendingPreviews(){
+            document.querySelectorAll('aside .previewMini').forEach(el=>{
+                const li = el.closest('li');
+                // try to read data-json if available
+                const raw = li?.getAttribute('data-json') || '';
+                let parsed = {};
+                try { parsed = raw ? JSON.parse(raw) : {}; } catch(e){}
+                let c = { bg: '#111827', button: '#4f46e5', hover: '#22c55e' };
+                if (parsed.light) c = { bg: parsed.light.bg||c.bg, button: parsed.light.button||c.button, hover: parsed.light.hover||c.hover };
+                el.innerHTML = `<div style="width:100%;height:100%;background:${c.bg};display:flex;flex-direction:column;justify-content:center;gap:6px;padding:6px">`+
+                    `<div style="height:28px;background:${c.button};border-radius:6px;width:70%"></div>`+
+                    `<div style="height:20px;background:${c.hover};border-radius:6px;width:50%"></div>`+
+                    `</div>`;
+            });
+        })();
+    })();
+</script>
+
+</body>
 
 <script src="/public/js/pagination.js"></script>
 <script>
@@ -269,8 +354,8 @@
 .actionsWrap { display: inline-block; }
 .actionsMenu { backdrop-filter: blur(4px); }
 .actionsMenu .menuItem { line-height: 1; }
-.actionsMenu .hasSubmenu:hover > .submenu { display: block; }
 .submenu { min-width: 9rem; }
+.submenu.open { display: block; }
 `;
         document.head.appendChild(styleMenu);
 
@@ -315,7 +400,19 @@
 
         // Menus d'actions et sous-menu Rôles
         function closeAllMenus(except) {
-            $$('.actionsMenu').forEach(m => { if (!except || m !== except) m.classList.add('hidden'); });
+            $$('.actionsMenu').forEach(m => {
+                if (!except || m !== except) {
+                    // Fermer d'abord tous les sous-menus ouverts
+                    m.querySelectorAll('.submenu.open').forEach(sub => {
+                        sub.classList.remove('open');
+                        sub.classList.add('hidden');
+                    });
+                    // Puis fermer le menu d'actions
+                    m.classList.add('hidden');
+                    const btn = m.closest('.actionsWrap')?.querySelector('.actionsBtn');
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
+                }
+            });
         }
         grid.addEventListener('click', (e) => {
             const btn = e.target.closest('.actionsBtn');
@@ -324,6 +421,13 @@
                 const menu = wrap.querySelector('.actionsMenu');
                 const isHidden = menu.classList.contains('hidden');
                 closeAllMenus(menu);
+                if (!isHidden) {
+                    // On ferme d'abord les sous-menus ouverts du menu courant
+                    menu.querySelectorAll('.submenu.open').forEach(sub => {
+                        sub.classList.remove('open');
+                        sub.classList.add('hidden');
+                    });
+                }
                 menu.classList.toggle('hidden', !isHidden);
                 btn.setAttribute('aria-expanded', String(!isHidden));
                 // Ajuster la position du sous-menu (droite/gauche) quand on ouvre
@@ -353,6 +457,43 @@
         });
         document.addEventListener('keydown', (ev) => {
             if (ev.key === 'Escape') closeAllMenus();
+        });
+
+        // Toggle du sous-menu Rôles au clic (au lieu d'exiger un survol rapide)
+        grid.addEventListener('click', (e) => {
+            // éviter de re-déclencher si on clique à l'intérieur du sous-menu
+            if (e.target.closest('.submenu')) return;
+            const host = e.target.closest('.hasSubmenu');
+            if (!host) return;
+            const sub = host.querySelector('.submenu');
+            if (!sub) return;
+            // Fermer les autres sous-menus ouverts du même menu
+            host.closest('.actionsMenu')?.querySelectorAll('.submenu.open')?.forEach(el => {
+                if (el !== sub) el.classList.remove('open');
+            });
+            const willOpen = !sub.classList.contains('open');
+            sub.classList.toggle('open', willOpen);
+            sub.classList.toggle('hidden', !willOpen);
+            // Repositionner quand on l'ouvre
+            if (willOpen) {
+                requestAnimationFrame(() => {
+                    const rect = sub.getBoundingClientRect();
+                    const overflowRight = rect.right > window.innerWidth - 8;
+                    if (overflowRight) {
+                        sub.style.left = 'auto';
+                        sub.style.right = '100%';
+                        sub.style.marginLeft = '0';
+                        sub.style.marginRight = '0.25rem';
+                        sub.dataset.side = 'left';
+                    } else {
+                        sub.style.left = '100%';
+                        sub.style.right = 'auto';
+                        sub.style.marginLeft = '0.25rem';
+                        sub.style.marginRight = '0';
+                        sub.dataset.side = 'right';
+                    }
+                });
+            }
         });
 
         // Changer rôle via éléments du sous-menu
@@ -461,6 +602,32 @@
             }
         });
 
+        // Désactiver la 2FA d'un utilisateur (admin)
+        grid.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.disable2faBtn');
+            if (!btn) return;
+            if (btn.disabled) return;
+            const id = btn.dataset.id;
+            const confirm = window.confirm("Désactiver la 2FA pour @" + id + " ?\nL'utilisateur devra la reconfigurer pour la réactiver.");
+            if (!confirm) return;
+            btn.disabled = true; const prev = btn.textContent; btn.textContent = 'Désactivation...';
+            try {
+                const res = await fetch(`/api/users/${encodeURIComponent(id)}/2fa/disable`, { method: 'POST' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                // Retirer l'état actif visuel et désactiver le bouton
+                btn.textContent = 'A2F désactivée';
+                btn.classList.add('opacity-60','cursor-not-allowed','text-slate-500');
+            } catch (err) {
+                console.error(err);
+                alert("Impossible de désactiver la 2FA");
+                btn.textContent = prev; btn.disabled = false;
+            } finally {
+                // fermer le menu
+                const menu = btn.closest('.actionsMenu');
+                if (menu) menu.classList.add('hidden');
+            }
+        });
+
         // Reveal / hide private email for admins (toggle)
         grid.addEventListener('click', (e) => {
             const btn = e.target.closest('.revealEmailBtn');
@@ -516,6 +683,5 @@
         });
     })();
 </script>
-</body>
 
 </html>

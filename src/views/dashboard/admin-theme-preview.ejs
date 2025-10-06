@@ -1,0 +1,82 @@
+<%- include('../partials/head.ejs', { title: 'Admin - Prévisualisation thème', description: '', robots: 'noindex,nofollow' }) %>
+<%- include('../partials/header-dash.ejs') %>
+
+<main class="max-w-5xl mx-auto p-4 space-y-5">
+  <div class="flex items-start justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold"><%= theme.name %></h1>
+      <p class="text-sm text-slate-400">par @<%= theme.author.userName %></p>
+    </div>
+    <div class="flex gap-2">
+      <button id="approveBtn" class="px-3 py-2 rounded bg-emerald-600 text-white text-sm">Approuver</button>
+      <button id="rejectBtn" class="px-3 py-2 rounded bg-rose-600 text-white text-sm">Rejeter</button>
+      <button id="deleteBtn" class="px-3 py-2 rounded bg-gray-700 text-white text-sm">Supprimer</button>
+    </div>
+  </div>
+
+  <div id="previewBox" class="rounded p-4 border border-slate-800">
+    <div class="flex gap-2">
+      <button id="btnPrimary" class="px-3 py-2 text-sm rounded">Bouton</button>
+      <button id="btnHover" class="px-3 py-2 text-sm rounded">Hover</button>
+    </div>
+    <p class="mt-3 text-sm">Texte d'exemple</p>
+  </div>
+</main>
+
+<script>
+(function(){
+  const d = JSON.parse(String.raw`<%- JSON.stringify(JSON.stringify(theme.data)) %>`);
+  const id = '<%= theme.id %>';
+  const previewBox = document.getElementById('previewBox');
+  const btnPrimary = document.getElementById('btnPrimary');
+  const btnHover = document.getElementById('btnHover');
+  function applyPreview(){
+    previewBox.style.background = d.background || '#111827';
+    previewBox.style.color = d.textColor || '#e5e7eb';
+    btnPrimary.style.background = d.buttonBackground || '#4f46e5'; btnPrimary.style.color = d.buttonTextColor || '#111827';
+    btnHover.style.background = d.hoverColor || '#22c55e'; btnHover.style.color = d.textColor || '#e5e7eb';
+  }
+  applyPreview();
+  const goBack = (msg) => { if (msg) console.info(msg); window.location.href = '/dashboard/admin/themes'; };
+  document.getElementById('approveBtn').addEventListener('click', async ()=>{
+    const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/approve', { method: 'POST' });
+    if (!res.ok) { alert('Erreur'); return; }
+    goBack('approved');
+  });
+  document.getElementById('rejectBtn').addEventListener('click', async ()=>{
+    const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/reject', { method: 'POST' });
+    if (!res.ok) { alert('Erreur'); return; }
+    goBack('rejected');
+  });
+
+  // Delete flow: show modal in page instead of alert
+  const deleteBtn = document.getElementById('deleteBtn');
+  function createModal(){
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
+    overlay.innerHTML = `
+      <div class="w-full max-w-md bg-slate-900 border border-slate-700 rounded p-4 text-sm">
+        <h3 class="font-semibold mb-2">Confirmer la suppression</h3>
+        <p class="text-xs text-slate-400 mb-3">Voulez-vous vraiment supprimer ce thème ? Cette action est irréversible.</p>
+        <div class="flex justify-end gap-2">
+          <button class="cancel px-3 py-1.5 rounded bg-slate-700">Annuler</button>
+          <button class="confirm px-3 py-1.5 rounded bg-rose-600 text-white">Supprimer</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const cancel = overlay.querySelector('.cancel');
+    const confirm = overlay.querySelector('.confirm');
+    cancel.addEventListener('click', ()=> overlay.remove());
+    confirm.addEventListener('click', async ()=>{
+      confirm.disabled = true; confirm.textContent = 'Suppression...';
+      try {
+        const res = await fetch('/api/themes/'+encodeURIComponent(id), { method: 'DELETE' });
+        if (!res.ok) throw new Error('HTTP '+res.status);
+        overlay.remove();
+        goBack('deleted');
+      } catch(e){ alert('Impossible de supprimer'); confirm.disabled = false; confirm.textContent = 'Supprimer'; }
+    });
+  }
+  deleteBtn.addEventListener('click', ()=> createModal());
+})();
+</script>

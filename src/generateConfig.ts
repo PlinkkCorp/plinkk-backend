@@ -19,12 +19,12 @@ export function generateProfileConfig(
 ) {
   return `
     export const profileData = {
-        profileLink: "${profile.profileLink || "https://github.com"}", // Lien du profil 
-        profileImage: "${profile.profileImage || "https://avatars.githubusercontent.com/u/9919?s=200&v=4"}", // Image de profil
-        profileIcon: "${profile.profileIcon || "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"}", // Icone derrière le profil
-        profileSiteText: "${profile.profileSiteText || "Github"}", // Nom derrière le profil
+        profileLink: "${profile.profileLink || ""}", // Lien du profil 
+        profileImage: "${profile.profileImage || ""}", // Image de profil
+        profileIcon: "${profile.profileIcon || ""}", // Icone derrière le profil
+        profileSiteText: "${profile.profileSiteText || ""}", // Nom derrière le profil
         userName: "${
-          profile.userName || "Github"
+          profile.userName || "User"
         }", // Nom affiché sur la page et dans le titre de l'onglet
   email: "${(profile as any).publicEmail || ""}", // Adresse mail publique affichée sur la page (découplée)
         links: ${JSON.stringify(
@@ -52,7 +52,7 @@ export function generateProfileConfig(
         neonColors: [${neonColors.map(
           (c) => '"' + c.color + '"'
         )}], // Couleurs du neon de profil
-        iconUrl: "${profile.iconUrl || "https://avatars.githubusercontent.com/u/9919?s=200&v=4"}", // Icone de l'onglet
+        iconUrl: "${profile.iconUrl || ""}", // Icone de l'onglet
         description: "${
           profile.description || ""
         }", // Description affichée sur la page, display: none si vide

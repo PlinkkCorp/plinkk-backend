@@ -22,6 +22,302 @@ const pending2fa = new Map<
 >();
 
 export function apiRoutes(fastify: FastifyInstance) {
+  // Helpers: thème simplifié (3 couleurs) -> format complet avec opposite (light/dark)
+  function normalizeHex(v?: string) {
+    if (!v || typeof v !== 'string') return '#000000';
+    const s = v.trim();
+    if (/^#?[0-9a-fA-F]{3}$/.test(s)) {
+      const t = s.replace('#', '');
+      return '#' + t.split('').map((c) => c + c).join('');
+    }
+    if (/^#?[0-9a-fA-F]{6}$/.test(s)) return s.startsWith('#') ? s : ('#' + s);
+    return '#000000';
+  }
+  function luminance(hex: string) {
+    const h = normalizeHex(hex).slice(1);
+    const r = parseInt(h.slice(0, 2), 16) / 255;
+    const g = parseInt(h.slice(2, 4), 16) / 255;
+    const b = parseInt(h.slice(4, 6), 16) / 255;
+    const a = [r, g, b].map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+    return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+  }
+  function contrastText(bg: string) { return luminance(bg) > 0.5 ? '#111827' : '#ffffff'; }
+  function mix(hexA: string, hexB: string, ratio = 0.2) {
+    const a = normalizeHex(hexA).slice(1);
+    const b = normalizeHex(hexB).slice(1);
+    const c = (i: number) => Math.round(parseInt(a.slice(i, i + 2), 16) * (1 - ratio) + parseInt(b.slice(i, i + 2), 16) * ratio);
+    const r = c(0), g = c(2), bl = c(4);
+    return `#${[r, g, bl].map((x) => x.toString(16).padStart(2, '0')).join('')}`;
+  }
+  function hoverVariant(color: string) {
+    // Crée une variante hover en mélangeant avec blanc/noir selon la luminance
+    return luminance(color) > 0.5 ? mix(color, '#000000', 0.2) : mix(color, '#ffffff', 0.2);
+  }
+  type SimplifiedVariant = { bg: string; button: string; hover: string };
+  function toFullTheme(light: SimplifiedVariant, dark: SimplifiedVariant) {
+    const L = {
+      background: normalizeHex(light.bg),
+      hoverColor: normalizeHex(light.hover),
+      textColor: contrastText(light.bg),
+      buttonBackground: normalizeHex(light.button),
+      buttonHoverBackground: hoverVariant(light.button),
+      buttonTextColor: contrastText(light.button),
+      linkHoverColor: normalizeHex(light.hover),
+      articleHoverBoxShadow: `0 4px 12px ${normalizeHex(light.hover)}55`,
+      darkTheme: false,
+    };
+    const D = {
+      background: normalizeHex(dark.bg),
+      hoverColor: normalizeHex(dark.hover),
+      textColor: contrastText(dark.bg),
+      buttonBackground: normalizeHex(dark.button),
+      buttonHoverBackground: hoverVariant(dark.button),
+      buttonTextColor: contrastText(dark.button),
+      linkHoverColor: normalizeHex(dark.hover),
+      articleHoverBoxShadow: `0 4px 12px ${normalizeHex(dark.hover)}55`,
+      darkTheme: true,
+    };
+    return { ...L, opposite: D } as any;
+  }
+  function coerceThemeData(data: any) {
+    // Si déjà au format complet (background/hoverColor/etc.), le retourner tel quel
+    if (data && typeof data === 'object' && 'background' in data && ('opposite' in data || 'darkTheme' in data)) return data;
+    // Sinon si format simplifié { light: {bg,button,hover}, dark: {bg,button,hover} }
+    if (data && data.light && data.dark) {
+      const l = data.light as SimplifiedVariant; const d = data.dark as SimplifiedVariant;
+      return toFullTheme(l, d);
+    }
+    // Dernier recours: si ne contient que 3 couleurs uniques, dupliquer pour dark en inversant légèrement
+    if (data && data.bg && data.button && data.hover) {
+      const l = { bg: data.bg, button: data.button, hover: data.hover } as SimplifiedVariant;
+      const d = { bg: hoverVariant(data.bg), button: hoverVariant(data.button), hover: data.hover } as SimplifiedVariant;
+      return toFullTheme(l, d);
+    }
+    throw new Error('invalid_theme_payload');
+  }
+  // THEME APIs
+  // List approved themes (public)
+  fastify.get("/themes/approved", async (request, reply) => {
+    const themes = await prisma.theme.findMany({
+      where: { status: "APPROVED" as any, isPrivate: false },
+      select: { id: true, name: true, description: true, data: true, author: { select: { id: true, userName: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+    // Ensure data has the shape expected by front
+    const list = themes.map((t) => {
+      let full: any;
+      try { full = coerceThemeData(t.data as any); } catch { full = t.data as any; }
+      return {
+        id: t.id,
+        name: t.name,
+        description: t.description || "",
+        source: "community",
+        author: t.author,
+        ...(full || {}),
+      };
+    });
+    return reply.send(list);
+  });
+
+  // Create/update my theme draft
+  fastify.post("/me/themes", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const body = (request.body as any) || {};
+    const name = String(body.name || "").trim();
+    if (!name) return reply.code(400).send({ error: "Nom requis" });
+    const description = body.description ? String(body.description) : null;
+    const raw = body.data;
+    if (!raw || typeof raw !== "object") return reply.code(400).send({ error: "Données du thème invalides" });
+    let data: any;
+    try { data = coerceThemeData(raw); } catch { return reply.code(400).send({ error: "Données du thème invalides (format)" }); }
+    const isPrivate = Boolean(body.isPrivate);
+    const created = await prisma.theme.create({
+      data: { name, description, data, authorId: userId as string, status: "DRAFT" as any, isPrivate },
+      select: { id: true, name: true, status: true },
+    });
+    return reply.send(created);
+  });
+
+  // Update my theme draft (only when status = DRAFT)
+  fastify.patch("/me/themes/:id", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, authorId: true, status: true } });
+    if (!t || t.authorId !== userId) return reply.code(404).send({ error: "Thème introuvable" });
+    if (t.status !== ("DRAFT" as any)) return reply.code(400).send({ error: "Seuls les brouillons sont modifiables" });
+    const body = (request.body as any) || {};
+    const patch: any = {};
+    if (typeof body.name === 'string' && body.name.trim()) patch.name = body.name.trim();
+    if (typeof body.description === 'string') patch.description = body.description;
+    if (body.data) {
+      try { patch.data = coerceThemeData(body.data); } catch { return reply.code(400).send({ error: "Données du thème invalides (format)" }); }
+    }
+    if (typeof body.isPrivate === 'boolean') patch.isPrivate = Boolean(body.isPrivate);
+    const updated = await prisma.theme.update({ where: { id }, data: patch, select: { id: true, name: true, status: true } });
+    return reply.send(updated);
+  });
+
+  // Delete my theme draft (allow for DRAFT or REJECTED)
+  fastify.delete("/me/themes/:id", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, authorId: true, status: true } });
+    if (!t || t.authorId !== userId) return reply.code(404).send({ error: "Thème introuvable" });
+    // Allow the owner to delete their theme at any status (DRAFT/SUBMITTED/APPROVED/REJECTED)
+    await prisma.theme.delete({ where: { id } });
+    return reply.send({ ok: true });
+  });
+
+  // Submit a draft for approval
+  fastify.post("/me/themes/:id/submit", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const theme = await prisma.theme.findUnique({ where: { id }, select: { id: true, authorId: true, status: true } });
+    if (!theme || theme.authorId !== userId) return reply.code(404).send({ error: "Thème introuvable" });
+    const updated = await prisma.theme.update({ where: { id }, data: { status: "SUBMITTED" as any }, select: { id: true, status: true } });
+    return reply.send(updated);
+  });
+
+  // Toggle private flag on my theme (owner only)
+  fastify.post('/me/themes/:id/privacy', async (request, reply) => {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+    const { id } = request.params as { id: string };
+    const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, authorId: true } });
+    if (!t || t.authorId !== userId) return reply.code(404).send({ error: 'Thème introuvable' });
+    const { isPrivate } = (request.body as any) ?? {};
+    const updated = await prisma.theme.update({ where: { id }, data: { isPrivate: Boolean(isPrivate) }, select: { id: true, isPrivate: true } });
+    return reply.send(updated);
+  });
+
+  // Select a private theme to use on my profile (doesn't publish it)
+  fastify.post('/me/themes/select', async (request, reply) => {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
+    const { themeId } = (request.body as any) ?? {};
+    if (!themeId || typeof themeId !== 'string') return reply.code(400).send({ error: 'themeId requis' });
+    const t = await prisma.theme.findUnique({ where: { id: themeId }, select: { id: true, authorId: true, isPrivate: true, status: true } });
+    if (!t || t.authorId !== userId) return reply.code(404).send({ error: 'Thème introuvable' });
+    // on autorise l’utilisation si le thème est privé (ou même brouillon privé pour usage perso)
+    if (!t.isPrivate) return reply.code(400).send({ error: 'Ce thème n\'est pas privé' });
+    await prisma.user.update({ where: { id: userId as string }, data: { selectedCustomThemeId: t.id } });
+    return reply.send({ ok: true });
+  });
+
+  // Submit an update for an approved theme (store as pendingUpdate)
+  fastify.post("/me/themes/:id/update", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, authorId: true, status: true } });
+    if (!t || t.authorId !== userId) return reply.code(404).send({ error: "Thème introuvable" });
+    if (t.status !== ("APPROVED" as any)) return reply.code(400).send({ error: "Seuls les thèmes approuvés peuvent proposer une mise à jour" });
+    const body = (request.body as any) || {};
+    if (!body.data || typeof body.data !== 'object') return reply.code(400).send({ error: 'Données invalides' });
+    let normalized: any;
+    try { normalized = coerceThemeData(body.data); } catch { return reply.code(400).send({ error: 'Données du thème invalides (format)' }); }
+    const message = typeof body.message === 'string' ? body.message.slice(0, 280) : null;
+    const updated = await prisma.theme.update({ where: { id }, data: { pendingUpdate: normalized as any, pendingUpdateAt: new Date(), pendingUpdateMessage: message } });
+    return reply.send({ id: updated.id, pending: true });
+  });
+
+  // Admin: approve a pending update -> replace data and clear pending
+  fastify.post("/themes/:id/approve-update", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+    const { id } = request.params as { id: string };
+    const t = await prisma.theme.findUnique({ where: { id }, select: { pendingUpdate: true } });
+    if (!t || !t.pendingUpdate) return reply.code(400).send({ error: 'Aucune mise à jour en attente' });
+    await prisma.theme.update({ where: { id }, data: { data: t.pendingUpdate as any, pendingUpdate: null, pendingUpdateAt: null, pendingUpdateMessage: null } });
+    return reply.send({ ok: true });
+  });
+
+  // Archive (owner hides from public list) -> sets status ARCHIVED
+  fastify.post("/me/themes/:id/archive", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, authorId: true } });
+    if (!t || t.authorId !== userId) return reply.code(404).send({ error: "Thème introuvable" });
+    await prisma.theme.update({ where: { id }, data: { status: "ARCHIVED" as any } });
+    return reply.send({ ok: true });
+  });
+
+  // Admin: unarchive (republish) -> sets status APPROVED
+  fastify.post("/themes/:id/unarchive", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+    const { id } = request.params as { id: string };
+    await prisma.theme.update({ where: { id }, data: { status: "APPROVED" as any } });
+    return reply.send({ ok: true });
+  });
+
+  // Admin: archive a theme (any status) -> sets status ARCHIVED
+  fastify.post("/themes/:id/archive", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+    const { id } = request.params as { id: string };
+    await prisma.theme.update({ where: { id }, data: { status: "ARCHIVED" as any } });
+    return reply.send({ ok: true });
+  });
+
+  // Admin: approve / reject
+  fastify.post("/themes/:id/approve", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+    const { id } = request.params as { id: string };
+    const updated = await prisma.theme.update({ where: { id }, data: { status: "APPROVED" as any }, select: { id: true, status: true } });
+    return reply.send(updated);
+  });
+
+  fastify.post("/themes/:id/reject", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+    const { id } = request.params as { id: string };
+    const updated = await prisma.theme.update({ where: { id }, data: { status: "REJECTED" as any }, select: { id: true, status: true } });
+    return reply.send(updated);
+  });
+
+  // Admin: delete a theme (any status)
+  fastify.delete("/themes/:id", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: meId as string }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+    const { id } = request.params as { id: string };
+    try {
+      await prisma.theme.delete({ where: { id } });
+      return reply.send({ ok: true });
+    } catch (e) {
+      return reply.code(404).send({ error: 'Not found' });
+    }
+  });
   // API: uploader/remplacer la photo de profil (avatar) via data URL (base64)
   fastify.post("/me/avatar", async (request, reply) => {
     const userId = request.session.get("data");
@@ -124,6 +420,23 @@ export function apiRoutes(fastify: FastifyInstance) {
     const { role } = (request.body as any) || {};
     if (!Object.values(Role).includes(role))
       return reply.code(400).send({ error: "Invalid role" });
+    // Enforce role hierarchy rules:
+    // hierarchy: USER(0) < MODERATOR(1) < DEVELOPER(2) < ADMIN(3)
+    const rank: Record<string, number> = { USER: 0, MODERATOR: 1, DEVELOPER: 2, ADMIN: 3 };
+    const meRole = me.role as string;
+    const targetRole = role as string;
+
+    // Admin may do anything
+    if (meRole !== Role.ADMIN) {
+      // Developer cannot promote to ADMIN
+      if (meRole === Role.DEVELOPER) {
+        if (targetRole === Role.ADMIN) return reply.code(403).send({ error: 'Forbidden' });
+      } else {
+        // Others (moderator) cannot set a role equal or higher than themselves
+        if (rank[targetRole] >= rank[meRole]) return reply.code(403).send({ error: 'Forbidden' });
+      }
+    }
+
     const updated = await prisma.user.update({ where: { id }, data: { role } });
     return reply.send({ id: updated.id, role: updated.role });
   });
@@ -186,6 +499,41 @@ export function apiRoutes(fastify: FastifyInstance) {
       prisma.user.delete({ where: { id } }),
     ]);
     return reply.send({ ok: true });
+  });
+
+  // API: désactiver la 2FA d'un utilisateur (admin/dev/moderator)
+  fastify.post("/users/:id/2fa/disable", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({
+      where: { id: meId as string },
+      select: { role: true },
+    });
+    if (
+      !(
+        me &&
+        (me.role === Role.ADMIN ||
+          me.role === Role.DEVELOPER ||
+          me.role === Role.MODERATOR)
+      )
+    ) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+    const { id } = request.params as { id: string };
+    const target = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, twoFactorEnabled: true, twoFactorSecret: true },
+    });
+    if (!target) return reply.code(404).send({ error: "Utilisateur introuvable" });
+
+    const alreadyDisabled = !target.twoFactorEnabled && !target.twoFactorSecret;
+    if (alreadyDisabled) return reply.send({ ok: true, changed: false });
+
+    await prisma.user.update({
+      where: { id },
+      data: { twoFactorSecret: "", twoFactorEnabled: false },
+    });
+    return reply.send({ ok: true, changed: true });
   });
 
   // API: Récupérer la configuration complète du profil pour l'éditeur

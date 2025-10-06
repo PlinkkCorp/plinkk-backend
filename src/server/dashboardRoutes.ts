@@ -130,7 +130,120 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       }
     });
     if (!userInfo) return reply.redirect("/login");
-    return reply.view("dashboard/stats.ejs", { user: userInfo, links: userInfo.links });
+    // Précharger la série par jour pour 30 derniers jours en fallback (si fetch échoue côté client)
+    const now = new Date();
+    const end = now;
+    const start = new Date(end.getTime() - 29 * 86400000);
+    const fmt = (dt: Date) => {
+      const y = dt.getUTCFullYear();
+      const m = String(dt.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(dt.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+    const s = fmt(start);
+    const e = fmt(end);
+    let preSeries: { date: string; count: number }[] = [];
+    try {
+      await prisma.$executeRawUnsafe(
+        'CREATE TABLE IF NOT EXISTS "UserViewDaily" ("userId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("userId","date"))'
+      );
+      const rows = (await prisma.$queryRaw<Array<{ date: string; count: number }>>`
+        SELECT "date", "count" FROM "UserViewDaily" WHERE "userId" = ${String(userId)} AND "date" BETWEEN ${s} AND ${e} ORDER BY "date" ASC
+      `);
+      const byDate = new Map(rows.map((r) => [r.date, r.count]));
+      for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
+        const key = fmt(t);
+        preSeries.push({ date: key, count: byDate.get(key) || 0 });
+      }
+    } catch (e) {
+      request.log?.warn({ err: e }, 'Failed to preload daily series');
+    }
+    return reply.view("dashboard/stats.ejs", { user: userInfo, links: userInfo.links, viewsDaily30d: preSeries });
+  });
+
+  // API: Vues journalières (pour graphiques)
+  fastify.get("/stats/views", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const { from, to } = request.query as { from?: string; to?: string };
+    // bornes par défaut: 30 derniers jours (UTC)
+    const now = new Date();
+    const end = to ? new Date(to) : now;
+    const start = from ? new Date(from) : new Date(end.getTime() - 29 * 86400000);
+    const fmt = (dt: Date) => {
+      const y = dt.getUTCFullYear();
+      const m = String(dt.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(dt.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+    const s = fmt(start);
+    const e = fmt(end);
+    try {
+      // Assurer l'existence de la table
+      await prisma.$executeRawUnsafe(
+        'CREATE TABLE IF NOT EXISTS "UserViewDaily" ("userId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("userId","date"))'
+      );
+      const rows = (await prisma.$queryRaw<Array<{ date: string; count: number }>>`
+        SELECT "date", "count"
+        FROM "UserViewDaily"
+        WHERE "userId" = ${String(userId)} AND "date" BETWEEN ${s} AND ${e}
+        ORDER BY "date" ASC
+      `);
+
+      // Remplir les jours manquants à 0
+      const byDate = new Map(rows.map((r) => [r.date, r.count]));
+      const series: { date: string; count: number }[] = [];
+      for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
+        const key = fmt(t);
+        series.push({ date: key, count: byDate.get(key) || 0 });
+      }
+      return reply.send({ from: s, to: e, series });
+    } catch (e) {
+      request.log?.error({ err: e }, 'Failed to query daily views');
+      return reply.code(500).send({ error: 'internal_error' });
+    }
+  });
+
+  // API: Clics journaliers (somme de tous les liens de l'utilisateur)
+  fastify.get("/stats/clicks", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const { from, to } = request.query as { from?: string; to?: string };
+    const now = new Date();
+    const end = to ? new Date(to) : now;
+    const start = from ? new Date(from) : new Date(end.getTime() - 29 * 86400000);
+    const fmt = (dt: Date) => {
+      const y = dt.getUTCFullYear();
+      const m = String(dt.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(dt.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+    const s = fmt(start);
+    const e = fmt(end);
+    try {
+      await prisma.$executeRawUnsafe(
+        'CREATE TABLE IF NOT EXISTS "LinkClickDaily" ("linkId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("linkId","date"))'
+      );
+      // agréger par jour pour tous les liens de l'utilisateur (via sous-sélection des linkId)
+      const linkIds = (await prisma.link.findMany({ where: { userId: String(userId) }, select: { id: true } })).map(x => x.id);
+      if (linkIds.length === 0) return reply.send({ from: s, to: e, series: [] });
+      // Construire la liste pour clause IN
+      const placeholders = linkIds.map(() => '?').join(',');
+      const rows = (await prisma.$queryRawUnsafe(
+        `SELECT "date", SUM("count") as count FROM "LinkClickDaily" WHERE "linkId" IN (${placeholders}) AND "date" BETWEEN ? AND ? GROUP BY "date" ORDER BY "date" ASC`,
+        ...linkIds, s, e
+      )) as Array<{ date: string; count: number }>;
+      const byDate = new Map(rows.map((r) => [r.date, Number(r.count)]));
+      const series: { date: string; count: number }[] = [];
+      for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
+        const key = fmt(t);
+        series.push({ date: key, count: byDate.get(key) || 0 });
+      }
+      return reply.send({ from: s, to: e, series });
+    } catch (e) {
+      request.log?.error({ err: e }, 'Failed to query daily clicks');
+      return reply.code(500).send({ error: 'internal_error' });
+    }
   });
 
   // Dashboard: Versions (vue dédiée)
@@ -189,6 +302,8 @@ export function dashboardRoutes(fastify: FastifyInstance) {
           isPublic: true,
           cosmetics: true,
           createdAt: true,
+          twoFactorEnabled: true,
+          twoFactorSecret: true,
         },
         orderBy: { createdAt: "desc" },
       }),
@@ -201,10 +316,76 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       })(),
     ]);
 
+    // Also fetch recent submitted themes for quick moderation view
+    const pendingThemes = await prisma.theme.findMany({
+      where: { status: "SUBMITTED" as any, isPrivate: false },
+      select: { id: true, name: true, description: true, authorId: true, data: true, updatedAt: true },
+      orderBy: { updatedAt: "desc" },
+      take: 10,
+    });
+
     return reply.view("dashboard/admin.ejs", {
       users,
       totals,
       user: userInfo,
+      pendingThemes,
     });
+  });
+
+  // Dashboard: Mes thèmes (création / soumission)
+  fastify.get("/themes", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.redirect("/login");
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    if (!userInfo) return reply.redirect("/login");
+    const myThemes = await prisma.theme.findMany({
+      where: { authorId: userId as string }, orderBy: { updatedAt: "desc" },
+      select: { id: true, name: true, description: true, status: true, updatedAt: true, data: true, pendingUpdate: true, pendingUpdateAt: true, pendingUpdateMessage: true, isPrivate: true }
+    });
+    return reply.view("dashboard/themes.ejs", { user: userInfo, myThemes, selectedCustomThemeId: (userInfo as any).selectedCustomThemeId || null });
+  });
+
+  // Admin: Liste des thèmes soumis
+  fastify.get("/admin/themes", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.redirect("/login");
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    if (!userInfo) return reply.redirect("/login");
+    if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
+      return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
+    }
+    const [submitted, approved, archived] = await Promise.all([
+      prisma.theme.findMany({
+        where: { status: "SUBMITTED" as any, isPrivate: false },
+        select: { id: true, name: true, description: true, author: { select: { id: true, userName: true } }, updatedAt: true, data: true },
+        orderBy: { updatedAt: "desc" }
+      }),
+      prisma.theme.findMany({
+        where: { status: "APPROVED" as any, isPrivate: false },
+        select: { id: true, name: true, description: true, author: { select: { id: true, userName: true } }, updatedAt: true, data: true, pendingUpdate: true, pendingUpdateAt: true },
+        orderBy: { updatedAt: "desc" }
+      }),
+      prisma.theme.findMany({
+        where: { status: "ARCHIVED" as any, isPrivate: false },
+        select: { id: true, name: true, description: true, author: { select: { id: true, userName: true } }, updatedAt: true, data: true },
+        orderBy: { updatedAt: "desc" }
+      })
+    ]);
+    return reply.view("dashboard/admin-themes.ejs", { user: userInfo, submitted, approved, archived });
+  });
+
+  // Admin: Prévisualisation d'un thème
+  fastify.get("/admin/themes/:id", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.redirect("/login");
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    if (!userInfo) return reply.redirect("/login");
+    if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
+      return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
+    }
+    const { id } = request.params as { id: string };
+    const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, name: true, description: true, data: true, author: { select: { id: true, userName: true } }, status: true } });
+    if (!t) return reply.code(404).view("erreurs/404.ejs", { currentUser: userInfo });
+    return reply.view("dashboard/admin-theme-preview.ejs", { user: userInfo, theme: t });
   });
 }

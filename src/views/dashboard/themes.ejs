@@ -1,0 +1,654 @@
+<%- include('../partials/head.ejs', { title: 'Tableau de bord - Mes thèmes', description: '', robots: 'noindex,nofollow' }) %>
+<%- include('../partials/header-dash.ejs') %>
+
+<main class="max-w-7xl mx-auto p-4 space-y-5">
+  <h1 class="text-2xl font-semibold">Mes thèmes</h1>
+  <section class="flex flex-col lg:flex-row gap-4 items-start">
+    <div class="flex-1 rounded-lg border border-slate-800/70 bg-slate-900/60 p-6">
+      <h2 class="font-medium mb-3">Créer/éditer un thème</h2>
+      <form id="themeForm" class="space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <input name="name" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm" placeholder="Nom du thème" required />
+          <input name="description" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm" placeholder="Description (optionnel)" />
+        </div>
+        <label class="flex items-center gap-2 text-sm text-slate-300">
+          <input id="isPrivate" type="checkbox" class="rounded border-slate-700" />
+          Thème privé (utilisable uniquement sur votre profil)
+        </label>
+        <div class="rounded-md border border-slate-800">
+          <div class="px-3 py-2 text-xs text-slate-400 border-b border-slate-800">Couleurs (Light)</div>
+          <div class="p-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs mb-1">Background</label>
+              <div class="flex gap-2">
+                <input name="light_bg" type="text" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm color-text" placeholder="#f5f5f5" />
+                <input name="light_bg_color" type="color" class="h-10 w-12 rounded color-input" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs mb-1">Bouton</label>
+              <div class="flex gap-2">
+                <input name="light_button" type="text" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm color-text" placeholder="#4f46e5" />
+                <input name="light_button_color" type="color" class="h-10 w-12 rounded color-input" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs mb-1">Hover</label>
+              <div class="flex gap-2">
+                <input name="light_hover" type="text" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm color-text" placeholder="#22c55e" />
+                <input name="light_hover_color" type="color" class="h-10 w-12 rounded color-input" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="rounded-md border border-slate-800">
+          <div class="px-3 py-2 text-xs text-slate-400 border-b border-slate-800">Couleurs (Dark)</div>
+          <div class="p-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs mb-1">Background</label>
+              <div class="flex gap-2">
+                <input name="dark_bg" type="text" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm color-text" placeholder="#0b1020" />
+                <input name="dark_bg_color" type="color" class="h-10 w-12 rounded color-input" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs mb-1">Bouton</label>
+              <div class="flex gap-2">
+                <input name="dark_button" type="text" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm color-text" placeholder="#4f46e5" />
+                <input name="dark_button_color" type="color" class="h-10 w-12 rounded color-input" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs mb-1">Hover</label>
+              <div class="flex gap-2">
+                <input name="dark_hover" type="text" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm color-text" placeholder="#22c55e" />
+                <input name="dark_hover_color" type="color" class="h-10 w-12 rounded color-input" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button class="px-3 py-2 text-sm rounded-md bg-emerald-600 hover:bg-emerald-500 text-white" type="submit">Enregistrer brouillon</button>
+          <button id="submitThemeBtn" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white" type="button" disabled>Soumettre</button>
+          <button id="resetThemeBtn" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700" type="button">Réinitialiser</button>
+          <button id="usePrivateBtn" class="px-3 py-2 text-sm rounded-md bg-amber-700 hover:bg-amber-600 text-white" type="button" title="Utiliser ce thème privé sur mon profil">Utiliser sur mon profil</button>
+        </div>
+        <div id="themeMsg" class="text-xs text-slate-400"></div>
+      </form>
+    </div>
+    <aside class="w-full lg:w-96 rounded-lg border border-slate-800/70 bg-slate-900/60 p-6 flex-shrink-0">
+      <h2 class="font-medium mb-3">Aperçu</h2>
+      <div id="previewTabs" class="flex items-center gap-2 mb-3 text-xs">
+        <button data-mode="light" class="px-2 py-1 rounded bg-slate-800 border border-slate-700">Light</button>
+        <button data-mode="dark" class="px-2 py-1 rounded bg-slate-800 border border-slate-700">Dark</button>
+      </div>
+      <div id="previewBox" class="rounded-lg p-4 border border-slate-800 h-56 flex items-center justify-center">
+        <div class="w-full max-w-xs">
+          <div class="flex flex-col gap-3 items-center">
+            <button id="btnPrimary" class="px-4 py-2 text-sm rounded shadow">Bouton</button>
+            <button id="btnHover" class="px-4 py-2 text-sm rounded shadow">Hover</button>
+            <p class="mt-3 text-sm text-slate-400 text-center">Aperçu en direct pour vos couleurs</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
+    <h2 class="font-medium mb-3">Mes thèmes</h2>
+    <% if ((myThemes||[]).length === 0) { %>
+      <p class="text-sm text-slate-400">Aucun thème pour l’instant.</p>
+    <% } else { %>
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-sm font-semibold mb-2">Brouillons</h3>
+          <ul id="listDrafts" class="flex flex-wrap gap-3">
+          <% myThemes.filter(t=>t.status==='DRAFT').forEach(t => { %>
+            <li class="w-full sm:w-1/2 lg:w-1/3 rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-id="<%= t.id %>" data-status="DRAFT" data-json='<%- JSON.stringify(t.data||{}) %>'>
+            <div class="flex items-start gap-3">
+              <div class="w-16 h-16 rounded border border-slate-800 overflow-hidden previewMini"></div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <strong class="truncate"><%= t.name %></strong>
+                  <span class="ml-1 text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300">DRAFT</span>
+                </div>
+                <% if (t.description) { %><div class="text-xs text-slate-400 truncate"><%= t.description %></div><% } %>
+                <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+              </div>
+            </div>
+            <div class="mt-3 flex items-center justify-end gap-2">
+                <button class="editOne px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white/90 text-xs" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>Éditer</button>
+                <button class="submitOne px-2 py-1 rounded bg-indigo-600 text-white text-xs" data-id="<%= t.id %>">Soumettre</button>
+                <button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="<%= t.id %>">Supprimer</button>
+            </div>
+          </li>
+          <% }) %>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-sm font-semibold mb-2">En attente de validation</h3>
+          <ul id="listSubmitted" class="flex flex-wrap gap-3">
+          <% myThemes.filter(t=>t.status==='SUBMITTED').forEach(t => { %>
+            <li class="w-full sm:w-1/2 lg:w-1/3 rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-id="<%= t.id %>" data-status="SUBMITTED" data-json='<%- JSON.stringify(t.data||{}) %>'>
+              <div class="flex items-start gap-3">
+                <div class="w-16 h-16 rounded border border-slate-800 overflow-hidden previewMini"></div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2">
+                    <strong class="truncate"><%= t.name %></strong>
+                    <span class="ml-1 text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300">SUBMITTED</span>
+                  </div>
+                  <% if (t.description) { %><div class="text-xs text-slate-400 truncate"><%= t.description %></div><% } %>
+                  <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+                </div>
+              </div>
+              <div class="mt-3 flex items-center justify-end gap-2">
+                <button class="archiveOne px-2 py-1 rounded bg-slate-700/80 border border-slate-600/50 text-white text-xs" data-id="<%= t.id %>">Archiver</button>
+                <button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="<%= t.id %>">Supprimer</button>
+              </div>
+            </li>
+          <% }) %>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-sm font-semibold mb-2">Validés</h3>
+          <ul id="listApproved" class="flex flex-wrap gap-3">
+          <% myThemes.filter(t=>t.status==='APPROVED').forEach(t => { %>
+            <li class="w-full sm:w-1/2 lg:w-1/3 rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-id="<%= t.id %>" data-status="APPROVED" data-json='<%- JSON.stringify(t.data||{}) %>'>
+              <div class="flex items-start gap-3">
+                <div class="w-16 h-16 rounded border border-slate-800 overflow-hidden previewMini"></div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2">
+                    <strong class="truncate"><%= t.name %></strong>
+                    <span class="ml-1 text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300">APPROVED</span>
+                    <% if (t.pendingUpdate) { %>
+                      <span class="ml-1 text-[10px] px-2 py-0.5 rounded bg-amber-700/40 border border-amber-600/50 text-amber-200">MAJ en attente</span>
+                    <% } %>
+                  </div>
+                  <% if (t.description) { %><div class="text-xs text-slate-400 truncate"><%= t.description %></div><% } %>
+                  <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+                </div>
+              </div>
+              <div class="mt-3 flex items-center justify-end gap-2">
+                <button class="archiveOne px-2 py-1 rounded bg-slate-700/80 border border-slate-600/50 text-white text-xs" data-id="<%= t.id %>">Archiver</button>
+                <button class="editOne px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white/90 text-xs" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>Éditer</button>
+                <button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="<%= t.id %>">Supprimer</button>
+              </div>
+            </li>
+          <% }) %>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-sm font-semibold mb-2">Archivés</h3>
+          <ul id="listArchived" class="flex flex-wrap gap-3">
+          <% myThemes.filter(t=>t.status==='ARCHIVED').forEach(t => { %>
+            <li class="w-full sm:w-1/2 lg:w-1/3 rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-id="<%= t.id %>" data-status="ARCHIVED" data-json='<%- JSON.stringify(t.data||{}) %>'>
+              <div class="flex items-start gap-3">
+                <div class="w-16 h-16 rounded border border-slate-800 overflow-hidden previewMini"></div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2">
+                    <strong class="truncate"><%= t.name %></strong>
+                    <span class="ml-1 text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300">ARCHIVED</span>
+                  </div>
+                  <% if (t.description) { %><div class="text-xs text-slate-400 truncate"><%= t.description %></div><% } %>
+                  <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+                </div>
+              </div>
+              <div class="mt-3 flex items-center justify-end gap-2">
+                <button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="<%= t.id %>">Supprimer</button>
+              </div>
+            </li>
+          <% }) %>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-sm font-semibold mb-2">Rejetés</h3>
+          <ul id="listRejected" class="flex flex-wrap gap-3">
+          <% myThemes.filter(t=>t.status==='REJECTED').forEach(t => { %>
+            <li class="w-full sm:w-1/2 lg:w-1/3 rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-id="<%= t.id %>" data-status="REJECTED" data-json='<%- JSON.stringify(t.data||{}) %>'>
+              <div class="flex items-start gap-3">
+                <div class="w-16 h-16 rounded border border-slate-800 overflow-hidden previewMini"></div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2">
+                    <strong class="truncate"><%= t.name %></strong>
+                    <span class="ml-1 text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300">REJECTED</span>
+                  </div>
+                  <% if (t.description) { %><div class="text-xs text-slate-400 truncate"><%= t.description %></div><% } %>
+                  <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+                </div>
+              </div>
+              <div class="mt-3 flex items-center justify-end gap-2">
+                <button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="<%= t.id %>">Supprimer</button>
+              </div>
+            </li>
+          <% }) %>
+          </ul>
+        </div>
+      </div>
+    <% } %>
+  </section>
+</main>
+
+<script>
+(function(){
+  const $ = (s, r=document) => r.querySelector(s);
+  const form = $('#themeForm');
+  const msg = $('#themeMsg');
+  const btnSubmit = $('#submitThemeBtn');
+  const previewBox = $('#previewBox');
+  const btnPrimary = $('#btnPrimary');
+  const btnHover = $('#btnHover');
+  const resetBtn = $('#resetThemeBtn');
+  const isPrivateEl = document.getElementById('isPrivate');
+  const usePrivateBtn = document.getElementById('usePrivateBtn');
+  let editId = null; // draft being edited
+  let editStatus = null; // status of the edited card
+  let previewMode = 'light';
+
+  function setMsg(t, ok){ msg.textContent = t||''; msg.className = 'text-xs ' + (ok ? 'text-emerald-400' : 'text-amber-300'); }
+  function linkColorInputs() {
+    document.querySelectorAll('.color-input').forEach((ci) => {
+      const wrapper = ci.parentElement;
+      const txt = wrapper?.querySelector('.color-text');
+      if (!txt) return;
+      ci.addEventListener('input', () => { txt.value = ci.value; updatePreview(); });
+      txt.addEventListener('input', () => { if (/^#?[0-9a-fA-F]{3,6}$/.test(txt.value.trim())) ci.value = txt.value.startsWith('#')?txt.value:('#'+txt.value); updatePreview(); });
+    });
+  }
+  function buildSimplified(fd){
+    const o = Object.fromEntries(fd.entries());
+    const light = { bg: o.light_bg || '#f5f5f5', button: o.light_button || '#4f46e5', hover: o.light_hover || '#22c55e' };
+    const dark  = { bg: o.dark_bg || '#0b1020',  button: o.dark_button || '#4f46e5', hover: o.dark_hover || '#22c55e' };
+    return { light, dark };
+  }
+  function applyPreviewFromSimplified(sim){
+    const v = previewMode === 'dark' ? sim.dark : sim.light;
+    const textColor = getContrast(v.bg);
+    const btnText = getContrast(v.button);
+    previewBox.style.background = norm(v.bg);
+    previewBox.style.color = textColor;
+    btnPrimary.style.background = norm(v.button); btnPrimary.style.color = btnText;
+    btnHover.style.background = norm(v.hover); btnHover.style.color = textColor;
+  }
+  function updatePreview(){ applyPreviewFromSimplified(buildSimplified(new FormData(form))); }
+  function norm(s){ s = String(s||'').trim(); if (!s.startsWith('#')) s = '#'+s; if (/^#[0-9a-fA-F]{3}$/.test(s)) s = '#'+s.slice(1).split('').map(c=>c+c).join(''); return s; }
+  function lum(hex){ const h = norm(hex).slice(1); const r=parseInt(h.slice(0,2),16)/255,g=parseInt(h.slice(2,4),16)/255,b=parseInt(h.slice(4,6),16)/255; const a=[r,g,b].map(v=>v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)); return 0.2126*a[0]+0.7152*a[1]+0.0722*a[2]; }
+  function getContrast(bg){ return lum(bg)>0.5 ? '#111827' : '#ffffff'; }
+
+  form.addEventListener('input', () => updatePreview());
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const name = (fd.get('name')||'').toString().trim(); if (!name) { setMsg('Nom requis', false); return; }
+  const payload = { name, description: (fd.get('description')||'').toString(), data: buildSimplified(fd), isPrivate: !!isPrivateEl.checked };
+    try {
+    // If editing an APPROVED theme, we don't PATCH the theme (immutable), we only allow proposing an update via the global Submit button.
+    const url = editId && editStatus !== 'APPROVED' ? ('/api/me/themes/'+encodeURIComponent(editId)) : '/api/me/themes';
+    const method = editId && editStatus !== 'APPROVED' ? 'PATCH' : 'POST';
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const j = await res.json();
+  if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
+      setMsg('Brouillon enregistré. Vous pouvez soumettre.', true);
+  btnSubmit.disabled = false;
+  btnSubmit.dataset.id = j.id;
+  editId = j.id;
+  editStatus = 'DRAFT';
+      // Insert the new draft in the list without reloading
+      try {
+        const theme = j; // assume API returns the created/updated theme object
+        let list = document.getElementById('listDrafts');
+        // fallback: find the container with h3 "Brouillons"
+        if (!list) {
+          const h3 = Array.from(document.querySelectorAll('h3')).find(h=>/Brouillons/i.test(h.textContent||''));
+          if (h3) list = h3.nextElementSibling;
+        }
+        if (list) {
+          const li = createThemeLi(theme);
+          list.appendChild(li);
+          renderMiniForLi(li);
+          attachCardListeners(li);
+        }
+      } catch (e) { /* non critique */ }
+    } catch(err){ setMsg(err.message||'Erreur', false); }
+  });
+
+  // Helper: create li DOM for a theme object
+  function createThemeLi(t){
+    const li = document.createElement('li');
+    li.className = 'w-full sm:w-1/2 lg:w-1/3 rounded border border-slate-800 bg-slate-900 p-3 text-sm';
+    li.setAttribute('data-id', String(t.id||''));
+    li.setAttribute('data-json', JSON.stringify(t.data||{}));
+    const name = escapeHtml(t.name||'');
+    const desc = t.description ? `<div class="text-xs text-slate-400 truncate">${escapeHtml(t.description)}</div>` : '';
+    const status = escapeHtml(t.status||'DRAFT');
+    const updated = t.updatedAt ? new Date(t.updatedAt).toLocaleString('fr-FR') : '';
+    let actions = '';
+    if (status === 'DRAFT') {
+      actions = `<button class="editOne px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white/90 text-xs" data-id="${escapeHtml(t.id)}" data-json='${escapeHtml(JSON.stringify(t.data||{}))}'>Éditer</button>
+                <button class="submitOne px-2 py-1 rounded bg-indigo-600 text-white text-xs" data-id="${escapeHtml(t.id)}">Soumettre</button>
+                <button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="${escapeHtml(t.id)}">Supprimer</button>`;
+    } else if (status === 'REJECTED') {
+      actions = `<button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="${escapeHtml(t.id)}">Supprimer</button>`;
+    } else if (status === 'SUBMITTED' || status === 'APPROVED') {
+      // Allow the owner to delete their submitted or approved themes as requested
+      actions = `<button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="${escapeHtml(t.id)}">Supprimer</button>`;
+    } else {
+      // For other statuses, show no actions
+      actions = '';
+    }
+    li.innerHTML = `
+      <div class="flex items-start gap-3">
+        <div class="w-16 h-16 rounded border border-slate-800 overflow-hidden previewMini"></div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            <strong class="truncate">${name}</strong>
+            <span class="ml-1 text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300">${status}</span>
+          </div>
+          ${desc}
+          <div class="text-[11px] text-slate-500 mt-1">Mis à jour ${updated}</div>
+        </div>
+      </div>
+      <div class="mt-3 flex items-center justify-end gap-2">
+        ${actions}
+      </div>
+    `;
+    return li;
+  }
+
+  function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;').replace(/"/g,'&quot;'); }
+
+  function renderMiniForLi(li){
+    try {
+      const raw = li.getAttribute('data-json') || '{}';
+      const parsed = JSON.parse(raw);
+      const mini = li.querySelector('.previewMini'); if (!mini) return;
+      let c = { bg: '#111827', button: '#4f46e5', hover: '#22c55e' };
+      if (parsed.light) c = { bg: parsed.light.bg||c.bg, button: parsed.light.button||c.button, hover: parsed.light.hover||c.hover };
+      else if (parsed.background) c = { bg: parsed.background||c.bg, button: parsed.buttonBackground||c.button, hover: parsed.hoverColor||c.hover };
+      mini.innerHTML = `<div style="width:100%;height:100%;background:${c.bg};display:flex;flex-direction:column;justify-content:center;gap:6px;padding:6px">`+
+        `<div style=\"height:28px;background:${c.button};border-radius:6px;width:70%\"></div>`+
+        `<div style=\"height:20px;background:${c.hover};border-radius:6px;width:50%\"></div>`+
+        `</div>`;
+    } catch(e){}
+  }
+
+  function attachCardListeners(li){
+    // Inline confirmation modal used across the page (returns a Promise<boolean>)
+    function showConfirm(message){
+      return new Promise(resolve => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
+        overlay.innerHTML = `
+          <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
+            <div class="mb-4">${escapeHtml(message)}</div>
+            <div class="flex justify-end gap-2">
+              <button class="cancel px-3 py-1.5 rounded-md bg-slate-700 text-sm">Annuler</button>
+              <button class="ok px-3 py-1.5 rounded-md bg-rose-600 text-white text-sm">Supprimer</button>
+            </div>
+          </div>`;
+
+        const btnCancel = overlay.querySelector('.cancel');
+        const btnOk = overlay.querySelector('.ok');
+
+        function cleanup(result){ overlay.remove(); resolve(result); }
+
+        btnCancel.addEventListener('click', () => cleanup(false));
+        btnOk.addEventListener('click', () => cleanup(true));
+        overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(false); });
+        document.body.appendChild(overlay);
+        // focus the cancel for accessibility
+        btnCancel.focus();
+      });
+    }
+
+    // edit
+    const editBtn = li.querySelector('.editOne');
+    if (editBtn) editBtn.addEventListener('click', () => {
+      const id = editBtn.dataset.id; const raw = editBtn.getAttribute('data-json');
+      const li = editBtn.closest('li');
+      try {
+        const full = raw ? JSON.parse(raw) : null;
+        const light = full && full.background ? { bg: full.background, button: full.buttonBackground, hover: full.hoverColor } : { bg: '', button: '', hover: '' };
+        const dark = full && full.opposite ? { bg: full.opposite.background, button: full.opposite.buttonBackground, hover: full.opposite.hoverColor } : { bg: '', button: '', hover: '' };
+        form.name.value = li.querySelector('strong')?.textContent || '';
+        form.description.value = '';
+        form.light_bg.value = light.bg || '';
+        form.light_button.value = light.button || '';
+        form.light_hover.value = light.hover || '';
+        form.dark_bg.value = dark.bg || '';
+        form.dark_button.value = dark.button || '';
+        form.dark_hover.value = dark.hover || '';
+        syncTextToColorInputs();
+        editId = id; editStatus = li?.getAttribute('data-status') || 'DRAFT';
+        btnSubmit.dataset.id = id; btnSubmit.disabled = false;
+        // When editing an approved theme, change the CTA label to "Proposer une MAJ" since submit will send an update
+        btnSubmit.textContent = (editStatus === 'APPROVED') ? 'Proposer une MAJ' : 'Soumettre';
+        setMsg(editStatus === 'APPROVED' ? 'Édition d’un thème validé. Cliquez sur "Proposer une MAJ" pour envoyer la mise à jour.' : 'Édition du brouillon chargée.', true);
+        updatePreview();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch(e){}
+    });
+    // submit
+    const submitBtn = li.querySelector('.submitOne');
+    if (submitBtn) submitBtn.addEventListener('click', async () => {
+      const id = submitBtn.dataset.id; if (!id) return;
+      submitBtn.disabled = true; submitBtn.textContent = 'En cours...';
+      try {
+        const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/submit', { method: 'POST' });
+        const j = await res.json();
+        if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
+        // update status badge
+        const badge = li.querySelector('span'); if (badge) badge.textContent = 'PENDING';
+        submitBtn.remove();
+        setMsg('Soumis pour validation ✓', true);
+      } catch(err){ alert('Erreur de soumission'); submitBtn.disabled = false; submitBtn.textContent = 'Soumettre'; }
+    });
+    // delete
+    const delBtn = li.querySelector('.deleteOne');
+    if (delBtn) delBtn.addEventListener('click', async () => {
+      const id = delBtn.dataset.id; if (!id) return;
+      const ok = await showConfirm('Supprimer ce thème ?'); if (!ok) return;
+      delBtn.disabled = true; delBtn.textContent = '...';
+      try {
+        const res = await fetch('/api/me/themes/'+encodeURIComponent(id), { method: 'DELETE' });
+        if (!res.ok) throw new Error('HTTP '+res.status);
+        li.remove();
+      } catch(err){ alert('Suppression impossible'); delBtn.disabled = false; delBtn.textContent = 'Supprimer'; }
+    });
+
+    // archive (owner)
+    const archiveBtn = li.querySelector('.archiveOne');
+    if (archiveBtn) archiveBtn.addEventListener('click', async () => {
+      const id = archiveBtn.dataset.id; if (!id) return;
+      const ok = await showConfirm('Archiver ce thème ? Il ne sera plus visible dans la liste des thèmes.'); if (!ok) return;
+      archiveBtn.disabled = true; const prev = archiveBtn.textContent; archiveBtn.textContent = '...';
+      try {
+        const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/archive', { method: 'POST' });
+        if (!res.ok) throw new Error('HTTP '+res.status);
+        // move card to Archived list
+        const archivedList = document.getElementById('listArchived');
+        if (archivedList) archivedList.appendChild(li);
+        // update status badge
+        const badge = li.querySelector('span'); if (badge) badge.textContent = 'ARCHIVED';
+        // remove archive & submit/update buttons in archived view
+        li.querySelectorAll('.archiveOne,.submitOne,.updateOne').forEach(b=>b.remove());
+      } catch(err){ alert("Impossible d'archiver"); archiveBtn.disabled = false; archiveBtn.textContent = prev; }
+    });
+
+    // propose update (for approved theme)
+    const updateBtn = li.querySelector('.updateOne');
+    if (updateBtn) updateBtn.addEventListener('click', async () => {
+      const id = updateBtn.dataset.id; if (!id) return;
+      // build payload from current form (reuse colors)
+      const fd = new FormData(form);
+      const payload = { data: buildSimplified(fd), message: 'Mise à jour proposée' };
+      updateBtn.disabled = true; const prev = updateBtn.textContent; updateBtn.textContent = 'Envoi...';
+      try {
+        const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/update', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
+        const j = await res.json();
+        if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
+        // add small badge "MAJ en attente"
+        const header = li.querySelector('.flex.items-center.gap-2');
+        if (header && !li.querySelector('.badge-pending-update')){
+          const b = document.createElement('span');
+          b.className = 'badge-pending-update ml-1 text-[10px] px-2 py-0.5 rounded bg-amber-700/40 border border-amber-600/50 text-amber-200';
+          b.textContent = 'MAJ en attente';
+          header.appendChild(b);
+        }
+        setMsg('Mise à jour envoyée (MAJ)', true);
+      } catch(err){ alert("Impossible d'envoyer la mise à jour"); }
+      finally { updateBtn.disabled = false; updateBtn.textContent = prev; }
+    });
+  }
+
+  btnSubmit.addEventListener('click', async () => {
+    const id = btnSubmit.dataset.id || editId; if (!id) return;
+    try {
+      if (editStatus === 'APPROVED') {
+        // Proposer une MAJ pour un thème validé avec les couleurs du formulaire
+        const fd = new FormData(form);
+        const payload = { data: buildSimplified(fd), message: 'Mise à jour via bouton principal' };
+        const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const j = await res.json();
+        if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
+        setMsg('Mise à jour envoyée ✓', true);
+      } else {
+        // Soumission classique (brouillon -> soumis)
+        const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/submit', { method: 'POST' });
+        const j = await res.json();
+        if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
+        setMsg('Soumis pour validation ✓', true);
+      }
+      btnSubmit.disabled = true;
+      setTimeout(()=>location.reload(), 700);
+    } catch(err){ setMsg(err.message||'Erreur', false); }
+  });
+
+  // Utiliser ce thème privé sur mon profil (sélectionne selectedCustomThemeId)
+  usePrivateBtn.addEventListener('click', async () => {
+    const id = btnSubmit.dataset.id || editId; if (!id) { setMsg('Enregistrez le brouillon d\'abord', false); return; }
+    if (!isPrivateEl.checked) { setMsg('Cochez "Thème privé" pour l\'utiliser en privé', false); return; }
+    try {
+      const res = await fetch('/api/me/themes/select', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ themeId: id }) });
+      const j = await res.json(); if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
+      setMsg('Thème privé sélectionné pour votre profil ✓', true);
+    } catch(err){ setMsg(err.message||'Erreur', false); }
+  });
+
+  document.querySelectorAll('.submitOne').forEach(btn => btn.addEventListener('click', async () => {
+    const id = btn.dataset.id; if (!id) return;
+    btn.disabled = true; btn.textContent = 'En cours...';
+    try {
+      const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/submit', { method: 'POST' });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      location.reload();
+    } catch(err){ alert('Erreur de soumission'); btn.disabled = false; btn.textContent = 'Soumettre'; }
+  }));
+
+  document.querySelectorAll('.deleteOne').forEach(btn => btn.addEventListener('click', async () => {
+    const id = btn.dataset.id; if (!id) return;
+    // show inline modal confirmation
+    const ok = await (async function(){
+      // create a modal similar to the one used per-card (fallback if attachCardListeners not applied)
+      const overlay = document.createElement('div');
+      overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
+      overlay.innerHTML = `
+        <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
+          <div class="mb-4">Supprimer ce thème ?</div>
+          <div class="flex justify-end gap-2">
+            <button class="cancel px-3 py-1.5 rounded-md bg-slate-700 text-sm">Annuler</button>
+            <button class="ok px-3 py-1.5 rounded-md bg-rose-600 text-white text-sm">Supprimer</button>
+          </div>
+        </div>`;
+      const btnCancel = overlay.querySelector('.cancel');
+      const btnOk = overlay.querySelector('.ok');
+      return new Promise(res => {
+        function cleanup(v){ overlay.remove(); res(v); }
+        btnCancel.addEventListener('click', () => cleanup(false));
+        btnOk.addEventListener('click', () => cleanup(true));
+        overlay.addEventListener('click', (ev)=>{ if (ev.target === overlay) cleanup(false); });
+        document.body.appendChild(overlay);
+        btnCancel.focus();
+      });
+    })();
+    if (!ok) return;
+    btn.disabled = true; btn.textContent = '...';
+    try {
+      const res = await fetch('/api/me/themes/'+encodeURIComponent(id), { method: 'DELETE' });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      // remove card
+      const li = btn.closest('li'); if (li) li.remove();
+    } catch(err){ alert('Suppression impossible'); btn.disabled = false; btn.textContent = 'Supprimer'; }
+  }));
+
+  document.querySelectorAll('.editOne').forEach(btn => btn.addEventListener('click', () => {
+    const id = btn.dataset.id; const raw = btn.getAttribute('data-json');
+    try {
+      const full = raw ? JSON.parse(raw) : null;
+      // Tenter d’extraire une représentation simplifiée depuis le full format (avec opposite)
+      const light = full && full.background ? { bg: full.background, button: full.buttonBackground, hover: full.hoverColor } : { bg: '', button: '', hover: '' };
+      const dark = full && full.opposite ? { bg: full.opposite.background, button: full.opposite.buttonBackground, hover: full.opposite.hoverColor } : { bg: '', button: '', hover: '' };
+      form.name.value = btn.closest('li').querySelector('strong')?.textContent || '';
+      form.description.value = '';
+      form.light_bg.value = light.bg || '';
+      form.light_button.value = light.button || '';
+      form.light_hover.value = light.hover || '';
+      form.dark_bg.value = dark.bg || '';
+      form.dark_button.value = dark.button || '';
+      form.dark_hover.value = dark.hover || '';
+      syncTextToColorInputs();
+      editId = id; btnSubmit.dataset.id = id; btnSubmit.disabled = false;
+      setMsg('Édition du brouillon chargée.', true);
+      updatePreview();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {}
+  }));
+
+  // Render mini previews for myThemesGrid
+  (function renderMyPreviews(){
+    const containers = ['listDrafts','listSubmitted','listApproved','listArchived','listRejected'];
+    containers.forEach(id => {
+      const grid = document.getElementById(id); if (!grid) return;
+      grid.querySelectorAll('li').forEach(li => {
+      const raw = li.getAttribute('data-json'); let parsed = {};
+      try { parsed = JSON.parse(raw||'{}'); } catch(e){ parsed = {}; }
+      const mini = li.querySelector('.previewMini'); if (!mini) return;
+      // extract colors
+      let c = { bg: '#111827', button: '#4f46e5', hover: '#22c55e' };
+      if (parsed.light) c = { bg: parsed.light.bg||c.bg, button: parsed.light.button||c.button, hover: parsed.light.hover||c.hover };
+      else if (parsed.background) c = { bg: parsed.background||c.bg, button: parsed.buttonBackground||c.button, hover: parsed.hoverColor||c.hover };
+      mini.innerHTML = `<div style="width:100%;height:100%;background:${c.bg};display:flex;flex-direction:column;justify-content:center;gap:6px;padding:6px">`+
+        `<div style=\"height:28px;background:${c.button};border-radius:6px;width:70%\"></div>`+
+        `<div style=\"height:20px;background:${c.hover};border-radius:6px;width:50%\"></div>`+
+        `</div>`;
+      });
+    });
+  })();
+
+  function syncTextToColorInputs(){
+    document.querySelectorAll('.color-text').forEach((txt)=>{
+      const col = txt.parentElement?.querySelector('.color-input');
+      if (col) { const v = String(txt.value||''); col.value = /^#/.test(v)?v:('#'+v); }
+    });
+  }
+  resetBtn?.addEventListener('click', () => { form.reset(); editId = null; btnSubmit.disabled = true; btnSubmit.dataset.id = ''; setMsg('', true); syncTextToColorInputs(); updatePreview(); });
+
+  // Preview mode switch
+  document.querySelectorAll('#previewTabs [data-mode]')?.forEach((b)=>{
+    b.addEventListener('click', ()=>{ previewMode = b.getAttribute('data-mode')||'light'; updatePreview(); });
+  });
+
+  // init
+  linkColorInputs();
+  syncTextToColorInputs();
+  updatePreview();
+  // attach listeners for all existing cards across lists
+  ['listDrafts','listSubmitted','listApproved','listArchived','listRejected'].forEach(id =>{
+    const ul = document.getElementById(id); if (!ul) return;
+    ul.querySelectorAll('li').forEach(li => attachCardListeners(li));
+  });
+})();
+</script>

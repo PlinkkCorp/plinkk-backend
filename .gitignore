@@ -3,3 +3,7 @@ generated/prisma/
 dist
 /src/secret-key
 .env
+.gitignore
+*.db
+*.sql
+/.vscode/

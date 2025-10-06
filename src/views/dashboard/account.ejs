@@ -77,13 +77,13 @@
                 <div>
                   <h4 class="text-lg font-semibold mb-2">Sécurité</h4>
                   <div class="space-y-2">
-                    <h4 class="font-medium mb-1">Authentification à 2 facteurs (2FA)</h4>
+                    <h4 class="font-medium mb-1">Authentification à 2 facteurs (A2F)</h4>
                     <p class="text-xs text-slate-400 mb-2">État: <span class="font-medium"><%= tfEnabled ? 'Activée' : 'Désactivée' %></span></p>
                     <div class="flex items-center gap-2">
                       <% if (!tfEnabled) { %>
-                        <button id="btnEnable2fa" class="px-3 py-2 text-sm rounded-md bg-emerald-600 hover:bg-emerald-500 text-white">Activer la 2FA</button>
+                        <button id="btnEnable2fa" class="px-3 py-2 text-sm rounded-md bg-emerald-600 hover:bg-emerald-500 text-white">Activer la A2F</button>
                       <% } else { %>
-                        <button id="btnDisable2fa" class="px-3 py-2 text-sm rounded-md bg-amber-600 hover:bg-amber-500 text-white">Désactiver la 2FA</button>
+                        <button id="btnDisable2fa" class="px-3 py-2 text-sm rounded-md bg-amber-600 hover:bg-amber-500 text-white">Désactiver la A2F</button>
                       <% } %>
                       <button id="btnLearn2fa" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 text-white">Comment ça marche</button>
                     </div>
@@ -158,7 +158,7 @@
           <input id="deletePassword" name="password" type="password" required class="w-full rounded-md bg-slate-950/40 border border-red-800 px-3 py-2 text-sm mb-3 text-red-50 placeholder:text-red-300/60" placeholder="Votre mot de passe" />
 
           <% if (user && user.twoFactorEnabled) { %>
-            <label class="block text-xs text-red-100 mb-1">Code 2FA</label>
+            <label class="block text-xs text-red-100 mb-1">Code A2F</label>
             <input id="deleteOtp" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" required class="w-full rounded-md bg-slate-950/40 border border-red-800 px-3 py-2 text-sm mb-3 text-red-50 placeholder:text-red-300/60" placeholder="123456" />
           <% } %>
 
@@ -171,12 +171,12 @@
     </div>
   </div>
 
-  <!-- 2FA Modal (utilisé par le JS d'activation) -->
+  <!-- A2F Modal (utilisé par le JS d'activation) -->
   <div id="twoFactorModal" class="fixed inset-0 hidden z-50 grid place-items-center">
     <div id="twoFactorOverlay" class="absolute inset-0 bg-black/60"></div>
     <div class="relative w-full max-w-md mx-4">
       <div class="rounded-lg bg-slate-900/95 border border-slate-800/60 p-6 shadow-lg">
-        <h3 class="text-lg font-semibold mb-2">Activer la 2FA</h3>
+        <h3 class="text-lg font-semibold mb-2">Activer la A2F</h3>
         <p class="text-sm text-slate-300 mb-3">Scannez le QR avec votre application d'authentification ou copiez la clé.</p>
 
         <div id="twoFactorQrWrap" class="mb-4 text-center"></div>
@@ -199,15 +199,15 @@
     </div>
   </div>
 
-  <!-- Disable 2FA Modal (collect OTP instead of prompt) -->
+  <!-- Disable A2F Modal (collect OTP instead of prompt) -->
   <div id="disable2faModal" class="fixed inset-0 hidden z-50 grid place-items-center">
     <div class="absolute inset-0 bg-black/60" data-disable-overlay></div>
     <div class="relative w-full max-w-md mx-4">
       <div class="rounded-lg bg-slate-900/95 border border-slate-800/60 p-6 shadow-lg">
-        <h3 class="text-lg font-semibold mb-2">Désactiver la 2FA</h3>
-        <p class="text-sm text-slate-300 mb-3">Saisis le code 2FA pour confirmer la désactivation.</p>
+        <h3 class="text-lg font-semibold mb-2">Désactiver la A2F</h3>
+        <p class="text-sm text-slate-300 mb-3">Saisis le code A2F pour confirmer la désactivation.</p>
         <div id="disable2faError" class="hidden mb-3 text-sm text-amber-300"></div>
-        <label class="block text-xs text-slate-400 mb-1">Code 2FA (6 chiffres)</label>
+        <label class="block text-xs text-slate-400 mb-1">Code A2F (6 chiffres)</label>
         <input id="disable2faOtp" inputmode="numeric" pattern="[0-9]*" maxlength="6" class="w-full rounded-md bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-200 mb-4" placeholder="123456" />
         <div class="flex items-center justify-end gap-2">
           <button id="btnCancelDisable2fa" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 text-white border border-slate-700">Annuler</button>
@@ -335,8 +335,8 @@
   </script>
 
   <script>
-  // Expose si la 2FA est activée (valeur server-side) au JS client
-    // Expose si la 2FA est activée (valeur server-side) au JS via data-attribute pour éviter l'injection directe
+  // Expose si la A2F est activée (valeur server-side) au JS client
+    // Expose si la A2F est activée (valeur server-side) au JS via data-attribute pour éviter l'injection directe
     const accountRoot = document.getElementById('accountRoot');
     const twoFactorEnabled = accountRoot ? accountRoot.getAttribute('data-twofactor') === 'true' : false;
     // Email
@@ -422,7 +422,7 @@
         }
         if (twoFactorEnabled) {
           if (!payload.otp || String(payload.otp).trim().length < 6) {
-            if (errorMsg) { errorMsg.textContent = 'Entrez votre code 2FA (6 chiffres).'; errorMsg.classList.remove('hidden'); }
+            if (errorMsg) { errorMsg.textContent = 'Entrez votre code A2F (6 chiffres).'; errorMsg.classList.remove('hidden'); }
             btnConfirm && (btnConfirm.disabled = false);
             return;
           }
@@ -449,7 +449,7 @@
       });
     })();
 
-    // Handlers for disable 2FA modal (confirm/cancel/overlay)
+    // Handlers for disable A2F modal (confirm/cancel/overlay)
     (function(){
       const disableModal = document.getElementById('disable2faModal');
       const btnCancel = document.getElementById('btnCancelDisable2fa');
@@ -466,7 +466,7 @@
 
       btnConfirm?.addEventListener('click', async () => {
         const val = inputOtp?.value?.trim();
-        if (!val || val.length < 6) { if (errEl) { errEl.textContent = 'Entrez un code 2FA valide (6 chiffres)'; errEl.classList.remove('hidden'); } return; }
+        if (!val || val.length < 6) { if (errEl) { errEl.textContent = 'Entrez un code A2F valide (6 chiffres)'; errEl.classList.remove('hidden'); } return; }
         try {
           btnConfirm.disabled = true;
           const res = await fetch('/api/me/2fa', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ otp: val }) });
@@ -477,7 +477,7 @@
             return;
           }
           if (j.successful) {
-            showAlert('2FA désactivée', 'success');
+            showAlert('A2F désactivée', 'success');
             close();
             setTimeout(()=>location.reload(), 600);
           } else {
@@ -487,11 +487,11 @@
       });
     })();
 
-    // 2FA: gestion activation / désactivation
+    // A2F: gestion activation / désactivation
     (function(){
       const btnEnable = document.getElementById('btnEnable2fa');
       const btnDisable = document.getElementById('btnDisable2fa');
-      console.debug('2FA buttons found', { btnEnable: !!btnEnable, btnDisable: !!btnDisable });
+      console.debug('A2F buttons found', { btnEnable: !!btnEnable, btnDisable: !!btnDisable });
       const btnLearn = document.getElementById('btnLearn2fa');
       const modal = document.getElementById('twoFactorModal');
       const overlay = document.getElementById('twoFactorOverlay');
@@ -507,7 +507,7 @@
         if (data.qrCode) {
           const img = document.createElement('img');
           img.src = data.qrCode;
-          img.alt = 'QR 2FA';
+          img.alt = 'QR A2F';
           img.className = 'mx-auto';
           qrWrap.appendChild(img);
         }
@@ -529,8 +529,8 @@
             <div class="absolute inset-0 bg-black/60" data-tips-overlay></div>
             <div class="relative w-full max-w-lg mx-4">
               <div class="rounded-lg bg-slate-900/95 border border-slate-800/60 p-6 shadow-lg">
-                <h3 class="text-lg font-semibold mb-2">Comment fonctionne la 2FA</h3>
-                <p class="text-sm text-slate-300 mb-3">Installe une application d'authentification (Google Authenticator, Authy, etc.). Pour activer : clique sur "Activer la 2FA", scanne le QR et entre le code généré pour confirmer.</p>
+                <h3 class="text-lg font-semibold mb-2">Comment fonctionne la A2F</h3>
+                <p class="text-sm text-slate-300 mb-3">Installe une application d'authentification (Google Authenticator, Authy, etc.). Pour activer : clique sur "Activer la A2F", scanne le QR et entre le code généré pour confirmer.</p>
                 <ul class="text-xs text-slate-400 mb-4 list-disc list-inside space-y-1">
                   <li>Télécharge une app d'authentification sur ton téléphone.</li>
                   <li>Scanne le QR fourni lors de l'activation.</li>
@@ -538,7 +538,7 @@
                 </ul>
                 <div class="flex items-center justify-end gap-2 mt-4">
                   <button data-tips-close class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 text-white border border-slate-700">Fermer</button>
-                  <button data-tips-open-2fa class="px-3 py-2 text-sm rounded-md bg-emerald-600 hover:bg-emerald-500 text-white">Activer la 2FA</button>
+                  <button data-tips-open-A2F class="px-3 py-2 text-sm rounded-md bg-emerald-600 hover:bg-emerald-500 text-white">Activer la A2F</button>
                 </div>
               </div>
             </div>
@@ -592,7 +592,7 @@
                 modal && modal.querySelector('.p-6')?.appendChild(errEl);
               }
               }
-              errEl.textContent = j.error || 'Erreur lors de la génération de la 2FA';
+              errEl.textContent = j.error || 'Erreur lors de la génération de la A2F';
             })();
             return;
           }
@@ -631,14 +631,14 @@
       const inputConfirmOtp = document.getElementById('twoFactorConfirmOtp');
       btnConfirm2fa?.addEventListener('click', async () => {
         const value = inputConfirmOtp?.value?.trim();
-        if (!value || value.length < 6) { showAlert('Entrez un code 2FA valide (6 chiffres)', 'error'); return; }
+        if (!value || value.length < 6) { showAlert('Entrez un code A2F valide (6 chiffres)', 'error'); return; }
         try {
           btnConfirm2fa.disabled = true;
           const res = await fetch('/api/me/2fa/confirm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ otp: value }) });
           const j = await res.json().catch(()=>({}));
           if (!res.ok) { showAlert(j.error || 'Code invalide', 'error'); return; }
           if (j.successful) {
-            showAlert('2FA activée avec succès', 'success');
+            showAlert('A2F activée avec succès', 'success');
             // masquer le bouton confirmer et montrer le bouton reload
             document.getElementById('btnReloadAfter2fa')?.classList.remove('hidden');
             btnConfirm2fa.classList.add('hidden');

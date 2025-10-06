@@ -4,4 +4,3 @@ onlyBuiltDependencies:
   - bcrypt
   - node
   - prisma
-  - sqlite3

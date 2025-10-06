@@ -4,13 +4,191 @@
     <div class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
       <%- include('../partials/asside_dash.ejs', { active: 'stats' }) %>
       <main class="col-span-12 lg:col-span-9 space-y-4">
-      <div class="rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-        <div class="mb-3"><h3 class="font-medium">Aperçu</h3><p class="text-xs text-slate-400">Module en développement (vues, clics, tendances).</p></div>
-        <div class="rounded border border-dashed border-indigo-700/40 bg-slate-900/40 p-6 text-sm text-slate-300 text-center">
-          <div class="font-medium mb-1">Bientôt disponible</div>
-          <div class="text-xs text-slate-400">Graphiques et métriques d’engagement arrivent prochainement.</div>
+        <!-- En-tête (style Mon compte) -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between">
+            <h1 class="text-2xl font-semibold">Statistiques</h1>
+            <div class="flex items-center gap-2">
+              <button id="exportCsv" class="px-3 py-2 text-sm rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200">Exporter CSV</button>
+            </div>
+          </div>
         </div>
-      </div>
+
+        <!-- Barre d'onglets (comme Compte) -->
+        <div class="rounded-lg border border-slate-800/60 bg-slate-900/40">
+          <div class="px-4 py-2 border-b border-slate-800/40">
+            <nav class="flex gap-2" role="tablist" aria-label="Sections stats">
+              <button class="tab-btn px-3 py-2 rounded-md text-sm font-medium bg-transparent text-slate-300" data-tab="overview" aria-selected="true">Aperçu</button>
+              <button class="tab-btn px-3 py-2 rounded-md text-sm font-medium bg-transparent text-slate-300" data-tab="trends" aria-selected="false">Tendances</button>
+              <button class="tab-btn px-3 py-2 rounded-md text-sm font-medium bg-transparent text-slate-300" data-tab="links" aria-selected="false">Liens</button>
+              <button class="tab-btn px-3 py-2 rounded-md text-sm font-medium bg-transparent text-slate-300" data-tab="categories" aria-selected="false">Catégories</button>
+            </nav>
+          </div>
+        </div>
+
+        <!-- Panels -->
+        <section id="panel-overview" class="tab-panel">
+          <!-- KPIs -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+              <div class="text-xs text-slate-400">Vues profil</div>
+              <div id="kpiViews" class="text-2xl font-semibold">—</div>
+            </div>
+            <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+              <div class="text-xs text-slate-400">Clics totaux</div>
+              <div id="kpiClicks" class="text-2xl font-semibold">—</div>
+            </div>
+            <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+              <div class="text-xs text-slate-400">Clics moyens / lien</div>
+              <div id="kpiAvg" class="text-2xl font-semibold">—</div>
+            </div>
+            <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+              <div class="text-xs text-slate-400">Top lien</div>
+              <div id="kpiTop" class="text-sm text-slate-200 truncate">—</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tendances -->
+        <section id="panel-trends" class="tab-panel hidden">
+          <section class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+            <div class="mb-4 flex items-center justify-between">
+              <h3 class="font-medium">Tendances (journalier)</h3>
+              <div class="flex items-center gap-2 text-xs">
+                <label>Période</label>
+                <select id="fRange" class="h-8 px-2 rounded bg-slate-900 border border-slate-800">
+                  <option value="7">7 jours</option>
+                  <option value="14">14 jours</option>
+                  <option value="30" selected>30 jours</option>
+                  <option value="60">60 jours</option>
+                  <option value="90">90 jours</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div class="mb-2 flex items-center justify-between">
+                  <span class="text-sm text-slate-300">Vues (journalier)</span>
+                </div>
+                <div id="chartViews" class="w-full"></div>
+              </div>
+              <div>
+                <div class="mb-2 flex items-center justify-between">
+                  <span class="text-sm text-slate-300">Clics (journalier)</span>
+                  <span class="text-xs text-slate-400">Total clics par jour</span>
+                </div>
+                <div id="chartClicks" class="w-full"></div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <!-- Liens: filtres + Top + tableau -->
+        <section id="panel-links" class="tab-panel hidden">
+          <!-- Filtres / barre d'outils -->
+          <section class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div class="col-span-2">
+                <label class="text-xs text-slate-400">Recherche</label>
+                <input id="fSearch" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" placeholder="Nom, URL, ID..." />
+              </div>
+              <div>
+                <label class="text-xs text-slate-400">Min. clics</label>
+                <input id="fMin" type="number" min="0" value="0" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-400">Top N (graphique)</label>
+                <input id="fTop" type="number" min="1" value="10" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+              </div>
+            </div>
+          </section>
+
+          <!-- Top liens -->
+          <section class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+            <div class="mb-2 flex items-center justify-between">
+              <h3 class="font-medium">Top liens par clics</h3>
+              <span class="text-xs text-slate-400">Barres proportionnelles</span>
+            </div>
+            <div id="chartTop" class="w-full"></div>
+          </section>
+
+          <!-- Tableau détaillé -->
+          <section class="rounded-lg border border-slate-800 bg-slate-900/60 p-4 overflow-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-xs text-slate-400 border-b border-slate-800">
+                  <th class="px-3 py-2">ID</th>
+                  <th class="px-3 py-2">Label</th>
+                  <th class="px-3 py-2">URL</th>
+                  <th class="px-3 py-2 text-right">Clics</th>
+                </tr>
+              </thead>
+              <tbody id="tblBody"></tbody>
+            </table>
+          </section>
+        </section>
+
+        <!-- Catégories -->
+        <section id="panel-categories" class="tab-panel hidden">
+          <section class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+            <div class="mb-2 flex items-center justify-between">
+              <h3 class="font-medium">Clics par catégorie</h3>
+              <span class="text-xs text-slate-400">Répartition des clics</span>
+            </div>
+            <div id="chartCategories" class="w-full"></div>
+          </section>
+        </section>
+
+        <!-- Tableau détaillé -->
+        <section class="rounded-lg border border-slate-800 bg-slate-900/60 p-4 overflow-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-xs text-slate-400 border-b border-slate-800">
+                <th class="px-3 py-2">ID</th>
+                <th class="px-3 py-2">Label</th>
+                <th class="px-3 py-2">URL</th>
+                <th class="px-3 py-2 text-right">Clics</th>
+              </tr>
+            </thead>
+            <tbody id="tblBody"></tbody>
+          </table>
+        </section>
+
+  <div id="statsRoot" data-views="<%= (user.views || 0) %>" data-links='\
+<%- JSON.stringify(links || []) %>' data-views-daily='\
+<%- JSON.stringify(viewsDaily30d || []) %>' data-clicks-daily='[]' hidden></div>
+        <script type="module" src="/public/js/dashboard-stats.js"></script>
+        <script>
+          // Tabs UX (comme la page Compte)
+          (function(){
+            const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
+            const panels = {
+              overview: document.getElementById('panel-overview'),
+              trends: document.getElementById('panel-trends'),
+              links: document.getElementById('panel-links'),
+              categories: document.getElementById('panel-categories')
+            };
+            function setActive(key){
+              tabButtons.forEach(btn => {
+                const t = btn.getAttribute('data-tab');
+                const selected = t === key;
+                btn.setAttribute('aria-selected', selected ? 'true' : 'false');
+                btn.classList.toggle('bg-slate-800/50', selected);
+                btn.classList.toggle('text-white', selected);
+                btn.classList.toggle('text-slate-300', !selected);
+              });
+              Object.keys(panels).forEach(k => {
+                const el = panels[k]; if (!el) return;
+                if (k === key) el.classList.remove('hidden'); else el.classList.add('hidden');
+              });
+            }
+            // initial
+            setActive('overview');
+            tabButtons.forEach(btn => btn.addEventListener('click', () => {
+              const key = btn.getAttribute('data-tab'); if (!key) return; setActive(key);
+            }));
+          })();
+        </script>
       </main>
     </div>
     <!-- profileMenuPanel logic is now handled in partials/header-dash.ejs -->
