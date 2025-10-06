@@ -87,11 +87,17 @@ fastify.get("/", async function (request, reply) {
 
 fastify.get("/login", async function (request, reply) {
   const currentUserId = request.session.get("data") as string | undefined;
+  // If user is fully authenticated (not the temporary TOTP marker), redirect to dashboard
+  if (currentUserId && !String(currentUserId).includes('__totp')) {
+    return reply.redirect('/dashboard');
+  }
   // Log stored returnTo for debugging
-  try { request.log?.info({ returnTo: (request.session as any).get('returnTo') }, 'GET /login session'); } catch (e) {}
-  const currentUser = currentUserId
+  try {
+    request.log?.info({ returnTo: (request.session as any).get('returnTo') }, 'GET /login session');
+  } catch (e) {}
+  const currentUser = currentUserId && String(currentUserId).includes('__totp')
     ? await prisma.user.findUnique({
-        where: { id: currentUserId },
+        where: { id: String(currentUserId).split('__')[0] },
         select: {
           id: true,
           userName: true,
@@ -105,7 +111,23 @@ fastify.get("/login", async function (request, reply) {
   return reply.view("connect.ejs", { currentUser, returnTo: returnToQuery });
 });
 
+// Provide a GET /register route: unauthenticated users are redirected to the login page anchor,
+// authenticated users are forwarded to the dashboard.
+fastify.get('/register', async (request, reply) => {
+  const currentUserId = request.session.get('data') as string | undefined;
+  if (currentUserId && !String(currentUserId).includes('__totp')) {
+    return reply.redirect('/dashboard');
+  }
+  // Not logged in: send to the login page signup anchor
+  return reply.redirect('/login#signup');
+});
+
 fastify.post("/register", async (req, reply) => {
+  // If already authenticated (not in TOTP flow), redirect to dashboard instead of creating another account
+  const currentUserId = req.session.get('data') as string | undefined;
+  if (currentUserId && !String(currentUserId).includes('__totp')) {
+    return reply.redirect('/dashboard');
+  }
   const { username, email, password, passwordVerif } = req.body as {
     username: string;
     email: string;
@@ -173,8 +195,9 @@ fastify.post("/register", async (req, reply) => {
     // Auto-login: set session and redirect to original destination if present
     const returnTo = (req.body as any)?.returnTo || (req.query as any)?.returnTo;
     req.log?.info({ returnTo }, 'register: returnTo read from request');
-    req.session.set("data", user.id);
-    return reply.redirect(returnTo || "/dashboard");
+  req.session.set("data", user.id);
+  req.log?.info({ sessionData: req.session.get('data'), cookies: req.headers.cookie }, 'session set after register');
+  return reply.redirect(returnTo || "/dashboard");
   } catch (error) {
     reply.redirect(
       "/login?error=" + encodeURIComponent("Utilisateur deja existant")
@@ -184,6 +207,11 @@ fastify.post("/register", async (req, reply) => {
 });
 
 fastify.post("/login", async (request, reply) => {
+  // If already authenticated and not in TOTP flow, redirect to dashboard
+  const currentUserId = request.session.get('data') as string | undefined;
+  if (currentUserId && !String(currentUserId).includes('__totp')) {
+    return reply.redirect('/dashboard');
+  }
   const { email, password } = request.body as {
     email: string;
     password: string;
@@ -229,6 +257,7 @@ fastify.post("/login", async (request, reply) => {
   const returnToLogin = (request.body as any)?.returnTo || (request.query as any)?.returnTo;
   request.log?.info({ returnTo: returnToLogin }, 'login: returnTo read from request');
   request.session.set("data", user.id);
+  request.log?.info({ sessionData: request.session.get('data'), cookies: request.headers.cookie }, 'session set after login');
   reply.redirect(returnToLogin || "/dashboard");
 });
 
@@ -261,12 +290,15 @@ fastify.post("/totp", async (request, reply) => {
       const returnToTotp = (request.body as any)?.returnTo || (request.query as any)?.returnTo;
       request.log?.info({ returnTo: returnToTotp }, 'totp: returnTo read from request');
       request.session.set("data", user.id)
+      request.log?.info({ sessionData: request.session.get('data'), cookies: request.headers.cookie }, 'session set after totp');
       return reply.redirect(returnToTotp || "/dashboard");
   }
 });
 
 fastify.get("/logout", (req, reply) => {
+  try { req.log?.info({ beforeDelete: req.session.get('data'), cookies: req.headers.cookie }, 'logout: before session.delete'); } catch (e) {}
   req.session.delete();
+  try { req.log?.info({ afterDelete: req.session.get('data'), cookies: req.headers.cookie }, 'logout: after session.delete'); } catch (e) {}
   reply.redirect("/login");
 });
 

@@ -5,6 +5,7 @@ const prisma = new PrismaClient();
 
 export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.get("/", async function (request, reply) {
+    request.log?.info({ cookies: request.headers.cookie, sessionData: request.session.get('data') }, 'dashboard root: incoming request');
     const userId = request.session.get("data");
     if (!userId) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
@@ -39,6 +40,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
 
   // Dashboard: Cosmétiques (aperçu et sélection)
   fastify.get("/cosmetics", async function (request, reply) {
+    request.log?.info({ cookies: request.headers.cookie, sessionData: request.session.get('data') }, 'dashboard cosmetics: incoming request');
     const userId = request.session.get("data");
     if (!userId) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
@@ -116,6 +118,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
 
   // Page d'édition du profil (éditeur complet)
   fastify.get("/edit", async function (request, reply) {
+    request.log?.info({ cookies: request.headers.cookie, sessionData: request.session.get('data') }, 'dashboard edit: incoming request');
     const userId = request.session.get("data");
     if (!userId) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
@@ -132,6 +135,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
 
   // Dashboard: Statistiques (vue dédiée)
   fastify.get("/stats", async function (request, reply) {
+    request.log?.info({ cookies: request.headers.cookie, sessionData: request.session.get('data') }, 'dashboard stats: incoming request');
     const userId = request.session.get("data");
     if (!userId) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
