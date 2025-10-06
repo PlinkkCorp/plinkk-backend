@@ -137,7 +137,8 @@ export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, rende
       ghost.style.top = `${y}px`;
     }
 
-    const children = Array.from(containerEl.children).filter((c) => c !== ghost && c !== placeholder);
+  // Consider only elements that are draggable (have a data-drag-index) to compute insertion point
+  const children = Array.from(containerEl.children).filter((c) => c !== ghost && c !== placeholder && c.dataset && c.dataset.dragIndex !== undefined && c.dataset.dragIndex !== null);
     let inserted = false;
     for (const child of children) {
       const r = child.getBoundingClientRect();
@@ -161,9 +162,10 @@ export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, rende
     } catch {}
     pointerId = null;
 
-    const all = Array.from(containerEl.children);
-    const filtered = all.filter((c) => c !== rowEl);
-    let insertAt = filtered.indexOf(placeholder);
+  // Use the same filtering as onPointerMove: only draggable rows matter for final index
+  const all = Array.from(containerEl.children);
+  const filtered = all.filter((c) => c !== rowEl && c.dataset && c.dataset.dragIndex !== undefined && c.dataset.dragIndex !== null);
+  let insertAt = filtered.indexOf(placeholder);
     if (insertAt === -1) {
       insertAt = filtered.findIndex((c) => c.getBoundingClientRect().top > e.clientY);
       if (insertAt === -1) insertAt = filtered.length;

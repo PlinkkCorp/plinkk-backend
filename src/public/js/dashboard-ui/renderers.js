@@ -26,12 +26,18 @@ export function renderBackground({ container, addBtn, colors, scheduleAutoSave }
     );
   } else {
     colors.forEach((c, idx) => {
-      const wrap = el('div', { class: 'flex items-center gap-2' });
+  const row = el('div', { class: 'flex items-center gap-1 w-full' });
+      row.dataset.dragIndex = String(idx);
+  const gripBtn = el('button', { type: 'button', class: 'h-9 w-9 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 mr-1', title: 'Déplacer', 'aria-label': 'Déplacer' });
+  gripBtn.style.cursor = 'grab';
+      gripBtn.appendChild(createGripSVG(18));
       const color = el('input', { type: 'color', value: c, class: 'h-10 w-full rounded bg-slate-900 border border-slate-800 p-1 flex-1' });
       const rm = trashButton(() => { colors.splice(idx, 1); renderBackground({ container, addBtn, colors, scheduleAutoSave }); scheduleAutoSave(); });
       color.addEventListener('input', () => { colors[idx] = color.value; scheduleAutoSave(); });
-      wrap.append(color, rm);
-      container.appendChild(wrap);
+  const rmWrap = el('div', { class: 'w-10 flex justify-end' }); rmWrap.append(rm);
+      row.append(gripBtn, color, rmWrap);
+      try { enableDragHandle(gripBtn, row, container, colors, () => renderBackground({ container, addBtn, colors, scheduleAutoSave }), scheduleAutoSave); } catch {}
+      container.appendChild(row);
     });
   }
   addBtn.onclick = () => { colors.push('#ffffff'); renderBackground({ container, addBtn, colors, scheduleAutoSave }); scheduleAutoSave(); };

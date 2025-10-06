@@ -141,12 +141,15 @@
 
                     <!-- Arrière-plan -->
                     <div id="section-background" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
-                        <div class="mb-3 flex items-center justify-between">
+                            <div class="mb-3 flex items-center justify-between">
                             <div>
                                 <h3 class="font-medium">Arrière‑plan (dégradé)</h3>
                                 <p class="text-xs text-slate-400">Définissez les couleurs du dégradé d’arrière‑plan.</p>
                             </div>
-                            <button id="addBackgroundColor" type="button" class="px-3 py-2 text-sm rounded-md bg-cyan-700/80 hover:bg-cyan-600 border border-cyan-500/40 text-white shadow transition-colors">+ Ajouter une couleur</button>
+                            <div class="flex items-center gap-2">
+                                <button id="invertBackgroundColors" type="button" class="px-3 py-2 text-sm rounded-md bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-white shadow transition-colors">Inverser</button>
+                                <button id="addBackgroundColor" type="button" class="px-3 py-2 text-sm rounded-md bg-cyan-700/80 hover:bg-cyan-600 border border-cyan-500/40 text-white shadow transition-colors">+ Ajouter une couleur</button>
+                            </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                             <label class="block text-sm">Angle du dégradé
