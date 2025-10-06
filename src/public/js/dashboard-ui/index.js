@@ -56,6 +56,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     statusDropdownPanel: qs('#statusDropdownPanel'),
     backgroundList: qs('#backgroundList'),
     addBackgroundColor: qs('#addBackgroundColor'),
+  invertBackgroundColors: qs('#invertBackgroundColors'),
     neonList: qs('#neonList'),
     addNeonColor: qs('#addNeonColor'),
     labelsList: qs('#labelsList'),
@@ -185,6 +186,16 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     renderLabels({ container: f.labelsList, addBtn: f.addLabel, labels: state.labels, scheduleAutoSave });
     renderSocial({ container: f.socialList, addBtn: f.addSocial, socials: state.socialIcon, scheduleAutoSave });
     renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, scheduleAutoSave });
+
+    // Inverser l'ordre des couleurs de background (bouton ajouté dans template)
+    if (f.invertBackgroundColors) {
+      f.invertBackgroundColors.addEventListener('click', () => {
+        state.background.reverse();
+        renderBackground({ container: f.backgroundList, addBtn: f.addBackgroundColor, colors: state.background, scheduleAutoSave });
+        scheduleAutoSave();
+        refreshPreview();
+      });
+    }
 
     const hasNeonColors = state.neonColors.length > 0;
     if (f.neonEnable) {
