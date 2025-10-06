@@ -1,0 +1,159 @@
+<%- include('../../partials/head.ejs', { title: 'Admin - Statistiques', description: 'Statistiques des utilisateurs', robots: 'noindex,nofollow' }) %>
+<%- include('../../partials/header-dash.ejs') %>
+<%- include('../../partials/admin-nav.ejs', { user: user }) %>
+
+<main class="max-w-7xl mx-auto p-4 space-y-5">
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight">Statistiques — Utilisateurs</h1>
+    <p class="text-xs text-slate-400">Filtre par dates, rôle et visibilité. Graphique des inscriptions/jour.</p>
+  </div>
+
+  <!-- Filtres -->
+  <section class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <label class="text-sm">Du
+        <input type="date" id="from" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-700" />
+      </label>
+      <label class="text-sm">Au
+        <input type="date" id="to" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-700" />
+      </label>
+      <label class="text-sm">Rôle
+        <select id="role" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-700">
+          <option value="all">Tous</option>
+          <option value="USER">USER</option>
+          <option value="MODERATOR">MODERATOR</option>
+          <option value="DEVELOPER">DEVELOPER</option>
+          <option value="ADMIN">ADMIN</option>
+        </select>
+      </label>
+      <label class="text-sm">Visibilité
+        <select id="visibility" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-700">
+          <option value="all">Toutes</option>
+          <option value="public">Public</option>
+          <option value="private">Privé</option>
+        </select>
+      </label>
+    </div>
+    <div class="mt-3 flex gap-2">
+      <button id="apply" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">Appliquer</button>
+      <button id="last7" class="px-3 py-2 rounded bg-slate-800 border border-slate-700 text-sm">7 jours</button>
+      <button id="last30" class="px-3 py-2 rounded bg-slate-800 border border-slate-700 text-sm">30 jours</button>
+      <button id="last90" class="px-3 py-2 rounded bg-slate-800 border border-slate-700 text-sm">90 jours</button>
+    </div>
+  </section>
+
+  <!-- Résumé -->
+  <section class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+      <div class="rounded border border-slate-800 p-3"><div class="text-xs text-slate-400">Total</div><div class="text-xl font-semibold" id="statTotal">–</div></div>
+      <div class="rounded border border-slate-800 p-3"><div class="text-xs text-slate-400">Publics</div><div class="text-xl font-semibold" id="statPub">–</div></div>
+      <div class="rounded border border-slate-800 p-3"><div class="text-xs text-slate-400">Privés</div><div class="text-xl font-semibold" id="statPriv">–</div></div>
+      <div class="rounded border border-slate-800 p-3"><div class="text-xs text-slate-400">Admins/Mods/Dev</div><div class="text-xl font-semibold" id="statStaff">–</div></div>
+    </div>
+  </section>
+
+  <!-- Graphique -->
+  <section class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="font-medium">Inscriptions par jour</h2>
+      <div class="text-xs text-slate-400" id="rangeLabel"></div>
+    </div>
+    <canvas id="chart" height="220"></canvas>
+  </section>
+</main>
+
+<script>
+(function(){
+  const $ = (s,r=document)=>r.querySelector(s);
+  function fmtDate(d){ const y=d.getUTCFullYear(); const m=String(d.getUTCMonth()+1).padStart(2,'0'); const dd=String(d.getUTCDate()).padStart(2,'0'); return `${y}-${m}-${dd}`; }
+  function setRange(days){ const to=new Date(); const from=new Date(to.getTime()- (days-1)*86400000); $('#from').value=fmtDate(from); $('#to').value=fmtDate(to); }
+  // init défaut: 30 jours
+  if(!$('#from').value || !$('#to').value) setRange(30);
+
+  const ctx = $('#chart').getContext('2d');
+  let chart = null;
+  function renderChart(series){
+    const labels = series.map(p=>p.date);
+    const data = series.map(p=>p.count);
+    // simple chart sans dépendances: tracer un polyline + axes minimalistes
+    const w = ctx.canvas.width = ctx.canvas.clientWidth;
+    const h = ctx.canvas.height = ctx.canvas.getAttribute('height');
+    ctx.clearRect(0,0,w,h);
+    const pad = 28; // padding axes
+    const max = Math.max(1, ...data);
+    const stepX = (w - pad*2) / Math.max(1, data.length-1);
+    const scaleY = (h - pad*2) / max;
+    // axes
+    ctx.strokeStyle = 'rgba(148,163,184,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad, pad); ctx.lineTo(pad, h-pad); ctx.lineTo(w-pad, h-pad); ctx.stroke();
+    // polyline
+    ctx.strokeStyle = '#6366f1';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    data.forEach((v,i)=>{
+      const x = pad + i*stepX;
+      const y = h - pad - v*scaleY;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    // points
+    ctx.fillStyle = '#818cf8';
+    data.forEach((v,i)=>{
+      const x = pad + i*stepX;
+      const y = h - pad - v*scaleY;
+      ctx.beginPath(); ctx.arc(x,y,2.5,0,Math.PI*2); ctx.fill();
+    });
+  }
+
+  async function fetchSeries(){
+    const q = new URLSearchParams({
+      from: $('#from').value,
+      to: $('#to').value,
+      role: $('#role').value,
+      visibility: $('#visibility').value,
+    });
+    const res = await fetch(`/dashboard/admin/stats/users/series?${q.toString()}`);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    return res.json();
+  }
+  async function fetchSummary(){
+    const q = new URLSearchParams({
+      from: $('#from').value,
+      to: $('#to').value,
+      role: $('#role').value,
+      visibility: $('#visibility').value,
+    });
+    const res = await fetch(`/dashboard/admin/stats/users/summary?${q.toString()}`);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    return res.json();
+  }
+
+  async function apply(){
+    try{
+      const [seriesPayload, summary] = await Promise.all([fetchSeries(), fetchSummary()]);
+      $('#rangeLabel').textContent = `${seriesPayload.from} → ${seriesPayload.to}`;
+      renderChart(seriesPayload.series || []);
+      // résumé
+      $('#statTotal').textContent = (summary.total ?? 0);
+      $('#statPub').textContent = (summary.publics ?? 0);
+      $('#statPriv').textContent = (summary.privates ?? 0);
+      const staff = (summary.byRole?.ADMIN||0) + (summary.byRole?.DEVELOPER||0) + (summary.byRole?.MODERATOR||0);
+      $('#statStaff').textContent = staff;
+    } catch(e) {
+      console.error(e);
+    }
+  }
+
+  $('#apply').addEventListener('click', apply);
+  $('#last7').addEventListener('click', ()=>{ setRange(7); apply(); });
+  $('#last30').addEventListener('click', ()=>{ setRange(30); apply(); });
+  $('#last90').addEventListener('click', ()=>{ setRange(90); apply(); });
+
+  // auto-appliquer au chargement
+  apply();
+})();
+</script>
+
+</body>
+</html>

@@ -1,5 +1,6 @@
 <%- include('../../partials/head.ejs', { title: 'Admin - Prévisualisation thème', description: '', robots: 'noindex,nofollow' }) %>
 <%- include('../../partials/header-dash.ejs') %>
+<%- include('../../partials/admin-nav.ejs', { user: user }) %>
 
 <main class="max-w-5xl mx-auto p-4 space-y-5">
   <div class="flex items-start justify-between">
@@ -8,9 +9,15 @@
       <p class="text-sm text-slate-400">par @<%= theme.author.userName %></p>
     </div>
     <div class="flex gap-2">
-      <button id="approveBtn" class="px-3 py-2 rounded bg-emerald-600 text-white text-sm">Approuver</button>
-      <button id="rejectBtn" class="px-3 py-2 rounded bg-rose-600 text-white text-sm">Rejeter</button>
-      <button id="deleteBtn" class="px-3 py-2 rounded bg-gray-700 text-white text-sm">Supprimer</button>
+      <% if (theme.pendingUpdate) { %>
+        <button id="approveUpdateBtn" class="px-3 py-2 rounded bg-emerald-600 text-white text-sm">Approuver la MAJ</button>
+        <button id="rejectBtn" class="px-3 py-2 rounded bg-rose-600 text-white text-sm">Rejeter</button>
+      <% } else if (theme.pending || theme.pendingApproval || theme.status === 'pending' || (!theme.approved && !theme.isApproved && !theme.archived)) { %>
+        <button id="approveBtn" class="px-3 py-2 rounded bg-emerald-600 text-white text-sm">Approuver</button>
+        <button id="rejectBtn" class="px-3 py-2 rounded bg-rose-600 text-white text-sm">Rejeter</button>
+      <% } else { %>
+        <!-- Aucun bouton pour les autres états -->
+      <% } %>
     </div>
   </div>
 
@@ -93,16 +100,55 @@
     b.addEventListener('click', ()=>{ mode = b.getAttribute('data-mode')||'light'; applyPreview(); });
   });
   const goBack = (msg) => { if (msg) console.info(msg); window.location.href = '/dashboard/admin/themes'; };
-  document.getElementById('approveBtn').addEventListener('click', async ()=>{
-    const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/approve', { method: 'POST' });
-    if (!res.ok) { alert('Erreur'); return; }
-    goBack('approved');
-  });
-  document.getElementById('rejectBtn').addEventListener('click', async ()=>{
-    const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/reject', { method: 'POST' });
-    if (!res.ok) { alert('Erreur'); return; }
-    goBack('rejected');
-  });
+  // Helper to attach safe handlers only if the element exists
+  const on = (sel, fn) => { const el = document.getElementById(sel); if (!el) return; fn(el); };
+
+  on('approveBtn', (el) => el.addEventListener('click', async ()=>{
+    el.disabled = true;
+    try{
+      const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/approve', { method: 'POST' });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      goBack('approved');
+    }catch(e){ console.error(e); alert('Erreur'); el.disabled = false; }
+  }));
+
+  on('approveUpdateBtn', (el) => el.addEventListener('click', async ()=>{
+    el.disabled = true;
+    try{
+      const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/approve-update', { method: 'POST' });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      goBack('approved-update');
+    }catch(e){ console.error(e); alert('Erreur'); el.disabled = false; }
+  }));
+
+  on('rejectBtn', (el) => el.addEventListener('click', async ()=>{
+    el.disabled = true;
+    try{
+      const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/reject', { method: 'POST' });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      goBack('rejected');
+    }catch(e){ console.error(e); alert('Erreur'); el.disabled = false; }
+  }));
+
+  on('archiveBtn', (el) => el.addEventListener('click', async ()=>{
+    el.disabled = true;
+    try{
+      const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/archive', { method: 'POST' });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      goBack('archived');
+    }catch(e){ console.error(e); alert('Erreur'); el.disabled = false; }
+  }));
+
+  on('unarchiveBtn', (el) => el.addEventListener('click', async ()=>{
+    el.disabled = true;
+    try{
+      const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/unarchive', { method: 'POST' });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      goBack('unarchived');
+    }catch(e){ console.error(e); alert('Erreur'); el.disabled = false; }
+  }));
+
+  on('deleteBtn', (el) => el.addEventListener('click', ()=> createModal()));
 
   // Delete flow: show modal in page instead of alert
   const deleteBtn = document.getElementById('deleteBtn');

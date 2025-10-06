@@ -332,6 +332,77 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
   });
 
+  // Admin: Page statistiques utilisateurs
+  fastify.get('/admin/stats', async function (request, reply) {
+    const userId = request.session.get('data');
+    if (!userId) return reply.redirect('/login');
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    if (!userInfo) return reply.redirect('/login');
+    if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
+      return reply.code(403).view('erreurs/500.ejs', { message: 'Accès refusé', currentUser: userInfo });
+    }
+    return reply.view('dashboard/admin/stats.ejs', { user: userInfo });
+  });
+
+  // Admin API: séries d'inscriptions d'utilisateurs par jour (filtrable)
+  fastify.get('/admin/stats/users/series', async function (request, reply) {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'unauthorized' });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: 'forbidden' });
+    }
+    const { from, to, role = 'all', visibility = 'all' } = (request.query as any) || {};
+    // default range: dernière 30j (UTC)
+    const now = new Date();
+    const end = to ? new Date(to + 'T23:59:59.999Z') : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
+    const start = from ? new Date(from + 'T00:00:00.000Z') : new Date(end.getTime() - 29 * 86400000);
+    const fmt = (dt: Date) => {
+      const y = dt.getUTCFullYear();
+      const m = String(dt.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(dt.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+    const where: any = { createdAt: { gte: start, lte: end } };
+    if (role && role !== 'all') where.role = role;
+    if (visibility && visibility !== 'all') where.isPublic = (visibility === 'public');
+    const users = await prisma.user.findMany({ where, select: { createdAt: true } });
+    const byDate = new Map<string, number>();
+    for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
+      byDate.set(fmt(t), 0);
+    }
+    for (const u of users) {
+      const key = fmt(new Date(u.createdAt));
+      if (byDate.has(key)) byDate.set(key, (byDate.get(key) || 0) + 1);
+    }
+    const series = Array.from(byDate.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([date, count]) => ({ date, count }));
+    return reply.send({ from: fmt(start), to: fmt(end), series });
+  });
+
+  // Admin API: résumé (totaux) selon filtres
+  fastify.get('/admin/stats/users/summary', async function (request, reply) {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'unauthorized' });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) {
+      return reply.code(403).send({ error: 'forbidden' });
+    }
+    const { from, to, role = 'all', visibility = 'all' } = (request.query as any) || {};
+    const now = new Date();
+    const end = to ? new Date(to + 'T23:59:59.999Z') : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
+    const start = from ? new Date(from + 'T00:00:00.000Z') : new Date(end.getTime() - 29 * 86400000);
+    const where: any = { createdAt: { gte: start, lte: end } };
+    if (role && role !== 'all') where.role = role;
+    if (visibility && visibility !== 'all') where.isPublic = (visibility === 'public');
+    const rows = await prisma.user.findMany({ where, select: { id: true, role: true, isPublic: true } });
+    const total = rows.length;
+    const publics = rows.filter(r => r.isPublic).length;
+    const privates = total - publics;
+    const byRole: Record<string, number> = { USER: 0, MODERATOR: 0, DEVELOPER: 0, ADMIN: 0 };
+    rows.forEach(r => { byRole[r.role as string] = (byRole[r.role as string] || 0) + 1; });
+    return reply.send({ total, publics, privates, byRole });
+  });
+
   // Dashboard: Mes thèmes (création / soumission)
   fastify.get("/themes", async function (request, reply) {
     const userId = request.session.get("data");
@@ -390,7 +461,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
     }
     const { id } = request.params as { id: string };
-    const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, name: true, description: true, data: true, author: { select: { id: true, userName: true } }, status: true } });
+  const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, name: true, description: true, data: true, author: { select: { id: true, userName: true } }, status: true, pendingUpdate: true, isPrivate: true } });
     if (!t) return reply.code(404).view("erreurs/404.ejs", { currentUser: userInfo });
     return reply.view("dashboard/admin/preview.ejs", { user: userInfo, theme: t });
   });
