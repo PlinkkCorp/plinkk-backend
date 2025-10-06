@@ -237,16 +237,22 @@
     document.body.appendChild(overlay);
     const cancel = overlay.querySelector('.cancel');
     const confirm = overlay.querySelector('.confirm');
-    cancel.addEventListener('click', ()=> overlay.remove());
+    function cleanup() { document.removeEventListener('keydown', onKey); overlay.remove(); }
+    cancel.addEventListener('click', ()=> { cleanup(); });
     confirm.addEventListener('click', async ()=>{
       confirm.disabled = true; confirm.textContent = 'Suppression...';
       try {
         const res = await fetch('/api/themes/'+encodeURIComponent(id), { method: 'DELETE' });
         if (!res.ok) throw new Error('HTTP '+res.status);
-        overlay.remove();
+        cleanup();
         goBack('deleted');
       } catch(e){ alert('Impossible de supprimer'); confirm.disabled = false; confirm.textContent = 'Supprimer'; }
     });
+    function onKey(ev){
+      if (ev.key === 'Escape') { ev.preventDefault(); cleanup(); }
+      if (ev.key === 'Enter') { ev.preventDefault(); confirm.click(); }
+    }
+    document.addEventListener('keydown', onKey);
   }
   if (deleteBtn) deleteBtn.addEventListener('click', ()=> createModal());
 })();

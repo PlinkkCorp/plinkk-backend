@@ -248,6 +248,15 @@
       setActive(null);
       apply();
     });
+    customEl.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') {
+        ev.preventDefault();
+        const n = Math.max(1, parseInt(customEl.value, 10) || 1);
+        setRange(n);
+        setActive(null);
+        apply();
+      }
+    });
   }
 
   // auto-apply when date inputs change (like presets/customDays)

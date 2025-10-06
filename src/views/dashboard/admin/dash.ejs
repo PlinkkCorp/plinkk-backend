@@ -527,7 +527,14 @@ box-shadow: 0 8px 24px rgba(16,185,129,.35);
                                 document.body.appendChild(overlay);
                                 input.focus();
 
+                                function onKey(ev){
+                                    if (ev.key === 'Enter') { ev.preventDefault(); btnOk.click(); }
+                                    if (ev.key === 'Escape') { ev.preventDefault(); btnCancel.click(); }
+                                    if (ev.key === 'Echap') { ev.preventDefault(); btnCancel.click(); }
+                                }
+
                                 const cleanup = (res) => {
+                                    document.removeEventListener('keydown', onKey);
                                     overlay.remove();
                                     resolve(res);
                                 };
@@ -536,9 +543,12 @@ box-shadow: 0 8px 24px rgba(16,185,129,.35);
                                 overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(false); });
                                 btnOk.addEventListener('click', () => cleanup((input.value || '').trim() === String(userId)));
                                 input.addEventListener('keydown', (ev) => {
+                                    // keep behavior local too; it will trigger onKey as well
                                     if (ev.key === 'Enter') { ev.preventDefault(); btnOk.click(); }
-                                    if (ev.key === 'Escape') { btnCancel.click(); }
+                                    if (ev.key === 'Escape') { ev.preventDefault(); btnCancel.click(); }
                                 });
+                                // attach document-level key handler for Enter/Escape
+                                document.addEventListener('keydown', onKey);
                             });
                         }
 
