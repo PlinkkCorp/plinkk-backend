@@ -393,12 +393,23 @@
         const btnCancel = overlay.querySelector('.cancel');
         const btnOk = overlay.querySelector('.ok');
 
-        function cleanup(result){ overlay.remove(); resolve(result); }
+        function cleanup(result){
+          document.removeEventListener('keydown', onKey);
+          overlay.remove();
+          resolve(result);
+        }
+
+        function onKey(ev){
+          if (ev.key === 'Escape') { ev.preventDefault(); cleanup(false); }
+          if (ev.key === 'Enter') { ev.preventDefault(); cleanup(true); }
+        }
 
         btnCancel.addEventListener('click', () => cleanup(false));
         btnOk.addEventListener('click', () => cleanup(true));
         overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(false); });
         document.body.appendChild(overlay);
+        // attach key handler so Enter confirms and Escape cancels
+        document.addEventListener('keydown', onKey);
         // focus the cancel for accessibility
         btnCancel.focus();
       });

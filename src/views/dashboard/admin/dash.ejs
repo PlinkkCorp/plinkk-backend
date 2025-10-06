@@ -118,7 +118,7 @@
                                                                 <%= u.userName %>
                                                             </div>
                                                             <span
-                                                                class="text-xs px-2 py-0.5 rounded bg-slate-800/80 border border-slate-700 text-slate-300">@
+                                                                class="text-xs px-2 py-0.5 rounded bg-slate-800/80 border border-slate-700 text-slate-300 max-w-[8rem] truncate inline-block">@
                                                                 <%= u.id %>
                                                             </span>
                                                         </div>
@@ -447,17 +447,16 @@
 `;
                         document.head.appendChild(styleMenu);
 
-                        // Copier le lien
+                        // Copier le lien (grid handler ignores menu items now)
                         grid.addEventListener('click', (e) => {
+                            // let document-level handler process menu actions
+                            if (e.target.closest('.actionsMenu') || e.target.closest('.copyBtn') || e.target.closest('.actionsBtn') || e.target.closest('.roleSet') || e.target.closest('.deleteBtn') || e.target.closest('.disable2faBtn') || e.target.closest('.revealEmailBtn')) return;
                             const btn = e.target.closest('.copyBtn');
                             if (btn) {
                                 const url = (window.location && window.location.origin ? window.location.origin : '') + '/' + btn.dataset.id;
-                                navigator.clipboard?.writeText(url).catch(() => { });
-                                // Fermer menu si bouton dans le menu
-                                const menu = btn.closest('.actionsMenu');
-                                if (menu) {
-                                    menu.classList.add('hidden');
-                                }
+                                navigator.clipboard?.writeText(url).then(() => {
+                                    showToast('Profile copié');
+                                }).catch(() => { showToast('Copie échouée'); });
                             }
                         });
 
@@ -477,7 +476,84 @@ box-shadow: 0 8px 24px rgba(16,185,129,.35);
 `;
                         document.head.appendChild(style);
 
+                        // Toast notification styles
+                        const toastStyle = document.createElement('style');
+                        toastStyle.textContent = `
+ .plinkk-toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 2147483200; display:flex; flex-direction:column; gap:8px; }
+ .plinkk-toast { background: rgba(17,24,39,0.95); color: #fff; padding: 8px 12px; border-radius: 8px; box-shadow: 0 8px 24px rgba(2,6,23,.6); font-size: 13px; opacity:0; transform: translateY(-6px); transition: opacity .18s ease, transform .18s ease; }
+ .plinkk-toast.show { opacity:1; transform: translateY(0); }
+ `;
+                        document.head.appendChild(toastStyle);
+
+                        // Ensure toast container exists
+                        function getToastContainer() {
+                            let c = document.querySelector('.plinkk-toast-container');
+                            if (!c) { c = document.createElement('div'); c.className = 'plinkk-toast-container'; document.body.appendChild(c); }
+                            return c;
+                        }
+
+                        function showToast(message, ms = 2000) {
+                            try {
+                                const c = getToastContainer();
+                                const t = document.createElement('div');
+                                t.className = 'plinkk-toast';
+                                t.textContent = message;
+                                c.appendChild(t);
+                                // force reflow then show
+                                void t.offsetWidth;
+                                t.classList.add('show');
+                                setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 180); }, ms);
+                            } catch (e) { /* ignore */ }
+                        }
+
+                        // Confirm with typed input helper (used by delete flows)
+                        function confirmWithInput(displayName, userId) {
+                            return new Promise(resolve => {
+                                const overlay = document.createElement('div');
+                                overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
+                                overlay.innerHTML = `
+        <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
+            <div class="mb-3">Pour confirmer la suppression du compte "<strong>${displayName}</strong>" (@${userId}), tapez <strong>${userId}</strong> ci‑dessous :</div>
+            <input type="text" class="w-full mb-3 px-3 py-2 rounded bg-slate-800 border border-slate-700 text-sm" aria-label="Confirmation input" />
+            <div class="flex justify-end gap-2">
+            <button class="cancel px-3 py-1.5 rounded-md bg-slate-700 text-sm">Annuler</button>
+            <button class="ok px-3 py-1.5 rounded-md bg-red-600 text-white text-sm">Supprimer</button>
+            </div>
+        </div>`;
+                                const input = overlay.querySelector('input');
+                                const btnOk = overlay.querySelector('.ok');
+                                const btnCancel = overlay.querySelector('.cancel');
+
+                                document.body.appendChild(overlay);
+                                input.focus();
+
+                                function onKey(ev){
+                                    if (ev.key === 'Enter') { ev.preventDefault(); btnOk.click(); }
+                                    if (ev.key === 'Escape') { ev.preventDefault(); btnCancel.click(); }
+                                    if (ev.key === 'Echap') { ev.preventDefault(); btnCancel.click(); }
+                                }
+
+                                const cleanup = (res) => {
+                                    document.removeEventListener('keydown', onKey);
+                                    overlay.remove();
+                                    resolve(res);
+                                };
+
+                                btnCancel.addEventListener('click', () => cleanup(false));
+                                overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(false); });
+                                btnOk.addEventListener('click', () => cleanup((input.value || '').trim() === String(userId)));
+                                input.addEventListener('keydown', (ev) => {
+                                    // keep behavior local too; it will trigger onKey as well
+                                    if (ev.key === 'Enter') { ev.preventDefault(); btnOk.click(); }
+                                    if (ev.key === 'Escape') { ev.preventDefault(); btnCancel.click(); }
+                                });
+                                // attach document-level key handler for Enter/Escape
+                                document.addEventListener('keydown', onKey);
+                            });
+                        }
+
                         grid.addEventListener('click', (e) => {
+                            if (e.target.closest('.actionsMenu') || e.target.closest('.copyBtn') || e.target.closest('.actionsBtn') || e.target.closest('.roleSet') || e.target.closest('.deleteBtn') || e.target.closest('.disable2faBtn') || e.target.closest('.revealEmailBtn')) return;
                             const btn = e.target.closest('.copyBtn');
                             if (btn) {
                                 btn.classList.add('copy-anim');
@@ -526,6 +602,8 @@ box-shadow: 0 8px 24px rgba(16,185,129,.35);
                             });
                         }
                         grid.addEventListener('click', (e) => {
+                            // ignore if click is inside menu: document handler will handle
+                            if (e.target.closest('.actionsMenu')) return;
                             const btn = e.target.closest('.actionsBtn');
                             if (btn) {
                                 const wrap = btn.closest('.actionsWrap');
@@ -611,28 +689,31 @@ box-shadow: 0 8px 24px rgba(16,185,129,.35);
                             }
                         });
                         document.addEventListener('click', (ev) => {
+                            // If click happens inside an actionsMenu (which may have been moved to body), don't close
+                            if (ev.target.closest('.actionsMenu')) return;
                             if (!ev.target.closest('.actionsWrap')) closeAllMenus();
                         });
                         document.addEventListener('keydown', (ev) => {
                             if (ev.key === 'Escape') closeAllMenus();
                         });
 
-                        // Toggle du sous-menu Rôles au clic (au lieu d'exiger un survol rapide)
-                        grid.addEventListener('click', (e) => {
-                            // éviter de re-déclencher si on clique à l'intérieur du sous-menu
+                        // Toggle du sous-menu Rôles au clic — document-level so it works when menu is moved to body
+                        document.addEventListener('click', (e) => {
+                            // avoid handling clicks inside the submenu itself
                             if (e.target.closest('.submenu')) return;
                             const host = e.target.closest('.hasSubmenu');
                             if (!host) return;
                             const sub = host.querySelector('.submenu');
                             if (!sub) return;
-                            // Fermer les autres sous-menus ouverts du même menu
-                            host.closest('.actionsMenu')?.querySelectorAll('.submenu.open')?.forEach(el => {
-                                if (el !== sub) el.classList.remove('open');
-                            });
+                            // Prevent closing the parent menu when toggling submenu
+                            e.stopPropagation();
+                            // Toggle only this submenu (close others in same actionsMenu)
+                            const parentMenu = host.closest('.actionsMenu');
+                            parentMenu?.querySelectorAll('.submenu.open')?.forEach(el => { if (el !== sub) { el.classList.remove('open'); el.classList.add('hidden'); } });
                             const willOpen = !sub.classList.contains('open');
                             sub.classList.toggle('open', willOpen);
                             sub.classList.toggle('hidden', !willOpen);
-                            // Repositionner quand on l'ouvre
+                            // Reposition when opening
                             if (willOpen) {
                                 requestAnimationFrame(() => {
                                     const rect = sub.getBoundingClientRect();
@@ -654,28 +735,7 @@ box-shadow: 0 8px 24px rgba(16,185,129,.35);
                             }
                         });
 
-                        // Changer rôle via éléments du sous-menu
-                        grid.addEventListener('click', async (e) => {
-                            const setBtn = e.target.closest('.roleSet');
-                            if (!setBtn) return;
-                            const li = e.target.closest('li');
-                            const id = li?.dataset.id;
-                            const newRole = setBtn.dataset.role;
-                            try {
-                                const res = await fetch('/api/users/' + encodeURIComponent(id) + '/role', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ role: newRole })
-                                });
-                                if (!res.ok) throw new Error('HTTP ' + res.status);
-                                li.dataset.role = newRole;
-                            } catch (err) {
-                                console.error(err);
-                                alert('Impossible de changer le rôle.');
-                            }
-                            closeAllMenus();
-                            applyFilter();
-                        });
+                        // Changer rôle via éléments du sous-menu — handled by document-level handler above
 
                         // Repositionner le sous-menu au survol pour éviter le dépassement
                         grid.addEventListener('mouseover', (e) => {
@@ -708,38 +768,7 @@ box-shadow: 0 8px 24px rgba(16,185,129,.35);
                             if (!btn) return;
                             const id = btn.dataset.id;
                             const name = btn.dataset.name || id;
-                            const confirmWithInput = (displayName, userId) => new Promise(resolve => {
-                                const overlay = document.createElement('div');
-                                overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
-                                overlay.innerHTML = `
-        <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
-            <div class="mb-3">Pour confirmer la suppression du compte "<strong>${displayName}</strong>" (@${userId}), tapez <strong>${userId}</strong> ci‑dessous :</div>
-            <input type="text" class="w-full mb-3 px-3 py-2 rounded bg-slate-800 border border-slate-700 text-sm" aria-label="Confirmation input" />
-            <div class="flex justify-end gap-2">
-            <button class="cancel px-3 py-1.5 rounded-md bg-slate-700 text-sm">Annuler</button>
-            <button class="ok px-3 py-1.5 rounded-md bg-red-600 text-white text-sm">Supprimer</button>
-            </div>
-        </div>`;
-                                const input = overlay.querySelector('input');
-                                const btnOk = overlay.querySelector('.ok');
-                                const btnCancel = overlay.querySelector('.cancel');
-
-                                document.body.appendChild(overlay);
-                                input.focus();
-
-                                const cleanup = (res) => {
-                                    overlay.remove();
-                                    resolve(res);
-                                };
-
-                                btnCancel.addEventListener('click', () => cleanup(false));
-                                overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(false); });
-                                btnOk.addEventListener('click', () => cleanup((input.value || '').trim() === String(userId)));
-                                input.addEventListener('keydown', (ev) => {
-                                    if (ev.key === 'Enter') { ev.preventDefault(); btnOk.click(); }
-                                    if (ev.key === 'Escape') { btnCancel.click(); }
-                                });
-                            });
+                            // use global confirmWithInput helper defined above
 
                             const ok = await confirmWithInput(name, id);
                             if (!ok) return;
@@ -747,7 +776,8 @@ box-shadow: 0 8px 24px rgba(16,185,129,.35);
                             try {
                                 const res = await fetch(`/api/users/${encodeURIComponent(id)}`, { method: 'DELETE' });
                                 if (!res.ok) throw new Error('HTTP ' + res.status);
-                                const li = btn.closest('li');
+                                let li = btn.closest('li');
+                                if (!li && btn.dataset.id) li = document.querySelector(`#usersGrid li[data-id="${btn.dataset.id}"]`);
                                 if (li) li.remove();
                                 // refresh paginator source & counts
                                 paginator.setFiltered(paginator.getAll());
@@ -796,8 +826,7 @@ box-shadow: 0 8px 24px rgba(16,185,129,.35);
                                 btn.textContent = prev; btn.disabled = false;
                             } finally {
                                 // fermer le menu
-                                const menu = btn.closest('.actionsMenu');
-                                if (menu) menu.classList.add('hidden');
+                                closeAllMenus();
                             }
                         });
 
@@ -854,6 +883,144 @@ box-shadow: 0 8px 24px rgba(16,185,129,.35);
                             const meta = isMac ? ev.metaKey : ev.ctrlKey;
                             if (meta && ev.key.toLowerCase() === 'k') { ev.preventDefault(); search?.focus(); }
                         });
+
+                        // Document-level handler for menu actions (works even if menu is moved to document.body)
+                        document.addEventListener('click', async (ev) => {
+                            // if user clicked the submenu host (hasSubmenu) but NOT inside the submenu, let the submenu toggle logic handle it and do not auto-close
+                            if (ev.target.closest('.hasSubmenu') && !ev.target.closest('.submenu')) return;
+                            const menuItem = ev.target.closest('.menuItem, .copyBtn, .roleSet, .deleteBtn, .disable2faBtn, .revealEmailBtn');
+                            if (!menuItem) return;
+                            // prevent grid-level handlers from also acting
+                            ev.stopPropagation();
+
+                            // Reveal email handled specially (inside emailContainer)
+                            if (menuItem.classList.contains('revealEmailBtn')) {
+                                const btn = menuItem;
+                                const container = btn.closest('.emailContainer');
+                                if (!container) return;
+                                const wrap = container.querySelector('.privateEmailWrap');
+                                if (!wrap) return;
+                                const emailEl = wrap.querySelector('.emailValue');
+                                if (!emailEl) return;
+                                const email = emailEl.textContent || '';
+                                if (!container.classList.contains('revealed')) {
+                                    container.classList.add('revealed');
+                                    container.innerHTML = `<span class="text-xs text-slate-400 truncate emailShown">${email}</span>
+            <div class="inline-flex items-center gap-2 ml-2">
+                <button class="copySmall px-2 py-0.5 text-xs rounded-md bg-emerald-600 text-white hover:bg-emerald-500">Copier</button>
+                <button class="hideEmailBtn px-2 py-0.5 text-xs rounded-md bg-slate-700 text-white hover:bg-slate-600">Cacher</button>
+            </div>`;
+                                    const copyBtn = container.querySelector('.copySmall');
+                                    copyBtn?.addEventListener('click', () => {
+                                        navigator.clipboard?.writeText(email).then(() => {
+                                            copyBtn.textContent = 'Copié !';
+                                            setTimeout(() => copyBtn.textContent = 'Copier', 1000);
+                                        }).catch(() => { });
+                                    });
+                                    const hideBtn = container.querySelector('.hideEmailBtn');
+                                    hideBtn?.addEventListener('click', () => {
+                                        container.classList.remove('revealed');
+                                        container.innerHTML = `<span class="text-xs text-slate-500 italic privateEmailLabel">Email privé</span>` +
+                                            `<span class="privateEmailWrap ml-3 inline-flex items-center gap-2 text-xs">` +
+                                            `<button type="button" class="revealEmailBtn inline-flex items-center gap-2 px-2 py-0.5 rounded-md bg-indigo-600/85 hover:bg-indigo-500 text-white text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400" aria-label="Afficher l'email">` +
+                                            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-3 w-3 text-white"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8.5v7A2.5 2.5 0 0 0 5.5 18h13A2.5 2.5 0 0 0 21 15.5v-7A2.5 2.5 0 0 0 18.5 6h-13A2.5 2.5 0 0 0 3 8.5z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.5l-9 5-9-5"/></svg>` +
+                                            `<span>Afficher</span></button>` +
+                                            `<span class="emailValue hidden">${email}</span>` +
+                                            `</span>`;
+                                    });
+                                }
+                                // reveal email is outside actionsMenu; do not attempt to close actions menus here
+                                return;
+                            }
+
+                            // copy link
+                            if (ev.target.closest('.copyBtn')) {
+                                const btn = ev.target.closest('.copyBtn');
+                                const id = btn.dataset.id;
+                                const url = (window.location && window.location.origin ? window.location.origin : '') + '/' + id;
+                                try {
+                                    await navigator.clipboard?.writeText(url);
+                                    showToast('Profile copié');
+                                    btn.classList.add('copy-anim');
+                                    setTimeout(() => btn.classList.add('copied'), 10);
+                                    setTimeout(() => btn.classList.remove('copied'), 1000);
+                                } catch (e) { showToast('Copie échouée'); }
+                                // fermer le menu après copie
+                                closeAllMenus();
+                                return;
+                            }
+
+                            // role change
+                            if (ev.target.closest('.roleSet')) {
+                                const setBtn = ev.target.closest('.roleSet');
+                                const menu = ev.target.closest('.actionsMenu');
+                                // find original li via menu._origParent or by walking up from menu's original location
+                                let li = null;
+                                if (menu && menu._origParent) {
+                                    li = menu._origParent.closest('li') || menu._origParent.querySelector('li');
+                                }
+                                if (!li) li = ev.target.closest('li');
+                                const id = li?.dataset.id;
+                                const newRole = setBtn.dataset.role;
+                                try {
+                                    if (window.console && window.console.log) console.log('Role change request', { id, newRole });
+                                    const res = await fetch('/api/users/' + encodeURIComponent(id) + '/role', {
+                                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role: newRole })
+                                    });
+                                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                                    if (li) {
+                                        li.dataset.role = newRole;
+                                        // update visible role text in the UI
+                                        const roleDisplay = li.querySelector('.ml-auto');
+                                        if (roleDisplay) roleDisplay.textContent = newRole;
+                                        if (window.console && window.console.log) console.log('Role change success', { id, newRole });
+                                    }
+                                } catch (err) { console.error(err); alert('Impossible de changer le rôle.'); }
+                                closeAllMenus(); applyFilter();
+                                return;
+                            }
+
+                            // delete
+                            if (ev.target.closest('.deleteBtn')) {
+                                const btn = ev.target.closest('.deleteBtn');
+                                const id = btn.dataset.id; const name = btn.dataset.name || id;
+                                const ok = await confirmWithInput(name, id);
+                                if (!ok) return;
+                                btn.disabled = true; btn.textContent = 'Suppression...';
+                                try {
+                                    const res = await fetch(`/api/users/${encodeURIComponent(id)}`, { method: 'DELETE' });
+                                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                                    const li = btn.closest('li'); if (li) li.remove();
+                                    paginator.setFiltered(paginator.getAll()); if (totalCount) totalCount.textContent = String(paginator.getAll().length);
+                                } catch (err) { console.error(err); alert('Impossible de supprimer cet utilisateur.'); } finally { btn.disabled = false; btn.textContent = 'Supprimer'; }
+                                // fermer le menu après suppression
+                                closeAllMenus();
+                                return;
+                            }
+
+                            // disable 2fa
+                            if (ev.target.closest('.disable2faBtn')) {
+                                const btn = ev.target.closest('.disable2faBtn'); if (!btn || btn.disabled) return;
+                                const id = btn.dataset.id; const confirmOk = window.confirm("Désactiver la 2FA pour @" + id + " ?\nL'utilisateur devra la reconfigurer pour la réactiver."); if (!confirmOk) return;
+                                btn.disabled = true; const prev = btn.textContent; btn.textContent = 'Désactivation...';
+                                try {
+                                    const res = await fetch(`/api/users/${encodeURIComponent(id)}/2fa/disable`, { method: 'POST' }); if (!res.ok) throw new Error('HTTP ' + res.status);
+                                    btn.textContent = 'A2F désactivée'; btn.classList.add('opacity-60', 'cursor-not-allowed', 'text-slate-500');
+                                } catch (err) {
+                                    console.error(err);
+                                    try {
+                                        const msg = 'Erreur : impossible de désactiver la 2FA'; let errEl = btn.parentElement.querySelector('.twofaError'); if (!errEl) { errEl = document.createElement('div'); errEl.className = 'twofaError text-xs text-rose-400 mt-2'; btn.insertAdjacentElement('afterend', errEl); }
+                                        errEl.textContent = msg; setTimeout(() => { try { errEl.remove(); } catch (e) { } }, 5000);
+                                    } catch (e) { console.error('failed to show inline 2FA error', e); }
+                                    btn.textContent = prev; btn.disabled = false;
+                                }
+                                // fermer le menu après désactivation
+                                closeAllMenus();
+                                return;
+                            }
+                            // If a plain anchor/menu link was clicked (menuItem is an <a>), close menus (navigation will occur)
+                            if (menuItem.tagName === 'A') { closeAllMenus(); }
+                        }, { capture: false });
                     })();
                 </script>
 

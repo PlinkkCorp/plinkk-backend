@@ -19,7 +19,7 @@
                 <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-700/70 text-xs font-semibold overflow-hidden" data-avatar>
                   <%- include('avatar.ejs', { user: currentUser }) %>
                 </span>
-                <span class="hidden sm:inline text-sm text-slate-200 max-w-[160px] truncate">@<%= currentUser.userName || currentUser.id %></span>
+                <span class="hidden sm:inline text-sm text-slate-200 max-w-[160px] truncate inline-block">@<%= currentUser.userName || currentUser.id %></span>
                 <svg class="w-4 h-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
               </button>
               <div id="accountPanel" class="absolute right-0 top-full mt-2 w-80 rounded-xl border border-slate-800/70 bg-slate-900/95 backdrop-blur shadow-xl p-2 hidden">
@@ -31,7 +31,7 @@
                   <div class="min-w-0">
                     <div class="flex items-center gap-2 min-w-0">
                       <p class="font-medium truncate text-slate-100"><%= currentUser.userName || currentUser.id %></p>
-                      <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800/80 border border-slate-700 text-slate-300 truncate">@<%= currentUser.id %></span>
+                      <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800/80 border border-slate-700 text-slate-300 truncate inline-block">@<%= currentUser.id %></span>
                     </div>
                     <% if (currentUser.email) { %>
                       <p class="text-[11px] text-slate-400 truncate"><%= currentUser.email %></p>
