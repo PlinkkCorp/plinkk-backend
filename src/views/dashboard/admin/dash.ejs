@@ -205,37 +205,26 @@
                                                             </svg>
                                                             <div class="submenu hidden absolute top-0 left-full ml-1 z-50 w-40 rounded-md border border-slate-700 bg-slate-900/95 p-1"
                                                                 data-side="right">
-                                                                <% /* Determine which role buttons should be disabled
-                                                                    based on current user role */ %>
-                                                                    <% const myRole=(user && user.role) ?
-                                                                        String(user.role) : 'USER' ; const
-                                                                        disableRoleBtn=(target)=> {
-                                                                        if (myRole === 'ADMIN') return false;
-                                                                        if (myRole === 'DEVELOPER') return (target ===
-                                                                        'ADMIN');
-                                                                        // moderators and others cannot set equal or
-                                                                        higher role
-                                                                        const ranks = { USER:0, MODERATOR:1,
-                                                                        DEVELOPER:2, ADMIN:3 };
-                                                                        return ranks[target] >= ranks[myRole];
+                                                                    <% /* Determine which role buttons should be disabled
+                                                                        based on current user role */ %>
+                                                                    <% const myRole = (user && user.role) ? String(user.role) : 'USER';
+                                                                        const disableRoleBtn = (target) => {
+                                                                            if (myRole === 'ADMIN') return false;
+                                                                            if (myRole === 'DEVELOPER') return (target === 'ADMIN');
+                                                                            // moderators and others cannot set equal or higher role
+                                                                            const ranks = { USER: 0, MODERATOR: 1, DEVELOPER: 2, ADMIN: 3 };
+                                                                            return ranks[target] >= ranks[myRole];
                                                                         };
                                                                         const renderRoleBtn = (r) => {
-                                                                        const d = disableRoleBtn(r);
-                                                                        const base = 'roleSet block w-full text-left
-                                                                        px-3 py-1.5 rounded text-xs';
-                                                                        const enabledClass = ' hover:bg-slate-800
-                                                                        text-slate-200';
-                                                                        const disabledClass = ' opacity-60
-                                                                        cursor-not-allowed text-slate-500';
-                                                                        const cls = base + (d ? disabledClass :
-                                                                        enabledClass);
-                                                                        const title = d ? 'Vous ne pouvez pas attribuer
-                                                                        ce rôle' : '';
-                                                                        return `<button class="${cls}" data-role="${r}"
-                                                                            ${d ? 'disabled' : '' }
-                                                                            title="${title}">${r}</button>`;
+                                                                            const d = disableRoleBtn(r);
+                                                                            const base = 'roleSet block w-full text-left px-3 py-1.5 rounded text-xs';
+                                                                            const enabledClass = ' hover:bg-slate-800 text-slate-200';
+                                                                            const disabledClass = ' opacity-60 cursor-not-allowed text-slate-500';
+                                                                            const cls = base + (d ? disabledClass : enabledClass);
+                                                                            const title = d ? 'Vous ne pouvez pas attribuer ce rôle' : '';
+                                                                            return `<button class="${cls}" data-role="${r}" ${d ? 'disabled' : ''} title="${title}">${r}</button>`;
                                                                         };
-                                                                        %>
+                                                                    %>
                                                                         <%- renderRoleBtn('USER') %>
                                                                             <%- renderRoleBtn('MODERATOR') %>
                                                                                 <%- renderRoleBtn('DEVELOPER') %>
