@@ -1072,7 +1072,7 @@ export function apiRoutes(fastify: FastifyInstance) {
     // Persist to DB and clear pending
     await prisma.user.update({
       where: { id: userId },
-      data: { twoFactorSecret: pending.secret },
+      data: { twoFactorSecret: pending.secret, twoFactorEnabled: true },
     });
     pending2fa.delete(userId as string);
     return reply.send({ successful: true });
