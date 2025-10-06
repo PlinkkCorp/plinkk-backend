@@ -20,6 +20,16 @@
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.15.0",
+  "overrides": {
+    "rimraf": "^5.0.0",
+    "glob": "11.0.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "rimraf": "^5.0.0",
+      "glob": "11.0.3"
+    }
+  },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
     "@fastify/formbody": "^8.0.2",
