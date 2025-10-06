@@ -32,6 +32,7 @@
             </ol>
 
             <form id="totpForm" action="/totp" method="post" style="margin-top:14px;display:flex;gap:8px;align-items:center;">
+                <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
                 <input id="totpInput" name="totp" type="text" inputmode="numeric" maxlength="6" required placeholder="000000" style="font-size:18px;padding:8px 10px;border-radius:6px;border:1px solid #e5e7eb;width:160px;">
                 <button type="submit" style="padding:8px 12px;border-radius:6px;border:0;background:#2563eb;color:#fff;cursor:pointer;">Confirmer</button>
                 <button id="cancelBtn" type="button" style="padding:8px 12px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;color:#111827;cursor:pointer;">Annuler</button>

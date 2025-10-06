@@ -6,13 +6,17 @@ const prisma = new PrismaClient();
 export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.get("/", async function (request, reply) {
     const userId = request.session.get("data");
-    if (!userId) return reply.redirect("/login");
+    if (!userId) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    }
 
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
       omit: { password: true },
     });
-    if (!userInfo) return reply.redirect("/login");
+    if (!userInfo) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    }
 
     const [linksCount, socialsCount, labelsCount, recentLinks] =
       await Promise.all([
@@ -36,13 +40,17 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   // Dashboard: Cosmétiques (aperçu et sélection)
   fastify.get("/cosmetics", async function (request, reply) {
     const userId = request.session.get("data");
-    if (!userId) return reply.redirect("/login");
+    if (!userId) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
       include: { cosmetics: true },
       omit: { password: true },
     });
-    if (!userInfo) return reply.redirect("/login");
+    if (!userInfo) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    }
     const cosmetics = (userInfo.cosmetics as any) || {};
     // Petit catalogue par défaut (certaines entrées "verrouillées" selon le rôle)
     const catalog = {
@@ -109,19 +117,25 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   // Page d'édition du profil (éditeur complet)
   fastify.get("/edit", async function (request, reply) {
     const userId = request.session.get("data");
-    if (!userId) return reply.redirect("/login");
+    if (!userId) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
       omit: { password: true },
     });
-    if (!userInfo) return reply.redirect("/login");
+    if (!userInfo) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    }
     return reply.view("dashboard/user/edit.ejs", { user: userInfo });
   });
 
   // Dashboard: Statistiques (vue dédiée)
   fastify.get("/stats", async function (request, reply) {
     const userId = request.session.get("data");
-    if (!userId) return reply.redirect("/login");
+    if (!userId) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
       omit: { password: true },
@@ -129,7 +143,9 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         links: true
       }
     });
-    if (!userInfo) return reply.redirect("/login");
+    if (!userInfo) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    }
     // Précharger la série par jour pour 30 derniers jours en fallback (si fetch échoue côté client)
     const now = new Date();
     const end = now;
@@ -249,25 +265,37 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   // Dashboard: Versions (vue dédiée)
   fastify.get("/versions", async function (request, reply) {
     const userId = request.session.get("data");
-    if (!userId) return reply.redirect("/login");
+    if (!userId) {
+  const dest = `/login?returnTo=${encodeURIComponent(request.raw.url || '/dashboard')}`;
+  request.log?.info({ returnTo: request.raw.url }, 'redirecting to login with returnTo');
+  return reply.redirect(dest);
+    }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
       omit: { password: true },
     });
-    if (!userInfo) return reply.redirect("/login");
+    if (!userInfo) {
+  const dest = `/login?returnTo=${encodeURIComponent(request.raw.url || '/dashboard')}`;
+  request.log?.info({ returnTo: request.raw.url }, 'redirecting to login with returnTo');
+  return reply.redirect(dest);
+    }
     return reply.view("dashboard/user/versions.ejs", { user: userInfo });
   });
 
   // Dashboard: Compte (gestion infos, confidentialité, cosmétiques)
   fastify.get("/account", async function (request, reply) {
     const userId = request.session.get("data");
-    if (!userId) return reply.redirect("/login");
+    if (!userId) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
       include: { cosmetics: true },
       omit: { password: true },
     });
-    if (!userInfo) return reply.redirect("/login");
+    if (!userInfo) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    }
     // Dérive la visibilité d'email depuis le champ `publicEmail` (présent
     // dans le schéma Prisma). Si publicEmail est défini -> l'email est public.
     const isEmailPublic = Boolean((userInfo as any).publicEmail);
@@ -280,13 +308,17 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   // Dashboard: Admin (gestion avancée)
   fastify.get("/admin", async function (request, reply) {
     const userId = request.session.get("data");
-    if (!userId) return reply.redirect("/login");
+    if (!userId) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    }
 
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
       omit: { password: true },
     });
-    if (!userInfo) return reply.redirect("/login");
+    if (!userInfo) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    }
     if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
       return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
     }
@@ -335,9 +367,13 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   // Admin: Page statistiques utilisateurs
   fastify.get('/admin/stats', async function (request, reply) {
     const userId = request.session.get('data');
-    if (!userId) return reply.redirect('/login');
+    if (!userId) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    }
     const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
-    if (!userInfo) return reply.redirect('/login');
+    if (!userInfo) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    }
     if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
       return reply.code(403).view('erreurs/500.ejs', { message: 'Accès refusé', currentUser: userInfo });
     }
@@ -405,10 +441,10 @@ export function dashboardRoutes(fastify: FastifyInstance) {
 
   // Dashboard: Mes thèmes (création / soumission)
   fastify.get("/themes", async function (request, reply) {
-    const userId = request.session.get("data");
-    if (!userId) return reply.redirect("/login");
+  const userId = request.session.get("data");
+  if (!userId) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
     const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
-    if (!userInfo) return reply.redirect("/login");
+  if (!userInfo) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
     const myThemes = await prisma.theme.findMany({
       where: { authorId: userId as string }, orderBy: { updatedAt: "desc" },
       select: { id: true, name: true, description: true, status: true, updatedAt: true, data: true, pendingUpdate: true, pendingUpdateAt: true, pendingUpdateMessage: true, isPrivate: true }
@@ -418,10 +454,10 @@ export function dashboardRoutes(fastify: FastifyInstance) {
 
   // Admin: Liste des thèmes soumis
   fastify.get("/admin/themes", async function (request, reply) {
-    const userId = request.session.get("data");
-    if (!userId) return reply.redirect("/login");
-    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
-    if (!userInfo) return reply.redirect("/login");
+  const userId = request.session.get("data");
+  if (!userId) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
+  const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+  if (!userInfo) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
     if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
       return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
     }
@@ -453,10 +489,10 @@ export function dashboardRoutes(fastify: FastifyInstance) {
 
   // Admin: Prévisualisation d'un thème
   fastify.get("/admin/themes/:id", async function (request, reply) {
-    const userId = request.session.get("data");
-    if (!userId) return reply.redirect("/login");
-    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
-    if (!userInfo) return reply.redirect("/login");
+  const userId = request.session.get("data");
+    if (!userId) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
+  const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+  if (!userInfo) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
     if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
       return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
     }

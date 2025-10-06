@@ -30,6 +30,8 @@ const PORT = Number(process.env.PORT) || 3001;
 declare module "@fastify/secure-session" {
   interface SessionData {
     data?: string;
+    // URL to return to after successful authentication
+    returnTo?: string;
   }
 }
 
@@ -85,6 +87,8 @@ fastify.get("/", async function (request, reply) {
 
 fastify.get("/login", async function (request, reply) {
   const currentUserId = request.session.get("data") as string | undefined;
+  // Log stored returnTo for debugging
+  try { request.log?.info({ returnTo: (request.session as any).get('returnTo') }, 'GET /login session'); } catch (e) {}
   const currentUser = currentUserId
     ? await prisma.user.findUnique({
         where: { id: currentUserId },
@@ -97,7 +101,8 @@ fastify.get("/login", async function (request, reply) {
         },
       })
     : null;
-  return reply.view("connect.ejs", { currentUser });
+  const returnToQuery = (request.query as any)?.returnTo || '';
+  return reply.view("connect.ejs", { currentUser, returnTo: returnToQuery });
 });
 
 fastify.post("/register", async (req, reply) => {
@@ -165,9 +170,11 @@ fastify.post("/register", async (req, reply) => {
         password: hashedPassword,
       },
     });
-    // Auto-login: set session and redirect to dashboard
+    // Auto-login: set session and redirect to original destination if present
+    const returnTo = (req.body as any)?.returnTo || (req.query as any)?.returnTo;
+    req.log?.info({ returnTo }, 'register: returnTo read from request');
     req.session.set("data", user.id);
-    return reply.redirect("/dashboard");
+    return reply.redirect(returnTo || "/dashboard");
   } catch (error) {
     reply.redirect(
       "/login?error=" + encodeURIComponent("Utilisateur deja existant")
@@ -214,11 +221,15 @@ fastify.post("/login", async (request, reply) => {
     );
 
   if (user.twoFactorEnabled) {
+    // Pass returnTo via query to TOTP step so it's preserved through the flow
+    const returnToQuery = (request.body as any)?.returnTo || (request.query as any)?.returnTo;
     request.session.set("data", user.id + "__totp");
-    return reply.redirect("/totp");
+    return reply.redirect(`/totp${returnToQuery ? `?returnTo=${encodeURIComponent(returnToQuery)}` : ''}`);
   }
+  const returnToLogin = (request.body as any)?.returnTo || (request.query as any)?.returnTo;
+  request.log?.info({ returnTo: returnToLogin }, 'login: returnTo read from request');
   request.session.set("data", user.id);
-  reply.redirect("/dashboard");
+  reply.redirect(returnToLogin || "/dashboard");
 });
 
 fastify.get("/totp", (request, reply) => {
@@ -227,7 +238,8 @@ fastify.get("/totp", (request, reply) => {
     currentUserIdTotp.split("__").length === 2 &&
     currentUserIdTotp.split("__")[1] === "totp"
   ) {
-    reply.view("totp.ejs");
+    const returnToQuery = (request.query as any)?.returnTo || '';
+    reply.view("totp.ejs", { returnTo: returnToQuery });
   }
 });
 
@@ -243,11 +255,13 @@ fastify.post("/totp", async (request, reply) => {
         id: currentUserIdTotp.split("__")[0]
       }
     })
-    const isValid = authenticator.check(totp, user.twoFactorSecret);
-    if (!isValid) return reply.code(401).send({ error: "Invalid TOTP code" });
+      const isValid = authenticator.check(totp, user.twoFactorSecret);
+      if (!isValid) return reply.code(401).send({ error: "Invalid TOTP code" });
 
-    request.session.set("data", user.id)
-    return reply.redirect("/dashboard");
+      const returnToTotp = (request.body as any)?.returnTo || (request.query as any)?.returnTo;
+      request.log?.info({ returnTo: returnToTotp }, 'totp: returnTo read from request');
+      request.session.set("data", user.id)
+      return reply.redirect(returnToTotp || "/dashboard");
   }
 });
 
