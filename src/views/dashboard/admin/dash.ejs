@@ -352,9 +352,9 @@
         const styleMenu = document.createElement('style');
         styleMenu.textContent = `
 .actionsWrap { display: inline-block; }
-.actionsMenu { backdrop-filter: blur(4px); }
+.actionsMenu { backdrop-filter: blur(4px); z-index: 9999 !important; }
 .actionsMenu .menuItem { line-height: 1; }
-.submenu { min-width: 9rem; }
+.submenu { min-width: 9rem; z-index: 10000 !important; }
 .submenu.open { display: block; }
 `;
         document.head.appendChild(styleMenu);
@@ -409,6 +409,12 @@
                     });
                     // Puis fermer le menu d'actions
                     m.classList.add('hidden');
+                    // remove any inline positioning applied when opened
+                    m.style.position = '';
+                    m.style.top = '';
+                    m.style.left = '';
+                    m.style.right = '';
+                    m.style.zIndex = '';
                     const btn = m.closest('.actionsWrap')?.querySelector('.actionsBtn');
                     if (btn) btn.setAttribute('aria-expanded', 'false');
                 }
@@ -430,6 +436,33 @@
                 }
                 menu.classList.toggle('hidden', !isHidden);
                 btn.setAttribute('aria-expanded', String(!isHidden));
+                // If we just opened the menu, position it as fixed to escape stacking contexts
+                if (isHidden) {
+                    // ensure visible for measurements
+                    menu.style.position = 'fixed';
+                    menu.style.zIndex = '99999';
+                    // compute coords: align menu's right edge with button's right edge and place below button
+                    const btnRect = btn.getBoundingClientRect();
+                    // allow the menu to layout first
+                    const menuRect = menu.getBoundingClientRect();
+                    let left = btnRect.right - menuRect.width;
+                    if (left < 8) left = 8; // small margin
+                    let top = btnRect.bottom + 6;
+                    // if bottom would overflow, place above
+                    if (top + menuRect.height > window.innerHeight - 8) {
+                        top = btnRect.top - menuRect.height - 6;
+                    }
+                    menu.style.left = left + 'px';
+                    menu.style.top = top + 'px';
+                    menu.style.right = 'auto';
+                } else {
+                    // closed -> reset inline styles
+                    menu.style.position = '';
+                    menu.style.top = '';
+                    menu.style.left = '';
+                    menu.style.right = '';
+                    menu.style.zIndex = '';
+                }
                 // Ajuster la position du sous-menu (droite/gauche) quand on ouvre
                 requestAnimationFrame(() => {
                     wrap.querySelectorAll('.submenu').forEach((sub) => {
