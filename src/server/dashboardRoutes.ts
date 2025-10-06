@@ -32,6 +32,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     } catch (e) {}
     return list;
   }
+  
   fastify.get("/", async function (request, reply) {
     request.log?.info({ cookies: request.headers.cookie, sessionData: request.session.get('data') }, 'dashboard root: incoming request');
     const userId = request.session.get("data");
@@ -353,8 +354,9 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (!userInfo) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
     }
-    if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
-      return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
+    if (!isStaff(userInfo.role)) {
+      request.log?.info({ userId: userInfo.id, role: userInfo.role }, 'non-staff attempted admin page - redirecting to user dashboard');
+      return reply.redirect('/dashboard');
     }
     const [users, totals] = await Promise.all([
       prisma.user.findMany({
@@ -408,8 +410,9 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (!userInfo) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
     }
-    if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
-      return reply.code(403).view('erreurs/500.ejs', { message: 'Accès refusé', currentUser: userInfo });
+    if (!isStaff(userInfo.role)) {
+      request.log?.info({ userId: userInfo.id, role: userInfo.role }, 'non-staff attempted admin stats page - redirecting to user dashboard');
+      return reply.redirect('/dashboard');
     }
     return reply.view('dashboard/admin/stats.ejs', { user: userInfo });
   });
@@ -492,8 +495,9 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   if (!userId) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
   const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
   if (!userInfo) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
-    if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
-      return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
+    if (!isStaff(userInfo.role)) {
+      request.log?.info({ userId: userInfo.id, role: userInfo.role }, 'non-staff attempted admin themes page - redirecting to user dashboard');
+      return reply.redirect('/dashboard');
     }
     const [submitted, approved, archived] = await Promise.all([
       prisma.theme.findMany({
@@ -527,8 +531,9 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (!userId) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
   const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
   if (!userInfo) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
-    if (!(userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER || userInfo.role === Role.MODERATOR)) {
-      return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
+    if (!isStaff(userInfo.role)) {
+      request.log?.info({ userId: userInfo.id, role: userInfo.role }, 'non-staff attempted admin theme preview - redirecting to user dashboard');
+      return reply.redirect('/dashboard');
     }
     const { id } = request.params as { id: string };
     const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, name: true, description: true, data: true, author: { select: { id: true, userName: true } }, status: true, pendingUpdate: true, isPrivate: true } });
