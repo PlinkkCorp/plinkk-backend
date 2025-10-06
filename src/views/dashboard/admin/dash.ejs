@@ -503,8 +503,25 @@ box-shadow: 0 8px 24px rgba(16,185,129,.35);
                                     m.style.left = '';
                                     m.style.right = '';
                                     m.style.zIndex = '';
-                                    const btn = m.closest('.actionsWrap')?.querySelector('.actionsBtn');
+                                    // reset pointer-events if changed
+                                    m.style.pointerEvents = '';
+                                    // attempt to find the corresponding button and update aria
+                                    const btn = (m._origParent && m._origParent.querySelector) ? m._origParent.querySelector('.actionsBtn') : m.closest('.actionsWrap')?.querySelector('.actionsBtn');
                                     if (btn) btn.setAttribute('aria-expanded', 'false');
+                                    // if the menu was moved to document.body, restore it into its original parent
+                                    if (m._origParent) {
+                                        try {
+                                            if (m._origNext && m._origNext.parentNode === m._origParent) {
+                                                m._origParent.insertBefore(m, m._origNext);
+                                            } else {
+                                                m._origParent.appendChild(m);
+                                            }
+                                        } catch (e) {
+                                            // ignore restore errors
+                                        }
+                                        delete m._origParent;
+                                        delete m._origNext;
+                                    }
                                 }
                             });
                         }
@@ -524,11 +541,19 @@ box-shadow: 0 8px 24px rgba(16,185,129,.35);
                                 }
                                 menu.classList.toggle('hidden', !isHidden);
                                 btn.setAttribute('aria-expanded', String(!isHidden));
-                                // If we just opened the menu, position it as fixed to escape stacking contexts
+                                // If we just opened the menu, move it to document.body and position it fixed to escape stacking contexts
                                 if (isHidden) {
+                                    // store original parent so we can restore later
+                                    try {
+                                        menu._origParent = wrap;
+                                        menu._origNext = menu.nextSibling;
+                                        // move menu to body so it is outside any stacking context
+                                        document.body.appendChild(menu);
+                                    } catch (e) { /* ignore */ }
                                     // ensure visible for measurements
                                     menu.style.position = 'fixed';
-                                    menu.style.zIndex = '99999';
+                                    menu.style.zIndex = '2147483000';
+                                    menu.style.pointerEvents = 'auto';
                                     // compute coords: align menu's right edge with button's right edge and place below button
                                     const btnRect = btn.getBoundingClientRect();
                                     // allow the menu to layout first
@@ -544,12 +569,24 @@ box-shadow: 0 8px 24px rgba(16,185,129,.35);
                                     menu.style.top = top + 'px';
                                     menu.style.right = 'auto';
                                 } else {
-                                    // closed -> reset inline styles
+                                    // closed -> reset inline styles and restore to original parent if moved
                                     menu.style.position = '';
                                     menu.style.top = '';
                                     menu.style.left = '';
                                     menu.style.right = '';
                                     menu.style.zIndex = '';
+                                    menu.style.pointerEvents = '';
+                                    if (menu._origParent) {
+                                        try {
+                                            if (menu._origNext && menu._origNext.parentNode === menu._origParent) {
+                                                menu._origParent.insertBefore(menu, menu._origNext);
+                                            } else {
+                                                menu._origParent.appendChild(menu);
+                                            }
+                                        } catch (e) { /* ignore */ }
+                                        delete menu._origParent;
+                                        delete menu._origNext;
+                                    }
                                 }
                                 // Ajuster la position du sous-menu (droite/gauche) quand on ouvre
                                 requestAnimationFrame(() => {
