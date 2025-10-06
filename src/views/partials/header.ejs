@@ -73,7 +73,7 @@
             <div class="pt-2 space-y-2">
               <div class="flex items-center gap-2">
                 <div class="h-8 w-8 rounded-full grid place-items-center bg-indigo-700/70 font-semibold text-white overflow-hidden" data-avatar>
-                  <%- include('./avatar', { user: currentUser }) %>
+                  <%- include('avatar.ejs', { user: currentUser }) %>
                 </div>
                 <div class="min-w-0">
                   <p class="text-sm font-medium text-slate-200 truncate"><%= currentUser.userName || currentUser.id %></p>
