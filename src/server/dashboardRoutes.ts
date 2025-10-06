@@ -461,8 +461,15 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       return reply.code(403).view("erreurs/500.ejs", { message: "Accès refusé", currentUser: userInfo });
     }
     const { id } = request.params as { id: string };
-  const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, name: true, description: true, data: true, author: { select: { id: true, userName: true } }, status: true, pendingUpdate: true, isPrivate: true } });
+    const t = await prisma.theme.findUnique({ where: { id }, select: { id: true, name: true, description: true, data: true, author: { select: { id: true, userName: true } }, status: true, pendingUpdate: true, isPrivate: true } });
     if (!t) return reply.code(404).view("erreurs/404.ejs", { currentUser: userInfo });
-    return reply.view("dashboard/admin/preview.ejs", { user: userInfo, theme: t });
+    // Expose convenient booleans expected by the preview template
+    const themeForView = {
+      ...t,
+      archived: (t.status === 'ARCHIVED'),
+      approved: (t.status === 'APPROVED'),
+      isApproved: (t.status === 'APPROVED')
+    };
+    return reply.view("dashboard/admin/preview.ejs", { user: userInfo, theme: themeForView });
   });
 }

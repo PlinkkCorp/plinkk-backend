@@ -10,13 +10,57 @@
     </div>
     <div class="flex gap-2">
       <% if (theme.pendingUpdate) { %>
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200" title="Une mise à jour est en attente">
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"></svg>
+        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.72-1.36 3.486 0l6.518 11.59A2 2 0 0116.518 18H3.482a2 2 0 01-1.743-3.311L8.257 3.1zM9 7a1 1 0 112 0v3a1 1 0 11-2 0V7zm1 6.5a1.25 1.25 0 100-2.5 1.25 1.25 0 000 2.5z" clip-rule="evenodd"/>
+          </svg>
+          <span>MAJ en attente</span>
+        </span>
         <button id="approveUpdateBtn" class="px-3 py-2 rounded bg-emerald-600 text-white text-sm">Approuver la MAJ</button>
         <button id="rejectBtn" class="px-3 py-2 rounded bg-rose-600 text-white text-sm">Rejeter</button>
       <% } else if (theme.pending || theme.pendingApproval || theme.status === 'pending' || (!theme.approved && !theme.isApproved && !theme.archived)) { %>
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100" title="En attente d'approbation">
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 8v4"/>
+        <path d="M12 16h.01"/>
+        <path d="M21 15a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h2l1-3h6l1 3h2a2 2 0 012 2z"/>
+          </svg>
+          <span>En attente</span>
+        </span>
         <button id="approveBtn" class="px-3 py-2 rounded bg-emerald-600 text-white text-sm">Approuver</button>
         <button id="rejectBtn" class="px-3 py-2 rounded bg-rose-600 text-white text-sm">Rejeter</button>
-      <% } else { %>
-        <!-- Aucun bouton pour les autres états -->
+      <% } else if (theme.archived) { %>
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-100 border border-slate-700" title="Thème archivé">
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <!-- cleaner archive box icon -->
+        <path d="M21 8v10a2 2 0 01-2 2H5a2 2 0 01-2-2V8" />
+        <path d="M3 8l9-5 9 5" />
+        <path d="M9 13h6" />
+          </svg>
+          <span>Archivé</span>
+        </span>
+        <button id="unarchiveBtn" class="px-3 py-2 rounded bg-slate-700 text-white text-sm">Désarchiver</button>
+        <button id="deleteBtn" class="px-3 py-2 rounded bg-rose-700 text-white text-sm">Supprimer</button>
+      <% } else if (theme.approved) { %>
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200" title="Thème approuvé">
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 10-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <span>Approuvé</span>
+        </span>
+        <button id="archiveBtn" class="px-3 py-2 rounded bg-slate-700 text-white text-sm">Archiver</button>
+        <button id="deleteBtn" class="px-3 py-2 rounded bg-rose-700 text-white text-sm">Supprimer</button>
+      <% } else if (theme.isApproved) { %>
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100" title="Thème en attente d'approbation">
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 6v6l4 2"/>
+        <path d="M7 20h10"/>
+        <path d="M7 4h10"/>
+          </svg>
+          <span>En attente d'approbation</span>
+        </span>
+        <button id="archiveBtn" class="px-3 py-2 rounded bg-slate-700 text-white text-sm">Archiver</button>
+        <button id="deleteBtn" class="px-3 py-2 rounded bg-rose-700 text-white text-sm">Supprimer</button>
       <% } %>
     </div>
   </div>
@@ -24,15 +68,29 @@
   <div class="text-sm text-slate-300"><%= theme.description || '' %></div>
   <div class="flex items-center gap-2 text-xs mt-2">
     <span class="text-slate-400">Aperçu:</span>
-    <button data-mode="light" class="px-2 py-1 rounded bg-slate-800 border border-slate-700">Light</button>
-    <button data-mode="dark" class="px-2 py-1 rounded bg-slate-800 border border-slate-700">Dark</button>
+    <span class="text-xs text-slate-400">Light & Dark affichés simultanément</span>
   </div>
-  <div id="previewBox" class="rounded p-4 border border-slate-800 mt-2">
-    <div class="flex gap-2">
-      <button id="btnPrimary" class="px-3 py-2 text-sm rounded">Bouton</button>
-      <button id="btnHover" class="px-3 py-2 text-sm rounded">Hover</button>
+  <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div id="previewBoxLight" class="rounded p-4 border border-slate-800">
+      <div class="flex items-center justify-between">
+        <strong class="text-sm">Light</strong>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button id="btnPrimaryLight" class="px-3 py-2 text-sm rounded">Bouton</button>
+        <button id="btnHoverLight" class="px-3 py-2 text-sm rounded">Hover</button>
+      </div>
+      <p class="mt-3 text-sm">Texte d'exemple</p>
     </div>
-    <p class="mt-3 text-sm">Texte d'exemple</p>
+    <div id="previewBoxDark" class="rounded p-4 border border-slate-800">
+      <div class="flex items-center justify-between">
+        <strong class="text-sm">Dark</strong>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button id="btnPrimaryDark" class="px-3 py-2 text-sm rounded">Bouton</button>
+        <button id="btnHoverDark" class="px-3 py-2 text-sm rounded">Hover</button>
+      </div>
+      <p class="mt-3 text-sm">Texte d'exemple</p>
+    </div>
   </div>
 </main>
 
@@ -40,10 +98,15 @@
 (function(){
   const raw = JSON.parse(String.raw`<%- JSON.stringify(JSON.stringify(theme.data)) %>`);
   const id = '<%= theme.id %>';
-  const previewBox = document.getElementById('previewBox');
-  const btnPrimary = document.getElementById('btnPrimary');
-  const btnHover = document.getElementById('btnHover');
-  let mode = 'light';
+
+  // DOM refs for both previews
+  const previewBoxLight = document.getElementById('previewBoxLight');
+  const previewBoxDark = document.getElementById('previewBoxDark');
+  const btnPrimaryLight = document.getElementById('btnPrimaryLight');
+  const btnHoverLight = document.getElementById('btnHoverLight');
+  const btnPrimaryDark = document.getElementById('btnPrimaryDark');
+  const btnHoverDark = document.getElementById('btnHoverDark');
+
   // Coerce to full theme shape {background, textColor, buttonBackground, buttonHoverBackground, linkHoverColor, articleHoverBoxShadow, darkTheme, opposite}
   function normalizeHex(v){ if(!v) return '#000000'; let s=String(v).trim(); if(!s.startsWith('#')) s='#'+s; if(/^#[0-9a-fA-F]{3}$/.test(s)) s='#'+s.slice(1).split('').map(c=>c+c).join(''); return s; }
   function lum(hex){ const h=normalizeHex(hex).slice(1); const r=parseInt(h.slice(0,2),16)/255,g=parseInt(h.slice(2,4),16)/255,b=parseInt(h.slice(4,6),16)/255; const a=[r,g,b].map(v=>v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)); return 0.2126*a[0]+0.7152*a[1]+0.0722*a[2]; }
@@ -85,20 +148,27 @@
     }
     return { background:'#111827', textColor:'#e5e7eb', buttonBackground:'#4f46e5', buttonHoverBackground:'#6366f1', buttonTextColor:'#111827', linkHoverColor:'#22c55e', articleHoverBoxShadow:'', darkTheme:false, opposite:{ background:'#0b1020', textColor:'#e5e7eb', buttonBackground:'#4f46e5', buttonHoverBackground:'#6366f1', buttonTextColor:'#ffffff', linkHoverColor:'#22c55e', articleHoverBoxShadow:'', darkTheme:true } };
   }
+
   const dataObj = (typeof raw === 'string') ? (function(){ try { return JSON.parse(raw); } catch(_) { return {}; } })() : raw;
   const d = coerce(dataObj);
-  function current(){ return mode==='dark' ? (d.opposite||d) : (d.darkTheme? d.opposite : d); }
-  function applyPreview(){
-    const t = current();
-    previewBox.style.background = t.background || '#111827';
-    previewBox.style.color = t.textColor || '#e5e7eb';
-    btnPrimary.style.background = t.buttonBackground || '#4f46e5'; btnPrimary.style.color = t.buttonTextColor || '#111827';
-    btnHover.style.background = t.hoverColor || t.linkHoverColor || '#22c55e'; btnHover.style.color = t.textColor || '#e5e7eb';
+
+  // Determine explicit light and dark theme objects
+  const lightTheme = d.darkTheme ? (d.opposite || d) : d;
+  const darkTheme = d.darkTheme ? d : (d.opposite || d);
+
+  function applyThemeTo(box, btnPrimary, btnHover, t){
+    if (!box) return;
+    box.style.background = t.background || '#111827';
+    box.style.color = t.textColor || '#e5e7eb';
+    if (btnPrimary) { btnPrimary.style.background = t.buttonBackground || '#4f46e5'; btnPrimary.style.color = t.buttonTextColor || '#111827'; }
+    if (btnHover) { btnHover.style.background = t.hoverColor || t.linkHoverColor || '#22c55e'; btnHover.style.color = t.textColor || '#e5e7eb'; }
+    if (t.articleHoverBoxShadow) box.style.boxShadow = t.articleHoverBoxShadow;
   }
-  applyPreview();
-  document.querySelectorAll('[data-mode]')?.forEach(b=>{
-    b.addEventListener('click', ()=>{ mode = b.getAttribute('data-mode')||'light'; applyPreview(); });
-  });
+
+  // Apply both themes immediately
+  applyThemeTo(previewBoxLight, btnPrimaryLight, btnHoverLight, lightTheme);
+  applyThemeTo(previewBoxDark, btnPrimaryDark, btnHoverDark, darkTheme);
+
   const goBack = (msg) => { if (msg) console.info(msg); window.location.href = '/dashboard/admin/themes'; };
   // Helper to attach safe handlers only if the element exists
   const on = (sel, fn) => { const el = document.getElementById(sel); if (!el) return; fn(el); };
@@ -178,6 +248,6 @@
       } catch(e){ alert('Impossible de supprimer'); confirm.disabled = false; confirm.textContent = 'Supprimer'; }
     });
   }
-  deleteBtn.addEventListener('click', ()=> createModal());
+  if (deleteBtn) deleteBtn.addEventListener('click', ()=> createModal());
 })();
 </script>
