@@ -268,6 +268,7 @@ fastify.get("/users", async (request, reply) => {
           isPublic: true,
           email: true,
           image: true,
+          profileImage: true
         },
       })
     : null;
@@ -284,7 +285,7 @@ fastify.get("/users", async (request, reply) => {
     },
     orderBy: { createdAt: "asc" },
   });
-  return reply.view("users.ejs", { users, currentUser });
+  return reply.view("users.ejs", { users: users, currentUser: currentUser });
 });
 
 // 404 handler (après routes spécifiques)
