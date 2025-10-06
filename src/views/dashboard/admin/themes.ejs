@@ -3,13 +3,43 @@
 
 <main class="max-w-7xl mx-auto p-4 space-y-5">
   <h1 class="text-2xl font-semibold">Gestion des thèmes</h1>
+  <style>
+    .searchWrap { display:flex; gap:.5rem; }
+    .searchInput { display:flex; align-items:center; gap:.5rem; background:rgba(15,23,42,.6); padding:.25rem .5rem; border-radius:.5rem; border:1px solid rgba(63,63,70,.6); }
+    .searchInput input { background:transparent; border:0; padding:.5rem .25rem; outline:none; color:inherit; width:18rem }
+    .clearBtn { background:transparent; border:0; color:rgba(148,163,184,0.9); cursor:pointer }
+    @media (max-width:640px){ .searchInput input{ width: 100%; } }
+  </style>
+
   <div class="flex items-center justify-between gap-3">
     <div class="flex-1">
-      <input id="themeSearch" type="search" placeholder="Rechercher un thème ou auteur..." class="w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-700 text-sm" />
+      <div class="searchWrap">
+        <div class="searchInput" role="search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-slate-400" aria-hidden="true"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <input id="themeSearch" type="search" placeholder="Rechercher un thème ou auteur..." class="text-sm" />
+          <button id="clearSearch" class="clearBtn" title="Effacer la recherche" aria-label="Effacer la recherche">✕</button>
+        </div>
+        <select id="themeCategoryFilter" class="px-3 py-2 rounded bg-slate-900/60 border border-slate-700 text-sm" aria-label="Filtrer par catégorie de chat">
+          <option value="">Toutes catégories</option>
+        </select>
+      </div>
     </div>
     <div class="ml-3">
-      <a href="/dashboard/themes" class="px-3 py-1.5 rounded bg-emerald-600 text-white text-xs">Créer un thème</a>
+      <a href="/dashboard/themes" class="px-3 py-2 rounded bg-emerald-600 text-white text-sm">Créer un thème</a>
     </div>
+  </div>
+
+  <style>
+    .tabs { display:flex; gap:.5rem; margin-top:.75rem }
+    .tabBtn { padding:.5rem .75rem; border-radius:.5rem; background:transparent; border:1px solid transparent; color:inherit; cursor:pointer }
+    .tabBtn.active { background:rgba(99,102,241,.12); border-color:rgba(99,102,241,.25); }
+    .section-hidden { display:none !important; }
+  </style>
+
+  <div class="tabs" role="tablist" aria-label="Sections des thèmes">
+    <button class="tabBtn active" data-tab="submitted" role="tab" aria-selected="true">À valider <span class="tab-count ml-2 text-xs text-slate-400">(<span>0</span>)</span></button>
+    <button class="tabBtn" data-tab="approved" role="tab" aria-selected="false">Validés <span class="tab-count ml-2 text-xs text-slate-400">(<span>0</span>)</span></button>
+    <button class="tabBtn" data-tab="archived" role="tab" aria-selected="false">Archivés <span class="tab-count ml-2 text-xs text-slate-400">(<span>0</span>)</span></button>
   </div>
 
   <!-- À valider -->
@@ -354,6 +384,105 @@
       grids.forEach(g=>observer.observe(g, { childList: true }));
     }
     setupDragAndDrop();
+  })();
+  </script>
+  <script src="/public/js/pagination.js"></script>
+  <script>
+  (function(){
+    // Pagination + filtre par catégorie pour chaque grille
+    const grids = {
+      submitted: document.getElementById('gridSubmitted'),
+      approved: document.getElementById('gridApproved'),
+      archived: document.getElementById('gridArchived')
+    };
+    const search = document.getElementById('themeSearch');
+    const catSelect = document.getElementById('themeCategoryFilter');
+    // collect categories from data-json of all themeCards
+    function collectCategories(){
+      const cats = new Set();
+      Object.values(grids).forEach(g=>{
+        if (!g) return;
+        Array.from(g.querySelectorAll('.themeCard')).forEach(card=>{
+          try{ const raw = card.getAttribute('data-json')||'{}'; const parsed = JSON.parse(raw); const cat = (parsed.chat && parsed.chat.category) || parsed.category || parsed.chatCategory || ''; if (cat) cats.add(String(cat)); }catch(e){}
+        });
+      });
+      return Array.from(cats).sort();
+    }
+
+    function populateCategorySelect(){
+      const cats = collectCategories();
+      cats.forEach(c=>{
+        const o = document.createElement('option'); o.value = c; o.textContent = c; catSelect.appendChild(o);
+      });
+    }
+
+    // helper to ensure a message when no items
+    function ensureEmptyMessage(grid){
+      let m = grid.querySelector('.no-match-msg');
+      if (!m){ m = document.createElement('div'); m.className = 'no-match-msg col-span-full text-sm text-slate-400'; m.style.display='none'; m.textContent = 'Aucun thème correspondant.'; grid.appendChild(m);} return m;
+    }
+
+    // create paginators if available and wire tab updates
+    const paginators = {};
+    const tabButtons = Array.from(document.querySelectorAll('.tabBtn'));
+    function showTab(name){
+      ['submitted','approved','archived'].forEach(s=>{
+        const sec = document.getElementById('grid'+(s==='submitted'?'Submitted': s==='approved'?'Approved':'Archived'))?.closest('section') || document.querySelector('[data-section="'+s+'"]');
+        if (sec) sec.classList.toggle('section-hidden', s!==name);
+      });
+      tabButtons.forEach(b=>{ const is = b.dataset.tab === name; b.classList.toggle('active', is); b.setAttribute('aria-selected', String(is)); });
+    }
+    tabButtons.forEach(b=> b.addEventListener('click', ()=> showTab(b.dataset.tab)));
+
+    Object.keys(grids).forEach(k=>{
+      const g = grids[k]; if (!g) return;
+      if (!window.__PlinkkPaginator) return;
+      const p = window.__PlinkkPaginator.createPaginator(g, { pageSize: 9, selectors: { items: '.themeCard' }, onRender: (pageItems, meta) => {
+        // show empty message when no matches
+        const em = ensureEmptyMessage(g);
+        if (!meta || meta.totalItems === 0) { em.style.display = ''; } else { em.style.display = 'none'; }
+        // update tab button count
+        try{
+          const btn = tabButtons.find(tb => tb.dataset.tab === k);
+          if (btn) { const span = btn.querySelector('span span'); if (span) span.textContent = String(meta.totalItems); }
+        }catch(e){}
+      }});
+      paginators[k] = p;
+      p.render();
+    });
+
+    // show only submitted by default
+    showTab('submitted');
+
+    function applyFilter(){
+      const q = (search?.value||'').trim().toLowerCase();
+      const cat = (catSelect?.value||'').trim();
+      Object.keys(paginators).forEach(k=>{
+        const p = paginators[k];
+        const all = p.getAll();
+        const filtered = all.filter(li => {
+          const name = (li.dataset.name||'') + ' ' + (li.dataset.author||'');
+          const matchesQ = !q || name.toLowerCase().includes(q);
+          if (!matchesQ) return false;
+          if (!cat) return true;
+          try{ const raw = li.getAttribute('data-json')||'{}'; const parsed = JSON.parse(raw);
+            const c = (parsed.chat && parsed.chat.category) || parsed.category || parsed.chatCategory || '';
+            return String(c) === String(cat);
+          }catch(e){ return false; }
+        });
+        p.setFiltered(filtered);
+      });
+    }
+
+  // wire events
+  search?.addEventListener('input', applyFilter);
+  catSelect?.addEventListener('change', applyFilter);
+  const clearBtn = document.getElementById('clearSearch');
+  clearBtn?.addEventListener('click', (e)=>{ e.preventDefault(); if (search) search.value=''; applyFilter(); if (search) search.focus(); });
+
+    populateCategorySelect();
+    // initial filter to sync pagination
+    applyFilter();
   })();
   </script>
 </main>
