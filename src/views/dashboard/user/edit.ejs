@@ -1,5 +1,5 @@
-<%- include('../partials/head.ejs', { title: 'Tableau de bord - Édition', description: 'Configure les sections, apparence et arrière‑plan de ta page.', robots: 'noindex,nofollow' }) %>
-<%- include('../partials/header-dash.ejs') %>
+<%- include('../../partials/head.ejs', { title: 'Tableau de bord - Édition', description: 'Configure les sections, apparence et arrière‑plan de ta page.', robots: 'noindex,nofollow' }) %>
+<%- include('../../partials/header-dash.ejs') %>
 
         <main class="max-w-7xl mx-auto p-4 grid grid-cols-12 gap-4">
             <!-- Colonne gauche: UI de configuration -->
@@ -398,19 +398,26 @@
                         </script>
                 <!-- Expose les données de configuration (thèmes, animations, canvas, boutons) au dashboard -->
                 <script type="module">
-                    import { themes } from '/public/config/themeConfig.js';
                     import canvaData from '/public/config/canvaConfig.js';
                     import { animations, animationBackground } from '/public/config/animationConfig.js';
                     import btnIconThemeConfig from '/public/config/btnIconThemeConfig.js';
                     import labelPresets from '/public/config/labelPresets.js';
-                                        // Charger thèmes approuvés (communauté) et les ajouter à la suite
-                                        let communityThemes = [];
-                                        try {
-                                            const res = await fetch('/api/themes/approved');
-                                            if (res.ok) communityThemes = await res.json();
-                                        } catch {}
-                                        const mergedThemes = Array.isArray(communityThemes) && communityThemes.length ? themes.concat(communityThemes) : themes;
-                                        window.__PLINKK_CFG__ = { themes: mergedThemes, canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
+                    // Fetch built-ins + community themes from the server and expose
+                    // them to the dashboard UI via window.__PLINKK_CFG__
+                    try {
+                        const res = await fetch('/api/themes/list');
+                        let builtIns = [];
+                        let community = [];
+                        if (res.ok) {
+                            const payload = await res.json();
+                            builtIns = Array.isArray(payload.builtIns) ? payload.builtIns : [];
+                            community = Array.isArray(payload.themes) ? payload.themes : [];
+                        }
+                        const mergedThemes = builtIns.concat(community);
+                        window.__PLINKK_CFG__ = { themes: mergedThemes, canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
+                    } catch (e) {
+                        window.__PLINKK_CFG__ = { themes: [], canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
+                    }
                 </script>
                 <!-- Initialisation de l'UI du dashboard (formulaire, listes, pickers) -->
                 <script type="module" src="/public/js/dashboard-ui/index.js"></script>

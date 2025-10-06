@@ -1,5 +1,8 @@
 import { setSafeText, isSafeUrl, isSafeColor, disableDrag, disableContextMenuOnImage } from './security.js';
 import { btnIconThemeConfig } from './config/btnIconThemeConfig.js';
+// themes are provided at runtime by src/public/js/init.js via the exported
+// `themes` array which is populated from the server-side DB. Do not import
+// the old static config file.
 export function createProfileContainer(profileData) {
     const profileContainer = document.createElement("div");
     profileContainer.className = "profile-container";
@@ -23,8 +26,35 @@ export function createProfileContainer(profileData) {
     else {
         profilePic.src = "{{username}}/images/logo.png";
     }
-    profilePic.onerror = () => {
-        profilePic.src = "{{username}}/images/logo.png";
+    // Try a single fallback to the username logo, then stop retrying to avoid infinite loops
+    profilePic.onerror = function () {
+        try {
+            if (!this._triedFallback) {
+                this._triedFallback = true;
+                // Attempt a single fallback
+                this.src = "{{username}}/images/logo.png";
+                return;
+            }
+        }
+        catch (e) {
+            // ignore
+        }
+        // If we reach here, the fallback failed too: remove the image and show an initial
+        try {
+            this.onerror = null;
+            this.style.display = 'none';
+            const span = document.createElement('span');
+            span.className = 'profile-pic-initial';
+            span.textContent = (profileData.userName || '').trim().charAt(0).toUpperCase() || '';
+            if (profilePicWrapper && profilePicWrapper.contains(this)) {
+                profilePicWrapper.removeChild(this);
+                profilePicWrapper.appendChild(span);
+            }
+        }
+        catch (e) {
+            // final fallback: hide the element
+            try { this.style.display = 'none'; } catch (e) { }
+        }
     };
     profilePic.alt = "Profile Picture";
     profilePic.className = "profile-pic";
@@ -42,8 +72,22 @@ export function createProfileContainer(profileData) {
     else {
         profileIcon.src = "{{username}}/images/icons/default-icon.svg";
     }
-    profileIcon.onerror = () => {
-        profileIcon.src = "{{username}}/images/icons/default-icon.svg";
+    // Single-attempt fallback for the icon, then stop retrying
+    profileIcon.onerror = function () {
+        try {
+            if (!this._triedFallback) {
+                this._triedFallback = true;
+                this.src = "{{username}}/images/icons/default-icon.svg";
+                return;
+            }
+        }
+        catch (e) { }
+        // If fallback failed too, hide the icon
+        try {
+            this.onerror = null;
+            this.style.display = 'none';
+        }
+        catch (e) { }
     };
     profileIcon.alt = "globe";
     profileIcon.className = "profile-icon";

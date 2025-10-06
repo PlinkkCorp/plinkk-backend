@@ -1,0 +1,359 @@
+<%- include('../../partials/head.ejs', { title: 'Admin - Thèmes', description: '', robots: 'noindex,nofollow' }) %>
+<%- include('../../partials/header-dash.ejs') %>
+
+<main class="max-w-7xl mx-auto p-4 space-y-5">
+  <h1 class="text-2xl font-semibold">Gestion des thèmes</h1>
+  <div class="flex items-center justify-between gap-3">
+    <div class="flex-1">
+      <input id="themeSearch" type="search" placeholder="Rechercher un thème ou auteur..." class="w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-700 text-sm" />
+    </div>
+    <div class="ml-3">
+      <a href="/dashboard/themes" class="px-3 py-1.5 rounded bg-emerald-600 text-white text-xs">Créer un thème</a>
+    </div>
+  </div>
+
+  <!-- À valider -->
+  <section>
+    <h2 class="text-lg font-semibold mt-4">À valider</h2>
+    <ul id="gridSubmitted" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
+        <% if ((submitted||[]).length === 0) { %>
+          <li class="col-span-full text-sm text-slate-400">Aucun thème en attente.</li>
+        <% } else { %>
+        <% submitted.forEach(t => { %>
+          <li draggable="true" class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
+            <div class="flex items-start gap-3">
+              <div class="dragHandle flex items-center" title="Déplacer" aria-hidden="true" style="margin-right:6px;align-self:flex-start;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color:rgba(148,163,184,0.9);">
+                  <circle cx="5" cy="6" r="1.5" fill="currentColor" />
+                  <circle cx="12" cy="6" r="1.5" fill="currentColor" />
+                  <circle cx="19" cy="6" r="1.5" fill="currentColor" />
+                  <circle cx="5" cy="13" r="1.5" fill="currentColor" />
+                  <circle cx="12" cy="13" r="1.5" fill="currentColor" />
+                  <circle cx="19" cy="13" r="1.5" fill="currentColor" />
+                </svg>
+              </div>
+              <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
+              <div class="min-w-0 flex-1">
+                <div class="font-medium truncate"><%= t.name %>
+                  <% if (t.pendingUpdate) { %>
+                    <span class="ml-2 text-[10px] px-2 py-0.5 rounded bg-amber-700/40 border border-amber-600/50 text-amber-200 badge-pending-update">MAJ en attente</span>
+                  <% } %>
+                </div>
+                <div class="text-xs text-slate-400 truncate">par @<%= t.author.userName %></div>
+                <% if (t.description) { %>
+                  <div class="text-xs text-slate-400 mt-2 truncate"><%= t.description %></div>
+                <% } %>
+                <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+              </div>
+            </div>
+              <div class="mt-3 flex items-center justify-end gap-2">
+                <% if (t.pendingUpdate) { %>
+                  <button class="approveUpdateBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs">Approuver la MAJ</button>
+                <% } else { %>
+                  <button class="approveBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs">Approuver</button>
+                  <button class="rejectBtn px-3 py-1.5 rounded bg-rose-600 text-white text-xs">Rejeter</button>
+                <% } %>
+                <button class="archiveBtn px-3 py-1.5 rounded bg-slate-700 text-white text-xs">Archiver</button>
+                <a class="px-3 py-1.5 rounded bg-indigo-600 text-white text-xs" href="/dashboard/admin/themes/<%= t.id %>">Prévisualiser</a>
+              </div>
+          </li>
+        <% }) %>
+      </ul>
+        <% } %>
+    </ul>
+  </section>
+
+  <!-- Validés -->
+  <section>
+    <h2 class="text-lg font-semibold mt-6">Validés</h2>
+    <ul id="gridApproved" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
+        <% if ((approved||[]).length === 0) { %>
+          <li class="col-span-full text-sm text-slate-400">Aucun thème validé.</li>
+        <% } else { %>
+        <% approved.forEach(t => { %>
+          <li draggable="true" class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
+            <div class="flex items-start gap-3">
+              <div class="dragHandle flex items-center" title="Déplacer" aria-hidden="true" style="margin-right:6px;align-self:flex-start;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color:rgba(148,163,184,0.9);">
+                  <circle cx="5" cy="6" r="1.5" fill="currentColor" />
+                  <circle cx="12" cy="6" r="1.5" fill="currentColor" />
+                  <circle cx="19" cy="6" r="1.5" fill="currentColor" />
+                  <circle cx="5" cy="13" r="1.5" fill="currentColor" />
+                  <circle cx="12" cy="13" r="1.5" fill="currentColor" />
+                  <circle cx="19" cy="13" r="1.5" fill="currentColor" />
+                </svg>
+              </div>
+              <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
+              <div class="min-w-0 flex-1">
+                <div class="font-medium truncate"><%= t.name %></div>
+                <div class="text-xs text-slate-400 truncate">par @<%= t.author.userName %></div>
+                <% if (t.description) { %>
+                  <div class="text-xs text-slate-400 mt-2 truncate"><%= t.description %></div>
+                <% } %>
+                <div class="flex items-center gap-2 mt-1">
+                  <div class="text-[11px] text-slate-500">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+                  <% if (t.pendingUpdate) { %>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-amber-700/40 border border-amber-600/50 text-amber-200">MAJ en attente</span>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 flex items-center justify-end gap-2">
+              <% if (t.pendingUpdate) { %>
+                <button class="approveUpdateBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs">Approuver la MAJ</button>
+              <% } %>
+              <button class="archiveBtn px-3 py-1.5 rounded bg-slate-700 text-white text-xs">Archiver</button>
+              <a class="px-3 py-1.5 rounded bg-indigo-600 text-white text-xs" href="/dashboard/admin/themes/<%= t.id %>">Prévisualiser</a>
+              <button class="deleteBtn px-3 py-1.5 rounded bg-rose-700 text-white text-xs">Supprimer</button>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+        <% } %>
+    </ul>
+  </section>
+
+  <!-- Archivés -->
+  <section>
+    <h2 class="text-lg font-semibold mt-6">Archivés</h2>
+    <ul id="gridArchived" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
+        <% if ((archived||[]).length === 0) { %>
+          <li class="col-span-full text-sm text-slate-400">Aucun thème archivé.</li>
+        <% } else { %>
+        <% archived.forEach(t => { %>
+          <li draggable="true" class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
+            <div class="flex items-start gap-3">
+              <div class="dragHandle flex items-center" title="Déplacer" aria-hidden="true" style="margin-right:6px;align-self:flex-start;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color:rgba(148,163,184,0.9);">
+                  <circle cx="5" cy="6" r="1.5" fill="currentColor" />
+                  <circle cx="12" cy="6" r="1.5" fill="currentColor" />
+                  <circle cx="19" cy="6" r="1.5" fill="currentColor" />
+                  <circle cx="5" cy="13" r="1.5" fill="currentColor" />
+                  <circle cx="12" cy="13" r="1.5" fill="currentColor" />
+                  <circle cx="19" cy="13" r="1.5" fill="currentColor" />
+                </svg>
+              </div>
+              <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
+              <div class="min-w-0 flex-1">
+                <div class="font-medium truncate"><%= t.name %></div>
+                <div class="text-xs text-slate-400 truncate">par @<%= t.author.userName %></div>
+                <% if (t.description) { %>
+                  <div class="text-xs text-slate-400 mt-2 truncate"><%= t.description %></div>
+                <% } %>
+                <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+              </div>
+            </div>
+            <div class="mt-3 flex items-center justify-end gap-2">
+              <button class="unarchiveBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs">Republier</button>
+              <a class="px-3 py-1.5 rounded bg-indigo-600 text-white text-xs" href="/dashboard/admin/themes/<%= t.id %>">Prévisualiser</a>
+              <button class="deleteBtn px-3 py-1.5 rounded bg-rose-700 text-white text-xs">Supprimer</button>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+        <% } %>
+    </ul>
+  </section>
+
+  <script>
+  (function(){
+    // Toast helper
+    function ensureToastContainer(){
+      let c = document.getElementById('toastContainer');
+      if (!c) {
+        c = document.createElement('div');
+        c.id = 'toastContainer';
+        c.style.position = 'fixed';
+        c.style.right = '16px';
+        c.style.top = '16px';
+        c.style.zIndex = 99999;
+        document.body.appendChild(c);
+      }
+      return c;
+    }
+    function showToast(message, type = 'info', timeout = 3500){
+      const container = ensureToastContainer();
+      const el = document.createElement('div');
+      el.className = 'toast-item';
+      el.style.marginTop = '8px';
+      el.style.minWidth = '220px';
+      el.style.padding = '10px 12px';
+      el.style.borderRadius = '8px';
+      el.style.color = '#fff';
+      el.style.boxShadow = '0 6px 18px rgba(2,6,23,0.6)';
+      el.style.fontSize = '13px';
+      el.style.opacity = '0';
+      el.style.transition = 'opacity 180ms ease, transform 180ms ease';
+      if (type === 'success') { el.style.background = '#16a34a'; }
+      else if (type === 'error') { el.style.background = '#dc2626'; }
+      else { el.style.background = '#0ea5e9'; }
+      el.textContent = message;
+      container.appendChild(el);
+      requestAnimationFrame(()=>{ el.style.opacity = '1'; el.style.transform = 'translateY(0)'; });
+      const id = setTimeout(()=>{
+        try{ el.style.opacity = '0'; setTimeout(()=>el.remove(), 220); }catch(e){}
+      }, timeout);
+      el.addEventListener('click', ()=>{ clearTimeout(id); try{ el.remove(); }catch(e){} });
+      return el;
+    }
+    const grids = [
+      document.getElementById('gridSubmitted'),
+      document.getElementById('gridApproved'),
+      document.getElementById('gridArchived')
+    ].filter(Boolean);
+    const search = document.getElementById('themeSearch');
+    function extractColors(raw){
+      try{ if(!raw) return null; const d = raw;
+        // si forme simplifiée { light: {bg,button,hover} }
+        if (d.light && typeof d.light === 'object') return { bg: d.light.bg||'#f5f5f5', button: d.light.button||'#4f46e5', hover: d.light.hover||'#22c55e' };
+        // si forme complète
+        if (d.background) return { bg: d.background||'#111827', button: d.buttonBackground||'#4f46e5', hover: d.hoverColor||'#22c55e' };
+        // autre
+        return { bg: d.bg||'#111827', button: d.button||'#4f46e5', hover: d.hover||'#22c55e' };
+      }catch(e){ return { bg:'#111827', button:'#4f46e5', hover:'#22c55e' }; }
+    }
+    function renderPreviews(){
+      grids.forEach(grid => {
+        Array.from(grid.querySelectorAll('.themeCard')).forEach(card=>{
+        const box = card.querySelector('.themePreview');
+        const raw = card.getAttribute('data-json');
+        let parsed = {};
+        try{ parsed = JSON.parse(raw||'{}'); }catch(e){ parsed = {}; }
+        const c = extractColors(parsed);
+        // simple aperçu : background et deux boutons
+        box.innerHTML = `<div style="padding:8px;background:${c.bg};height:100%;display:flex;flex-direction:column;justify-content:center;gap:8px;">`+
+          `<div style=\"height:28px;width:60%;background:${c.button};border-radius:6px;margin:0 auto;\"></div>`+
+          `<div style=\"height:28px;width:40%;background:${c.hover};border-radius:6px;margin:0 auto;\"></div>`+
+          `</div>`;
+        });
+      });
+    }
+    function wireActions(){
+      grids.forEach(grid => {
+        grid.addEventListener('click', async (e)=>{
+          const li = e.target.closest('.themeCard');
+          if (!li) return;
+          const id = li.dataset.id;
+          const approve = e.target.closest('.approveBtn');
+          const reject = e.target.closest('.rejectBtn');
+          const archive = e.target.closest('.archiveBtn');
+          const unarchive = e.target.closest('.unarchiveBtn');
+          const approveUpdate = e.target.closest('.approveUpdateBtn');
+          const del = e.target.closest('.deleteBtn');
+          const actBtn = approve||reject||archive||unarchive||approveUpdate||del;
+          if (!actBtn) return;
+          const prev = actBtn.textContent; actBtn.disabled = true; actBtn.textContent = 'En cours...';
+          // Save DOM position for rollback
+          const originalParent = li.parentElement;
+          const originalNext = li.nextElementSibling;
+          let tempMoved = false;
+          try{
+            if (approve || reject){
+              const action = approve ? 'approve' : 'reject';
+              // optimistic: move/ remove UI immediately for snappiness
+              if (approve) {
+                const target = document.getElementById('gridApproved');
+                if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); target.appendChild(li); }
+                li.querySelector('.badge-pending-update')?.remove?.();
+                tempMoved = true;
+              } else {
+                li.remove();
+                tempMoved = true;
+              }
+              const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/'+action, { method: 'POST' });
+              if (!res.ok) throw new Error('HTTP '+res.status);
+              showToast(approve ? 'Thème approuvé' : 'Thème rejeté', 'success');
+            } else if (archive){
+              const target = document.getElementById('gridArchived'); if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); target.appendChild(li); }
+              tempMoved = true;
+              const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/archive', { method: 'POST' });
+              if (!res.ok) throw new Error('HTTP '+res.status);
+              showToast('Thème archivé', 'success');
+            } else if (unarchive){
+              const target = document.getElementById('gridApproved'); if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); target.appendChild(li); }
+              tempMoved = true;
+              const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/unarchive', { method: 'POST' });
+              if (!res.ok) throw new Error('HTTP '+res.status);
+              showToast('Thème republié', 'success');
+            } else if (approveUpdate){
+              // optimistic visual update: remove badge and move to approved
+              li.querySelector('.badge-pending-update')?.remove?.();
+              const target = document.getElementById('gridApproved'); if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); target.appendChild(li); }
+              tempMoved = true;
+              const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/approve-update', { method: 'POST' });
+              if (!res.ok) throw new Error('HTTP '+res.status);
+              showToast('MAJ approuvée', 'success');
+            } else if (del){
+              const ok = window.confirm('Supprimer définitivement ce thème ?');
+              if (!ok) { actBtn.disabled = false; actBtn.textContent = prev; return; }
+              // optimistic remove
+              li.remove(); tempMoved = true;
+              const res = await fetch('/api/themes/'+encodeURIComponent(id), { method: 'DELETE' });
+              if (!res.ok) throw new Error('HTTP '+res.status);
+              showToast('Thème supprimé', 'success');
+            }
+          }catch(err){
+            // rollback optimistic UI change
+            try{
+              if (tempMoved) {
+                if (!originalParent) {
+                  // nothing to rollback to
+                } else {
+                  if (originalNext) originalParent.insertBefore(li, originalNext);
+                  else originalParent.appendChild(li);
+                }
+              }
+            }catch(e){}
+            showToast('Erreur lors de l\'opération', 'error');
+          }
+          finally { if (document.body.contains(li)) { actBtn.disabled = false; actBtn.textContent = prev; } }
+        });
+      });
+    }
+    function applyFilter(){
+      const q = (search?.value||'').trim().toLowerCase();
+      grids.forEach(grid => {
+        Array.from(grid.querySelectorAll('.themeCard')).forEach(card=>{
+          const name = card.dataset.name||'';
+          const author = card.dataset.author||'';
+          const ok = !q || name.includes(q) || author.includes(q);
+          card.style.display = ok ? '' : 'none';
+        });
+      });
+    }
+    search?.addEventListener('input', applyFilter);
+    renderPreviews(); wireActions();
+    // Drag & Drop: allow moving theme cards between columns via the left grip
+    function setupDragAndDrop(){
+      let dragged = null;
+      function ensurePlaceholderRemoved(target){ const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); }
+      function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.themeCard:not(.dragging)')];
+        return draggableElements.reduce((closest, child) => {
+          const box = child.getBoundingClientRect();
+          const offset = y - box.top - box.height / 2;
+          if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+          } else return closest;
+        }, { offset: Number.NEGATIVE_INFINITY }).element || null;
+      }
+      // start only when handle is pressed
+      window.__dragStartFromHandle = false;
+      document.addEventListener('mouseup', ()=>{ window.__dragStartFromHandle = false; });
+      document.querySelectorAll('.themeCard').forEach(card => {
+        const handle = card.querySelector('.dragHandle');
+        if (handle) { handle.style.cursor='grab'; handle.addEventListener('mousedown', ()=>{ window.__dragStartFromHandle = true; }); }
+        card.addEventListener('dragstart', (e)=>{ if (!window.__dragStartFromHandle) { e.preventDefault(); return; } dragged = card; card.classList.add('dragging'); try{ e.dataTransfer.setData('text/plain', card.dataset.id); }catch(_){} e.dataTransfer.effectAllowed='move'; });
+        card.addEventListener('dragend', ()=>{ if (dragged) { dragged.classList.remove('dragging'); dragged = null; } });
+      });
+      grids.forEach(grid => {
+        grid.addEventListener('dragover', (e)=>{ e.preventDefault(); if (!dragged) return; const after = getDragAfterElement(grid, e.clientY); ensurePlaceholderRemoved(grid); if (after == null) grid.appendChild(dragged); else grid.insertBefore(dragged, after); });
+        grid.addEventListener('drop', (e)=>{ e.preventDefault(); if (!dragged) return; ensurePlaceholderRemoved(grid); showToast('Thème déplacé', 'success', 1400); });
+      });
+      const observer = new MutationObserver((mut)=>{ mut.forEach(m=>{ if (m.addedNodes.length){ m.addedNodes.forEach(n=>{ if (n.nodeType===1 && n.classList.contains('themeCard')){ const handle = n.querySelector('.dragHandle'); if (handle) { handle.style.cursor='grab'; handle.addEventListener('mousedown', ()=>{ window.__dragStartFromHandle = true; }); } n.addEventListener('dragstart', (e)=>{ if (!window.__dragStartFromHandle) { e.preventDefault(); return; } dragged = n; n.classList.add('dragging'); try{ e.dataTransfer.setData('text/plain', n.dataset.id); }catch(_){} e.dataTransfer.effectAllowed='move'; }); n.addEventListener('dragend', ()=>{ n.classList.remove('dragging'); dragged = null; }); } }); } }); });
+      grids.forEach(g=>observer.observe(g, { childList: true }));
+    }
+    setupDragAndDrop();
+  })();
+  </script>
+</main>

@@ -119,6 +119,55 @@ export function apiRoutes(fastify: FastifyInstance) {
     return reply.send(list);
   });
 
+  // List all themes: built-in + approved community themes (and optionally owner's themes if requested)
+  fastify.get('/themes/list', async (request, reply) => {
+    // Use server-side builtInThemes module
+    let builtIns: any[] = [];
+    try {
+      // Lazy require to avoid potential startup ordering issues
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { builtInThemes } = require('./builtInThemes');
+      if (Array.isArray(builtInThemes)) builtIns = builtInThemes;
+    } catch (e) {
+      builtIns = [];
+    }
+
+    // Load approved community themes from DB
+    const community = await prisma.theme.findMany({ where: { status: 'APPROVED' as any, isPrivate: false }, select: { id: true, name: true, description: true, data: true, author: { select: { id: true, userName: true } } }, orderBy: { createdAt: 'desc' } });
+    const list = [] as any[];
+    // normalize community themes using coerceThemeData
+    for (const t of community) {
+      let full: any;
+      try { full = coerceThemeData(t.data as any); } catch { full = t.data as any; }
+      list.push({ id: t.id, name: t.name, description: t.description || '', source: 'community', author: t.author, ...(full || {}) });
+    }
+
+    // Optionally include user's own themes when query userId is provided (for editor)
+    const userId = (request.query as any)?.userId;
+    if (userId && typeof userId === 'string') {
+      const mine = await prisma.theme.findMany({ where: { authorId: userId }, select: { id: true, name: true, description: true, data: true, status: true } });
+      for (const t of mine) {
+        let full: any;
+        try { full = coerceThemeData(t.data as any); } catch { full = t.data as any; }
+        list.push({ id: t.id, name: t.name, description: t.description || '', source: 'mine', status: t.status, ...(full || {}) });
+      }
+    }
+
+    // Return built-ins first, then community and mine
+    return reply.send({ builtIns, themes: list });
+  });
+
+  // Helper: read built-in themes from server module
+  function readBuiltInThemes(): any[] {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { builtInThemes } = require('./builtInThemes');
+      return Array.isArray(builtInThemes) ? builtInThemes : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   // Create/update my theme draft
   fastify.post("/me/themes", async (request, reply) => {
     const userId = request.session.get("data");
@@ -198,12 +247,23 @@ export function apiRoutes(fastify: FastifyInstance) {
   fastify.post('/me/themes/select', async (request, reply) => {
     const userId = request.session.get('data');
     if (!userId) return reply.code(401).send({ error: 'Unauthorized' });
-    const { themeId } = (request.body as any) ?? {};
+    const body = (request.body as any) ?? {};
+    const { themeId, builtInIndex } = body;
+    if (typeof builtInIndex === 'number') {
+      // Use built-in theme: read built-ins and pick index
+      const built = readBuiltInThemes();
+      if (!Array.isArray(built) || built.length === 0) return reply.code(400).send({ error: 'No built-in themes available' });
+      if (builtInIndex < 0 || builtInIndex >= built.length) return reply.code(400).send({ error: 'builtInIndex out of range' });
+      const themeData = built[builtInIndex];
+      // create a private theme in DB for this user and select it
+  const created = await prisma.theme.create({ data: { name: `builtin-${builtInIndex}`, data: themeData as any, authorId: userId as string, status: 'APPROVED' as any, isPrivate: true }, select: { id: true } });
+      await prisma.user.update({ where: { id: userId as string }, data: { selectedCustomThemeId: created.id } });
+      return reply.send({ ok: true, selected: created.id });
+    }
     if (!themeId || typeof themeId !== 'string') return reply.code(400).send({ error: 'themeId requis' });
     const t = await prisma.theme.findUnique({ where: { id: themeId }, select: { id: true, authorId: true, isPrivate: true, status: true } });
     if (!t || t.authorId !== userId) return reply.code(404).send({ error: 'Thème introuvable' });
-    // on autorise l’utilisation si le thème est privé (ou même brouillon privé pour usage perso)
-    if (!t.isPrivate) return reply.code(400).send({ error: 'Ce thème n\'est pas privé' });
+    // Autoriser l’utilisation de n’importe quel thème qui t’appartient (privé, brouillon, soumis ou approuvé)
     await prisma.user.update({ where: { id: userId as string }, data: { selectedCustomThemeId: t.id } });
     return reply.send({ ok: true });
   });

@@ -1,10 +1,10 @@
-<%- include('../partials/head.ejs', { title: 'Tableau de bord - Mon compte', description: 'Gère ton email, mot de passe et confidentialité du profil.', robots: 'noindex,nofollow' }) %>
-<%- include('../partials/header-dash.ejs') %>
+<%- include('../../partials/head.ejs', { title: 'Tableau de bord - Mon compte', description: 'Gère ton email, mot de passe et confidentialité du profil.', robots: 'noindex,nofollow' }) %>
+<%- include('../../partials/header-dash.ejs') %>
 
 
   <main class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
 
-  <%- include('../partials/asside_dash.ejs', { active: 'account' }) %>
+  <%- include('../../partials/asside_dash.ejs', { active: 'account' }) %>
 
     <section class="col-span-12 lg:col-span-9 space-y-4">
       <!-- Title simple (sans fond ni description) -->
@@ -32,7 +32,7 @@
             <div id="panel-profile" class="tab-panel">
               <div class="flex items-start gap-4">
                 <div class="h-20 w-20 rounded-full overflow-hidden border border-slate-700 bg-slate-800 grid place-items-center text-xl font-semibold text-slate-200" id="avatarPreview" data-avatar>
-                  <%- include('../partials/avatar.ejs', { user: user }) %>
+                  <%- include('../../partials/avatar.ejs', { user: user }) %>
                 </div>
                 <div class="flex-1">
                   <h4 class="font-medium mb-1">Photo de profil</h4>
