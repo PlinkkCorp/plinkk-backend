@@ -86,7 +86,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         { encoding: "utf-8" }
       );
       let mini;
-      if (!/(\.|^)plinkk\.fr$/i.test(request.host) && request.host !== "127.0.0.1:3001" && jsFileName === "styleTools.js") {
+      if (request.host !== "plinkk.fr" && request.host !== "127.0.0.1:3001" && jsFileName === "styleTools.js") {
         mini = minify(file.replaceAll("{{username}}", "https://plinkk.fr/" + username));
       } else {
         mini = minify(file.replaceAll("{{username}}", username));
