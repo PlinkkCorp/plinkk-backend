@@ -85,10 +85,12 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         path.join(__dirname, "..", "public", "js", jsFileName),
         { encoding: "utf-8" }
       );
-      if (!/(\.|^)plinkk\.fr$/i.test(request.host) && jsFileName === "styleTools.js") {
-        file.replaceAll("{{username}}", "https://plinkk.fr/{{username}}")
+      let mini;
+      if (!/(\.|^)plinkk\.fr$/i.test(request.host) && request.host !== "127.0.0.1:3001" && jsFileName === "styleTools.js") {
+        mini = minify(file.replaceAll("{{username}}", "https://plinkk.fr/" + username));
+      } else {
+        mini = minify(file.replaceAll("{{username}}", username));
       }
-      const mini = minify(file.replaceAll("{{username}}", username));
       return reply.type("text/javascript").send(mini.code);
     }
     return reply.code(404).send({ error: "non existant file" });

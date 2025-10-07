@@ -72,8 +72,7 @@ fastify.register(plinkkFrontUserRoutes);
 fastify.addHook("onRequest", async (request, reply) => {
   const host = request.headers.host || "";
 
-  // autoriser plinkk.fr et ses sous-domaines
-  if (!/(\.|^)plinkk\.fr$/i.test(host)) {
+  if (!/(\.|^)plinkk\.fr$/i.test(host) && host !== "127.0.0.1:3001") {
     const hostDb = await prisma.host.findUnique({
       where: {
         id: host,
@@ -94,9 +93,9 @@ fastify.addHook("onRequest", async (request, reply) => {
       <html>
         <head><title>Plinkk</title></head>
         <body style="font-family:sans-serif;text-align:center;padding-top:40px">
-          <h1>🚀 Bienvenue sur Plinkk</h1>
+          <h1>Bienvenue sur Plinkk</h1>
           <p>Ce contenu est uniquement accessible via <b>plinkk.fr</b></p>
-          <a href="https://plinkk.fr">Accéder au site officiel</a>
+          <a href="https://plinkk.fr">Acceder au site officiel</a>
         </body>
       </html>
     `);
