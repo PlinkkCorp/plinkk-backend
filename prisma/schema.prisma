@@ -95,6 +95,8 @@ model User {
 
   announcement    AnnouncementTarget[]
 
+  host            Host?
+
   // Thème personnalisé sélectionné pour usage privé
   selectedCustomThemeId String?
 }
@@ -123,6 +125,14 @@ model Link {
   clicks                 Int      @default(0)
 
   userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Host {
+  id                   String   @id
+  verified               Boolean  @default(false)
+
+  userId String @unique
   user   User   @relation(fields: [userId], references: [id])
 }
 
