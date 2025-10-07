@@ -86,7 +86,7 @@ fastify.addHook("onRequest", async (request, reply) => {
         return;
       }
 
-      return reply.view("links_cname.ejs", { username: user.id });
+      return reply.view("links.ejs", { username: user.id });
     }
 
     return reply.type("text/html").send(`
