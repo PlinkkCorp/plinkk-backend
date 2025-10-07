@@ -93,6 +93,8 @@ model User {
   // Thèmes créés par l'utilisateur
   themes          Theme[]
 
+  announcement    AnnouncementTarget[]
+
   // Thème personnalisé sélectionné pour usage privé
   selectedCustomThemeId String?
 }
