@@ -84,12 +84,8 @@ fastify.addHook("onRequest", async (request, reply) => {
 
       return reply.view("links.ejs", { username: userName });
     }
-    // Option 1 : rediriger
-    // reply.redirect('https://plinkk.fr');
-    // return;
 
-    // Option 2 : afficher page spéciale
-    reply.type("text/html").send(`
+    return reply.type("text/html").send(`
       <html>
         <head><title>Plinkk</title></head>
         <body style="font-family:sans-serif;text-align:center;padding-top:40px">
@@ -99,7 +95,6 @@ fastify.addHook("onRequest", async (request, reply) => {
         </body>
       </html>
     `);
-    return reply; // stoppe la requête
   }
 });
 
