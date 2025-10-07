@@ -1,10 +1,38 @@
 import { FastifyInstance } from "fastify";
 import { PrismaClient, Role } from "../../generated/prisma/client";
+import fs from 'fs';
 
 const prisma = new PrismaClient();
 
 export function dashboardRoutes(fastify: FastifyInstance) {
   const isStaff = (r?: Role | string) => r === Role.ADMIN || r === Role.DEVELOPER || r === Role.MODERATOR;
+
+  async function getActiveAnnouncementsForUser(userId: string | null) {
+    const list: any[] = [];
+    try {
+      const now = new Date();
+      const me = userId ? await prisma.user.findUnique({ where: { id: userId }, select: { id: true, role: true } }) : null;
+      const anns = await (prisma as any).announcement.findMany({
+        where: {
+          AND: [
+            { OR: [ { startAt: null }, { startAt: { lte: now } } ] },
+            { OR: [ { endAt: null }, { endAt: { gte: now } } ] },
+          ],
+        },
+        include: { targets: true, roleTargets: true },
+        orderBy: { createdAt: 'desc' }
+      });
+      for (const a of anns) {
+        const toUser = a.global
+          || (!!me && a.targets.some((t: any) => t.userId === me.id))
+          || (!!me && a.roleTargets.some((rt: any) => rt.role === me.role));
+        if (!toUser) continue;
+        list.push({ id: a.id, level: a.level, text: a.text, dismissible: a.dismissible, startAt: a.startAt, endAt: a.endAt, createdAt: a.createdAt });
+      }
+    } catch (e) {}
+    return list;
+  }
+  
   fastify.get("/", async function (request, reply) {
     request.log?.info({ cookies: request.headers.cookie, sessionData: request.session.get('data') }, 'dashboard root: incoming request');
     const userId = request.session.get("data");
@@ -36,6 +64,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       user: userInfo,
       stats: { links: linksCount, socials: socialsCount, labels: labelsCount },
       links: recentLinks,
+      __SITE_MESSAGES__: await getActiveAnnouncementsForUser(userId as string)
     });
   });
 
@@ -114,6 +143,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       user: userInfo,
       cosmetics,
       catalog,
+      __SITE_MESSAGES__: await getActiveAnnouncementsForUser(userId as string)
     });
   });
 
@@ -516,5 +546,102 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       isApproved: (t.status === 'APPROVED')
     };
     return reply.view("dashboard/admin/preview.ejs", { user: userInfo, theme: themeForView });
+  });
+
+  // Admin: Message global (page)
+  fastify.get('/admin/message', async function (request, reply) {
+    const userId = request.session.get('data');
+    if (!userId) return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    if (!userInfo) return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
+    if (!isStaff(userInfo.role)) return reply.redirect('/dashboard');
+    return reply.view('dashboard/admin/message.ejs', { user: userInfo, __SITE_MESSAGES__: await getActiveAnnouncementsForUser(userId as string) });
+  });
+
+  // Admin API: get current message
+  fastify.get('/admin/message/api', async function (request, reply) {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'unauthorized' });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) return reply.code(403).send({ error: 'forbidden' });
+    const list = await getActiveAnnouncementsForUser(userId as string);
+    return reply.send({ messages: list });
+  });
+
+  // Admin API: search users for mentions (@autocomplete)
+  fastify.get('/admin/users/search', async function (request, reply) {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'unauthorized' });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) return reply.code(403).send({ error: 'forbidden' });
+    const q = String((request.query as any)?.q || '').trim();
+    if (!q) return reply.send({ users: [] });
+    const take = Math.min(10, Math.max(1, Number((request.query as any)?.limit || 8)));
+    const users = await prisma.user.findMany({
+      where: {
+        OR: [
+          { id: { contains: q } },
+          { userName: { contains: q } },
+          { email: { contains: q } },
+        ]
+      },
+      select: { id: true, userName: true, email: true, role: true, image: true },
+      take,
+      orderBy: { createdAt: 'asc' }
+    });
+    return reply.send({ users });
+  });
+
+  // Admin API: set message (DB only)
+  fastify.post('/admin/message/api', async function (request, reply) {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'unauthorized' });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) return reply.code(403).send({ error: 'forbidden' });
+    const body = request.body as any;
+    // Create/update DB announcement with targets
+    const id = body.id as string | undefined;
+    const targetUserIds: string[] = Array.isArray(body.targetUserIds) ? body.targetUserIds : [];
+    const targetRoles: Role[] = Array.isArray(body.targetRoles) ? body.targetRoles : [];
+    const payload = {
+      level: String(body.level || 'info'),
+      text: String(body.text || ''),
+      dismissible: !!body.dismissible,
+      startAt: body.startAt ? new Date(body.startAt) : null,
+      endAt: body.endAt ? new Date(body.endAt) : null,
+      global: !!body.global,
+    } as any;
+    let ann: any;
+    if (!id) {
+      ann = await (prisma as any).announcement.create({ data: { ...payload } });
+    } else {
+      ann = await (prisma as any).announcement.update({ where: { id }, data: { ...payload } });
+      // clear previous targets
+      await (prisma as any).announcementTarget.deleteMany({ where: { announcementId: ann.id } });
+      await (prisma as any).announcementRoleTarget.deleteMany({ where: { announcementId: ann.id } });
+    }
+    if (!payload.global) {
+      if (targetUserIds.length) {
+        await (prisma as any).announcementTarget.createMany({ data: targetUserIds.map(uid => ({ announcementId: ann.id, userId: uid })) });
+      }
+      if (targetRoles.length) {
+        await (prisma as any).announcementRoleTarget.createMany({ data: targetRoles.map(r => ({ announcementId: ann.id, role: r })) });
+      }
+    }
+    return reply.send({ ok: true, message: { id: ann.id, ...payload } });
+  });
+
+  // Admin API: delete message (DB only)
+  fastify.delete('/admin/message/api', async function (request, reply) {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'unauthorized' });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) return reply.code(403).send({ error: 'forbidden' });
+    const { id } = request.query as any;
+    if (!id) return reply.code(400).send({ error: 'missing_id' });
+    await (prisma as any).announcementRoleTarget.deleteMany({ where: { announcementId: String(id) } });
+    await (prisma as any).announcementTarget.deleteMany({ where: { announcementId: String(id) } });
+    await (prisma as any).announcement.delete({ where: { id: String(id) } });
+    return reply.send({ ok: true });
   });
 }

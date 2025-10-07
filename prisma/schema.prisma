@@ -93,6 +93,8 @@ model User {
   // Thèmes créés par l'utilisateur
   themes          Theme[]
 
+  announcement    AnnouncementTarget[]
+
   // Thème personnalisé sélectionné pour usage privé
   selectedCustomThemeId String?
 }
@@ -169,6 +171,43 @@ model Statusbar {
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
+}
+
+// Messages/annonces adressables globalement, par rôles et/ou par utilisateurs spécifiques
+model Announcement {
+  id          String   @id @default(nanoid(16))
+  level       String   @default("info")
+  text        String
+  dismissible Boolean  @default(true)
+  startAt     DateTime?
+  endAt       DateTime?
+  createdAt   DateTime @default(now())
+  global      Boolean  @default(false)
+
+  // Cibles par utilisateurs (m2m)
+  targets AnnouncementTarget[]
+
+  // Cibles par rôles (m2m vers enum Role via table) 
+  roleTargets AnnouncementRoleTarget[]
+}
+
+model AnnouncementTarget {
+  announcementId String
+  userId         String
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([announcementId, userId])
+}
+
+model AnnouncementRoleTarget {
+  announcementId String
+  role           Role
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@id([announcementId, role])
 }
 
 // Thème personnalisable soumis par un utilisateur, validé par un admin

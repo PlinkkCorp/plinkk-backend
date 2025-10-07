@@ -6,6 +6,43 @@
             <span class="hidden sm:inline text-sm font-semibold tracking-wide text-slate-200">Plinkk</span>
         </a>
         <div class="flex-1 min-w-0"></div>
+        <% const __SMS__ = (typeof __SITE_MESSAGES__ !== 'undefined' && Array.isArray(__SITE_MESSAGES__)) ? __SITE_MESSAGES__ : ((typeof __SITE_MESSAGE__ !== 'undefined' && __SITE_MESSAGE__ && __SITE_MESSAGE__.message) ? [__SITE_MESSAGE__.message] : []); %>
+        <% if (__SMS__.length) { %>
+            <% __SMS__.slice(0,3).forEach(function(__SM__, idx){ %>
+            <% const lvl = (__SM__.level || 'info').toLowerCase();
+                             let bg='bg-slate-700/20', br='border-slate-600/40', tx='text-slate-100', btn='bg-slate-600/80 hover:bg-slate-600', icon='info';
+                             if (lvl==='info') { bg='bg-sky-700/20'; br='border-sky-600/40'; tx='text-sky-50'; btn='bg-sky-600/80 hover:bg-sky-600'; icon='info'; }
+                             else if (lvl==='success') { bg='bg-emerald-700/20'; br='border-emerald-600/40'; tx='text-emerald-50'; btn='bg-emerald-600/80 hover:bg-emerald-600'; icon='check'; }
+                             else if (lvl==='warning') { bg='bg-amber-700/20'; br='border-amber-600/40'; tx='text-amber-50'; btn='bg-amber-600/80 hover:bg-amber-600'; icon='warn'; }
+                             else if (lvl==='error' || lvl==='critical') { bg='bg-rose-700/20'; br='border-rose-600/40'; tx='text-rose-50'; btn='bg-rose-600/80 hover:bg-rose-600'; icon='error'; }
+                             else if (lvl==='maintenance') { bg='bg-indigo-700/20'; br='border-indigo-600/40'; tx='text-indigo-50'; btn='bg-indigo-600/80 hover:bg-indigo-600'; icon='wrench'; }
+                        %>
+            <div class="ml-4 hidden sm:block" id="siteMessageWrapDash_<%- idx %>" data-msg='<%- JSON.stringify(__SM__ || null).replace(/'/g, "&#39;") %>'>
+                <div class="<%= `mt-1 px-3 py-1 text-xs rounded-md border ${br} ${bg} ${tx} flex items-center gap-2` %>" role="status" aria-live="polite" style="align-items:center">
+                                        <span aria-hidden="true">
+                                            <% if (icon==='info') { %>
+                                                <svg class="w-4 h-4 align-middle" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16Zm-.75-9.25a.75.75 0 011.5 0v5.5a.75.75 0 01-1.5 0v-5.5ZM10 6a1 1 0 100 2 1 1 0 000-2Z" clip-rule="evenodd"/></svg>
+                                            <% } else if (icon==='check') { %>
+                                                <svg class="w-4 h-4 align-middle" viewBox="0 0 24 24" fill="currentColor"><path d="M9 12.75l-2.25-2.25-1.5 1.5L9 15.75l9-9-1.5-1.5z"/></svg>
+                                            <% } else if (icon==='warn') { %>
+                                                <svg class="w-4 h-4 align-middle" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v2h2v-2zm0-8h-2v6h2V10z"/></svg>
+                                            <% } else if (icon==='error') { %>
+                                                <svg class="w-4 h-4 align-middle" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 110 20 10 10 0 010-20zm-1 5h2v7h-2V7zm0 9h2v2h-2v-2z"/></svg>
+                                            <% } else if (icon==='wrench') { %>
+                                                <svg class="w-4 h-4 align-middle" viewBox="0 0 24 24" fill="currentColor"><path d="M22.7 19.3l-6.5-6.5a6 6 0 11-3.2-3.2l6.5 6.5a2.25 2.25 0 103.2 3.2zM10 14a4 4 0 100-8 4 4 0 000 8z"/></svg>
+                                            <% } %>
+                                        </span>
+                                        <span class="ml-1 flex-1"><%= __SM__.text %></span>
+                                        <% if (__SM__.dismissible) { %>
+                                            <button id="dismissSiteMessageDash_<%- idx %>" aria-label="Fermer l'alerte" class="inline-flex items-center justify-center rounded hover:opacity-90 transition focus:outline-none focus:ring-1 focus:ring-white/40" style="width:22px;height:22px">
+                                                <svg class="w-3.5 h-3.5 align-middle" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/></svg>
+                                            </button>
+                                        <% } %>
+                                </div>
+                        </div>
+                        <% }) %>
+                <% } %>
+        <div class="flex-1 min-w-0"></div>
         <div class="hidden md:flex items-center gap-3">
             <a href="https://github.com/PlinkkCorp/plinkk-backend" target="_blank" class="px-3 py-1.5 text-xs rounded-md border border-slate-700/60 bg-slate-800/50 hover:bg-slate-700/60">GitHub</a>
             <a href="/users" class="px-3 py-1.5 text-xs rounded-md border border-slate-700/60 bg-slate-800/50 hover:bg-slate-700/60">Utilisateurs</a>
@@ -65,5 +102,23 @@
             if (!root.contains(e.target)) close();
         });
         document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') close(); });
+    })();
+</script>
+<script>
+    (function(){
+        try {
+            const nodes = Array.from(document.querySelectorAll('[id^="siteMessageWrapDash_"] , #siteMessageWrapDash'));
+            nodes.forEach((wrap) => {
+                const raw = wrap.getAttribute('data-msg');
+                if (!raw) return;
+                const safe = raw.replace(/&#39;/g, "'");
+                let msg = null; try { msg = JSON.parse(safe); } catch(e) {}
+                if (!msg || !msg.id) return;
+                const key = 'dismissed_site_message_' + msg.id;
+                if (localStorage.getItem(key)) { wrap.style.display = 'none'; return; }
+                const btn = wrap.querySelector('button[id^="dismissSiteMessageDash"]');
+                if (btn) btn.addEventListener('click', ()=>{ localStorage.setItem(key,'1'); wrap.style.display='none'; });
+            });
+        } catch(e){}
     })();
 </script>

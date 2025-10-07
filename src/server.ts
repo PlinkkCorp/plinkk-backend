@@ -4,9 +4,7 @@ import fastifyView from "@fastify/view";
 import Fastify from "fastify";
 import path from "path";
 import ejs from "ejs";
-import {
-  readFileSync,
-} from "fs";
+import { readFileSync } from "fs";
 import { PrismaClient } from "../generated/prisma/client";
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
@@ -79,10 +77,36 @@ fastify.get("/", async function (request, reply) {
           email: true,
           publicEmail: true,
           image: true,
+          role: true,
         },
       })
     : null;
-  return reply.view("index.ejs", { currentUser });
+  // Annonces depuis la DB (affichées si ciblées pour l'utilisateur courant ou globales)
+  let msgs: any[] = [];
+  try {
+    const now = new Date();
+    const anns = await (prisma as any).announcement.findMany({
+      where: {
+        AND: [
+          { OR: [ { startAt: null }, { startAt: { lte: now } } ] },
+          { OR: [ { endAt: null }, { endAt: { gte: now } } ] },
+        ],
+      },
+      include: { targets: true, roleTargets: true },
+      orderBy: { createdAt: 'desc' }
+    });
+    if (currentUser) {
+      for (const a of anns) {
+        const toUser = a.global
+          || a.targets.some((t: any) => t.userId === currentUser.id)
+          || a.roleTargets.some((rt: any) => rt.role === currentUser.role);
+        if (toUser) msgs.push({ id: a.id, level: a.level, text: a.text, dismissible: a.dismissible, startAt: a.startAt, endAt: a.endAt, createdAt: a.createdAt });
+      }
+    } else {
+      msgs = anns.filter((a: any) => a.global).map((a: any) => ({ id: a.id, level: a.level, text: a.text, dismissible: a.dismissible, startAt: a.startAt, endAt: a.endAt, createdAt: a.createdAt }));
+    }
+  } catch (e) {}
+  return reply.view("index.ejs", { currentUser, __SITE_MESSAGES__: msgs });
 });
 
 fastify.get("/login", async function (request, reply) {
@@ -340,6 +364,7 @@ fastify.get("/users", async (request, reply) => {
           email: true,
           image: true,
           profileImage: true
+          ,role: true
         },
       })
     : null;
@@ -356,7 +381,32 @@ fastify.get("/users", async (request, reply) => {
     },
     orderBy: { createdAt: "asc" },
   });
-  return reply.view("users.ejs", { users: users, currentUser: currentUser });
+  // Annonces DB pour la page publique des utilisateurs: on affiche seulement les globales si non connecté
+  let msgs: any[] = [];
+  try {
+    const now = new Date();
+    const anns = await (prisma as any).announcement.findMany({
+      where: {
+        AND: [
+          { OR: [ { startAt: null }, { startAt: { lte: now } } ] },
+          { OR: [ { endAt: null }, { endAt: { gte: now } } ] },
+        ],
+      },
+      include: { targets: true, roleTargets: true },
+      orderBy: { createdAt: 'desc' }
+    });
+    if (currentUser) {
+      for (const a of anns) {
+        const toUser = a.global
+          || a.targets.some((t: any) => t.userId === currentUser.id)
+          || a.roleTargets.some((rt: any) => rt.role === currentUser.role);
+        if (toUser) msgs.push({ id: a.id, level: a.level, text: a.text, dismissible: a.dismissible, startAt: a.startAt, endAt: a.endAt, createdAt: a.createdAt });
+      }
+    } else {
+      msgs = anns.filter((a: any) => a.global).map((a: any) => ({ id: a.id, level: a.level, text: a.text, dismissible: a.dismissible, startAt: a.startAt, endAt: a.endAt, createdAt: a.createdAt }));
+    }
+  } catch (e) {}
+  return reply.view("users.ejs", { users: users, currentUser: currentUser, __SITE_MESSAGES__: msgs });
 });
 
 // 404 handler (après routes spécifiques)
