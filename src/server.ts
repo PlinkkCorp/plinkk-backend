@@ -61,7 +61,7 @@ fastify.register(fastifySecureSession, {
 });
 
 fastify.register(fastifyCors,  {
-  origin: "*"
+  origin: true
 })
 
 fastify.register(apiRoutes, { prefix: "/api" });
