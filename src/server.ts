@@ -9,6 +9,7 @@ import { PrismaClient } from "../generated/prisma/client";
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
+import fastifyCors from "@fastify/cors";
 import bcrypt from "bcrypt";
 import fastifySecureSession from "@fastify/secure-session";
 import z from "zod";
@@ -58,6 +59,10 @@ fastify.register(fastifySecureSession, {
     path: "/",
   },
 });
+
+fastify.register(fastifyCors,  {
+  origin: "*"
+})
 
 fastify.register(apiRoutes, { prefix: "/api" });
 fastify.register(staticPagesRoutes);

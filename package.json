@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^11.1.0",
     "@fastify/formbody": "^8.0.2",
     "@fastify/multipart": "^9.2.1",
     "@fastify/oauth2": "^8.1.2",
@@ -47,7 +48,6 @@
     "fastify-cli": "^7.4.0",
     "otplib": "^12.0.1",
     "qrcode": "^1.5.4",
-    
     "uglify-js": "^3.19.3",
     "zod": "^4.1.11"
   },
