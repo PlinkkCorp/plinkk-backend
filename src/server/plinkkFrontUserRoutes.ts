@@ -153,7 +153,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         if (!profile) return reply.code(404).send({ error: 'Profil introuvable' });
         // Si un thème privé est sélectionné, récupérer ses données, les normaliser en "full shape"
         // et l'injecter comme thème 0 pour le front.
-  let injectedThemeVar = '';
+        let injectedThemeVar = '';
         try {
           // Helpers de normalisation (cohérents avec apiRoutes)
           const normalizeHex = (v?: string) => {
@@ -288,6 +288,11 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           path.join(__dirname, "..", "public", "config", configFileName),
           { encoding: "utf-8" }
         );
+        if (configFileName === "btnIconThemeConfig.js") {
+          return reply
+          .type("text/javascript")
+          .send(file.replaceAll("{{username}}", "https://plinkk.fr/" + username));
+        }
         return reply
           .type("text/javascript")
           .send(file.replaceAll("{{username}}", username));
