@@ -85,6 +85,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         path.join(__dirname, "..", "public", "js", jsFileName),
         { encoding: "utf-8" }
       );
+      if (!/(\.|^)plinkk\.fr$/i.test(request.host) && jsFileName === "styleTools.js") {
+        file.replaceAll("{{username}}", "https://plinkk.fr/{{username}}")
+      }
       const mini = minify(file.replaceAll("{{username}}", username));
       return reply.type("text/javascript").send(mini.code);
     }
