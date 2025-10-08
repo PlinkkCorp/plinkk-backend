@@ -13,6 +13,7 @@ import z from "zod";
 import bcrypt from "bcrypt";
 import { authenticator } from "otplib";
 import QRCode from "qrcode";
+import { verifyDomain } from "../lib/verifyDNS";
 
 const prisma = new PrismaClient();
 // In-memory store for pending 2FA secrets awaiting user confirmation (keyed by userId)
@@ -1096,6 +1097,48 @@ export function apiRoutes(fastify: FastifyInstance) {
       select: { id: true, userName: true, name: true, description: true },
     });
     return reply.send(updated);
+  });
+
+  // API: ajouter un domaine ou le remplacer
+  fastify.post("/me/host", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const body = (request.body as any) || {};
+    const hostname = body.hostname.trim();
+    const token = crypto.randomUUID()
+    const updated = await prisma.host.upsert({
+      where: { userId: userId },
+      create: {
+        id: hostname,
+        userId: userId,
+        verified: false,
+        verifyToken: token
+      },
+      update: {
+        id: hostname,
+        verified: false,
+        verifyToken: token
+      }
+    });
+    return reply.send({ token: updated.verifyToken, verified: updated.verified });
+  });
+
+  // API: verifier si le domaine est valide
+  fastify.post("/me/host/verify", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const verified = await verifyDomain(userId)
+    return reply.send({ verified: verified });
+  });
+
+  // API: supprime le domaine
+  fastify.delete("/me/host", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const deleted = await prisma.host.delete({
+      where: { userId: userId }
+    })
+    return reply.send({ successful: true })
   });
 
   // API: sélectionner des cosmétiques (flair, bannerUrl, frame, theme)

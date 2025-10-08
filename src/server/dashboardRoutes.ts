@@ -42,7 +42,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
 
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      omit: { password: true },
+      omit: { password: true, twoFactorSecret: true },
     });
     if (!userInfo) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
@@ -78,7 +78,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
       include: { cosmetics: true },
-      omit: { password: true },
+      omit: { password: true, twoFactorSecret: true },
     });
     if (!userInfo) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
@@ -156,7 +156,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      omit: { password: true },
+      omit: { password: true, twoFactorSecret: true },
     });
     if (!userInfo) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
@@ -173,7 +173,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      omit: { password: true },
+      omit: { password: true, twoFactorSecret: true },
       include: {
         links: true
       }
@@ -307,7 +307,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      omit: { password: true },
+      omit: { password: true, twoFactorSecret: true },
     });
     if (!userInfo) {
   const dest = `/login?returnTo=${encodeURIComponent(request.raw.url || '/dashboard')}`;
@@ -325,8 +325,8 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      include: { cosmetics: true },
-      omit: { password: true },
+      include: { cosmetics: true, host: true },
+      omit: { password: true, twoFactorSecret: true },
     });
     if (!userInfo) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
@@ -349,7 +349,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
 
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      omit: { password: true },
+      omit: { password: true, twoFactorSecret: true },
     });
     if (!userInfo) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
@@ -406,7 +406,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (!userId) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
     }
-    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true, twoFactorSecret: true } });
     if (!userInfo) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
     }
@@ -480,7 +480,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.get("/themes", async function (request, reply) {
   const userId = request.session.get("data");
   if (!userId) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
-    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true, twoFactorSecret: true } });
   if (!userInfo) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
     const myThemes = await prisma.theme.findMany({
       where: { authorId: userId as string }, orderBy: { updatedAt: "desc" },
@@ -493,7 +493,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.get("/admin/themes", async function (request, reply) {
   const userId = request.session.get("data");
   if (!userId) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
-  const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+  const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true, twoFactorSecret: true } });
   if (!userInfo) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
     if (!isStaff(userInfo.role)) {
       request.log?.info({ userId: userInfo.id, role: userInfo.role }, 'non-staff attempted admin themes page - redirecting to user dashboard');
@@ -529,7 +529,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.get("/admin/themes/:id", async function (request, reply) {
   const userId = request.session.get("data");
     if (!userId) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
-  const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+  const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true, twoFactorSecret: true } });
   if (!userInfo) { return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`); }
     if (!isStaff(userInfo.role)) {
       request.log?.info({ userId: userInfo.id, role: userInfo.role }, 'non-staff attempted admin theme preview - redirecting to user dashboard');
@@ -552,7 +552,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.get('/admin/message', async function (request, reply) {
     const userId = request.session.get('data');
     if (!userId) return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
-    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true, twoFactorSecret: true } });
     if (!userInfo) return reply.redirect(`/login?returnTo=${encodeURIComponent(String(request.raw.url || '/dashboard'))}`);
     if (!isStaff(userInfo.role)) return reply.redirect('/dashboard');
     return reply.view('dashboard/admin/message.ejs', { user: userInfo, __SITE_MESSAGES__: await getActiveAnnouncementsForUser(userId as string) });

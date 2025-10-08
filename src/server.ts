@@ -72,13 +72,13 @@ fastify.register(plinkkFrontUserRoutes);
 fastify.addHook("onRequest", async (request, reply) => {
   const host = request.headers.host || "";
 
-  if (host !== "plinkk.fr" && request.url === "/") { // host !== "127.0.0.1:3001"
+  if (host !== "plinkk.fr" && host !== "127.0.0.1:3001" && request.url === "/") {
     const hostDb = await prisma.host.findUnique({
       where: {
         id: host,
       },
     });
-    if (hostDb) {
+    if (hostDb && hostDb.verified === true) {
       const user = await prisma.user.findUnique({ where: { id: hostDb.userId } });
       const userName = user.userName
       if (userName === "") {

@@ -129,8 +129,9 @@ model Link {
 }
 
 model Host {
-  id                   String   @id
+  id                     String   @id
   verified               Boolean  @default(false)
+  verifyToken            String   @unique
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
