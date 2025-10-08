@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { PrismaClient } from "../../generated/prisma/client";
+import { replyView } from "../lib/replyView";
 
 const prisma = new PrismaClient();
 
@@ -10,80 +11,45 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
     const currentUser = currentUserId
       ? await prisma.user.findUnique({
           where: { id: currentUserId },
-          select: {
-            id: true,
-            userName: true,
-            isPublic: true,
-            email: true,
-            image: true,
-          },
         })
       : null;
-    return reply.view("about.ejs", { currentUser });
+    return await replyView(reply, "about.ejs", currentUser, {});
   });
   fastify.get("/privacy", async (request, reply) => {
     const currentUserId = request.session.get("data") as string | undefined;
     const currentUser = currentUserId
       ? await prisma.user.findUnique({
           where: { id: currentUserId },
-          select: {
-            id: true,
-            userName: true,
-            isPublic: true,
-            email: true,
-            image: true,
-          },
         })
       : null;
-    return reply.view("privacy.ejs", { currentUser });
+    return await replyView(reply, "privacy.ejs", currentUser, {});
   });
   fastify.get("/terms", async (request, reply) => {
     const currentUserId = request.session.get("data") as string | undefined;
     const currentUser = currentUserId
       ? await prisma.user.findUnique({
           where: { id: currentUserId },
-          select: {
-            id: true,
-            userName: true,
-            isPublic: true,
-            email: true,
-            image: true,
-          },
         })
       : null;
-    return reply.view("terms.ejs", { currentUser });
+    return await replyView(reply, "terms.ejs", currentUser, {});
   });
   fastify.get("/cookies", async (request, reply) => {
     const currentUserId = request.session.get("data") as string | undefined;
     const currentUser = currentUserId
       ? await prisma.user.findUnique({
           where: { id: currentUserId },
-          select: {
-            id: true,
-            userName: true,
-            isPublic: true,
-            email: true,
-            image: true,
-          },
         })
       : null;
-    return reply.view("cookies.ejs", { currentUser });
+    return await replyView(reply, "cookies.ejs", currentUser, {});
   });
   fastify.get("/legal", async (request, reply) => {
     const currentUserId = request.session.get("data") as string | undefined;
     const currentUser = currentUserId
       ? await prisma.user.findUnique({
           where: { id: currentUserId },
-          select: {
-            id: true,
-            userName: true,
-            isPublic: true,
-            email: true,
-            image: true,
-          },
         })
       : null;
-    return reply.view("legal.ejs", { currentUser });
+    return await replyView(reply, "legal.ejs", currentUser, {});
   });
 
   // robots.txt

@@ -18,6 +18,8 @@ import { staticPagesRoutes } from "./server/staticPagesRoutes";
 import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
 import { authenticator } from "otplib";
+import { replyView } from "./lib/replyView";
+import { toSafeUser } from "./types/user";
 
 export const prisma = new PrismaClient();
 export const fastify = Fastify({
@@ -107,15 +109,6 @@ fastify.get("/", async function (request, reply) {
   const currentUser = currentUserId
     ? await prisma.user.findUnique({
         where: { id: currentUserId },
-        select: {
-          id: true,
-          userName: true,
-          isPublic: true,
-          email: true,
-          publicEmail: true,
-          image: true,
-          role: true,
-        },
       })
     : null;
   // Annonces depuis la DB (affichées si ciblées pour l'utilisateur courant ou globales)
@@ -163,7 +156,7 @@ fastify.get("/", async function (request, reply) {
         }));
     }
   } catch (e) {}
-  return reply.view("index.ejs", { currentUser, __SITE_MESSAGES__: msgs });
+  return await replyView(reply, "index.ejs", currentUser, {});
 });
 
 fastify.get("/login", async function (request, reply) {
@@ -183,17 +176,10 @@ fastify.get("/login", async function (request, reply) {
     currentUserId && String(currentUserId).includes("__totp")
       ? await prisma.user.findUnique({
           where: { id: String(currentUserId).split("__")[0] },
-          select: {
-            id: true,
-            userName: true,
-            isPublic: true,
-            email: true,
-            image: true,
-          },
         })
       : null;
   const returnToQuery = (request.query as any)?.returnTo || "";
-  return reply.view("connect.ejs", { currentUser, returnTo: returnToQuery });
+  return await replyView(reply, "connect.ejs", currentUser, { returnTo: returnToQuery });
 });
 
 // Provide a GET /register route: unauthenticated users are redirected to the login page anchor,
@@ -457,15 +443,6 @@ fastify.get("/users", async (request, reply) => {
   const currentUser = currentUserId
     ? await prisma.user.findUnique({
         where: { id: currentUserId },
-        select: {
-          id: true,
-          userName: true,
-          isPublic: true,
-          email: true,
-          image: true,
-          profileImage: true,
-          role: true,
-        },
       })
     : null;
   const users = await prisma.user.findMany({
@@ -526,10 +503,8 @@ fastify.get("/users", async (request, reply) => {
         }));
     }
   } catch (e) {}
-  return reply.view("users.ejs", {
+  return await replyView(reply, "users.ejs", currentUser, {
     users: users,
-    currentUser: currentUser,
-    __SITE_MESSAGES__: msgs,
   });
 });
 
