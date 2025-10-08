@@ -24,11 +24,16 @@ export async function replyView(
     unknown
   >,
   template: string,
-  user: User,
+  user: User | null,
   data: ejs.Data
 ): Promise<string> {
+  if (user === null) {
+    return reply.view(template, {
+      ...data,
+    });
+  }
   return reply.view(template, {
-    __SITE_MESSAGES__: await getActiveAnnouncementsForUser(user.id),
+    __SITE_MESSAGES__: getActiveAnnouncementsForUser(user.id),
     user: toSafeUser(user),
     ...data,
   });
