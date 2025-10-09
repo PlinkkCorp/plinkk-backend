@@ -9,7 +9,7 @@ import {
 } from "../generated/prisma";
 
 export function generateProfileConfig(
-  profile: User,
+  profile: any,
   links: Link[],
   backgroundColors: BackgroundColor[],
   labels: Label[],
