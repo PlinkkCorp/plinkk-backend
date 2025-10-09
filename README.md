@@ -29,59 +29,197 @@ Backend Node.js/TypeScript pour le projet [Plinkk](https://github.com/PlinkkCorp
    git clone https://github.com/PlinkkCorp/plinkk-backend.git
    cd plinkk-backend
    ```
+## Plinkk — Backend
 
-2. **Installer les dépendances**
+Bienvenue dans le backend de Plinkk (Node.js + TypeScript). Ce dépôt sert l'API, le rendu côté serveur (EJS) et les endpoints pour les pages « Plinkk » (équivalent à Linktree).
 
-  ```bash
-  pnpm install
-  # ou npm install
-  ```
+Badges: [build] [prisma] [node]
 
-3. **Générer la clé de session**
+## ⚡ Points saillants
 
-  ```bash
-  pnpm run create-key
-  ```
+- Serveur rapide avec Fastify
+- TypeScript + Prisma (client généré dans `generated/prisma/`)
+- Templates EJS pour rendu serveur
+- Auth (bcrypt, sessions sécurisées)
+- Support multi-pages par utilisateur (slugs / index)
 
-4. **Configurer la base de données**
+## 🚀 Prérequis
 
-  ```bash
-  pnpx prisma migrate deploy
-  ```
+- Node.js 18+ (ou version LTS compatible)
+- pnpm (recommandé) ou npm
+- PostgreSQL (requis en production — configurez DATABASE_URL, ex : `postgresql://user:password@host:5432/dbname`)
+- SQLite peut être utilisé localement uniquement pour du développement/test (fichier : `prisma/dev.db`), mais la cible de déploiement est PostgreSQL
 
-5. **Lancer en développement**
+## Installation rapide (développement)
 
-  ```bash
-  pnpm run dev
-  # Accès sur http://localhost:3000
-  ```
+1. Clonez le dépôt et entrez dans le dossier:
 
-## 🛠️ Scripts utiles
+```bash
+git clone https://github.com/PlinkkCorp/plinkk-backend.git
+cd plinkk-backend
+```
 
-- `pnpm run dev` : Démarre le serveur en mode développement (hot reload)
-- `pnpm run build` : Compile le projet TypeScript et copie les assets
-- `pnpm run start` : Lance le serveur compilé (production)
-- pnpm run create-key : Génère une clé secrète pour les sessions
+2. Installez les dépendances:
 
-## 📁 Structure
+```bash
+pnpm install
+```
 
-- `src/server.ts` : Point d'entrée principal (Fastify)
-- `src/views/` : Templates EJS
-- `src/public/` : Fichiers statiques (JS, CSS, images)
-- `generated/prisma/` : Client Prisma généré
-- `prisma/schema.prisma` : Schéma de la base de données
+# Plinkk — Backend
 
-## 🔒 Sécurité
+Backend Node.js + TypeScript pour le projet Plinkk (service de pages de liens, style Linktree).
 
-- Mots de passe hashés avec bcrypt
-- Sessions sécurisées via fastify-secure-session
-- Validation des entrées utilisateurs avec Zod
+![build](https://img.shields.io/badge/build-passing-brightgreen) ![prisma](https://img.shields.io/badge/prisma-ready-blue) ![node](https://img.shields.io/badge/node-18%2B-green)
 
-## 📚 Liens utiles
+## Résumé
 
-- Frontend Plinkk : [github.com/PlinkkCorp/plinkk](https://github.com/PlinkkCorp/plinkk)
-- Documentation Plinkk : [github.com/PlinkkCorp/plinkk/docs.md](https://github.com/PlinkkCorp/plinkk/blob/main/.md/docs.md)
+- Serveur web rapide (Fastify)
+- Rendu serveur avec EJS
+- TypeScript + Prisma (client dans `generated/prisma/`)
+- Auth sécurisée (bcrypt + sessions)
+- Support multi-pages par utilisateur (slugs / index)
 
-## 📝 Licence
+## Prérequis
 
-MIT © Marvideo2009, Klaynight [LICENSE](LICENSE)
+- Node.js 18+ (ou LTS compatible)
+- pnpm (recommandé) ou npm
+- SQLite pour le développement (fichier: `prisma/dev.db`) ; Postgres possible en production
+
+## Installation (développement)
+
+1. Clonez le dépôt et entrez dans le dossier:
+
+```bash
+git clone https://github.com/PlinkkCorp/plinkk-backend.git
+cd plinkk-backend
+```
+
+2. Installez les dépendances:
+
+```bash
+pnpm install
+```
+
+3. Générez la clé secrète de session (si nécessaire):
+
+```bash
+pnpm run create-key
+```
+
+4. Préparez la base de données en développement:
+
+```bash
+pnpm prisma:devdb
+# ou : pnpm prisma-db-push
+```
+
+5. Lancez le serveur en mode dev:
+
+```bash
+pnpm run dev
+# Ouvrez ensuite http://localhost:3000
+```
+
+## Variables d'environnement importantes
+
+- `PORT` (ex: 3000)
+- `DATABASE_URL` (dev: `file:./prisma/dev.db`; prod: Postgres URI)
+- `SESSION_KEY` / `SESSION_SECRET` (générée avec `pnpm run create-key`)
+
+Placez-les dans un fichier `.env` ou dans votre système d'environnement avant de lancer l'application.
+
+## Scripts utiles
+
+- `pnpm run dev` — développement (watch)
+- `pnpm run build` — compilation TypeScript
+- `pnpm run start` — lancer la version compilée
+- `pnpm run create-key` — génère une clé de session
+- `pnpm run prisma:devdb` — applique migrations locales (développement)
+- `pnpm run prisma-db-push` — push schema sans migrations
+
+Consultez `package.json` pour la liste complète.
+
+## Architecture & routes clés
+
+- Point d'entrée: `src/server.ts`
+- Templates: `src/views/` (EJS)
+- Static: `src/public/`
+- Prisma client: `generated/prisma/`
+
+Routage public principal:
+
+- `/:username` — page par défaut
+- `/:username/0` ou `/:username/default` — page par défaut
+- `/:username/:index` (1..N) — pages additionnelles
+- `/:username/:slug` — page par slug
+
+Dashboard (admin / utilisateur connecté):
+
+- `/dashboard/plinkks` — créer / modifier / supprimer / définir défaut / statistiques
+
+Par défaut: 2 pages par utilisateur (modifiable selon rôle).
+
+## Base de données & migrations
+
+- Schéma: `prisma/schema.prisma`
+- Fichier dev SQLite: `prisma/dev.db`
+- Migrations: `prisma/migrations/`
+
+Commandes fréquentes:
+
+```bash
+pnpm prisma:devdb       # applique les migrations locales
+pnpm prisma-generate    # génère le client Prisma (postinstall)
+pnpm prisma-db-push     # push schema (avec --accept-data-loss si nécessaire)
+```
+
+> En production, utilisez Postgres et `pnpm prisma:migrate:deploy` ou `npx prisma migrate deploy`.
+
+## Sécurité
+
+- Hash des mots de passe: bcrypt
+- Sessions signées/chiffrées (fastify-secure-session ou équivalent)
+- Validation des entrées: Zod
+
+Bonnes pratiques:
+
+- Ne commitez jamais votre clé de session dans Git
+- Activez HTTPS en production
+
+## Déploiement (notes rapides)
+
+- Construire: `pnpm run build`
+- Démarrer: `pnpm run start`
+- Assurez-vous que `DATABASE_URL` pointe vers une DB accessible et que la clé de session est configurée
+
+Exemple (container / CI):
+
+```bash
+pnpm install --prod
+pnpm run build
+NODE_ENV=production DATABASE_URL="postgresql://..." pnpm run start
+```
+
+## Développement & contributions
+
+- Forkez & créez une branche `feature/xxx` ou `fix/xxx`
+- Respectez les linters / formatters (PRs clairs, petits commits)
+- Tests: aucun test automatisé pour l'instant — contributions bienvenues
+
+Si vous souhaitez ajouter des tests, proposez un petit set (Jest / Vitest) pour les handlers critiques.
+
+## Dépannage rapide
+
+- Erreur: `PrismaClient` non trouvé → exécutez `pnpm prisma-generate` ou `pnpm install` puis `pnpm prisma:devdb`
+- Erreur: port occupé → changez `PORT` ou tuez le processus
+- Erreur: clé de session manquante → exécutez `pnpm run create-key` et exportez la variable
+
+## Licence
+
+MIT — voir le fichier `LICENSE`.
+
+## Contacts
+
+- Email : [contact@plinkk.fr](mailto:contact@plinkk.fr)
+- Repo: [Plinkk Backend](https://github.com/PlinkkCorp/plinkk-backend)
+- Frontend: [Plinkk Frontend](https://github.com/PlinkkCorp/plinkk)
