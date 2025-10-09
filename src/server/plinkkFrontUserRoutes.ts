@@ -39,8 +39,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           return reply.view("plinkk/show.ejs", { page: resolved.page, userId: resolved.user.id, username: resolved.user.id, isOwner, links, publicPath });
         }
         // if page exists but resolve failed (private/inactive), return appropriate status
-        if (resolved.status === 403) return reply.code(403).view("erreurs/404.ejs", { currentUser: null });
-        return reply.code(404).view("erreurs/404.ejs", { currentUser: null });
+        if (resolved.status === 403) return reply.code(403).view("erreurs/404.ejs", { user: null });
+        return reply.code(404).view("erreurs/404.ejs", { user: null });
       }
     } catch (e) {
       // ignore and fallback to username-based resolution below
@@ -89,7 +89,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
   // Résoudre toujours la page par défaut Plinkk; ne plus faire de fallback vers l'ancien rendu
   const resolved = await resolvePlinkkPage(prisma, username, undefined, request);
     if (resolved.status !== 200) {
-      return reply.code(resolved.status).view("erreurs/404.ejs", { currentUser: null });
+      return reply.code(resolved.status).view("erreurs/404.ejs", { user: null });
     }
   const links = await prisma.link.findMany({ where: { plinkkId: resolved.page.id, userId: resolved.user.id } });
   const isOwner = (request.session.get('data') as string | undefined) === resolved.user.id;
@@ -449,10 +449,10 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     const { username, identifier } = request.params as any;
     // Ignore si l'identifiant correspond à un préfixe d'actifs
     if (["css", "js", "images", "canvaAnimation"].includes(String(identifier))) {
-      return reply.code(404).view("erreurs/404.ejs", { currentUser: null });
+      return reply.code(404).view("erreurs/404.ejs", { user: null });
     }
     const resolved = await resolvePlinkkPage(prisma, username, identifier, request);
-    if (resolved.status !== 200) return reply.code(resolved.status).view("erreurs/404.ejs", { currentUser: null });
+    if (resolved.status !== 200) return reply.code(resolved.status).view("erreurs/404.ejs", { user: null });
   const links = await prisma.link.findMany({ where: { plinkkId: resolved.page.id, userId: resolved.user.id } });
   const isOwner = (request.session.get('data') as string | undefined) === resolved.user.id;
   const publicPath = resolved.page && resolved.page.slug ? resolved.page.slug : resolved.user.id;
@@ -465,7 +465,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
   }>("/:username/0", async (request, reply) => {
     const { username } = request.params as any;
     const resolved = await resolvePlinkkPage(prisma, username, undefined, request);
-    if (resolved.status !== 200) return reply.code(resolved.status).view("erreurs/404.ejs", { currentUser: null });
+    if (resolved.status !== 200) return reply.code(resolved.status).view("erreurs/404.ejs", { user: null });
     const links = await prisma.link.findMany({ where: { plinkkId: resolved.page.id, userId: resolved.user.id } });
     const isOwner = (request.session.get('data') as string | undefined) === resolved.user.id;
     return reply.view("plinkk/show.ejs", { page: resolved.page, userId: resolved.user.id, username: resolved.user.id, isOwner, links });

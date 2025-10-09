@@ -14,7 +14,7 @@
         <div class="hidden md:flex items-center gap-3">
           <% if (typeof user !== 'undefined' && user) { %>
             <div class="flex items-center gap-2 relative" id="accountMenuRoot">
-              <% if (currentUser.isAdmin) { %>
+              <% if (user.isAdmin) { %>
                 <a href="/dashboard/admin" class="px-3 py-2 text-sm rounded-md flex items-center gap-2 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 border border-rose-700 text-white transition transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-rose-400" title="Dashboard administrateur" aria-label="Accéder au dashboard administrateur">Admin</a>
               <% } %>
               <a href="/dashboard" class="px-3 py-2 text-sm rounded-md bg-slate-800/60 hover:bg-slate-800 border border-slate-700">Mon dashboard</a>

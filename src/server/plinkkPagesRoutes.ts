@@ -51,7 +51,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     if (!userId) return reply.redirect(`/login?returnTo=${encodeURIComponent('/dashboard/edit')}`);
     const { id } = request.params;
     const page = await prisma.plinkk.findUnique({ where: { id } });
-    if (!page || page.userId !== userId) return reply.code(404).view("erreurs/404.ejs", { currentUser: { id: userId } });
+    if (!page || page.userId !== userId) return reply.code(404).view("erreurs/404.ejs", { user: { id: userId } });
     return reply.redirect(`/dashboard/edit?plinkkId=${encodeURIComponent(id)}`);
   });
 
@@ -62,13 +62,13 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     const { id } = request.params;
     const body = request.body || ({} as any);
     const page = await prisma.plinkk.findUnique({ where: { id } });
-    if (!page || page.userId !== userId) return reply.code(404).view("erreurs/404.ejs", { currentUser: { id: userId } });
+    if (!page || page.userId !== userId) return reply.code(404).view("erreurs/404.ejs", { user: { id: userId } });
     const data: any = {};
     if (typeof body.title === 'string' && body.title.trim()) data.name = body.title.trim();
     if (typeof body.slug === 'string' && body.slug.trim()) {
       const s = slugify(body.slug);
       if (s !== page.slug) {
-        if (await isReservedSlug(prisma as any, s)) return reply.code(400).view("erreurs/500.ejs", { message: 'Slug réservé', currentUser: { id: userId } });
+        if (await isReservedSlug(prisma as any, s)) return reply.code(400).view("erreurs/500.ejs", { message: 'Slug réservé', user: { id: userId } });
         data.slug = await suggestUniqueSlug(prisma, userId, s);
       }
     }
@@ -97,7 +97,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     const { id } = request.params;
     const mode = String((request.body as any)?.mode || 'soft');
     const page = await prisma.plinkk.findUnique({ where: { id } });
-    if (!page || page.userId !== userId) return reply.code(404).view("erreurs/404.ejs", { currentUser: { id: userId } });
+    if (!page || page.userId !== userId) return reply.code(404).view("erreurs/404.ejs", { user: { id: userId } });
     if (page.isDefault) {
       // prevent deletion of default if other pages exist
       const others = await prisma.plinkk.count({ where: { userId, NOT: { id } } });
@@ -118,7 +118,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     if (!userId) return reply.redirect(`/login?returnTo=${encodeURIComponent('/dashboard/plinkks')}`);
     const { id } = request.params;
     const page = await prisma.plinkk.findUnique({ where: { id } });
-    if (!page || page.userId !== userId) return reply.code(404).view("erreurs/404.ejs", { currentUser: { id: userId } });
+    if (!page || page.userId !== userId) return reply.code(404).view("erreurs/404.ejs", { user: { id: userId } });
     if (page.isDefault) return reply.redirect('/dashboard/plinkks');
     const prev = await prisma.plinkk.findFirst({ where: { userId, isDefault: true } });
     await prisma.$transaction([
@@ -135,7 +135,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     if (!userId) return reply.redirect(`/login?returnTo=${encodeURIComponent('/dashboard/stats')}`);
     const { id } = request.params;
     const page = await prisma.plinkk.findUnique({ where: { id } });
-    if (!page || page.userId !== userId) return reply.code(404).view("erreurs/404.ejs", { currentUser: { id: userId } });
+    if (!page || page.userId !== userId) return reply.code(404).view("erreurs/404.ejs", { user: { id: userId } });
     return reply.redirect(`/dashboard/stats?plinkkId=${encodeURIComponent(id)}`);
   });
 }
