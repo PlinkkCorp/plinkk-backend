@@ -19,8 +19,12 @@ export function isAdminLike(role?: Role | null): boolean {
   return role === "ADMIN" || role === "DEVELOPER" || role === "MODERATOR";
 }
 
+export function isPartener(role?: Role | null): boolean {
+  return role === "PARTNER";
+}
+
 export function getMaxPagesForRole(role?: Role | null): number {
-  return isAdminLike(role) ? 100 : MAX_PAGES_DEFAULT;
+  return isAdminLike(role) ? 100 : isPartener(role) ? 5 : MAX_PAGES_DEFAULT;
 }
 
 // Identifiants réservés (chemins, préfixes d'actifs, zones système)
