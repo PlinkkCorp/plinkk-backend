@@ -1,5 +1,7 @@
 // Utilitaires liés aux pages Plinkk (profils secondaires)
 import { PrismaClient, Role } from "../../generated/prisma/client";
+import { RESERVED_SLUGS } from './reservedSlugs';
+import { isBannedSlug } from './bannedSlugs';
 
 export const MAX_PAGES_DEFAULT = 2;
 
@@ -22,22 +24,14 @@ export function getMaxPagesForRole(role?: Role | null): number {
 }
 
 // Identifiants réservés (chemins, préfixes d'actifs, zones système)
-export const RESERVED_SLUGS = new Set<string>([
-  'css', 'js', 'images', 'canvaAnimation', 'public', 'api', 'dashboard',
-  'login', 'logout', 'register', 'totp', 'users', 'favicon.ico', 'robots.txt'
-]);
-
 // Vérifie si un slug est réservé (in-memory ou DB)
 export async function isReservedSlug(prisma: PrismaClient, slug: string): Promise<boolean> {
   if (!slug) return true;
   if (RESERVED_SLUGS.has(slug)) return true;
   try {
-    // prisma may not have the model if migrations not applied; guard access
-    // @ts-ignore
-    const hit = await prisma.bannedSlug.findUnique({ where: { slug } });
-    return !!hit;
+    // if DB has BannedSlug model, consider it as banned list
+    return await isBannedSlug(slug);
   } catch (e) {
-    // If the table doesn't exist yet or other DB error, fall back to in-memory only
     return RESERVED_SLUGS.has(slug);
   }
 }

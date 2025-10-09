@@ -17,7 +17,7 @@ import { staticPagesRoutes } from "./server/staticPagesRoutes";
 import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
 import { plinkkPagesRoutes } from "./server/plinkkPagesRoutes";
-import { createPlinkkForUser, slugify, RESERVED_SLUGS, isReservedSlug } from "./server/plinkkUtils";
+import { createPlinkkForUser, slugify, isReservedSlug } from "./server/plinkkUtils";
 // Example profile data used to pre-fill a new user's main Plinkk
 // Note: this file is shared with client-side config and exports a default object
 import profileConfig from "./public/config/profileConfig";
