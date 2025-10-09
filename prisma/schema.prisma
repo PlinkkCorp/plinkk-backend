@@ -339,3 +339,9 @@ model PageStat {
   createdAt    DateTime @default(now())
   @@index([plinkkId, eventType, createdAt])
 }
+
+model BannedSlug {
+  slug         String  @id
+  reason       String
+  createdAt    DateTime @default(now())
+}

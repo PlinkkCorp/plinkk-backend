@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 export async function isBannedSlug(slug: string): Promise<boolean> {
   if (!slug) return true;
   try {
-    const hit = await prisma.bannedSlug.findUnique({ where: { slug } });
+    const hit = await prisma.bannedSlug.findUnique({ where: { slug: slug } });
     return !!hit;
   } catch (e) {
     // Si la table BannedSlug n'existe pas, on tombe sur false pour ne pas bloquer la création
@@ -37,9 +37,9 @@ export async function createBannedSlug(slug: string, reason?: string) {
   }
 }
 
-export async function deleteBannedSlugById(id: string) {
+export async function deleteBannedSlugById(slug: string) {
   try {
-    return await prisma.bannedSlug.delete({ where: { id } });
+    return await prisma.bannedSlug.delete({ where: { slug } });
   } catch (e: any) {
     const msg = String(e?.message || '');
     if (msg.includes('BannedSlug') && msg.includes('does not exist')) {
