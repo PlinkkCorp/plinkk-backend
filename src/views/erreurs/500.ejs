@@ -5,7 +5,47 @@
     <div class="text-5xl font-bold">500</div>
     <p class="mt-3 text-slate-300">Désolé, une erreur est survenue.</p>
     <% if (typeof message === 'string' && message) { %>
-      <pre class="mt-4 text-xs text-slate-400 bg-slate-900/60 border border-slate-800/60 rounded p-3 overflow-auto text-left"><%= message %></pre>
+      <div class="mt-4 text-left">
+        <div class="relative">
+          <pre id="errorMessage" class="text-xs text-slate-400 bg-slate-900/60 border border-slate-800/60 rounded p-3 overflow-auto"><%= message %></pre>
+          <button type="button" id="copyErrorBtn" aria-label="Copier l'erreur"
+            class="absolute top-2 right-2 inline-flex items-center gap-2 px-2 py-1 text-xs bg-slate-800/70 hover:bg-slate-700 rounded text-slate-200">
+            Copier
+          </button>
+        </div>
+      </div>
+
+      <script>
+        (function(){
+          var btn = document.getElementById('copyErrorBtn');
+          var pre = document.getElementById('errorMessage');
+          if (!btn || !pre) return;
+          btn.addEventListener('click', function(){
+            var text = pre.innerText || pre.textContent || '';
+            if (!navigator.clipboard) {
+              try {
+                var range = document.createRange();
+                range.selectNodeContents(pre);
+                var sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+                document.execCommand('copy');
+                sel.removeAllRanges();
+                showCopied();
+              } catch (e) {
+                console.warn('Copy failed', e);
+              }
+              return;
+            }
+            navigator.clipboard.writeText(text).then(showCopied, function(){ console.warn('Copy failed');});
+          });
+          function showCopied(){
+            var original = btn.innerHTML;
+            btn.textContent = 'Copié !';
+            setTimeout(function(){ btn.innerHTML = original; }, 1500);
+          }
+        })();
+      </script>
     <% } %>
     <a href="/" class="mt-6 inline-block px-4 py-2.5 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white">Retour à l’accueil</a>
   </div>
