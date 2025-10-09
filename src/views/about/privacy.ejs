@@ -1,5 +1,5 @@
-<%- include('partials/head', { title: 'Confidentialité', description: 'Politique de confidentialité de Plinkk.' }) %>
-<%- include('partials/header') %>
+<%- include('../partials/head', { title: 'Confidentialité', description: 'Politique de confidentialité de Plinkk.' }) %>
+<%- include('../partials/header') %>
 <main class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-10">
   <article class="glass ring-gradient rounded-2xl p-6 prose prose-invert max-w-none">
     <h1 class="mb-2">Politique de confidentialité</h1>
@@ -16,7 +16,7 @@
     <hr class="my-4 border-slate-800/60" />
 
     <h2 id="responsable">Responsable de traitement</h2>
-    <p>Plinkk — Klaynight (Elouan Passereau). Contact : <a href="mailto:contact@studio.klaynight.fr">contact@studio.klaynight.fr</a>.</p>
+  <p>Plinkk — Klaynight (Elouan Passereau). Contact : <%- include('../partials/contact-email') %>.</p>
 
     <h2 id="donnees">Données traitées</h2>
     <ul>
@@ -45,8 +45,11 @@
     <ul>
       <li>Droit d’accès, de rectification, d’effacement, de limitation et d’opposition.</li>
       <li>Droit à la portabilité des données.</li>
-      <li>Exercer vos droits : <a href="mailto:contact@studio.klaynight.fr">contact@studio.klaynight.fr</a>.</li>
+  <li>Exercer vos droits : <%- include('../partials/contact-email') %>.</li>
     </ul>
+
+  <h3 id="consentement">Consentement</h3>
+  <p>En vous inscrivant sur Plinkk, vous consentez au traitement des données nécessaires à la fourniture du service et acceptez nos <a href="/terms">Conditions générales d'utilisation</a>. Vous pouvez retirer votre consentement à tout moment en supprimant votre compte ou en nous contactant.</p>
 
     <h2 id="securite">Sécurité</h2>
     <p>Chiffrement des mots de passe (bcrypt), séparation des données, contrôles d’accès. Nous améliorons régulièrement nos mesures.</p>
@@ -61,4 +64,4 @@
     <p>Nous pouvons mettre à jour cette politique. La date de dernière mise à jour est indiquée en haut de page.</p>
   </article>
 </main>
-<%- include('partials/footer') %>
+<%- include('../partials/footer') %>
