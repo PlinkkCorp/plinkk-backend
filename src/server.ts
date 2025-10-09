@@ -17,7 +17,10 @@ import { staticPagesRoutes } from "./server/staticPagesRoutes";
 import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
 import { plinkkPagesRoutes } from "./server/plinkkPagesRoutes";
-import { createPlinkkForUser, slugify, RESERVED_SLUGS } from "./server/plinkkUtils";
+import { createPlinkkForUser, slugify, RESERVED_SLUGS, isReservedSlug } from "./server/plinkkUtils";
+// Example profile data used to pre-fill a new user's main Plinkk
+// Note: this file is shared with client-side config and exports a default object
+import profileConfig from "./public/config/profileConfig";
 import { authenticator } from "otplib";
 
 
@@ -250,7 +253,7 @@ fastify.post("/register", async (req, reply) => {
     }
 
     // Vérifier unicité globale: pas d'utilisateur existant, pas de plinkk avec ce slug, pas de mot réservé
-    if (RESERVED_SLUGS.has(generatedId)) {
+    if (await isReservedSlug(prisma as any, generatedId)) {
       const emailParam = encodeURIComponent(rawEmail);
       const userParam = encodeURIComponent(rawUsername);
       return reply.redirect(`/login?error=${encodeURIComponent("Cet @ est réservé, essaye un autre nom d'utilisateur")}&email=${emailParam}&username=${userParam}#signup`);
@@ -277,9 +280,69 @@ fastify.post("/register", async (req, reply) => {
         password: hashedPassword,
       },
     });
+    // Ensure a default Cosmetic row exists to avoid null-access errors in code
+    try {
+      await prisma.cosmetic.create({ data: { userId: user.id } });
+    } catch (e) {
+      // Non bloquant: ignore unique constraint or other create errors
+      req.log?.warn({ e }, 'create default cosmetic failed');
+    }
     // Auto-crée un Plinkk principal pour ce compte (slug global basé sur username)
     try {
-      await createPlinkkForUser(prisma as any, user.id, { name: username, slugBase: username, visibility: 'PUBLIC', isActive: true });
+      // Create the user's main Plinkk and capture it so we can attach example data
+      const createdPlinkk = await createPlinkkForUser(prisma as any, user.id, { name: username, slugBase: username, visibility: 'PUBLIC', isActive: true });
+      try {
+        // Create PlinkkSettings from example profileConfig (non-blocking)
+        await prisma.plinkkSettings.create({ data: {
+          plinkkId: createdPlinkk.id,
+          profileLink: (profileConfig as any).profileLink,
+          profileImage: (profileConfig as any).profileImage,
+          profileIcon: (profileConfig as any).profileIcon,
+          profileSiteText: (profileConfig as any).profileSiteText,
+          userName: (profileConfig as any).userName,
+          iconUrl: (profileConfig as any).iconUrl,
+          description: (profileConfig as any).description,
+          profileHoverColor: (profileConfig as any).profileHoverColor,
+          degBackgroundColor: (profileConfig as any).degBackgroundColor,
+          neonEnable: (profileConfig as any).neonEnable ?? (profileConfig as any).neonEnable === 0 ? 0 : 1,
+          buttonThemeEnable: (profileConfig as any).buttonThemeEnable,
+          EnableAnimationArticle: (profileConfig as any).EnableAnimationArticle,
+          EnableAnimationButton: (profileConfig as any).EnableAnimationButton,
+          EnableAnimationBackground: (profileConfig as any).EnableAnimationBackground,
+          backgroundSize: (profileConfig as any).backgroundSize,
+          selectedThemeIndex: (profileConfig as any).selectedThemeIndex,
+          selectedAnimationIndex: (profileConfig as any).selectedAnimationIndex,
+          selectedAnimationButtonIndex: (profileConfig as any).selectedAnimationButtonIndex,
+          selectedAnimationBackgroundIndex: (profileConfig as any).selectedAnimationBackgroundIndex,
+          animationDurationBackground: (profileConfig as any).animationDurationBackground,
+          delayAnimationButton: (profileConfig as any).delayAnimationButton,
+          canvaEnable: (profileConfig as any).canvaEnable,
+          selectedCanvasIndex: (profileConfig as any).selectedCanvasIndex,
+        }});
+      } catch (e) {
+        req.log?.warn({ e }, 'create default plinkkSettings failed');
+      }
+
+      try {
+        // Create a single example Link for the new Plinkk if provided in the example config
+        const exampleLinks = (profileConfig as any).links;
+        if (Array.isArray(exampleLinks) && exampleLinks.length > 0) {
+          const l = exampleLinks[0];
+          await prisma.link.create({ data: {
+            userId: user.id,
+            plinkkId: createdPlinkk.id,
+            icon: l.icon || (profileConfig as any).profileIcon || undefined,
+            url: l.url || (profileConfig as any).profileLink || 'https://example.com',
+            text: l.text || 'Mon lien',
+            name: l.name || 'Exemple',
+            description: l.description || null,
+            showDescriptionOnHover: typeof l.showDescriptionOnHover === 'boolean' ? l.showDescriptionOnHover : true,
+            showDescription: typeof l.showDescription === 'boolean' ? l.showDescription : true,
+          }});
+        }
+      } catch (e) {
+        req.log?.warn({ e }, 'create example link failed');
+      }
     } catch (e) {
       // non bloquant
       req.log?.warn({ e }, 'auto-create default plinkk failed');

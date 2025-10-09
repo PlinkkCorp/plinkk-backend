@@ -52,7 +52,7 @@ CREATE TABLE "new_User" (
     "isPublic" BOOLEAN NOT NULL DEFAULT true,
     "views" INTEGER NOT NULL DEFAULT 0,
     "selectedCustomThemeId" TEXT,
-    "slags" JSONB DEFAULT []
+    "slags" JSON DEFAULT []
 );
 INSERT INTO "new_User" ("bumpExpiresAt", "bumpPaidUntil", "bumpedAt", "createdAt", "email", "emailVerified", "id", "image", "isPublic", "name", "password", "publicEmail", "rankScore", "role", "selectedCustomThemeId", "twoFactorEnabled", "twoFactorSecret", "updatedAt", "userName", "views") SELECT "bumpExpiresAt", "bumpPaidUntil", "bumpedAt", "createdAt", "email", "emailVerified", "id", "image", "isPublic", "name", "password", "publicEmail", "rankScore", "role", "selectedCustomThemeId", "twoFactorEnabled", "twoFactorSecret", "updatedAt", "userName", "views" FROM "User";
 DROP TABLE "User";

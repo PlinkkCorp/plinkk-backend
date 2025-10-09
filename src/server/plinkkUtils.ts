@@ -27,6 +27,21 @@ export const RESERVED_SLUGS = new Set<string>([
   'login', 'logout', 'register', 'totp', 'users', 'favicon.ico', 'robots.txt'
 ]);
 
+// Vérifie si un slug est réservé (in-memory ou DB)
+export async function isReservedSlug(prisma: PrismaClient, slug: string): Promise<boolean> {
+  if (!slug) return true;
+  if (RESERVED_SLUGS.has(slug)) return true;
+  try {
+    // prisma may not have the model if migrations not applied; guard access
+    // @ts-ignore
+    const hit = await prisma.bannedSlug.findUnique({ where: { slug } });
+    return !!hit;
+  } catch (e) {
+    // If the table doesn't exist yet or other DB error, fall back to in-memory only
+    return RESERVED_SLUGS.has(slug);
+  }
+}
+
 // Suggestion de slug unique: ajoute -1, -2...
 export async function suggestUniqueSlug(prisma: PrismaClient, userId: string, baseSlug: string): Promise<string> {
   let candidate = baseSlug || "page";
@@ -73,7 +88,7 @@ export async function suggestGloballyUniqueSlug(prisma: PrismaClient, baseSlug: 
   while (true) {
     const candidate = suffix === 0 ? base : `${base}-${suffix + 1}`;
     // Éviter les mots réservés
-    if (RESERVED_SLUGS.has(candidate)) { suffix++; continue; }
+    if (await isReservedSlug(prisma, candidate)) { suffix++; continue; }
     // Le slug ne doit pas entrer en conflit avec un @ (User.id)
     const userHit = await prisma.user.findUnique({ where: { id: candidate } });
     if (userHit) { suffix++; continue; }

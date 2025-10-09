@@ -718,4 +718,66 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     await (prisma as any).announcement.delete({ where: { id: String(id) } });
     return reply.send({ ok: true });
   });
+
+  // Admin: gestion des slugs bannis (UI)
+  fastify.get('/admin/bans', async function (request, reply) {
+    const userId = request.session.get('data');
+    if (!userId) return reply.redirect(`/login?returnTo=${encodeURIComponent('/dashboard/admin/bans')}`);
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, omit: { password: true } });
+    if (!userInfo) return reply.redirect(`/login?returnTo=${encodeURIComponent('/dashboard/admin/bans')}`);
+    if (!isStaff(userInfo.role)) return reply.redirect('/dashboard');
+    try {
+      const defaultPlinkk = await prisma.plinkk.findFirst({ where: { userId: userInfo.id, isDefault: true } });
+      (userInfo as any).publicPath = (defaultPlinkk && defaultPlinkk.slug) ? defaultPlinkk.slug : userInfo.id;
+    } catch (e) {}
+    return reply.view('dashboard/admin/bans.ejs', { user: userInfo });
+  });
+
+  // Admin API: list bans
+  fastify.get('/admin/bans/api', async function (request, reply) {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'unauthorized' });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) return reply.code(403).send({ error: 'forbidden' });
+    const list = await (prisma as any).bannedSlug.findMany({ orderBy: { createdAt: 'desc' } });
+    return reply.send({ bans: list });
+  });
+
+
+  // Admin API: add ban
+  fastify.post('/admin/bans/api', async function (request, reply) {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'unauthorized' });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) return reply.code(403).send({ error: 'forbidden' });
+    const body = request.body as any;
+    const slug = (body.slug || '').trim();
+    if (!slug) return reply.code(400).send({ error: 'missing_slug' });
+    try {
+      const created = await (prisma as any).bannedSlug.create({ data: { slug: slug, reason: body.reason || null } });
+      return reply.send({ ok: true, ban: created });
+    } catch (e: any) {
+      if (String(e?.message).includes('Unique') || String(e?.message).includes('UNIQUE')) return reply.code(409).send({ error: 'already_banned' });
+      return reply.code(500).send({ error: 'internal_error' });
+    }
+  });
+
+
+  // Admin API: remove ban
+  fastify.delete('/admin/bans/api', async function (request, reply) {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'unauthorized' });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) return reply.code(403).send({ error: 'forbidden' });
+    const { id } = request.query as any;
+    if (!id) return reply.code(400).send({ error: 'missing_id' });
+    try {
+      await (prisma as any).bannedSlug.delete({ where: { id: String(id) } });
+      return reply.send({ ok: true });
+    } catch (e) {
+      return reply.code(404).send({ error: 'not_found' });
+    }
+  });
+
+  // NOTE: /api/bans endpoints are implemented in apiRoutes (mounted under /api)
 }

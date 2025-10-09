@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { PrismaClient, Role } from "../../generated/prisma/client";
-import { getMaxPagesForRole, reindexNonDefault, slugify, suggestUniqueSlug, getNextIndex, createPlinkkForUser } from "./plinkkUtils";
+import { getMaxPagesForRole, reindexNonDefault, slugify, suggestUniqueSlug, getNextIndex, createPlinkkForUser, isReservedSlug } from "./plinkkUtils";
 
 const prisma = new PrismaClient();
 
@@ -67,7 +67,10 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     if (typeof body.title === 'string' && body.title.trim()) data.name = body.title.trim();
     if (typeof body.slug === 'string' && body.slug.trim()) {
       const s = slugify(body.slug);
-      if (s !== page.slug) data.slug = await suggestUniqueSlug(prisma, userId, s);
+      if (s !== page.slug) {
+        if (await isReservedSlug(prisma as any, s)) return reply.code(400).view("erreurs/500.ejs", { message: 'Slug réservé', currentUser: { id: userId } });
+        data.slug = await suggestUniqueSlug(prisma, userId, s);
+      }
     }
     if (typeof body.visibility === 'string') data.visibility = (body.visibility.toLowerCase() === 'private') ? 'PRIVATE' : 'PUBLIC';
     if (typeof body.isActive !== 'undefined') data.isActive = !!body.isActive;

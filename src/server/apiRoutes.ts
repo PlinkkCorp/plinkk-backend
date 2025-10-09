@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { PrismaClient, Role } from "../../generated/prisma/client";
-import { getMaxPagesForRole, getNextIndex, reindexNonDefault, slugify, suggestUniqueSlug, createPlinkkForUser, RESERVED_SLUGS } from './plinkkUtils';
+import { getMaxPagesForRole, getNextIndex, reindexNonDefault, slugify, suggestUniqueSlug, createPlinkkForUser, RESERVED_SLUGS, isReservedSlug } from './plinkkUtils';
 import path from "path";
 import {
   existsSync,
@@ -33,8 +33,8 @@ export function apiRoutes(fastify: FastifyInstance) {
     const rawName = typeof body.name === 'string' ? body.name : '';
     try {
       // Normaliser la base; éviter mots réservés
-      const base = slugify(rawSlug || rawName || 'page');
-      if (!base || RESERVED_SLUGS.has(base)) return reply.code(400).send({ error: 'invalid_or_reserved_slug' });
+  const base = slugify(rawSlug || rawName || 'page');
+  if (!base || await isReservedSlug(prisma as any, base)) return reply.code(400).send({ error: 'invalid_or_reserved_slug' });
       // Interdire conflit avec un @ d'utilisateur
       const userConflict = await prisma.user.findUnique({ where: { id: base }, select: { id: true } });
       if (userConflict) return reply.code(409).send({ error: 'slug_conflicts_with_user' });
@@ -45,6 +45,48 @@ export function apiRoutes(fastify: FastifyInstance) {
       if (e?.message === 'max_pages_reached') return reply.code(400).send({ error: 'max_pages_reached' });
       if (e?.message === 'user_not_found') return reply.code(401).send({ error: 'unauthorized' });
       return reply.code(500).send({ error: 'internal_error' });
+    }
+  });
+
+  // Admin: bans API (mounted under /api because apiRoutes is registered with prefix '/api')
+  fastify.get('/bans', async (request, reply) => {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'unauthorized' });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) return reply.code(403).send({ error: 'forbidden' });
+    const list = await (prisma as any).bannedSlug.findMany({ orderBy: { createdAt: 'desc' } });
+    return reply.send({ bans: list });
+  });
+
+  fastify.post('/bans', async (request, reply) => {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'unauthorized' });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) return reply.code(403).send({ error: 'forbidden' });
+    const body = request.body as any;
+    const slug = (body.slug || '').trim();
+    if (!slug) return reply.code(400).send({ error: 'missing_slug' });
+    try {
+      const created = await (prisma as any).bannedSlug.create({ data: { slug: slug, reason: body.reason || null } });
+      return reply.send({ ok: true, ban: created });
+    } catch (e: any) {
+      if (String(e?.message).includes('Unique') || String(e?.message).includes('UNIQUE')) return reply.code(409).send({ error: 'already_banned' });
+      return reply.code(500).send({ error: 'internal_error' });
+    }
+  });
+
+  fastify.delete('/bans', async (request, reply) => {
+    const userId = request.session.get('data');
+    if (!userId) return reply.code(401).send({ error: 'unauthorized' });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && (me.role === Role.ADMIN || me.role === Role.DEVELOPER || me.role === Role.MODERATOR))) return reply.code(403).send({ error: 'forbidden' });
+    const { id } = request.query as any;
+    if (!id) return reply.code(400).send({ error: 'missing_id' });
+    try {
+      await (prisma as any).bannedSlug.delete({ where: { id: String(id) } });
+      return reply.send({ ok: true });
+    } catch (e) {
+      return reply.code(404).send({ error: 'not_found' });
     }
   });
 
@@ -1379,7 +1421,8 @@ export function apiRoutes(fastify: FastifyInstance) {
       where: { id: userId as string },
       select: { cosmetics: true },
     });
-    const cosmetics = u?.cosmetics;
+    // Fallback to empty object to avoid runtime errors when cosmetics is null/undefined
+    const cosmetics = (u?.cosmetics ?? {}) as any;
     const updated = await prisma.user.update({
       where: { id: userId as string },
       data: { cosmetics: {
