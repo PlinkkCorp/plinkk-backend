@@ -4,6 +4,7 @@ import path from "path";
 import { generateProfileConfig } from "../generateConfig";
 import { minify } from "uglify-js";
 import { PrismaClient } from "../../generated/prisma/client";
+import { replyView } from "../lib/replyView";
 
 const prisma = new PrismaClient();
 
@@ -57,21 +58,29 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
       // Enregistrer la vue datée (agrégation quotidienne) dans SQLite sans modifier le client généré
       try {
-        // Assurer la table (SQLite)
-        await prisma.$executeRawUnsafe(
-          'CREATE TABLE IF NOT EXISTS "UserViewDaily" ("userId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("userId","date"))'
-        );
         const now = new Date();
         const y = now.getUTCFullYear();
         const m = String(now.getUTCMonth() + 1).padStart(2, '0');
         const d = String(now.getUTCDate()).padStart(2, '0');
         const dateStr = `${y}-${m}-${d}`; // YYYY-MM-DD (UTC)
-        // Upsert (ON CONFLICT) pour incrémenter le compteur du jour
-        await prisma.$executeRawUnsafe(
-          'INSERT INTO "UserViewDaily" ("userId","date","count") VALUES (?,?,1) ON CONFLICT("userId","date") DO UPDATE SET "count" = "count" + 1',
-          username,
-          dateStr
-        );
+        await prisma.userViewDaily.upsert({
+          where: {
+            userId_date: {
+              userId: username,
+              date: dateStr
+            },
+          },
+          create: {
+            userId: username,
+            date: dateStr,
+            count: 1,
+          },
+          update: {
+            count: {
+              increment: 1
+            }
+          }
+        })
       } catch (e) {
         request.log?.warn({ err: e }, 'Failed to record daily view');
       }
@@ -173,7 +182,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         return;
       }
       if (configFileName === "") {
-        reply.code(404).send({ error: "please specify a css file" });
+        reply.code(404).send({ error: "please specify a config file" });
         return;
       }
       if (configFileName === "profileConfig.js") {
@@ -232,7 +241,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         ]);
         // Si un thème privé est sélectionné, récupérer ses données, les normaliser en "full shape"
         // et l'injecter comme thème 0 pour le front.
-  let injectedThemeVar = '';
+        let injectedThemeVar = '';
         try {
           // Helpers de normalisation (cohérents avec apiRoutes)
           const normalizeHex = (v?: string) => {
@@ -403,6 +412,11 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           path.join(__dirname, "..", "public", "config", configFileName),
           { encoding: "utf-8" }
         );
+        if (configFileName === "btnIconThemeConfig.js") {
+          return reply
+          .type("text/javascript")
+          .send(file.replaceAll("{{username}}", "https://plinkk.fr/" + username));
+        }
         return reply
           .type("text/javascript")
           .send(file.replaceAll("{{username}}", username));

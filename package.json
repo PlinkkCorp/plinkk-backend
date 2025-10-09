@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev src/server.ts",
+    "dev:tsx": "tsx watch src/server.ts",
     "create-key": "pnpx @fastify/secure-session > src/secret-key",
     "build": "tsc -p tsconfig.json && node scripts/copy-static.mjs",
     "start": "node dist/server.js",
@@ -20,24 +21,31 @@
   "license": "ISC",
   "packageManager": "pnpm@10.15.0",
   "overrides": {
-    "rimraf": "^5.0.0",
     "glob": "11.0.3"
   },
   "pnpm": {
     "overrides": {
-      "rimraf": "^5.0.0",
       "glob": "11.0.3"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "bcrypt",
+      "esbuild",
+      "node",
+      "prisma"
+    ]
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^11.1.0",
     "@fastify/formbody": "^8.0.2",
     "@fastify/multipart": "^9.2.1",
     "@fastify/oauth2": "^8.1.2",
     "@fastify/secure-session": "^8.2.0",
     "@fastify/static": "^8.2.0",
     "@fastify/view": "^11.1.1",
-    "@prisma/client": "^6.16.3",
+    "@prisma/client": "^6.17.0",
     "@types/uglify-js": "^3.17.5",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
@@ -46,15 +54,16 @@
     "fastify-cli": "^7.4.0",
     "otplib": "^12.0.1",
     "qrcode": "^1.5.4",
-    
+    "rimraf": "^5.0.10",
     "uglify-js": "^3.19.3",
-    "zod": "^4.1.11"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/ejs": "^3.1.5",
-    "@types/node": "^24.5.2",
-    "prisma": "^6.16.3",
+    "@types/node": "^24.7.0",
+    "prisma": "^6.17.0",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.9.2"
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
   }
 }

@@ -9,6 +9,7 @@ import { PrismaClient } from "../generated/prisma/client";
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
+import fastifyCors from "@fastify/cors";
 import bcrypt from "bcrypt";
 import fastifySecureSession from "@fastify/secure-session";
 import z from "zod";
@@ -22,7 +23,8 @@ import { createPlinkkForUser, slugify, isReservedSlug } from "./server/plinkkUti
 // Note: this file is shared with client-side config and exports a default object
 import profileConfig from "./public/config/profileConfig";
 import { authenticator } from "otplib";
-
+import { replyView } from "./lib/replyView";
+import { toSafeUser } from "./types/user";
 
 export const prisma = new PrismaClient();
 export const fastify = Fastify({
@@ -65,27 +67,55 @@ fastify.register(fastifySecureSession, {
   },
 });
 
+fastify.register(fastifyCors,  {
+  origin: true
+})
+
 fastify.register(apiRoutes, { prefix: "/api" });
 fastify.register(staticPagesRoutes);
 fastify.register(dashboardRoutes, { prefix: "/dashboard" });
 fastify.register(plinkkPagesRoutes, { prefix: "/dashboard" });
 fastify.register(plinkkFrontUserRoutes);
 
+fastify.addHook("onRequest", async (request, reply) => {
+  const host = request.headers.host || "";
+
+  if (host !== "plinkk.fr" && host !== "127.0.0.1:3001" && request.url === "/") {
+    const hostDb = await prisma.host.findUnique({
+      where: {
+        id: host,
+      },
+    });
+    if (hostDb && hostDb.verified === true) {
+      const user = await prisma.user.findUnique({ where: { id: hostDb.userId } });
+      const userName = user.userName
+      if (userName === "") {
+        reply.code(404).send({ error: "please specify a userName" });
+        return;
+      }
+
+      return reply.view("links.ejs", { username: user.id });
+    }
+
+    return reply.type("text/html").send(`
+      <html>
+        <head><title>Plinkk</title></head>
+        <body style="font-family:sans-serif;text-align:center;padding-top:40px">
+          <h1>Bienvenue sur Plinkk</h1>
+          <p>Ce contenu est uniquement accessible via <b>plinkk.fr</b></p>
+          <a href="https://plinkk.fr">Acceder au site officiel</a>
+        </body>
+      </html>
+    `);
+  }
+});
+
 fastify.get("/", async function (request, reply) {
   const currentUserId = request.session.get("data") as string | undefined;
     const currentUser = currentUserId
     ? (await prisma.user.findUnique({
         where: { id: currentUserId },
-        select: ({
-          id: true,
-          userName: true,
-          isPublic: true,
-          email: true,
-          publicEmail: true,
-          image: true,
-          role: true,
-        } as any),
-      })) as any
+      }))
     : null;
   // Annonces depuis la DB (affichées si ciblées pour l'utilisateur courant ou globales)
   let msgs: any[] = [];
@@ -94,25 +124,45 @@ fastify.get("/", async function (request, reply) {
     const anns = await (prisma as any).announcement.findMany({
       where: {
         AND: [
-          { OR: [ { startAt: null }, { startAt: { lte: now } } ] },
-          { OR: [ { endAt: null }, { endAt: { gte: now } } ] },
+          { OR: [{ startAt: null }, { startAt: { lte: now } }] },
+          { OR: [{ endAt: null }, { endAt: { gte: now } }] },
         ],
       },
       include: { targets: true, roleTargets: true },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
     if (currentUser) {
       for (const a of anns) {
-        const toUser = a.global
-          || a.targets.some((t: any) => t.userId === currentUser.id)
-          || a.roleTargets.some((rt: any) => rt.role === currentUser.role);
-        if (toUser) msgs.push({ id: a.id, level: a.level, text: a.text, dismissible: a.dismissible, startAt: a.startAt, endAt: a.endAt, createdAt: a.createdAt });
+        const toUser =
+          a.global ||
+          a.targets.some((t: any) => t.userId === currentUser.id) ||
+          a.roleTargets.some((rt: any) => rt.role === currentUser.role);
+        if (toUser)
+          msgs.push({
+            id: a.id,
+            level: a.level,
+            text: a.text,
+            dismissible: a.dismissible,
+            startAt: a.startAt,
+            endAt: a.endAt,
+            createdAt: a.createdAt,
+          });
       }
     } else {
-      msgs = anns.filter((a: any) => a.global).map((a: any) => ({ id: a.id, level: a.level, text: a.text, dismissible: a.dismissible, startAt: a.startAt, endAt: a.endAt, createdAt: a.createdAt }));
+      msgs = anns
+        .filter((a: any) => a.global)
+        .map((a: any) => ({
+          id: a.id,
+          level: a.level,
+          text: a.text,
+          dismissible: a.dismissible,
+          startAt: a.startAt,
+          endAt: a.endAt,
+          createdAt: a.createdAt,
+        }));
     }
   } catch (e) {}
-  return reply.view("index.ejs", { currentUser, __SITE_MESSAGES__: msgs });
+  return await replyView(reply, "index.ejs", currentUser, {});
 });
 
 fastify.get("/login", async function (request, reply) {
@@ -134,40 +184,37 @@ fastify.get("/login", async function (request, reply) {
   }
   // Log stored returnTo for debugging
   try {
-    request.log?.info({ returnTo: (request.session as any).get('returnTo') }, 'GET /login session');
+    request.log?.info(
+      { returnTo: (request.session as any).get("returnTo") },
+      "GET /login session"
+    );
   } catch (e) {}
-  const currentUser = currentUserId && String(currentUserId).includes('__totp')
-    ? (await prisma.user.findUnique({
-        where: { id: String(currentUserId).split('__')[0] },
-        select: {
-          id: true,
-          userName: true,
-          isPublic: true,
-          email: true,
-          image: true,
-        },
-      })) as any
-    : null;
-  const returnToQuery = (request.query as any)?.returnTo || '';
-  return reply.view("connect.ejs", { currentUser, returnTo: returnToQuery });
+  const currentUser =
+    currentUserId && String(currentUserId).includes("__totp")
+      ? await prisma.user.findUnique({
+          where: { id: String(currentUserId).split("__")[0] },
+        })
+      : null;
+  const returnToQuery = (request.query as any)?.returnTo || "";
+  return await replyView(reply, "connect.ejs", currentUser, { returnTo: returnToQuery });
 });
 
 // Provide a GET /register route: unauthenticated users are redirected to the login page anchor,
 // authenticated users are forwarded to the dashboard.
-fastify.get('/register', async (request, reply) => {
-  const currentUserId = request.session.get('data') as string | undefined;
-  if (currentUserId && !String(currentUserId).includes('__totp')) {
-    return reply.redirect('/dashboard');
+fastify.get("/register", async (request, reply) => {
+  const currentUserId = request.session.get("data") as string | undefined;
+  if (currentUserId && !String(currentUserId).includes("__totp")) {
+    return reply.redirect("/dashboard");
   }
   // Not logged in: send to the login page signup anchor
-  return reply.redirect('/login#signup');
+  return reply.redirect("/login#signup");
 });
 
 fastify.post("/register", async (req, reply) => {
   // If already authenticated (not in TOTP flow), redirect to dashboard instead of creating another account
-  const currentUserId = req.session.get('data') as string | undefined;
-  if (currentUserId && !String(currentUserId).includes('__totp')) {
-    return reply.redirect('/dashboard');
+  const currentUserId = req.session.get("data") as string | undefined;
+  if (currentUserId && !String(currentUserId).includes("__totp")) {
+    return reply.redirect("/dashboard");
   }
   const { username, email, password, passwordVerif, acceptTerms } = req.body as {
     username: string;
@@ -348,11 +395,15 @@ fastify.post("/register", async (req, reply) => {
       req.log?.warn({ e }, 'auto-create default plinkk failed');
     }
     // Auto-login: set session and redirect to original destination if present
-    const returnTo = (req.body as any)?.returnTo || (req.query as any)?.returnTo;
-    req.log?.info({ returnTo }, 'register: returnTo read from request');
-  req.session.set("data", user.id);
-  req.log?.info({ sessionData: req.session.get('data'), cookies: req.headers.cookie }, 'session set after register');
-  return reply.redirect(returnTo || "/dashboard");
+    const returnTo =
+      (req.body as any)?.returnTo || (req.query as any)?.returnTo;
+    req.log?.info({ returnTo }, "register: returnTo read from request");
+    req.session.set("data", user.id);
+    req.log?.info(
+      { sessionData: req.session.get("data"), cookies: req.headers.cookie },
+      "session set after register"
+    );
+    return reply.redirect(returnTo || "/dashboard");
   } catch (error) {
     reply.redirect(
       "/login?error=" + encodeURIComponent("Utilisateur deja existant")
@@ -363,9 +414,9 @@ fastify.post("/register", async (req, reply) => {
 
 fastify.post("/login", async (request, reply) => {
   // If already authenticated and not in TOTP flow, redirect to dashboard
-  const currentUserId = request.session.get('data') as string | undefined;
-  if (currentUserId && !String(currentUserId).includes('__totp')) {
-    return reply.redirect('/dashboard');
+  const currentUserId = request.session.get("data") as string | undefined;
+  if (currentUserId && !String(currentUserId).includes("__totp")) {
+    return reply.redirect("/dashboard");
   }
   const { email, password } = request.body as {
     email: string;
@@ -405,14 +456,29 @@ fastify.post("/login", async (request, reply) => {
 
   if (user.twoFactorEnabled) {
     // Pass returnTo via query to TOTP step so it's preserved through the flow
-    const returnToQuery = (request.body as any)?.returnTo || (request.query as any)?.returnTo;
+    const returnToQuery =
+      (request.body as any)?.returnTo || (request.query as any)?.returnTo;
     request.session.set("data", user.id + "__totp");
-    return reply.redirect(`/totp${returnToQuery ? `?returnTo=${encodeURIComponent(returnToQuery)}` : ''}`);
+    return reply.redirect(
+      `/totp${
+        returnToQuery ? `?returnTo=${encodeURIComponent(returnToQuery)}` : ""
+      }`
+    );
   }
-  const returnToLogin = (request.body as any)?.returnTo || (request.query as any)?.returnTo;
-  request.log?.info({ returnTo: returnToLogin }, 'login: returnTo read from request');
+  const returnToLogin =
+    (request.body as any)?.returnTo || (request.query as any)?.returnTo;
+  request.log?.info(
+    { returnTo: returnToLogin },
+    "login: returnTo read from request"
+  );
   request.session.set("data", user.id);
-  request.log?.info({ sessionData: request.session.get('data'), cookies: request.headers.cookie }, 'session set after login');
+  request.log?.info(
+    {
+      sessionData: request.session.get("data"),
+      cookies: request.headers.cookie,
+    },
+    "session set after login"
+  );
   reply.redirect(returnToLogin || "/dashboard");
 });
 
@@ -430,7 +496,7 @@ fastify.get("/totp", (request, reply) => {
 });
 
 fastify.post("/totp", async (request, reply) => {
-  const { totp } = request.body as { totp: string }
+  const { totp } = request.body as { totp: string };
   const currentUserIdTotp = request.session.get("data") as string | undefined;
   if (!currentUserIdTotp) {
     return reply.redirect('/login');
@@ -458,9 +524,19 @@ fastify.post("/totp", async (request, reply) => {
 });
 
 fastify.get("/logout", (req, reply) => {
-  try { req.log?.info({ beforeDelete: req.session.get('data'), cookies: req.headers.cookie }, 'logout: before session.delete'); } catch (e) {}
+  try {
+    req.log?.info(
+      { beforeDelete: req.session.get("data"), cookies: req.headers.cookie },
+      "logout: before session.delete"
+    );
+  } catch (e) {}
   req.session.delete();
-  try { req.log?.info({ afterDelete: req.session.get('data'), cookies: req.headers.cookie }, 'logout: after session.delete'); } catch (e) {}
+  try {
+    req.log?.info(
+      { afterDelete: req.session.get("data"), cookies: req.headers.cookie },
+      "logout: after session.delete"
+    );
+  } catch (e) {}
   reply.redirect("/login");
 });
 
@@ -470,15 +546,6 @@ fastify.get("/users", async (request, reply) => {
   const currentUser = currentUserId
     ? await prisma.user.findUnique({
         where: { id: currentUserId },
-        select: ({
-          id: true,
-          userName: true,
-          isPublic: true,
-          email: true,
-          image: true,
-          role: true,
-          plinkks: { select: { id: true, name: true, slug: true } },
-        } as any),
       })
     : null;
   const users = await prisma.user.findMany({
@@ -502,25 +569,47 @@ fastify.get("/users", async (request, reply) => {
     const anns = await (prisma as any).announcement.findMany({
       where: {
         AND: [
-          { OR: [ { startAt: null }, { startAt: { lte: now } } ] },
-          { OR: [ { endAt: null }, { endAt: { gte: now } } ] },
+          { OR: [{ startAt: null }, { startAt: { lte: now } }] },
+          { OR: [{ endAt: null }, { endAt: { gte: now } }] },
         ],
       },
       include: { targets: true, roleTargets: true },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
     if (currentUser) {
       for (const a of anns) {
-        const toUser = a.global
-          || a.targets.some((t: any) => t.userId === currentUser.id)
-          || a.roleTargets.some((rt: any) => rt.role === currentUser.role);
-        if (toUser) msgs.push({ id: a.id, level: a.level, text: a.text, dismissible: a.dismissible, startAt: a.startAt, endAt: a.endAt, createdAt: a.createdAt });
+        const toUser =
+          a.global ||
+          a.targets.some((t: any) => t.userId === currentUser.id) ||
+          a.roleTargets.some((rt: any) => rt.role === currentUser.role);
+        if (toUser)
+          msgs.push({
+            id: a.id,
+            level: a.level,
+            text: a.text,
+            dismissible: a.dismissible,
+            startAt: a.startAt,
+            endAt: a.endAt,
+            createdAt: a.createdAt,
+          });
       }
     } else {
-      msgs = anns.filter((a: any) => a.global).map((a: any) => ({ id: a.id, level: a.level, text: a.text, dismissible: a.dismissible, startAt: a.startAt, endAt: a.endAt, createdAt: a.createdAt }));
+      msgs = anns
+        .filter((a: any) => a.global)
+        .map((a: any) => ({
+          id: a.id,
+          level: a.level,
+          text: a.text,
+          dismissible: a.dismissible,
+          startAt: a.startAt,
+          endAt: a.endAt,
+          createdAt: a.createdAt,
+        }));
     }
   } catch (e) {}
-  return reply.view("users.ejs", { users: users, currentUser: currentUser, __SITE_MESSAGES__: msgs });
+  return await replyView(reply, "users.ejs", currentUser, {
+    users: users,
+  });
 });
 
 // 404 handler (après routes spécifiques)

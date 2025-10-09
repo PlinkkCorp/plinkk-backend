@@ -1,6 +1,6 @@
 <% 
   // Rendu d'un avatar: image user.image (URL complète ou nom de fichier) sinon user.profileImage, sinon initiale
-  const entity = typeof user !== 'undefined' && user ? user : (typeof currentUser !== 'undefined' ? currentUser : null);
+  const entity = typeof user !== 'undefined' && user;
   let imgUrl = null;
   if (entity && entity.image) {
     imgUrl = String(entity.image);
