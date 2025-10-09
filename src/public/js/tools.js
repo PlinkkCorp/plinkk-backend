@@ -693,7 +693,7 @@ export function createIconList(profileData) {
             if (/^(https?:\/\/|\/|data:)/i.test(iconVal)) {
                 iconImg.src = iconVal;
             } else {
-                iconImg.src = `{{username}}/images/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
+                iconImg.src = `/{{username}}/images/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
             }
         setSafeText(iconImg, iconData.icon);
         iconImg.alt = iconData.icon;

@@ -468,20 +468,35 @@
       })();
     </script>
 
-    <script>
-      // Expose si la A2F est activée (valeur server-side) au JS client
-      // Expose si la A2F est activée (valeur server-side) au JS via data-attribute pour éviter l'injection directe
-      const accountRoot = document.getElementById('accountRoot');
-      const twoFactorEnabled = accountRoot ? accountRoot.getAttribute('data-twofactor') === 'true' : false;
-      // Email
-      document.getElementById('formEmail')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.currentTarget);
-        const payload = Object.fromEntries(fd.entries());
-        const res = await fetch('/api/me/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        const j = await res.json().catch(() => ({}));
-        if (res.ok) showAlert('Email mis à jour', 'success'); else showAlert(j.error || 'Erreur', 'error');
-      });
+  <script>
+  // Expose si la A2F est activée (valeur server-side) au JS client
+    // Expose si la A2F est activée (valeur server-side) au JS via data-attribute pour éviter l'injection directe
+    const accountRoot = document.getElementById('accountRoot');
+    const twoFactorEnabled = accountRoot ? accountRoot.getAttribute('data-twofactor') === 'true' : false;
+    // Email
+    document.getElementById('formEmail')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.currentTarget);
+      const payload = Object.fromEntries(fd.entries());
+      const res = await fetch('/api/me/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const j = await res.json().catch(()=>({}));
+      if (res.ok) {
+        showAlert('Email mis à jour', 'success');
+        // mettre à jour dynamiquement l'affichage de l'email dans le header et mobile
+        try {
+          const newEmail = (j && j.email) ? j.email : payload.email;
+          if (newEmail) {
+            document.querySelectorAll('[data-current-email]').forEach(el => {
+              el.textContent = newEmail;
+            });
+          }
+        } catch (err) {
+          // ignore
+        }
+      } else {
+        showAlert(j.error || 'Erreur', 'error');
+      }
+    });
 
       // Toggle profil public
       document.getElementById('togglePublic')?.addEventListener('change', async (e) => {

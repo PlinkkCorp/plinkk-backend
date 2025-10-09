@@ -1,11 +1,26 @@
 import { getCookie, setCookie } from './cookies.js';
 import { canvaData } from './config/canvaConfig.js';
-import { profileData } from './config/profileConfig.js';
+// profileData est fourni par init.js via import dynamique de profileConfig.js
+// On y accède indirectement quand nécessaire (il est importé dans init.js)
 // `themes` is exported/populated by src/public/js/init.js at runtime. We avoid
 // a static import to prevent circular imports and allow themes to come from
 // the DB via the server API.
 import { themes } from './init.js';
 import { animationBackground } from './config/animationConfig.js';
+
+// Helper safe getter for profileData to avoid ReferenceError when imports
+// are circular. init.js exposes the parsed config on window.__PLINKK_PROFILE_DATA__.
+function getProfileData() {
+    try {
+        if (typeof profileData !== 'undefined') return profileData;
+    }
+    catch (e) { }
+    try {
+        if (typeof window !== 'undefined' && window.__PLINKK_PROFILE_DATA__) return window.__PLINKK_PROFILE_DATA__;
+    }
+    catch (e) { }
+    return undefined;
+}
 export function applyFirstTheme(theme) {
     const darkThemeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const savedTheme = getCookie("theme");
@@ -94,7 +109,8 @@ export function applyTheme(theme) {
             htmlBox.style.boxShadow = "none";
         });
     });
-    if (profileData.buttonThemeEnable !== 1) {
+    const _profile = getProfileData() || {};
+    if ((_profile.buttonThemeEnable) !== 1) {
         document.querySelectorAll("a").forEach((link) => {
             const htmlLink = link;
             htmlLink.style.color = theme.textColor;
@@ -260,13 +276,14 @@ export function applyTheme(theme) {
     });
 }
 export function setBackgroundStyles(profileData) {
-    if (Array.isArray(profileData.background)) {
-        document.body.style.background = `linear-gradient(${profileData.degBackgroundColor}deg, ${profileData.background.join(", ")})`;
+    const _p = profileData || getProfileData() || {};
+    if (Array.isArray(_p.background)) {
+        document.body.style.background = `linear-gradient(${_p.degBackgroundColor}deg, ${_p.background.join(", ")})`;
         document.body.style.backgroundSize = "cover";
     }
     else {
-        document.body.style.background = `url(${profileData.background})`;
-        document.body.style.backgroundSize = `${profileData.backgroundSize}%`;
+        document.body.style.background = `url(${_p.background})`;
+        document.body.style.backgroundSize = `${_p.backgroundSize || 100}%`;
     }
 }
 export function applyAnimation(animation, animationEnabled) {
@@ -317,14 +334,14 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
                     });
                 };
                 // Charger les scripts dans l'ordre
-                loadScript('{{username}}/canvaAnimation/matrix-effect/effect.js')
+                loadScript('/{{username}}/canvaAnimation/matrix-effect/effect.js')
                     .then(() => {
                     console.log("Effect.js loaded, checking window.Effect:", typeof window.Effect);
-                    return loadScript('{{username}}/canvaAnimation/matrix-effect/symbol.js');
+                    return loadScript('/{{username}}/canvaAnimation/matrix-effect/symbol.js');
                 })
                     .then(() => {
                     console.log("Symbol.js loaded, checking window.Symbol:", typeof window.Symbol);
-                    return loadScript('{{username}}/canvaAnimation/matrix-effect/app.js');
+                    return loadScript('/{{username}}/canvaAnimation/matrix-effect/app.js');
                 })
                     .then(() => {
                     console.log("App.js loaded, checking runCanvasAnimation:", typeof runCanvasAnimation);
@@ -344,7 +361,7 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
             else {
                 // Pour les autres animations
                 const script = document.createElement("script");
-                script.src = `{{username}}/canvaAnimation/${canvaData[selectedCanvasIndex].fileNames}`;
+                script.src = `/{{username}}/canvaAnimation/${canvaData[selectedCanvasIndex].fileNames}`;
                 document.body.appendChild(script);
                 script.onload = () => {
                     if (typeof runCanvasAnimation === "function") {
@@ -372,7 +389,8 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
         document.body.style.animation = "none";
     }
     // Appliquer le neon si activé avec vérifications
-    if (profileData.neonEnable === 0) {
+    const _p_neon = getProfileData() || {};
+    if ((_p_neon.neonEnable) === 0) {
         try {
             styleSheet.insertRule(`
                 .profile-pic-wrapper::before,
@@ -386,8 +404,8 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
         }
     }
     else {
-        if (profileData.neonColors && Array.isArray(profileData.neonColors) && profileData.neonColors.length > 0) {
-            const neonGradient = profileData.neonColors.filter(color => color && color.trim() !== '').join(", ");
+        if (_p_neon.neonColors && Array.isArray(_p_neon.neonColors) && _p_neon.neonColors.length > 0) {
+            const neonGradient = _p_neon.neonColors.filter(color => color && color.trim() !== '').join(", ");
             if (neonGradient) {
                 try {
                     styleSheet.insertRule(`
@@ -397,7 +415,7 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
                     `, styleSheet.cssRules.length);
                 }
                 catch (e) {
-                    console.warn('Invalid neon colors:', profileData.neonColors, e);
+                    console.warn('Invalid neon colors:', _p_neon.neonColors, e);
                 }
             }
         }
@@ -406,7 +424,8 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
 export function addEmailStyles() {
     const styleSheet = document.styleSheets[0];
     // Vérifier que le thème existe et a les propriétés nécessaires
-    const currentTheme = themes[profileData.selectedThemeIndex % themes.length];
+    const _p = getProfileData() || {};
+    const currentTheme = themes[(_p.selectedThemeIndex || 0) % themes.length];
     const borderColor = (currentTheme === null || currentTheme === void 0 ? void 0 : currentTheme.buttonHoverBackground) || '#2C2F33';
     try {
         styleSheet.insertRule(`

@@ -25,10 +25,11 @@ export async function replyView(
   >,
   template: string,
   user: User | null,
-  data: ejs.Data
+  data: ejs.Data,
+  statusCode: number = 200
 ): Promise<string> {
   if (user === null) {
-    return reply.view(template, {
+    return reply.code(statusCode).view(template, {
       ...data,
     });
   }

@@ -7,9 +7,10 @@
         <!-- En-tête (style Mon compte) -->
         <div class="mb-4">
           <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-semibold">Statistiques</h1>
+            <h1 class="text-2xl font-semibold">Statistiques <% if (typeof plinkk !== 'undefined' && plinkk) { %><span class="text-base text-slate-400">— <%= plinkk.name %></span><% } %></h1>
             <div class="flex items-center gap-2">
               <button id="exportCsv" class="px-3 py-2 text-sm rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200">Exporter CSV</button>
+              <%- include('../../partials/changePlinkkDropdown.ejs') %>
             </div>
           </div>
         </div>
@@ -157,8 +158,93 @@
   <div id="statsRoot" data-views="<%= (user.views || 0) %>" data-links='\
 <%- JSON.stringify(links || []) %>' data-views-daily='\
 <%- JSON.stringify(viewsDaily30d || []) %>' data-clicks-daily='[]' hidden></div>
+        <script type="application/json" id="pages-data"><%- JSON.stringify(typeof pages !== 'undefined' ? pages : []) %></script>
+        <script type="application/json" id="autoopen-data"><%= (typeof autoOpenPlinkkModal !== 'undefined' && autoOpenPlinkkModal) ? 'true' : 'false' %></script>
         <script type="module" src="/public/js/dashboard-stats.js"></script>
         <script>
+          // Sélection intégrée de page (dropdown avec recherche) — fallback vers prompt si nécessaire
+          (function(){
+            const btn = document.getElementById('changePlinkkBtn');
+            const dropdown = document.getElementById('changePlinkkDropdown');
+            const listEl = document.getElementById('changePlinkkList');
+            const search = document.getElementById('changePlinkkSearch');
+            const pagesRaw = document.getElementById('pages-data')?.textContent || '[]';
+            let pages = [];
+            try { pages = JSON.parse(pagesRaw) || []; } catch {}
+
+            // If the integrated elements aren't present, fallback to the prompt behavior
+            if (!btn || !dropdown || !listEl || !search) {
+              const fallbackBtn = document.getElementById('changePlinkk');
+              if (!fallbackBtn) return;
+              fallbackBtn.addEventListener('click', () => {
+                // Redirect to the first available page by default (with autoRedirect flag)
+                if (pages && pages.length) {
+                  const id = pages[0].id;
+                  if (id) location.href = `/dashboard/stats?plinkkId=${encodeURIComponent(id)}&autoRedirect=1`;
+                }
+              });
+              return;
+            }
+
+            // Build list items
+            function buildList() {
+              listEl.innerHTML = '';
+              pages.forEach((p, i) => {
+                const li = document.createElement('li');
+                li.className = 'px-2 py-1 rounded hover:bg-slate-800 cursor-pointer';
+                li.tabIndex = 0;
+                li.setAttribute('role','option');
+                li.dataset.id = p.id;
+                li.textContent = `${p.name} (${p.slug})`;
+                li.addEventListener('click', () => { location.href = `/dashboard/stats?plinkkId=${encodeURIComponent(p.id)}`; });
+                li.addEventListener('keydown', (e) => { if (e.key === 'Enter') location.href = `/dashboard/stats?plinkkId=${encodeURIComponent(p.id)}`; });
+                listEl.appendChild(li);
+              });
+            }
+
+            function filterList(q){
+              const needle = (q||'').toLowerCase().trim();
+              Array.from(listEl.children).forEach(li => {
+                const txt = li.textContent || '';
+                li.style.display = txt.toLowerCase().includes(needle) ? '' : 'none';
+              });
+            }
+
+            // Toggle helper
+            function toggle(open){
+              dropdown.classList.toggle('hidden', !open);
+              btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+              if (open) { setTimeout(()=> search.focus(), 50); }
+            }
+
+            buildList();
+
+            // Don't bind toggle if button indicates a selection is needed
+            if (!btn.hasAttribute('data-needs-selection')) {
+              btn.addEventListener('click', (e) => { e.stopPropagation(); toggle(!dropdown.classList.contains('hidden')); search.value = ''; filterList(''); });
+            } else {
+              // Visual cue when user clicks a disabled button: briefly pulse the label
+              btn.addEventListener('click', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                btn.classList.add('ring-2','ring-amber-400');
+                setTimeout(()=> btn.classList.remove('ring-2','ring-amber-400'), 700);
+              });
+            }
+            search.addEventListener('input', () => filterList(search.value));
+
+            // Close when clicking outside
+            document.addEventListener('click', () => toggle(false));
+            dropdown.addEventListener('click', (e)=> e.stopPropagation());
+
+            // Auto-open support (keeps previous behavior when requested)
+            const autoOpenRaw = document.getElementById('autoopen-data')?.textContent || 'false';
+            const autoOpen = String(autoOpenRaw).trim() === 'true';
+            if (autoOpen && pages.length > 0) {
+              // auto-redirect to first page when autoOpen requested
+              const id = pages[0] && pages[0].id;
+              if (id) location.href = `/dashboard/stats?plinkkId=${encodeURIComponent(id)}&autoRedirect=1`;
+            }
+          })();
           // Tabs UX (comme la page Compte)
           (function(){
             const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));

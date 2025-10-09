@@ -5,7 +5,29 @@
 
   <%- include('../../partials/asside_dash.ejs', { active: 'cosmetics' }) %>
 
-  <section class="col-span-12 lg:col-span-9 space-y-4">
+  <section class="col-span-12 lg:col-span-9 space-y-4 relative">
+    <!-- Improved overlay: centered card with actions -->
+    <div id="comingSoonOverlay" class="absolute -inset-3 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm rounded-xl" aria-hidden="false">
+      <div role="dialog" aria-modal="true" aria-labelledby="comingSoonTitle" aria-describedby="comingSoonDesc" class="mx-4 w-full max-w-lg rounded-xl bg-gradient-to-b from-slate-900/95 to-slate-900/90 border border-slate-700 p-6 text-center text-white shadow-2xl transform transition-all duration-200">
+        <div class="flex items-center justify-center mb-4">
+          <div class="h-12 w-12 rounded-full bg-indigo-600/90 flex items-center justify-center shadow-lg mr-3">
+            <!-- improved wrench icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" role="img">
+              <rect x="3" y="5" width="18" height="12" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2 19h20" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 9h8" />
+            </svg>
+          </div>
+        </div>
+        <h2 id="comingSoonTitle" class="text-2xl font-semibold mb-2">Fonctionnalité en cours</h2>
+        <p id="comingSoonDesc" class="text-sm text-slate-300 mb-3">Nous améliorons activement cet outil. Il sera disponible prochainement avec une interface dédiée.</p>
+        <p class="text-xs text-slate-400 mb-4">L'interface est désactivée pour l'instant.</p>
+        <div class="flex items-center justify-center gap-3">
+          <button id="notifyMeBtn" class="px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400">Me prévenir</button>
+        </div>
+        <div class="mt-4 text-xs text-slate-400">Ce message restera visible tant que la fonctionnalité est en développement.</div>
+      </div>
+    </div>
     <!-- Header (style Mon compte) -->
     <div class="mb-4">
       <div class="flex items-center justify-between gap-4">
@@ -261,4 +283,45 @@
   });
 
   applyPreview();
+</script>
+<script>
+  // Overlay behavior: dismiss or 'notify me' action
+  (function(){
+    const overlay = document.getElementById('comingSoonOverlay');
+  const btnNotify = document.getElementById('notifyMeBtn');
+
+    function hideOverlay() {
+      if (!overlay) return;
+      overlay.style.display = 'none';
+    }
+
+    // Always show the overlay by default; do not persist dismissal across sessions
+    if (overlay) overlay.style.display = '';
+
+  // No dismiss handlers: overlay intentionally non-closable via UI
+
+    btnNotify?.addEventListener('click', async () => {
+      // Keep the overlay visible. Mark the user as interested: disable the button and show a small confirmation.
+      try {
+        if (btnNotify.disabled) return;
+        btnNotify.disabled = true;
+        btnNotify.textContent = 'Noté — merci';
+        btnNotify.classList.remove('bg-emerald-600');
+        btnNotify.classList.add('bg-emerald-700', 'opacity-80');
+        // show an inline confirmation message inside the dialog
+        try {
+          const dialog = overlay.querySelector('[role="dialog"]');
+          if (dialog && !dialog.querySelector('.notify-confirm')) {
+            const note = document.createElement('div');
+            note.className = 'notify-confirm mt-3 text-sm text-slate-300';
+            note.textContent = 'Merci — nous vous préviendrons lorsque la fonctionnalité sera disponible.';
+            dialog.appendChild(note);
+          }
+        } catch (e) {}
+        // Optionally, you could call an API to register interest here.
+      } catch (e) {
+        alert('Erreur lors de la demande');
+      }
+    });
+  })();
 </script>

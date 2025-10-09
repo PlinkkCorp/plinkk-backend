@@ -19,10 +19,9 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     );
     const userId = request.session.get("data");
     if (!userId) {
+      // Ne redirigez pas vers /dashboard lui-même comme returnTo pour éviter un ping-pong
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard")}`
       );
     }
 
@@ -31,9 +30,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
     if (!userInfo) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard")}`
       );
     }
 
@@ -48,6 +45,15 @@ export function dashboardRoutes(fastify: FastifyInstance) {
           take: 10,
         }),
       ]);
+
+    // compute publicPath for user views (prefer default plinkk slug if present)
+    try {
+      const defaultPlinkk = await prisma.plinkk.findFirst({
+        where: { userId: userInfo.id, isDefault: true },
+      });
+      (userInfo as any).publicPath =
+        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+    } catch (e) {}
 
     return await replyView(reply, "dashboard.ejs", userInfo, {
       stats: { links: linksCount, socials: socialsCount, labels: labelsCount },
@@ -67,9 +73,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userId = request.session.get("data");
     if (!userId) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/cosmetics")}`
       );
     }
     const userInfo = await prisma.user.findFirst({
@@ -78,9 +82,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
     if (!userInfo) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/cosmetics")}`
       );
     }
     const cosmetics = (userInfo.cosmetics as any) || {};
@@ -139,13 +141,20 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         },
       ],
     };
+    try {
+      const defaultPlinkk = await prisma.plinkk.findFirst({
+        where: { userId: userInfo.id, isDefault: true },
+      });
+      (userInfo as any).publicPath =
+        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+    } catch (e) {}
     return await replyView(reply, "dashboard/user/cosmetics.ejs", userInfo, {
       cosmetics,
       catalog,
     });
   });
 
-  // Page d'édition du profil (éditeur complet)
+  // Page d'édition (classique) avec sélection de Plinkk (par défaut si non fourni)
   fastify.get("/edit", async function (request, reply) {
     request.log?.info(
       {
@@ -157,9 +166,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userId = request.session.get("data");
     if (!userId) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/edit")}`
       );
     }
     const userInfo = await prisma.user.findFirst({
@@ -167,15 +174,53 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
     if (!userInfo) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/edit")}`
       );
     }
-    return await replyView(reply, "dashboard/user/edit.ejs", userInfo, {});
+    // Sélection de la page Plinkk à éditer
+    const q = request.query as any;
+    const pages = await prisma.plinkk.findMany({
+      where: { userId: String(userId) },
+      include: { settings: true },
+      orderBy: [{ isDefault: "desc" }, { index: "asc" }, { createdAt: "asc" }],
+    });
+    let selected = null as any;
+    if (q?.plinkkId)
+      selected = pages.find((p) => p.id === String(q.plinkkId)) || null;
+    if (!selected)
+      selected =
+        pages.find((p) => p.isDefault) ||
+        pages.find((p) => p.index === 0) ||
+        pages[0] ||
+        null;
+    const selectedForView = selected
+      ? {
+          ...selected,
+          affichageEmail: (selected as any).settings?.affichageEmail ?? null,
+        }
+      : null;
+    const autoOpenPlinkkModal = !q?.plinkkId && pages.length > 1;
+    try {
+      const defaultPlinkk = await prisma.plinkk.findFirst({
+        where: { userId: userInfo.id, isDefault: true },
+      });
+      (userInfo as any).publicPath =
+        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+    } catch (e) {}
+    // Ajout d'un champ top-level `affichageEmail` par page pour simplifier l'usage côté client
+    const pagesForView = pages.map((p) => ({
+      ...p,
+      affichageEmail: (p as any).settings?.affichageEmail ?? null,
+    }));
+    return reply.view("dashboard/user/edit.ejs", {
+      user: userInfo,
+      plinkk: selectedForView,
+      pages: pagesForView,
+      autoOpenPlinkkModal,
+    });
   });
 
-  // Dashboard: Statistiques (vue dédiée)
+  // Dashboard: Statistiques (classique) avec sélection de Plinkk (par défaut si non fourni)
   fastify.get("/stats", async function (request, reply) {
     request.log?.info(
       {
@@ -187,9 +232,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userId = request.session.get("data");
     if (!userId) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/stats")}`
       );
     }
     const userInfo = await prisma.user.findFirst({
@@ -200,12 +243,34 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
     if (!userInfo) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/stats")}`
       );
     }
-    // Précharger la série par jour pour 30 derniers jours en fallback (si fetch échoue côté client)
+    // Pages de l'utilisateur et sélection
+    const q = request.query as any;
+    const pages = await prisma.plinkk.findMany({
+      where: { userId: String(userId) },
+      include: { settings: true },
+      orderBy: [{ isDefault: "desc" }, { index: "asc" }, { createdAt: "asc" }],
+    });
+    let selected = null as any;
+    if (q?.plinkkId)
+      selected = pages.find((p) => p.id === String(q.plinkkId)) || null;
+    if (!selected)
+      selected =
+        pages.find((p) => p.isDefault) ||
+        pages.find((p) => p.index === 0) ||
+        pages[0] ||
+        null;
+    const selectedForView = selected
+      ? {
+          ...selected,
+          affichageEmail: (selected as any).settings?.affichageEmail ?? null,
+        }
+      : null;
+    const autoOpenPlinkkModal = !q?.plinkkId && pages.length > 1;
+
+    // Précharger la série par jour (plinkk)
     const now = new Date();
     const end = now;
     const start = new Date(end.getTime() - 29 * 86400000);
@@ -218,32 +283,63 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const s = fmt(start);
     const e = fmt(end);
     let preSeries: { date: string; count: number }[] = [];
+    let totalViews = 0;
+    let totalClicks = 0;
     try {
-      await prisma.$executeRawUnsafe(
-        'CREATE TABLE IF NOT EXISTS "UserViewDaily" ("userId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("userId","date"))'
-      );
-      const rows = await prisma.$queryRaw<
-        Array<{ date: string; count: number }>
-      >`
-        SELECT "date", "count" FROM "UserViewDaily" WHERE "userId" = ${String(
-          userId
-        )} AND "date" BETWEEN ${s} AND ${e} ORDER BY "date" ASC
-      `;
-      const byDate = new Map(rows.map((r) => [r.date, r.count]));
-      for (
-        let t = new Date(start.getTime());
-        t <= end;
-        t = new Date(t.getTime() + 86400000)
-      ) {
-        const key = fmt(t);
-        preSeries.push({ date: key, count: byDate.get(key) || 0 });
+      if (selected) {
+        await prisma.$executeRawUnsafe(
+          'CREATE TABLE IF NOT EXISTS "PlinkkViewDaily" ("plinkkId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("plinkkId","date"))'
+        );
+        const rows = (await prisma.$queryRawUnsafe(
+          `SELECT "date", "count" FROM "PlinkkViewDaily" WHERE "plinkkId" = ? AND "date" BETWEEN ? AND ? ORDER BY "date" ASC`,
+          selected.id,
+          s,
+          e
+        )) as Array<{ date: string; count: number }>;
+        const byDate = new Map(rows.map((r) => [r.date, Number(r.count)]));
+        for (
+          let t = new Date(start.getTime());
+          t <= end;
+          t = new Date(t.getTime() + 86400000)
+        ) {
+          const key = fmt(t);
+          preSeries.push({ date: key, count: byDate.get(key) || 0 });
+        }
+        totalViews = await prisma.pageStat.count({
+          where: { plinkkId: selected.id, eventType: "view" },
+        });
+        totalClicks = await prisma.pageStat.count({
+          where: { plinkkId: selected.id, eventType: "click" },
+        });
       }
     } catch (e) {
       request.log?.warn({ err: e }, "Failed to preload daily series");
     }
-    return await replyView(reply, "dashboard/user/stats.ejs", userInfo, {
-      links: userInfo.links,
+    const links = await prisma.link.findMany({
+      where: { userId: String(userId) },
+      orderBy: { id: "desc" },
+      take: 100,
+    });
+    try {
+      const defaultPlinkk = await prisma.plinkk.findFirst({
+        where: { userId: userInfo.id, isDefault: true },
+      });
+      (userInfo as any).publicPath =
+        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+    } catch (e) {}
+    const pagesForView = pages.map((p) => ({
+      ...p,
+      affichageEmail: (p as any).settings?.affichageEmail ?? null,
+    }));
+    return reply.view("dashboard/user/stats.ejs", {
+      user: userInfo,
+      plinkk: selectedForView,
+      pages: pagesForView,
+      autoOpenPlinkkModal,
       viewsDaily30d: preSeries,
+      totalViews,
+      totalClicks,
+      links,
     });
   });
 
@@ -359,7 +455,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userId = request.session.get("data");
     if (!userId) {
       const dest = `/login?returnTo=${encodeURIComponent(
-        request.raw.url || "/dashboard"
+        "/dashboard/versions"
       )}`;
       request.log?.info(
         { returnTo: request.raw.url },
@@ -372,7 +468,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
     if (!userInfo) {
       const dest = `/login?returnTo=${encodeURIComponent(
-        request.raw.url || "/dashboard"
+        "/dashboard/versions"
       )}`;
       request.log?.info(
         { returnTo: request.raw.url },
@@ -380,7 +476,14 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       );
       return reply.redirect(dest);
     }
-    return await replyView(reply, "dashboard/user/versions.ejs", userInfo, {});
+    try {
+      const defaultPlinkk = await prisma.plinkk.findFirst({
+        where: { userId: userInfo.id, isDefault: true },
+      });
+      (userInfo as any).publicPath =
+        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+    } catch (e) {}
+    return reply.view("dashboard/user/versions.ejs", { user: userInfo });
   });
 
   // Dashboard: Compte (gestion infos, confidentialité, cosmétiques)
@@ -388,9 +491,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userId = request.session.get("data");
     if (!userId) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/account")}`
       );
     }
     const userInfo = await prisma.user.findFirst({
@@ -399,15 +500,21 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
     if (!userInfo) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/account")}`
       );
     }
     // Dérive la visibilité d'email depuis le champ `publicEmail` (présent
     // dans le schéma Prisma). Si publicEmail est défini -> l'email est public.
     const isEmailPublic = Boolean((userInfo as any).publicEmail);
-    return await replyView(reply, "dashboard/user/account.ejs", userInfo, {
+    try {
+      const defaultPlinkk = await prisma.plinkk.findFirst({
+        where: { userId: userInfo.id, isDefault: true },
+      });
+      (userInfo as any).publicPath =
+        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+    } catch (e) {}
+    return reply.view("dashboard/user/account.ejs", {
+      user: userInfo,
       isEmailPublic,
     });
   });
@@ -417,9 +524,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userId = request.session.get("data");
     if (!userId) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/admin")}`
       );
     }
 
@@ -428,9 +533,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
     if (!userInfo) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/admin")}`
       );
     }
     if (!isStaff(userInfo.role)) {
@@ -487,10 +590,18 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       take: 10,
     });
 
-    return await replyView(reply, "/dashboard/admin/dash.ejs", userInfo, {
-      users: users,
-      totals: totals,
-      pendingThemes: pendingThemes,
+    try {
+      const defaultPlinkk = await prisma.plinkk.findFirst({
+        where: { userId: userInfo.id, isDefault: true },
+      });
+      (userInfo as any).publicPath =
+        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+    } catch (e) {}
+    return reply.view("dashboard/admin/dash.ejs", {
+      users,
+      totals,
+      user: userInfo,
+      pendingThemes,
     });
   });
 
@@ -499,9 +610,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userId = request.session.get("data");
     if (!userId) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/admin/stats")}`
       );
     }
     const userInfo = await prisma.user.findFirst({
@@ -509,9 +618,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
     if (!userInfo) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/admin/stats")}`
       );
     }
     if (!isStaff(userInfo.role)) {
@@ -521,7 +628,14 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       );
       return reply.redirect("/dashboard");
     }
-    return await replyView(reply, "dashboard/admin/stats.ejs", userInfo, {});
+    try {
+      const defaultPlinkk = await prisma.plinkk.findFirst({
+        where: { userId: userInfo.id, isDefault: true },
+      });
+      (userInfo as any).publicPath =
+        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+    } catch (e) {}
+    return replyView(reply, "dashboard/admin/stats.ejs", userInfo, {});
   });
 
   // Admin API: séries d'inscriptions d'utilisateurs par jour (filtrable)
@@ -667,19 +781,16 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userId = request.session.get("data");
     if (!userId) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/themes")}`
       );
     }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
+      omit: { password: true },
     });
     if (!userInfo) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/themes")}`
       );
     }
     const myThemes = await prisma.theme.findMany({
@@ -698,7 +809,15 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         isPrivate: true,
       },
     });
-    return await replyView(reply, "dashboard/user/themes.ejs", userInfo, {
+    try {
+      const defaultPlinkk = await prisma.plinkk.findFirst({
+        where: { userId: userInfo.id, isDefault: true },
+      });
+      (userInfo as any).publicPath =
+        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+    } catch (e) {}
+    return reply.view("dashboard/user/themes.ejs", {
+      user: userInfo,
       myThemes,
       selectedCustomThemeId: (userInfo as any).selectedCustomThemeId || null,
     });
@@ -709,19 +828,16 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userId = request.session.get("data");
     if (!userId) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/admin/themes")}`
       );
     }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
+      omit: { password: true },
     });
     if (!userInfo) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/admin/themes")}`
       );
     }
     if (!isStaff(userInfo.role)) {
@@ -784,7 +900,15 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       pendingUpdate: false,
     }));
     const mergedSubmitted = [...submittedNormalized, ...approvedWithPending];
-    return await replyView(reply, "dashboard/admin/themes.ejs", userInfo, {
+    try {
+      const defaultPlinkk = await prisma.plinkk.findFirst({
+        where: { userId: userInfo.id, isDefault: true },
+      });
+      (userInfo as any).publicPath =
+        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+    } catch (e) {}
+    return reply.view("dashboard/admin/themes.ejs", {
+      user: userInfo,
       submitted: mergedSubmitted,
       approved: approvedFiltered,
       archived,
@@ -796,19 +920,13 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userId = request.session.get("data");
     if (!userId) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/admin/themes")}`
       );
     }
-    const userInfo = await prisma.user.findFirst({
-      where: { id: userId },
-    });
+    const userInfo = await prisma.user.findFirst({ where: { id: userId } });
     if (!userInfo) {
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/admin/themes")}`
       );
     }
     if (!isStaff(userInfo.role)) {
@@ -841,6 +959,13 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       approved: t.status === "APPROVED",
       isApproved: t.status === "APPROVED",
     };
+    try {
+      const defaultPlinkk = await prisma.plinkk.findFirst({
+        where: { userId: userInfo.id, isDefault: true },
+      });
+      (userInfo as any).publicPath =
+        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+    } catch (e) {}
     return await replyView(reply, "dashboard/admin/preview.ejs", userInfo, {
       theme: themeForView,
     });
@@ -851,22 +976,28 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userId = request.session.get("data");
     if (!userId)
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/admin/message")}`
       );
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
+      omit: { password: true },
     });
     if (!userInfo)
       return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard")
-        )}`
+        `/login?returnTo=${encodeURIComponent("/dashboard/admin/message")}`
       );
     if (!isStaff(userInfo.role)) return reply.redirect("/dashboard");
-
-    return await replyView(reply, "dashboard/admin/message.ejs", userInfo, {});
+    try {
+      const defaultPlinkk = await prisma.plinkk.findFirst({
+        where: { userId: userInfo.id, isDefault: true },
+      });
+      (userInfo as any).publicPath =
+        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+    } catch (e) {}
+    return reply.view("dashboard/admin/message.ejs", {
+      user: userInfo,
+      __SITE_MESSAGES__: await getActiveAnnouncementsForUser(userId as string),
+    });
   });
 
   // Admin API: get current message
@@ -1021,13 +1152,13 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       return reply.code(403).send({ error: "forbidden" });
     const { id } = request.query as any;
     if (!id) return reply.code(400).send({ error: "missing_id" });
-    await (prisma as any).announcementRoleTarget.deleteMany({
-      where: { announcementId: String(id) },
-    });
-    await (prisma as any).announcementTarget.deleteMany({
-      where: { announcementId: String(id) },
-    });
-    await (prisma as any).announcement.delete({ where: { id: String(id) } });
-    return reply.send({ ok: true });
+    try {
+      await (prisma as any).bannedSlug.delete({ where: { id: String(id) } });
+      return reply.send({ ok: true });
+    } catch (e) {
+      return reply.code(404).send({ error: "not_found" });
+    }
   });
+
+  // NOTE: /api/bans endpoints are implemented in apiRoutes (mounted under /api)
 }
