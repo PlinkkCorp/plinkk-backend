@@ -1,7 +1,7 @@
 import { createToggleThemeButton, applyAnimation, applyAnimationButton, applyDynamicStyles, applyFirstTheme } from './styleTools.js';
 import { createProfileContainer, createUserName, createStatusBar, createLabelButtons, createIconList, createEmailAndDescription, createLinkBoxes } from './tools.js';
 import { initEasterEggs } from './easterEggs.js';
-import { profileData, injectedTheme } from './config/profileConfig.js';
+// profileData/injectedTheme seront importés dynamiquement par page
 import { loadThemes } from './themesStore.js';
 // We'll load built-ins + community themes from the server. We first handle
 // injectedTheme (exported by profileConfig) then append the built-ins/themes
@@ -28,6 +28,15 @@ import { animations, styleSheet } from './config/animationConfig.js';
 import { canvaData } from './config/canvaConfig.js';
 document.addEventListener("DOMContentLoaded", async function () {
     var _a, _b;
+    // Résoudre username/slug depuis les globals fournis par la vue
+    const username = (window.__PLINKK_USERNAME__ || (location.pathname.split('/').filter(Boolean)[0] || '')).trim();
+    const identifier = (window.__PLINKK_IDENTIFIER__ || (location.pathname.split('/').filter(Boolean)[1] || '')).trim();
+    const params = new URLSearchParams(location.search);
+    if (identifier) params.set('slug', identifier);
+    // Importer la config de la page (non-cachée côté serveur)
+    const mod = await import(`/${encodeURIComponent(username)}/js/config/profileConfig.js?${params.toString()}`);
+    const profileData = mod.profileData;
+    const injectedTheme = mod.injectedTheme;
     let parsedProfileData = profileData;
     if (typeof profileData === 'string') {
         try {
@@ -42,6 +51,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!parsedProfileData || typeof parsedProfileData !== 'object') {
         console.error("profileData is not defined or is not an object.");
         return;
+    }
+    // Expose parsedProfileData as a global to support modules that access
+    // profileData indirectly (e.g. styleTools.js) and to avoid issues from
+    // circular imports. Use a namespaced property to avoid collisions.
+    try {
+        window.profileData = parsedProfileData;
+        window.__PLINKK_PROFILE_DATA__ = parsedProfileData;
+    }
+    catch (e) {
+        // ignore if window is not writable for some reason
     }
     const article = document.getElementById("profile-article");
     if (!article) {
