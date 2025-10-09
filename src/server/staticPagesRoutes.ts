@@ -19,7 +19,7 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
           },
         })
       : null;
-    return reply.view("about.ejs", { currentUser });
+    return reply.view("about/about.ejs", { currentUser });
   });
   fastify.get("/privacy", async (request, reply) => {
     const currentUserId = request.session.get("data") as string | undefined;
@@ -35,7 +35,7 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
           },
         })
       : null;
-    return reply.view("privacy.ejs", { currentUser });
+    return reply.view("about/privacy.ejs", { currentUser });
   });
   fastify.get("/terms", async (request, reply) => {
     const currentUserId = request.session.get("data") as string | undefined;
@@ -51,7 +51,7 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
           },
         })
       : null;
-    return reply.view("terms.ejs", { currentUser });
+    return reply.view("about/terms.ejs", { currentUser });
   });
   fastify.get("/cookies", async (request, reply) => {
     const currentUserId = request.session.get("data") as string | undefined;
@@ -67,7 +67,7 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
           },
         })
       : null;
-    return reply.view("cookies.ejs", { currentUser });
+    return reply.view("about/cookies.ejs", { currentUser });
   });
   fastify.get("/legal", async (request, reply) => {
     const currentUserId = request.session.get("data") as string | undefined;
@@ -83,7 +83,7 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
           },
         })
       : null;
-    return reply.view("legal.ejs", { currentUser });
+    return reply.view("about/legal.ejs", { currentUser });
   });
 
   // robots.txt

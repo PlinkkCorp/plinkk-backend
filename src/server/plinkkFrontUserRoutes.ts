@@ -7,8 +7,10 @@ import { PrismaClient } from "../../generated/prisma/client";
 
 const prisma = new PrismaClient();
 
+import { resolvePlinkkPage } from "./resolvePlinkkPage";
+
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
-  fastify.get("/:username", async function (request, reply) {
+  fastify.get('/:username', async function (request, reply) {
     const { username } = request.params as { username: string };
     const isPreview = (request.query as any)?.preview === '1';
     if (username === "") {
@@ -16,12 +18,42 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       return;
     }
 
+    // Ignore obvious asset-like requests or reserved system paths so they
+    // don't get treated as a username and cause DB updates (e.g. favicon.ico)
+    const reservedRoots = new Set(["favicon.ico", "robots.txt", "manifest.json", "public", "api", "dashboard", "login", "logout", "register", "totp", "users"]);
+    if (username.includes('.') || reservedRoots.has(username) || username.startsWith('.well-known')) {
+      return reply.code(404).send({ error: 'not_found' });
+    }
+
+    // Slug-first: si le premier segment correspond à un plinkk.slug global,
+    // afficher directement cette page (le plinkk est indépendant du compte).
+    try {
+      const pageBySlug = await prisma.plinkk.findFirst({ where: { slug: username }, select: { id: true, userId: true, slug: true } });
+      if (pageBySlug) {
+        const resolved = await resolvePlinkkPage(prisma, pageBySlug.userId, pageBySlug.slug, request);
+          if (resolved.status === 200) {
+          const links = await prisma.link.findMany({ where: { plinkkId: resolved.page.id, userId: resolved.user.id } });
+          const isOwner = (request.session.get('data') as string | undefined) === resolved.user.id;
+          const publicPath = resolved.page && resolved.page.slug ? resolved.page.slug : resolved.user.id;
+          return reply.view("plinkk/show.ejs", { page: resolved.page, userId: resolved.user.id, username: resolved.user.id, isOwner, links, publicPath });
+        }
+        // if page exists but resolve failed (private/inactive), return appropriate status
+        if (resolved.status === 403) return reply.code(403).view("erreurs/404.ejs", { currentUser: null });
+        return reply.code(404).view("erreurs/404.ejs", { currentUser: null });
+      }
+    } catch (e) {
+      // ignore and fallback to username-based resolution below
+    }
+
     // En mode aperçu on n'incrémente pas les vues ni les agrégations journalières
     if (!isPreview) {
-      await prisma.user.update({
-        where: { id: username },
-        data: { views: { increment: 1 } },
-      });
+        // Use updateMany instead of update to avoid throwing when the user does not exist
+        // (update would fail with 'No record was found for an update'). updateMany will
+        // silently affect 0 rows if there's no matching user, which is desirable here.
+        await prisma.user.updateMany({
+          where: { id: username },
+          data: { views: { increment: 1 } },
+        });
 
       // Enregistrer la vue datée (agrégation quotidienne) dans SQLite sans modifier le client généré
       try {
@@ -45,7 +77,15 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       }
     }
 
-    return reply.view("links.ejs", { username: username });
+  // Résoudre toujours la page par défaut Plinkk; ne plus faire de fallback vers l'ancien rendu
+  const resolved = await resolvePlinkkPage(prisma, username, undefined, request);
+    if (resolved.status !== 200) {
+      return reply.code(resolved.status).view("erreurs/404.ejs", { currentUser: null });
+    }
+  const links = await prisma.link.findMany({ where: { plinkkId: resolved.page.id, userId: resolved.user.id } });
+  const isOwner = (request.session.get('data') as string | undefined) === resolved.user.id;
+  const publicPath = resolved.page && resolved.page.slug ? resolved.page.slug : resolved.user.id;
+  return reply.view("plinkk/show.ejs", { page: resolved.page, userId: resolved.user.id, username: resolved.user.id, isOwner, links, publicPath });
   });
 
   fastify.get("/:username/css/:cssFileName", function (request, reply) {
@@ -137,20 +177,59 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         return;
       }
       if (configFileName === "profileConfig.js") {
-        const profile = await prisma.user.findFirst({
-          where: {
-            id: username,
-          },
-          include: {
-            background: true,
-            labels: true,
-            neonColors: true,
-            socialIcons: true,
-            statusbar: true,
-            links: true,
-          },
-        });
+        // Eviter le cache pour garantir l'actualisation immédiate du preview
+        reply.header('Cache-Control', 'no-store, max-age=0, must-revalidate');
+        reply.header('Vary', 'Referer');
+  const profile = await prisma.user.findFirst({ where: { id: username } }) as any;
         if (!profile) return reply.code(404).send({ error: 'Profil introuvable' });
+
+        // Déterminer la page Plinkk à partir du query ?slug= ou du Referer (/:username ou /:username/:slug)
+        let identifier: string | undefined = undefined;
+        const q = request.query as any;
+        if (typeof q?.slug === 'string') {
+          const s = (q.slug || '').trim();
+          // compat: slug=0 => page par défaut
+          identifier = (s === '0') ? '' : s;
+        }
+        try {
+          if (!identifier) {
+            const ref = String(request.headers.referer || '');
+            if (ref) {
+              const u = new URL(ref);
+              const parts = u.pathname.split('/').filter(Boolean);
+              // parts: [username] ou [username, slug]
+              if (parts.length >= 2 && parts[0] === username) {
+                const candidate = parts[1];
+                if (!['css', 'js', 'images', 'canvaAnimation'].includes(candidate)) {
+                  identifier = candidate;
+                }
+              }
+            }
+          }
+        } catch {}
+
+        // Résoudre la page
+        let page = null as any;
+        if (identifier) {
+          page = await prisma.plinkk.findFirst({ where: { userId: profile.id, slug: identifier } });
+        }
+        if (!page) {
+          page = await prisma.plinkk.findFirst({ where: { userId: profile.id, isDefault: true } })
+              || await prisma.plinkk.findFirst({ where: { userId: profile.id, index: 0 } })
+              || await prisma.plinkk.findFirst({ where: { userId: profile.id }, orderBy: [{ index: 'asc' }, { createdAt: 'asc' }] });
+        }
+        if (!page) return reply.code(404).send({ error: 'Page introuvable' });
+
+        // Charger les données par Plinkk
+        const [settings, background, labels, neonColors, socialIcons, links, pageStatusbar] = await Promise.all([
+          prisma.plinkkSettings.findUnique({ where: { plinkkId: page.id } }),
+          prisma.backgroundColor.findMany({ where: { userId: profile.id, plinkkId: page.id } }),
+          prisma.label.findMany({ where: { userId: profile.id, plinkkId: page.id } }),
+          prisma.neonColor.findMany({ where: { userId: profile.id, plinkkId: page.id } }),
+          prisma.socialIcon.findMany({ where: { userId: profile.id, plinkkId: page.id } }),
+          prisma.link.findMany({ where: { userId: profile.id, plinkkId: page.id } }),
+          prisma.plinkkStatusbar.findUnique({ where: { plinkkId: page.id } }),
+        ]);
         // Si un thème privé est sélectionné, récupérer ses données, les normaliser en "full shape"
         // et l'injecter comme thème 0 pour le front.
   let injectedThemeVar = '';
@@ -257,14 +336,50 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           }
         } catch (e) { /* ignore */ }
 
+        // Fusionner les réglages de page (PlinkkSettings) avec les valeurs par défaut du compte
+        const pageProfile: any = {
+          ...profile,
+          profileLink: (settings as any)?.profileLink ?? (profile as any).profileLink,
+          profileImage: (settings as any)?.profileImage ?? (profile as any).profileImage,
+          profileIcon: (settings as any)?.profileIcon ?? (profile as any).profileIcon,
+          profileSiteText: (settings as any)?.profileSiteText ?? (profile as any).profileSiteText,
+          userName: (settings as any)?.userName ?? (profile as any).userName,
+          iconUrl: (settings as any)?.iconUrl ?? (profile as any).iconUrl,
+          description: (settings as any)?.description ?? (profile as any).description,
+          profileHoverColor: (settings as any)?.profileHoverColor ?? (profile as any).profileHoverColor,
+          degBackgroundColor: (settings as any)?.degBackgroundColor ?? (profile as any).degBackgroundColor,
+          neonEnable: (settings as any)?.neonEnable ?? (profile as any).neonEnable,
+          buttonThemeEnable: (settings as any)?.buttonThemeEnable ?? (profile as any).buttonThemeEnable,
+          EnableAnimationArticle: (settings as any)?.EnableAnimationArticle ?? (profile as any).EnableAnimationArticle,
+          EnableAnimationButton: (settings as any)?.EnableAnimationButton ?? (profile as any).EnableAnimationButton,
+          EnableAnimationBackground: (settings as any)?.EnableAnimationBackground ?? (profile as any).EnableAnimationBackground,
+          backgroundSize: (settings as any)?.backgroundSize ?? (profile as any).backgroundSize,
+          selectedThemeIndex: (settings as any)?.selectedThemeIndex ?? (profile as any).selectedThemeIndex,
+          selectedAnimationIndex: (settings as any)?.selectedAnimationIndex ?? (profile as any).selectedAnimationIndex,
+          selectedAnimationButtonIndex: (settings as any)?.selectedAnimationButtonIndex ?? (profile as any).selectedAnimationButtonIndex,
+          selectedAnimationBackgroundIndex: (settings as any)?.selectedAnimationBackgroundIndex ?? (profile as any).selectedAnimationBackgroundIndex,
+          animationDurationBackground: (settings as any)?.animationDurationBackground ?? (profile as any).animationDurationBackground,
+          delayAnimationButton: (settings as any)?.delayAnimationButton ?? (profile as any).delayAnimationButton,
+          // Support for per-Plinkk public email: if a PlinkkSettings.affichageEmail
+          // exists we must prefer it for the generated profile config. We expose it
+          // both as `affichageEmail` and override `publicEmail` so generateProfileConfig
+          // (which reads profile.publicEmail) will pick up the page-specific value.
+          affichageEmail: (settings as any)?.affichageEmail ?? null,
+          publicEmail: (settings as any && Object.prototype.hasOwnProperty.call(settings, 'affichageEmail'))
+            ? (settings as any).affichageEmail
+            : (profile as any).publicEmail ?? null,
+          canvaEnable: (settings as any)?.canvaEnable ?? (profile as any).canvaEnable,
+          selectedCanvasIndex: (settings as any)?.selectedCanvasIndex ?? (profile as any).selectedCanvasIndex,
+        };
+
         const generated = generateProfileConfig(
-          profile,
-          profile.links,
-          profile.background,
-          profile.labels,
-          profile.neonColors,
-          profile.socialIcons,
-          profile.statusbar,
+          pageProfile,
+          links,
+          background,
+          labels,
+          neonColors,
+          socialIcons,
+          (pageStatusbar ? { text: pageStatusbar.text, colorBg: pageStatusbar.colorBg, fontTextColor: pageStatusbar.fontTextColor, statusText: pageStatusbar.statusText } as any : (null as any)),
           injectedObj
         ).replaceAll("{{username}}", username);
 
@@ -311,6 +426,35 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       return reply.sendFile(`images/${image}`);
     }
     return reply.code(404).send({ error: "non existant file" });
+  });
+
+  // Route publique pour pages Plinkk multiples – placée APRÈS les routes d’actifs
+  fastify.get<{
+    Params: { username: string; identifier?: string }
+  }>("/:username/:identifier", async (request, reply) => {
+    const { username, identifier } = request.params as any;
+    // Ignore si l'identifiant correspond à un préfixe d'actifs
+    if (["css", "js", "images", "canvaAnimation"].includes(String(identifier))) {
+      return reply.code(404).view("erreurs/404.ejs", { currentUser: null });
+    }
+    const resolved = await resolvePlinkkPage(prisma, username, identifier, request);
+    if (resolved.status !== 200) return reply.code(resolved.status).view("erreurs/404.ejs", { currentUser: null });
+  const links = await prisma.link.findMany({ where: { plinkkId: resolved.page.id, userId: resolved.user.id } });
+  const isOwner = (request.session.get('data') as string | undefined) === resolved.user.id;
+  const publicPath = resolved.page && resolved.page.slug ? resolved.page.slug : resolved.user.id;
+  return reply.view("plinkk/show.ejs", { page: resolved.page, userId: resolved.user.id, username: resolved.user.id, isOwner, links, publicPath });
+  });
+
+  // Compat: /:username/0 -> page par défaut
+  fastify.get<{
+    Params: { username: string }
+  }>("/:username/0", async (request, reply) => {
+    const { username } = request.params as any;
+    const resolved = await resolvePlinkkPage(prisma, username, undefined, request);
+    if (resolved.status !== 200) return reply.code(resolved.status).view("erreurs/404.ejs", { currentUser: null });
+    const links = await prisma.link.findMany({ where: { plinkkId: resolved.page.id, userId: resolved.user.id } });
+    const isOwner = (request.session.get('data') as string | undefined) === resolved.user.id;
+    return reply.view("plinkk/show.ejs", { page: resolved.page, userId: resolved.user.id, username: resolved.user.id, isOwner, links });
   });
 
   fastify.get("/click/:linkId", async (req, reply) => {

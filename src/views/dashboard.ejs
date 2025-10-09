@@ -16,7 +16,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <a href="/dashboard/edit" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow">Éditer le profil</a>
-                            <a target="_blank" href="/<%= user.id %>" class="px-3 py-2 text-sm rounded-md bg-emerald-700/80 hover:bg-emerald-600 text-white border border-emerald-500/40 shadow">Voir le profil</a>
+                            <a target="_blank" href="/<%= (user && user.publicPath) ? user.publicPath : user.id %>" class="px-3 py-2 text-sm rounded-md bg-emerald-700/80 hover:bg-emerald-600 text-white border border-emerald-500/40 shadow">Voir le profil</a>
                         </div>
                     </div>
 
@@ -112,7 +112,7 @@
                                 <h2 class="text-base font-semibold">Aperçu</h2>
                                 <div class="flex items-center gap-2">
                                     <button id="previewReload" class="px-3 py-1.5 text-xs rounded-md border border-slate-700/60 bg-slate-800/50 hover:bg-slate-700/60">Recharger</button>
-                                    <a class="px-3 py-1.5 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors" target="_blank" href="/<%= user.id %>">Ouvrir</a>
+                                    <a class="px-3 py-1.5 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors" target="_blank" href="<% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>">Ouvrir</a>
                                 </div>
                             </div>
                             <div class="rounded-lg border border-slate-800 bg-slate-950/60 overflow-hidden">
@@ -120,9 +120,9 @@
                                     <span class="size-2 rounded-full bg-rose-500/80"></span>
                                     <span class="size-2 rounded-full bg-amber-500/80"></span>
                                     <span class="size-2 rounded-full bg-emerald-500/80"></span>
-                                    <span class="ml-2 text-[10px] text-slate-400 truncate">/<%= user.id %></span>
+                                    <span class="ml-2 text-[10px] text-slate-400 truncate"><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %></span>
                                 </div>
-                                <iframe id="previewFrame" class="w-full h-[68dvh] bg-white" src="/<%= user.id %>?preview=1"></iframe>
+                                <iframe id="previewFrame" class="w-full h-[68dvh] bg-white" src="<% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %>?preview=1<% } else { %>/<%= user.id %>?preview=1<% } %>"></iframe>
                             </div>
                         </div>
                     </div>

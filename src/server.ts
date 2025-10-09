@@ -16,6 +16,8 @@ import { apiRoutes } from "./server/apiRoutes";
 import { staticPagesRoutes } from "./server/staticPagesRoutes";
 import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
+import { plinkkPagesRoutes } from "./server/plinkkPagesRoutes";
+import { createPlinkkForUser, slugify, RESERVED_SLUGS } from "./server/plinkkUtils";
 import { authenticator } from "otplib";
 
 
@@ -63,14 +65,15 @@ fastify.register(fastifySecureSession, {
 fastify.register(apiRoutes, { prefix: "/api" });
 fastify.register(staticPagesRoutes);
 fastify.register(dashboardRoutes, { prefix: "/dashboard" });
+fastify.register(plinkkPagesRoutes, { prefix: "/dashboard" });
 fastify.register(plinkkFrontUserRoutes);
 
 fastify.get("/", async function (request, reply) {
   const currentUserId = request.session.get("data") as string | undefined;
-  const currentUser = currentUserId
-    ? await prisma.user.findUnique({
+    const currentUser = currentUserId
+    ? (await prisma.user.findUnique({
         where: { id: currentUserId },
-        select: {
+        select: ({
           id: true,
           userName: true,
           isPublic: true,
@@ -78,8 +81,8 @@ fastify.get("/", async function (request, reply) {
           publicEmail: true,
           image: true,
           role: true,
-        },
-      })
+        } as any),
+      })) as any
     : null;
   // Annonces depuis la DB (affichées si ciblées pour l'utilisateur courant ou globales)
   let msgs: any[] = [];
@@ -111,16 +114,27 @@ fastify.get("/", async function (request, reply) {
 
 fastify.get("/login", async function (request, reply) {
   const currentUserId = request.session.get("data") as string | undefined;
-  // If user is fully authenticated (not the temporary TOTP marker), redirect to dashboard
+  // If a session exists and it's not a temporary TOTP marker, ensure the user still exists.
+  // If user exists, redirect to dashboard; otherwise, clear the stale session to avoid redirect loops.
   if (currentUserId && !String(currentUserId).includes('__totp')) {
-    return reply.redirect('/dashboard');
+    try {
+      const exists = await prisma.user.findUnique({ where: { id: String(currentUserId) }, select: { id: true } });
+      if (exists) {
+        return reply.redirect('/dashboard');
+      }
+      // stale session -> clear and continue to render login page
+      try { request.session.delete(); } catch (e) {}
+    } catch (e) {
+      // On DB error, do not loop: clear session as a safe fallback
+      try { request.session.delete(); } catch (_) {}
+    }
   }
   // Log stored returnTo for debugging
   try {
     request.log?.info({ returnTo: (request.session as any).get('returnTo') }, 'GET /login session');
   } catch (e) {}
   const currentUser = currentUserId && String(currentUserId).includes('__totp')
-    ? await prisma.user.findUnique({
+    ? (await prisma.user.findUnique({
         where: { id: String(currentUserId).split('__')[0] },
         select: {
           id: true,
@@ -129,7 +143,7 @@ fastify.get("/login", async function (request, reply) {
           email: true,
           image: true,
         },
-      })
+      })) as any
     : null;
   const returnToQuery = (request.query as any)?.returnTo || '';
   return reply.view("connect.ejs", { currentUser, returnTo: returnToQuery });
@@ -152,11 +166,12 @@ fastify.post("/register", async (req, reply) => {
   if (currentUserId && !String(currentUserId).includes('__totp')) {
     return reply.redirect('/dashboard');
   }
-  const { username, email, password, passwordVerif } = req.body as {
+  const { username, email, password, passwordVerif, acceptTerms } = req.body as {
     username: string;
     email: string;
     password: string;
     passwordVerif: string;
+    acceptTerms?: string | boolean;
   };
   // Nettoyage / validations de base
   const rawUsername = (username || "").trim();
@@ -198,6 +213,15 @@ fastify.post("/register", async (req, reply) => {
     );
   }
 
+  // Vérifier que l'utilisateur a accepté les CGU
+  if (!(acceptTerms === 'on' || acceptTerms === 'true' || acceptTerms === true)) {
+    const emailParam = encodeURIComponent(rawEmail);
+    const userParam = encodeURIComponent(rawUsername);
+    return reply.redirect(
+      `/login?error=${encodeURIComponent("Vous devez accepter les Conditions générales d'utilisation et la politique de confidentialité")}&email=${emailParam}&username=${userParam}#signup`
+    );
+  }
+
   try {
     z.email().parse(rawEmail);
   } catch (error) {
@@ -213,14 +237,7 @@ fastify.post("/register", async (req, reply) => {
   }
   try {
     // generate slug/id from username
-    const generatedId = username
-      .replaceAll(" ", "-")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
+    const generatedId = slugify(username);
 
     if (!generatedId || generatedId.length === 0) {
       const emailParam = encodeURIComponent(rawEmail);
@@ -232,6 +249,25 @@ fastify.post("/register", async (req, reply) => {
       );
     }
 
+    // Vérifier unicité globale: pas d'utilisateur existant, pas de plinkk avec ce slug, pas de mot réservé
+    if (RESERVED_SLUGS.has(generatedId)) {
+      const emailParam = encodeURIComponent(rawEmail);
+      const userParam = encodeURIComponent(rawUsername);
+      return reply.redirect(`/login?error=${encodeURIComponent("Cet @ est réservé, essaye un autre nom d'utilisateur")}&email=${emailParam}&username=${userParam}#signup`);
+    }
+    const conflictUser = await prisma.user.findUnique({ where: { id: generatedId }, select: { id: true } });
+    if (conflictUser) {
+      const emailParam = encodeURIComponent(rawEmail);
+      const userParam = encodeURIComponent(rawUsername);
+      return reply.redirect(`/login?error=${encodeURIComponent("Ce @ est déjà pris")}&email=${emailParam}&username=${userParam}#signup`);
+    }
+    const conflictPlinkk = await prisma.plinkk.findFirst({ where: { slug: generatedId }, select: { id: true } });
+    if (conflictPlinkk) {
+      const emailParam = encodeURIComponent(rawEmail);
+      const userParam = encodeURIComponent(rawUsername);
+      return reply.redirect(`/login?error=${encodeURIComponent("Ce @ est déjà pris")}&email=${emailParam}&username=${userParam}#signup`);
+    }
+
     const user = await prisma.user.create({
       data: {
         id: generatedId,
@@ -241,6 +277,13 @@ fastify.post("/register", async (req, reply) => {
         password: hashedPassword,
       },
     });
+    // Auto-crée un Plinkk principal pour ce compte (slug global basé sur username)
+    try {
+      await createPlinkkForUser(prisma as any, user.id, { name: username, slugBase: username, visibility: 'PUBLIC', isActive: true });
+    } catch (e) {
+      // non bloquant
+      req.log?.warn({ e }, 'auto-create default plinkk failed');
+    }
     // Auto-login: set session and redirect to original destination if present
     const returnTo = (req.body as any)?.returnTo || (req.query as any)?.returnTo;
     req.log?.info({ returnTo }, 'register: returnTo read from request');
@@ -312,36 +355,43 @@ fastify.post("/login", async (request, reply) => {
 
 fastify.get("/totp", (request, reply) => {
   const currentUserIdTotp = request.session.get("data") as string | undefined;
-  if (
-    currentUserIdTotp.split("__").length === 2 &&
-    currentUserIdTotp.split("__")[1] === "totp"
-  ) {
-    const returnToQuery = (request.query as any)?.returnTo || '';
-    reply.view("totp.ejs", { returnTo: returnToQuery });
+  if (!currentUserIdTotp) {
+    return reply.redirect('/login');
   }
+  const parts = String(currentUserIdTotp).split("__");
+  if (parts.length === 2 && parts[1] === "totp") {
+    const returnToQuery = (request.query as any)?.returnTo || '';
+    return reply.view("totp.ejs", { returnTo: returnToQuery });
+  }
+  return reply.redirect('/login');
 });
 
 fastify.post("/totp", async (request, reply) => {
   const { totp } = request.body as { totp: string }
   const currentUserIdTotp = request.session.get("data") as string | undefined;
-  if (
-    currentUserIdTotp.split("__").length === 2 &&
-    currentUserIdTotp.split("__")[1] === "totp"
-  ) {
-    const user = await prisma.user.findUnique({
-      where: {
-        id: currentUserIdTotp.split("__")[0]
-      }
-    })
-      const isValid = authenticator.check(totp, user.twoFactorSecret);
-      if (!isValid) return reply.code(401).send({ error: "Invalid TOTP code" });
-
-      const returnToTotp = (request.body as any)?.returnTo || (request.query as any)?.returnTo;
-      request.log?.info({ returnTo: returnToTotp }, 'totp: returnTo read from request');
-      request.session.set("data", user.id)
-      request.log?.info({ sessionData: request.session.get('data'), cookies: request.headers.cookie }, 'session set after totp');
-      return reply.redirect(returnToTotp || "/dashboard");
+  if (!currentUserIdTotp) {
+    return reply.redirect('/login');
   }
+  const parts = String(currentUserIdTotp).split("__");
+  if (parts.length === 2 && parts[1] === "totp") {
+    const user = await prisma.user.findUnique({ where: { id: parts[0] } });
+    if (!user || !user.twoFactorSecret) {
+      try { request.session.delete(); } catch (e) {}
+      return reply.redirect('/login');
+    }
+    const isValid = authenticator.check(totp, user.twoFactorSecret);
+    if (!isValid) {
+      return reply.code(401).send({ error: "Invalid TOTP code" });
+    }
+    const returnToTotp = (request.body as any)?.returnTo || (request.query as any)?.returnTo;
+    request.log?.info({ returnTo: returnToTotp }, 'totp: returnTo read from request');
+    request.session.set("data", user.id);
+    request.log?.info({ sessionData: request.session.get('data'), cookies: request.headers.cookie }, 'session set after totp');
+    return reply.redirect(returnToTotp || "/dashboard");
+  }
+  // Unexpected state: clear and go to login to avoid loops
+  try { request.session.delete(); } catch (e) {}
+  return reply.redirect('/login');
 });
 
 fastify.get("/logout", (req, reply) => {
@@ -357,28 +407,29 @@ fastify.get("/users", async (request, reply) => {
   const currentUser = currentUserId
     ? await prisma.user.findUnique({
         where: { id: currentUserId },
-        select: {
+        select: ({
           id: true,
           userName: true,
           isPublic: true,
           email: true,
           image: true,
-          profileImage: true
-          ,role: true
-        },
+          role: true,
+          plinkks: { select: { id: true, name: true, slug: true } },
+        } as any),
       })
     : null;
   const users = await prisma.user.findMany({
     where: { isPublic: true },
-    select: {
+    select: ({
       id: true,
       userName: true,
       email: true,
       publicEmail: true,
       role: true,
       cosmetics: true,
-      profileImage: true,
-    },
+      image: true,
+      plinkks: { select: { id: true, name: true, slug: true } },
+    } as any),
     orderBy: { createdAt: "asc" },
   });
   // Annonces DB pour la page publique des utilisateurs: on affiche seulement les globales si non connecté

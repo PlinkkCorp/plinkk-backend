@@ -6,13 +6,32 @@
             <section class="col-span-12 md:col-span-7 xl:col-span-8 space-y-4">
                 <div class="flex items-center justify-between gap-3">
                     <div class="min-w-0">
-                        <h2 class="text-base font-semibold">Configuration</h2>
+                        <h2 class="text/base font-semibold">Configuration <% if (typeof plinkk !== 'undefined' && plinkk) { %>
+                            <span id="headerPlinkkLabel" class="text-slate-400">— <span id="headerPlinkkName"><%= plinkk.name %></span> (<span id="headerPlinkkSlug"><%= plinkk.slug %></span>)</span>
+                        <% } %></h2>
                         <div id="status" class="text-xs text-slate-400"></div>
                     </div>
-                    <div class="flex sm:hidden items-center gap-2">
-                        <button id="resetBtn--mobile" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Reset</button>
-                        <button id="saveBtn--mobile" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500">Save</button>
-                    </div>
+                                        <div class="hidden sm:flex items-center gap-2">
+                                                <%- include('../../partials/changePlinkkDropdown.ejs') %>
+                                        </div>
+                                        <div class="flex sm:hidden items-center gap-2">
+                                                <% if (typeof pages !== 'undefined' && Array.isArray(pages) && pages.length > 1) { %>
+                                                    <div class="ml-2 relative inline-block text-left">
+                                                        <button id="changePlinkkBtnMobile" type="button" class="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-md bg-slate-800 border border-slate-700 text-white focus:outline-none">
+                                                            <span id="changePlinkkBtnLabelMobile">Choisir...</span>
+                                                            <svg class="text-slate-300" width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
+                                                        </button>
+                                                        <div id="changePlinkkDropdownMobile" class="hidden absolute right-0 mt-2 w-64 rounded-md bg-slate-900 border border-slate-800 shadow-lg z-40">
+                                                            <div class="p-2">
+                                                                <input id="changePlinkkSearchMobile" type="search" placeholder="Rechercher..." class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none" />
+                                                            </div>
+                                                            <ul id="changePlinkkListMobile" class="max-h-48 overflow-auto divide-y divide-slate-800 text-sm"></ul>
+                                                        </div>
+                                                    </div>
+                                                <% } %>
+                                                <button id="resetBtn--mobile" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Reset</button>
+                                                <button id="saveBtn--mobile" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500">Save</button>
+                                        </div>
                 </div>
 
                 <!-- Onglets (avec icônes, accessible) -->
@@ -296,14 +315,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Barre d’action collante (mobile + bas de page) -->
-                <div class="lg:hidden sticky bottom-3 z-30 flex justify-end">
-                    <div class="flex gap-2 rounded-full border border-indigo-700/40 bg-slate-900/80 backdrop-blur px-2 py-2 shadow-lg">
-                        <button id="resetBtn--fab" class="px-3 py-2 text-sm rounded-full bg-amber-700/80 hover:bg-amber-600 border border-amber-500/40 text-white shadow transition-colors">Réinitialiser</button>
-                        <button id="saveBtn--fab" class="px-3 py-2 text-sm rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Enregistrer</button>
-                    </div>
-                </div>
             </section>
 
             <!-- Colonne droite: Aperçu -->
@@ -313,7 +324,7 @@
                         <h2 class="text-base font-semibold">Aperçu</h2>
                         <div class="flex items-center gap-2">
                             <button id="refreshPreview" class="px-3 py-2 text-xs rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Rafraîchir</button>
-                            <a class="px-3 py-2 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors" target="_blank" href="/<%= user.id %>">Ouvrir</a>
+                            <a class="px-3 py-2 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors" target="_blank" href="<% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>">Ouvrir</a>
                         </div>
                     </div>
                     <div class="rounded border border-slate-800 overflow-hidden bg-slate-950/40">
@@ -326,7 +337,7 @@
                                 <button type="button" data-view="mobile" class="px-2 py-1 rounded hover:bg-slate-800">Mobile</button>
                             </div>
                         </div>
-                        <iframe id="preview" class="w-full h-[72dvh] bg-white" src="/<%= user.id %>?preview=1"></iframe>
+                        <iframe id="preview" class="w-full h-[72dvh] bg-white" src="<% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %>?preview=1<% } else { %>/<%= user.id %>?preview=1<% } %>"></iframe>
                     </div>
                 </div>
             </aside>
@@ -422,6 +433,12 @@
                         window.__PLINKK_CFG__ = { themes: [], canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
                     }
                 </script>
+                <!-- Données utiles pour la sélection de page -->
+                <script type="application/json" id="pages-data"><%- JSON.stringify(typeof pages !== 'undefined' ? pages : []) %></script>
+                <script type="application/json" id="autoopen-data"><%= (typeof autoOpenPlinkkModal !== 'undefined' && autoOpenPlinkkModal) ? 'true' : 'false' %></script>
+                <% if (typeof plinkk !== 'undefined' && plinkk) { %>
+                <script>window.__PLINKK_SELECTED_ID__ = "<%= plinkk.id %>";</script>
+                <% } %>
                 <!-- Initialisation de l'UI du dashboard (formulaire, listes, pickers) -->
                 <script type="module" src="/public/js/dashboard-ui/index.js"></script>
                 <script>
@@ -437,6 +454,188 @@
                             document.querySelectorAll('[data-view]')?.forEach(btn=>{
                                 btn.addEventListener('click', ()=> setMobile(btn.getAttribute('data-view')==='mobile'));
                             });
+                        })();
+                        // Live-update header plinkk name as user types in the "Nom affiché" field
+                        (function(){
+                            try {
+                                const nameInput = document.getElementById('userName');
+                                const headerName = document.getElementById('headerPlinkkName');
+                                if (nameInput && headerName) {
+                                    nameInput.addEventListener('input', () => {
+                                        const v = nameInput.value || '';
+                                        headerName.textContent = v || headerName.getAttribute('data-original') || '';
+                                    });
+                                    // store original as fallback
+                                    headerName.setAttribute('data-original', headerName.textContent || '');
+                                }
+                            } catch (e) { /* ignore */ }
+                        })();
+                        // Sélection de page via un select intégré à la page (fallback vers prompt si nécessaire)
+                        (function(){
+                            const btn = document.getElementById('changePlinkk');
+                            const btnMobile = document.getElementById('changePlinkk--mobile');
+                            const select = document.getElementById('changePlinkkSelect');
+                            const selectMobile = document.getElementById('changePlinkkSelectMobile');
+                            const pagesRaw = document.getElementById('pages-data')?.textContent || '[]';
+                            let pages = [];
+                            try { pages = JSON.parse(pagesRaw) || []; } catch {}
+
+                            const currentId = window.__PLINKK_SELECTED_ID__ || '';
+
+
+                            // Build dropdown items into a UL
+                            function buildList(listEl, isMobile) {
+                                if (!listEl) return;
+                                listEl.innerHTML = '';
+                                pages.forEach(p => {
+                                    const li = document.createElement('li');
+                                    li.className = 'px-3 py-2 hover:bg-slate-800 cursor-pointer flex items-center justify-between';
+                                    li.tabIndex = 0;
+                                    const left = document.createElement('div');
+                                    // Afficher uniquement le slug dans la liste déroulante (visuel)
+                                    left.textContent = p.slug;
+                                    const openLink = document.createElement('a');
+                                    openLink.textContent = 'Ouvrir';
+                                    openLink.href = `/${p.slug}`;
+                                    openLink.target = '_blank';
+                                    openLink.rel = 'noopener';
+                                    openLink.className = 'text-emerald-300 hover:underline ml-2';
+                                    li.appendChild(left);
+                                    li.appendChild(openLink);
+                                    li.addEventListener('click', (e) => {
+                                        // If clicking the 'Ouvrir' link, let it open in new tab
+                                        if (e.target === openLink) return;
+                                        location.href = `/dashboard/edit?plinkkId=${encodeURIComponent(p.id)}`;
+                                    });
+                                    li.addEventListener('keypress', (e) => { if (e.key === 'Enter') location.href = `/dashboard/edit?plinkkId=${encodeURIComponent(p.id)}`; });
+                                    listEl.appendChild(li);
+                                });
+                            }
+
+                            function filterList(inputEl, listEl) {
+                                const q = (inputEl.value || '').toLowerCase().trim();
+                                Array.from(listEl.children).forEach(li => {
+                                    const txt = li.textContent || '';
+                                    li.style.display = txt.toLowerCase().includes(q) ? '' : 'none';
+                                });
+                            }
+
+                            // Dropdown open/close helpers
+                            function toggleDropdown(drop, open) {
+                                if (!drop) return;
+                                drop.classList.toggle('hidden', !open);
+                            }
+
+                            const dropdown = document.getElementById('changePlinkkDropdown');
+                            const list = document.getElementById('changePlinkkList');
+                            const search = document.getElementById('changePlinkkSearch');
+
+                            const dropdownM = document.getElementById('changePlinkkDropdownMobile');
+                            const listM = document.getElementById('changePlinkkListMobile');
+                            const searchM = document.getElementById('changePlinkkSearchMobile');
+
+                            buildList(list, false);
+                            buildList(listM, true);
+
+                            if (search && list) {
+                                search.addEventListener('input', () => filterList(search, list));
+                            }
+                            if (searchM && listM) {
+                                searchM.addEventListener('input', () => filterList(searchM, listM));
+                            }
+
+                            // Show current label + open link
+                            if (currentId) {
+                                const current = pages.find(p => p.id === currentId);
+                                if (current) {
+                                    const lbl = document.getElementById('currentPlinkkLabel');
+                                    const link = document.getElementById('openCurrentPlinkk');
+                                    const btnLabel = document.getElementById('changePlinkkBtnLabel');
+                                    if (lbl) { lbl.textContent = current.slug; lbl.classList.remove('hidden'); }
+                                    if (link) { link.href = `/${current.slug}`; link.classList.remove('hidden'); }
+                                    if (btnLabel) { btnLabel.textContent = `${current.slug}`; }
+
+                                    const lblM = document.getElementById('currentPlinkkLabelMobile');
+                                    const linkM = document.getElementById('openCurrentPlinkkMobile');
+                                    const btnLabelM = document.getElementById('changePlinkkBtnLabelMobile');
+                                    if (lblM) { lblM.textContent = current.slug; lblM.classList.remove('hidden'); }
+                                    if (linkM) { linkM.href = `/${current.slug}`; linkM.classList.remove('hidden'); }
+                                    if (btnLabelM) { btnLabelM.textContent = `${current.slug}`; }
+                                }
+                            }
+
+                            // Toggle dropdown on button click
+                            const btnEl = document.getElementById('changePlinkkBtn');
+                            const btnElM = document.getElementById('changePlinkkBtnMobile');
+                            if (btnEl && dropdown) {
+                                btnEl.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(dropdown, dropdown.classList.contains('hidden')); if (search) { search.value = ''; filterList(search, list); setTimeout(()=>search.focus(), 50); } });
+                            }
+                            if (btnElM && dropdownM) {
+                                btnElM.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(dropdownM, dropdownM.classList.contains('hidden')); if (searchM) { searchM.value = ''; filterList(searchM, listM); setTimeout(()=>searchM.focus(), 50); } });
+                            }
+
+                            // Close dropdown when clicking outside
+                            document.addEventListener('click', () => { toggleDropdown(dropdown, false); toggleDropdown(dropdownM, false); });
+                            // Prevent clicks inside dropdown from closing (we handle)
+                            if (dropdown) dropdown.addEventListener('click', (e)=> e.stopPropagation());
+                            if (dropdownM) dropdownM.addEventListener('click', (e)=> e.stopPropagation());
+
+                            function openChooserFallback() {
+                                // Redirect to the first available page by default instead of using prompt
+                                if (pages && pages.length) {
+                                    const id = pages[0].id;
+                                    if (id) location.href = `/dashboard/edit?plinkkId=${encodeURIComponent(id)}&autoRedirect=1`;
+                                }
+                            }
+
+                            // Helper to populate a <select> with available pages and wire navigation
+                            function populate(selectEl, isMobile) {
+                                if (!selectEl) return;
+                                selectEl.innerHTML = '';
+                                pages.forEach((p, i) => {
+                                    const opt = document.createElement('option');
+                                    opt.value = p.id;
+                                    opt.textContent = `${i+1}. ${p.name} (${p.slug})`;
+                                    selectEl.appendChild(opt);
+                                });
+                                // Pre-select current if known
+                                if (currentId) {
+                                    const idx = pages.findIndex(p => p.id === currentId);
+                                    if (idx !== -1) selectEl.value = pages[idx].id;
+                                }
+                                // Navigate when selection changes
+                                selectEl.addEventListener('change', () => {
+                                    const val = selectEl.value;
+                                    if (!val) return;
+                                    location.href = `/dashboard/edit?plinkkId=${encodeURIComponent(val)}`;
+                                });
+                                // Keyboard support: Enter to confirm
+                                selectEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const val = selectEl.value; if (val) location.href = `/dashboard/edit?plinkkId=${encodeURIComponent(val)}`; } });
+                            }
+
+                            populate(select, false);
+                            populate(selectMobile, true);
+
+                            // Afficher le label courant (au lieu de pré-sélectionner l'option)
+                            if (currentId) {
+                                const current = pages.find(p => p.id === currentId);
+                                if (current) {
+                                    const lbl = document.getElementById('currentPlinkkLabel');
+                                    if (lbl) { lbl.textContent = `${current.name} (${current.slug})`; lbl.classList.remove('hidden'); }
+                                    const lblM = document.getElementById('currentPlinkkLabelMobile');
+                                    if (lblM) { lblM.textContent = `${current.name} (${current.slug})`; lblM.classList.remove('hidden'); }
+                                }
+                            }
+
+                            if (btn) { btn.addEventListener('click', () => { if (select) select.focus(); else openChooserFallback(); }); }
+                            if (btnMobile) { btnMobile.addEventListener('click', () => { if (selectMobile) selectMobile.focus(); else openChooserFallback(); }); }
+
+                            const autoOpenRaw = document.getElementById('autoopen-data')?.textContent || 'false';
+                            const autoOpen = String(autoOpenRaw).trim() === 'true';
+                            if (autoOpen && pages.length > 1) {
+                                // si un select existe, l'ouvrir (focus) sinon fallback
+                                if (select) { select.focus(); } else { openChooserFallback(); }
+                            }
                         })();
                 </script>
     </body>

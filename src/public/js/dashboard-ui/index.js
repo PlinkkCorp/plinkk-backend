@@ -79,8 +79,13 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     autoSaveTimer = setTimeout(() => { saveNow(false); }, AUTO_SAVE_DELAY);
   };
 
-  const fetchConfig = () => fetch('/api/me/config').then(async (r) => { if (!r.ok) throw new Error(await r.text()); return r.json(); });
-  const putConfig = (obj) => fetch('/api/me/config', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(obj) }).then(async (r) => { if (!r.ok) throw new Error(await r.text()); return r.json(); });
+  function getConfigEndpoint() {
+    const pid = (window.__PLINKK_SELECTED_ID__ || '').trim();
+    if (pid) return `/api/me/plinkks/${encodeURIComponent(pid)}/config`;
+    return '/api/me/config';
+  }
+  const fetchConfig = () => fetch(getConfigEndpoint()).then(async (r) => { if (!r.ok) throw new Error(await r.text()); return r.json(); });
+  const putConfig = (obj) => fetch(getConfigEndpoint(), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(obj) }).then(async (r) => { if (!r.ok) throw new Error(await r.text()); return r.json(); });
 
   async function saveNow(manual) {
     if (autoSaveTimer) { clearTimeout(autoSaveTimer); autoSaveTimer = null; }
