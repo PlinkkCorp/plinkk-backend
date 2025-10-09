@@ -1,7 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-
 generator client {
   provider      = "prisma-client-js"
   output        = "../generated/prisma"
@@ -13,7 +9,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Rôles de compte (prépare avantages partenaires/admin/développeur...)
 enum Role {
   USER
   PARTNER
@@ -22,7 +17,6 @@ enum Role {
   MODERATOR
 }
 
-// Statut de publication d'un thème utilisateur
 enum ThemeStatus {
   DRAFT
   SUBMITTED
@@ -31,72 +25,55 @@ enum ThemeStatus {
   ARCHIVED
 }
 
+enum Visibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum PlinkkEventType {
+  CREATED
+  DELETED
+}
+
 model User {
-  id                               String  @id @unique // username slug (sans espace)
+  id                               String  @id @unique
   userName                         String
   password                         String
   email                            String  @unique
-  publicEmail                      String? 
-  // 2FA (TOTP) optionnelle
+  publicEmail                      String?
   twoFactorEnabled                 Boolean @default(false)
   twoFactorSecret                  String?
-  profileLink                      String? @default("https://github.com")
-  profileImage                     String? @default("https://avatars.githubusercontent.com/u/9919?s=200&v=4")
-  profileIcon                      String? @default("https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png")
-  profileSiteText                  String? @default("Github")
-  iconUrl                          String? @default("https://avatars.githubusercontent.com/u/9919?s=200&v=4")
-  description                      String? @default("Mollit laboris cupidatat do enim nulla ex laborum. Nulla labore reprehenderit nisi non anim aute.")
-  profileHoverColor                String? @default("#7289DA")
-  degBackgroundColor               Int?    @default(45)
-  neonEnable                       Int     @default(1)
-  buttonThemeEnable                Int     @default(1)
-  EnableAnimationArticle           Int     @default(1)
-  EnableAnimationButton            Int     @default(1)
-  EnableAnimationBackground        Int     @default(1)
-  backgroundSize                   Int?    @default(50)
-  selectedThemeIndex               Int?    @default(13)
-  selectedAnimationIndex           Int?    @default(0)
-  selectedAnimationButtonIndex     Int?    @default(10)
-  selectedAnimationBackgroundIndex Int?    @default(10)
-  animationDurationBackground      Int?    @default(30)
-  delayAnimationButton             Float?  @default(0.1)
-  canvaEnable                      Int     @default(1)
-  selectedCanvasIndex              Int?    @default(16)
 
-  // Relations
-  links         Link[]
-  labels        Label[]
-  socialIcons   SocialIcon[]
-  background    BackgroundColor[]
-  neonColors    NeonColor[]
-  statusbar     Statusbar?
   name          String
   emailVerified Boolean           @default(false)
   image         String?
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @default(now()) @updatedAt
 
-  // Découverte et référencement
   role            Role      @default(USER)
-  rankScore       Int       @default(0) // score pour classement/trending
-  bumpedAt        DateTime?         // dernier bump gratuit
-  bumpExpiresAt   DateTime?         // fin d’effet du bump gratuit
-  bumpPaidUntil   DateTime?         // bump payant actif jusqu’à
+  rankScore       Int       @default(0)
+  bumpedAt        DateTime?
+  bumpExpiresAt   DateTime?
+  bumpPaidUntil   DateTime?
 
-  // Cosmétiques et avantages visuels
-  cosmetics       Cosmetic?             // { flair, bannerUrl, frame, theme, ... }
-
-  // Visibilité répertoire public Plinkk
+  cosmetics       Cosmetic?
   isPublic        Boolean   @default(true)
   views           Int       @default(0)
 
-  // Thèmes créés par l'utilisateur
   themes          Theme[]
-
   announcement    AnnouncementTarget[]
-
-  // Thème personnalisé sélectionné pour usage privé
   selectedCustomThemeId String?
+
+  plinkks        Plinkk[]
+  // Relations vers d'autres modèles
+  links          Link[]
+  labels         Label[]
+  socialIcons    SocialIcon[]
+  backgroundColors BackgroundColor[]
+  neonColors     NeonColor[]
+  statusbar      Statusbar?
+
+  slags          Json     @default("[]")
 }
 
 model Cosmetic {
@@ -122,8 +99,10 @@ model Link {
   showDescription        Boolean? @default(true)
   clicks                 Int      @default(0)
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  plinkkId  String?
+  plinkk    Plinkk? @relation(fields: [plinkkId], references: [id])
 }
 
 model Label {
@@ -132,8 +111,10 @@ model Label {
   color     String @default("#FF6384")
   fontColor String @default("#FFFFFF")
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+  userId   String
+  user     User    @relation(fields: [userId], references: [id])
+  plinkkId String?
+  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id])
 }
 
 model SocialIcon {
@@ -141,24 +122,30 @@ model SocialIcon {
   url  String @default("https://github.com")
   icon String @default("Github")
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+  userId   String
+  user     User    @relation(fields: [userId], references: [id])
+  plinkkId String?
+  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id])
 }
 
 model BackgroundColor {
   id    String @id @default(nanoid(16))
   color String @default("#FF5733")
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+  userId   String
+  user     User    @relation(fields: [userId], references: [id])
+  plinkkId String?
+  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id])
 }
 
 model NeonColor {
   id    String @id @default(nanoid(16))
   color String @default("#7289DA")
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+  userId   String
+  user     User    @relation(fields: [userId], references: [id])
+  plinkkId String?
+  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id])
 }
 
 model Statusbar {
@@ -167,13 +154,24 @@ model Statusbar {
   colorBg       String? @default("#222222")
   colorText     String? @default("#cccccc")
   fontTextColor Int?    @default(1)
-  statusText    String? @default("busy") // offline / online / busy / away
+  statusText    String? @default("busy")
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
 }
 
-// Messages/annonces adressables globalement, par rôles et/ou par utilisateurs spécifiques
+model PlinkkStatusbar {
+  id            String  @id @default(nanoid(16))
+  text          String? @default("Hello World!")
+  colorBg       String? @default("#222222")
+  colorText     String? @default("#cccccc")
+  fontTextColor Int?    @default(1)
+  statusText    String? @default("busy")
+
+  plinkkId String @unique
+  plinkk   Plinkk @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+}
+
 model Announcement {
   id          String   @id @default(nanoid(16))
   level       String   @default("info")
@@ -184,10 +182,7 @@ model Announcement {
   createdAt   DateTime @default(now())
   global      Boolean  @default(false)
 
-  // Cibles par utilisateurs (m2m)
   targets AnnouncementTarget[]
-
-  // Cibles par rôles (m2m vers enum Role via table) 
   roleTargets AnnouncementRoleTarget[]
 }
 
@@ -210,43 +205,124 @@ model AnnouncementRoleTarget {
   @@id([announcementId, role])
 }
 
-// Thème personnalisable soumis par un utilisateur, validé par un admin
 model Theme {
   id        String      @id @default(nanoid(16))
   name      String
   description String?
-  data      Json        // structure compatible avec src/public/config/themeConfig.js
+  data      Json
   status    ThemeStatus @default(DRAFT)
   isPrivate Boolean     @default(false)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @default(now()) @updatedAt
 
-  // Mise à jour en attente (permet à un thème APPROUVÉ de proposer une MAJ sans dépublier)
   pendingUpdate        Json?
   pendingUpdateAt      DateTime?
   pendingUpdateMessage String?
 
-  // Auteur
   authorId String
   author   User        @relation(fields: [authorId], references: [id])
 }
 
-/// Table analytique gérée en dehors de Prisma (créée dynamiquement) — ne pas migrer
+model Plinkk {
+  id        String   @id @default(nanoid(16))
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name      String
+  slug      String
+  index     Int      @default(0)
+  isDefault Boolean  @default(false)
+  isPublic  Boolean  @default(true)
+  visibility Visibility @default(PUBLIC)
+  isActive  Boolean  @default(true)
+  views     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  links         Link[]
+  labels        Label[]
+  socialIcons   SocialIcon[]
+  background    BackgroundColor[]
+  neonColors    NeonColor[]
+  statusbar     PlinkkStatusbar?
+  settings      PlinkkSettings?
+  pageStats     PageStat[] @relation("PageStats")
+
+  @@unique([userId, slug])
+  @@unique([userId, index])
+}
+
+model PlinkkSettings {
+  id                               String  @id @default(nanoid(16))
+  plinkkId                         String  @unique
+  plinkk                           Plinkk  @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+
+  profileLink                      String?
+  profileImage                     String?
+  profileIcon                      String?
+  profileSiteText                  String?
+  userName                         String?
+  iconUrl                          String?
+  description                      String?
+  profileHoverColor                String?
+  // affichageEmail spécifique à cette Plinkk (email affiché publiquement pour cette page)
+  affichageEmail                   String?
+  degBackgroundColor               Int?
+  neonEnable                       Int?
+  buttonThemeEnable                Int?
+  EnableAnimationArticle           Int?
+  EnableAnimationButton            Int?
+  EnableAnimationBackground        Int?
+  backgroundSize                   Int?
+  selectedThemeIndex               Int?
+  selectedAnimationIndex           Int?
+  selectedAnimationButtonIndex     Int?
+  selectedAnimationBackgroundIndex Int?
+  animationDurationBackground      Int?
+  delayAnimationButton             Float?
+  canvaEnable                      Int?
+  selectedCanvasIndex              Int?
+}
+
+model PlinkkEvent {
+  id        String          @id @default(nanoid(16))
+  type      PlinkkEventType
+  userId    String
+  plinkkId  String
+  createdAt DateTime        @default(now())
+}
+
 model UserViewDaily {
   userId String
   date   String
   count  Int
-
   @@id([userId, date])
   @@map("UserViewDaily")
 }
 
-/// Table analytique gérée en dehors de Prisma (créée dynamiquement) — ne pas migrer
 model LinkClickDaily {
   linkId String
   date   String
   count  Int
-
   @@id([linkId, date])
   @@map("LinkClickDaily")
+}
+
+model PlinkkViewDaily {
+  plinkkId String
+  date     String
+  count    Int
+  @@id([plinkkId, date])
+  @@map("PlinkkViewDaily")
+}
+
+model PageStat {
+  id           String   @id @default(nanoid(16))
+  plinkkId     String
+  plinkk       Plinkk   @relation("PageStats", fields: [plinkkId], references: [id], onDelete: Cascade)
+  eventType    String
+  meta         Json?
+  ip           String?
+  createdAt    DateTime @default(now())
+  @@index([plinkkId, eventType, createdAt])
 }
