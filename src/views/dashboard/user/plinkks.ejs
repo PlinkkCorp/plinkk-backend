@@ -4,16 +4,19 @@
 <div class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
   <%- include('../../partials/asside_dash.ejs', { active: 'plinkks' }) %>
   <main class="col-span-12 lg:col-span-9 space-y-4">
-    <% const list = (plinkks && plinkks.length ? plinkks : (pages || [])); const currentCount = list.length; const maxPlinkks = (typeof maxPages !== 'undefined' ? maxPages : 2); %>
+   <% const list = (plinkks && plinkks.length ? plinkks : (pages || [])); const currentCount = list.length; const maxPlinkks = (typeof maxPages !== 'undefined' ? maxPages : 2);
+     const isAdminView = (typeof user !== 'undefined' && user && user.role === 'ADMIN');
+     const maxPlinkksDisplay = (maxPlinkks === Infinity || isAdminView) ? '∞' : String(maxPlinkks);
+   %>
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
         <h1 class="text-2xl font-semibold">Mes Plinkks</h1>
-        <div class="text-sm text-slate-400 bg-slate-800 px-2 py-0.5 rounded"> <%= currentCount %> / <%= maxPlinkks %> </div>
+  <div class="text-sm text-slate-400 bg-slate-800 px-2 py-0.5 rounded"> <%= currentCount %> / <%= maxPlinkksDisplay %> </div>
       </div>
       <div class="flex items-center gap-4">
         <div id="plinkkMsg" class="text-sm text-amber-300"><% if (currentCount >= maxPlinkks) { %>Limite atteinte<% } %></div>
-        <% const reached = currentCount >= maxPlinkks; %>
-        <button id="btnCreate" class="px-3 py-2 text-sm rounded-md <%= reached ? 'bg-slate-700 text-slate-400 opacity-50 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-500 text-white' %>" <%= reached ? 'disabled' : '' %>><%= 'Créer' %></button>
+  <% const reached = !(maxPlinkks === Infinity) && (currentCount >= maxPlinkks); %>
+  <button id="btnCreate" class="px-3 py-2 text-sm rounded-md <%= reached ? 'bg-slate-700 text-slate-400 opacity-50 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-500 text-white' %>" <%= reached ? 'disabled' : '' %>><%= 'Créer' %></button>
       </div>
     </div>
 
@@ -42,7 +45,7 @@
       <% } %>
     </div>
 
-    <p class="text-xs text-slate-400">Limite actuelle: <%= maxPlinkks %> plinkks par utilisateur.</p>
+  <p class="text-xs text-slate-400">Limite actuelle: <%= maxPlinkksDisplay %> plinkks par utilisateur.</p>
   </main>
 </div>
 

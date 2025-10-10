@@ -494,10 +494,18 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         `/login?returnTo=${encodeURIComponent("/dashboard/account")}`
       );
     }
-    const userInfo = await prisma.user.findFirst({
-      where: { id: userId },
-      include: { cosmetics: true, host: true },
-    });
+    let userInfo: any = null;
+    try {
+      // Try to include `host` if the table exists in the DB/schema
+      userInfo = await prisma.user.findFirst({
+        where: { id: userId },
+        include: { cosmetics: true, host: true },
+      });
+    } catch (e: any) {
+      // If the Host table is missing (e.g. migrations not applied), fallback to query without it
+      request.log?.warn({ err: e }, 'Failed to include host when fetching userInfo; retrying without host (fallback)');
+      userInfo = await prisma.user.findFirst({ where: { id: userId }, include: { cosmetics: true } });
+    }
     if (!userInfo) {
       return reply.redirect(
         `/login?returnTo=${encodeURIComponent("/dashboard/account")}`

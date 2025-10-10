@@ -396,18 +396,33 @@
           if (!input || !input.files || !input.files[0]) { setMsg('Choisis une image.', false); return; }
           const file = input.files[0];
           if (!/^image\//i.test(file.type)) { setMsg('Fichier non valide (image requise).', false); return; }
+          // Note: le serveur limite à ~128 Ko; on garde 2 Mo côté client pour l’instant
           if (file.size > 2 * 1024 * 1024) { setMsg('Image trop lourde (max 2 Mo).', false); return; }
           try {
-            const fd = new FormData();
-            fd.append('avatar', file, file.name);
-            const res = await fetch('/api/me/avatar-file', {
-              method: 'POST',
-              body: fd
+            // Convertir le fichier en Data URL (base64) attendu par l'API /api/me/avatar
+            const fileToDataUrl = (f) => new Promise((resolve, reject) => {
+              const fr = new FileReader();
+              fr.onload = () => resolve(fr.result);
+              fr.onerror = () => reject(fr.error || new Error('Lecture du fichier échouée'));
+              fr.readAsDataURL(f);
             });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const dataUrl = await fileToDataUrl(file);
+
+            const res = await fetch('/api/me/avatar', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ dataUrl })
+            });
+            if (!res.ok) {
+              if (res.status === 413) {
+                setMsg('Image trop lourde (max 128 Ko)', false);
+                return;
+              }
+              throw new Error('HTTP ' + res.status);
+            }
             const json = await res.json();
             if (json && (json.url || json.file) && preview) {
-              const raw = json.url || ('/public/uploads/plinkk/' + json.file);
+              const raw = json.url || ('/public/uploads/avatars/' + json.file);
               const url = raw + '?v=' + Date.now();
               preview.innerHTML = '<img src="' + url + '" alt="Avatar" class="h-full w-full object-cover" />';
               const currentId = '<%= user.id %>';

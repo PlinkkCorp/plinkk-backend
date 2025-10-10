@@ -3,7 +3,7 @@ import { PrismaClient, Role } from "../../generated/prisma/client";
 import { RESERVED_SLUGS } from './reservedSlugs';
 import { isBannedSlug } from './bannedSlugs';
 
-export const MAX_PAGES_DEFAULT = 2;
+export const MAX_PAGES_DEFAULT = 1; // default users can create 1 plinkk
 
 export function slugify(input: string): string {
   return (input || "")
@@ -16,15 +16,23 @@ export function slugify(input: string): string {
 }
 
 export function isAdminLike(role?: Role | null): boolean {
-  return role === "ADMIN" || role === "DEVELOPER" || role === "MODERATOR";
+  return role === "ADMIN";
 }
 
-export function isPartener(role?: Role | null): boolean {
+export function isDeveloper(role?: Role | null): boolean {
+  return role === "DEVELOPER";
+}
+
+export function isPartner(role?: Role | null): boolean {
   return role === "PARTNER";
 }
 
 export function getMaxPagesForRole(role?: Role | null): number {
-  return isAdminLike(role) ? 100 : isPartener(role) ? 5 : MAX_PAGES_DEFAULT;
+  // USER: 1, PARTNER: 2, DEVELOPER: 3, ADMIN: unlimited (represented by Infinity)
+  if (isAdminLike(role)) return Infinity;
+  if (isDeveloper(role)) return 3;
+  if (isPartner(role)) return 2;
+  return MAX_PAGES_DEFAULT;
 }
 
 // Identifiants réservés (chemins, préfixes d'actifs, zones système)
@@ -40,15 +48,15 @@ export async function isReservedSlug(prisma: PrismaClient, slug: string): Promis
   }
 }
 
-// Suggestion de slug unique: ajoute -1, -2...
+// Suggestion de slug unique: ajoute -1, -2... (évite de sauter directement à -2)
 export async function suggestUniqueSlug(prisma: PrismaClient, userId: string, baseSlug: string): Promise<string> {
-  let candidate = baseSlug || "page";
-  let i = 1;
+  const base = baseSlug || "page";
+  let i = 0;
   while (true) {
+    const candidate = i === 0 ? base : `${base}-${i}`;
     const exists = await prisma.plinkk.findFirst({ where: { userId, slug: candidate } });
     if (!exists) return candidate;
     i += 1;
-    candidate = `${baseSlug}-${i}`;
   }
 }
 
@@ -79,20 +87,20 @@ export async function reindexNonDefault(prisma: PrismaClient, userId: string): P
   }
 }
 
-// Génère un slug unique à l'échelle du système (tous comptes), en ajoutant -2, -3 si nécessaire
+// Génère un slug unique à l'échelle du système (tous comptes), en ajoutant -1, -2... si nécessaire
 export async function suggestGloballyUniqueSlug(prisma: PrismaClient, baseSlug: string, excludePlinkkId?: string): Promise<string> {
   const base = baseSlug || 'page';
-  let suffix = 0;
+  let i = 0;
   while (true) {
-    const candidate = suffix === 0 ? base : `${base}-${suffix + 1}`;
+    const candidate = i === 0 ? base : `${base}-${i}`;
     // Éviter les mots réservés
-    if (await isReservedSlug(prisma, candidate)) { suffix++; continue; }
+    if (await isReservedSlug(prisma, candidate)) { i++; continue; }
     // Le slug ne doit pas entrer en conflit avec un @ (User.id)
     const userHit = await prisma.user.findUnique({ where: { id: candidate } });
-    if (userHit) { suffix++; continue; }
+    if (userHit) { i++; continue; }
     // Le slug ne doit pas entrer en conflit avec un autre plinkk (global)
     const plinkkHit = await prisma.plinkk.findFirst({ where: { slug: candidate, ...(excludePlinkkId ? { NOT: { id: excludePlinkkId } } : {}) } });
-    if (plinkkHit) { suffix++; continue; }
+    if (plinkkHit) { i++; continue; }
     return candidate;
   }
 }

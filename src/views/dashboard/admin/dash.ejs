@@ -105,6 +105,7 @@
                                                 data-id="<%- (u.id||'').toLowerCase() %>"
                                                 data-role="<%- (u.role||'USER') %>"
                                                 data-visible="<%- u.isPublic ? 'public' : 'private' %>"
+                                                data-email-public="<%- u.publicEmail ? '1' : '0' %>"
                                                 data-created="<%- +new Date(u.createdAt) %>"
                                                 data-search="<%- (u.userName+' '+u.id+' '+(u.publicEmail||u.email||'')).toLowerCase() %>">
                                                 <div class="flex items-start gap-3">
@@ -238,6 +239,21 @@
                                                             : 'disabled' %>>
                                                             <span>Désactiver la A2F</span>
                                                         </button>
+                                                        <div class="menuItem hasSubmenu relative group flex items-center gap-2 w-full text-left px-3 py-1.5 rounded hover:bg-slate-800 text-xs text-slate-200 cursor-default select-none">
+                                                            <span>Visibilité</span>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="ml-auto h-3.5 w-3.5 opacity-80">
+                                                                <path d="M9 5l7 7-7 7" />
+                                                            </svg>
+                                                            <% const _isPublic = Boolean(u.isPublic); const _emailPublic = Boolean(u.publicEmail); %>
+                                                            <div class="submenu hidden absolute top-0 left-full ml-1 z-50 w-44 rounded-md border border-slate-700 bg-slate-900/95 p-1" data-side="right">
+                                                                <button class="menuItem visibilityToggle block w-full text-left px-3 py-1.5 rounded text-xs hover:bg-slate-800 text-slate-200">
+                                                                    <%= _isPublic ? 'Rendre privé' : 'Rendre public' %>
+                                                                </button>
+                                                                <button class="menuItem emailVisibilityToggle block w-full text-left px-3 py-1.5 rounded text-xs hover:bg-slate-800 text-slate-200">
+                                                                    <%= _emailPublic ? "Rendre l'email privé" : "Rendre l'email public" %>
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                         <div class="my-1 border-t border-slate-700/70"></div>
                                                         <button type="button"
                                                             class="menuItem deleteBtn flex items-center gap-2 w-full text-left px-3 py-1.5 rounded hover:bg-red-900/30 text-xs text-red-300"
@@ -977,6 +993,46 @@ box-shadow: 0 8px 24px rgba(16,185,129,.35);
                                     }
                                 } catch (err) { console.error(err); alert('Impossible de changer le rôle.'); }
                                 closeAllMenus(); applyFilter();
+                                return;
+                            }
+
+                            // visibility toggle (single button) - uses data-visible on the li to determine current state
+                            if (ev.target.closest('.visibilityToggle')) {
+                                const btn = ev.target.closest('.visibilityToggle');
+                                const menu = ev.target.closest('.actionsMenu');
+                                let li = null;
+                                if (menu && menu._origParent) li = menu._origParent.closest('li') || menu._origParent.querySelector('li');
+                                if (!li) li = ev.target.closest('li');
+                                const id = li?.dataset.id;
+                                const currentlyPublic = li?.dataset.visible === 'public';
+                                try {
+                                    const res = await fetch('/api/users/' + encodeURIComponent(id) + '/visibility', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isPublic: !currentlyPublic }) });
+                                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                                    location.reload();
+                                } catch (err) {
+                                    console.error(err); alert('Impossible de changer la visibilité.');
+                                }
+                                closeAllMenus();
+                                return;
+                            }
+
+                            // email visibility toggle (single button) - uses data-email-public on the li to determine current state
+                            if (ev.target.closest('.emailVisibilityToggle')) {
+                                const btn = ev.target.closest('.emailVisibilityToggle');
+                                const menu = ev.target.closest('.actionsMenu');
+                                let li = null;
+                                if (menu && menu._origParent) li = menu._origParent.closest('li') || menu._origParent.querySelector('li');
+                                if (!li) li = ev.target.closest('li');
+                                const id = li?.dataset.id;
+                                const emailPublic = li?.dataset.emailPublic === '1';
+                                try {
+                                    const res = await fetch('/api/users/' + encodeURIComponent(id) + '/email-visibility', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isEmailPublic: !emailPublic }) });
+                                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                                    location.reload();
+                                } catch (err) {
+                                    console.error(err); alert('Impossible de changer la visibilité de l\'email.');
+                                }
+                                closeAllMenus();
                                 return;
                             }
 
