@@ -5,7 +5,6 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  rimraf: ^5.0.0
   glob: 11.0.3
 
 importers:
@@ -27,6 +26,9 @@ importers:
       '@fastify/oauth2':
         specifier: ^8.1.2
         version: 8.1.2
+      '@fastify/rate-limit':
+        specifier: ^10.3.0
+        version: 10.3.0
       '@fastify/secure-session':
         specifier: ^8.2.0
         version: 8.2.0
@@ -64,7 +66,7 @@ importers:
         specifier: ^1.5.4
         version: 1.5.4
       rimraf:
-        specifier: ^5.0.0
+        specifier: ^5.0.10
         version: 5.0.10
       uglify-js:
         specifier: ^3.19.3
@@ -298,6 +300,9 @@ packages:
 
   '@fastify/proxy-addr@5.1.0':
     resolution: {integrity: sha512-INS+6gh91cLUjB+PVHfu1UqcB76Sqtpyp7bnL+FYojhjygvOPA9ctiD/JDKsyD9Xgu4hUhCSJBPig/w7duNajw==}
+
+  '@fastify/rate-limit@10.3.0':
+    resolution: {integrity: sha512-eIGkG9XKQs0nyynatApA3EVrojHOuq4l6fhB4eeCk4PIOeadvOJz9/4w3vGI44Go17uaXOWEcPkaD8kuKm7g6Q==}
 
   '@fastify/secure-session@8.2.0':
     resolution: {integrity: sha512-E1linEHVV86c0Gt+ohujcuRsCeedhD2M3X5+a2aU9Ln0YDC0bbuA7bE6QQzf/HAacOpt9+CJqV5NqdlQr9ui0A==}
@@ -1123,6 +1128,11 @@ packages:
   rfdc@1.4.1:
     resolution: {integrity: sha512-q1b3N5QkRUWUl7iyylaaj3kOpIT0N2i9MqIEQXP73GVsN9cw3fdx8X63cEmWhJGi2PPCF23Ijp7ktmd39rawIA==}
 
+  rimraf@2.7.1:
+    resolution: {integrity: sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
+    hasBin: true
+
   rimraf@5.0.10:
     resolution: {integrity: sha512-l0OE8wL34P4nJH/H2ffoaniAokM2qSmrtXHmlpvYr5AVVX8msAyW0l8NVJFDxlSK4u3Uh/f41cQheDVdnYijwQ==}
     hasBin: true
@@ -1513,6 +1523,12 @@ snapshots:
     dependencies:
       '@fastify/forwarded': 3.0.1
       ipaddr.js: 2.2.0
+
+  '@fastify/rate-limit@10.3.0':
+    dependencies:
+      '@lukeed/ms': 2.0.2
+      fastify-plugin: 5.1.0
+      toad-cache: 3.7.0
 
   '@fastify/secure-session@8.2.0':
     dependencies:
@@ -2369,6 +2385,10 @@ snapshots:
 
   rfdc@1.4.1: {}
 
+  rimraf@2.7.1:
+    dependencies:
+      glob: 11.0.3
+
   rimraf@5.0.10:
     dependencies:
       glob: 11.0.3
@@ -2496,7 +2516,7 @@ snapshots:
       minimist: 1.2.8
       mkdirp: 1.0.4
       resolve: 1.22.10
-      rimraf: 5.0.10
+      rimraf: 2.7.1
       source-map-support: 0.5.21
       tree-kill: 1.2.2
       ts-node: 10.9.2(@types/node@24.7.0)(typescript@5.9.3)

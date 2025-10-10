@@ -25,6 +25,7 @@ import profileConfig from "./public/config/profileConfig";
 import { authenticator } from "otplib";
 import { replyView } from "./lib/replyView";
 import { toSafeUser } from "./types/user";
+import fastifyRateLimit from "@fastify/rate-limit";
 
 export const prisma = new PrismaClient();
 export const fastify = Fastify({
@@ -39,6 +40,11 @@ declare module "@fastify/secure-session" {
     returnTo?: string;
   }
 }
+
+fastify.register(fastifyRateLimit, {
+  max: 100,
+  timeWindow: "1 minutes",
+})
 
 fastify.register(fastifyView, {
   engine: {
