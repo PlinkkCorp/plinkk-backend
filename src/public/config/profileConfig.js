@@ -1,10 +1,10 @@
 export const profileData = {
-    profileLink: "https://github.com", // Lien du profil 
-    profileImage: "https://avatars.githubusercontent.com/u/9919?s=200&v=4", // Image de profil
-    profileIcon: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png", // Icone derrière le profil
-    profileSiteText: "GitHub", // Nom derrière le profil
-    userName: "GitHub User", // Nom affiché sur la page et dans le titre de l'onglet
-    email: "user@github.com", // Adresse mail affichée sur la page
+    profileLink: "https://plinkk.fr", // Lien du profil 
+    profileImage: "/public/images/default_profile.png", // Image de profil
+    profileIcon: "/public/images/logo.svg", // Icone derrière le profil
+    profileSiteText: "Plinkk", // Nom derrière le profil
+    userName: "Plinkk User", // Nom affiché sur la page et dans le titre de l'onglet
+    email: "user@plinkk.fr", // Adresse mail affichée sur la page
     links: [
         {
             icon: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
