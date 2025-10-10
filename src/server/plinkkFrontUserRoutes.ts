@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 import { resolvePlinkkPage } from "./resolvePlinkkPage";
 
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
-  fastify.get('/:username', async function (request, reply) {
+  fastify.get('/:username', { config: { rateLimit: false } }, async function (request, reply) {
     const { username } = request.params as { username: string };
     const isPreview = (request.query as any)?.preview === '1';
     if (username === "") {
@@ -97,7 +97,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
   return reply.view("plinkk/show.ejs", { page: resolved.page, userId: resolved.user.id, username: resolved.user.id, isOwner, links, publicPath });
   });
 
-  fastify.get("/:username/css/:cssFileName", function (request, reply) {
+  fastify.get("/:username/css/:cssFileName", { config: { rateLimit: false } }, function (request, reply) {
     const { username, cssFileName } = request.params as {
       username: string;
       cssFileName: string;
@@ -140,7 +140,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     return reply.code(404).send({ error: "non existant file" });
   });
 
-  fastify.get("/:username/canvaAnimation/*", function (request, reply) {
+  fastify.get("/:username/canvaAnimation/*", { config: { rateLimit: false } }, function (request, reply) {
     const { username } = request.params as {
       username: string;
       animationFileName: string;
@@ -172,6 +172,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     "/:username/js/config/:configFileName",
+    { config: { rateLimit: false } },
     async function (request, reply) {
       const { username, configFileName } = request.params as {
         username: string;

@@ -146,6 +146,13 @@
           if (!slug || !name) return; // keep modal open
           cleanup({ slug, name });
         });
+        // Entrée: sur le champ slug -> passer au champ nom; sur le champ nom -> valider
+        inSlug.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); inName?.focus(); }
+        });
+        inName.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); btnOk.click(); }
+        });
         overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(null); });
         document.body.appendChild(overlay);
         inSlug.focus();
