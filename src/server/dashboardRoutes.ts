@@ -1160,5 +1160,36 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     }
   });
 
+  fastify.get("/admin/bans", async function (request, reply) {
+    const userId = request.session.get("data");
+
+    if (!userId)
+      return reply.redirect(
+        `/login?returnTo=${encodeURIComponent("/dashboard/admin/bans")}`
+      );
+
+    const userInfo = await prisma.user.findFirst({
+      where: { id: userId },
+      omit: { password: true },
+    });
+
+    if (!userInfo)
+      return reply.redirect(
+        `/login?returnTo=${encodeURIComponent("/dashboard/admin/bans")}`
+      );
+
+    if (!isStaff(userInfo.role)) return reply.redirect("/dashboard");
+
+    try {
+      const defaultPlinkk = await prisma.plinkk.findFirst({
+        where: { userId: userInfo.id, isDefault: true },
+      });
+
+      (userInfo as any).publicPath =
+        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+    } catch (e) {}
+
+    return reply.view("dashboard/admin/bans.ejs", { user: userInfo });
+  });
   // NOTE: /api/bans endpoints are implemented in apiRoutes (mounted under /api)
 }
