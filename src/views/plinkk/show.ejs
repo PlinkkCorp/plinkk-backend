@@ -5,19 +5,19 @@
     <link rel="stylesheet" href="/<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : ((page && page.slug) ? page.slug : username) %>/css/button.css">
     <link rel="icon" href="/public/images/logo.svg" />
     <meta name="title" content="<%= (page && page.title) ? page.title : username %>">
-    <meta name="description" content="<%= (page && page.description) ? page.description : 'Plinkk - A project by Klaynight Dev' %>">
+    <meta name="description" content="<%= (page && page.description) ? page.description : 'Découvre mon profil sur Plinkk !' %>">
     <meta name="keywords" content="Plinkk, Klaynight Dev, Profil, Secondaire, Page, Linktree, Bio, Social, Réseaux sociaux, Portfolio, CV, Liens, Partage, Personnalisation, Thèmes, Cosmétiques">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="profile">
     <meta property="og:url" content="<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : ((page && page.slug) ? page.slug : username) %>">
-    <meta property="og:title" content="<%= (page && page.title) ? page.title : username %>">
-    <meta property="og:description" content="<%= (page && page.description) ? page.description : 'Plinkk - A project by Klaynight Dev' %>">
-    <meta property="og:image" content="/public/images/logo.svg">
+    <meta property="og:title" content="<%= (page && page.title) ? page.title : username %> sur Plinkk">
+    <meta property="og:description" content="<%= (page && page.description) ? page.description : 'Découvre mon profil sur Plinkk !' %>">
+    <meta property="og:image" content="/api/plinkks/og/<%= (page && page.title) ? page.title : username %>">
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : ((page && page.slug) ? page.slug : username) %>">
-    <meta property="twitter:title" content="<%= (page && page.title) ? page.title : username %>">
-    <meta property="twitter:description" content="<%= (page && page.description) ? page.description : 'Plinkk - A project by Klaynight Dev' %>">
-    <meta property="twitter:image" content="/public/images/logo.svg">
-    <meta property="twitter:image:alt" content="Plinkk logo">
+    <meta property="twitter:title" content="<%= (page && page.title) ? page.title : username %> sur Plinkk">
+    <meta property="twitter:description" content="<%= (page && page.description) ? page.description : 'Découvre mon profil sur Plinkk !' %>">
+    <meta property="twitter:image" content="/api/plinkks/og/<%= (page && page.title) ? page.title : username %>">
+    <meta property="twitter:image:alt" content="Plinkk">
     <meta name="theme-color" content="#7289DA">
     <meta name="author" content="PlinkkCorp">
     <meta name="robots" content="index, follow">
