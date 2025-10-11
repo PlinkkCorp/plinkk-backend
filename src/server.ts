@@ -44,7 +44,7 @@ declare module "@fastify/secure-session" {
 
 fastify.register(fastifyRateLimit, {
   max: 500,
-  timeWindow: "1 minutes",
+  timeWindow: "2 minutes",
 })
 
 fastify.register(fastifyView, {
