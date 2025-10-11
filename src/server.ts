@@ -572,16 +572,7 @@ fastify.get("/users", async (request, reply) => {
     : null;
   const plinkks = await prisma.plinkk.findMany({
     where: { isPublic: true },
-    select: ({
-      id: true,
-      userName: true,
-      email: true,
-      publicEmail: true,
-      role: true,
-      cosmetics: true,
-      image: true,
-      plinkks: { select: { id: true, name: true, slug: true, isDefault: true } },
-    } as any),
+    include: { settings: true },
     orderBy: { createdAt: "asc" },
   });
   // Annonces DB pour la page publique des utilisateurs: on affiche seulement les globales si non connecté
@@ -629,7 +620,6 @@ fastify.get("/users", async (request, reply) => {
         }));
     }
   } catch (e) {}
-  console.log(plinkks)
   return await replyView(reply, "users.ejs", currentUser, {
     plinkks: plinkks,
   });
