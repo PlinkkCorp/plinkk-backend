@@ -8,7 +8,7 @@
         <p class="text-xs text-slate-400">Découvrez les comptes publics Plinkk.</p>
       </div>
 
-      <% if (users.length > 0) { %>
+      <% if (plinkks.length > 0) { %>
       <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2">
         <label class="relative block flex-1">
           <input id="searchInput" type="text" placeholder="Rechercher (nom, @id, email)" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 pr-10 text-sm outline-none focus:ring-2 focus:ring-indigo-600 placeholder:text-slate-500" />
@@ -28,20 +28,20 @@
     </div>
 
     <div class="flex items-center justify-between animate-slide-up">
-      <p class="text-xs text-slate-400">Total: <span id="totalCount"><%= users.length %></span></p>
-      <p class="text-xs text-slate-400 hidden sm:block"><span id="visibleCount"><%= users.length %></span> affiché(s)</p>
+      <p class="text-xs text-slate-400">Total: <span id="totalCount"><%= plinkks.length %></span></p>
+      <p class="text-xs text-slate-400 hidden sm:block"><span id="visibleCount"><%= plinkks.length %></span> affiché(s)</p>
     </div>
 
-    <% if (users.length === 0) { %>
+    <% if (plinkks.length === 0) { %>
       <div class="rounded-lg border border-dashed border-slate-700 bg-slate-900/50 p-10 text-center space-y-2 animate-slide-up">
         <div class="text-2xl">🫥</div>
-        <p class="text-sm text-slate-300 font-medium">Aucun utilisateur pour le moment</p>
-        <p class="text-xs text-slate-500">Les comptes publics s’afficheront ici.</p>
+        <p class="text-sm text-slate-300 font-medium">Aucun Plinkks pour le moment</p>
+        <p class="text-xs text-slate-500">Les Plinkks publics s’afficheront ici.</p>
       </div>
     <% } else { %>
       <ul id="usersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-     <% users.forEach(u => { 
-       const initials = (u.userName || u.id || '?').trim().charAt(0).toUpperCase(); 
+     <% plinkks.forEach(u => { 
+       const initials = (u.name || u.id || '?').trim().charAt(0).toUpperCase(); 
        const role = u.role || 'USER';
        const cosmetics = (u.cosmetics || {});
        const selected = (cosmetics.selected || {});
@@ -50,12 +50,12 @@
        const bannerUrl = selected.bannerUrl ? String(selected.bannerUrl) : '';
        const theme = selected.theme ? String(selected.theme) : 'system';
      %>
-  <% const isEmailPublic = Boolean(u.publicEmail); %>
-  <% const publicEmail = u.publicEmail || u.email; %>
+  <% const isEmailPublic = Boolean(u.settings.affichageEmail !== null); %>
+  <% const publicEmail = u.settings.affichageEmail; %>
       <li class="group rounded-xl border border-slate-800/80 bg-slate-900/70 hover:bg-slate-900 transition-colors shadow-sm hover:shadow-md animate-slide-up overflow-hidden"
-        data-name="<%- (u.userName||'').toLowerCase() %>"
+        data-name="<%- (u.name||'').toLowerCase() %>"
         data-id="<%- (u.id||'').toLowerCase() %>"
-  data-search="<%- (u.userName+' '+u.id + (isEmailPublic && publicEmail ? (' '+publicEmail) : '')).toLowerCase() %>">
+  data-search="<%- (u.name+' '+u.id + (isEmailPublic && publicEmail ? (' '+publicEmail) : '')).toLowerCase() %>">
             <% if (bannerUrl) { %>
               <div class="h-12 w-full border-b border-slate-800" style="background: center/cover no-repeat url('<%= bannerUrl %>')"></div>
             <% } %>
@@ -68,8 +68,8 @@
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2 min-w-0">
-                  <div class="font-semibold truncate"><%= u.userName %></div>
-                  <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 max-w-[7.5rem] truncate inline-block">@<%= u.id %></span>
+                  <div class="font-semibold truncate"><%= u.name %></div>
+                  <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 max-w-[7.5rem] truncate inline-block">@<%= u.slug %></span>
                   <% if (role && role !== 'USER') { %>
                     <span class="text-[10px] px-2 py-0.5 rounded-full border truncate <%= role === 'ADMIN' ? 'bg-red-600/20 border-red-500/40 text-red-300' : role === 'PARTNER' ? 'bg-indigo-600/20 border-indigo-500/40 text-indigo-300' : role === 'DEVELOPER' ? 'bg-emerald-600/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-700/30 border-slate-600/50 text-slate-300' %>"><%= role %></span>
                   <% } %>
@@ -83,8 +83,8 @@
                   <span class="text-xs text-slate-500 italic">Email privé</span>
                 <% } %>
                 <div class="mt-3 flex flex-wrap items-center gap-2">
-                  <a class="px-3 py-1.5 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors" href="/<%= u.id %>">Voir le profil</a>
-                  <button type="button" class="px-3 py-1.5 text-xs rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200 transition-colors copyBtn" data-id="<%= u.id %>">Copier le lien</button>
+                  <a class="px-3 py-1.5 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors" href="/<%= u.slug %>">Voir le profil</a>
+                  <button type="button" class="px-3 py-1.5 text-xs rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200 transition-colors copyBtn" data-id="<%= u.slug %>">Copier le lien</button>
                 </div>
               </div>
             </div>
