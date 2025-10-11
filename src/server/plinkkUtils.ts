@@ -1,7 +1,8 @@
 // Utilitaires liés aux pages Plinkk (profils secondaires)
 import { PrismaClient, Role } from "../../generated/prisma/client";
-import { RESERVED_SLUGS } from './reservedSlugs';
-import { isBannedSlug } from './bannedSlugs';
+import { RESERVED_SLUGS } from "./reservedSlugs";
+import { isBannedSlug } from "./bannedSlugs";
+import profileConfig from "../public/config/profileConfig";
 
 export const MAX_PAGES_DEFAULT = 1; // default users can create 1 plinkk
 
@@ -37,7 +38,10 @@ export function getMaxPagesForRole(role?: Role | null): number {
 
 // Identifiants réservés (chemins, préfixes d'actifs, zones système)
 // Vérifie si un slug est réservé (in-memory ou DB)
-export async function isReservedSlug(prisma: PrismaClient, slug: string): Promise<boolean> {
+export async function isReservedSlug(
+  prisma: PrismaClient,
+  slug: string
+): Promise<boolean> {
   if (!slug) return true;
   if (RESERVED_SLUGS.has(slug)) return true;
   try {
@@ -61,17 +65,29 @@ export async function suggestUniqueSlug(prisma: PrismaClient, userId: string, ba
 }
 
 // Attribue un index disponible (>0), 0 est réservé à la page par défaut
-export async function getNextIndex(prisma: PrismaClient, userId: string): Promise<number> {
-  const pages = await prisma.plinkk.findMany({ where: { userId }, select: { index: true } });
-  const used = new Set(pages.map(p => p.index));
+export async function getNextIndex(
+  prisma: PrismaClient,
+  userId: string
+): Promise<number> {
+  const pages = await prisma.plinkk.findMany({
+    where: { userId },
+    select: { index: true },
+  });
+  const used = new Set(pages.map((p) => p.index));
   let i = 1;
   while (used.has(i)) i++;
   return i;
 }
 
 // Réindexe toutes les pages non-défaut en séquence 1..N selon createdAt
-export async function reindexNonDefault(prisma: PrismaClient, userId: string): Promise<void> {
-  const pages = await prisma.plinkk.findMany({ where: { userId }, orderBy: { createdAt: 'asc' } });
+export async function reindexNonDefault(
+  prisma: PrismaClient,
+  userId: string
+): Promise<void> {
+  const pages = await prisma.plinkk.findMany({
+    where: { userId },
+    orderBy: { createdAt: "asc" },
+  });
   let n = 1;
   for (const p of pages) {
     if (p.isDefault) {
@@ -109,28 +125,77 @@ export async function suggestGloballyUniqueSlug(prisma: PrismaClient, baseSlug: 
 export async function createPlinkkForUser(
   prisma: PrismaClient,
   userId: string,
-  opts: { name?: string; slugBase?: string; visibility?: 'PUBLIC' | 'PRIVATE'; isActive?: boolean }
+  opts: {
+    name?: string;
+    slugBase?: string;
+    visibility?: "PUBLIC" | "PRIVATE";
+    isActive?: boolean;
+  }
 ) {
-  const me = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, role: true } });
-  if (!me) throw new Error('user_not_found');
+  const me = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, role: true },
+  });
+  if (!me) throw new Error("user_not_found");
   const count = await prisma.plinkk.count({ where: { userId } });
   const maxPages = getMaxPagesForRole(me.role);
-  if (count >= maxPages) throw new Error('max_pages_reached');
-  const name = (opts.name || 'Page').trim() || 'Page';
+  if (count >= maxPages) throw new Error("max_pages_reached");
+  const name = (opts.name || "Page").trim() || "Page";
   const base = slugify(opts.slugBase || name);
   const slug = await suggestGloballyUniqueSlug(prisma, base);
   const isFirst = count === 0;
   const index = isFirst ? 0 : await getNextIndex(prisma, userId);
-  const created = await prisma.plinkk.create({ data: {
-    userId,
-    name,
-    slug,
-    index,
-    isDefault: isFirst,
-    isActive: opts.isActive ?? true,
-    visibility: (opts.visibility || 'PUBLIC') as any,
-    isPublic: (opts.visibility || 'PUBLIC') === 'PUBLIC',
-  }});
+  const created = await prisma.plinkk.create({
+    data: {
+      userId,
+      name,
+      slug,
+      index,
+      isDefault: isFirst,
+      isActive: opts.isActive ?? true,
+      visibility: (opts.visibility || "PUBLIC") as any,
+      isPublic: (opts.visibility || "PUBLIC") === "PUBLIC",
+    },
+  });
+  try {
+    // Create PlinkkSettings from example profileConfig (non-blocking)
+    await prisma.plinkkSettings.create({
+      data: {
+        plinkkId: created.id,
+        profileLink: (profileConfig as any).profileLink,
+        profileImage: (profileConfig as any).profileImage,
+        profileIcon: (profileConfig as any).profileIcon,
+        profileSiteText: (profileConfig as any).profileSiteText,
+        userName: (profileConfig as any).userName,
+        iconUrl: (profileConfig as any).iconUrl,
+        description: (profileConfig as any).description,
+        profileHoverColor: (profileConfig as any).profileHoverColor,
+        degBackgroundColor: (profileConfig as any).degBackgroundColor,
+        neonEnable:
+          (profileConfig as any).neonEnable ??
+          (profileConfig as any).neonEnable === 0
+            ? 0
+            : 1,
+        buttonThemeEnable: (profileConfig as any).buttonThemeEnable,
+        EnableAnimationArticle: (profileConfig as any).EnableAnimationArticle,
+        EnableAnimationButton: (profileConfig as any).EnableAnimationButton,
+        EnableAnimationBackground: (profileConfig as any)
+          .EnableAnimationBackground,
+        backgroundSize: (profileConfig as any).backgroundSize,
+        selectedThemeIndex: (profileConfig as any).selectedThemeIndex,
+        selectedAnimationIndex: (profileConfig as any).selectedAnimationIndex,
+        selectedAnimationButtonIndex: (profileConfig as any)
+          .selectedAnimationButtonIndex,
+        selectedAnimationBackgroundIndex: (profileConfig as any)
+          .selectedAnimationBackgroundIndex,
+        animationDurationBackground: (profileConfig as any)
+          .animationDurationBackground,
+        delayAnimationButton: (profileConfig as any).delayAnimationButton,
+        canvaEnable: (profileConfig as any).canvaEnable,
+        selectedCanvasIndex: (profileConfig as any).selectedCanvasIndex,
+      },
+    });
+  } catch (e) {}
   if (isFirst) await reindexNonDefault(prisma, userId);
   return created;
 }

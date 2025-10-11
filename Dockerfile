@@ -1,6 +1,18 @@
 FROM node:24-alpine
 
-RUN apk add --no-cache openssl libc6-compat bash
+RUN apk add --no-cache \
+    openssl \
+    libc6-compat \
+    bash \
+    python3 \
+    make \
+    g++ \
+    cairo-dev \
+    pango-dev \
+    jpeg-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev
 
 COPY . .
 RUN npm install

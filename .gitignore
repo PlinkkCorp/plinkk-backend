@@ -5,3 +5,4 @@ dist
 .env
 *.db
 /.vscode/
+/src/public/uploads

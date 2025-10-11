@@ -26,6 +26,7 @@ import { authenticator } from "otplib";
 import { replyView } from "./lib/replyView";
 import { toSafeUser } from "./types/user";
 import fastifyRateLimit from "@fastify/rate-limit";
+import fastifyHttpProxy from "@fastify/http-proxy";
 
 export const prisma = new PrismaClient();
 export const fastify = Fastify({
@@ -42,8 +43,8 @@ declare module "@fastify/secure-session" {
 }
 
 fastify.register(fastifyRateLimit, {
-  max: 100,
-  timeWindow: "1 minutes",
+  max: 500,
+  timeWindow: "2 minutes",
 })
 
 fastify.register(fastifyView, {
@@ -76,6 +77,21 @@ fastify.register(fastifySecureSession, {
 fastify.register(fastifyCors,  {
   origin: true
 })
+
+fastify.register(fastifyHttpProxy, {
+  upstream: "https://analytics.plinkk.fr/",
+  prefix: "/umami_script.js",
+  rewritePrefix: "/script.js", // Supprime le préfixe dans la requête vers upstream
+  replyOptions: {
+    rewriteRequestHeaders: (req, headers) => {
+      // On force un User-Agent et Host propres
+      return {
+        ...headers,
+        host: "analytics.plinkk.fr",
+      };
+    },
+  },
+});
 
 fastify.register(apiRoutes, { prefix: "/api" });
 fastify.register(staticPagesRoutes);
@@ -554,7 +570,7 @@ fastify.get("/users", async (request, reply) => {
         where: { id: currentUserId },
       })
     : null;
-  const users = await prisma.user.findMany({
+  const plinkks = await prisma.plinkk.findMany({
     where: { isPublic: true },
     select: ({
       id: true,
@@ -613,8 +629,9 @@ fastify.get("/users", async (request, reply) => {
         }));
     }
   } catch (e) {}
+  console.log(plinkks)
   return await replyView(reply, "users.ejs", currentUser, {
-    users: users,
+    plinkks: plinkks,
   });
 });
 
