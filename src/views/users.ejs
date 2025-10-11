@@ -32,7 +32,18 @@
       <p class="text-xs text-slate-400 hidden sm:block"><span id="visibleCount"><%= plinkks.length %></span> affiché(s)</p>
     </div>
 
-    <% if (plinkks.length === 0) { %>
+    <!-- Liste plate des Plinkks (un élément par plinkk) -->
+    <section class="mt-4 animate-slide-up">
+      <h2 class="text-lg font-medium mb-2">Plinkks publics</h2>
+    <% // Construire une liste plate de plinkks avec owner object
+      const plinks = [];
+      users.forEach(u => { if (Array.isArray(u.plinkks)) u.plinkks.forEach(p => plinks.push({ owner: u, name: p.name, slug: p.slug, isDefault: !!p.isDefault })); });
+         // trier par owner (owner.id) puis par name
+         plinks.sort((a,b) => { const ao = (a.owner && a.owner.id) ? String(a.owner.id) : ''; const bo = (b.owner && b.owner.id) ? String(b.owner.id) : ''; if (ao === bo) return ((a.name||a.slug||'').toString().localeCompare((b.name||b.slug||''))); return ao.localeCompare(bo); });
+         let _prevOwner = null;
+      %>
+
+      <% if (users.length === 0) { %>
       <div class="rounded-lg border border-dashed border-slate-700 bg-slate-900/50 p-10 text-center space-y-2 animate-slide-up">
         <div class="text-2xl">🫥</div>
         <p class="text-sm text-slate-300 font-medium">Aucun Plinkks pour le moment</p>
@@ -40,62 +51,97 @@
       </div>
     <% } else { %>
       <ul id="usersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-     <% plinkks.forEach(u => { 
-       const initials = (u.name || u.id || '?').trim().charAt(0).toUpperCase(); 
-       const role = u.role || 'USER';
-       const cosmetics = (u.cosmetics || {});
-       const selected = (cosmetics.selected || {});
-       const flair = selected.flair ? String(selected.flair) : null;
-       const frame = selected.frame ? String(selected.frame) : 'none';
-       const bannerUrl = selected.bannerUrl ? String(selected.bannerUrl) : '';
-       const theme = selected.theme ? String(selected.theme) : 'system';
+        <% // Render one tile per plinkk while keeping base card styling
+        let _prevOwnerTile = null;
+        plinks.forEach(p => {
+          const owner = p.owner || {};
+          const ownerId = owner.id ? String(owner.id) : '';
+          const initials = (owner.userName || owner.id || '?').trim().charAt(0).toUpperCase();
+          const ownerIsPublicEmail = Boolean(owner.publicEmail);
+          const ownerEmail = owner.publicEmail || owner.email || '';
+          const role = owner.role || 'USER';
+          const cosmetics = (owner.cosmetics || {});
+          const selected = (cosmetics.selected || {});
+          const bannerUrl = selected.bannerUrl ? String(selected.bannerUrl) : '';
+          const showOwnerLabel = (_prevOwnerTile !== ownerId);
      %>
-  <% const isEmailPublic = Boolean(u.settings.affichageEmail !== null); %>
-  <% const publicEmail = u.settings.affichageEmail; %>
-      <li class="group rounded-xl border border-slate-800/80 bg-slate-900/70 hover:bg-slate-900 transition-colors shadow-sm hover:shadow-md animate-slide-up overflow-hidden"
-        data-name="<%- (u.name||'').toLowerCase() %>"
-        data-id="<%- (u.id||'').toLowerCase() %>"
-  data-search="<%- (u.name+' '+u.id + (isEmailPublic && publicEmail ? (' '+publicEmail) : '')).toLowerCase() %>">
+          <li class="group rounded-xl border border-slate-800/80 bg-slate-900/70 hover:bg-slate-900 transition-colors shadow-sm hover:shadow-md animate-slide-up overflow-hidden"
+          data-name="<%- ((p.name||p.slug)||'').toLowerCase() %>"
+          data-id="<%- (ownerId||'').toLowerCase() %>"
+          data-search="<%- (((p.name||p.slug)||'') + ' ' + ownerId).toLowerCase() %>">
             <% if (bannerUrl) { %>
               <div class="h-12 w-full border-b border-slate-800" style="background: center/cover no-repeat url('<%= bannerUrl %>')"></div>
             <% } %>
             <div class="p-4 flex items-start gap-3">
-              <div class="relative ">
+                <div class="relative ">
                 <div class="relative shrink-0 h-11 w-11 rounded-full border border-indigo-600/50 overflow-hidden grid place-items-center bg-indigo-700/70 text-sm font-semibold text-white">
-                  <%- include('partials/avatar.ejs', { u }) %>
+                  <%- include('partials/avatar.ejs', { user: owner }) %>
                 </div>
-                <!-- Mettre ici une puce perso si voulu -->
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2 min-w-0">
-                  <div class="font-semibold truncate"><%= u.name %></div>
-                  <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 max-w-[7.5rem] truncate inline-block">@<%= u.slug %></span>
+                  <div class="font-semibold truncate"><%= p.name || p.slug %></div>
+                  <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 max-w-[7.5rem] truncate inline-block">@<%= ownerId %></span>
                   <% if (role && role !== 'USER') { %>
                     <span class="text-[10px] px-2 py-0.5 rounded-full border truncate <%= role === 'ADMIN' ? 'bg-red-600/20 border-red-500/40 text-red-300' : role === 'PARTNER' ? 'bg-indigo-600/20 border-indigo-500/40 text-indigo-300' : role === 'DEVELOPER' ? 'bg-emerald-600/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-700/30 border-slate-600/50 text-slate-300' %>"><%= role %></span>
                   <% } %>
-                  <% if (flair) { %>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 truncate" title="Flair"><%= flair %></span>
-                  <% } %>
                 </div>
-                <% if (isEmailPublic) { %>
-                  <span class="text-xs text-slate-400 truncate"><%= publicEmail %></span>
-                <% } else { %>
-                  <span class="text-xs text-slate-500 italic">Email privé</span>
+                  <div class="text-xs text-slate-400 truncate">/<%= p.isDefault ? ownerId : (p.slug || (ownerId + '/' + p.slug)) %></div>
+                <% if (showOwnerLabel) { %>
+                  <div class="mt-2 text-xs text-slate-400">@<%= ownerId %></div>
                 <% } %>
                 <div class="mt-3 flex flex-wrap items-center gap-2">
-                  <a class="px-3 py-1.5 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors" href="/<%= u.slug %>">Voir le profil</a>
-                  <button type="button" class="px-3 py-1.5 text-xs rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200 transition-colors copyBtn" data-id="<%= u.slug %>">Copier le lien</button>
+                  <a class="px-3 py-1.5 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors plinkk-link" href="/<%= p.isDefault ? owner.id : (p.slug || owner.id) %>">Voir</a>
+                  <button type="button" class="px-3 py-1.5 text-xs rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200 transition-colors copyBtn" data-id="<%= p.isDefault ? ownerId : (p.slug || ownerId) %>">Copier le lien</button>
                 </div>
               </div>
             </div>
-          </li>
-        <% }) %>
+        </li>
+     <% _prevOwnerTile = ownerId; }); %>
       </ul>
     <% } %>
   </main>
 
   <script src="/public/js/pagination.js"></script>
+  <!-- Modal pour preview Plinkk -->
+  <div id="plinkkPreviewModal" class="fixed inset-0 hidden z-50 items-center justify-center">
+    <div class="absolute inset-0 bg-black/60" data-close></div>
+    <div class="relative w-full max-w-4xl h-[80vh] bg-slate-900 border border-slate-700 rounded-lg overflow-hidden">
+      <div class="flex items-center justify-between p-2 border-b border-slate-800 bg-slate-900/95">
+        <div id="plinkkPreviewTitle" class="text-sm text-white font-semibold">Prévisualisation</div>
+        <button id="closePlinkkPreview" class="px-3 py-1 rounded bg-slate-800 text-xs">Fermer</button>
+      </div>
+      <iframe id="plinkkPreviewFrame" src="about:blank" class="w-full h-full bg-white"></iframe>
+    </div>
+  </div>
   <script>
+    (function(){
+      const modal = document.getElementById('plinkkPreviewModal');
+      const frame = document.getElementById('plinkkPreviewFrame');
+      const title = document.getElementById('plinkkPreviewTitle');
+      const closeBtn = document.getElementById('closePlinkkPreview');
+      function openModal(url, label) {
+        try {
+          const sep = url.includes('?') ? '&' : '?';
+          frame.src = url + sep + 'preview=1';
+          title.textContent = label || 'Prévisualisation';
+          modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.style.overflow='hidden';
+        } catch(e){}
+      }
+      function closeModal(){ frame.src='about:blank'; modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.style.overflow=''; }
+      closeBtn?.addEventListener('click', closeModal);
+      modal?.querySelector('[data-close]')?.addEventListener('click', closeModal);
+      document.addEventListener('keydown', (e)=>{ if (e.key==='Escape' && !modal.classList.contains('hidden')) closeModal(); });
+      document.addEventListener('click', (ev)=>{
+        const a = ev.target.closest && ev.target.closest('a.plinkk-link');
+        if (!a) return;
+        ev.preventDefault();
+        const href = a.getAttribute('href') || '';
+        const label = a.textContent && a.textContent.trim() ? a.textContent.trim() : href;
+        openModal(href, label);
+      });
+    })();
+  
     (function(){
       const $ = (s, r=document) => r.querySelector(s);
       const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));

@@ -572,7 +572,16 @@ fastify.get("/users", async (request, reply) => {
     : null;
   const plinkks = await prisma.plinkk.findMany({
     where: { isPublic: true },
-    include: { settings: true },
+    select: ({
+      id: true,
+      userName: true,
+      email: true,
+      publicEmail: true,
+      role: true,
+      cosmetics: true,
+      image: true,
+      plinkks: { select: { id: true, name: true, slug: true, isDefault: true } },
+    } as any),
     orderBy: { createdAt: "asc" },
   });
   // Annonces DB pour la page publique des utilisateurs: on affiche seulement les globales si non connecté

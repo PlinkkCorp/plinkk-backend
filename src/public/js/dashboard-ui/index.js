@@ -20,10 +20,16 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
   const canvasPreviewEnable = qs('#canvasPreviewEnable');
 
   let autoSaveTimer = null;
+  let previewTimer = null;
   let suspendAutoSave = false;
   let saving = false;
   let saveQueued = false;
-  const AUTO_SAVE_DELAY = 800;
+  // Délais pour limiter le spam de requêtes et de rafraîchissements
+  const AUTO_SAVE_DELAY = 1500; // délai avant PUT auto (1.5s)
+  const PREVIEW_REFRESH_DELAY = 1000; // délai avant déclencher un refresh si aucune autre frappe (debounce)
+  const PREVIEW_MIN_INTERVAL = 1000; // intervalle min entre 2 refresh effectifs (throttle)
+  let lastPreviewAt = 0;
+  let previewQueued = false;
 
   const f = {
     profileLink: qs('#profileLink'),
@@ -72,6 +78,27 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     statusEl.textContent = text || '';
     statusEl.className = 'text-xs ' + (kind === 'error' ? 'text-red-400' : kind === 'success' ? 'text-emerald-400' : 'text-slate-400');
   };
+  const schedulePreviewRefresh = () => {
+    // Debounce: repousser si ça tape vite
+    if (previewTimer) clearTimeout(previewTimer);
+    previewTimer = setTimeout(() => {
+      const now = Date.now();
+      const elapsed = now - lastPreviewAt;
+      // Throttle: au plus 1 refresh/s
+      if (elapsed >= PREVIEW_MIN_INTERVAL) {
+        try { refreshPreview(); } catch {}
+        lastPreviewAt = Date.now();
+        previewQueued = false;
+      } else if (!previewQueued) {
+        previewQueued = true;
+        setTimeout(() => {
+          try { refreshPreview(); } catch {}
+          lastPreviewAt = Date.now();
+          previewQueued = false;
+        }, PREVIEW_MIN_INTERVAL - elapsed);
+      }
+    }, PREVIEW_REFRESH_DELAY);
+  };
   const scheduleAutoSave = () => {
     if (suspendAutoSave) return;
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
@@ -96,7 +123,8 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     try {
       await putConfig(payload);
       setStatus(manual ? 'Enregistré ✓' : 'Enregistré automatiquement ✓', 'success');
-      refreshPreview();
+      // Ne pas recharger instantanément la preview pour éviter le spam en cours de frappe
+      schedulePreviewRefresh();
     } catch (e) {
       setStatus('Erreur: ' + (e?.message || ''), 'error');
     } finally {
@@ -197,8 +225,8 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       f.invertBackgroundColors.addEventListener('click', () => {
         state.background.reverse();
         renderBackground({ container: f.backgroundList, addBtn: f.addBackgroundColor, colors: state.background, scheduleAutoSave });
+        // On enregistre et on laissera le rafraîchissement se faire après save (pour éviter les doubles reload)
         scheduleAutoSave();
-        refreshPreview();
       });
     }
 
@@ -259,7 +287,8 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     try { const cfg = await fetchConfig(); fillForm(cfg); setStatus('Données rechargées', 'success'); }
     catch (e) { setStatus('Erreur: ' + (e?.message || ''), 'error'); }
   });
-  refreshBtn?.addEventListener('click', refreshPreview);
+  // Bouton manuel: respecter le throttle également
+  refreshBtn?.addEventListener('click', (e) => { e.preventDefault(); schedulePreviewRefresh(); });
 
   [
     f.profileLink, f.profileSiteText, f.userName, f.email,
@@ -273,21 +302,8 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     f.status_text, f.status_fontTextColor, f.status_statusText,
   ].forEach((el) => attachAutoSave(el, scheduleAutoSave));
 
-  [
-    f.profileImage, f.profileIcon, f.iconUrl, f.description,
-    f.userName, f.profileSiteText, f.profileLink,
-    f.selectedThemeIndex, f.selectedAnimationIndex,
-    f.selectedAnimationButtonIndex, f.selectedAnimationBackgroundIndex,
-    f.animationDurationBackground, f.delayAnimationButton,
-    f.profileHoverColor, f.backgroundSize,
-    f.canvaEnable, f.selectedCanvasIndex,
-  ].forEach((el) => {
-    if (!el) return;
-    const tag = (el.tagName || '').toUpperCase();
-    const type = (el.type || '').toLowerCase();
-    const evt = tag === 'SELECT' || type === 'checkbox' || type === 'color' || type === 'number' ? 'change' : 'input';
-    el.addEventListener(evt, () => refreshPreview());
-  });
+  // Ne pas rafraîchir la preview sur chaque frappe pour éviter les doubles reloads.
+  // On rafraîchit uniquement après enregistrement auto (saveNow) ou sur clic du bouton.
 
   if (f.status_statusText) f.status_statusText.addEventListener('change', () => updateStatusPreview({ elements: f }));
   f.status_text?.addEventListener('input', () => { updateStatusControlsDisabled({ elements: f }); scheduleAutoSave(); });

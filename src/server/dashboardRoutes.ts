@@ -34,7 +34,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       );
     }
 
-    const [linksCount, socialsCount, labelsCount, recentLinks] =
+    const [linksCount, socialsCount, labelsCount, recentLinks, plinkks] =
       await Promise.all([
         prisma.link.count({ where: { userId: userId as string } }),
         prisma.socialIcon.count({ where: { userId: userId as string } }),
@@ -44,6 +44,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
           orderBy: { id: "desc" },
           take: 10,
         }),
+        prisma.plinkk.findMany({ where: { userId: userId as string }, select: { id: true, name: true, slug: true, isDefault: true }, orderBy: [{ isDefault: 'desc' }, { index: 'asc' }] }),
       ]);
 
     // compute publicPath for user views (prefer default plinkk slug if present)
@@ -58,6 +59,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     return await replyView(reply, "dashboard.ejs", userInfo, {
       stats: { links: linksCount, socials: socialsCount, labels: labelsCount },
       links: recentLinks,
+      plinkks,
     });
   });
 
@@ -494,10 +496,18 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         `/login?returnTo=${encodeURIComponent("/dashboard/account")}`
       );
     }
-    const userInfo = await prisma.user.findFirst({
-      where: { id: userId },
-      include: { cosmetics: true, host: true },
-    });
+    let userInfo: any = null;
+    try {
+      // Try to include `host` if the table exists in the DB/schema
+      userInfo = await prisma.user.findFirst({
+        where: { id: userId },
+        include: { cosmetics: true, host: true },
+      });
+    } catch (e: any) {
+      // If the Host table is missing (e.g. migrations not applied), fallback to query without it
+      request.log?.warn({ err: e }, 'Failed to include host when fetching userInfo; retrying without host (fallback)');
+      userInfo = await prisma.user.findFirst({ where: { id: userId }, include: { cosmetics: true } });
+    }
     if (!userInfo) {
       return reply.redirect(
         `/login?returnTo=${encodeURIComponent("/dashboard/account")}`
@@ -557,6 +567,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
           createdAt: true,
           twoFactorEnabled: true,
           twoFactorSecret: true,
+          plinkks: { select: { id: true, name: true, slug: true, isDefault: true } },
         },
         orderBy: { createdAt: "desc" },
       }),
