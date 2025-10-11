@@ -34,7 +34,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       );
     }
 
-    const [linksCount, socialsCount, labelsCount, recentLinks] =
+    const [linksCount, socialsCount, labelsCount, recentLinks, plinkks] =
       await Promise.all([
         prisma.link.count({ where: { userId: userId as string } }),
         prisma.socialIcon.count({ where: { userId: userId as string } }),
@@ -44,6 +44,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
           orderBy: { id: "desc" },
           take: 10,
         }),
+        prisma.plinkk.findMany({ where: { userId: userId as string }, select: { id: true, name: true, slug: true, isDefault: true }, orderBy: [{ isDefault: 'desc' }, { index: 'asc' }] }),
       ]);
 
     // compute publicPath for user views (prefer default plinkk slug if present)
@@ -58,6 +59,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     return await replyView(reply, "dashboard.ejs", userInfo, {
       stats: { links: linksCount, socials: socialsCount, labels: labelsCount },
       links: recentLinks,
+      plinkks,
     });
   });
 
@@ -565,6 +567,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
           createdAt: true,
           twoFactorEnabled: true,
           twoFactorSecret: true,
+          plinkks: { select: { id: true, name: true, slug: true, isDefault: true } },
         },
         orderBy: { createdAt: "desc" },
       }),

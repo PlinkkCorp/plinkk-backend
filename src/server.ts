@@ -564,7 +564,7 @@ fastify.get("/users", async (request, reply) => {
       role: true,
       cosmetics: true,
       image: true,
-      plinkks: { select: { id: true, name: true, slug: true } },
+      plinkks: { select: { id: true, name: true, slug: true, isDefault: true } },
     } as any),
     orderBy: { createdAt: "asc" },
   });

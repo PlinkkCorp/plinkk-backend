@@ -8,7 +8,7 @@ import { replyView } from "../lib/replyView";
 
 const prisma = new PrismaClient();
 
-import { resolvePlinkkPage } from "./resolvePlinkkPage";
+import { resolvePlinkkPage, parseIdentifier } from "./resolvePlinkkPage";
 
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
   fastify.get('/:username', { config: { rateLimit: false } }, async function (request, reply) {
@@ -451,6 +451,20 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     // Ignore si l'identifiant correspond à un préfixe d'actifs
     if (["css", "js", "images", "canvaAnimation"].includes(String(identifier))) {
       return reply.code(404).view("erreurs/404.ejs", { user: null });
+    }
+    // Si l'identifiant est un slug qui existe globalement sur un autre utilisateur,
+    // préférer l'URL globale '/:slug' et rediriger vers elle.
+    try {
+      const parsed = parseIdentifier(identifier);
+      if (parsed.kind === 'slug') {
+        const global = await prisma.plinkk.findFirst({ where: { slug: parsed.value as string }, select: { userId: true } });
+        if (global && global.userId !== username) {
+          // redirection permanente non obligatoire; on utilise 302 pour être sûr
+          return reply.redirect(`/${parsed.value}`);
+        }
+      }
+    } catch (e) {
+      // ignore and continue resolving by username
     }
     const resolved = await resolvePlinkkPage(prisma, username, identifier, request);
     if (resolved.status !== 200) return reply.code(resolved.status).view("erreurs/404.ejs", { user: null });

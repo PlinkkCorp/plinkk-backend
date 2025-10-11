@@ -123,6 +123,24 @@
                                                                 <%= u.id %>
                                                             </span>
                                                         </div>
+                                                                                                                <% /* Références Plinkk */ %>
+                                                                                                                <% if (Array.isArray(u.plinkks) && u.plinkks.length > 0) { 
+                                                                                                                         const def = u.plinkks.find(p=>p.isDefault) || null;
+                                                                                                                         const others = u.plinkks.filter(p=>!p.isDefault);
+                                                                                                                %>
+                                                                                                                    <div class="mt-1 flex flex-wrap items-center gap-1">
+                                                                                                                        <% if (def) { %>
+                                                                                                                            <a href="/<%= u.id %>" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-600/30" title="Page par défaut">
+                                                                                                                                <span>Par défaut</span>
+                                                                                                                            </a>
+                                                                                                                        <% } %>
+                                                                                                                        <% others.forEach(p => { %>
+                                                                                                                            <a href="/<%= u.id %>/<%= p.slug %>" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-slate-800/70 border border-slate-700 text-slate-200 hover:bg-slate-800" title="Plinkk: <%- p.name || p.slug %>">
+                                                                                                                                <span><%- p.name || p.slug %></span>
+                                                                                                                            </a>
+                                                                                                                        <% }) %>
+                                                                                                                    </div>
+                                                                                                                <% } %>
                                                         <% const isEmailPublic=Boolean(u.publicEmail); %>
                                                             <% const publicEmail=u.publicEmail || u.email; %>
                                                                 <% const canReveal=(user && (user.role==='ADMIN' ||
@@ -232,6 +250,50 @@
                                                                                     <%- renderRoleBtn('ADMIN') %>
                                                             </div>
                                                         </div>
+                                                        <div class="menuItem hasSubmenu relative group flex items-center gap-2 w-full text-left px-3 py-1.5 rounded hover:bg-slate-800 text-xs text-slate-200 cursor-default select-none">
+                                                            <span>Plinkks</span>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="ml-auto h-3.5 w-3.5 opacity-80">
+                                                                <path d="M9 5l7 7-7 7" />
+                                                            </svg>
+                                                            <div class="submenu hidden absolute top-0 left-full ml-1 z-50 w-64 rounded-md border border-slate-700 bg-slate-900/95 p-1" data-side="right">
+                                                                <% if (Array.isArray(u.plinkks) && u.plinkks.length > 0) {
+                                                                    const def = u.plinkks.find(p=>p.isDefault) || null;
+                                                                    const others = u.plinkks.filter(p=>!p.isDefault);
+                                                                %>
+                                                                    <% if (def) { %>
+                                                                        <div class="menuItem hasSubmenu relative group block w-full text-left px-0 py-0 rounded text-xs hover:bg-transparent text-slate-200 cursor-default select-none">
+                                                                            <div class="px-3 py-1.5 flex items-center gap-2">
+                                                                                <span class="truncate">Par défaut — /<%= u.id %></span>
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="ml-auto h-3.5 w-3.5 opacity-80">
+                                                                                    <path d="M9 5l7 7-7 7" />
+                                                                                </svg>
+                                                                            </div>
+                                                                            <div class="submenu hidden absolute top-0 left-full ml-1 z-50 w-56 rounded-md border border-slate-700 bg-slate-900/95 p-1" data-side="right">
+                                                                                <a href="/<%= def.slug ? def.slug : u.id %>" class="menuItem plinkk-link block w-full text-left px-3 py-1.5 rounded text-xs hover:bg-slate-800 text-slate-200">Voir le Plinkk — /<%= def.slug ? def.slug : u.id %></a>
+                                                                                <div class="text-xs text-slate-400 px-3 py-1">Email du compte: <strong class="text-sm text-slate-200"><%= u.publicEmail || u.email || '—' %></strong></div>
+                                                                            </div>
+                                                                        </div>
+                                                                    <% } %>
+                                                                    <% others.forEach(p=>{ %>
+                                                                        <div class="menuItem hasSubmenu relative group block w-full text-left px-0 py-0 rounded text-xs hover:bg-transparent text-slate-200 cursor-default select-none">
+                                                                            <div class="px-3 py-1.5 flex items-center gap-2">
+                                                                                <span class="truncate"><%- p.name || p.slug %> — /<%= p.slug ? p.slug : (u.id + '/' + (p.slug||'')) %></span>
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="ml-auto h-3.5 w-3.5 opacity-80">
+                                                                                    <path d="M9 5l7 7-7 7" />
+                                                                                </svg>
+                                                                            </div>
+                                                                            <div class="submenu hidden absolute top-0 left-full ml-1 z-50 w-56 rounded-md border border-slate-700 bg-slate-900/95 p-1" data-side="right">
+                                                                                <a href="/<%= p.slug ? p.slug : (u.id + '/' + p.slug) %>" class="menuItem plinkk-link block w-full text-left px-3 py-1.5 rounded text-xs hover:bg-slate-800 text-slate-200">Voir le Plinkk — /<%= p.slug ? p.slug : (u.id + '/' + p.slug) %></a>
+                                                                                <button type="button" data-plinkk-id="<%= p.id %>" class="menuItem plinkkMakePublic block w-full text-left px-3 py-1.5 rounded text-xs hover:bg-slate-800 text-slate-200">Rendre public</button>
+                                                                                <button type="button" data-plinkk-id="<%= p.id %>" class="menuItem plinkkMakePrivate block w-full text-left px-3 py-1.5 rounded text-xs hover:bg-slate-800 text-slate-200">Rendre privé</button>
+                                                                            </div>
+                                                                        </div>
+                                                                    <% }) %>
+                                                                <% } else { %>
+                                                                    <div class="text-xs text-slate-500 px-3 py-1">Aucun Plinkk</div>
+                                                                <% } %>
+                                                            </div>
+                                                        </div>
                                                         <button type="button"
                                                             class="menuItem disable2faBtn flex items-center gap-2 w-full text-left px-3 py-1.5 rounded hover:bg-amber-900/30 text-xs text-<%= (u.twoFactorEnabled || (u.twoFactorSecret && u.twoFactorSecret !== '')) ? 'amber-300' : 'slate-500 cursor-not-allowed opacity-60' %>"
                                                             data-id="<%= u.id %>" <%=(u.twoFactorEnabled ||
@@ -307,6 +369,32 @@
                                     <% } %>
                         </aside>
                     </div>
+
+                                        
+                                                        <!-- Modal preview réutilisable (admin) -->
+                                                        <div id="plinkkPreviewModalAdmin" class="fixed inset-0 hidden z-50 items-center justify-center">
+                                                            <div class="absolute inset-0 bg-black/60" data-close></div>
+                                                            <div class="relative w-full max-w-4xl h-[80vh] bg-slate-900 border border-slate-700 rounded-lg overflow-hidden">
+                                                                <div class="flex items-center justify-between p-2 border-b border-slate-800 bg-slate-900/95">
+                                                                    <div id="plinkkPreviewTitleAdmin" class="text-sm text-white font-semibold">Prévisualisation</div>
+                                                                    <button id="closePlinkkPreviewAdmin" class="px-3 py-1 rounded bg-slate-800 text-xs">Fermer</button>
+                                                                </div>
+                                                                <iframe id="plinkkPreviewFrameAdmin" src="about:blank" class="w-full h-full bg-white"></iframe>
+                                                            </div>
+                                                        </div>
+                                                        <script>
+                                                            (function(){
+                                                                const modal = document.getElementById('plinkkPreviewModalAdmin');
+                                                                const frame = document.getElementById('plinkkPreviewFrameAdmin');
+                                                                const title = document.getElementById('plinkkPreviewTitleAdmin');
+                                                                const closeBtn = document.getElementById('closePlinkkPreviewAdmin');
+                                                                function openModal(url,label){ const sep = url.includes('?') ? '&' : '?'; frame.src = url+sep+'preview=1'; title.textContent = label||'Prévisualisation'; modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.style.overflow='hidden'; }
+                                                                function closeModal(){ frame.src='about:blank'; modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.style.overflow=''; }
+                                                                closeBtn?.addEventListener('click', closeModal); modal?.querySelector('[data-close]')?.addEventListener('click', closeModal);
+                                                                document.addEventListener('click', (ev)=>{ const a = ev.target.closest && ev.target.closest('a.plinkk-link'); if (!a) return; ev.preventDefault(); const href=a.getAttribute('href')||''; const label = a.textContent && a.textContent.trim() ? a.textContent.trim() : href; openModal(href,label); });
+                                                                document.addEventListener('keydown',(e)=>{ if(e.key==='Escape' && !modal.classList.contains('hidden')) closeModal(); });
+                                                            })();
+                                                        </script>
 
                 </main>
 
@@ -722,7 +810,7 @@ box-shadow: 0 8px 24px rgba(16,185,129,.35);
                             const sub = host.querySelector('.submenu');
                             if (!sub) return;
                             // Prevent closing the parent menu when toggling submenu
-                            e.stopPropagation();
+                            // (do not stop propagation so submenu item clicks still reach the global handler)
                             // Toggle only this submenu (close others in same actionsMenu)
                             const parentMenu = host.closest('.actionsMenu');
                             parentMenu?.querySelectorAll('.submenu.open')?.forEach(el => { if (el !== sub) { el.classList.remove('open'); el.classList.add('hidden'); } });

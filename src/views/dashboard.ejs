@@ -82,6 +82,31 @@
                             <% } %>
                         </div>
 
+                        <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up" style="animation-delay:80ms">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-medium">Mes Plinkks</h3>
+                                <a href="/dashboard/plinkks" class="text-sm text-indigo-300 hover:text-indigo-200 underline underline-offset-4">Gérer</a>
+                            </div>
+                            <% if (typeof plinkks !== 'undefined' && Array.isArray(plinkks) && plinkks.length) { %>
+                                <ul class="divide-y divide-slate-800">
+                                    <% plinkks.forEach(p => { %>
+                                        <li class="py-2 flex items-center justify-between">
+                                            <div>
+                                                <div class="font-medium text-slate-100"><%= p.name || p.slug || p.id %></div>
+                                                <div class="text-xs text-slate-400">/<%= p.slug ? p.slug : user.id %></div>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <a target="_blank" href="/<%= p.slug ? p.slug : user.id %>" class="px-3 py-1.5 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white">Ouvrir</a>
+                                                <a href="/dashboard/edit?plinkkId=<%= p.id %>" class="px-3 py-1.5 text-xs rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200">Éditer</a>
+                                            </div>
+                                        </li>
+                                    <% }) %>
+                                </ul>
+                            <% } else { %>
+                                <p class="text-sm text-slate-400">Aucun Plinkk pour le moment.</p>
+                            <% } %>
+                        </div>
+
                         <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up" style="animation-delay:100ms">
                             <h3 class="font-medium mb-2">Raccourcis</h3>
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
