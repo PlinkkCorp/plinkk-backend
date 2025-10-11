@@ -1,6 +1,6 @@
 <%- include('../../partials/head.ejs') -%>
-<%- include('../../partials/header.ejs') -%>
-<%- include('../../partials/header-dash.ejs') -%>
+<%- include('../../partials/header-dash.ejs', { user: user }) -%>
+<%- include('../../partials/admin-nav.ejs', { user: user }) %>
 
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
       <div class="flex items-center justify-between mb-6">

@@ -3,7 +3,7 @@
     description: 'Tableau de bord d\'administration — actions rapides, statistiques et modération.' ,
     robots: 'noindex,nofollow' }) %>
 
-    <%- include('../../partials/header-dash.ejs') %>
+    <%- include('../../partials/header-dash.ejs', { user: user }) %>
         <%- include('../../partials/admin-nav.ejs', { user: user }) %>
 
             <% // safe fallbacks: totals or pendingThemes might be undefined depending on controller const

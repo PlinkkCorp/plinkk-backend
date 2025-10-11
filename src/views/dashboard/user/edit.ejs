@@ -1,5 +1,5 @@
 <%- include('../../partials/head.ejs', { title: 'Tableau de bord - Édition', description: 'Configure les sections, apparence et arrière‑plan de ta page.', robots: 'noindex,nofollow' }) %>
-<%- include('../../partials/header-dash.ejs') %>
+<%- include('../../partials/header-dash.ejs', { user: user }) %>
 
 <div id="mobileEditNotice" class="md:hidden fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4" role="dialog" aria-modal="true">
     <div class="relative w-full max-w-lg mx-auto bg-slate-800/85 border border-slate-700 rounded-lg p-5 text-center text-white">
