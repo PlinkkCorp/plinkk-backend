@@ -49,6 +49,14 @@
        const frame = selected.frame ? String(selected.frame) : 'none';
        const bannerUrl = selected.bannerUrl ? String(selected.bannerUrl) : '';
        const theme = selected.theme ? String(selected.theme) : 'system';
+         // Construire l'objet attendu par le partial avatar
+         const avatarUrl = (u.settings && u.settings.profileImage) ? String(u.settings.profileImage) : null;
+         const avatarUser = {
+           image: avatarUrl,
+           profileImage: avatarUrl,
+           userName: u.name,
+           id: u.slug,
+         };
      %>
   <% // protection si u.settings est null ou undefined %>
   <% const isEmailPublic = Boolean(u.settings && (u.settings.affichageEmail !== null && u.settings.affichageEmail !== undefined)); %>
@@ -62,8 +70,10 @@
             <% } %>
             <div class="p-4 flex items-start gap-3">
               <div class="relative ">
+              <% // Construire l'URL de l'avatar à afficher %>
+              
                 <div class="relative shrink-0 h-11 w-11 rounded-full border border-indigo-600/50 overflow-hidden grid place-items-center bg-indigo-700/70 text-sm font-semibold text-white">
-                  <%- include('partials/avatar.ejs', { u }) %>
+                  <%- include('partials/avatar.ejs', { user: avatarUser }) %>
                 </div>
                 <!-- Mettre ici une puce perso si voulu -->
               </div>
