@@ -26,6 +26,7 @@ import { authenticator } from "otplib";
 import { replyView } from "./lib/replyView";
 import { toSafeUser } from "./types/user";
 import fastifyRateLimit from "@fastify/rate-limit";
+import fastifyHttpProxy from "@fastify/http-proxy";
 
 export const prisma = new PrismaClient();
 export const fastify = Fastify({
@@ -76,6 +77,21 @@ fastify.register(fastifySecureSession, {
 fastify.register(fastifyCors,  {
   origin: true
 })
+
+fastify.register(fastifyHttpProxy, {
+  upstream: "https://analytics.plinkk.fr/",
+  prefix: "/umami_script.js",
+  rewritePrefix: "/script.js", // Supprime le préfixe dans la requête vers upstream
+  replyOptions: {
+    rewriteRequestHeaders: (req, headers) => {
+      // On force un User-Agent et Host propres
+      return {
+        ...headers,
+        host: "analytics.plinkk.fr",
+      };
+    },
+  },
+});
 
 fastify.register(apiRoutes, { prefix: "/api" });
 fastify.register(staticPagesRoutes);

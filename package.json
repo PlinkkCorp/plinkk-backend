@@ -40,6 +40,7 @@
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.1.0",
     "@fastify/formbody": "^8.0.2",
+    "@fastify/http-proxy": "^11.3.0",
     "@fastify/multipart": "^9.2.1",
     "@fastify/oauth2": "^8.1.2",
     "@fastify/rate-limit": "^10.3.0",
