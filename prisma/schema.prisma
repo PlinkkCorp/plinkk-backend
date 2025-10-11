@@ -342,6 +342,6 @@ model PageStat {
 
 model BannedSlug {
   slug         String  @id
-  reason       String
+  reason       String?
   createdAt    DateTime @default(now())
 }
