@@ -393,23 +393,49 @@
         }
 
         async function uploadAvatar() {
-          if (!input || !input.files || !input.files[0]) { setMsg('Choisis une image.', false); return; }
+          if (!input || !input.files || !input.files[0]) {
+            setMsg('Choisis une image.', false);
+            return;
+          }
+
           const file = input.files[0];
-          if (!/^image\//i.test(file.type)) { setMsg('Fichier non valide (image requise).', false); return; }
-          if (file.size > 2 * 1024 * 1024) { setMsg('Image trop lourde (max 2 Mo).', false); return; }
+
+          if (!/^image\//i.test(file.type)) {
+            setMsg('Fichier non valide (image requise).', false);
+            return;
+          }
+
+          if (file.size > 2 * 1024 * 1024) {
+            setMsg('Image trop lourde (max 2 Mo).', false);
+            return;
+          }
+
           try {
-            const fd = new FormData();
-            fd.append('avatar', file, file.name);
-            const res = await fetch('/api/me/avatar-file', {
-              method: 'POST',
-              body: fd
+            // Conversion du fichier en base64
+            const toBase64 = file => new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result);
+              reader.onerror = reject;
+              reader.readAsDataURL(file); // produit un dataURL complet: "data:image/png;base64,xxxx..."
             });
+
+            const dataUrl = await toBase64(file);
+
+            // Envoi direct au backend Fastify en JSON
+            const res = await fetch('/api/me/avatar', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ dataUrl }),
+            });
+
             if (!res.ok) throw new Error('HTTP ' + res.status);
+
             const json = await res.json();
             if (json && (json.url || json.file) && preview) {
-              const raw = json.url || ('/public/uploads/plinkk/' + json.file);
+              const raw = json.url || ('/public/uploads/avatars/' + json.file);
               const url = raw + '?v=' + Date.now();
-              preview.innerHTML = '<img src="' + url + '" alt="Avatar" class="h-full w-full object-cover" />';
+              preview.innerHTML = `<img src="${url}" alt="Avatar" class="h-full w-full object-cover" />`;
+
               const currentId = '<%= user.id %>';
               document.querySelectorAll('[data-avatar]').forEach(el => {
                 const elUser = el.getAttribute && el.getAttribute('data-avatar-user');
@@ -417,17 +443,19 @@
                   if (el.tagName === 'IMG') {
                     el.setAttribute('src', url);
                   } else {
-                    el.innerHTML = '<img data-avatar data-avatar-user="' + currentId + '" src="' + url + '" alt="Avatar" class="h-full w-full object-cover" />';
+                    el.innerHTML = `<img data-avatar data-avatar-user="${currentId}" src="${url}" alt="Avatar" class="h-full w-full object-cover" />`;
                   }
                 }
               });
             }
+
             setMsg('Avatar mis à jour.', true);
           } catch (err) {
             console.error(err);
             setMsg('Échec de l’upload.', false);
           }
         }
+
 
         input?.addEventListener('change', uploadAvatar);
       })();
@@ -468,35 +496,35 @@
       })();
     </script>
 
-  <script>
-  // Expose si la A2F est activée (valeur server-side) au JS client
-    // Expose si la A2F est activée (valeur server-side) au JS via data-attribute pour éviter l'injection directe
-    const accountRoot = document.getElementById('accountRoot');
-    const twoFactorEnabled = accountRoot ? accountRoot.getAttribute('data-twofactor') === 'true' : false;
-    // Email
-    document.getElementById('formEmail')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.currentTarget);
-      const payload = Object.fromEntries(fd.entries());
-      const res = await fetch('/api/me/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      const j = await res.json().catch(()=>({}));
-      if (res.ok) {
-        showAlert('Email mis à jour', 'success');
-        // mettre à jour dynamiquement l'affichage de l'email dans le header et mobile
-        try {
-          const newEmail = (j && j.email) ? j.email : payload.email;
-          if (newEmail) {
-            document.querySelectorAll('[data-current-email]').forEach(el => {
-              el.textContent = newEmail;
-            });
+    <script>
+      // Expose si la A2F est activée (valeur server-side) au JS client
+      // Expose si la A2F est activée (valeur server-side) au JS via data-attribute pour éviter l'injection directe
+      const accountRoot = document.getElementById('accountRoot');
+      const twoFactorEnabled = accountRoot ? accountRoot.getAttribute('data-twofactor') === 'true' : false;
+      // Email
+      document.getElementById('formEmail')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.currentTarget);
+        const payload = Object.fromEntries(fd.entries());
+        const res = await fetch('/api/me/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const j = await res.json().catch(() => ({}));
+        if (res.ok) {
+          showAlert('Email mis à jour', 'success');
+          // mettre à jour dynamiquement l'affichage de l'email dans le header et mobile
+          try {
+            const newEmail = (j && j.email) ? j.email : payload.email;
+            if (newEmail) {
+              document.querySelectorAll('[data-current-email]').forEach(el => {
+                el.textContent = newEmail;
+              });
+            }
+          } catch (err) {
+            // ignore
           }
-        } catch (err) {
-          // ignore
+        } else {
+          showAlert(j.error || 'Erreur', 'error');
         }
-      } else {
-        showAlert(j.error || 'Erreur', 'error');
-      }
-    });
+      });
 
       // Toggle profil public
       document.getElementById('togglePublic')?.addEventListener('change', async (e) => {
