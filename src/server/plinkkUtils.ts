@@ -104,7 +104,13 @@ export async function reindexNonDefault(
 }
 
 // Génère un slug unique à l'échelle du système (tous comptes), en ajoutant -1, -2... si nécessaire
-export async function suggestGloballyUniqueSlug(prisma: PrismaClient, baseSlug: string, excludePlinkkId?: string): Promise<string> {
+export async function suggestGloballyUniqueSlug(
+  prisma: PrismaClient,
+  baseSlug: string,
+  excludePlinkkId?: string,
+  // allowCandidateIfUserId: if provided, a candidate equal to this user id will be permitted
+  allowCandidateIfUserId?: string
+): Promise<string> {
   const base = baseSlug || 'page';
   let i = 0;
   while (true) {
@@ -113,7 +119,7 @@ export async function suggestGloballyUniqueSlug(prisma: PrismaClient, baseSlug: 
     if (await isReservedSlug(prisma, candidate)) { i++; continue; }
     // Le slug ne doit pas entrer en conflit avec un @ (User.id)
     const userHit = await prisma.user.findUnique({ where: { id: candidate } });
-    if (userHit) { i++; continue; }
+    if (userHit && userHit.id !== allowCandidateIfUserId) { i++; continue; }
     // Le slug ne doit pas entrer en conflit avec un autre plinkk (global)
     const plinkkHit = await prisma.plinkk.findFirst({ where: { slug: candidate, ...(excludePlinkkId ? { NOT: { id: excludePlinkkId } } : {}) } });
     if (plinkkHit) { i++; continue; }
@@ -142,7 +148,8 @@ export async function createPlinkkForUser(
   if (count >= maxPages) throw new Error("max_pages_reached");
   const name = (opts.name || "Page").trim() || "Page";
   const base = slugify(opts.slugBase || name);
-  const slug = await suggestGloballyUniqueSlug(prisma, base);
+  // Allow the created user's id to be used as the plinkk slug for their main Plinkk
+  const slug = await suggestGloballyUniqueSlug(prisma, base, undefined, userId);
   const isFirst = count === 0;
   const index = isFirst ? 0 : await getNextIndex(prisma, userId);
   const created = await prisma.plinkk.create({

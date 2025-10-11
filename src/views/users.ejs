@@ -50,8 +50,9 @@
        const bannerUrl = selected.bannerUrl ? String(selected.bannerUrl) : '';
        const theme = selected.theme ? String(selected.theme) : 'system';
      %>
-  <% const isEmailPublic = Boolean(u.settings.affichageEmail !== null); %>
-  <% const publicEmail = u.settings.affichageEmail; %>
+  <% // protection si u.settings est null ou undefined %>
+  <% const isEmailPublic = Boolean(u.settings && (u.settings.affichageEmail !== null && u.settings.affichageEmail !== undefined)); %>
+  <% const publicEmail = (u.settings && (u.settings.affichageEmail !== null && u.settings.affichageEmail !== undefined)) ? String(u.settings.affichageEmail) : ''; %>
       <li class="group rounded-xl border border-slate-800/80 bg-slate-900/70 hover:bg-slate-900 transition-colors shadow-sm hover:shadow-md animate-slide-up overflow-hidden"
         data-name="<%- (u.name||'').toLowerCase() %>"
         data-id="<%- (u.id||'').toLowerCase() %>"
