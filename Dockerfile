@@ -21,7 +21,7 @@ RUN npx @fastify/secure-session > src/secret-key
 
 RUN npx prisma generate
 
-RUN npm ts-node prisma/seed.ts
+RUN npm run seed:role
 
 RUN npm run build
 
