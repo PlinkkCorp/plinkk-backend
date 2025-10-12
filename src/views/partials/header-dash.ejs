@@ -46,7 +46,7 @@
         <div class="hidden md:flex items-center gap-3">
             <a href="https://github.com/PlinkkCorp/plinkk-backend" target="_blank" class="px-3 py-1.5 text-xs rounded-md border border-slate-700/60 bg-slate-800/50 hover:bg-slate-700/60">GitHub</a>
             <a href="/users" class="px-3 py-1.5 text-xs rounded-md border border-slate-700/60 bg-slate-800/50 hover:bg-slate-700/60">Utilisateurs</a>
-                        <% if (user && (user.role === 'ADMIN' || user.role === 'DEVELOPER' || user.role === 'MODERATOR')) { %>
+                        <% if (user && (user.role.id === 'ADMIN' || user.role.id === 'DEVELOPER' || user.role.id === 'MODERATOR')) { %>
                             <a href="/dashboard/admin" class="px-3 py-1.5 text-xs rounded-md border border-red-600/50 bg-red-700/30 hover:bg-red-700/40 text-red-100">Admin</a>
                         <% } %>
         </div>
