@@ -18,7 +18,7 @@ import { staticPagesRoutes } from "./server/staticPagesRoutes";
 import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
 import { plinkkPagesRoutes } from "./server/plinkkPagesRoutes";
-import { createPlinkkForUser, slugify, isReservedSlug } from "./server/plinkkUtils";
+import { createPlinkkForUser, slugify, isReservedSlug } from "./lib/plinkkUtils";
 // Example profile data used to pre-fill a new user's main Plinkk
 // Note: this file is shared with client-side config and exports a default object
 import profileConfig from "./public/config/profileConfig";
@@ -28,8 +28,8 @@ import { toSafeUser } from "./types/user";
 import fastifyRateLimit from "@fastify/rate-limit";
 import fastifyHttpProxy from "@fastify/http-proxy";
 
-export const prisma = new PrismaClient();
-export const fastify = Fastify({
+const prisma = new PrismaClient();
+const fastify = Fastify({
   logger: true,
 });
 const PORT = Number(process.env.PORT) || 3001;

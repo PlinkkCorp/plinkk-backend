@@ -1,14 +1,14 @@
 import { FastifyInstance } from "fastify";
 import { existsSync, readFileSync } from "fs";
 import path from "path";
-import { generateProfileConfig } from "../generateConfig";
+import { generateProfileConfig } from "../lib/generateConfig";
 import { minify } from "uglify-js";
 import { PrismaClient } from "../../generated/prisma/client";
 import { replyView } from "../lib/replyView";
 
 const prisma = new PrismaClient();
 
-import { resolvePlinkkPage, parseIdentifier } from "./resolvePlinkkPage";
+import { resolvePlinkkPage, parseIdentifier } from "../lib/resolvePlinkkPage";
 
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
   fastify.get('/:username', { config: { rateLimit: false } }, async function (request, reply) {
@@ -170,8 +170,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     return reply.code(404).send({ error: "non existant file" });
   });
 
-  fastify.get(
-    "/:username/js/config/:configFileName",
+  fastify.get("/:username/js/config/:configFileName",
     { config: { rateLimit: false } },
     async function (request, reply) {
       const { username, configFileName } = request.params as {

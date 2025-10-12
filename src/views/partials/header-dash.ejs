@@ -46,7 +46,7 @@
         <div class="hidden md:flex items-center gap-3">
             <a href="https://github.com/PlinkkCorp/plinkk-backend" target="_blank" class="px-3 py-1.5 text-xs rounded-md border border-slate-700/60 bg-slate-800/50 hover:bg-slate-700/60">GitHub</a>
             <a href="/users" class="px-3 py-1.5 text-xs rounded-md border border-slate-700/60 bg-slate-800/50 hover:bg-slate-700/60">Utilisateurs</a>
-                        <% if (user && (user.role.id === 'ADMIN' || user.role.id === 'DEVELOPER' || user.role.id === 'MODERATOR')) { %>
+                        <% if (user.role && (user.role.id === 'ADMIN' || user.role.id === 'DEVELOPER' || user.role.id === 'MODERATOR')) { %>
                             <a href="/dashboard/admin" class="px-3 py-1.5 text-xs rounded-md border border-red-600/50 bg-red-700/30 hover:bg-red-700/40 text-red-100">Admin</a>
                         <% } %>
         </div>
@@ -68,7 +68,7 @@
                 <a href="/dashboard/themes" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Mes Thèmes</a>
                 <a href="/dashboard/account" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Compte</a>
                 <div class="my-1 border-t border-slate-700"></div>
-                <a target="_blank" href="/<%= (publicPath) ? publicPath : user.id %>" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Voir mon profil</a>
+                <a target="_blank" href="/<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : user.id %>" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Voir mon profil</a>
                 <div class="my-1 border-t border-slate-700"></div>
                 <a href="/logout" class="block px-3 py-2 text-sm rounded-md text-rose-300 hover:bg-rose-900/20">Déconnexion</a>
             </div>

@@ -1,27 +1,27 @@
 import { Role } from "../../generated/prisma";
 
 export function verifyRoleUser(role: Role) {
-    return role.id === "USER" ? true : false
+    return role === null ? "USER" : role.id === "USER" ? true : false
 }
 
 export function verifyRoleBeta(role: Role) {
-    return role.id === "BETA" ? true : false
+    return role === null ? "USER" : role.id === "BETA" ? true : false
 }
 
 export function verifyRolePartner(role: Role) {
-    return role.id === "PARTNER" ? true : false
+    return role === null ? "USER" : role.id === "PARTNER" ? true : false
 }
 
 export function verifyRoleAdmin(role: Role) {
-    return role.id === "ADMIN" ? true : false
+    return role === null ? "USER" : role.id === "ADMIN" ? true : false
 }
 
 export function verifyRoleDeveloper(role: Role) {
-    return role.id === "DEVELOPER" ? true : false
+    return role === null ? "USER" : role.id === "DEVELOPER" ? true : false
 }
 
 export function verifyRoleModrator(role: Role) {
-    return role.id === "MODERATOR" ? true : false
+    return role === null ? "USER" : role.id === "MODERATOR" ? true : false
 }
 
 export function verifyRoleIsStaff(role: Role) {

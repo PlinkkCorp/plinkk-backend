@@ -8,7 +8,7 @@
         <a href="/dashboard/admin/bans" class="text-sm px-3 py-1 rounded hover:bg-slate-800">Slugs bans</a>
         <a href="/dashboard/admin/logs" aria-disabled="true" class="text-sm px-3 py-1 rounded text-slate-400 opacity-60 pointer-events-none">Logs</a>
         <div class="flex-1"></div>
-        <% if (user && (user.role.id === 'ADMIN' || user.role.id === 'DEVELOPER' || user.role.id === 'MODERATOR')) { %>
+        <% if (user.role && (user.role.id === 'ADMIN' || user.role.id === 'DEVELOPER' || user.role.id === 'MODERATOR')) { %>
             <a href="/dashboard/" class="text-sm px-3 py-1 rounded bg-slate-800 text-white">Retour</a>
         <% } %>
     </div>

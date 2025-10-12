@@ -15,6 +15,7 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
       : null;
     return await replyView(reply, "about/about.ejs", currentUser, {});
   });
+
   fastify.get("/privacy", async (request, reply) => {
     const currentUserId = request.session.get("data") as string | undefined;
     const currentUser = currentUserId
@@ -24,6 +25,7 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
       : null;
     return await replyView(reply, "about/privacy.ejs", currentUser, {});
   });
+
   fastify.get("/terms", async (request, reply) => {
     const currentUserId = request.session.get("data") as string | undefined;
     const currentUser = currentUserId
@@ -33,6 +35,7 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
       : null;
     return await replyView(reply, "about/terms.ejs", currentUser, {});
   });
+
   fastify.get("/cookies", async (request, reply) => {
     const currentUserId = request.session.get("data") as string | undefined;
     const currentUser = currentUserId
@@ -42,6 +45,7 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
       : null;
     return await replyView(reply, "about/cookies.ejs", currentUser, {});
   });
+
   fastify.get("/legal", async (request, reply) => {
     const currentUserId = request.session.get("data") as string | undefined;
     const currentUser = currentUserId

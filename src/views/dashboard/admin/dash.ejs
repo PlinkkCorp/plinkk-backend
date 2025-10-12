@@ -145,7 +145,7 @@
                                                                                                                 <% } %>
                                                         <% const isEmailPublic=Boolean(u.publicEmail); %>
                                                             <% const publicEmail=u.publicEmail || u.email; %>
-                                                                <% const canReveal=(user && (user.role.id==='ADMIN' ||
+                                                                <% const canReveal=(user.role && (user.role.id==='ADMIN' ||
                                                                     user.role.id==='DEVELOPER' || user.role.id==='MODERATOR'
                                                                     )); %>
                                                                     <% if (isEmailPublic) { %>
@@ -191,7 +191,7 @@
                                                                             <% } %>
                                                     </div>
                                                     <div class="ml-auto text-xs text-slate-400">
-                                                        <%= u.role || 'USER' %>
+                                                        <%= u.role.name || 'USER' %>
                                                     </div>
                                                 </div>
 
@@ -228,7 +228,7 @@
                                                                 data-side="right">
                                                                     <% /* Determine which role buttons should be disabled
                                                                         based on current user role */ %>
-                                                                    <% const myRole = (user && user.role.id) ? String(user.role.id) : 'USER';
+                                                                    <% const myRole = (user.role && user.role.id) ? String(user.role.id) : 'USER';
                                                                         const disableRoleBtn = (target) => {
                                                                             if (myRole === 'ADMIN') return false;
                                                                             if (myRole === 'DEVELOPER') return (target === 'ADMIN');

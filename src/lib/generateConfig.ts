@@ -6,7 +6,7 @@ import {
   NeonColor,
   SocialIcon,
   Statusbar,
-} from "../generated/prisma";
+} from "../../generated/prisma";
 
 export function generateProfileConfig(
   profile: any,

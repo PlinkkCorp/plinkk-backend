@@ -8,7 +8,7 @@ import {
   getNextIndex,
   createPlinkkForUser,
   isReservedSlug,
-} from "./plinkkUtils";
+} from "../lib/plinkkUtils";
 
 const prisma = new PrismaClient();
 

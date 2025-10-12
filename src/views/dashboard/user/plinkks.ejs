@@ -5,7 +5,7 @@
   <%- include('../../partials/asside_dash.ejs', { active: 'plinkks' }) %>
   <main class="col-span-12 lg:col-span-9 space-y-4">
    <% const list = (plinkks && plinkks.length ? plinkks : (pages || [])); const currentCount = list.length; const maxPlinkks = (typeof maxPages !== 'undefined' ? maxPages : 2);
-     const isAdminView = (typeof user !== 'undefined' && user && user.role.id === 'ADMIN');
+     const isAdminView = (typeof user !== 'undefined' && user.role && user.role.id === 'ADMIN');
      const maxPlinkksDisplay = (maxPlinkks === Infinity || isAdminView) ? '∞' : String(maxPlinkks);
    %>
     <div class="flex items-center justify-between">

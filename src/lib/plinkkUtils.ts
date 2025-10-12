@@ -3,7 +3,7 @@ import { PrismaClient, Role } from "../../generated/prisma/client";
 import { RESERVED_SLUGS } from "./reservedSlugs";
 import { isBannedSlug } from "./bannedSlugs";
 import profileConfig from "../public/config/profileConfig";
-import { verifyRoleAdmin, verifyRoleDeveloper, verifyRolePartner } from "../lib/verifyRole";
+import { verifyRoleAdmin, verifyRoleDeveloper, verifyRolePartner } from "./verifyRole";
 
 export const MAX_PAGES_DEFAULT = 1; // default users can create 1 plinkk
 
