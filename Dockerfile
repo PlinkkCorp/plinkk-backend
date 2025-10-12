@@ -21,6 +21,8 @@ RUN npx @fastify/secure-session > src/secret-key
 
 RUN npx prisma generate
 
+RUN npx prisma db seed
+
 RUN npm run build
 
 CMD ["sh", "-c", "npm run prisma:init && npm run start"]

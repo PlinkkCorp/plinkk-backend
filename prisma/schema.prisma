@@ -9,14 +9,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  USER
-  PARTNER
-  ADMIN
-  DEVELOPER
-  MODERATOR
-}
-
 enum ThemeStatus {
   DRAFT
   SUBMITTED
@@ -50,7 +42,8 @@ model User {
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @default(now()) @updatedAt
 
-  role            Role      @default(USER)
+  roleId          String?
+  role            Role?     @relation(fields: [roleId], references: [id])
   rankScore       Int       @default(0)
   bumpedAt        DateTime?
   bumpExpiresAt   DateTime?
@@ -78,6 +71,14 @@ model User {
   statusbar      Statusbar?
 
   slags          Json     @default("[]")
+}
+
+model Role {
+  id    String  @id @default(nanoid(16))
+  name  String  @unique
+  users User[]
+
+  AnnouncementRoleTarget AnnouncementRoleTarget[]
 }
 
 model Cosmetic {
@@ -211,11 +212,12 @@ model AnnouncementTarget {
 
 model AnnouncementRoleTarget {
   announcementId String
-  role           Role
+  roleId         String
+  role           Role         @relation(fields: [roleId], references: [id])
 
   announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
 
-  @@id([announcementId, role])
+  @@id([announcementId, roleId])
 }
 
 model Theme {
