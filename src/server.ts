@@ -61,7 +61,11 @@ fastify.register(fastifyStatic, {
 
 fastify.register(fastifyFormbody);
 // support file uploads via multipart/form-data
-fastify.register(fastifyMultipart, { attachFieldsToBody: true });
+fastify.register(fastifyMultipart, {
+  limits: {
+    fileSize: 2 * 1024 * 1024, // 2 Mo
+  },
+});
 fastify.register(fastifyCookie);
 
 fastify.register(fastifySecureSession, {

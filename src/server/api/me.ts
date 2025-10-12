@@ -4,11 +4,16 @@ import z from "zod";
 import { verifyDomain } from "../../lib/verifyDNS";
 import { verifyRoleAdmin, verifyRoleDeveloper } from "../../lib/verifyRole";
 import path from "path";
-import bcrypt from 'bcrypt'
-import QRCode from "qrcode"
+import bcrypt from "bcrypt";
+import QRCode from "qrcode";
 import { existsSync, mkdirSync, writeFileSync, unlinkSync } from "fs";
 import { coerceThemeData, readBuiltInThemes } from "../../lib/theme";
-import { reindexNonDefault, slugify, isReservedSlug, createPlinkkForUser } from "../../lib/plinkkUtils";
+import {
+  reindexNonDefault,
+  slugify,
+  isReservedSlug,
+  createPlinkkForUser,
+} from "../../lib/plinkkUtils";
 import { PrismaClient } from "../../../generated/prisma/client";
 import { apiMeThemesRoutes } from "./me/theme";
 import { apiMePlinkksRoutes } from "./me/plinkks";
@@ -22,8 +27,8 @@ const pending2fa = new Map<
 const prisma = new PrismaClient();
 
 export function apiMeRoutes(fastify: FastifyInstance) {
-  fastify.register(apiMeThemesRoutes, { prefix: "/themes" })
-  fastify.register(apiMePlinkksRoutes, { prefix: "/plinkks" })
+  fastify.register(apiMeThemesRoutes, { prefix: "/themes" });
+  fastify.register(apiMePlinkksRoutes, { prefix: "/plinkks" });
   // API: basculer la visibilité publique/privée de son profil
   fastify.post("/visibility", async (request, reply) => {
     const userId = request.session.get("data");
@@ -647,80 +652,77 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/avatar", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const { dataUrl } = (request.body as any) || {};
-    if (typeof dataUrl !== "string" || !dataUrl.startsWith("data:")) {
-      return reply.code(400).send({ error: "Invalid payload" });
+
+    // Récupération du fichier envoyé
+    const file = await request.file();
+
+    if (!file) return reply.code(400).send({ error: "Aucun fichier reçu" });
+    if (!file.mimetype.startsWith("image/"))
+      return reply.code(400).send({ error: "Format non supporté" });
+
+    const buf = await file.toBuffer();
+
+    // Limite stricte: 2 Mo
+    if (buf.byteLength > 2 * 1024 * 1024)
+      return reply.code(413).send({ error: "Image trop lourde (max 2 Mo)" });
+
+    const mime = file.mimetype.toLowerCase();
+    const ext = mime.endsWith("png")
+      ? "png"
+      : mime.endsWith("webp")
+      ? "webp"
+      : "jpg";
+
+    const dir = path.join(
+      __dirname,
+      "..",
+      "..",
+      "public",
+      "uploads",
+      "avatars"
+    );
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+
+    // Récupérer l’utilisateur
+    const me = await prisma.user.findUnique({
+      where: { id: userId as string },
+    });
+    if (!me) return reply.code(404).send({ error: "Utilisateur introuvable" });
+
+    const hash = me.id;
+    const dedupName = `${hash}.${ext}`;
+    const filePath = path.join(dir, dedupName);
+    const publicUrl = `/public/uploads/avatars/${dedupName}`;
+    const oldVal = me?.image || null;
+
+    // Écriture du fichier
+    writeFileSync(filePath, buf);
+
+    // Mise à jour de l’utilisateur
+    await prisma.user.update({
+      where: { id: me.id },
+      data: { image: publicUrl },
+    });
+
+    // Suppression ancienne image si inutilisée
+    if (oldVal && oldVal !== publicUrl) {
+      const refs = await prisma.user.count({ where: { image: oldVal } });
+      if (refs === 0) {
+        try {
+          let oldPath = "";
+          if (oldVal.startsWith("/public/uploads/avatars/")) {
+            oldPath = path.join(
+              __dirname,
+              oldVal.replace(/^\/public\//, "public/")
+            );
+          } else {
+            oldPath = path.join(dir, oldVal);
+          }
+          if (existsSync(oldPath)) unlinkSync(oldPath);
+        } catch {}
+      }
     }
-    try {
-      const match = /^data:(image\/(png|jpeg|jpg|webp));base64,(.+)$/i.exec(
-        dataUrl
-      );
-      if (!match)
-        return reply.code(400).send({ error: "Unsupported image format" });
-      const mime = match[1].toLowerCase();
-      const base64 = match[3];
-      const buf = Buffer.from(base64, "base64");
-      // Limite stricte: 2 Mo
-      if (buf.byteLength > 2 * 1024 * 1024) {
-        return reply
-          .code(413)
-          .send({ error: "Image trop lourde (max 128 Ko)" });
-      }
-      const ext = mime.endsWith("png")
-        ? "png"
-        : mime.endsWith("webp")
-        ? "webp"
-        : "jpg";
-      const dir = path.join(__dirname, "..", "public", "uploads", "avatars");
-      if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
-      // Récupérer l'ancienne image du compte (stockée comme nom de fichier ou ancienne URL)
-      const me = await prisma.user.findUnique({
-        where: { id: userId as string },
-      });
-      // Déduplication par hash
-      // const hash = crypto.createHash("sha256").update(buf).digest("hex");
-      const hash = me.id;
-      const dedupName = `${hash}.${ext}`;
-      const filePath = path.join(dir, dedupName);
-      const publicUrl = `/public/uploads/avatars/${dedupName}`;
-
-      const oldVal = me?.image || null;
-
-      if (!existsSync(filePath)) {
-        writeFileSync(filePath, buf);
-      }
-
-      // Mettre à jour l'utilisateur avec l'URL publique complète (compat templates/UI)
-      await prisma.user.update({
-        where: { id: me.id },
-        data: { image: publicUrl },
-      });
-
-      // Nettoyage: tenter de supprimer l'ancienne image si non référencée par d'autres
-      if (oldVal && oldVal !== publicUrl) {
-        const refs = await prisma.user.count({ where: { image: oldVal } });
-        if (refs === 0) {
-          try {
-            let oldPath = "";
-            if (oldVal.startsWith("/public/uploads/avatars/")) {
-              oldPath = path.join(
-                __dirname,
-                oldVal.replace(/^\/public\//, "public/")
-              );
-            } else {
-              // ancien format stocké comme "hash.ext"
-              oldPath = path.join(dir, oldVal);
-            }
-            if (existsSync(oldPath)) unlinkSync(oldPath);
-          } catch {}
-        }
-      }
-
-      return reply.send({ ok: true, file: dedupName, url: publicUrl });
-    } catch (e) {
-      request.log.error(e);
-      return reply.code(500).send({ error: "Upload failed" });
-    }
+    return reply.send({ ok: true, file: dedupName, url: publicUrl });
   });
 }

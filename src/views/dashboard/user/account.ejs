@@ -412,10 +412,12 @@
             });
             const dataUrl = await fileToDataUrl(file);
 
-            const res = await fetch('/api/me/avatar', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ dataUrl })
+            const formData = new FormData();
+            formData.append("file", input.files[0]);
+
+            const res = await fetch("/api/me/avatar", {
+              method: "POST",
+              body: formData,
             });
             if (!res.ok) {
               if (res.status === 413) {
