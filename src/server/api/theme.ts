@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { PrismaClient } from "../../../generated/prisma/client";
 import { coerceThemeData } from "../../lib/theme";
 import { verifyRoleIsStaff } from "../../lib/verifyRole";
+import { builtInThemes } from "../../lib/builtInThemes";
 
 const prisma = new PrismaClient();
 
@@ -42,12 +43,8 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
 
   // List all themes: built-in + approved community themes (and optionally owner's themes if requested)
   fastify.get("/list", async (request, reply) => {
-    // Use server-side builtInThemes module
     let builtIns: any[] = [];
     try {
-      // Lazy require to avoid potential startup ordering issues
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { builtInThemes } = require("./builtInThemes");
       if (Array.isArray(builtInThemes)) builtIns = builtInThemes;
     } catch (e) {
       builtIns = [];

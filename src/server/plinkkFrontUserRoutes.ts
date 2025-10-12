@@ -4,7 +4,6 @@ import path from "path";
 import { generateProfileConfig } from "../lib/generateConfig";
 import { minify } from "uglify-js";
 import { PrismaClient } from "../../generated/prisma/client";
-import { replyView } from "../lib/replyView";
 
 const prisma = new PrismaClient();
 
