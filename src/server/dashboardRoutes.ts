@@ -2,12 +2,11 @@ import { FastifyInstance } from "fastify";
 import { PrismaClient, Role } from "../../generated/prisma/client";
 import fs from "fs";
 import { getActiveAnnouncementsForUser, replyView } from "../lib/replyView";
+import { verifyRoleAdmin, verifyRoleIsStaff, verifyRoleDeveloper } from "../lib/verifyRole";
 
 const prisma = new PrismaClient();
 
 export function dashboardRoutes(fastify: FastifyInstance) {
-  const isStaff = (r?: Role | string) =>
-    r === Role.ADMIN || r === Role.DEVELOPER || r === Role.MODERATOR;
 
   fastify.get("/", async function (request, reply) {
     request.log?.info(
@@ -80,7 +79,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      include: { cosmetics: true },
+      include: { cosmetics: true, role: true },
     });
     if (!userInfo) {
       return reply.redirect(
@@ -97,21 +96,21 @@ export function dashboardRoutes(fastify: FastifyInstance) {
           key: "ADMIN",
           label: "ADMIN",
           locked: !(
-            userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER
+            verifyRoleAdmin(userInfo.role) || verifyRoleDeveloper(userInfo.role)
           ),
         },
         {
           key: "DEVELOPER",
           label: "DEVELOPER",
           locked: !(
-            userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER
+            verifyRoleAdmin(userInfo.role) || verifyRoleDeveloper(userInfo.role)
           ),
         },
         {
           key: "FOUNDER",
           label: "FOUNDER",
           locked: !(
-            userInfo.role === Role.ADMIN || userInfo.role === Role.DEVELOPER
+            verifyRoleAdmin(userInfo.role) || verifyRoleDeveloper(userInfo.role)
           ),
         },
       ],
@@ -540,13 +539,14 @@ export function dashboardRoutes(fastify: FastifyInstance) {
 
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
+      include: { role: true }
     });
     if (!userInfo) {
       return reply.redirect(
         `/login?returnTo=${encodeURIComponent("/dashboard/admin")}`
       );
     }
-    if (!isStaff(userInfo.role)) {
+    if (!verifyRoleIsStaff(userInfo.role)) {
       request.log?.info(
         { userId: userInfo.id, role: userInfo.role },
         "non-staff attempted admin page - redirecting to user dashboard"
@@ -626,13 +626,14 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
+      include: { role: true }
     });
     if (!userInfo) {
       return reply.redirect(
         `/login?returnTo=${encodeURIComponent("/dashboard/admin/stats")}`
       );
     }
-    if (!isStaff(userInfo.role)) {
+    if (!verifyRoleIsStaff(userInfo.role)) {
       request.log?.info(
         { userId: userInfo.id, role: userInfo.role },
         "non-staff attempted admin stats page - redirecting to user dashboard"
@@ -660,9 +661,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (
       !(
         me &&
-        (me.role === Role.ADMIN ||
-          me.role === Role.DEVELOPER ||
-          me.role === Role.MODERATOR)
+        (verifyRoleIsStaff(me.role))
       )
     ) {
       return reply.code(403).send({ error: "forbidden" });
@@ -734,9 +733,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (
       !(
         me &&
-        (me.role === Role.ADMIN ||
-          me.role === Role.DEVELOPER ||
-          me.role === Role.MODERATOR)
+        (verifyRoleIsStaff(me.role))
       )
     ) {
       return reply.code(403).send({ error: "forbidden" });
@@ -782,7 +779,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       ADMIN: 0,
     };
     rows.forEach((r) => {
-      byRole[r.role as string] = (byRole[r.role as string] || 0) + 1;
+      byRole[r.role.name as string] = (byRole[r.role.name as string] || 0) + 1;
     });
     return reply.send({ total, publics, privates, byRole });
   });
@@ -845,13 +842,14 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
       omit: { password: true },
+      include: { role: true }
     });
     if (!userInfo) {
       return reply.redirect(
         `/login?returnTo=${encodeURIComponent("/dashboard/admin/themes")}`
       );
     }
-    if (!isStaff(userInfo.role)) {
+    if (!verifyRoleIsStaff(userInfo.role)) {
       request.log?.info(
         { userId: userInfo.id, role: userInfo.role },
         "non-staff attempted admin themes page - redirecting to user dashboard"
@@ -934,13 +932,13 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         `/login?returnTo=${encodeURIComponent("/dashboard/admin/themes")}`
       );
     }
-    const userInfo = await prisma.user.findFirst({ where: { id: userId } });
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, include: { role: true } });
     if (!userInfo) {
       return reply.redirect(
         `/login?returnTo=${encodeURIComponent("/dashboard/admin/themes")}`
       );
     }
-    if (!isStaff(userInfo.role)) {
+    if (!verifyRoleIsStaff(userInfo.role)) {
       request.log?.info(
         { userId: userInfo.id, role: userInfo.role },
         "non-staff attempted admin theme preview - redirecting to user dashboard"
@@ -992,12 +990,13 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
       omit: { password: true },
+      include: { role: true }
     });
     if (!userInfo)
       return reply.redirect(
         `/login?returnTo=${encodeURIComponent("/dashboard/admin/message")}`
       );
-    if (!isStaff(userInfo.role)) return reply.redirect("/dashboard");
+    if (!verifyRoleIsStaff(userInfo.role)) return reply.redirect("/dashboard");
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
@@ -1022,9 +1021,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (
       !(
         me &&
-        (me.role === Role.ADMIN ||
-          me.role === Role.DEVELOPER ||
-          me.role === Role.MODERATOR)
+        (verifyRoleIsStaff(me.role))
       )
     )
       return reply.code(403).send({ error: "forbidden" });
@@ -1043,9 +1040,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (
       !(
         me &&
-        (me.role === Role.ADMIN ||
-          me.role === Role.DEVELOPER ||
-          me.role === Role.MODERATOR)
+        (verifyRoleIsStaff(me.role))
       )
     )
       return reply.code(403).send({ error: "forbidden" });
@@ -1087,9 +1082,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (
       !(
         me &&
-        (me.role === Role.ADMIN ||
-          me.role === Role.DEVELOPER ||
-          me.role === Role.MODERATOR)
+        (verifyRoleIsStaff(me.role))
       )
     )
       return reply.code(403).send({ error: "forbidden" });
@@ -1155,9 +1148,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (
       !(
         me &&
-        (me.role === Role.ADMIN ||
-          me.role === Role.DEVELOPER ||
-          me.role === Role.MODERATOR)
+        (verifyRoleIsStaff(me.role))
       )
     )
       return reply.code(403).send({ error: "forbidden" });
@@ -1182,6 +1173,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
       omit: { password: true },
+      include: { role: true }
     });
 
     if (!userInfo)
@@ -1189,7 +1181,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         `/login?returnTo=${encodeURIComponent("/dashboard/admin/bans")}`
       );
 
-    if (!isStaff(userInfo.role)) return reply.redirect("/dashboard");
+    if (!verifyRoleIsStaff(userInfo.role)) return reply.redirect("/dashboard");
 
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({

@@ -3,6 +3,7 @@ import { PrismaClient, Role } from "../../generated/prisma/client";
 import { RESERVED_SLUGS } from "./reservedSlugs";
 import { isBannedSlug } from "./bannedSlugs";
 import profileConfig from "../public/config/profileConfig";
+import { verifyRoleAdmin, verifyRoleDeveloper, verifyRolePartner } from "../lib/verifyRole";
 
 export const MAX_PAGES_DEFAULT = 1; // default users can create 1 plinkk
 
@@ -16,23 +17,11 @@ export function slugify(input: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export function isAdminLike(role?: Role | null): boolean {
-  return role === "ADMIN";
-}
-
-export function isDeveloper(role?: Role | null): boolean {
-  return role === "DEVELOPER";
-}
-
-export function isPartner(role?: Role | null): boolean {
-  return role === "PARTNER";
-}
-
 export function getMaxPagesForRole(role?: Role | null): number {
   // USER: 1, PARTNER: 2, DEVELOPER: 3, ADMIN: unlimited (represented by Infinity)
-  if (isAdminLike(role)) return Infinity;
-  if (isDeveloper(role)) return 3;
-  if (isPartner(role)) return 2;
+  if (verifyRoleAdmin(role)) return Infinity;
+  if (verifyRoleDeveloper(role)) return 3;
+  if (verifyRolePartner(role)) return 2;
   return MAX_PAGES_DEFAULT;
 }
 

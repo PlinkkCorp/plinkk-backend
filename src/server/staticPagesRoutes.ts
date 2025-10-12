@@ -64,9 +64,42 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
       "http"
     ).split(",")[0];
     const base = `${proto}://${host}`;
+    const txt = 
+    `User-agent: Baiduspider
+User-agent: 360Spider
+User-agent: Sogouspider
+User-agent: Yisouspider
+User-agent: PetalBot
+User-agent: Bytespider
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: anthropic-ai
+User-agent: ClaudeBot
+User-agent: PerplexityBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: meta-externalagent
+User-agent: DuckAssistBot
+User-agent: ChatGPT-User
+User-agent: Gemini-Deep-Research
+User-agent: GoogleAgent-Mariner
+User-agent: Google-NotebookLM
+User-agent: CCBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: Perplexity-User
+User-agent: AI2Bot
+User-agent: MistralAI-User
+Disallow: /
+
+User-agent: *
+Allow: /
+Sitemap: ${base}/sitemap.xml
+
+    `
     reply
       .type("text/plain")
-      .send(`User-agent: *\nAllow: /\nSitemap: ${base}/sitemap.xml\n`);
+      .send(txt);
   });
 
   // sitemap.xml

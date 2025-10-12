@@ -137,13 +137,14 @@ fastify.get("/", async function (request, reply) {
     const currentUser = currentUserId
     ? (await prisma.user.findUnique({
         where: { id: currentUserId },
+        include: { role: true }
       }))
     : null;
   // Annonces depuis la DB (affichées si ciblées pour l'utilisateur courant ou globales)
   let msgs: any[] = [];
   try {
     const now = new Date();
-    const anns = await (prisma as any).announcement.findMany({
+    const anns = await prisma.announcement.findMany({
       where: {
         AND: [
           { OR: [{ startAt: null }, { startAt: { lte: now } }] },
@@ -158,7 +159,7 @@ fastify.get("/", async function (request, reply) {
         const toUser =
           a.global ||
           a.targets.some((t: any) => t.userId === currentUser.id) ||
-          a.roleTargets.some((rt: any) => rt.role === currentUser.role);
+          a.roleTargets.some((rt: any) => rt.role === currentUser.role.name);
         if (toUser)
           msgs.push({
             id: a.id,
@@ -364,29 +365,29 @@ fastify.post("/register", async (req, reply) => {
         // Create PlinkkSettings from example profileConfig (non-blocking)
         await prisma.plinkkSettings.create({ data: {
           plinkkId: createdPlinkk.id,
-          profileLink: (profileConfig as any).profileLink,
-          profileImage: (profileConfig as any).profileImage,
-          profileIcon: (profileConfig as any).profileIcon,
-          profileSiteText: (profileConfig as any).profileSiteText,
-          userName: (profileConfig as any).userName,
-          iconUrl: (profileConfig as any).iconUrl,
-          description: (profileConfig as any).description,
-          profileHoverColor: (profileConfig as any).profileHoverColor,
-          degBackgroundColor: (profileConfig as any).degBackgroundColor,
-          neonEnable: (profileConfig as any).neonEnable ?? (profileConfig as any).neonEnable === 0 ? 0 : 1,
-          buttonThemeEnable: (profileConfig as any).buttonThemeEnable,
-          EnableAnimationArticle: (profileConfig as any).EnableAnimationArticle,
-          EnableAnimationButton: (profileConfig as any).EnableAnimationButton,
-          EnableAnimationBackground: (profileConfig as any).EnableAnimationBackground,
-          backgroundSize: (profileConfig as any).backgroundSize,
-          selectedThemeIndex: (profileConfig as any).selectedThemeIndex,
-          selectedAnimationIndex: (profileConfig as any).selectedAnimationIndex,
-          selectedAnimationButtonIndex: (profileConfig as any).selectedAnimationButtonIndex,
-          selectedAnimationBackgroundIndex: (profileConfig as any).selectedAnimationBackgroundIndex,
-          animationDurationBackground: (profileConfig as any).animationDurationBackground,
-          delayAnimationButton: (profileConfig as any).delayAnimationButton,
-          canvaEnable: (profileConfig as any).canvaEnable,
-          selectedCanvasIndex: (profileConfig as any).selectedCanvasIndex,
+          profileLink: profileConfig.profileLink,
+          profileImage: profileConfig.profileImage,
+          profileIcon: profileConfig.profileIcon,
+          profileSiteText: profileConfig.profileSiteText,
+          userName: username,
+          iconUrl: profileConfig.iconUrl,
+          description: profileConfig.description,
+          profileHoverColor: profileConfig.profileHoverColor,
+          degBackgroundColor: profileConfig.degBackgroundColor,
+          neonEnable: profileConfig.neonEnable ?? profileConfig.neonEnable === 0 ? 0 : 1,
+          buttonThemeEnable: profileConfig.buttonThemeEnable,
+          EnableAnimationArticle: profileConfig.EnableAnimationArticle,
+          EnableAnimationButton: profileConfig.EnableAnimationButton,
+          EnableAnimationBackground: profileConfig.EnableAnimationBackground,
+          backgroundSize: profileConfig.backgroundSize,
+          selectedThemeIndex: profileConfig.selectedThemeIndex,
+          selectedAnimationIndex: profileConfig.selectedAnimationIndex,
+          selectedAnimationButtonIndex: profileConfig.selectedAnimationButtonIndex,
+          selectedAnimationBackgroundIndex: profileConfig.selectedAnimationBackgroundIndex,
+          animationDurationBackground: profileConfig.animationDurationBackground,
+          delayAnimationButton: profileConfig.delayAnimationButton,
+          canvaEnable: profileConfig.canvaEnable,
+          selectedCanvasIndex: profileConfig.selectedCanvasIndex,
         }});
       } catch (e) {
         req.log?.warn({ e }, 'create default plinkkSettings failed');
@@ -394,14 +395,14 @@ fastify.post("/register", async (req, reply) => {
 
       try {
         // Create a single example Link for the new Plinkk if provided in the example config
-        const exampleLinks = (profileConfig as any).links;
+        const exampleLinks = profileConfig.links;
         if (Array.isArray(exampleLinks) && exampleLinks.length > 0) {
           const l = exampleLinks[0];
           await prisma.link.create({ data: {
             userId: user.id,
             plinkkId: createdPlinkk.id,
-            icon: l.icon || (profileConfig as any).profileIcon || undefined,
-            url: l.url || (profileConfig as any).profileLink || 'https://example.com',
+            icon: l.icon || profileConfig.profileIcon || undefined,
+            url: l.url || profileConfig.profileLink || 'https://example.com',
             text: l.text || 'Mon lien',
             name: l.name || 'Exemple',
             description: l.description || null,
@@ -568,6 +569,7 @@ fastify.get("/users", async (request, reply) => {
   const currentUser = currentUserId
     ? await prisma.user.findUnique({
         where: { id: currentUserId },
+        include: { role: true }
       })
     : null;
   const plinkks = await prisma.plinkk.findMany({
@@ -594,7 +596,7 @@ fastify.get("/users", async (request, reply) => {
         const toUser =
           a.global ||
           a.targets.some((t: any) => t.userId === currentUser.id) ||
-          a.roleTargets.some((rt: any) => rt.role === currentUser.role);
+          a.roleTargets.some((rt: any) => rt.role === currentUser.role.name);
         if (toUser)
           msgs.push({
             id: a.id,
