@@ -23,9 +23,6 @@
   "overrides": {
     "glob": "11.0.3"
   },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
-  },
   "pnpm": {
     "overrides": {
       "glob": "11.0.3"
