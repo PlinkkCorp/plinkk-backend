@@ -14,7 +14,8 @@
     "prisma:init": "prisma migrate deploy && prisma generate",
     "postinstall": "prisma generate || true",
     "set-admin": "node scripts/set-admin.cjs",
-    "migrate:plinkks": "node scripts/migrate-plinkks.cjs"
+    "migrate:plinkks": "node scripts/migrate-plinkks.cjs",
+    "seed:role": "ts-node prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
