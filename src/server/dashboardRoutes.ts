@@ -48,11 +48,12 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       ]);
 
     // compute publicPath for user views (prefer default plinkk slug if present)
+    let publicPath;
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
       });
-      (userInfo as any).publicPath =
+      publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
 
@@ -60,6 +61,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       stats: { links: linksCount, socials: socialsCount, labels: labelsCount },
       links: recentLinks,
       plinkks,
+      publicPath
     });
   });
 
@@ -87,7 +89,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         `/login?returnTo=${encodeURIComponent("/dashboard/cosmetics")}`
       );
     }
-    const cosmetics = (userInfo.cosmetics as any) || {};
+    const cosmetics = userInfo.cosmetics;
     // Petit catalogue par défaut (certaines entrées "verrouillées" selon le rôle)
     const catalog = {
       flairs: [
@@ -143,16 +145,17 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         },
       ],
     };
+    let publicPath;
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
       });
-      (userInfo as any).publicPath =
-        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+      publicPath = defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
     return await replyView(reply, "dashboard/user/cosmetics.ejs", userInfo, {
       cosmetics,
       catalog,
+      publicPath
     });
   });
 
@@ -181,13 +184,13 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       );
     }
     // Sélection de la page Plinkk à éditer
-    const q = request.query as any;
+    const q = request.query as { plinkkId: string };
     const pages = await prisma.plinkk.findMany({
       where: { userId: String(userId) },
       include: { settings: true },
       orderBy: [{ isDefault: "desc" }, { index: "asc" }, { createdAt: "asc" }],
     });
-    let selected = null as any;
+    let selected = null;
     if (q?.plinkkId)
       selected = pages.find((p) => p.id === String(q.plinkkId)) || null;
     if (!selected)
@@ -199,27 +202,28 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const selectedForView = selected
       ? {
           ...selected,
-          affichageEmail: (selected as any).settings?.affichageEmail ?? null,
+          affichageEmail: selected.settings?.affichageEmail ?? null,
         }
       : null;
     const autoOpenPlinkkModal = !q?.plinkkId && pages.length > 1;
+    let publicPath
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
       });
-      (userInfo as any).publicPath =
-        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+      publicPath = defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
     // Ajout d'un champ top-level `affichageEmail` par page pour simplifier l'usage côté client
     const pagesForView = pages.map((p) => ({
       ...p,
-      affichageEmail: (p as any).settings?.affichageEmail ?? null,
+      affichageEmail: p.settings?.affichageEmail ?? null,
     }));
     return reply.view("dashboard/user/edit.ejs", {
       user: userInfo,
       plinkk: selectedForView,
       pages: pagesForView,
       autoOpenPlinkkModal,
+      publicPath
     });
   });
 
@@ -251,13 +255,13 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       );
     }
     // Pages de l'utilisateur et sélection
-    const q = request.query as any;
+    const q = request.query as { plinkkId: string };
     const pages = await prisma.plinkk.findMany({
       where: { userId: String(userId) },
       include: { settings: true },
       orderBy: [{ isDefault: "desc" }, { index: "asc" }, { createdAt: "asc" }],
     });
-    let selected = null as any;
+    let selected = null;
     if (q?.plinkkId)
       selected = pages.find((p) => p.id === String(q.plinkkId)) || null;
     if (!selected)
@@ -269,7 +273,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const selectedForView = selected
       ? {
           ...selected,
-          affichageEmail: (selected as any).settings?.affichageEmail ?? null,
+          affichageEmail: selected.settings?.affichageEmail ?? null,
         }
       : null;
     const autoOpenPlinkkModal = !q?.plinkkId && pages.length > 1;
@@ -324,16 +328,17 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       orderBy: { id: "desc" },
       take: 100,
     });
+    let publicPath
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
       });
-      (userInfo as any).publicPath =
+      publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
     const pagesForView = pages.map((p) => ({
       ...p,
-      affichageEmail: (p as any).settings?.affichageEmail ?? null,
+      affichageEmail: p.settings?.affichageEmail ?? null,
     }));
     return reply.view("dashboard/user/stats.ejs", {
       user: userInfo,
@@ -344,6 +349,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       totalViews,
       totalClicks,
       links,
+      publicPath
     });
   });
 
@@ -481,14 +487,15 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       );
       return reply.redirect(dest);
     }
+    let publicPath
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
       });
-      (userInfo as any).publicPath =
+      publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
-    return reply.view("dashboard/user/versions.ejs", { user: userInfo });
+    return replyView(reply, "dashboard/user/versions.ejs", userInfo, { publicPath });
   });
 
   // Dashboard: Compte (gestion infos, confidentialité, cosmétiques)
@@ -518,17 +525,18 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     }
     // Dérive la visibilité d'email depuis le champ `publicEmail` (présent
     // dans le schéma Prisma). Si publicEmail est défini -> l'email est public.
-    const isEmailPublic = Boolean((userInfo as any).publicEmail);
+    const isEmailPublic = Boolean(userInfo.publicEmail);
+    let publicPath
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
       });
-      (userInfo as any).publicPath =
+      publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
-    return reply.view("dashboard/user/account.ejs", {
-      user: userInfo,
+    return replyView(reply, "dashboard/user/account.ejs", userInfo, {
       isEmailPublic,
+      publicPath
     });
   });
 
@@ -581,18 +589,22 @@ export function dashboardRoutes(fastify: FastifyInstance) {
           where: { isPublic: true },
         });
         const totalPrivate = totalUsers - totalPublic;
-        const moderators = await prisma.user.count({
+        const allRoles = await prisma.role.findMany({
           where: {
-            role: { in: ["ADMIN", "DEVELOPER", "MODERATOR"] as any } as any,
+            id: { in: ["ADMIN", "DEVELOPER", "MODERATOR"] }
           },
-        });
+          include: {
+            users: true
+          }
+        })
+        const moderators = allRoles[0].users.length
         return { totalUsers, totalPublic, totalPrivate, moderators };
       })(),
     ]);
 
     // Also fetch recent submitted themes for quick moderation view
     const pendingThemes = await prisma.theme.findMany({
-      where: { status: "SUBMITTED" as any, isPrivate: false },
+      where: { status: "SUBMITTED", isPrivate: false },
       select: {
         id: true,
         name: true,
@@ -605,11 +617,12 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       take: 10,
     });
 
+    let publicPath
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
       });
-      (userInfo as any).publicPath =
+      publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
     return reply.view("dashboard/admin/dash.ejs", {
@@ -617,6 +630,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       totals,
       user: userInfo,
       pendingThemes,
+      publicPath
     });
   });
 
@@ -644,14 +658,15 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       );
       return reply.redirect("/dashboard");
     }
+    let publicPath
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
       });
-      (userInfo as any).publicPath =
+      publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
-    return replyView(reply, "dashboard/admin/stats.ejs", userInfo, {});
+    return replyView(reply, "dashboard/admin/stats.ejs", userInfo, { publicPath });
   });
 
   // Admin API: séries d'inscriptions d'utilisateurs par jour (filtrable)
@@ -675,7 +690,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       to,
       role = "all",
       visibility = "all",
-    } = (request.query as any) || {};
+    } = request.query as { from: string, to: string, role: string, visibility: string };
     // default range: dernière 30j (UTC)
     const now = new Date();
     const end = to
@@ -747,7 +762,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       to,
       role = "all",
       visibility = "all",
-    } = (request.query as any) || {};
+    } = request.query as { from: string, to: string, role: string, visibility: string };
     const now = new Date();
     const end = to
       ? new Date(to + "T23:59:59.999Z")
@@ -822,17 +837,19 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         isPrivate: true,
       },
     });
+    let publicPath
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
       });
-      (userInfo as any).publicPath =
+      publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
     return reply.view("dashboard/user/themes.ejs", {
       user: userInfo,
       myThemes,
       selectedCustomThemeId: (userInfo as any).selectedCustomThemeId || null,
+      publicPath
     });
   });
 
@@ -863,7 +880,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     }
     const [submitted, approved, archived] = await Promise.all([
       prisma.theme.findMany({
-        where: { status: "SUBMITTED" as any, isPrivate: false },
+        where: { status: "SUBMITTED", isPrivate: false },
         select: {
           id: true,
           name: true,
@@ -875,7 +892,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         orderBy: { updatedAt: "desc" },
       }),
       prisma.theme.findMany({
-        where: { status: "APPROVED" as any, isPrivate: false },
+        where: { status: "APPROVED", isPrivate: false },
         select: {
           id: true,
           name: true,
@@ -889,7 +906,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         orderBy: { updatedAt: "desc" },
       }),
       prisma.theme.findMany({
-        where: { status: "ARCHIVED" as any, isPrivate: false },
+        where: { status: "ARCHIVED", isPrivate: false },
         select: {
           id: true,
           name: true,
@@ -903,22 +920,23 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     ]);
     // Move approved themes that have pending updates into submitted list so admins
     // can validate updates from the top "À valider" section.
-    const approvedWithPending = (approved as any[]).filter(
+    const approvedWithPending = approved.filter(
       (t) => t.pendingUpdate
     );
-    const approvedFiltered = (approved as any[]).filter(
+    const approvedFiltered = approved.filter(
       (t) => !t.pendingUpdate
     );
-    const submittedNormalized = (submitted as any[]).map((s) => ({
+    const submittedNormalized = submitted.map((s) => ({
       ...s,
       pendingUpdate: false,
     }));
     const mergedSubmitted = [...submittedNormalized, ...approvedWithPending];
+    let publicPath
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
       });
-      (userInfo as any).publicPath =
+      publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
     return reply.view("dashboard/admin/themes.ejs", {
@@ -926,6 +944,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       submitted: mergedSubmitted,
       approved: approvedFiltered,
       archived,
+      publicPath
     });
   });
 
@@ -973,15 +992,17 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       approved: t.status === "APPROVED",
       isApproved: t.status === "APPROVED",
     };
+    let publicPath
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
       });
-      (userInfo as any).publicPath =
+      publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
     return await replyView(reply, "dashboard/admin/preview.ejs", userInfo, {
       theme: themeForView,
+      publicPath
     });
   });
 
@@ -994,7 +1015,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       );
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      omit: { password: true },
       include: { role: true }
     });
     if (!userInfo)
@@ -1002,17 +1022,15 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         `/login?returnTo=${encodeURIComponent("/dashboard/admin/message")}`
       );
     if (!verifyRoleIsStaff(userInfo.role)) return reply.redirect("/dashboard");
+    let publicPath
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
       });
-      (userInfo as any).publicPath =
+      publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
-    return reply.view("dashboard/admin/message.ejs", {
-      user: userInfo,
-      __SITE_MESSAGES__: await getActiveAnnouncementsForUser(userId as string),
-    });
+    return replyView(reply, "dashboard/admin/message.ejs", userInfo, { publicPath });
   });
 
   // Admin API: get current message
@@ -1049,11 +1067,11 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       )
     )
       return reply.code(403).send({ error: "forbidden" });
-    const q = String((request.query as any)?.q || "").trim();
+    const q = String((request.query as { q: string })?.q as string).trim();
     if (!q) return reply.send({ users: [] });
     const take = Math.min(
       10,
-      Math.max(1, Number((request.query as any)?.limit || 8))
+      Math.max(1, Number((request.query as { limit: number })?.limit || 8))
     );
     const users = await prisma.user.findMany({
       where: {
@@ -1091,7 +1109,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       )
     )
       return reply.code(403).send({ error: "forbidden" });
-    const body = request.body as any;
+    const body = request.body as { id: string, targetUserIds: any[], targetRoles: any[], level: string, text: string, dismissible: string, startAt: string, endAt: string, global: string};
     // Create/update DB announcement with targets
     const id = body.id as string | undefined;
     const targetUserIds: string[] = Array.isArray(body.targetUserIds)
@@ -1107,26 +1125,26 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       startAt: body.startAt ? new Date(body.startAt) : null,
       endAt: body.endAt ? new Date(body.endAt) : null,
       global: !!body.global,
-    } as any;
+    };
     let ann: any;
     if (!id) {
-      ann = await (prisma as any).announcement.create({ data: { ...payload } });
+      ann = await prisma.announcement.create({ data: { ...payload } });
     } else {
-      ann = await (prisma as any).announcement.update({
+      ann = await prisma.announcement.update({
         where: { id },
         data: { ...payload },
       });
       // clear previous targets
-      await (prisma as any).announcementTarget.deleteMany({
+      await prisma.announcementTarget.deleteMany({
         where: { announcementId: ann.id },
       });
-      await (prisma as any).announcementRoleTarget.deleteMany({
+      await prisma.announcementRoleTarget.deleteMany({
         where: { announcementId: ann.id },
       });
     }
     if (!payload.global) {
       if (targetUserIds.length) {
-        await (prisma as any).announcementTarget.createMany({
+        await prisma.announcementTarget.createMany({
           data: targetUserIds.map((uid) => ({
             announcementId: ann.id,
             userId: uid,
@@ -1157,7 +1175,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       )
     )
       return reply.code(403).send({ error: "forbidden" });
-    const { id } = request.query as any;
+    const { id } = request.query as { id: string };
     if (!id) return reply.code(400).send({ error: "missing_id" });
     try {
       await (prisma as any).bannedSlug.delete({ where: { id: String(id) } });
@@ -1177,7 +1195,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
 
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      omit: { password: true },
       include: { role: true }
     });
 
@@ -1188,16 +1205,17 @@ export function dashboardRoutes(fastify: FastifyInstance) {
 
     if (!verifyRoleIsStaff(userInfo.role)) return reply.redirect("/dashboard");
 
+    let publicPath
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
       });
 
-      (userInfo as any).publicPath =
+      publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
 
-    return reply.view("dashboard/admin/bans.ejs", { user: userInfo });
+    return replyView(reply, "dashboard/admin/bans.ejs", userInfo, { publicPath });
   });
   // NOTE: /api/bans endpoints are implemented in apiRoutes (mounted under /api)
 }

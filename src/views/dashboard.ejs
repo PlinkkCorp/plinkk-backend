@@ -16,7 +16,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <a href="/dashboard/edit" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow">Éditer le profil</a>
-                            <a target="_blank" href="/<%= (user && user.publicPath) ? user.publicPath : user.id %>" class="px-3 py-2 text-sm rounded-md bg-emerald-700/80 hover:bg-emerald-600 text-white border border-emerald-500/40 shadow">Voir le profil</a>
+                            <a target="_blank" href="/<%= (publicPath) ? publicPath : user.id %>" class="px-3 py-2 text-sm rounded-md bg-emerald-700/80 hover:bg-emerald-600 text-white border border-emerald-500/40 shadow">Voir le profil</a>
                         </div>
                     </div>
 
