@@ -179,7 +179,7 @@
       <td class="px-3 py-3 text-slate-300">${escapeHtml(b.reason || '')}</td>
       <td class="px-3 py-3 text-slate-300">${new Date(b.createdAt).toLocaleString()}</td>
       <td class="px-3 py-3">
-        <button data-id="${b.id}" class="del-btn inline-flex items-center gap-2 px-2 py-1 rounded-md border border-rose-700 text-rose-300 hover:bg-rose-700/10">Supprimer</button>
+        <button data-id="${b.slug}" class="del-btn inline-flex items-center gap-2 px-2 py-1 rounded-md border border-rose-700 text-rose-300 hover:bg-rose-700/10">Supprimer</button>
       </td>
     `;
             tbody.appendChild(tr);
