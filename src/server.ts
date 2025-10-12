@@ -461,6 +461,7 @@ fastify.post("/login", async (request, reply) => {
     where: {
       email: emailTrim,
     },
+    include: { role: true }
   });
 
   if (!user)

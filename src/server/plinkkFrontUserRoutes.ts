@@ -190,7 +190,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         // Eviter le cache pour garantir l'actualisation immédiate du preview
         reply.header('Cache-Control', 'no-store, max-age=0, must-revalidate');
         reply.header('Vary', 'Referer');
-  const profile = await prisma.user.findFirst({ where: { id: username } }) as any;
+  const profile = await prisma.user.findFirst({ where: { id: username }, include: { role: true } });
         if (!profile) return reply.code(404).send({ error: 'Profil introuvable' });
 
         // Déterminer la page Plinkk à partir du query ?slug= ou du Referer (/:username ou /:username/:slug)
