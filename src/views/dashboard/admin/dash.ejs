@@ -191,7 +191,7 @@
                                                                             <% } %>
                                                     </div>
                                                     <div class="ml-auto text-xs text-slate-400">
-                                                        <%= u.role.name || 'USER' %>
+                                                        <%= (typeof u.role !== 'undefined' && u.role) ? u.role.name : 'USER' %>
                                                     </div>
                                                 </div>
 
