@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient } from "../../../../generated/prisma/client";
+import { PrismaClient, Theme } from "../../../../generated/prisma/client";
 import { coerceThemeData, readBuiltInThemes } from "../../../lib/theme";
 
 const prisma = new PrismaClient();
@@ -34,7 +34,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
     const raw = body.data;
     if (!raw || typeof raw !== "object")
       return reply.code(400).send({ error: "Données du thème invalides" });
-    let data: any;
+    let data;
     try {
       data = coerceThemeData(raw);
     } catch {
@@ -73,7 +73,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
         .code(400)
         .send({ error: "Seuls les brouillons sont modifiables" });
     const body = request.body as { name: string, description: string, data: string, isPrivate: boolean };
-    const patch: any = {};
+    let patch: Theme;
     if (typeof body.name === "string" && body.name.trim())
       patch.name = body.name.trim();
     if (typeof body.description === "string")
@@ -217,7 +217,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
     const body = request.body as { data: object, message: string };
     if (!body.data || typeof body.data !== "object")
       return reply.code(400).send({ error: "Données invalides" });
-    let normalized: any;
+    let normalized;
     try {
       normalized = coerceThemeData(body.data);
     } catch {

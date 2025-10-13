@@ -1,11 +1,10 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient, Role } from "../../generated/prisma/client";
+import { Plinkk, PrismaClient } from "../../generated/prisma/client";
 import {
   getMaxPagesForRole,
   reindexNonDefault,
   slugify,
   suggestUniqueSlug,
-  getNextIndex,
   createPlinkkForUser,
   isReservedSlug,
 } from "../lib/plinkkUtils";
@@ -159,7 +158,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     const page = await prisma.plinkk.findUnique({ where: { id } });
     if (!page || page.userId !== userId)
       return reply.code(404).view("erreurs/404.ejs", { user: { id: userId } });
-    const data: any = {};
+    let data: Plinkk;
     if (typeof body.title === "string" && body.title.trim())
       data.name = body.title.trim();
     if (typeof body.slug === "string" && body.slug.trim()) {

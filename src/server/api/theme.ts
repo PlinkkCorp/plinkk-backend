@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { PrismaClient } from "../../../generated/prisma/client";
-import { coerceThemeData } from "../../lib/theme";
+import { builtInThemesTypes, coerceThemeData } from "../../lib/theme";
 import { verifyRoleIsStaff } from "../../lib/verifyRole";
 import { builtInThemes } from "../../lib/builtInThemes";
 
@@ -23,7 +23,7 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     });
     // Ensure data has the shape expected by front
     const list = themes.map((t) => {
-      let full: any;
+      let full;
       try {
         full = coerceThemeData(t.data);
       } catch {
@@ -43,7 +43,7 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
 
   // List all themes: built-in + approved community themes (and optionally owner's themes if requested)
   fastify.get("/list", async (request, reply) => {
-    let builtIns: any[] = [];
+    let builtIns: builtInThemesTypes[] = [];
     try {
       if (Array.isArray(builtInThemes)) builtIns = builtInThemes;
     } catch (e) {
@@ -65,7 +65,7 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     const list = [];
     // normalize community themes using coerceThemeData
     for (const t of community) {
-      let full: any;
+      let full;
       try {
         full = coerceThemeData(t.data);
       } catch {
@@ -95,7 +95,7 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
         },
       });
       for (const t of mine) {
-        let full: any;
+        let full;
         try {
           full = coerceThemeData(t.data);
         } catch {

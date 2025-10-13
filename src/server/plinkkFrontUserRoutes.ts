@@ -3,11 +3,12 @@ import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { generateProfileConfig } from "../lib/generateConfig";
 import { minify } from "uglify-js";
-import { PrismaClient } from "../../generated/prisma/client";
+import { PlinkkSettings, PrismaClient, User } from "../../generated/prisma/client";
 
 const prisma = new PrismaClient();
 
 import { resolvePlinkkPage, parseIdentifier } from "../lib/resolvePlinkkPage";
+import { coerceThemeData } from "../lib/theme";
 
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
   fastify.get('/:username', { config: { rateLimit: false } }, async function (request, reply) {
@@ -296,19 +297,6 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             };
             return { ...L, opposite: D };
           };
-          const coerceThemeData = (data: any) => {
-            if (data && typeof data === 'object' && 'background' in data && ('opposite' in data || 'darkTheme' in data)) return data;
-            if (data && data.light && data.dark) {
-              const l = data.light as SimplifiedVariant; const d = data.dark as SimplifiedVariant;
-              return toFullTheme(l, d);
-            }
-            if (data && data.bg && data.button && data.hover) {
-              const l = { bg: data.bg, button: data.button, hover: data.hover } as SimplifiedVariant;
-              const d = { bg: hoverVariant(data.bg), button: hoverVariant(data.button), hover: data.hover } as SimplifiedVariant;
-              return toFullTheme(l, d);
-            }
-            return null;
-          };
 
           if (profile.selectedCustomThemeId) {
             const t = await prisma.theme.findUnique({ where: { id: profile.selectedCustomThemeId }, select: { data: true, isPrivate: true, authorId: true } });
@@ -345,7 +333,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         } catch (e) { /* ignore */ }
 
         // Fusionner les réglages de page (PlinkkSettings) avec les valeurs par défaut du compte
-        const pageProfile: any = {
+        const pageProfile: User & PlinkkSettings = {
+          plinkkId: null,
           ...profile,
           profileLink: settings?.profileLink ?? "",
           profileImage: settings?.profileImage ?? "",
@@ -355,19 +344,19 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           iconUrl: settings?.iconUrl ?? "",
           description: settings?.description ?? "",
           profileHoverColor: settings?.profileHoverColor ?? "",
-          degBackgroundColor: settings?.degBackgroundColor ?? "",
-          neonEnable: settings?.neonEnable ?? "",
-          buttonThemeEnable: settings?.buttonThemeEnable ?? "",
-          EnableAnimationArticle: settings?.EnableAnimationArticle ?? "",
-          EnableAnimationButton: settings?.EnableAnimationButton ?? "",
-          EnableAnimationBackground: settings?.EnableAnimationBackground ?? "",
-          backgroundSize: settings?.backgroundSize ?? "",
-          selectedThemeIndex: settings?.selectedThemeIndex ?? "",
-          selectedAnimationIndex: settings?.selectedAnimationIndex ?? "",
-          selectedAnimationButtonIndex: settings?.selectedAnimationButtonIndex ?? "",
-          selectedAnimationBackgroundIndex: settings?.selectedAnimationBackgroundIndex ?? "",
-          animationDurationBackground: settings?.animationDurationBackground ?? "",
-          delayAnimationButton: settings?.delayAnimationButton ?? "",
+          degBackgroundColor: settings?.degBackgroundColor ?? 45,
+          neonEnable: settings?.neonEnable ?? 1,
+          buttonThemeEnable: settings?.buttonThemeEnable ?? 1,
+          EnableAnimationArticle: settings?.EnableAnimationArticle ?? 1,
+          EnableAnimationButton: settings?.EnableAnimationButton ?? 1,
+          EnableAnimationBackground: settings?.EnableAnimationBackground ?? 1,
+          backgroundSize: settings?.backgroundSize ?? 50,
+          selectedThemeIndex: settings?.selectedThemeIndex ?? 13,
+          selectedAnimationIndex: settings?.selectedAnimationIndex ?? 0,
+          selectedAnimationButtonIndex: settings?.selectedAnimationButtonIndex ?? 10,
+          selectedAnimationBackgroundIndex: settings?.selectedAnimationBackgroundIndex ?? 0,
+          animationDurationBackground: settings?.animationDurationBackground ?? 30,
+          delayAnimationButton: settings?.delayAnimationButton ?? 0.1,
           // Support for per-Plinkk public email: if a PlinkkSettings.affichageEmail
           // exists we must prefer it for the generated profile config. We expose it
           // both as `affichageEmail` and override `publicEmail` so generateProfileConfig
@@ -376,8 +365,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           publicEmail: (settings && Object.prototype.hasOwnProperty.call(settings, 'affichageEmail'))
             ? settings.affichageEmail
             : profile.publicEmail ?? null,
-          canvaEnable: settings?.canvaEnable ?? "",
-          selectedCanvasIndex: settings?.selectedCanvasIndex ?? "",
+          canvaEnable: settings?.canvaEnable ?? 1,
+          selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
         };
 
         const generated = generateProfileConfig(

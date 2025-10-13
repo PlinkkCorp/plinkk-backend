@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient, Role } from "../../../generated/prisma/client";
+import { PrismaClient } from "../../../generated/prisma/client";
 import { verifyRoleIsStaff, verifyRoleAdmin, verifyRoleDeveloper } from "../../lib/verifyRole";
 
 const prisma = new PrismaClient();

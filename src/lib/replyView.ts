@@ -6,9 +6,9 @@ import {
   RouteGenericInterface,
 } from "fastify";
 import ejs from "ejs";
-import { PrismaClient, User } from "../../generated/prisma/client";
+import { Announcement, AnnouncementRoleTarget, AnnouncementTarget, PrismaClient, Role, User } from "../../generated/prisma/client";
 import { IncomingMessage, ServerResponse } from "http";
-import { SafeUser, toSafeUser } from "../types/user";
+import { toSafeUser } from "../types/user";
 
 const prisma = new PrismaClient();
 
@@ -40,7 +40,7 @@ export async function replyView(
   });
 }
 export async function getActiveAnnouncementsForUser(userId: string | null) {
-  const list: any[] = [];
+  const list: Announcement[] = [];
   try {
     const now = new Date();
     const me = userId
@@ -62,18 +62,10 @@ export async function getActiveAnnouncementsForUser(userId: string | null) {
     for (const a of anns) {
       const toUser =
         a.global ||
-        (!!me && a.targets.some((t: any) => t.userId === me.id)) ||
-        (!!me && a.roleTargets.some((rt: any) => rt.role === me.role));
+        (!!me && a.targets.some((t: AnnouncementTarget) => t.userId === me.id)) ||
+        (!!me && a.roleTargets.some((rt: AnnouncementRoleTarget & { role: Role }) => rt.role.name === me.role.name));
       if (!toUser) continue;
-      list.push({
-        id: a.id,
-        level: a.level,
-        text: a.text,
-        dismissible: a.dismissible,
-        startAt: a.startAt,
-        endAt: a.endAt,
-        createdAt: a.createdAt,
-      });
+      list.push(a);
     }
   } catch (e) {}
   return list;

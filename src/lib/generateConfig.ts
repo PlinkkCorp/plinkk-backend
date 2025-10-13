@@ -5,17 +5,19 @@ import {
   NeonColor,
   SocialIcon,
   PlinkkStatusbar,
+  PlinkkSettings,
+  User,
 } from "../../generated/prisma";
 
 export function generateProfileConfig(
-  profile: any,
+  profile: User & PlinkkSettings,
   links: Link[],
   backgroundColors: BackgroundColor[],
   labels: Label[],
   neonColors: NeonColor[],
   socialIcons: SocialIcon[],
   statusBar: PlinkkStatusbar,
-  injectedTheme?: any
+  injectedTheme?: JSON
 ) {
   return `
     export const injectedTheme = ${injectedTheme ? JSON.stringify(injectedTheme) : 'null'};

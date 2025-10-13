@@ -106,22 +106,53 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     autoSaveTimer = setTimeout(() => { saveNow(false); }, AUTO_SAVE_DELAY);
   };
 
-  function getConfigEndpoint() {
+  function getConfigEndpoint(section) {
     const pid = (window.__PLINKK_SELECTED_ID__ || '').trim();
     if (pid) return `/api/me/plinkks/${encodeURIComponent(pid)}/config`;
     return '/api/me/config';
   }
   const fetchConfig = () => fetch(getConfigEndpoint()).then(async (r) => { if (!r.ok) throw new Error(await r.text()); return r.json(); });
-  const putConfig = (obj) => fetch(getConfigEndpoint(), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(obj) }).then(async (r) => { if (!r.ok) throw new Error(await r.text()); return r.json(); });
+  const putConfig = (section, obj) => fetch(getConfigEndpoint() + `/${section}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(obj) }).then(async (r) => { if (!r.ok) throw new Error(await r.text()); return r.json(); });
 
   async function saveNow(manual) {
     if (autoSaveTimer) { clearTimeout(autoSaveTimer); autoSaveTimer = null; }
     if (saving) { saveQueued = true; return; }
     saving = true;
-    const payload = collectPayload();
+    const hash = location.hash.replace("#section-", "") !== "" ? location.hash.replace("#section-", "") : 'profile'
+    let sectionsAPI = [];
+    let sectionsAPIFunction = []
+    switch (hash) {
+      case "appearance":
+        sectionsAPI = [ "plinkk", "neonColor" ]
+        sectionsAPIFunction = [ collectPayloadPlinkk(), collectPayloadNeonColor() ]
+        break;
+      case "background":
+        sectionsAPI = [ "background", "plinkk" ]
+        sectionsAPIFunction = [ collectPayloadBackground(), collectPayloadPlinkk() ]
+        break;
+      case "links":
+        sectionsAPI = [ "socialIcon", "links" ]
+        sectionsAPIFunction = [ collectPayloadSocialIcon(), collectPayloadLinks() ]
+        break;
+      case "animations":
+        sectionsAPI = [ "plinkk" ]
+        sectionsAPIFunction = [ collectPayloadPlinkk() ]
+        break;
+      case "statusbar":
+        sectionsAPI = [ "statusBar", "labels" ]
+        sectionsAPIFunction = [ collectPayloadStatusBar(), collectPayloadLabels() ]
+        break;
+      default:
+        sectionsAPI = [ "plinkk" ]
+        sectionsAPIFunction = [ collectPayloadPlinkk() ]
+        break;
+    }
     setStatus('Enregistrement...');
     try {
-      await putConfig(payload);
+      for (let i = 0; i < sectionsAPI.length; i++) {
+        const payload = sectionsAPIFunction[i];
+        await putConfig(sectionsAPI[i], payload);
+      }
       setStatus(manual ? 'Enregistré ✓' : 'Enregistré automatiquement ✓', 'success');
       // Ne pas recharger instantanément la preview pour éviter le spam en cours de frappe
       schedulePreviewRefresh();
@@ -240,37 +271,67 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     suspendAutoSave = false;
   }
 
-  function collectPayload() {
-    const sbText = vOrNull(f.status_text.value);
-    const statusbar = sbText === null ? null : { text: sbText, fontTextColor: numOrNull(f.status_fontTextColor.value), statusText: vOrNull(f.status_statusText.value) };
+  function collectPayloadPlinkk() {
     return {
       profileLink: vOrNull(f.profileLink.value),
-      profileSiteText: vOrNull(f.profileSiteText.value),
-      userName: vOrNull(f.userName.value),
-      email: vOrNull(f.email.value),
       profileImage: vOrNull(f.profileImage.value),
       profileIcon: vOrNull(f.profileIcon.value),
+      profileSiteText: vOrNull(f.profileSiteText.value),
+      userName: vOrNull(f.userName.value),
+      affichageEmail: vOrNull(f.email.value),
       iconUrl: vOrNull(f.iconUrl.value),
       description: vOrNull(f.description.value),
       profileHoverColor: vOrNull(f.profileHoverColor.value),
       degBackgroundColor: numOrNull(f.degBackgroundColor.value),
       neonEnable: state.neonColors.length > 0 && f.neonEnable?.checked ? 1 : 0,
       buttonThemeEnable: f.buttonThemeEnable.checked ? 1 : 0,
-      canvaEnable: f.canvaEnable.checked ? 1 : 0,
+      backgroundSize: numOrNull(f.backgroundSize.value),
       selectedThemeIndex: numOrNull(f.selectedThemeIndex.value),
       selectedAnimationIndex: numOrNull(f.selectedAnimationIndex.value),
       selectedAnimationButtonIndex: numOrNull(f.selectedAnimationButtonIndex.value),
       selectedAnimationBackgroundIndex: numOrNull(f.selectedAnimationBackgroundIndex.value),
       animationDurationBackground: numOrNull(f.animationDurationBackground.value),
       delayAnimationButton: parseFloat(f.delayAnimationButton.value || '0'),
-      backgroundSize: numOrNull(f.backgroundSize.value),
+      canvaEnable: f.canvaEnable.checked ? 1 : 0,
       selectedCanvasIndex: numOrNull(f.selectedCanvasIndex.value),
+    };
+  }
+
+  function collectPayloadBackground() {
+    return {
       background: state.background,
-      neonColors: state.neonColors,
+    };
+  }
+
+  function collectPayloadLabels() {
+    return {
       labels: state.labels,
+    };
+  }
+
+  function collectPayloadSocialIcon() {
+    return {
       socialIcon: state.socialIcon,
+    };
+  }
+
+  function collectPayloadLinks() {
+    return {
       links: state.links,
+    };
+  }
+
+  function collectPayloadStatusBar() {
+    const sbText = vOrNull(f.status_text.value);
+    const statusbar = sbText === null ? null : { text: sbText, fontTextColor: numOrNull(f.status_fontTextColor.value), statusText: vOrNull(f.status_statusText.value) };
+    return {
       statusbar,
+    };
+  }
+
+  function collectPayloadNeonColor() {
+    return {
+      neonColors: state.neonColors,
     };
   }
 

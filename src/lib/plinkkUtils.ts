@@ -3,7 +3,11 @@ import { PrismaClient, Role } from "../../generated/prisma/client";
 import { RESERVED_SLUGS } from "./reservedSlugs";
 import { isBannedSlug } from "./bannedSlugs";
 import profileConfig from "../public/config/profileConfig";
-import { verifyRoleAdmin, verifyRoleDeveloper, verifyRolePartner } from "./verifyRole";
+import {
+  verifyRoleAdmin,
+  verifyRoleDeveloper,
+  verifyRolePartner,
+} from "./verifyRole";
 
 export const MAX_PAGES_DEFAULT = 1; // default users can create 1 plinkk
 
@@ -42,12 +46,18 @@ export async function isReservedSlug(
 }
 
 // Suggestion de slug unique: ajoute -1, -2... (évite de sauter directement à -2)
-export async function suggestUniqueSlug(prisma: PrismaClient, userId: string, baseSlug: string): Promise<string> {
+export async function suggestUniqueSlug(
+  prisma: PrismaClient,
+  userId: string,
+  baseSlug: string
+): Promise<string> {
   const base = baseSlug || "page";
   let i = 0;
   while (true) {
     const candidate = i === 0 ? base : `${base}-${i}`;
-    const exists = await prisma.plinkk.findFirst({ where: { userId, slug: candidate } });
+    const exists = await prisma.plinkk.findFirst({
+      where: { userId, slug: candidate },
+    });
     if (!exists) return candidate;
     i += 1;
   }
@@ -100,18 +110,32 @@ export async function suggestGloballyUniqueSlug(
   // allowCandidateIfUserId: if provided, a candidate equal to this user id will be permitted
   allowCandidateIfUserId?: string
 ): Promise<string> {
-  const base = baseSlug || 'page';
+  const base = baseSlug || "page";
   let i = 0;
   while (true) {
     const candidate = i === 0 ? base : `${base}-${i}`;
     // Éviter les mots réservés
-    if (await isReservedSlug(prisma, candidate)) { i++; continue; }
+    if (await isReservedSlug(prisma, candidate)) {
+      i++;
+      continue;
+    }
     // Le slug ne doit pas entrer en conflit avec un @ (User.id)
     const userHit = await prisma.user.findUnique({ where: { id: candidate } });
-    if (userHit && userHit.id !== allowCandidateIfUserId) { i++; continue; }
+    if (userHit && userHit.id !== allowCandidateIfUserId) {
+      i++;
+      continue;
+    }
     // Le slug ne doit pas entrer en conflit avec un autre plinkk (global)
-    const plinkkHit = await prisma.plinkk.findFirst({ where: { slug: candidate, ...(excludePlinkkId ? { NOT: { id: excludePlinkkId } } : {}) } });
-    if (plinkkHit) { i++; continue; }
+    const plinkkHit = await prisma.plinkk.findFirst({
+      where: {
+        slug: candidate,
+        ...(excludePlinkkId ? { NOT: { id: excludePlinkkId } } : {}),
+      },
+    });
+    if (plinkkHit) {
+      i++;
+      continue;
+    }
     return candidate;
   }
 }
@@ -149,7 +173,7 @@ export async function createPlinkkForUser(
       index,
       isDefault: isFirst,
       isActive: opts.isActive ?? true,
-      visibility: (opts.visibility || "PUBLIC"),
+      visibility: opts.visibility || "PUBLIC",
       isPublic: (opts.visibility || "PUBLIC") === "PUBLIC",
     },
   });
@@ -168,10 +192,7 @@ export async function createPlinkkForUser(
         profileHoverColor: profileConfig.profileHoverColor,
         degBackgroundColor: profileConfig.degBackgroundColor,
         neonEnable:
-          profileConfig.neonEnable ??
-          profileConfig.neonEnable === 0
-            ? 0
-            : 1,
+          profileConfig.neonEnable ?? profileConfig.neonEnable === 0 ? 0 : 1,
         buttonThemeEnable: profileConfig.buttonThemeEnable,
         EnableAnimationArticle: profileConfig.EnableAnimationArticle,
         EnableAnimationButton: profileConfig.EnableAnimationButton,
@@ -179,8 +200,10 @@ export async function createPlinkkForUser(
         backgroundSize: profileConfig.backgroundSize,
         selectedThemeIndex: profileConfig.selectedThemeIndex,
         selectedAnimationIndex: profileConfig.selectedAnimationIndex,
-        selectedAnimationButtonIndex: profileConfig.selectedAnimationButtonIndex,
-        selectedAnimationBackgroundIndex: profileConfig.selectedAnimationBackgroundIndex,
+        selectedAnimationButtonIndex:
+          profileConfig.selectedAnimationButtonIndex,
+        selectedAnimationBackgroundIndex:
+          profileConfig.selectedAnimationBackgroundIndex,
         animationDurationBackground: profileConfig.animationDurationBackground,
         delayAnimationButton: profileConfig.delayAnimationButton,
         canvaEnable: profileConfig.canvaEnable,
@@ -191,3 +214,6 @@ export async function createPlinkkForUser(
   if (isFirst) await reindexNonDefault(prisma, userId);
   return created;
 }
+
+export const pickDefined = (obj: Record<string, unknown>) =>
+  Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined));

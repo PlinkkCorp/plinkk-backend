@@ -1,8 +1,31 @@
+import builtInThemes from "./builtInThemes";
+
+export type builtInThemesTypes = {
+  background: string;
+  hoverColor: string;
+  textColor: string;
+  buttonBackground: string;
+  buttonHoverBackground: string;
+  buttonTextColor: string;
+  linkHoverColor: string;
+  articleHoverBoxShadow: string;
+  darkTheme: boolean;
+  opposite: {
+    background: string;
+    hoverColor: string;
+    textColor: string;
+    buttonBackground: string;
+    buttonHoverBackground: string;
+    buttonTextColor: string;
+    linkHoverColor: string;
+    articleHoverBoxShadow: string;
+    darkTheme: boolean;
+  };
+};
+
 // Helper: read built-in themes from server module
-export function readBuiltInThemes(): any[] {
+export function readBuiltInThemes(): builtInThemesTypes[] {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { builtInThemes } = require("./builtInThemes");
     return Array.isArray(builtInThemes) ? builtInThemes : [];
   } catch (e) {
     return [];
