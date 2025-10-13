@@ -7,13 +7,6 @@ import path from "path";
 import bcrypt from "bcrypt";
 import QRCode from "qrcode";
 import { existsSync, mkdirSync, writeFileSync, unlinkSync } from "fs";
-import { coerceThemeData, readBuiltInThemes } from "../../lib/theme";
-import {
-  reindexNonDefault,
-  slugify,
-  isReservedSlug,
-  createPlinkkForUser,
-} from "../../lib/plinkkUtils";
 import { PrismaClient } from "../../../generated/prisma/client";
 import { apiMeThemesRoutes } from "./me/theme";
 import { apiMePlinkksRoutes } from "./me/plinkks";
