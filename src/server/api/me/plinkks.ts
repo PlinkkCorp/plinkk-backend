@@ -148,19 +148,19 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       profileLink:
         settings != null
           ? settings.profileLink
-          : user?.profileLink ?? null,
+          : null,
       profileImage:
         settings != null
           ? settings.profileImage
-          : user?.profileImage ?? null,
+          : null,
       profileIcon:
         settings != null
           ? settings.profileIcon
-          : user?.profileIcon ?? null,
+          : null,
       profileSiteText:
         settings != null
           ? settings.profileSiteText
-          : user?.profileSiteText ?? null,
+          : null,
       userName:
         settings != null ? settings.userName : user?.userName ?? null,
       // Email public spécifique à la Plinkk : si settings présent ET que la
@@ -172,63 +172,41 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
           ? settings.affichageEmail
           : user?.publicEmail ?? user?.email ?? "",
       iconUrl:
-        settings != null ? settings.iconUrl : user?.iconUrl ?? null,
+        settings != null ? settings.iconUrl : null,
       description:
         settings != null
           ? settings.description
-          : user?.description ?? null,
+          : null,
       profileHoverColor:
-        settings?.profileHoverColor ?? user?.profileHoverColor ?? null,
+        settings?.profileHoverColor ?? null,
       degBackgroundColor:
-        settings?.degBackgroundColor ??
-        user?.degBackgroundColor ??
-        null,
-      neonEnable: settings?.neonEnable ?? user?.neonEnable ?? 0,
+        settings?.degBackgroundColor ?? null,
+      neonEnable: settings?.neonEnable ?? 0,
       buttonThemeEnable:
-        settings?.buttonThemeEnable ?? user?.buttonThemeEnable ?? 0,
+        settings?.buttonThemeEnable ?? 0,
       EnableAnimationArticle:
-        settings?.EnableAnimationArticle ??
-        user?.EnableAnimationArticle ??
-        0,
+        settings?.EnableAnimationArticle ?? 0,
       EnableAnimationButton:
-        settings?.EnableAnimationButton ??
-        user?.EnableAnimationButton ??
-        0,
+        settings?.EnableAnimationButton ?? 0,
       EnableAnimationBackground:
-        settings?.EnableAnimationBackground ??
-        user?.EnableAnimationBackground ??
-        0,
+        settings?.EnableAnimationBackground ?? 0,
       backgroundSize:
-        settings?.backgroundSize ?? user?.backgroundSize ?? null,
+        settings?.backgroundSize ?? null,
       selectedThemeIndex:
-        settings?.selectedThemeIndex ??
-        user?.selectedThemeIndex ??
-        null,
+        settings?.selectedThemeIndex ?? null,
       selectedAnimationIndex:
-        settings?.selectedAnimationIndex ??
-        user?.selectedAnimationIndex ??
-        null,
+        settings?.selectedAnimationIndex ?? null,
       selectedAnimationButtonIndex:
-        settings?.selectedAnimationButtonIndex ??
-        user?.selectedAnimationButtonIndex ??
-        null,
+        settings?.selectedAnimationButtonIndex ?? null,
       selectedAnimationBackgroundIndex:
-        settings?.selectedAnimationBackgroundIndex ??
-        user?.selectedAnimationBackgroundIndex ??
-        null,
+        settings?.selectedAnimationBackgroundIndex ?? null,
       animationDurationBackground:
-        settings?.animationDurationBackground ??
-        user?.animationDurationBackground ??
-        null,
+        settings?.animationDurationBackground ?? null,
       delayAnimationButton:
-        settings?.delayAnimationButton ??
-        user?.delayAnimationButton ??
-        null,
-      canvaEnable: settings?.canvaEnable ?? user?.canvaEnable ?? 0,
+        settings?.delayAnimationButton ?? null,
+      canvaEnable: settings?.canvaEnable ?? 0,
       selectedCanvasIndex:
-        settings?.selectedCanvasIndex ??
-        user?.selectedCanvasIndex ??
-        null,
+        settings?.selectedCanvasIndex ?? null,
       background: background.map((c) => c.color),
       neonColors: neonColors.map((c) => c.color),
       labels: labels.map((l) => ({
