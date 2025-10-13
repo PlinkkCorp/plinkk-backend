@@ -1,5 +1,14 @@
 <!-- Header -->
-<header class="sticky top-0 z-50 border-b border-fuchsia-600/30 bg-gradient-to-r from-slate-950/80 via-fuchsia-900/35 to-slate-950/80 backdrop-blur">
+<header class="sticky top-0 z-50 border-b border-fuchsia-600/30 bg-gradient-to-r from-slate-950/80 via-fuchsia-900/35 to-slate-950/80 backdrop-blur" style="position: sticky">
+    <!-- SPA top loader (fixed, NProgress-like) -->
+    <style>
+        #spaTopLoaderDash { position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 10000; pointer-events: none; opacity: 0; transition: opacity .15s ease; }
+        #spaTopLoaderDash.active { opacity: 1; }
+        #spaTopLoaderDash .prog { width: 0%; height: 100%;
+            background: linear-gradient(90deg, #ec4899, #f472b6);
+            box-shadow: 0 0 8px rgba(236, 72, 153, .6);
+            transition: width .18s ease; }
+    </style>
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
         <a href="/dashboard" class="flex items-center gap-2">
             <img src="/public/images/logo.svg" alt="Plinkk" class="h-8 w-8 rounded" />
@@ -74,7 +83,33 @@
             </div>
         </div>
     </div>
+    <div id="spaTopLoaderDash" aria-hidden="true"><div class="prog" id="spaTopLoaderProgDash"></div></div>
 </header>
+<script>
+    (function(){
+    const el = document.getElementById('spaTopLoaderDash');
+    const bar = document.getElementById('spaTopLoaderProgDash');
+    let _active = false, _timer = null, _val = 0, _t0 = 0;
+    const MIN_VISIBLE = 300; // ms
+    function setProgress(p){ if (!bar) return; _val = Math.max(0, Math.min(100, p)); bar.style.width = _val + '%'; }
+    function tick(){ if (!_active) return; const target = 80; const delta = Math.max(0.5, (target - _val) * 0.1); setProgress(_val + delta); _timer = setTimeout(tick, 200); }
+    function start(){ if (!el || !bar) return; if (_active) return; _active = true; _t0 = Date.now(); el.classList.add('active'); setProgress(5); clearTimeout(_timer); _timer = setTimeout(tick, 160); }
+    function end(){ if (!el || !bar) return; clearTimeout(_timer); setProgress(100); const elapsed = Date.now() - _t0; const extra = Math.max(0, MIN_VISIBLE - elapsed); setTimeout(()=>{ el.classList.remove('active'); setProgress(0); _active = false; }, 250 + extra); }
+        if (!window.__spaLoadingStartDash) window.__spaLoadingStartDash = start;
+        if (!window.__spaLoadingEndDash) window.__spaLoadingEndDash = end;
+        window.addEventListener('spa:loading-start', start);
+        window.addEventListener('spa:loading-end', end);
+        window.addEventListener('beforeunload', ()=>{ try { sessionStorage.setItem('spa_nav','1'); start(); } catch{} });
+        try {
+            if (sessionStorage.getItem('spa_nav') === '1') {
+                sessionStorage.removeItem('spa_nav');
+                start();
+                const fin = ()=> setTimeout(end, 120);
+                if (document.readyState === 'complete') fin(); else window.addEventListener('load', fin, { once: true });
+            }
+        } catch {}
+    })();
+</script>
 <script>
     (function(){
         const root = document.getElementById('profileMenu');
@@ -121,5 +156,49 @@
                 if (btn) btn.addEventListener('click', ()=>{ localStorage.setItem(key,'1'); wrap.style.display='none'; });
             });
         } catch(e){}
+    })();
+</script>
+<script>
+    (function(){
+        // Auto SPA loader triggers for dashboard
+        const el = document.getElementById('spaTopLoaderDash');
+        function start(){ if (el) el.classList.add('active'); }
+        function end(){ if (el) el.classList.remove('active'); }
+        if (!window.__spaLoadingStartDash) window.__spaLoadingStartDash = start;
+        if (!window.__spaLoadingEndDash) window.__spaLoadingEndDash = end;
+        window.addEventListener('spa:loading-start', start);
+        window.addEventListener('spa:loading-end', end);
+
+        function isModifiedClick(e){ return e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0; }
+        function isSameOrigin(url){ try { const u=new URL(url, location.href); return u.origin===location.origin; } catch { return false; } }
+        function looksLikeHtmlRequest(url){ return isSameOrigin(url) && !/\.(?:png|jpe?g|webp|gif|svg|ico|css|js|map|json|txt|woff2?|ttf|otf)(?:[?#].*)?$/i.test(url); }
+        document.addEventListener('click', (e)=>{
+            const a = e.target && (e.target.closest ? e.target.closest('a') : null);
+            if (!a) return; const href = a.getAttribute('href') || '';
+            if (!href || href.startsWith('#')) return; if (a.target === '_blank' || a.download != null) return; if (isModifiedClick(e)) return;
+            if (!looksLikeHtmlRequest(href)) return;
+            try { window.dispatchEvent(new Event('spa:loading-start')); } catch {}
+            setTimeout(()=>{ try { window.dispatchEvent(new Event('spa:loading-end')); } catch {} }, 8000);
+        }, true);
+
+        try {
+            const origFetch = window.fetch.bind(window);
+            let inflight = 0; const onBegin=()=>{ if (inflight++===0) window.dispatchEvent(new Event('spa:loading-start')); };
+            const onEnd=()=>{ if (inflight>0 && --inflight===0) window.dispatchEvent(new Event('spa:loading-end')); };
+            window.fetch = function(input, init){
+                try {
+                    const url = typeof input === 'string' ? input : (input && input.url) || '';
+                    const method = (init && (init.method||'GET')) || (typeof input!=='string' && input && input.method) || 'GET';
+                    const headers = new Headers((init && init.headers) || (typeof input!=='string' && input && input.headers) || undefined);
+                    const accept = (headers.get('Accept') || headers.get('accept') || '').toLowerCase();
+                    const isHtmlAccept = accept.includes('text/html') || accept === '';
+                    const qualifies = method.toUpperCase()==='GET' && looksLikeHtmlRequest(url) && !url.startsWith('/api');
+                    if (qualifies && isHtmlAccept) onBegin();
+                    const p = origFetch(input, init);
+                    if (qualifies && isHtmlAccept) { p.finally(()=>{ setTimeout(onEnd, 80); }); }
+                    return p;
+                } catch { return origFetch(input, init); }
+            };
+        } catch {}
     })();
 </script>

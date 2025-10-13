@@ -5,7 +5,6 @@ import {
   reindexNonDefault,
   slugify,
   suggestUniqueSlug,
-  getNextIndex,
   createPlinkkForUser,
   isReservedSlug,
 } from "../lib/plinkkUtils";

@@ -632,6 +632,40 @@ fastify.get("/users", async (request, reply) => {
   });
 });
 
+// SPA fallback: serve the main index for non-API, non-static HTML navigations
+// This enables client-side routing across the site without breaking existing server routes.
+fastify.get("/*", async (request, reply) => {
+  const url = request.raw.url || "";
+  // Exclusions: API endpoints, known static prefixes, dashboard server routes keep server-side handling
+  if (
+    url.startsWith("/api") ||
+    url.startsWith("/public") ||
+    url.startsWith("/umami_script.js") ||
+    url.startsWith("/dashboard")
+  ) {
+    return reply.callNotFound();
+  }
+  // Respect existing host handling: do not force SPA on non-allowed hosts
+  const host = request.headers.host || "";
+  if (host !== "plinkk.fr" && host !== "127.0.0.1:3001") {
+    return reply.callNotFound();
+  }
+  // If it looks like a file request (has an extension), let 404/static handler deal with it
+  if (/\.[a-zA-Z0-9]+$/.test(url)) {
+    return reply.callNotFound();
+  }
+  // Only for HTML navigations
+  const accept = request.headers.accept || "";
+  if (!accept.includes("text/html")) {
+    return reply.callNotFound();
+  }
+  const currentUserId = request.session.get("data") as string | undefined;
+  const currentUser = currentUserId
+    ? await prisma.user.findUnique({ where: { id: currentUserId }, include: { role: true } })
+    : null;
+  return await replyView(reply, "index.ejs", currentUser, {});
+});
+
 // 404 handler (après routes spécifiques)
 fastify.setNotFoundHandler((request, reply) => {
   if (request.raw.url?.startsWith("/api")) {
