@@ -3,16 +3,17 @@ import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { generateProfileConfig } from "../lib/generateConfig";
 import { minify } from "uglify-js";
-import { PrismaClient } from "../../generated/prisma/client";
+import { PlinkkSettings, PrismaClient, User } from "../../generated/prisma/client";
 
 const prisma = new PrismaClient();
 
 import { resolvePlinkkPage, parseIdentifier } from "../lib/resolvePlinkkPage";
+import { coerceThemeData } from "../lib/theme";
 
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
   fastify.get('/:username', { config: { rateLimit: false } }, async function (request, reply) {
     const { username } = request.params as { username: string };
-    const isPreview = (request.query as any)?.preview === '1';
+    const isPreview = (request.query as { preview: string })?.preview === '1';
     if (username === "") {
       reply.code(404).send({ error: "please specify a username" });
       return;
@@ -193,7 +194,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
         // Déterminer la page Plinkk à partir du query ?slug= ou du Referer (/:username ou /:username/:slug)
         let identifier: string | undefined = undefined;
-        const q = request.query as any;
+        const q = request.query as { slug: string };
         if (typeof q?.slug === 'string') {
           const s = (q.slug || '').trim();
           // compat: slug=0 => page par défaut
@@ -217,7 +218,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         } catch {}
 
         // Résoudre la page
-        let page = null as any;
+        let page = null;
         if (identifier) {
           page = await prisma.plinkk.findFirst({ where: { userId: profile.id, slug: identifier } });
         }
@@ -294,26 +295,13 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
               articleHoverBoxShadow: `0 4px 12px ${normalizeHex(dark.hover)}55`,
               darkTheme: true,
             };
-            return { ...L, opposite: D } as any;
-          };
-          const coerceThemeData = (data: any) => {
-            if (data && typeof data === 'object' && 'background' in data && ('opposite' in data || 'darkTheme' in data)) return data;
-            if (data && data.light && data.dark) {
-              const l = data.light as SimplifiedVariant; const d = data.dark as SimplifiedVariant;
-              return toFullTheme(l, d);
-            }
-            if (data && data.bg && data.button && data.hover) {
-              const l = { bg: data.bg, button: data.button, hover: data.hover } as SimplifiedVariant;
-              const d = { bg: hoverVariant(data.bg), button: hoverVariant(data.button), hover: data.hover } as SimplifiedVariant;
-              return toFullTheme(l, d);
-            }
-            return null;
+            return { ...L, opposite: D };
           };
 
-          if ((profile as any).selectedCustomThemeId) {
-            const t = await prisma.theme.findUnique({ where: { id: (profile as any).selectedCustomThemeId }, select: { data: true, isPrivate: true, authorId: true } });
+          if (profile.selectedCustomThemeId) {
+            const t = await prisma.theme.findUnique({ where: { id: profile.selectedCustomThemeId }, select: { data: true, isPrivate: true, authorId: true } });
             if (t && t.authorId === profile.id) {
-              const full = coerceThemeData(t.data as any);
+              const full = coerceThemeData(t.data);
               if (full) {
                 const safe = JSON.stringify(full);
                 injectedThemeVar = `window.__PLINKK_PRIVATE_THEME__ = ${safe};`;
@@ -322,10 +310,10 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           }
           // Fallback: si aucun thème sélectionné injecté, injecter le dernier SUBMITTED de l'utilisateur
           if (!injectedThemeVar) {
-            const sub = await prisma.theme.findFirst({ where: { authorId: profile.id, status: 'SUBMITTED' as any }, select: { data: true }, orderBy: { updatedAt: 'desc' } });
-            const candidate = sub ? sub : await prisma.theme.findFirst({ where: { authorId: profile.id, status: 'DRAFT' as any }, select: { data: true }, orderBy: { updatedAt: 'desc' } });
+            const sub = await prisma.theme.findFirst({ where: { authorId: profile.id, status: 'SUBMITTED' }, select: { data: true }, orderBy: { updatedAt: 'desc' } });
+            const candidate = sub ? sub : await prisma.theme.findFirst({ where: { authorId: profile.id, status: 'DRAFT' }, select: { data: true }, orderBy: { updatedAt: 'desc' } });
             if (candidate && candidate.data) {
-              const full = coerceThemeData(candidate.data as any);
+              const full = coerceThemeData(candidate.data);
               if (full) {
                 const safe = JSON.stringify(full);
                 injectedThemeVar = `window.__PLINKK_PRIVATE_THEME__ = ${safe};`;
@@ -345,39 +333,40 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         } catch (e) { /* ignore */ }
 
         // Fusionner les réglages de page (PlinkkSettings) avec les valeurs par défaut du compte
-        const pageProfile: any = {
+        const pageProfile: User & PlinkkSettings = {
+          plinkkId: null,
           ...profile,
-          profileLink: (settings as any)?.profileLink ?? (profile as any).profileLink,
-          profileImage: (settings as any)?.profileImage ?? (profile as any).profileImage,
-          profileIcon: (settings as any)?.profileIcon ?? (profile as any).profileIcon,
-          profileSiteText: (settings as any)?.profileSiteText ?? (profile as any).profileSiteText,
-          userName: (settings as any)?.userName ?? (profile as any).userName,
-          iconUrl: (settings as any)?.iconUrl ?? (profile as any).iconUrl,
-          description: (settings as any)?.description ?? (profile as any).description,
-          profileHoverColor: (settings as any)?.profileHoverColor ?? (profile as any).profileHoverColor,
-          degBackgroundColor: (settings as any)?.degBackgroundColor ?? (profile as any).degBackgroundColor,
-          neonEnable: (settings as any)?.neonEnable ?? (profile as any).neonEnable,
-          buttonThemeEnable: (settings as any)?.buttonThemeEnable ?? (profile as any).buttonThemeEnable,
-          EnableAnimationArticle: (settings as any)?.EnableAnimationArticle ?? (profile as any).EnableAnimationArticle,
-          EnableAnimationButton: (settings as any)?.EnableAnimationButton ?? (profile as any).EnableAnimationButton,
-          EnableAnimationBackground: (settings as any)?.EnableAnimationBackground ?? (profile as any).EnableAnimationBackground,
-          backgroundSize: (settings as any)?.backgroundSize ?? (profile as any).backgroundSize,
-          selectedThemeIndex: (settings as any)?.selectedThemeIndex ?? (profile as any).selectedThemeIndex,
-          selectedAnimationIndex: (settings as any)?.selectedAnimationIndex ?? (profile as any).selectedAnimationIndex,
-          selectedAnimationButtonIndex: (settings as any)?.selectedAnimationButtonIndex ?? (profile as any).selectedAnimationButtonIndex,
-          selectedAnimationBackgroundIndex: (settings as any)?.selectedAnimationBackgroundIndex ?? (profile as any).selectedAnimationBackgroundIndex,
-          animationDurationBackground: (settings as any)?.animationDurationBackground ?? (profile as any).animationDurationBackground,
-          delayAnimationButton: (settings as any)?.delayAnimationButton ?? (profile as any).delayAnimationButton,
+          profileLink: settings?.profileLink ?? "",
+          profileImage: settings?.profileImage ?? "",
+          profileIcon: settings?.profileIcon ?? "",
+          profileSiteText: settings?.profileSiteText ?? "",
+          userName: settings?.userName ?? profile.userName,
+          iconUrl: settings?.iconUrl ?? "",
+          description: settings?.description ?? "",
+          profileHoverColor: settings?.profileHoverColor ?? "",
+          degBackgroundColor: settings?.degBackgroundColor ?? 45,
+          neonEnable: settings?.neonEnable ?? 1,
+          buttonThemeEnable: settings?.buttonThemeEnable ?? 1,
+          EnableAnimationArticle: settings?.EnableAnimationArticle ?? 1,
+          EnableAnimationButton: settings?.EnableAnimationButton ?? 1,
+          EnableAnimationBackground: settings?.EnableAnimationBackground ?? 1,
+          backgroundSize: settings?.backgroundSize ?? 50,
+          selectedThemeIndex: settings?.selectedThemeIndex ?? 13,
+          selectedAnimationIndex: settings?.selectedAnimationIndex ?? 0,
+          selectedAnimationButtonIndex: settings?.selectedAnimationButtonIndex ?? 10,
+          selectedAnimationBackgroundIndex: settings?.selectedAnimationBackgroundIndex ?? 0,
+          animationDurationBackground: settings?.animationDurationBackground ?? 30,
+          delayAnimationButton: settings?.delayAnimationButton ?? 0.1,
           // Support for per-Plinkk public email: if a PlinkkSettings.affichageEmail
           // exists we must prefer it for the generated profile config. We expose it
           // both as `affichageEmail` and override `publicEmail` so generateProfileConfig
           // (which reads profile.publicEmail) will pick up the page-specific value.
-          affichageEmail: (settings as any)?.affichageEmail ?? null,
-          publicEmail: (settings as any && Object.prototype.hasOwnProperty.call(settings, 'affichageEmail'))
-            ? (settings as any).affichageEmail
-            : (profile as any).publicEmail ?? null,
-          canvaEnable: (settings as any)?.canvaEnable ?? (profile as any).canvaEnable,
-          selectedCanvasIndex: (settings as any)?.selectedCanvasIndex ?? (profile as any).selectedCanvasIndex,
+          affichageEmail: settings?.affichageEmail ?? null,
+          publicEmail: (settings && Object.prototype.hasOwnProperty.call(settings, 'affichageEmail'))
+            ? settings.affichageEmail
+            : profile.publicEmail ?? null,
+          canvaEnable: settings?.canvaEnable ?? 1,
+          selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
         };
 
         const generated = generateProfileConfig(
@@ -387,12 +376,12 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           labels,
           neonColors,
           socialIcons,
-          (pageStatusbar ? { text: pageStatusbar.text, colorBg: pageStatusbar.colorBg, fontTextColor: pageStatusbar.fontTextColor, statusText: pageStatusbar.statusText } as any : (null as any)),
+          pageStatusbar,
           injectedObj
         ).replaceAll("{{username}}", username);
 
         // If debug=1 in query, return the non-minified generated code for inspection
-        const isDebug = (request.query as any)?.debug === '1';
+        const isDebug = (request.query as { debug: string })?.debug === '1';
         if (injectedObj) {
           reply.header('X-Plinkk-Injected', '1');
         }
@@ -445,7 +434,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
   fastify.get<{
     Params: { username: string; identifier?: string }
   }>("/:username/:identifier", async (request, reply) => {
-    const { username, identifier } = request.params as any;
+    const { username, identifier } = request.params as { username: string, identifier: string };
     // Ignore si l'identifiant correspond à un préfixe d'actifs
     if (["css", "js", "images", "canvaAnimation"].includes(String(identifier))) {
       return reply.code(404).view("erreurs/404.ejs", { user: null });
@@ -476,7 +465,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
   fastify.get<{
     Params: { username: string }
   }>("/:username/0", async (request, reply) => {
-    const { username } = request.params as any;
+    const { username } = request.params as { username: string };
     const resolved = await resolvePlinkkPage(prisma, username, undefined, request);
     if (resolved.status !== 200) return reply.code(resolved.status).view("erreurs/404.ejs", { user: null });
     const links = await prisma.link.findMany({ where: { plinkkId: resolved.page.id, userId: resolved.user.id } });

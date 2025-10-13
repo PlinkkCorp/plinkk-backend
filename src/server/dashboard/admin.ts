@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient, Role } from "../../../generated/prisma/client";
+import { Announcement, Prisma, PrismaClient, Role } from "../../../generated/prisma/client";
 import { replyView, getActiveAnnouncementsForUser } from "../../lib/replyView";
 import { verifyRoleIsStaff } from "../../lib/verifyRole";
 
@@ -250,8 +250,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       return reply.code(403).send({ error: "forbidden" });
     const body = request.body as {
       id: string;
-      targetUserIds: any[];
-      targetRoles: any[];
+      targetUserIds: string[];
+      targetRoles: Role[];
       level: string;
       text: string;
       dismissible: string;
@@ -275,7 +275,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       endAt: body.endAt ? new Date(body.endAt) : null,
       global: !!body.global,
     };
-    let ann: any;
+    let ann: Announcement;
     if (!id) {
       ann = await prisma.announcement.create({ data: { ...payload } });
     } else {
@@ -301,8 +301,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
         });
       }
       if (targetRoles.length) {
-        await (prisma as any).announcementRoleTarget.createMany({
-          data: targetRoles.map((r) => ({ announcementId: ann.id, role: r })),
+        await prisma.announcementRoleTarget.createMany({
+          data: targetRoles.map((r) => ({ announcementId: ann.id, roleId: r.id })),
         });
       }
     }
@@ -322,7 +322,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     const { id } = request.query as { id: string };
     if (!id) return reply.code(400).send({ error: "missing_id" });
     try {
-      await (prisma as any).bannedSlug.delete({ where: { id: String(id) } });
+      await prisma.bannedSlug.delete({ where: { slug: String(id) } });
       return reply.send({ ok: true });
     } catch (e) {
       return reply.code(404).send({ error: "not_found" });
@@ -538,8 +538,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       const d = String(dt.getUTCDate()).padStart(2, "0");
       return `${y}-${m}-${d}`;
     };
-    const where: any = { createdAt: { gte: start, lte: end } };
-    if (role && role !== "all") where.role = role;
+    const where: Prisma.UserWhereInput = { createdAt: { gte: start, lte: end } };
+    if (role && role !== "all") where.role.name = role;
     if (visibility && visibility !== "all")
       where.isPublic = visibility === "public";
     const users = await prisma.user.findMany({
@@ -603,8 +603,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     const start = from
       ? new Date(from + "T00:00:00.000Z")
       : new Date(end.getTime() - 29 * 86400000);
-    const where: any = { createdAt: { gte: start, lte: end } };
-    if (role && role !== "all") where.role = role;
+    const where: Prisma.UserWhereInput = { createdAt: { gte: start, lte: end } };
+    if (role && role !== "all") where.role.name = role;
     if (visibility && visibility !== "all")
       where.isPublic = visibility === "public";
     const rows = await prisma.user.findMany({

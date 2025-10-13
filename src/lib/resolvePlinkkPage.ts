@@ -34,7 +34,7 @@ export async function resolvePlinkkPage(prisma: PrismaClient, username: string, 
   if (isPrivate && !isOwner) return { status: 403 as const, error: 'forbidden' };
 
   // Analytics: incrémenter vues et PageStat + table journalière (hors mode preview)
-  const isPreview = (request?.query as any)?.preview === '1';
+  const isPreview = (request?.query as { preview: string })?.preview === '1';
   if (!isPreview) {
     try {
       await prisma.$transaction([

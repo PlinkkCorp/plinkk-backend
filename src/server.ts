@@ -5,7 +5,7 @@ import Fastify from "fastify";
 import path from "path";
 import ejs from "ejs";
 import { readFileSync } from "fs";
-import { PrismaClient } from "../generated/prisma/client";
+import { Announcement, AnnouncementRoleTarget, AnnouncementTarget, PrismaClient, Role } from "../generated/prisma/client";
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
@@ -145,7 +145,7 @@ fastify.get("/", async function (request, reply) {
       }))
     : null;
   // Annonces depuis la DB (affichées si ciblées pour l'utilisateur courant ou globales)
-  let msgs: any[] = [];
+  let msgs: Announcement[] = [];
   try {
     const now = new Date();
     const anns = await prisma.announcement.findMany({
@@ -155,38 +155,21 @@ fastify.get("/", async function (request, reply) {
           { OR: [{ endAt: null }, { endAt: { gte: now } }] },
         ],
       },
-      include: { targets: true, roleTargets: true },
+      include: { targets: true, roleTargets: { include: { role: true } } },
       orderBy: { createdAt: "desc" },
     });
     if (currentUser) {
       for (const a of anns) {
         const toUser =
           a.global ||
-          a.targets.some((t: any) => t.userId === currentUser.id) ||
-          a.roleTargets.some((rt: any) => rt.role === currentUser.role.name);
+          a.targets.some((t: AnnouncementTarget) => t.userId === currentUser.id) ||
+          a.roleTargets.some((rt: AnnouncementRoleTarget & { role: Role }) => rt.role.name === currentUser.role.name);
         if (toUser)
-          msgs.push({
-            id: a.id,
-            level: a.level,
-            text: a.text,
-            dismissible: a.dismissible,
-            startAt: a.startAt,
-            endAt: a.endAt,
-            createdAt: a.createdAt,
-          });
+          msgs.push(a);
       }
     } else {
       msgs = anns
-        .filter((a: any) => a.global)
-        .map((a: any) => ({
-          id: a.id,
-          level: a.level,
-          text: a.text,
-          dismissible: a.dismissible,
-          startAt: a.startAt,
-          endAt: a.endAt,
-          createdAt: a.createdAt,
-        }));
+        .filter((a) => a.global)
     }
   } catch (e) {}
   return await replyView(reply, "index.ejs", currentUser, {});
@@ -212,7 +195,7 @@ fastify.get("/login", async function (request, reply) {
   // Log stored returnTo for debugging
   try {
     request.log?.info(
-      { returnTo: (request.session as any).get("returnTo") },
+      { returnTo: request.session.get("returnTo") },
       "GET /login session"
     );
   } catch (e) {}
@@ -222,7 +205,7 @@ fastify.get("/login", async function (request, reply) {
           where: { id: String(currentUserId).split("__")[0] },
         })
       : null;
-  const returnToQuery = (request.query as any)?.returnTo || "";
+  const returnToQuery = (request.query as { returnTo: string })?.returnTo || "";
   return await replyView(reply, "connect.ejs", currentUser, { returnTo: returnToQuery });
 });
 
@@ -327,7 +310,7 @@ fastify.post("/register", async (req, reply) => {
     }
 
     // Vérifier unicité globale: pas d'utilisateur existant, pas de plinkk avec ce slug, pas de mot réservé
-    if (await isReservedSlug(prisma as any, generatedId)) {
+    if (await isReservedSlug(prisma, generatedId)) {
       const emailParam = encodeURIComponent(rawEmail);
       const userParam = encodeURIComponent(rawUsername);
       return reply.redirect(`/login?error=${encodeURIComponent("Cet @ est réservé, essaye un autre nom d'utilisateur")}&email=${emailParam}&username=${userParam}#signup`);
@@ -364,7 +347,7 @@ fastify.post("/register", async (req, reply) => {
     // Auto-crée un Plinkk principal pour ce compte (slug global basé sur username)
     try {
       // Create the user's main Plinkk and capture it so we can attach example data
-      const createdPlinkk = await createPlinkkForUser(prisma as any, user.id, { name: username, slugBase: username, visibility: 'PUBLIC', isActive: true });
+      const createdPlinkk = await createPlinkkForUser(prisma, user.id, { name: username, slugBase: username, visibility: 'PUBLIC', isActive: true });
       try {
         // Create PlinkkSettings from example profileConfig (non-blocking)
         await prisma.plinkkSettings.create({ data: {
@@ -423,7 +406,7 @@ fastify.post("/register", async (req, reply) => {
     }
     // Auto-login: set session and redirect to original destination if present
     const returnTo =
-      (req.body as any)?.returnTo || (req.query as any)?.returnTo;
+      (req.body as { returnTo: string })?.returnTo || (req.query as { returnTo: string })?.returnTo;
     req.log?.info({ returnTo }, "register: returnTo read from request");
     req.session.set("data", user.id);
     req.log?.info(
@@ -485,7 +468,7 @@ fastify.post("/login", async (request, reply) => {
   if (user.twoFactorEnabled) {
     // Pass returnTo via query to TOTP step so it's preserved through the flow
     const returnToQuery =
-      (request.body as any)?.returnTo || (request.query as any)?.returnTo;
+      (request.body as { returnTo: string })?.returnTo || (request.query as { returnTo: string })?.returnTo;
     request.session.set("data", user.id + "__totp");
     return reply.redirect(
       `/totp${
@@ -494,7 +477,7 @@ fastify.post("/login", async (request, reply) => {
     );
   }
   const returnToLogin =
-    (request.body as any)?.returnTo || (request.query as any)?.returnTo;
+    (request.body as { returnTo: string })?.returnTo || (request.query as { returnTo: string })?.returnTo;
   request.log?.info(
     { returnTo: returnToLogin },
     "login: returnTo read from request"
@@ -517,7 +500,7 @@ fastify.get("/totp", (request, reply) => {
   }
   const parts = String(currentUserIdTotp).split("__");
   if (parts.length === 2 && parts[1] === "totp") {
-    const returnToQuery = (request.query as any)?.returnTo || '';
+    const returnToQuery = (request.query as { returnTo: string })?.returnTo || '';
     return reply.view("totp.ejs", { returnTo: returnToQuery });
   }
   return reply.redirect('/login');
@@ -540,7 +523,7 @@ fastify.post("/totp", async (request, reply) => {
     if (!isValid) {
       return reply.code(401).send({ error: "Invalid TOTP code" });
     }
-    const returnToTotp = (request.body as any)?.returnTo || (request.query as any)?.returnTo;
+    const returnToTotp = (request.body as { returnTo: string })?.returnTo || (request.query as { returnTo: string })?.returnTo;
     request.log?.info({ returnTo: returnToTotp }, 'totp: returnTo read from request');
     request.session.set("data", user.id);
     request.log?.info({ sessionData: request.session.get('data'), cookies: request.headers.cookie }, 'session set after totp');
@@ -583,10 +566,10 @@ fastify.get("/users", async (request, reply) => {
     orderBy: { createdAt: "asc" },
   });
   // Annonces DB pour la page publique des utilisateurs: on affiche seulement les globales si non connecté
-  let msgs: any[] = [];
+  let msgs: Announcement[] = [];
   try {
     const now = new Date();
-    const anns = await (prisma as any).announcement.findMany({
+    const anns = await prisma.announcement.findMany({
       where: {
         AND: [
           { OR: [{ startAt: null }, { startAt: { lte: now } }] },
@@ -600,31 +583,14 @@ fastify.get("/users", async (request, reply) => {
       for (const a of anns) {
         const toUser =
           a.global ||
-          a.targets.some((t: any) => t.userId === currentUser.id) ||
-          a.roleTargets.some((rt: any) => rt.role === currentUser.role.name);
+          a.targets.some((t: AnnouncementTarget) => t.userId === currentUser.id) ||
+          a.roleTargets.some((rt: AnnouncementRoleTarget & { role: Role }) => rt.role.name === currentUser.role.name);
         if (toUser)
-          msgs.push({
-            id: a.id,
-            level: a.level,
-            text: a.text,
-            dismissible: a.dismissible,
-            startAt: a.startAt,
-            endAt: a.endAt,
-            createdAt: a.createdAt,
-          });
+          msgs.push(a);
       }
     } else {
       msgs = anns
-        .filter((a: any) => a.global)
-        .map((a: any) => ({
-          id: a.id,
-          level: a.level,
-          text: a.text,
-          dismissible: a.dismissible,
-          startAt: a.startAt,
-          endAt: a.endAt,
-          createdAt: a.createdAt,
-        }));
+        .filter((a) => a.global)
     }
   } catch (e) {}
   return await replyView(reply, "users.ejs", currentUser, {

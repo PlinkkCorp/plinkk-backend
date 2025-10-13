@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../generated/prisma/client';
+import { BannedSlug, PrismaClient } from '../../generated/prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -15,7 +15,7 @@ export async function isBannedSlug(slug: string): Promise<boolean> {
 }
 
 // Liste (lecture) de tous les bans: renvoie [] si table manquante
-export async function listBannedSlugs(): Promise<any[]> {
+export async function listBannedSlugs(): Promise<BannedSlug[]> {
   try {
     return await prisma.bannedSlug.findMany({ orderBy: { createdAt: 'desc' } });
   } catch (e) {
@@ -27,7 +27,7 @@ export async function listBannedSlugs(): Promise<any[]> {
 export async function createBannedSlug(slug: string, reason?: string) {
   try {
     return await prisma.bannedSlug.create({ data: { slug, reason: reason || null } });
-  } catch (e: any) {
+  } catch (e) {
     // If the underlying table is missing, surface a clear error the caller can handle.
     const msg = String(e?.message || '');
     if (msg.includes('BannedSlug') && msg.includes('does not exist')) {
@@ -40,7 +40,7 @@ export async function createBannedSlug(slug: string, reason?: string) {
 export async function deleteBannedSlugById(slug: string) {
   try {
     return await prisma.bannedSlug.delete({ where: { slug } });
-  } catch (e: any) {
+  } catch (e) {
     const msg = String(e?.message || '');
     if (msg.includes('BannedSlug') && msg.includes('does not exist')) {
       throw new Error('bannedslug_table_missing');

@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient } from "../../generated/prisma/client";
+import { PrismaClient, User } from "../../generated/prisma/client";
 import { replyView } from "../lib/replyView";
 import { verifyRoleAdmin, verifyRoleDeveloper } from "../lib/verifyRole";
 import { dashboardAdminRoutes } from "./dashboard/admin";
@@ -508,14 +508,14 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         `/login?returnTo=${encodeURIComponent("/dashboard/account")}`
       );
     }
-    let userInfo: any = null;
+    let userInfo: User = null;
     try {
       // Try to include `host` if the table exists in the DB/schema
       userInfo = await prisma.user.findFirst({
         where: { id: userId },
         include: { cosmetics: true, host: true, role: true },
       });
-    } catch (e: any) {
+    } catch (e) {
       // If the Host table is missing (e.g. migrations not applied), fallback to query without it
       request.log?.warn({ err: e }, 'Failed to include host when fetching userInfo; retrying without host (fallback)');
       userInfo = await prisma.user.findFirst({ where: { id: userId }, include: { cosmetics: true, role: true } });
@@ -587,7 +587,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     return reply.view("dashboard/user/themes.ejs", {
       user: userInfo,
       myThemes,
-      selectedCustomThemeId: (userInfo as any).selectedCustomThemeId || null,
+      selectedCustomThemeId: userInfo.selectedCustomThemeId || null,
       publicPath
     });
   });

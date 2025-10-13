@@ -1,22 +1,23 @@
 import {
-  User,
   Link,
   BackgroundColor,
   Label,
   NeonColor,
   SocialIcon,
-  Statusbar,
+  PlinkkStatusbar,
+  PlinkkSettings,
+  User,
 } from "../../generated/prisma";
 
 export function generateProfileConfig(
-  profile: any,
+  profile: User & PlinkkSettings,
   links: Link[],
   backgroundColors: BackgroundColor[],
   labels: Label[],
   neonColors: NeonColor[],
   socialIcons: SocialIcon[],
-  statusBar: Statusbar
-  , injectedTheme?: any
+  statusBar: PlinkkStatusbar,
+  injectedTheme?: JSON
 ) {
   return `
     export const injectedTheme = ${injectedTheme ? JSON.stringify(injectedTheme) : 'null'};
@@ -26,7 +27,7 @@ export function generateProfileConfig(
         profileIcon: ${JSON.stringify(profile.profileIcon || "")}, // Icone derrière le profil
         profileSiteText: ${JSON.stringify(profile.profileSiteText || "")}, // Nom derrière le profil
         userName: ${JSON.stringify(profile.userName || "User")}, // Nom affiché sur la page et dans le titre de l'onglet
-  email: ${JSON.stringify((profile as any).publicEmail || "")}, // Adresse mail publique affichée sur la page (découplée)
+  email: ${JSON.stringify(profile.publicEmail || "")}, // Adresse mail publique affichée sur la page (découplée)
         links: ${JSON.stringify(
           links.map((l) => ({
             icon: l.icon,

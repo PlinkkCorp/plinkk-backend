@@ -17,7 +17,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       return reply.code(403).send({ error: "Forbidden" });
     }
     const { id } = request.params as { id: string };
-    const { role } = (request.body as any) || {};
+    const { role } = request.body as { role: string };
     if (!Object.values("").includes(role))
       return reply.code(400).send({ error: "Invalid role" });
     // Enforce role hierarchy rules:
@@ -46,7 +46,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
 
     const updated = await prisma.user.update({
       where: { id },
-      data: { role },
+      data: { roleId: role },
       include: { role: true },
     });
     return reply.send({ id: updated.id, role: updated.role });
@@ -64,7 +64,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       return reply.code(403).send({ error: "Forbidden" });
     }
     const { id } = request.params as { id: string };
-    const cosmetics = (request.body as any) ?? null;
+    const cosmetics = request.body;
     const updated = await prisma.user.update({
       where: { id },
       data: { cosmetics },

@@ -3,7 +3,11 @@ import { PrismaClient, Role } from "../../generated/prisma/client";
 import { RESERVED_SLUGS } from "./reservedSlugs";
 import { isBannedSlug } from "./bannedSlugs";
 import profileConfig from "../public/config/profileConfig";
-import { verifyRoleAdmin, verifyRoleDeveloper, verifyRolePartner } from "./verifyRole";
+import {
+  verifyRoleAdmin,
+  verifyRoleDeveloper,
+  verifyRolePartner,
+} from "./verifyRole";
 
 export const MAX_PAGES_DEFAULT = 1; // default users can create 1 plinkk
 
@@ -42,12 +46,18 @@ export async function isReservedSlug(
 }
 
 // Suggestion de slug unique: ajoute -1, -2... (évite de sauter directement à -2)
-export async function suggestUniqueSlug(prisma: PrismaClient, userId: string, baseSlug: string): Promise<string> {
+export async function suggestUniqueSlug(
+  prisma: PrismaClient,
+  userId: string,
+  baseSlug: string
+): Promise<string> {
   const base = baseSlug || "page";
   let i = 0;
   while (true) {
     const candidate = i === 0 ? base : `${base}-${i}`;
-    const exists = await prisma.plinkk.findFirst({ where: { userId, slug: candidate } });
+    const exists = await prisma.plinkk.findFirst({
+      where: { userId, slug: candidate },
+    });
     if (!exists) return candidate;
     i += 1;
   }
@@ -100,18 +110,32 @@ export async function suggestGloballyUniqueSlug(
   // allowCandidateIfUserId: if provided, a candidate equal to this user id will be permitted
   allowCandidateIfUserId?: string
 ): Promise<string> {
-  const base = baseSlug || 'page';
+  const base = baseSlug || "page";
   let i = 0;
   while (true) {
     const candidate = i === 0 ? base : `${base}-${i}`;
     // Éviter les mots réservés
-    if (await isReservedSlug(prisma, candidate)) { i++; continue; }
+    if (await isReservedSlug(prisma, candidate)) {
+      i++;
+      continue;
+    }
     // Le slug ne doit pas entrer en conflit avec un @ (User.id)
     const userHit = await prisma.user.findUnique({ where: { id: candidate } });
-    if (userHit && userHit.id !== allowCandidateIfUserId) { i++; continue; }
+    if (userHit && userHit.id !== allowCandidateIfUserId) {
+      i++;
+      continue;
+    }
     // Le slug ne doit pas entrer en conflit avec un autre plinkk (global)
-    const plinkkHit = await prisma.plinkk.findFirst({ where: { slug: candidate, ...(excludePlinkkId ? { NOT: { id: excludePlinkkId } } : {}) } });
-    if (plinkkHit) { i++; continue; }
+    const plinkkHit = await prisma.plinkk.findFirst({
+      where: {
+        slug: candidate,
+        ...(excludePlinkkId ? { NOT: { id: excludePlinkkId } } : {}),
+      },
+    });
+    if (plinkkHit) {
+      i++;
+      continue;
+    }
     return candidate;
   }
 }
@@ -149,7 +173,7 @@ export async function createPlinkkForUser(
       index,
       isDefault: isFirst,
       isActive: opts.isActive ?? true,
-      visibility: (opts.visibility || "PUBLIC") as any,
+      visibility: opts.visibility || "PUBLIC",
       isPublic: (opts.visibility || "PUBLIC") === "PUBLIC",
     },
   });
@@ -158,40 +182,38 @@ export async function createPlinkkForUser(
     await prisma.plinkkSettings.create({
       data: {
         plinkkId: created.id,
-        profileLink: (profileConfig as any).profileLink,
-        profileImage: (profileConfig as any).profileImage,
-        profileIcon: (profileConfig as any).profileIcon,
-        profileSiteText: (profileConfig as any).profileSiteText,
-        userName: (profileConfig as any).userName,
-        iconUrl: (profileConfig as any).iconUrl,
-        description: (profileConfig as any).description,
-        profileHoverColor: (profileConfig as any).profileHoverColor,
-        degBackgroundColor: (profileConfig as any).degBackgroundColor,
+        profileLink: profileConfig.profileLink,
+        profileImage: profileConfig.profileImage,
+        profileIcon: profileConfig.profileIcon,
+        profileSiteText: profileConfig.profileSiteText,
+        userName: profileConfig.userName,
+        iconUrl: profileConfig.iconUrl,
+        description: profileConfig.description,
+        profileHoverColor: profileConfig.profileHoverColor,
+        degBackgroundColor: profileConfig.degBackgroundColor,
         neonEnable:
-          (profileConfig as any).neonEnable ??
-          (profileConfig as any).neonEnable === 0
-            ? 0
-            : 1,
-        buttonThemeEnable: (profileConfig as any).buttonThemeEnable,
-        EnableAnimationArticle: (profileConfig as any).EnableAnimationArticle,
-        EnableAnimationButton: (profileConfig as any).EnableAnimationButton,
-        EnableAnimationBackground: (profileConfig as any)
-          .EnableAnimationBackground,
-        backgroundSize: (profileConfig as any).backgroundSize,
-        selectedThemeIndex: (profileConfig as any).selectedThemeIndex,
-        selectedAnimationIndex: (profileConfig as any).selectedAnimationIndex,
-        selectedAnimationButtonIndex: (profileConfig as any)
-          .selectedAnimationButtonIndex,
-        selectedAnimationBackgroundIndex: (profileConfig as any)
-          .selectedAnimationBackgroundIndex,
-        animationDurationBackground: (profileConfig as any)
-          .animationDurationBackground,
-        delayAnimationButton: (profileConfig as any).delayAnimationButton,
-        canvaEnable: (profileConfig as any).canvaEnable,
-        selectedCanvasIndex: (profileConfig as any).selectedCanvasIndex,
+          profileConfig.neonEnable ?? profileConfig.neonEnable === 0 ? 0 : 1,
+        buttonThemeEnable: profileConfig.buttonThemeEnable,
+        EnableAnimationArticle: profileConfig.EnableAnimationArticle,
+        EnableAnimationButton: profileConfig.EnableAnimationButton,
+        EnableAnimationBackground: profileConfig.EnableAnimationBackground,
+        backgroundSize: profileConfig.backgroundSize,
+        selectedThemeIndex: profileConfig.selectedThemeIndex,
+        selectedAnimationIndex: profileConfig.selectedAnimationIndex,
+        selectedAnimationButtonIndex:
+          profileConfig.selectedAnimationButtonIndex,
+        selectedAnimationBackgroundIndex:
+          profileConfig.selectedAnimationBackgroundIndex,
+        animationDurationBackground: profileConfig.animationDurationBackground,
+        delayAnimationButton: profileConfig.delayAnimationButton,
+        canvaEnable: profileConfig.canvaEnable,
+        selectedCanvasIndex: profileConfig.selectedCanvasIndex,
       },
     });
   } catch (e) {}
   if (isFirst) await reindexNonDefault(prisma, userId);
   return created;
 }
+
+export const pickDefined = (obj: Record<string, unknown>) =>
+  Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined));

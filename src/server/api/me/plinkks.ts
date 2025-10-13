@@ -1,6 +1,21 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient } from "../../../../generated/prisma/client";
-import { reindexNonDefault, slugify, isReservedSlug, createPlinkkForUser } from "../../../lib/plinkkUtils";
+import {
+  BackgroundColor,
+  Label,
+  Link,
+  NeonColor,
+  PlinkkSettings,
+  PlinkkStatusbar,
+  PrismaClient,
+  SocialIcon,
+} from "../../../../generated/prisma/client";
+import {
+  reindexNonDefault,
+  slugify,
+  isReservedSlug,
+  createPlinkkForUser,
+  pickDefined,
+} from "../../../lib/plinkkUtils";
 
 const prisma = new PrismaClient();
 
@@ -13,12 +28,12 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     const p = await prisma.plinkk.findUnique({ where: { id } });
     if (!p || p.userId !== userId)
       return reply.code(404).send({ error: "not_found" });
-    const body = (request.body as any) || {};
-    const patch: any = {};
+    const body = request.body as { isPublic: boolean; isDefault: boolean };
+    const patch: { isPublic?: boolean; visibility?: "PUBLIC" | "PRIVATE" } = {};
     // Toggle public
     if (typeof body.isPublic === "boolean") {
       patch.isPublic = Boolean(body.isPublic);
-      patch.visibility = (body.isPublic ? "PUBLIC" : "PRIVATE") as any;
+      patch.visibility = body.isPublic ? "PUBLIC" : "PRIVATE";
     }
     // Set default
     if (body.isDefault === true && !p.isDefault) {
@@ -39,7 +54,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
           data: { isDefault: true, index: 0 },
         }),
       ]);
-      await reindexNonDefault(prisma as any, userId);
+      await reindexNonDefault(prisma, userId);
     }
     if (Object.keys(patch).length) {
       await prisma.plinkk.update({ where: { id }, data: patch });
@@ -63,7 +78,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
         return reply.code(400).send({ error: "cannot_delete_default" });
     }
     await prisma.plinkk.delete({ where: { id } });
-    await reindexNonDefault(prisma as any, userId);
+    await reindexNonDefault(prisma, userId);
     return reply.send({ ok: true });
   });
 
@@ -71,13 +86,13 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
   fastify.post("/", async (request, reply) => {
     const userId = request.session.get("data") as string | undefined;
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
-    const body = (request.body as any) || {};
+    const body = request.body as { slug: string; name: string };
     const rawSlug = typeof body.slug === "string" ? body.slug : "";
     const rawName = typeof body.name === "string" ? body.name : "";
     try {
       // Normaliser la base; éviter mots réservés
       const base = slugify(rawSlug || rawName || "page");
-      if (!base || (await isReservedSlug(prisma as any, base)))
+      if (!base || (await isReservedSlug(prisma, base)))
         return reply.code(400).send({ error: "invalid_or_reserved_slug" });
       // Interdire conflit avec un @ d'utilisateur
       const userConflict = await prisma.user.findUnique({
@@ -87,14 +102,14 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       if (userConflict)
         return reply.code(409).send({ error: "slug_conflicts_with_user" });
       // Interdire conflit direct avec un autre plinkk (suggestion générera une variante de toute façon)
-      const created = await createPlinkkForUser(prisma as any, userId, {
+      const created = await createPlinkkForUser(prisma, userId, {
         name: rawName,
         slugBase: base,
       });
       return reply
         .code(201)
         .send({ id: created.id, slug: created.slug, name: created.name });
-    } catch (e: any) {
+    } catch (e) {
       if (e?.message === "max_pages_reached")
         return reply.code(400).send({ error: "max_pages_reached" });
       if (e?.message === "user_not_found")
@@ -125,7 +140,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       links,
     ] = await Promise.all([
       prisma.plinkkSettings.findUnique({ where: { plinkkId: id } }),
-      prisma.user.findUnique({ where: { id: String(userId) } }) as any,
+      prisma.user.findUnique({ where: { id: String(userId) } }),
       prisma.backgroundColor.findMany({
         where: { userId: String(userId), plinkkId: id },
       }),
@@ -145,90 +160,40 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     const cfg = {
       // Champs d'identité/texte: si un enregistrement PlinkkSettings existe, on respecte ses valeurs
       // même si elles valent null (ce qui signifie "effacé"), sinon on fallback vers user.
-      profileLink:
-        settings != null
-          ? settings.profileLink
-          : (user as any)?.profileLink ?? null,
-      profileImage:
-        settings != null
-          ? settings.profileImage
-          : (user as any)?.profileImage ?? null,
-      profileIcon:
-        settings != null
-          ? settings.profileIcon
-          : (user as any)?.profileIcon ?? null,
-      profileSiteText:
-        settings != null
-          ? settings.profileSiteText
-          : (user as any)?.profileSiteText ?? null,
-      userName:
-        settings != null ? settings.userName : (user as any)?.userName ?? null,
+      profileLink: settings != null ? settings.profileLink : null,
+      profileImage: settings != null ? settings.profileImage : null,
+      profileIcon: settings != null ? settings.profileIcon : null,
+      profileSiteText: settings != null ? settings.profileSiteText : null,
+      userName: settings != null ? settings.userName : user?.userName ?? null,
       // Email public spécifique à la Plinkk : si settings présent ET que la
       // propriété `affichageEmail` est définie, l'utiliser (même si null =>
       // effacement explicite). Sinon fallback vers user.publicEmail || user.email.
       email:
         settings != null &&
         Object.prototype.hasOwnProperty.call(settings, "affichageEmail")
-          ? (settings as any).affichageEmail
-          : (user as any)?.publicEmail ?? (user as any)?.email ?? "",
-      iconUrl:
-        settings != null ? settings.iconUrl : (user as any)?.iconUrl ?? null,
-      description:
-        settings != null
-          ? settings.description
-          : (user as any)?.description ?? null,
-      profileHoverColor:
-        settings?.profileHoverColor ?? (user as any)?.profileHoverColor ?? null,
-      degBackgroundColor:
-        settings?.degBackgroundColor ??
-        (user as any)?.degBackgroundColor ??
-        null,
-      neonEnable: settings?.neonEnable ?? (user as any)?.neonEnable ?? 0,
-      buttonThemeEnable:
-        settings?.buttonThemeEnable ?? (user as any)?.buttonThemeEnable ?? 0,
-      EnableAnimationArticle:
-        settings?.EnableAnimationArticle ??
-        (user as any)?.EnableAnimationArticle ??
-        0,
-      EnableAnimationButton:
-        settings?.EnableAnimationButton ??
-        (user as any)?.EnableAnimationButton ??
-        0,
-      EnableAnimationBackground:
-        settings?.EnableAnimationBackground ??
-        (user as any)?.EnableAnimationBackground ??
-        0,
-      backgroundSize:
-        settings?.backgroundSize ?? (user as any)?.backgroundSize ?? null,
-      selectedThemeIndex:
-        settings?.selectedThemeIndex ??
-        (user as any)?.selectedThemeIndex ??
-        null,
-      selectedAnimationIndex:
-        settings?.selectedAnimationIndex ??
-        (user as any)?.selectedAnimationIndex ??
-        null,
+          ? settings.affichageEmail
+          : user?.publicEmail ?? user?.email ?? "",
+      iconUrl: settings != null ? settings.iconUrl : null,
+      description: settings != null ? settings.description : null,
+      profileHoverColor: settings?.profileHoverColor ?? null,
+      degBackgroundColor: settings?.degBackgroundColor ?? null,
+      neonEnable: settings?.neonEnable ?? 0,
+      buttonThemeEnable: settings?.buttonThemeEnable ?? 0,
+      EnableAnimationArticle: settings?.EnableAnimationArticle ?? 0,
+      EnableAnimationButton: settings?.EnableAnimationButton ?? 0,
+      EnableAnimationBackground: settings?.EnableAnimationBackground ?? 0,
+      backgroundSize: settings?.backgroundSize ?? null,
+      selectedThemeIndex: settings?.selectedThemeIndex ?? null,
+      selectedAnimationIndex: settings?.selectedAnimationIndex ?? null,
       selectedAnimationButtonIndex:
-        settings?.selectedAnimationButtonIndex ??
-        (user as any)?.selectedAnimationButtonIndex ??
-        null,
+        settings?.selectedAnimationButtonIndex ?? null,
       selectedAnimationBackgroundIndex:
-        settings?.selectedAnimationBackgroundIndex ??
-        (user as any)?.selectedAnimationBackgroundIndex ??
-        null,
+        settings?.selectedAnimationBackgroundIndex ?? null,
       animationDurationBackground:
-        settings?.animationDurationBackground ??
-        (user as any)?.animationDurationBackground ??
-        null,
-      delayAnimationButton:
-        settings?.delayAnimationButton ??
-        (user as any)?.delayAnimationButton ??
-        null,
-      canvaEnable: settings?.canvaEnable ?? (user as any)?.canvaEnable ?? 0,
-      selectedCanvasIndex:
-        settings?.selectedCanvasIndex ??
-        (user as any)?.selectedCanvasIndex ??
-        null,
+        settings?.animationDurationBackground ?? null,
+      delayAnimationButton: settings?.delayAnimationButton ?? null,
+      canvaEnable: settings?.canvaEnable ?? 0,
+      selectedCanvasIndex: settings?.selectedCanvasIndex ?? null,
       background: background.map((c) => c.color),
       neonColors: neonColors.map((c) => c.color),
       labels: labels.map((l) => ({
@@ -259,8 +224,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     return reply.send(cfg);
   });
 
-  // API: Mettre à jour la configuration du profil depuis l'éditeur (par Plinkk)
-  fastify.put("/:id/config", async (request, reply) => {
+  fastify.put("/:id/config/plinkk", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
     const { id } = request.params as { id: string };
@@ -269,147 +233,175 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     });
     if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
 
-    const body = (request.body as any) ?? {};
-    const pickDefined = (obj: Record<string, any>) =>
-      Object.fromEntries(
-        Object.entries(obj).filter(([_, v]) => v !== undefined)
-      );
+    const body = request.body as PlinkkSettings;
 
-    await prisma.$transaction(async (tx) => {
-      // Upsert des réglages de page
-      const data = pickDefined({
-        profileLink: body.profileLink,
-        profileImage: body.profileImage,
-        profileIcon: body.profileIcon,
-        profileSiteText: body.profileSiteText,
-        userName: body.userName,
-        // affichageEmail: valeur publique spécifique à cette Plinkk
-        affichageEmail: body.email,
-        iconUrl: body.iconUrl,
-        description: body.description,
-        profileHoverColor: body.profileHoverColor,
-        degBackgroundColor: body.degBackgroundColor,
-        neonEnable: body.neonEnable,
-        buttonThemeEnable: body.buttonThemeEnable,
-        EnableAnimationArticle: body.EnableAnimationArticle,
-        EnableAnimationButton: body.EnableAnimationButton,
-        EnableAnimationBackground: body.EnableAnimationBackground,
-        backgroundSize: body.backgroundSize,
-        selectedThemeIndex: body.selectedThemeIndex,
-        selectedAnimationIndex: body.selectedAnimationIndex,
-        selectedAnimationButtonIndex: body.selectedAnimationButtonIndex,
-        selectedAnimationBackgroundIndex: body.selectedAnimationBackgroundIndex,
-        animationDurationBackground: body.animationDurationBackground,
-        delayAnimationButton: body.delayAnimationButton,
-        canvaEnable: body.canvaEnable,
-        selectedCanvasIndex: body.selectedCanvasIndex,
+    // Upsert des réglages de page
+    const data = pickDefined({
+      profileLink: body.profileLink,
+      profileImage: body.profileImage,
+      profileIcon: body.profileIcon,
+      profileSiteText: body.profileSiteText,
+      userName: body.userName,
+      // affichageEmail: valeur publique spécifique à cette Plinkk
+      affichageEmail: body.affichageEmail,
+      iconUrl: body.iconUrl,
+      description: body.description,
+      profileHoverColor: body.profileHoverColor,
+      degBackgroundColor: body.degBackgroundColor,
+      neonEnable: body.neonEnable,
+      buttonThemeEnable: body.buttonThemeEnable,
+      EnableAnimationArticle: body.EnableAnimationArticle,
+      EnableAnimationButton: body.EnableAnimationButton,
+      EnableAnimationBackground: body.EnableAnimationBackground,
+      backgroundSize: body.backgroundSize,
+      selectedThemeIndex: body.selectedThemeIndex,
+      selectedAnimationIndex: body.selectedAnimationIndex,
+      selectedAnimationButtonIndex: body.selectedAnimationButtonIndex,
+      selectedAnimationBackgroundIndex: body.selectedAnimationBackgroundIndex,
+      animationDurationBackground: body.animationDurationBackground,
+      delayAnimationButton: body.delayAnimationButton,
+      canvaEnable: body.canvaEnable,
+      selectedCanvasIndex: body.selectedCanvasIndex,
+    });
+
+    if (Object.keys(data).length > 0) {
+      await prisma.plinkkSettings.upsert({
+        where: { plinkkId: id },
+        create: { plinkkId: id, ...data },
+        update: data,
       });
-      if (Object.keys(data).length > 0) {
-        await tx.plinkkSettings.upsert({
-          where: { plinkkId: id },
-          create: { plinkkId: id, ...data },
-          update: data,
+    }
+    if (typeof body.userName === "string" && body.userName.trim()) {
+      await prisma.plinkk.update({
+        where: { id },
+        data: { name: body.userName.trim() },
+      });
+    }
+
+    return reply.send({ ok: true });
+  });
+
+  fastify.put("/:id/config/background", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const page = await prisma.plinkk.findFirst({
+      where: { id, userId: String(userId) },
+    });
+    if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
+
+    const body = request.body as { background: BackgroundColor[] };
+    // Couleurs de fond
+    if (Array.isArray(body.background)) {
+      await prisma.backgroundColor.deleteMany({
+        where: { userId: String(userId), plinkkId: id },
+      });
+      if (body.background.length > 0) {
+        await prisma.backgroundColor.createMany({
+          data: body.background.map((backgroundColor: BackgroundColor) => ({
+            color: backgroundColor.color,
+            userId: String(userId),
+            plinkkId: id,
+          })),
         });
       }
+    }
 
-      // If the editor submitted a userName, persist it as the plinkk's public name
-      // so that the "Nom affiché" shown in the editor is the canonical plinkk.name.
-      if (typeof body.userName === "string" && body.userName.trim()) {
-        await tx.plinkk.update({
-          where: { id },
-          data: { name: body.userName.trim() },
+    return reply.send({ ok: true });
+  });
+
+  fastify.put("/:id/config/labels", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const page = await prisma.plinkk.findFirst({
+      where: { id, userId: String(userId) },
+    });
+    if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
+
+    const body = request.body as { labels: Label[] };
+
+    // Labels
+    if (Array.isArray(body.labels)) {
+      await prisma.label.deleteMany({
+        where: { userId: String(userId), plinkkId: id },
+      });
+      if (body.labels.length > 0) {
+        await prisma.label.createMany({
+          data: body.labels.map((l: Label) => ({
+            data: l.data,
+            color: l.color,
+            fontColor: l.fontColor,
+            userId: String(userId),
+            plinkkId: id,
+          })),
         });
       }
+    }
 
-      // NOTE: email for a specific Plinkk must be stored on PlinkkSettings.affichageEmail
-      // so that it is detached per page. The global publicEmail on User is only
-      // updated via account-level endpoints (/me/config or /me/email).
+    return reply.send({ ok: true });
+  });
 
-      // Couleurs de fond
-      if (Array.isArray(body.background)) {
-        await tx.backgroundColor.deleteMany({
-          where: { userId: String(userId), plinkkId: id },
+  fastify.put("/:id/config/socialIcon", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const page = await prisma.plinkk.findFirst({
+      where: { id, userId: String(userId) },
+    });
+    if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
+
+    const body = request.body as { socialIcon: SocialIcon[] };
+
+    // Icônes sociales
+    if (Array.isArray(body.socialIcon)) {
+      await prisma.socialIcon.deleteMany({
+        where: { userId: String(userId), plinkkId: id },
+      });
+      if (body.socialIcon.length > 0) {
+        await prisma.socialIcon.createMany({
+          data: body.socialIcon.map((s: SocialIcon) => ({
+            url: s.url,
+            icon: s.icon,
+            userId: String(userId),
+            plinkkId: id,
+          })),
         });
-        if (body.background.length > 0) {
-          await tx.backgroundColor.createMany({
-            data: body.background.map((color: string) => ({
-              color,
-              userId: String(userId),
-              plinkkId: id,
-            })),
-          });
-        }
       }
+    }
 
-      // Néon
-      if (Array.isArray(body.neonColors)) {
-        await tx.neonColor.deleteMany({
-          where: { userId: String(userId), plinkkId: id },
-        });
-        if (body.neonColors.length > 0) {
-          await tx.neonColor.createMany({
-            data: body.neonColors.map((color: string) => ({
-              color,
-              userId: String(userId),
-              plinkkId: id,
-            })),
-          });
-        }
-      }
+    return reply.send({ ok: true });
+  });
 
-      // Labels
-      if (Array.isArray(body.labels)) {
-        await tx.label.deleteMany({
-          where: { userId: String(userId), plinkkId: id },
-        });
-        if (body.labels.length > 0) {
-          await tx.label.createMany({
-            data: body.labels.map((l: any) => ({
-              data: l.data,
-              color: l.color,
-              fontColor: l.fontColor,
-              userId: String(userId),
-              plinkkId: id,
-            })),
-          });
-        }
-      }
+  fastify.put("/:id/config/links", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const page = await prisma.plinkk.findFirst({
+      where: { id, userId: String(userId) },
+    });
+    if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
 
-      // Icônes sociales
-      if (Array.isArray(body.socialIcon)) {
-        await tx.socialIcon.deleteMany({
-          where: { userId: String(userId), plinkkId: id },
-        });
-        if (body.socialIcon.length > 0) {
-          await tx.socialIcon.createMany({
-            data: body.socialIcon.map((s: any) => ({
-              url: s.url,
-              icon: s.icon,
-              userId: String(userId),
-              plinkkId: id,
-            })),
-          });
-        }
-      }
+    const body = request.body as { links: Link[] };
 
-      // Liens
+    // Liens
       if (Array.isArray(body.links)) {
-        const existing = await tx.link.findMany({
+        const existing = await prisma.link.findMany({
           where: { userId: String(userId), plinkkId: id },
           select: { id: true },
         });
         const existingIds = new Set(existing.map((l) => l.id));
         const incomingIds = new Set(
-          body.links.map((l: any) => l.id).filter(Boolean)
+          body.links.map((l: Link) => l.id).filter(Boolean)
         );
         const toDelete = Array.from(existingIds).filter(
           (x) => !incomingIds.has(x)
         );
         if (toDelete.length > 0)
-          await tx.link.deleteMany({ where: { id: { in: toDelete } } });
+          await prisma.link.deleteMany({ where: { id: { in: toDelete } } });
         for (const l of body.links) {
           if (l.id && existingIds.has(l.id)) {
-            await tx.link.update({
+            await prisma.link.update({
               where: { id: l.id },
               data: {
                 icon: l.icon ?? undefined,
@@ -422,7 +414,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
               },
             });
           } else {
-            await tx.link.create({
+            await prisma.link.create({
               data: {
                 icon: l.icon ?? undefined,
                 url: l.url,
@@ -439,31 +431,74 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
         }
       }
 
-      // Statusbar dédié à la page
-      if (body.statusbar !== undefined) {
-        const s = body.statusbar;
-        if (s === null) {
-          await tx.plinkkStatusbar.deleteMany({ where: { plinkkId: id } });
-        } else {
-          await tx.plinkkStatusbar.upsert({
-            where: { plinkkId: id },
-            create: {
-              plinkkId: id,
-              text: s.text ?? undefined,
-              colorBg: s.colorBg ?? undefined,
-              fontTextColor: s.fontTextColor ?? undefined,
-              statusText: s.statusText ?? undefined,
-            },
-            update: pickDefined({
-              text: s.text ?? undefined,
-              colorBg: s.colorBg ?? undefined,
-              fontTextColor: s.fontTextColor ?? undefined,
-              statusText: s.statusText ?? undefined,
-            }),
-          });
-        }
-      }
+    return reply.send({ ok: true });
+  });
+
+  fastify.put("/:id/config/statusBar", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const page = await prisma.plinkk.findFirst({
+      where: { id, userId: String(userId) },
     });
+    if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
+
+    const body = request.body as { statusbar: PlinkkStatusbar };
+
+    // Statusbar dédié à la page
+    if (body.statusbar !== undefined) {
+      const s = body.statusbar;
+      if (s === null) {
+        await prisma.plinkkStatusbar.deleteMany({ where: { plinkkId: id } });
+      } else {
+        await prisma.plinkkStatusbar.upsert({
+          where: { plinkkId: id },
+          create: {
+            plinkkId: id,
+            text: s.text ?? undefined,
+            colorBg: s.colorBg ?? undefined,
+            fontTextColor: s.fontTextColor ?? undefined,
+            statusText: s.statusText ?? undefined,
+          },
+          update: pickDefined({
+            text: s.text ?? undefined,
+            colorBg: s.colorBg ?? undefined,
+            fontTextColor: s.fontTextColor ?? undefined,
+            statusText: s.statusText ?? undefined,
+          }),
+        });
+      }
+    }
+
+    return reply.send({ ok: true });
+  });
+
+  fastify.put("/:id/config/neonColor", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const page = await prisma.plinkk.findFirst({
+      where: { id, userId: String(userId) },
+    });
+    if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
+
+    const body = request.body as { neonColors: NeonColor[] };
+
+    // Néon
+    if (Array.isArray(body.neonColors)) {
+      await prisma.neonColor.deleteMany({
+        where: { userId: String(userId), plinkkId: id },
+      });
+      if (body.neonColors.length > 0) {
+        await prisma.neonColor.createMany({
+          data: body.neonColors.map((neonColor: NeonColor) => ({
+            color: neonColor.color,
+            userId: String(userId),
+            plinkkId: id,
+          })),
+        });
+      }
+    }
 
     return reply.send({ ok: true });
   });
