@@ -33,7 +33,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/visibility", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const { isPublic } = (request.body as any) ?? {};
+    const { isPublic } = (request.body as { isPublic: string }) ?? {};
     const updated = await prisma.user.update({
       where: { id: userId as string },
       data: { isPublic: Boolean(isPublic) },
@@ -46,7 +46,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/email", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const { email } = (request.body as any) || {};
+    const { email } = (request.body as { email: string }) || {};
     try {
       z.email().parse(email);
     } catch (e) {
@@ -71,7 +71,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
     const { currentPassword, newPassword, confirmPassword } =
-      (request.body as any) || {};
+      (request.body as { currentPassword: string, newPassword: string, confirmPassword: string }) || {};
     if (!currentPassword || !newPassword || !confirmPassword)
       return reply.code(400).send({ error: "Champs manquants" });
     if (newPassword !== confirmPassword)
@@ -102,7 +102,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/delete", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const { password, otp } = (request.body as any) || {};
+    const { password, otp } = (request.body as { password: string, otp: string }) || {};
     if (!password)
       return reply.code(400).send({ error: "Mot de passe requis" });
     const me = await prisma.user.findUnique({
@@ -141,7 +141,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     // control whether the account email is publicly visible. This avoids
     // coupling visibility to a cosmetics JSON object which doesn't exist
     // in the Prisma schema.
-    const { isEmailPublic } = (request.body as any) ?? {};
+    const { isEmailPublic } = (request.body as { isEmailPublic: string }) ?? {};
     const me = await prisma.user.findUnique({
       where: { id: userId as string },
       select: { email: true, publicEmail: true },
@@ -193,7 +193,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     }
 
     // If secret exists in DB -> expect an OTP to disable 2FA
-    const { otp } = (request.body as any) || {};
+    const { otp } = (request.body as { otp: string }) || {};
     if (!otp || typeof otp !== "string") {
       return reply
         .code(400)
@@ -213,7 +213,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/2fa/confirm", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const { otp } = (request.body as any) || {};
+    const { otp } = (request.body as { otp: string }) || {};
     if (!otp || typeof otp !== "string")
       return reply.code(400).send({ error: "OTP requis" });
 
@@ -246,7 +246,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/profile", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const body = (request.body as any) || {};
+    const body = (request.body as { userName: string, name: string, description: string });
     const data: any = {};
     if (typeof body.userName === "string" && body.userName.trim())
       data.userName = body.userName.trim();
@@ -261,8 +261,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
         id: true,
         userName: true,
         name: true,
-        description: true,
-      } as any,
+      },
     });
 
     // If the account's display name was updated, also update the user's default Plinkk
@@ -290,7 +289,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/host", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const body = (request.body as any) || {};
+    const body = (request.body as { hostname: string });
     const hostname = body.hostname.trim();
     const token = crypto.randomUUID();
     const updated = await prisma.host.upsert({
@@ -335,13 +334,13 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/cosmetics", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const body = (request.body as any) || {};
+    const body = (request.body as { bannerUrl: string, banner: string, frame: string, theme: string });
     const u = await prisma.user.findUnique({
       where: { id: userId as string },
       select: { cosmetics: true },
     });
     // Fallback to empty object to avoid runtime errors when cosmetics is null/undefined
-    const cosmetics = (u?.cosmetics ?? {}) as any;
+    const cosmetics = u?.cosmetics;
     const updated = await prisma.user.update({
       where: { id: userId as string },
       data: {
@@ -369,52 +368,21 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
   });
 
-  // API: appliquer un starter pack de cosmétiques
-  fastify.post("/cosmetics/starter-pack", async (request, reply) => {
-    const userId = request.session.get("data");
-    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const u = await prisma.user.findUnique({
-      where: { id: userId as string },
-      select: { role: true, cosmetics: true },
-    });
-    if (!u) return reply.code(404).send({ error: "Utilisateur introuvable" });
-    const baseFlair =
-      verifyRoleAdmin(u.role) || verifyRoleDeveloper(u.role)
-        ? "DEVELOPER"
-        : "OG";
-    const cosmetics: any = (u.cosmetics as any) || {};
-    // Le starter pack n'attribue plus de flair automatiquement (laisse tel quel)
-    cosmetics.selected = {
-      flair: cosmetics.selected?.flair ?? null,
-      frame: "neon",
-      theme: "dark-emerald",
-      banner: "gradient-emerald",
-      bannerUrl: "",
-    };
-    const updated = await prisma.user.update({
-      where: { id: userId as string },
-      data: { cosmetics },
-      select: { id: true, cosmetics: true },
-    });
-    return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
-  });
-
   // API: Récupérer la configuration complète du profil pour l'éditeur
-  fastify.get("/config", async (request, reply) => {
+  /* fastify.get("/config", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
 
     const profile = (await prisma.user.findFirst({
       where: { id: userId as string },
       include: {
-        background: true,
         labels: true,
         neonColors: true,
         socialIcons: true,
         statusbar: true,
         links: true,
-      } as any,
-    })) as any;
+      },
+    }));
     if (!profile) return reply.code(404).send({ error: "Not found" });
 
     const config = {
@@ -646,7 +614,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     });
 
     return reply.send({ ok: true });
-  });
+  }); */
 
   // API: uploader/remplacer la photo de profil (avatar) via data URL (base64)
   fastify.post("/avatar", async (request, reply) => {

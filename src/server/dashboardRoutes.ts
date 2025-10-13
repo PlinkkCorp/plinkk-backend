@@ -587,7 +587,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     return reply.view("dashboard/user/themes.ejs", {
       user: userInfo,
       myThemes,
-      selectedCustomThemeId: (userInfo as any).selectedCustomThemeId || null,
+      selectedCustomThemeId: userInfo.selectedCustomThemeId || null,
       publicPath
     });
   });

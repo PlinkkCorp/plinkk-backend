@@ -88,7 +88,7 @@ export function toFullTheme(light: SimplifiedVariant, dark: SimplifiedVariant) {
     articleHoverBoxShadow: `0 4px 12px ${normalizeHex(dark.hover)}55`,
     darkTheme: true,
   };
-  return { ...L, opposite: D } as any;
+  return { ...L, opposite: D };
 }
 
 export function coerceThemeData(data: any) {

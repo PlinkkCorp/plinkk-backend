@@ -301,8 +301,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
         });
       }
       if (targetRoles.length) {
-        await (prisma as any).announcementRoleTarget.createMany({
-          data: targetRoles.map((r) => ({ announcementId: ann.id, role: r })),
+        await prisma.announcementRoleTarget.createMany({
+          data: targetRoles.map((r) => ({ announcementId: ann.id, roleId: r.id })),
         });
       }
     }
@@ -322,7 +322,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     const { id } = request.query as { id: string };
     if (!id) return reply.code(400).send({ error: "missing_id" });
     try {
-      await (prisma as any).bannedSlug.delete({ where: { id: String(id) } });
+      await prisma.bannedSlug.delete({ where: { slug: String(id) } });
       return reply.send({ ok: true });
     } catch (e) {
       return reply.code(404).send({ error: "not_found" });

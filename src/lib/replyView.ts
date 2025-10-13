@@ -49,7 +49,7 @@ export async function getActiveAnnouncementsForUser(userId: string | null) {
           select: { id: true, role: true },
         })
       : null;
-    const anns = await (prisma as any).announcement.findMany({
+    const anns = await prisma.announcement.findMany({
       where: {
         AND: [
           { OR: [{ startAt: null }, { startAt: { lte: now } }] },

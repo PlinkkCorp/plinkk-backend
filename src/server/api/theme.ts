@@ -11,23 +11,23 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
   // List approved themes (public)
   fastify.get("/approved", async (request, reply) => {
     const themes = await prisma.theme.findMany({
-      where: { status: "APPROVED" as any, isPrivate: false },
+      where: { status: "APPROVED", isPrivate: false },
       select: {
         id: true,
         name: true,
         description: true,
         data: true,
         author: { select: { id: true, userName: true } },
-      } as any,
+      },
       orderBy: { createdAt: "desc" },
     });
     // Ensure data has the shape expected by front
     const list = themes.map((t) => {
       let full: any;
       try {
-        full = coerceThemeData(t.data as any);
+        full = coerceThemeData(t.data);
       } catch {
-        full = t.data as any;
+        full = t.data;
       }
       return {
         id: t.id,
@@ -52,7 +52,7 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
 
     // Load approved community themes from DB
     const community = await prisma.theme.findMany({
-      where: { status: "APPROVED" as any, isPrivate: false },
+      where: { status: "APPROVED", isPrivate: false },
       select: {
         id: true,
         name: true,
@@ -62,14 +62,14 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
       },
       orderBy: { createdAt: "desc" },
     });
-    const list = [] as any[];
+    const list = [];
     // normalize community themes using coerceThemeData
     for (const t of community) {
       let full: any;
       try {
-        full = coerceThemeData(t.data as any);
+        full = coerceThemeData(t.data);
       } catch {
-        full = t.data as any;
+        full = t.data;
       }
       list.push({
         id: t.id,
@@ -82,7 +82,7 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     }
 
     // Optionally include user's own themes when query userId is provided (for editor)
-    const userId = (request.query as any)?.userId;
+    const userId = (request.query as { userId: string })?.userId;
     if (userId && typeof userId === "string") {
       const mine = await prisma.theme.findMany({
         where: { authorId: userId },
@@ -97,9 +97,9 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
       for (const t of mine) {
         let full: any;
         try {
-          full = coerceThemeData(t.data as any);
+          full = coerceThemeData(t.data);
         } catch {
-          full = t.data as any;
+          full = t.data;
         }
         list.push({
           id: t.id,
@@ -137,7 +137,7 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     await prisma.theme.update({
       where: { id },
       data: {
-        data: t.pendingUpdate as any,
+        data: t.pendingUpdate,
         pendingUpdate: null,
         pendingUpdateAt: null,
         pendingUpdateMessage: null,
@@ -160,7 +160,7 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
     await prisma.theme.update({
       where: { id },
-      data: { status: "APPROVED" as any },
+      data: { status: "APPROVED" },
     });
     return reply.send({ ok: true });
   });
@@ -179,7 +179,7 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
     await prisma.theme.update({
       where: { id },
-      data: { status: "ARCHIVED" as any },
+      data: { status: "ARCHIVED" },
     });
     return reply.send({ ok: true });
   });
@@ -198,7 +198,7 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
     const updated = await prisma.theme.update({
       where: { id },
-      data: { status: "APPROVED" as any },
+      data: { status: "APPROVED" },
       select: { id: true, status: true },
     });
     return reply.send(updated);
@@ -217,7 +217,7 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
     const updated = await prisma.theme.update({
       where: { id },
-      data: { status: "REJECTED" as any },
+      data: { status: "REJECTED" },
       select: { id: true, status: true },
     });
     return reply.send(updated);

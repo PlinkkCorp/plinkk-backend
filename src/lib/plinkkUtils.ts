@@ -149,7 +149,7 @@ export async function createPlinkkForUser(
       index,
       isDefault: isFirst,
       isActive: opts.isActive ?? true,
-      visibility: (opts.visibility || "PUBLIC") as any,
+      visibility: (opts.visibility || "PUBLIC"),
       isPublic: (opts.visibility || "PUBLIC") === "PUBLIC",
     },
   });
@@ -158,37 +158,33 @@ export async function createPlinkkForUser(
     await prisma.plinkkSettings.create({
       data: {
         plinkkId: created.id,
-        profileLink: (profileConfig as any).profileLink,
-        profileImage: (profileConfig as any).profileImage,
-        profileIcon: (profileConfig as any).profileIcon,
-        profileSiteText: (profileConfig as any).profileSiteText,
-        userName: (profileConfig as any).userName,
-        iconUrl: (profileConfig as any).iconUrl,
-        description: (profileConfig as any).description,
-        profileHoverColor: (profileConfig as any).profileHoverColor,
-        degBackgroundColor: (profileConfig as any).degBackgroundColor,
+        profileLink: profileConfig.profileLink,
+        profileImage: profileConfig.profileImage,
+        profileIcon: profileConfig.profileIcon,
+        profileSiteText: profileConfig.profileSiteText,
+        userName: profileConfig.userName,
+        iconUrl: profileConfig.iconUrl,
+        description: profileConfig.description,
+        profileHoverColor: profileConfig.profileHoverColor,
+        degBackgroundColor: profileConfig.degBackgroundColor,
         neonEnable:
-          (profileConfig as any).neonEnable ??
-          (profileConfig as any).neonEnable === 0
+          profileConfig.neonEnable ??
+          profileConfig.neonEnable === 0
             ? 0
             : 1,
-        buttonThemeEnable: (profileConfig as any).buttonThemeEnable,
-        EnableAnimationArticle: (profileConfig as any).EnableAnimationArticle,
-        EnableAnimationButton: (profileConfig as any).EnableAnimationButton,
-        EnableAnimationBackground: (profileConfig as any)
-          .EnableAnimationBackground,
-        backgroundSize: (profileConfig as any).backgroundSize,
-        selectedThemeIndex: (profileConfig as any).selectedThemeIndex,
-        selectedAnimationIndex: (profileConfig as any).selectedAnimationIndex,
-        selectedAnimationButtonIndex: (profileConfig as any)
-          .selectedAnimationButtonIndex,
-        selectedAnimationBackgroundIndex: (profileConfig as any)
-          .selectedAnimationBackgroundIndex,
-        animationDurationBackground: (profileConfig as any)
-          .animationDurationBackground,
-        delayAnimationButton: (profileConfig as any).delayAnimationButton,
-        canvaEnable: (profileConfig as any).canvaEnable,
-        selectedCanvasIndex: (profileConfig as any).selectedCanvasIndex,
+        buttonThemeEnable: profileConfig.buttonThemeEnable,
+        EnableAnimationArticle: profileConfig.EnableAnimationArticle,
+        EnableAnimationButton: profileConfig.EnableAnimationButton,
+        EnableAnimationBackground: profileConfig.EnableAnimationBackground,
+        backgroundSize: profileConfig.backgroundSize,
+        selectedThemeIndex: profileConfig.selectedThemeIndex,
+        selectedAnimationIndex: profileConfig.selectedAnimationIndex,
+        selectedAnimationButtonIndex: profileConfig.selectedAnimationButtonIndex,
+        selectedAnimationBackgroundIndex: profileConfig.selectedAnimationBackgroundIndex,
+        animationDurationBackground: profileConfig.animationDurationBackground,
+        delayAnimationButton: profileConfig.delayAnimationButton,
+        canvaEnable: profileConfig.canvaEnable,
+        selectedCanvasIndex: profileConfig.selectedCanvasIndex,
       },
     });
   } catch (e) {}

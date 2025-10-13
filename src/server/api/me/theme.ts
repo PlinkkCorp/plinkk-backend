@@ -18,7 +18,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
       return reply.code(404).send({ error: "Thème introuvable" });
     await prisma.theme.update({
       where: { id },
-      data: { status: "ARCHIVED" as any },
+      data: { status: "ARCHIVED" },
     });
     return reply.send({ ok: true });
   });
@@ -27,7 +27,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
   fastify.post("/", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const body = (request.body as any) || {};
+    const body = request.body as { name: string, description: string, data: string, isPrivate: boolean };
     const name = String(body.name || "").trim();
     if (!name) return reply.code(400).send({ error: "Nom requis" });
     const description = body.description ? String(body.description) : null;
@@ -49,7 +49,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
         description,
         data,
         authorId: userId as string,
-        status: "DRAFT" as any,
+        status: "DRAFT",
         isPrivate,
       },
       select: { id: true, name: true, status: true },
@@ -68,11 +68,11 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
     });
     if (!t || t.authorId !== userId)
       return reply.code(404).send({ error: "Thème introuvable" });
-    if (t.status !== ("DRAFT" as any))
+    if (t.status !== ("DRAFT"))
       return reply
         .code(400)
         .send({ error: "Seuls les brouillons sont modifiables" });
-    const body = (request.body as any) || {};
+    const body = request.body as { name: string, description: string, data: string, isPrivate: boolean };
     const patch: any = {};
     if (typeof body.name === "string" && body.name.trim())
       patch.name = body.name.trim();
@@ -126,7 +126,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
       return reply.code(404).send({ error: "Thème introuvable" });
     const updated = await prisma.theme.update({
       where: { id },
-      data: { status: "SUBMITTED" as any },
+      data: { status: "SUBMITTED" },
       select: { id: true, status: true },
     });
     return reply.send(updated);
@@ -143,7 +143,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
     });
     if (!t || t.authorId !== userId)
       return reply.code(404).send({ error: "Thème introuvable" });
-    const { isPrivate } = (request.body as any) ?? {};
+    const { isPrivate } = request.body as { isPrivate: boolean };
     const updated = await prisma.theme.update({
       where: { id },
       data: { isPrivate: Boolean(isPrivate) },
@@ -156,7 +156,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
   fastify.post("/select", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const body = (request.body as any) ?? {};
+    const body = request.body as { themeId: string, builtInIndex: number };
     const { themeId, builtInIndex } = body;
     if (typeof builtInIndex === "number") {
       // Use built-in theme: read built-ins and pick index
@@ -170,9 +170,9 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
       const created = await prisma.theme.create({
         data: {
           name: `builtin-${builtInIndex}`,
-          data: themeData as any,
+          data: themeData,
           authorId: userId as string,
-          status: "APPROVED" as any,
+          status: "APPROVED",
           isPrivate: true,
         },
         select: { id: true },
@@ -210,11 +210,11 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
     });
     if (!t || t.authorId !== userId)
       return reply.code(404).send({ error: "Thème introuvable" });
-    if (t.status !== ("APPROVED" as any))
+    if (t.status !== ("APPROVED"))
       return reply.code(400).send({
         error: "Seuls les thèmes approuvés peuvent proposer une mise à jour",
       });
-    const body = (request.body as any) || {};
+    const body = request.body as { data: object, message: string };
     if (!body.data || typeof body.data !== "object")
       return reply.code(400).send({ error: "Données invalides" });
     let normalized: any;
@@ -230,7 +230,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
     const updated = await prisma.theme.update({
       where: { id },
       data: {
-        pendingUpdate: normalized as any,
+        pendingUpdate: normalized,
         pendingUpdateAt: new Date(),
         pendingUpdateMessage: message,
       },

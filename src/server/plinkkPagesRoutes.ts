@@ -39,7 +39,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     // Passe aussi user et un alias plinkks pour la vue intégrée
     const pagesForView = pages.map((p) => ({
       ...p,
-      affichageEmail: (p as any).settings?.affichageEmail ?? null,
+      affichageEmail: p.settings?.affichageEmail ?? null,
     }));
     return reply.view("dashboard/user/plinkks.ejs", {
       user: me,
@@ -100,7 +100,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
       return reply.redirect(
         `/login?returnTo=${encodeURIComponent("/dashboard/plinkks")}`
       );
-    const body = request.body || ({} as any);
+    const body = request.body as { title: string, slug: string, visibility: string, isActive: string };
     const title = String(body.title || "").trim();
     const slugBase = String(body.slug || title);
     const visibility =
@@ -108,10 +108,10 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
         ? "PRIVATE"
         : "PUBLIC";
     const isActive = !!body.isActive;
-    await createPlinkkForUser(prisma as any, me.id, {
+    await createPlinkkForUser(prisma, me.id, {
       name: title || "Page",
       slugBase,
-      visibility: visibility as any,
+      visibility,
       isActive,
     });
     return reply.redirect("/dashboard/plinkks");
@@ -155,7 +155,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
         `/login?returnTo=${encodeURIComponent("/dashboard/plinkks")}`
       );
     const { id } = request.params;
-    const body = request.body || ({} as any);
+    const body = request.body as { title: string, slug: string, visibility: string, isActive: string, isDefault: string };
     const page = await prisma.plinkk.findUnique({ where: { id } });
     if (!page || page.userId !== userId)
       return reply.code(404).view("erreurs/404.ejs", { user: { id: userId } });
@@ -165,7 +165,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     if (typeof body.slug === "string" && body.slug.trim()) {
       const s = slugify(body.slug);
       if (s !== page.slug) {
-        if (await isReservedSlug(prisma as any, s))
+        if (await isReservedSlug(prisma, s))
           return reply
             .code(400)
             .view("erreurs/500.ejs", {
@@ -217,7 +217,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
           `/login?returnTo=${encodeURIComponent("/dashboard/plinkks")}`
         );
       const { id } = request.params;
-      const mode = String((request.body as any)?.mode || "soft");
+      const mode = String((request.body as { mode: string })?.mode || "soft");
       const page = await prisma.plinkk.findUnique({ where: { id } });
       if (!page || page.userId !== userId)
         return reply

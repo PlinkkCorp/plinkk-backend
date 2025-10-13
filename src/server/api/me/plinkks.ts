@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient } from "../../../../generated/prisma/client";
+import { PlinkkSettings, PrismaClient } from "../../../../generated/prisma/client";
 import { reindexNonDefault, slugify, isReservedSlug, createPlinkkForUser } from "../../../lib/plinkkUtils";
 
 const prisma = new PrismaClient();
@@ -13,12 +13,12 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     const p = await prisma.plinkk.findUnique({ where: { id } });
     if (!p || p.userId !== userId)
       return reply.code(404).send({ error: "not_found" });
-    const body = (request.body as any) || {};
-    const patch: any = {};
+    const body = (request.body as { isPublic: boolean, isDefault: boolean });
+    const patch: { isPublic?: boolean, visibility?: "PUBLIC" | "PRIVATE" } = {};
     // Toggle public
     if (typeof body.isPublic === "boolean") {
       patch.isPublic = Boolean(body.isPublic);
-      patch.visibility = (body.isPublic ? "PUBLIC" : "PRIVATE") as any;
+      patch.visibility = (body.isPublic ? "PUBLIC" : "PRIVATE");
     }
     // Set default
     if (body.isDefault === true && !p.isDefault) {
@@ -39,7 +39,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
           data: { isDefault: true, index: 0 },
         }),
       ]);
-      await reindexNonDefault(prisma as any, userId);
+      await reindexNonDefault(prisma, userId);
     }
     if (Object.keys(patch).length) {
       await prisma.plinkk.update({ where: { id }, data: patch });
@@ -63,7 +63,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
         return reply.code(400).send({ error: "cannot_delete_default" });
     }
     await prisma.plinkk.delete({ where: { id } });
-    await reindexNonDefault(prisma as any, userId);
+    await reindexNonDefault(prisma, userId);
     return reply.send({ ok: true });
   });
 
@@ -71,13 +71,13 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
   fastify.post("/", async (request, reply) => {
     const userId = request.session.get("data") as string | undefined;
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
-    const body = (request.body as any) || {};
+    const body = request.body as { slug: string, name: string };
     const rawSlug = typeof body.slug === "string" ? body.slug : "";
     const rawName = typeof body.name === "string" ? body.name : "";
     try {
       // Normaliser la base; éviter mots réservés
       const base = slugify(rawSlug || rawName || "page");
-      if (!base || (await isReservedSlug(prisma as any, base)))
+      if (!base || (await isReservedSlug(prisma, base)))
         return reply.code(400).send({ error: "invalid_or_reserved_slug" });
       // Interdire conflit avec un @ d'utilisateur
       const userConflict = await prisma.user.findUnique({
@@ -87,7 +87,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       if (userConflict)
         return reply.code(409).send({ error: "slug_conflicts_with_user" });
       // Interdire conflit direct avec un autre plinkk (suggestion générera une variante de toute façon)
-      const created = await createPlinkkForUser(prisma as any, userId, {
+      const created = await createPlinkkForUser(prisma, userId, {
         name: rawName,
         slugBase: base,
       });
@@ -125,7 +125,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       links,
     ] = await Promise.all([
       prisma.plinkkSettings.findUnique({ where: { plinkkId: id } }),
-      prisma.user.findUnique({ where: { id: String(userId) } }) as any,
+      prisma.user.findUnique({ where: { id: String(userId) } }),
       prisma.backgroundColor.findMany({
         where: { userId: String(userId), plinkkId: id },
       }),
@@ -148,86 +148,86 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       profileLink:
         settings != null
           ? settings.profileLink
-          : (user as any)?.profileLink ?? null,
+          : user?.profileLink ?? null,
       profileImage:
         settings != null
           ? settings.profileImage
-          : (user as any)?.profileImage ?? null,
+          : user?.profileImage ?? null,
       profileIcon:
         settings != null
           ? settings.profileIcon
-          : (user as any)?.profileIcon ?? null,
+          : user?.profileIcon ?? null,
       profileSiteText:
         settings != null
           ? settings.profileSiteText
-          : (user as any)?.profileSiteText ?? null,
+          : user?.profileSiteText ?? null,
       userName:
-        settings != null ? settings.userName : (user as any)?.userName ?? null,
+        settings != null ? settings.userName : user?.userName ?? null,
       // Email public spécifique à la Plinkk : si settings présent ET que la
       // propriété `affichageEmail` est définie, l'utiliser (même si null =>
       // effacement explicite). Sinon fallback vers user.publicEmail || user.email.
       email:
         settings != null &&
         Object.prototype.hasOwnProperty.call(settings, "affichageEmail")
-          ? (settings as any).affichageEmail
-          : (user as any)?.publicEmail ?? (user as any)?.email ?? "",
+          ? settings.affichageEmail
+          : user?.publicEmail ?? user?.email ?? "",
       iconUrl:
-        settings != null ? settings.iconUrl : (user as any)?.iconUrl ?? null,
+        settings != null ? settings.iconUrl : user?.iconUrl ?? null,
       description:
         settings != null
           ? settings.description
-          : (user as any)?.description ?? null,
+          : user?.description ?? null,
       profileHoverColor:
-        settings?.profileHoverColor ?? (user as any)?.profileHoverColor ?? null,
+        settings?.profileHoverColor ?? user?.profileHoverColor ?? null,
       degBackgroundColor:
         settings?.degBackgroundColor ??
-        (user as any)?.degBackgroundColor ??
+        user?.degBackgroundColor ??
         null,
-      neonEnable: settings?.neonEnable ?? (user as any)?.neonEnable ?? 0,
+      neonEnable: settings?.neonEnable ?? user?.neonEnable ?? 0,
       buttonThemeEnable:
-        settings?.buttonThemeEnable ?? (user as any)?.buttonThemeEnable ?? 0,
+        settings?.buttonThemeEnable ?? user?.buttonThemeEnable ?? 0,
       EnableAnimationArticle:
         settings?.EnableAnimationArticle ??
-        (user as any)?.EnableAnimationArticle ??
+        user?.EnableAnimationArticle ??
         0,
       EnableAnimationButton:
         settings?.EnableAnimationButton ??
-        (user as any)?.EnableAnimationButton ??
+        user?.EnableAnimationButton ??
         0,
       EnableAnimationBackground:
         settings?.EnableAnimationBackground ??
-        (user as any)?.EnableAnimationBackground ??
+        user?.EnableAnimationBackground ??
         0,
       backgroundSize:
-        settings?.backgroundSize ?? (user as any)?.backgroundSize ?? null,
+        settings?.backgroundSize ?? user?.backgroundSize ?? null,
       selectedThemeIndex:
         settings?.selectedThemeIndex ??
-        (user as any)?.selectedThemeIndex ??
+        user?.selectedThemeIndex ??
         null,
       selectedAnimationIndex:
         settings?.selectedAnimationIndex ??
-        (user as any)?.selectedAnimationIndex ??
+        user?.selectedAnimationIndex ??
         null,
       selectedAnimationButtonIndex:
         settings?.selectedAnimationButtonIndex ??
-        (user as any)?.selectedAnimationButtonIndex ??
+        user?.selectedAnimationButtonIndex ??
         null,
       selectedAnimationBackgroundIndex:
         settings?.selectedAnimationBackgroundIndex ??
-        (user as any)?.selectedAnimationBackgroundIndex ??
+        user?.selectedAnimationBackgroundIndex ??
         null,
       animationDurationBackground:
         settings?.animationDurationBackground ??
-        (user as any)?.animationDurationBackground ??
+        user?.animationDurationBackground ??
         null,
       delayAnimationButton:
         settings?.delayAnimationButton ??
-        (user as any)?.delayAnimationButton ??
+        user?.delayAnimationButton ??
         null,
-      canvaEnable: settings?.canvaEnable ?? (user as any)?.canvaEnable ?? 0,
+      canvaEnable: settings?.canvaEnable ?? user?.canvaEnable ?? 0,
       selectedCanvasIndex:
         settings?.selectedCanvasIndex ??
-        (user as any)?.selectedCanvasIndex ??
+        user?.selectedCanvasIndex ??
         null,
       background: background.map((c) => c.color),
       neonColors: neonColors.map((c) => c.color),
@@ -269,7 +269,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     });
     if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
 
-    const body = (request.body as any) ?? {};
+    const body = request.body as PlinkkSettings;
     const pickDefined = (obj: Record<string, any>) =>
       Object.fromEntries(
         Object.entries(obj).filter(([_, v]) => v !== undefined)
