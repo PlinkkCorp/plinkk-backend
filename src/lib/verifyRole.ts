@@ -1,29 +1,37 @@
 import { Role } from "../../generated/prisma";
 
-export function verifyRoleUser(role: Role) {
-    return role === null ? "USER" : role.id === "USER" ? true : false
+// Retourne true si l'utilisateur a le rôle USER (ou pas de rôle)
+export function verifyRoleUser(role: Role | null | undefined): boolean {
+    if (!role) return true;
+    return role.name === "USER";
 }
 
-export function verifyRoleBeta(role: Role) {
-    return role === null ? "USER" : role.id === "BETA" ? true : false
+export function verifyRoleBeta(role: Role | null | undefined): boolean {
+    if (!role) return false;
+    return role.name === "BETA";
 }
 
-export function verifyRolePartner(role: Role) {
-    return role === null ? "USER" : role.id === "PARTNER" ? true : false
+export function verifyRolePartner(role: Role | null | undefined): boolean {
+    if (!role) return false;
+    return role.name === "PARTNER";
 }
 
-export function verifyRoleAdmin(role: Role) {
-    return role === null ? "USER" : role.id === "ADMIN" ? true : false
+export function verifyRoleAdmin(role: Role | null | undefined): boolean {
+    if (!role) return false;
+    return role.name === "ADMIN";
 }
 
-export function verifyRoleDeveloper(role: Role) {
-    return role === null ? "USER" : role.id === "DEVELOPER" ? true : false
+export function verifyRoleDeveloper(role: Role | null | undefined): boolean {
+    if (!role) return false;
+    return role.name === "DEVELOPER";
 }
 
-export function verifyRoleModrator(role: Role) {
-    return role === null ? "USER" : role.id === "MODERATOR" ? true : false
+// Note: original had a typo 'Modrator' — keep compatibility by keeping the same export name
+export function verifyRoleModrator(role: Role | null | undefined): boolean {
+    if (!role) return false;
+    return role.name === "MODERATOR";
 }
 
-export function verifyRoleIsStaff(role: Role) {
-    return verifyRoleAdmin(role) || verifyRoleDeveloper(role) || verifyRoleModrator(role)
+export function verifyRoleIsStaff(role: Role | null | undefined): boolean {
+    return verifyRoleAdmin(role) || verifyRoleDeveloper(role) || verifyRoleModrator(role);
 }
