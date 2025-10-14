@@ -7,7 +7,7 @@ Backend Node.js/TypeScript pour le projet [Plinkk](https://github.com/PlinkkCorp
 - Authentification (inscription, connexion, session sécurisée)
 - Génération dynamique de profils utilisateurs
 - API pour servir les assets, images, fichiers JS/CSS personnalisés
-- Intégration avec Prisma (SQLite)
+- Intégration avec Prisma (SQLite (_pour le développement_), PostgreSQL)
 - Sécurité renforcée (bcrypt, validation Zod, cookies sécurisés)
 - Rendu côté serveur avec EJS
 
