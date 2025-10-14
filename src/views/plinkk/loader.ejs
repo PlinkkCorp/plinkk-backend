@@ -1,0 +1,269 @@
+
+<!-- Loader -->
+<div id="page-loader" role="status" aria-live="polite" aria-label="Chargement de la page">
+    <div class="loader-wrap">
+        <svg class="loader-logo" viewBox="0 0 100 100" aria-hidden="true">
+            <circle cx="50" cy="50" r="40" class="ring" />
+            <circle cx="50" cy="50" r="30" class="dot" />
+        </svg>
+        <div class="loader-text">Chargement<span class="dots" aria-hidden="true">...</span></div>
+    </div>
+</div>
+
+<style>
+    :root{
+        --bg-start: rgba(6,7,10,0.92);
+        --bg-end: rgba(18,19,22,0.78);
+        --card-bg: rgba(255,255,255,0.03);
+        --accent-1: #6ea8fe;
+        --accent-2: #7c5cff;
+        --text: #f6f7fb;
+        --glass-border: rgba(255,255,255,0.06);
+    }
+
+    /* Fullscreen loader */
+    #page-loader {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(180deg, var(--bg-start), var(--bg-end));
+        z-index: 99999;
+        transition: opacity 420ms cubic-bezier(.2,.9,.2,1), transform 420ms cubic-bezier(.2,.9,.2,1), visibility 420ms;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        -webkit-font-smoothing:antialiased;
+        -moz-osx-font-smoothing:grayscale;
+    }
+
+    #page-loader.loaded {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transform: scale(0.995);
+    }
+
+    /* Center card (glass) with animated glowing blobs behind content */
+    .loader-wrap {
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+        color: var(--text);
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+        padding: 20px 26px;
+        border-radius: 16px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.02));
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 14px 40px rgba(2,6,23,0.55), inset 0 1px 0 rgba(255,255,255,0.02);
+        transform-origin: center;
+        width: min(92%, 480px);
+        backdrop-filter: blur(8px) saturate(120%);
+    }
+
+    /* animated glowing accent blobs */
+    .loader-wrap::before,
+    .loader-wrap::after {
+        content: "";
+        position: absolute;
+        inset: -30%;
+        z-index: 0;
+        pointer-events: none;
+        background-repeat: no-repeat;
+        filter: blur(36px) saturate(120%);
+        opacity: 0.37;
+        transition: opacity 320ms ease;
+    }
+
+    .loader-wrap::before {
+        background-image: radial-gradient(circle at 20% 30%, var(--accent-1) 0%, rgba(110,168,254,0.0) 40%),
+                          radial-gradient(circle at 80% 70%, var(--accent-2) 0%, rgba(124,92,255,0.0) 36%);
+        animation: blob-move 7.2s ease-in-out infinite alternate;
+    }
+
+    .loader-wrap::after {
+        background-image: radial-gradient(circle at 60% 20%, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.0) 35%);
+        animation: blob-fade 9.6s ease-in-out infinite;
+    }
+
+    /* keep content above blobs */
+    .loader-wrap > * { position: relative; z-index: 1; }
+
+    .loader-logo {
+        width: 86px;
+        height: 86px;
+        display: block;
+        transform-origin: 50% 50%;
+        z-index: 1;
+        /* subtle entrance + slow rotate to feel alive (not just a spinner) */
+        animation: logo-entrance 1600ms cubic-bezier(.22,.9,.2,1) both, logo-breath 2200ms ease-in-out infinite;
+    }
+
+    /* SVG stroke/draw effect instead of monotone spin */
+    .ring {
+        fill: none;
+        stroke: rgba(255,255,255,0.12);
+        stroke-width: 8;
+        stroke-linecap: round;
+        stroke-dasharray: 180;
+        stroke-dashoffset: 180;
+        filter: drop-shadow(0 6px 18px rgba(0,0,0,0.45));
+        transform-origin: 50% 50%;
+        transform-box: fill-box; /* ensure SVG transforms use its bounding box */
+        /* separate spin animation and draw animation (draw no longer modifies transform) */
+        animation: ring-draw 2200ms ease-in-out infinite, ring-spin 3000ms linear infinite;
+    }
+
+    /* dot pulses and slightly hops outward */
+    .dot {
+        fill: var(--text);
+        filter: drop-shadow(0 4px 10px rgba(0,0,0,0.45));
+        transform-origin: 50% 50%;
+        animation: dot-pop 1200ms cubic-bezier(.2,.9,.2,1) infinite;
+    }
+
+    /* loader text / subtitle */
+    .loader-text {
+        font-size: 14px;
+        letter-spacing: 0.2px;
+        color: var(--text);
+        font-weight: 700;
+        opacity: 0;
+        transform: translateY(8px) scale(0.995);
+        animation: text-in 900ms cubic-bezier(.2,.9,.25,1) 240ms both;
+    }
+
+    .loader-sub {
+        font-size: 12px;
+        color: rgba(246,247,251,0.78);
+        margin-top: -2px;
+        opacity: 0;
+        transform: translateY(6px);
+        animation: text-in 900ms cubic-bezier(.2,.9,.25,1) 360ms both;
+    }
+
+    .dots {
+        display: inline-block;
+        width: 3ch;
+        text-align: left;
+        animation: dots 1.05s steps(3,end) infinite;
+        color: var(--accent-1);
+        margin-left: 8px;
+        font-weight: 700;
+    }
+
+    /* subtle hover of whole card while loading to give life */
+    #page-loader:not(.loaded) .loader-wrap {
+        animation: card-floating 4200ms ease-in-out infinite;
+    }
+
+    /* KEYFRAMES */
+    @keyframes blob-move {
+        0% { transform: translateY(0) translateX(0) scale(1); opacity: 0.42; }
+        50% { transform: translateY(-8%) translateX(6%) scale(1.08); opacity: 0.56; }
+        100% { transform: translateY(-4%) translateX(-6%) scale(0.95); opacity: 0.45; }
+    }
+
+    @keyframes blob-fade {
+        0% { opacity: 0.18; transform: translateY(0) scale(1); }
+        50% { opacity: 0.28; transform: translateY(-10%) scale(1.06); }
+        100% { opacity: 0.2; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes logo-entrance {
+        0% { opacity: 0; transform: translateY(8px) scale(0.9) rotate(-6deg); }
+        100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+    }
+
+    @keyframes logo-breath {
+        0% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 6px 18px rgba(0,0,0,0.45)); }
+        50% { transform: scale(1.03) rotate(4deg); filter: drop-shadow(0 12px 30px rgba(0,0,0,0.5)); }
+        100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 6px 18px rgba(0,0,0,0.45)); }
+    }
+
+    /* Draw effect only (no transforms) so rotation can be applied separately */
+    @keyframes ring-draw {
+        0%   { stroke-dashoffset: 180; opacity: 0.6; }
+        45%  { stroke-dashoffset: 32;  opacity: 1; }
+        100% { stroke-dashoffset: 180; opacity: 0.7; }
+    }
+
+    /* Continuous rotation for the ring */
+    @keyframes ring-spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+    }
+
+    @keyframes dot-pop {
+        0%   { transform: scale(0.92) translateY(0); opacity: 0.85; }
+        45%  { transform: scale(1.18) translateY(-8%); opacity: 1; }
+        100% { transform: scale(0.92) translateY(0); opacity: 0.85; }
+    }
+
+    @keyframes text-in {
+        0% { opacity: 0; transform: translateY(8px) scale(0.995); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes dots {
+        0%   { opacity: 0.28; transform: translateY(0); }
+        20%  { opacity: 1; transform: translateY(-2px); }
+        40%  { opacity: 0.6; transform: translateY(0); }
+        100% { opacity: 0.28; transform: translateY(0); }
+    }
+
+    @keyframes card-floating {
+        0% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+        100% { transform: translateY(0); }
+    }
+
+    /* Responsive sizing */
+    @media (max-width:420px){
+        .loader-logo { width: 72px; height: 72px; }
+        .loader-wrap { padding: 14px; border-radius: 12px; }
+        .loader-text { font-size: 13px; }
+    }
+
+    /* Respect prefers-reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+        .ring, .dot, .dots, .loader-wrap::before, .loader-wrap::after, .loader-wrap, .loader-logo {
+            animation: none !important;
+            transition: none !important;
+        }
+        #page-loader { transition: none !important; }
+    }
+</style>
+
+<script>
+    (function () {
+        const loader = document.getElementById('page-loader');
+        if (!loader) return;
+
+        function hideLoader() {
+            // start fade-out
+            loader.classList.add('loaded');
+            // remove from DOM after transition
+            loader.addEventListener('transitionend', () => {
+                try { loader.remove(); } catch (e) {}
+            }, { once: true });
+        }
+
+        // Hide on full load
+        if (document.readyState === 'complete') {
+            // small delay so initial paint shows loader briefly
+            setTimeout(hideLoader, 120);
+        } else {
+            window.addEventListener('load', () => setTimeout(hideLoader, 120), { once: true });
+            // Fallback: remove after 6s to avoid stuck loader
+            setTimeout(() => {
+                if (document.body && document.getElementById('page-loader')) hideLoader();
+            }, 6000);
+        }
+    })();
+</script>
