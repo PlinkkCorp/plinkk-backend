@@ -10,6 +10,7 @@ import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
 import fastifyCors from "@fastify/cors";
+import fastifyCron from "fastify-cron";
 import bcrypt from "bcrypt";
 import fastifySecureSession from "@fastify/secure-session";
 import z from "zod";
@@ -96,6 +97,14 @@ fastify.register(fastifyHttpProxy, {
     },
   },
 });
+
+
+fastify.register(fastifyCron, {})
+
+/* fastify.cron.createJob({
+  cronTime: '0 0 * * MON', // At 00:00 on Monday.
+  onTick: () => {}
+}) */
 
 fastify.register(apiRoutes, { prefix: "/api" });
 fastify.register(staticPagesRoutes);
@@ -476,6 +485,12 @@ fastify.post("/login", async (request, reply) => {
       }`
     );
   }
+  await prisma.user.update({
+    where: { email: emailTrim },
+    data: {
+      lastLogin: new Date(Date.now())
+    }
+  })
   const returnToLogin =
     (request.body as { returnTo: string })?.returnTo || (request.query as { returnTo: string })?.returnTo;
   request.log?.info(
@@ -662,4 +677,5 @@ fastify.listen({ port: PORT, host: "0.0.0.0" }, function (err, address) {
     process.exit(1);
   }
   console.info(`Server is now listening on ${address}`);
+  fastify.cron.startAllJobs()
 });

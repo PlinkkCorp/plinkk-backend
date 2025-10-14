@@ -39,6 +39,7 @@ model User {
   name          String
   emailVerified Boolean           @default(false)
   image         String?
+  lastLogin     DateTime          @default(now())
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @default(now()) @updatedAt
 
