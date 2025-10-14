@@ -408,8 +408,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     // Écriture du fichier
     writeFileSync(filePath, buf);
 
-    console.log(filePath)
-
     // Mise à jour de l’utilisateur
     await prisma.user.update({
       where: { id: me.id },

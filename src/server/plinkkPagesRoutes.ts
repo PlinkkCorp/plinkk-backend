@@ -8,6 +8,7 @@ import {
   createPlinkkForUser,
   isReservedSlug,
 } from "../lib/plinkkUtils";
+import { replyView } from "../lib/replyView";
 
 const prisma = new PrismaClient();
 
@@ -21,7 +22,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
       );
     const me = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, role: true, userName: true, image: true },
+      include: { role: true }
     });
     if (!me)
       return reply.redirect(
@@ -40,39 +41,11 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
       ...p,
       affichageEmail: p.settings?.affichageEmail ?? null,
     }));
-    return reply.view("dashboard/user/plinkks.ejs", {
-      user: me,
+    return replyView(reply, "dashboard/user/plinkks.ejs", me, {
       userId: me.id,
       userName: me.userName,
       pages: pagesForView,
       plinkks: pagesForView,
-      maxPages,
-    });
-  });
-
-  // New form
-  fastify.get("/plinkks/new", async (request, reply) => {
-    const userId = request.session.get("data") as string | undefined;
-    if (!userId)
-      return reply.redirect(
-        `/login?returnTo=${encodeURIComponent("/dashboard/plinkks/new")}`
-      );
-    const me = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true, role: true, userName: true },
-    });
-    if (!me)
-      return reply.redirect(
-        `/login?returnTo=${encodeURIComponent(
-          String(request.raw.url || "/dashboard/plinkks/new")
-        )}`
-      );
-    const pagesCount = await prisma.plinkk.count({ where: { userId: me.id } });
-    const maxPages = getMaxPagesForRole(me.role);
-    const canCreate = pagesCount < maxPages;
-    return reply.view("dashboard/user/plinkks_new.ejs", {
-      userName: me.userName,
-      canCreate,
       maxPages,
     });
   });

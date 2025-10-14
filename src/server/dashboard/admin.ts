@@ -16,7 +16,6 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      omit: { password: true },
       include: { role: true },
     });
     if (!userInfo) {
@@ -88,8 +87,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
-    return reply.view("dashboard/admin/themes.ejs", {
-      user: userInfo,
+    return replyView(reply, "dashboard/admin/themes.ejs", userInfo, {
       submitted: mergedSubmitted,
       approved: approvedFiltered,
       archived,
