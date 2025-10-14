@@ -220,8 +220,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       ...p,
       affichageEmail: p.settings?.affichageEmail ?? null,
     }));
-    return reply.view("dashboard/user/edit.ejs", {
-      user: userInfo,
+    return replyView(reply, "dashboard/user/edit.ejs", userInfo, {
       plinkk: selectedForView,
       pages: pagesForView,
       autoOpenPlinkkModal,
@@ -342,8 +341,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       ...p,
       affichageEmail: p.settings?.affichageEmail ?? null,
     }));
-    return reply.view("dashboard/user/stats.ejs", {
-      user: userInfo,
+    return replyView(reply, "dashboard/user/stats.ejs", userInfo, {
       plinkk: selectedForView,
       pages: pagesForView,
       autoOpenPlinkkModal,
@@ -552,7 +550,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      omit: { password: true },
       include: { role: true }
     });
     if (!userInfo) {
@@ -584,8 +581,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
-    return reply.view("dashboard/user/themes.ejs", {
-      user: userInfo,
+    return replyView(reply, "dashboard/user/themes.ejs", userInfo, {
       myThemes,
       selectedCustomThemeId: userInfo.selectedCustomThemeId || null,
       publicPath

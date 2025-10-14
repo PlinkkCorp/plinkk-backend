@@ -16,6 +16,7 @@
     "postinstall": "prisma generate || true",
     "set-admin": "node scripts/set-admin.cjs",
     "migrate:plinkks": "node scripts/migrate-plinkks.cjs",
+    "delete_inactive": "node scripts/delete_inactive_user.js ",
     "seed:role": "ts-node prisma/seed.ts"
   },
   "keywords": [],
@@ -57,6 +58,7 @@
     "ejs": "^3.1.10",
     "fastify": "^5.6.1",
     "fastify-cli": "^7.4.0",
+    "fastify-cron": "^1.4.0",
     "otplib": "^12.0.1",
     "qrcode": "^1.5.4",
     "rimraf": "^5.0.10",

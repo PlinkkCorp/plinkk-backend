@@ -51,8 +51,8 @@ export async function replyView(
   }
 
   return reply.view(template, {
-    __SITE_MESSAGES__: siteMessages,
-    user: safe,
+    __SITE_MESSAGES__: await getActiveAnnouncementsForUser(user.id),
+    user: toSafeUser(user),
     ...data,
   });
 }
