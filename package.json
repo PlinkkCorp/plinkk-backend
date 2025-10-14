@@ -16,6 +16,7 @@
     "postinstall": "prisma generate || true",
     "set-admin": "node scripts/set-admin.cjs",
     "migrate:plinkks": "node scripts/migrate-plinkks.cjs",
+    "delete_inactive": "node scripts/delete_inactive_user.js ",
     "seed:role": "ts-node prisma/seed.ts"
   },
   "keywords": [],
