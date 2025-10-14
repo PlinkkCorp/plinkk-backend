@@ -416,6 +416,11 @@ fastify.post("/register", async (req, reply) => {
         name: username,
         email: email,
         password: hashedPassword,
+        role: {
+          connect: {
+            id: "USER"
+          }
+        }
       },
     });
     // Ensure a default Cosmetic row exists to avoid null-access errors in code

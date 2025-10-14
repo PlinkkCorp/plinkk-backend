@@ -607,7 +607,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       where.isPublic = visibility === "public";
     const rows = await prisma.user.findMany({
       where,
-      select: { id: true, role: true, isPublic: true },
+      include: { role: true }
     });
     const total = rows.length;
     const publics = rows.filter((r) => r.isPublic).length;
@@ -619,7 +619,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       ADMIN: 0,
     };
     rows.forEach((r) => {
-      byRole[r.role.name as string] = (byRole[r.role.name as string] || 0) + 1;
+      byRole[r.role.name] = (byRole[r.role.name] || 0) + 1;
     });
     return reply.send({ total, publics, privates, byRole });
   });
