@@ -1,0 +1,104 @@
+
+<!-- Loader -->
+<div id="page-loader" role="status" aria-live="polite" aria-label="Chargement de la page">
+    <div class="loader-wrap">
+        <!-- SVG loader will be fetched and inlined from ./anim-load.svg -->
+        <div class="loader-logo" aria-hidden="true" role="img" aria-label="Animation de chargement">
+            <!-- fallback content while fetching -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" width="100%" height="100%" style="shape-rendering: auto; display: block; background: transparent;" xmlns:xlink="http://www.w3.org/1999/xlink"><g><path style="transform:scale(0.9600000000000001);transform-origin:50px 50px" stroke-linecap="round" d="M24.3 30C11.4 30 5 43.3 5 50s6.4 20 19.3 20c19.3 0 32.1-40 51.4-40 C88.6 30 95 43.3 95 50s-6.4 20-19.3 20C56.4 70 43.6 30 24.3 30z" stroke-dasharray="218.10058898925783 38.48833923339842" stroke-width="12" stroke="#6ea8fe" fill="none">
+            <animate values="0;256.58892822265625" keyTimes="0;1" dur="1.4705882352941175s" repeatCount="indefinite" attributeName="stroke-dashoffset"></animate>
+            </path><g></g></g></svg>
+        </div>
+        <div class="loader-text">Chargement<span class="dots" aria-hidden="true">...</span></div>
+    </div>
+</div>
+
+<style>
+    :root{
+        --bg: rgba(8,9,12,0.92);
+        --card-bg: rgba(255,255,255,0.03);
+        --text: #f6f7fb;
+    }
+
+    /* Minimal, non-animated loader styles — SVG handles the animation now */
+    #page-loader {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(180deg, var(--bg), rgba(0,0,0,0.6));
+        z-index: 99999;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        -webkit-font-smoothing:antialiased;
+        -moz-osx-font-smoothing:grayscale;
+    }
+
+    #page-loader.loaded {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    .loader-wrap {
+        position: relative;
+        text-align: center;
+        color: var(--text);
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+        padding: 16px 20px;
+        border-radius: 12px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        border: 1px solid rgba(255,255,255,0.04);
+        width: min(92%, 420px);
+        backdrop-filter: blur(6px);
+    }
+
+    .loader-logo { width: 80px; height: 80px; }
+
+    .loader-text { font-size: 14px; font-weight:700; color:var(--text); }
+
+    .loader-sub { font-size:12px; color: rgba(246,247,251,0.8); }
+
+    .dots { margin-left:8px; color: inherit; }
+
+    @media (max-width:420px){
+        .loader-logo { width: 64px; height: 64px; }
+        .loader-wrap { padding: 12px; border-radius: 10px; }
+        .loader-text { font-size: 13px; }
+    }
+</style>
+
+<script>
+    (function () {
+        const loader = document.getElementById('page-loader');
+        if (!loader) return;
+
+        function hideLoader() {
+            // start fade-out
+            loader.classList.add('loaded');
+            // remove from DOM after transition
+            loader.addEventListener('transitionend', () => {
+                try { loader.remove(); } catch (e) {}
+            }, { once: true });
+        }
+
+        // Hide on full load
+        if (document.readyState === 'complete') {
+            // small delay so initial paint shows loader briefly.
+            // Increase to 420ms to ensure CSS/JS animations get time to start on fast loads.
+            setTimeout(hideLoader, 420);
+        } else {
+            window.addEventListener('load', () => setTimeout(hideLoader, 420), { once: true });
+            // Fallback: remove after 6s to avoid stuck loader
+            setTimeout(() => {
+                if (document.body && document.getElementById('page-loader')) hideLoader();
+            }, 6000);
+        }
+    })();
+</script>   

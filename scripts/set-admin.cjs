@@ -22,13 +22,19 @@ async function main() {
     process.exit(1);
   }
 
+  // Ensure the Role model has an ADMIN entry, create if missing
+  let role = await prisma.role.findUnique({ where: { name: 'ADMIN' } });
+  if (!role) {
+    role = await prisma.role.create({ data: { name: 'ADMIN' } });
+  }
+
   const updated = await prisma.user.update({
     where: { id: user.id },
-    data: { role: 'ADMIN' },
-    select: { id: true, userName: true, role: true },
+    data: { role: { connect: { id: role.id } } },
+    select: { id: true, userName: true, role: { select: { name: true } } },
   });
 
-  console.log(`✅ OK: ${updated.userName} (${updated.id}) est maintenant ${updated.role}.`);
+  console.log(`✅ OK: ${updated.userName} (${updated.id}) est maintenant ${updated.role.name}.`);
 }
 
 main()
