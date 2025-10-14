@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <link rel="stylesheet" href="/<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : ((page && page.slug) ? page.slug : username) %>/css/styles.css">
-    <link rel="stylesheet" href="/<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : ((page && page.slug) ? page.slug : username) %>/css/button.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/button.css">
     <link rel="icon" href="/public/images/logo.svg" />
     <meta name="title" content="<%= (page && page.title) ? page.title : username %>">
     <meta name="description" content="<%= (page && page.description) ? page.description : 'Découvre mon profil sur Plinkk !' %>">
@@ -58,7 +58,7 @@
     }
 </script>
 <!-- Tools et Init -->
-    <script type="module" src="/<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : ((page && page.slug) ? page.slug : username) %>/js/init.js"></script>
+    <script type="module" src="/<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : ((page && page.slug) ? page.slug : username) %>/bundle.js"></script>
 <!-- Ajout de librairie d'icons -->
 <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
