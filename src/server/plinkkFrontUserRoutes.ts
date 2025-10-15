@@ -14,6 +14,7 @@ const prisma = new PrismaClient();
 import { resolvePlinkkPage, parseIdentifier } from "../lib/resolvePlinkkPage";
 import { coerceThemeData } from "../lib/theme";
 import { build } from "esbuild";
+import { generateBundle } from "../lib/generateBundle";
 
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
   fastify.get(
@@ -195,31 +196,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       return;
     }
 
-    const entryFile = path.join(__dirname, "..", "public", "js", "init.js");
-    if (!existsSync(entryFile)) {
-      reply.code(404).send("// Fichier JS non trouvé");
-      return;
-    }
-
-    const result = await build({
-      entryPoints: [entryFile],
-      bundle: true,
-      minify: true,
-      platform: "browser",
-      format: "esm",
-      write: false, // on garde le résultat en mémoire
-      banner: {
-        js: "// JavaScript made by PlinkkCorp Dev",
-        css: "/* CSS made by PlinkkCorp Dev */",
-      },
-      legalComments: "eof",
-      drop: ["console"],
-      define: {
-        __plinkk_username__: username,
-      },
-    });
-
-    const js = result.outputFiles[0].text;
+    const js = await generateBundle()
 
     reply.type("application/javascript").send(js);
   });
@@ -582,10 +559,10 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
   ); */
 
   fastify.get(
-    "/:username/config.js",
+    "/config.js",
     { config: { rateLimit: false } },
     async function (request, reply) {
-      const { username } = request.params as {
+      const { username } = request.query as {
         username: string;
       };
       if (username === "") {

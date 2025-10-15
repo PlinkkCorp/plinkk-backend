@@ -8,6 +8,7 @@ import {
   PlinkkStatusbar,
   PrismaClient,
   SocialIcon,
+  User,
 } from "../../../../generated/prisma/client";
 import {
   reindexNonDefault,
@@ -16,6 +17,12 @@ import {
   createPlinkkForUser,
   pickDefined,
 } from "../../../lib/plinkkUtils";
+import { generateBundle } from "../../../lib/generateBundle";
+import { generateProfileConfig } from "../../../lib/generateConfig";
+import path from "path";
+import { readdirSync } from "fs";
+import archiver from "archiver"
+import ejs from "ejs";
 
 const prisma = new PrismaClient();
 
@@ -385,51 +392,51 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     const body = request.body as { links: Link[] };
 
     // Liens
-      if (Array.isArray(body.links)) {
-        const existing = await prisma.link.findMany({
-          where: { userId: String(userId), plinkkId: id },
-          select: { id: true },
-        });
-        const existingIds = new Set(existing.map((l) => l.id));
-        const incomingIds = new Set(
-          body.links.map((l: Link) => l.id).filter(Boolean)
-        );
-        const toDelete = Array.from(existingIds).filter(
-          (x) => !incomingIds.has(x)
-        );
-        if (toDelete.length > 0)
-          await prisma.link.deleteMany({ where: { id: { in: toDelete } } });
-        for (const l of body.links) {
-          if (l.id && existingIds.has(l.id)) {
-            await prisma.link.update({
-              where: { id: l.id },
-              data: {
-                icon: l.icon ?? undefined,
-                url: l.url,
-                text: l.text ?? undefined,
-                name: l.name ?? undefined,
-                description: l.description ?? undefined,
-                showDescriptionOnHover: l.showDescriptionOnHover ?? undefined,
-                showDescription: l.showDescription ?? undefined,
-              },
-            });
-          } else {
-            await prisma.link.create({
-              data: {
-                icon: l.icon ?? undefined,
-                url: l.url,
-                text: l.text ?? undefined,
-                name: l.name ?? undefined,
-                description: l.description ?? undefined,
-                showDescriptionOnHover: l.showDescriptionOnHover ?? undefined,
-                showDescription: l.showDescription ?? undefined,
-                userId: String(userId),
-                plinkkId: id,
-              },
-            });
-          }
+    if (Array.isArray(body.links)) {
+      const existing = await prisma.link.findMany({
+        where: { userId: String(userId), plinkkId: id },
+        select: { id: true },
+      });
+      const existingIds = new Set(existing.map((l) => l.id));
+      const incomingIds = new Set(
+        body.links.map((l: Link) => l.id).filter(Boolean)
+      );
+      const toDelete = Array.from(existingIds).filter(
+        (x) => !incomingIds.has(x)
+      );
+      if (toDelete.length > 0)
+        await prisma.link.deleteMany({ where: { id: { in: toDelete } } });
+      for (const l of body.links) {
+        if (l.id && existingIds.has(l.id)) {
+          await prisma.link.update({
+            where: { id: l.id },
+            data: {
+              icon: l.icon ?? undefined,
+              url: l.url,
+              text: l.text ?? undefined,
+              name: l.name ?? undefined,
+              description: l.description ?? undefined,
+              showDescriptionOnHover: l.showDescriptionOnHover ?? undefined,
+              showDescription: l.showDescription ?? undefined,
+            },
+          });
+        } else {
+          await prisma.link.create({
+            data: {
+              icon: l.icon ?? undefined,
+              url: l.url,
+              text: l.text ?? undefined,
+              name: l.name ?? undefined,
+              description: l.description ?? undefined,
+              showDescriptionOnHover: l.showDescriptionOnHover ?? undefined,
+              showDescription: l.showDescription ?? undefined,
+              userId: String(userId),
+              plinkkId: id,
+            },
+          });
         }
       }
+    }
 
     return reply.send({ ok: true });
   });
@@ -501,5 +508,105 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     }
 
     return reply.send({ ok: true });
+  });
+
+  fastify.get("/:id/export.zip", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const page = await prisma.plinkk.findFirst({
+      where: { id, userId: String(userId) },
+      include: {
+        user: true,
+        settings: true,
+        links: true,
+        background: true,
+        labels: true,
+        neonColors: true,
+        socialIcons: true,
+        statusbar: true,
+      },
+    });
+    if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
+    const js = await generateBundle();
+    const settings = page.settings;
+    const pageProfile: User & PlinkkSettings = {
+      plinkkId: null,
+      ...page.user,
+      profileLink: settings?.profileLink ?? "",
+      profileImage: settings?.profileImage ?? "",
+      profileIcon: settings?.profileIcon ?? "",
+      profileSiteText: settings?.profileSiteText ?? "",
+      userName: settings?.userName ?? page.user.userName,
+      iconUrl: settings?.iconUrl ?? "",
+      description: settings?.description ?? "",
+      profileHoverColor: settings?.profileHoverColor ?? "",
+      degBackgroundColor: settings?.degBackgroundColor ?? 45,
+      neonEnable: settings?.neonEnable ?? 1,
+      buttonThemeEnable: settings?.buttonThemeEnable ?? 1,
+      EnableAnimationArticle: settings?.EnableAnimationArticle ?? 1,
+      EnableAnimationButton: settings?.EnableAnimationButton ?? 1,
+      EnableAnimationBackground: settings?.EnableAnimationBackground ?? 1,
+      backgroundSize: settings?.backgroundSize ?? 50,
+      selectedThemeIndex: settings?.selectedThemeIndex ?? 13,
+      selectedAnimationIndex: settings?.selectedAnimationIndex ?? 0,
+      selectedAnimationButtonIndex:
+        settings?.selectedAnimationButtonIndex ?? 10,
+      selectedAnimationBackgroundIndex:
+        settings?.selectedAnimationBackgroundIndex ?? 0,
+      animationDurationBackground: settings?.animationDurationBackground ?? 30,
+      delayAnimationButton: settings?.delayAnimationButton ?? 0.1,
+      // Support for per-Plinkk public email: if a PlinkkSettings.affichageEmail
+      // exists we must prefer it for the generated profile config. We expose it
+      // both as `affichageEmail` and override `publicEmail` so generateProfileConfig
+      // (which reads profile.publicEmail) will pick up the page-specific value.
+      affichageEmail: settings?.affichageEmail ?? null,
+      publicEmail:
+        settings &&
+        Object.prototype.hasOwnProperty.call(settings, "affichageEmail")
+          ? settings.affichageEmail
+          : page.user.publicEmail ?? null,
+      canvaEnable: settings?.canvaEnable ?? 1,
+      selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
+    };
+    const config = await generateProfileConfig(
+      pageProfile,
+      page.links,
+      page.background,
+      page.labels,
+      page.neonColors,
+      page.socialIcons,
+      page.statusbar
+    );
+
+    // Création du flux d’archive
+    const archive = archiver("zip", { zlib: { level: 9 } }); // niveau max de compression
+
+    // Définition des headers HTTP pour le téléchargement
+    reply
+      .header("Content-Type", "application/zip")
+      .header("Content-Disposition", "attachment; filename=plinkk_" + page.name + ".zip");
+
+    // Piping direct de l’archive dans la réponse (stream)
+    archive.pipe(reply.raw);
+
+    // --- FICHIERS DYNAMIQUES ---
+    archive.append(await ejs.renderFile(path.join(__dirname, "..", "..", "..", "views", "plinkk", "show.ejs"), { page: page, userId: page.userId, username: page.userId }), { name: "index.html" });
+    archive.append(js, { name: "bundle.js" });
+    archive.append(config, { name: "config.js" });
+
+    // --- FICHIERS CSS (statiques) ---
+    archive.file(path.join(__dirname, "..", "..", "..", "public", "css", "styles.css"), { name: "style.css" });
+    archive.file(path.join(__dirname, "..", "..", "..", "public", "css", "button.css"), { name: "button.css" });
+
+    // --- LOGOS (statiques) ---
+    const logosPath = path.join(__dirname, "..", "..", "..", "public", "images", "icons");
+    const logos = readdirSync(logosPath);
+    for (const logo of logos) {
+      archive.file(path.join(logosPath, logo), { name: `images/${logo}` });
+    }
+
+    // Finaliser le ZIP
+    await archive.finalize();
   });
 }

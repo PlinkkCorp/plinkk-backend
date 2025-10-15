@@ -32,9 +32,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     const username = (window.__PLINKK_USERNAME__ || (location.pathname.split('/').filter(Boolean)[0] || '')).trim();
     const identifier = (window.__PLINKK_IDENTIFIER__ || (location.pathname.split('/').filter(Boolean)[1] || '')).trim();
     const params = new URLSearchParams(location.search);
-    if (identifier) params.set('slug', identifier);
+    if (identifier) params.set('username', identifier);
     // Importer la config de la page (non-cachée côté serveur)
-    const mod = await import(`/${encodeURIComponent(identifier)}/config.js`);
+    const mod = await import(`/config.js?${params}`);
     const profileData = mod.profileData;
     const injectedTheme = mod.injectedTheme;
     let parsedProfileData = profileData;
