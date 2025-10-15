@@ -70,14 +70,14 @@ export function createProfileContainer(profileData) {
         profileIcon.src = profileData.profileIcon;
     }
     else {
-        profileIcon.src = username + "/images/icons/default-icon.svg";
+        profileIcon.src = "public/images/icons/default-icon.svg";
     }
     // Single-attempt fallback for the icon, then stop retrying
     profileIcon.onerror = function () {
         try {
             if (!this._triedFallback) {
                 this._triedFallback = true;
-                this.src = username + "/images/icons/default-icon.svg";
+                this.src = "public/images/icons/default-icon.svg";
                 return;
             }
         }
