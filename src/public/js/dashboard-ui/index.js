@@ -423,6 +423,9 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     const cfg = await ensureCfg();
     const themeBtn = qs('#openThemePicker');
     const canvasBtn = qs('#openCanvasPicker');
+    const animArticleBtn = qs('#openAnimArticlePicker');
+    const animButtonBtn = qs('#openAnimButtonPicker');
+    const animBgBtn = qs('#openAnimBackgroundPicker');
     const canvasLabelEl = qs('#selectedCanvasLabel');
     if (themeBtn && f.selectedThemeIndex) {
       themeBtn.addEventListener('click', () => openPicker({
@@ -515,6 +518,113 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       selectedCanvasPreviewFrame,
       canvasPreviewEnable,
     }));
+
+    function ensureAnimationLoops(animStr) {
+      if (!animStr) return '';
+      // Insère 'infinite' si pas déjà présent
+      return /\binfinite\b/.test(animStr) ? animStr : `${animStr} infinite`;
+    }
+
+    function renderAnimCard(item, idx) {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left space-y-2';
+      const head = document.createElement('div'); head.className = 'flex items-center justify-between';
+      const title = document.createElement('div'); title.className = 'font-medium truncate'; title.textContent = `#${idx} · ${item?.name || 'Animation'}`;
+      const small = document.createElement('div'); small.className = 'text-xs text-slate-400'; small.textContent = item?.keyframes || '';
+      head.append(title, small);
+      const previewBox = document.createElement('div');
+      previewBox.className = 'rounded border border-slate-800 p-4 flex items-center justify-center';
+      const dot = document.createElement('div');
+      dot.className = 'h-6 w-6 rounded-full bg-indigo-400';
+      // Appliquer l'animation via style.animation, en prenant uniquement le nom s'il contient durée par défaut
+      // item.keyframes est du type "fade 1s ease-in-out"; on garde tel quel pour un aperçu parlant
+  dot.style.animation = ensureAnimationLoops(item?.keyframes || '');
+      previewBox.append(dot);
+      card.append(head, previewBox);
+      card.addEventListener('click', () => { window.__DASH_PICKERS__.pickerOnSelect?.(idx); closePicker(); });
+      return card;
+    }
+
+  function renderAnimBgCard(item, idx) {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left space-y-2';
+      const head = document.createElement('div'); head.className = 'flex items-center justify-between';
+      const title = document.createElement('div'); title.className = 'font-medium truncate'; title.textContent = `#${idx} · ${item?.name || 'Anim BG'}`;
+      const small = document.createElement('div'); small.className = 'text-xs text-slate-400'; small.textContent = item?.keyframes || '';
+      head.append(title, small);
+      const preview = document.createElement('div');
+      preview.className = 'rounded border border-slate-800 h-20';
+      preview.style.backgroundImage = 'linear-gradient(45deg, #1f2937 0%, #0f172a 100%)';
+      preview.style.backgroundSize = '200% 200%';
+  preview.style.animation = ensureAnimationLoops(item?.keyframes || '');
+      card.append(head, preview);
+      card.addEventListener('click', () => { window.__DASH_PICKERS__.pickerOnSelect?.(idx); closePicker(); });
+      return card;
+    }
+
+    const cfgReady = window.__PLINKK_CFG__ || await ensureCfg();
+    const anims = cfgReady.animations || [];
+    const animBgs = cfgReady.animationBackground || [];
+
+    // Helpers pour mise à jour des labels visibles
+    function setAnimLabel(inputEl, items, idx) {
+      if (!inputEl) return;
+      idx = Number(idx || 0) || 0;
+      const it = items[idx];
+      inputEl.value = it?.name ? `#${idx} · ${it.name}` : `#${idx}`;
+    }
+
+    const animArticleLabel = qs('#selectedAnimationLabel');
+    const animButtonLabel = qs('#selectedAnimationButtonLabel');
+    const animBgLabel = qs('#selectedAnimationBackgroundLabel');
+
+    // Remplir labels initiaux
+    setAnimLabel(animArticleLabel, anims, f.selectedAnimationIndex?.value);
+    setAnimLabel(animButtonLabel, anims, f.selectedAnimationButtonIndex?.value);
+    setAnimLabel(animBgLabel, animBgs, f.selectedAnimationBackgroundIndex?.value);
+
+    if (animArticleBtn && f.selectedAnimationIndex) {
+      animArticleBtn.addEventListener('click', () => openPicker({
+        title: "Choisir l'animation d'article", type: 'anim', items: anims,
+        renderCard: (it, i) => renderAnimCard(it, i),
+        onSelect: (i) => {
+          f.selectedAnimationIndex.value = String(i);
+          setAnimLabel(animArticleLabel, anims, i);
+          scheduleAutoSave();
+        },
+      }));
+      // Ouverture en cliquant sur le champ
+      animArticleLabel?.addEventListener('click', () => animArticleBtn.click());
+      animArticleLabel?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); animArticleBtn.click(); } });
+    }
+    if (animButtonBtn && f.selectedAnimationButtonIndex) {
+      animButtonBtn.addEventListener('click', () => openPicker({
+        title: "Choisir l'animation de bouton", type: 'anim', items: anims,
+        renderCard: (it, i) => renderAnimCard(it, i),
+        onSelect: (i) => {
+          f.selectedAnimationButtonIndex.value = String(i);
+          setAnimLabel(animButtonLabel, anims, i);
+          scheduleAutoSave();
+        },
+      }));
+      animButtonLabel?.addEventListener('click', () => animButtonBtn.click());
+      animButtonLabel?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); animButtonBtn.click(); } });
+    }
+    if (animBgBtn && f.selectedAnimationBackgroundIndex) {
+      animBgBtn.addEventListener('click', () => openPicker({
+        title: "Choisir l'animation d'arrière‑plan", type: 'anim-bg', items: animBgs,
+        renderCard: (it, i) => renderAnimBgCard(it, i),
+        onSelect: (i) => {
+          f.selectedAnimationBackgroundIndex.value = String(i);
+          setAnimLabel(animBgLabel, animBgs, i);
+          scheduleAutoSave();
+        },
+      }));
+      animBgLabel?.addEventListener('click', () => animBgBtn.click());
+      animBgLabel?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); animBgBtn.click(); } });
+    }
   })();
 
   setStatus('Chargement...');

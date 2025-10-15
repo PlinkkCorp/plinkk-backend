@@ -309,13 +309,25 @@
                         <div class="mb-3"><h3 class="font-medium">Animations</h3><p class="text-xs text-slate-400">Ajustez les animations d’éléments et d’arrière‑plan.</p></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <label class="block text-sm">Animation d'article
-                                <select id="selectedAnimationIndex" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800"></select>
+                                <select id="selectedAnimationIndex" class="hidden"></select>
+                                <div class="relative mt-1">
+                                    <input id="selectedAnimationLabel" type="text" class="pl-3 pr-20 py-2 w-full rounded bg-slate-900/60 border border-slate-800/60 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="Cliquer pour choisir" readonly />
+                                    <button id="openAnimArticlePicker" type="button" class="absolute right-1 top-1 h-8 px-2 text-xs rounded bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Choisir</button>
+                                </div>
                             </label>
                             <label class="block text-sm">Animation de bouton
-                                <select id="selectedAnimationButtonIndex" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800"></select>
+                                <select id="selectedAnimationButtonIndex" class="hidden"></select>
+                                <div class="relative mt-1">
+                                    <input id="selectedAnimationButtonLabel" type="text" class="pl-3 pr-20 py-2 w-full rounded bg-slate-900/60 border border-slate-800/60 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="Cliquer pour choisir" readonly />
+                                    <button id="openAnimButtonPicker" type="button" class="absolute right-1 top-1 h-8 px-2 text-xs rounded bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Choisir</button>
+                                </div>
                             </label>
                             <label class="block text-sm">Animation d'arrière-plan
-                                <select id="selectedAnimationBackgroundIndex" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800"></select>
+                                <select id="selectedAnimationBackgroundIndex" class="hidden"></select>
+                                <div class="relative mt-1">
+                                    <input id="selectedAnimationBackgroundLabel" type="text" class="pl-3 pr-20 py-2 w-full rounded bg-slate-900/60 border border-slate-800/60 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="Cliquer pour choisir" readonly />
+                                    <button id="openAnimBackgroundPicker" type="button" class="absolute right-1 top-1 h-8 px-2 text-xs rounded bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Choisir</button>
+                                </div>
                             </label>
                             <label class="block text-sm">Durée anim background (s)
                                 <input id="animationDurationBackground" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
