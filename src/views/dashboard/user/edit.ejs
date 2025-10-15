@@ -231,7 +231,12 @@
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                             <label class="block text-sm">Angle du dégradé
-                                <input id="degBackgroundColor" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+                                <div class="mt-1 flex items-center gap-3">
+                                    <input id="degBackgroundColor" type="number" class="w-24 px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+                                    <div id="degDial" class="deg-dial" tabindex="0" role="slider" aria-label="Angle du dégradé" aria-valuemin="0" aria-valuemax="359" aria-valuenow="0">
+                                        <div class="deg-dial-dot"></div>
+                                    </div>
+                                </div>
                             </label>
                         </div>
                         <div id="backgroundList" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
@@ -476,6 +481,13 @@
                     .masked-field:disabled { color: inherit; }
                     .masked-field[readonly] { color: inherit; }
                     .mask-toggle { line-height: 1; }
+
+                    /* Cadran d'angle (knob) */
+                    .deg-dial { position: relative; width: 72px; height: 72px; border-radius: 9999px; border: 1px solid #334155; background: radial-gradient(closest-side, rgba(30,41,59,0.9), rgba(15,23,42,0.9)); box-shadow: inset 0 0 0 2px rgba(148,163,184,0.1); outline: none; user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab; }
+                    .deg-dial:focus { box-shadow: 0 0 0 2px rgba(99,102,241,0.55), inset 0 0 0 2px rgba(148,163,184,0.1); }
+                    .deg-dial.is-dragging { cursor: grabbing; }
+                    .deg-dial-dot { position: absolute; width: 14px; height: 14px; border-radius: 9999px; background: #93c5fd; border: 2px solid #1f2937; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(0deg) translate(28px, 0); box-shadow: 0 0 0 1px rgba(148,163,184,0.35); pointer-events: auto; cursor: grab; }
+                    .deg-dial:active .deg-dial-dot, .deg-dial.is-dragging .deg-dial-dot { background: #3b82f6; cursor: grabbing; }
                 </style>
                 <script>
                     (function(){
@@ -611,6 +623,92 @@
                     } catch (e) {
                         window.__PLINKK_CFG__ = { themes: [], canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
                     }
+                </script>
+                <script>
+                    // Synchronisation knob <-> input pour l'angle de dégradé
+                    (function(){
+                        const input = document.getElementById('degBackgroundColor');
+                        const dial = document.getElementById('degDial');
+                        const dot = dial ? dial.querySelector('.deg-dial-dot') : null;
+                        if (!input || !dial || !dot) return;
+
+                        function clampDeg(n){ n = Math.round(Number(n)||0); n %= 360; if (n < 0) n += 360; return n; }
+                        function setAria(val){ dial.setAttribute('aria-valuenow', String(val)); }
+                        function setDot(val){ dot.style.transform = `translate(-50%, -50%) rotate(${val}deg) translate(26px, 0)`; }
+                        function syncFromInput(){ const v = clampDeg(input.value); setDot(v); setAria(v); }
+                        function syncFromDeg(val){ const v = clampDeg(val); input.value = String(v); setDot(v); setAria(v); if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); }
+
+                        // Init (attendre que le formulaire soit rempli)
+                        setTimeout(syncFromInput, 0);
+
+                        input.addEventListener('input', () => syncFromInput());
+                        input.addEventListener('change', () => { if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); });
+
+                        function posToDeg(clientX, clientY){
+                            const rect = dial.getBoundingClientRect();
+                            const cx = rect.left + rect.width/2; const cy = rect.top + rect.height/2;
+                            const dx = clientX - cx; const dy = clientY - cy;
+                            let angle = Math.atan2(dy, dx) * 180/Math.PI; // -180..180, 0 à droite
+                            angle = (angle + 360) % 360; // 0..359
+                            // On veut 0° en haut: ajouter 90° puis modulo 360
+                            angle = (angle + 90) % 360;
+                            return Math.round(angle);
+                        }
+
+                        let dragging = false;
+                        function onPointerMove(e){
+                            if (!dragging) return;
+                            const pt = e.touches?.[0] || e;
+                            syncFromDeg(posToDeg(pt.clientX, pt.clientY));
+                            e.preventDefault();
+                        }
+                        function onPointerUp(){
+                            dragging = false;
+                            dial.classList.remove('is-dragging');
+                            window.removeEventListener('mousemove', onPointerMove, { passive: false });
+                            window.removeEventListener('mouseup', onPointerUp);
+                            window.removeEventListener('touchmove', onPointerMove);
+                            window.removeEventListener('touchend', onPointerUp);
+                        }
+                        function startDrag(e){
+                            e.preventDefault();
+                            dragging = true;
+                            dial.classList.add('is-dragging');
+                            const pt = e.touches?.[0] || e;
+                            syncFromDeg(posToDeg(pt.clientX, pt.clientY));
+                            window.addEventListener('mousemove', onPointerMove, { passive: false });
+                            window.addEventListener('mouseup', onPointerUp);
+                            window.addEventListener('touchmove', onPointerMove, { passive: false });
+                            window.addEventListener('touchend', onPointerUp);
+                            // Focus pour activer le support à la molette ensuite
+                            dial.focus();
+                        }
+
+                        // Drag depuis n'importe où sur le dial (dot compris)
+                        dial.addEventListener('mousedown', startDrag);
+                        dial.addEventListener('touchstart', startDrag, { passive: false });
+
+                        // Molette (uniquement quand le dial a le focus, i.e. cliqué juste avant)
+                        dial.addEventListener('wheel', (e) => {
+                            if (document.activeElement !== dial) return;
+                            e.preventDefault();
+                            const delta = e.deltaY || e.deltaX || 0;
+                            const step = e.shiftKey ? 10 : 1;
+                            const dir = delta > 0 ? -step : step; // sens intuitif
+                            const val = clampDeg((Number(input.value)||0) + dir);
+                            syncFromDeg(val);
+                        }, { passive: false });
+
+                        // Accessibilité clavier
+                        dial.addEventListener('keydown', (e) => {
+                            const step = (e.shiftKey ? 10 : 1);
+                            let val = clampDeg(input.value);
+                            if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { val = clampDeg(val + step); syncFromDeg(val); e.preventDefault(); }
+                            if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { val = clampDeg(val - step); syncFromDeg(val); e.preventDefault(); }
+                            if (e.key === 'Home') { syncFromDeg(0); e.preventDefault(); }
+                            if (e.key === 'End') { syncFromDeg(359); e.preventDefault(); }
+                        });
+                    })();
                 </script>
                 <!-- Données utiles pour la sélection de page -->
                 <script type="application/json" id="pages-data"><%- JSON.stringify(typeof pages !== 'undefined' ? pages : []) %></script>
