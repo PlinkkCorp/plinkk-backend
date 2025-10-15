@@ -1,6 +1,6 @@
 import { Prisma, User } from "../../generated/prisma/client";
 
-export type UserWithInclude = Prisma.UserGetPayload<{
+export type UserWithIncludeStrict = Prisma.UserGetPayload<{
   include: {
     role?: true,
     announcement?: true,
@@ -16,6 +16,9 @@ export type UserWithInclude = Prisma.UserGetPayload<{
     themes?: true
   };
 }>;
+
+export type UserWithInclude = Omit<UserWithIncludeStrict, keyof UserWithIncludeStrict> &
+  Partial<UserWithIncludeStrict>;
 
 export type SafeUser = Omit<UserWithInclude, 'password' | 'twoFactorSecret'>;
 
