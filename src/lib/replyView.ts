@@ -8,7 +8,7 @@ import {
 import ejs from "ejs";
 import { Announcement, AnnouncementRoleTarget, AnnouncementTarget, PrismaClient, Role, User } from "../../generated/prisma/client";
 import { IncomingMessage, ServerResponse } from "http";
-import { toSafeUser } from "../types/user";
+import { toSafeUser, UserWithInclude } from "../types/user";
 
 const prisma = new PrismaClient();
 
@@ -24,7 +24,7 @@ export async function replyView(
     unknown
   >,
   template: string,
-  user: User | null,
+  user: UserWithInclude,
   data: ejs.Data,
   statusCode: number = 200
 ): Promise<string> {
@@ -34,25 +34,26 @@ export async function replyView(
     });
   }
 
-  // Resolve site messages for the user (await the promise so templates receive an array)
-  const siteMessages = await getActiveAnnouncementsForUser(user.id);
-
   // Build a safe user object for templates and normalize role identifiers so older templates
   // that compare `user.role.id === 'ADMIN'` keep working even if role.id is a nanoid.
-  const safe = toSafeUser(user as User);
-  if (safe && (safe as any).role) {
+  const safe = toSafeUser(user);
+  let isAdmin = false
+  let isStaff = false
+  if (safe && safe.role) {
     try {
       // Align role.id with role.name for template compatibility
-      (safe as any).role.id = (safe as any).role.name;
+      safe.role.id = safe.role.name;
     } catch (e) {}
     // Convenience flags for templates
-    (safe as any).isAdmin = (safe as any).role && (safe as any).role.name === 'ADMIN';
-    (safe as any).isStaff = (safe as any).role && ['ADMIN', 'DEVELOPER', 'MODERATOR'].includes((safe as any).role.name);
+    isAdmin = safe.role && safe.role.name === 'ADMIN';
+    isStaff = safe.role && ['ADMIN', 'DEVELOPER', 'MODERATOR'].includes(safe.role.name);
   }
 
   return reply.view(template, {
     __SITE_MESSAGES__: await getActiveAnnouncementsForUser(user.id),
     user: toSafeUser(user),
+    isAdmin: isAdmin,
+    isStaff: isStaff,
     ...data,
   });
 }
