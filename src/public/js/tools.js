@@ -344,9 +344,10 @@ export function createEmailAndDescription(profileData) {
     container.appendChild(emailDiv);
     container.appendChild(descriptionDiv);
     // Affichage conditionnel
-    if (!profileData.description.trim())
+    if (!profileData.description.trim()) {
         descriptionDiv.style.display = "none";
         container.style.background = "none";
+    }
     if (!profileData.email.trim())
         emailDiv.style.display = "none";
     return container;

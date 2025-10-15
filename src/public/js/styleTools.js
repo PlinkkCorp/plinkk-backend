@@ -277,13 +277,23 @@ export function applyTheme(theme) {
 }
 export function setBackgroundStyles(profileData) {
     const _p = profileData || getProfileData() || {};
-    if (Array.isArray(_p.background)) {
-        document.body.style.background = `linear-gradient(${_p.degBackgroundColor}deg, ${_p.background.join(", ")})`;
+    const colors = Array.isArray(_p.background) ? _p.background.filter(Boolean) : null;
+    const deg = (Number.isFinite(_p.degBackgroundColor) ? _p.degBackgroundColor : 45) || 45;
+    if (colors) {
+        if (colors.length === 0) {
+            // Pas de couleur: ne force pas de background ici, laisser le thème s'appliquer
+            document.body.style.background = '';
+        } else if (colors.length === 1) {
+            document.body.style.background = colors[0];
+        } else {
+            document.body.style.background = `linear-gradient(${deg}deg, ${colors.join(", ")})`;
+        }
         document.body.style.backgroundSize = "cover";
-    }
-    else {
+    } else if (typeof _p.background === 'string' && _p.background.trim() !== '') {
         document.body.style.background = `url(${_p.background})`;
         document.body.style.backgroundSize = `${_p.backgroundSize || 100}%`;
+    } else {
+        document.body.style.background = '';
     }
 }
 export function applyAnimation(animation, animationEnabled) {

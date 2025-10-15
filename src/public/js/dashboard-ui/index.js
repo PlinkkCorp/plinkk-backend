@@ -1,6 +1,6 @@
 import { qs, attachAutoSave, fillSelect, vOrNull, numOrNull } from './utils.js';
 import { openIconModal, openPicker, renderPickerGrid, renderBtnThemeCard, closePicker, ensurePlatformEntryModal, pickerSelect } from './pickers.js';
-import { renderBackground, renderNeon, renderLabels, renderSocial, renderLinks } from './renderers.js';
+import { renderBackground, renderNeon, renderLabels, renderSocial, renderLinks, renderLayout } from './renderers.js';
 import { ensureCanvasPreviewModal, openCanvasInlinePreview, buildCanvasPreviewUrl, refreshSelectedCanvasPreview, renderCanvasCard } from './canvas.js';
 import { setupStatusDropdown, updateStatusControlsDisabled, updateStatusPreview } from './status.js';
 
@@ -71,6 +71,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     addSocial: qs('#addSocial'),
     linksList: qs('#linksList'),
     addLink: qs('#addLink'),
+    layoutList: qs('#layoutList'),
   };
 
   const setStatus = (text, kind = '') => {
@@ -147,6 +148,10 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
         sectionsAPI = [ "statusBar", "labels" ]
         sectionsAPIFunction = [ collectPayloadStatusBar(), collectPayloadLabels() ]
         break;
+      case "layout":
+        sectionsAPI = [ "layout" ]
+        sectionsAPIFunction = [ collectPayloadLayout() ]
+        break;
       default:
         sectionsAPI = [ "plinkk" ]
         sectionsAPIFunction = [ collectPayloadPlinkk() ]
@@ -169,7 +174,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     }
   }
 
-  const state = { background: [], neonColors: [], labels: [], socialIcon: [], links: [] };
+  const state = { background: [], neonColors: [], labels: [], socialIcon: [], links: [], layoutOrder: [] };
 
   async function ensureCfg(maxWaitMs = 3000) {
     const start = Date.now();
@@ -192,6 +197,11 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     f.description.value = cfg.description || '';
     f.profileHoverColor.value = cfg.profileHoverColor || '#7289DA';
     f.degBackgroundColor.value = cfg.degBackgroundColor ?? 45;
+    // Synchroniser le cadran (dot) avec la valeur chargée après remplissage
+    try {
+      f.degBackgroundColor.dispatchEvent(new Event('input', { bubbles: true }));
+      f.degBackgroundColor.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch {}
     f.buttonThemeEnable.checked = (cfg.buttonThemeEnable ?? 1) === 1;
     f.canvaEnable.checked = (cfg.canvaEnable ?? 1) === 1;
 
@@ -247,14 +257,19 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     state.background = Array.isArray(cfg.background) ? [...cfg.background] : [];
     state.neonColors = Array.isArray(cfg.neonColors) ? [...cfg.neonColors] : [];
     state.labels = Array.isArray(cfg.labels) ? cfg.labels.map((x) => ({ ...x })) : [];
-    state.socialIcon = Array.isArray(cfg.socialIcon) ? cfg.socialIcon.map((x) => ({ ...x })) : [];
-    state.links = Array.isArray(cfg.links) ? cfg.links.map((x) => ({ ...x })) : [];
+  state.socialIcon = Array.isArray(cfg.socialIcon) ? cfg.socialIcon.map((x) => ({ ...x })) : [];
+  state.links = Array.isArray(cfg.links) ? cfg.links.map((x) => ({ ...x })) : [];
+  // Agencement: ordre des sections
+  const DEFAULT_LAYOUT = ['profile','username','statusbar','labels','social','email','links'];
+  state.layoutOrder = Array.isArray(cfg.layoutOrder) ? [...cfg.layoutOrder] : [...DEFAULT_LAYOUT];
 
     renderBackground({ container: f.backgroundList, addBtn: f.addBackgroundColor, colors: state.background, scheduleAutoSave });
     renderNeon({ container: f.neonList, addBtn: f.addNeonColor, colors: state.neonColors, neonEnableEl: f.neonEnable, scheduleAutoSave });
     renderLabels({ container: f.labelsList, addBtn: f.addLabel, labels: state.labels, scheduleAutoSave });
     renderSocial({ container: f.socialList, addBtn: f.addSocial, socials: state.socialIcon, scheduleAutoSave });
-    renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, scheduleAutoSave });
+  renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, scheduleAutoSave });
+  // Rendu de l'agencement
+  renderLayout({ container: f.layoutList, order: state.layoutOrder, scheduleAutoSave });
 
     // Inverser l'ordre des couleurs de background (bouton ajouté dans template)
     if (f.invertBackgroundColors) {
@@ -337,6 +352,12 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
   function collectPayloadLinks() {
     return {
       links: state.links,
+    };
+  }
+
+  function collectPayloadLayout() {
+    return {
+      layoutOrder: state.layoutOrder,
     };
   }
 

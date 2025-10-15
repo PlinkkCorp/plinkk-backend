@@ -105,6 +105,12 @@
                                 Status & Labels
                             </button>
                         </li>
+                        <li>
+                            <button data-target="#section-layout" role="tab" aria-controls="section-layout" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800 flex items-center gap-2">
+                                <svg class="size-4 text-slate-300" viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16v2H4zM4 11h10v2H4zM4 17h13v2H4z"/></svg>
+                                Agencement
+                            </button>
+                        </li>
                     </ul>
                 </nav>
 
@@ -390,6 +396,13 @@
                             <div id="labelsList" class="space-y-3"></div>
                         </div>
                     </div>
+
+                    <!-- Agencement -->
+                    <div id="section-layout" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
+                        <div class="mb-3"><h3 class="font-medium">Agencement</h3><p class="text-xs text-slate-400">Réordonne visuellement les sections de ta page par glisser‑déposer.</p></div>
+                        <div class="space-y-2" id="layoutList" role="list"></div>
+                        <p class="text-[11px] text-slate-400 mt-3">Astuce: fais glisser les éléments avec la poignée à gauche pour changer l’ordre.</p>
+                    </div>
                 </div>
             </section>
 
@@ -499,10 +512,10 @@
                     .info-i:hover { background: rgba(30,41,59,0.6); color:#e5e7eb; border-color: rgba(148,163,184,0.6); }
 
                     /* Cadran d'angle (knob) */
-                    .deg-dial { position: relative; width: 72px; height: 72px; border-radius: 9999px; border: 1px solid #334155; background: radial-gradient(closest-side, rgba(30,41,59,0.9), rgba(15,23,42,0.9)); box-shadow: inset 0 0 0 2px rgba(148,163,184,0.1); outline: none; user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab; }
+                    .deg-dial { position: relative; width: 72px; height: 72px; border-radius: 100%; border: 1px solid #334155; background: radial-gradient(closest-side, rgba(30,41,59,0.9), rgba(15,23,42,0.9)); box-shadow: inset 0 0 0 2px rgba(148,163,184,0.1); outline: none; user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab; }
                     .deg-dial:focus { box-shadow: 0 0 0 2px rgba(99,102,241,0.55), inset 0 0 0 2px rgba(148,163,184,0.1); }
                     .deg-dial.is-dragging { cursor: grabbing; }
-                    .deg-dial-dot { position: absolute; width: 14px; height: 14px; border-radius: 9999px; background: #93c5fd; border: 2px solid #1f2937; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(0deg) translate(28px, 0); box-shadow: 0 0 0 1px rgba(148,163,184,0.35); pointer-events: auto; cursor: grab; }
+                    .deg-dial-dot { position: absolute; width: 14px; height: 14px; border-radius: 100%; background: #93c5fd; border: 2px solid #1f2937; top: 50%; left: 50%; box-shadow: 0 0 0 1px rgba(148,163,184,0.35); pointer-events: auto; cursor: grab; }
                     .deg-dial:active .deg-dial-dot, .deg-dial.is-dragging .deg-dial-dot { background: #3b82f6; cursor: grabbing; }
                 </style>
                 <script>
@@ -510,7 +523,7 @@
                         // Gestion des boutons "œil" pour masquer les inputs de profil, avec persistance locale
                         const USER_ID = window.__PLINKK_USER_ID__ || 'self';
                         const PLINKK_ID = window.__PLINKK_SELECTED_ID__ || 'default';
-                        const LS_PREFIX = 'PLK_MASK:'; // localStorage key prefix
+                        const LS_PREFIX = 'PLK_MASK:'; // clé localStorage prefix
 
                         function lsGet(key){ try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } }
                         function lsSet(key, val){ try { localStorage.setItem(key, JSON.stringify(val)); } catch { /* ignore */ } }
@@ -521,7 +534,7 @@
                             // saved: { masked: boolean, value: string }
                             if (!input || !btn) return;
                             const isMasked = !!(saved && saved.masked);
-                            // Always ensure button a11y attributes
+                            
                             btn.setAttribute('title', 'Masquer / afficher le champ');
                             btn.setAttribute('aria-pressed', isMasked ? 'true' : 'false');
 
@@ -650,7 +663,7 @@
 
                         function clampDeg(n){ n = Math.round(Number(n)||0); n %= 360; if (n < 0) n += 360; return n; }
                         function setAria(val){ dial.setAttribute('aria-valuenow', String(val)); }
-                        function setDot(val){ dot.style.transform = `translate(-50%, -50%) rotate(${val}deg) translate(26px, 0)`; }
+                        function setDot(val){ dot.style.transform = `translate(-50%, -50%) rotate(${val - 90}deg) translate(26px, 0)`; }
                         function syncFromInput(){ const v = clampDeg(input.value); setDot(v); setAria(v); }
                         function syncFromDeg(val){ const v = clampDeg(val); input.value = String(v); setDot(v); setAria(v); if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); }
 

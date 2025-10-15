@@ -43,8 +43,8 @@ export function generateProfileConfig(
         // Fond de la page si une liste est utilisée alors le fond sera via les couleurs que vous mettez dedans
         background: ${JSON.stringify(backgroundColors.map((c) => c.color))}, //"https://static.vecteezy.com/ti/vecteur-libre/p1/12697876-motif-geometriquele-continue-noir-et-blanc-motif-repetitif-monochrome-arriere-plan-abstrait-optique-tridimensionnel-avec-cubes-troues-vectoriel.jpg",
         degBackgroundColor: ${
-          profile.degBackgroundColor
-        }, // inclinaison du degradé
+          profile.degBackgroundColor ?? 45
+        }, // inclinaison du degradé (fallback 45°)
         profileHoverColor: ${JSON.stringify(profile.profileHoverColor)}, // Couleur de hover sur l'article (l'élément principal)
         neonColors: ${JSON.stringify(neonColors.map((c) => c.color))}, // Couleurs du neon de profil
         iconUrl: ${JSON.stringify(profile.iconUrl || "")}, // Icone de l'onglet
@@ -98,6 +98,7 @@ export function generateProfileConfig(
         selectedCanvasIndex: ${
           profile.selectedCanvasIndex ?? 16
         }, // Animation du canva (voir ci-dessous) - Matrix Effect
+        layoutOrder: ${JSON.stringify((profile).layoutOrder ?? null)}, // Ordre des sections (optionnel)
     };
     export default profileData;
     `;

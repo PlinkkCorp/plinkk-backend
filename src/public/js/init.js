@@ -67,12 +67,36 @@ document.addEventListener("DOMContentLoaded", async function () {
         console.error("Element with id 'profile-article' not found.");
         return;
     }
-    article.appendChild(createProfileContainer(profileData));
-    article.appendChild(createUserName(profileData));
-    createStatusBar(profileData);
-    createLabelButtons(profileData);
-    createIconList(profileData);
-    article.appendChild(createEmailAndDescription(profileData));
+    // Rendu des sections selon l'ordre choisi (layoutOrder) si présent
+    try {
+        const DEFAULT_LAYOUT = ['profile','username','statusbar','labels','social','email','links'];
+        let order = Array.isArray(profileData.layoutOrder) ? profileData.layoutOrder.slice() : DEFAULT_LAYOUT;
+        const KNOWN = new Set(DEFAULT_LAYOUT);
+        // Normaliser: garder seulement les connus puis ajouter les manquants dans l'ordre par défaut
+        const filtered = order.filter(k => KNOWN.has(k));
+        DEFAULT_LAYOUT.forEach(k => { if (!filtered.includes(k)) filtered.push(k); });
+        const renderers = {
+            profile: () => article.appendChild(createProfileContainer(profileData)),
+            username: () => article.appendChild(createUserName(profileData)),
+            statusbar: () => createStatusBar(profileData),
+            labels: () => createLabelButtons(profileData),
+            social: () => createIconList(profileData),
+            email: () => article.appendChild(createEmailAndDescription(profileData)),
+            links: () => {
+                const linkBoxes = createLinkBoxes(profileData);
+                (linkBoxes || []).forEach((box) => article.appendChild(box));
+            },
+        };
+        filtered.forEach(key => { try { renderers[key] && renderers[key](); } catch (e) { /* ignore */ } });
+    } catch (e) {
+        // Fallback: ordre historique
+        article.appendChild(createProfileContainer(profileData));
+        article.appendChild(createUserName(profileData));
+        createStatusBar(profileData);
+        createLabelButtons(profileData);
+        createIconList(profileData);
+        article.appendChild(createEmailAndDescription(profileData));
+    }
     // Wait for themes to be loaded (built-ins + community). This ensures
     // selectedThemeIndex refers to the final ordering and that applyFirstTheme
     // receives a real theme object.
@@ -119,13 +143,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     else {
         createToggleThemeButton(themes[profileData.selectedThemeIndex % themes.length]);
     }
-    const linkBoxes = createLinkBoxes(profileData);
-    if (!linkBoxes || !linkBoxes.length) {
-        console.warn("No link boxes created.");
-    }
-    else {
-        linkBoxes.forEach((box) => article.appendChild(box));
-    }
+    // Si les liens n'ont pas été rendus par l'ordre ci-dessus (par ex. fallback), rendre maintenant
+    try {
+        const hasLinksRendered = !!document.querySelector('#profile-article .discord-box, #profile-article .button');
+        if (!hasLinksRendered) {
+            const linkBoxes = createLinkBoxes(profileData);
+            if (!linkBoxes || !linkBoxes.length) {
+                console.warn("No link boxes created.");
+            } else {
+                linkBoxes.forEach((box) => article.appendChild(box));
+            }
+        }
+    } catch (_) { }
     document.title = profileData.userName ? `${profileData.userName} - Linktree` : "Plinkk By Klaynight";
     const link = document.createElement("link");
     link.rel = "icon";

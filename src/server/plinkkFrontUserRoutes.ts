@@ -344,6 +344,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           iconUrl: settings?.iconUrl ?? "",
           description: settings?.description ?? "",
           profileHoverColor: settings?.profileHoverColor ?? "",
+          // Nouvel agencement: ordre des sections
+          layoutOrder: settings?.layoutOrder ?? null,
           degBackgroundColor: settings?.degBackgroundColor ?? 45,
           neonEnable: settings?.neonEnable ?? 1,
           buttonThemeEnable: settings?.buttonThemeEnable ?? 1,
