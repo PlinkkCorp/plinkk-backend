@@ -59,6 +59,9 @@ importers:
       ejs:
         specifier: ^3.1.10
         version: 3.1.10
+      esbuild:
+        specifier: ^0.25.10
+        version: 0.25.10
       fastify:
         specifier: ^5.6.1
         version: 5.6.1

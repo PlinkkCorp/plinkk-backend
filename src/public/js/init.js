@@ -24,8 +24,8 @@ export const themesLoaded = (async () => {
         // ignore
     }
 })();
-import { animations, styleSheet } from './config/animationConfig.js';
-import { canvaData } from './config/canvaConfig.js';
+import { animations, styleSheet } from '../config/animationConfig.js';
+import { canvaData } from '../config/canvaConfig.js';
 document.addEventListener("DOMContentLoaded", async function () {
     var _a, _b;
     // Résoudre username/slug depuis les globals fournis par la vue
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const params = new URLSearchParams(location.search);
     if (identifier) params.set('slug', identifier);
     // Importer la config de la page (non-cachée côté serveur)
-    const mod = await import(`/${encodeURIComponent(username)}/js/config/profileConfig.js?${params.toString()}`);
+    const mod = await import(`/${encodeURIComponent(identifier)}/config.js`);
     const profileData = mod.profileData;
     const injectedTheme = mod.injectedTheme;
     let parsedProfileData = profileData;

@@ -132,11 +132,6 @@ fastify.register(fastifyCron, {
   ],
 });
 
-/* fastify.cron.createJob({
-  cronTime: '0 0 * * MON', // At 00:00 on Monday.
-  onTick: () => {}
-}) */
-
 fastify.register(apiRoutes, { prefix: "/api" });
 fastify.register(staticPagesRoutes);
 fastify.register(dashboardRoutes, { prefix: "/dashboard" });

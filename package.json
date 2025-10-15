@@ -57,6 +57,7 @@
     "canvas": "^3.2.0",
     "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
+    "esbuild": "^0.25.10",
     "fastify": "^5.6.1",
     "fastify-cli": "^7.4.0",
     "fastify-cron": "^1.4.0",

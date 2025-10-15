@@ -1,5 +1,5 @@
 import { setSafeText, isSafeUrl, isSafeColor, disableDrag, disableContextMenuOnImage } from './security.js';
-import { btnIconThemeConfig } from './config/btnIconThemeConfig.js';
+import { btnIconThemeConfig } from '../config/btnIconThemeConfig.js';
 // themes are provided at runtime by src/public/js/init.js via the exported
 // `themes` array which is populated from the server-side DB. Do not import
 // the old static config file.
@@ -24,7 +24,7 @@ export function createProfileContainer(profileData) {
         profilePic.src = profileData.profileImage;
     }
     else {
-        profilePic.src = "{{username}}/images/logo.png";
+        profilePic.src = username + "/images/logo.png";
     }
     // Try a single fallback to the username logo, then stop retrying to avoid infinite loops
     profilePic.onerror = function () {
@@ -32,7 +32,7 @@ export function createProfileContainer(profileData) {
             if (!this._triedFallback) {
                 this._triedFallback = true;
                 // Attempt a single fallback
-                this.src = "{{username}}/images/logo.png";
+                this.src = username + "/images/logo.png";
                 return;
             }
         }
@@ -70,14 +70,14 @@ export function createProfileContainer(profileData) {
         profileIcon.src = profileData.profileIcon;
     }
     else {
-        profileIcon.src = "{{username}}/images/icons/default-icon.svg";
+        profileIcon.src = username + "/images/icons/default-icon.svg";
     }
     // Single-attempt fallback for the icon, then stop retrying
     profileIcon.onerror = function () {
         try {
             if (!this._triedFallback) {
                 this._triedFallback = true;
-                this.src = "{{username}}/images/icons/default-icon.svg";
+                this.src = username + "/images/icons/default-icon.svg";
                 return;
             }
         }
@@ -693,7 +693,7 @@ export function createIconList(profileData) {
             if (/^(https?:\/\/|\/|data:)/i.test(iconVal)) {
                 iconImg.src = iconVal;
             } else {
-                iconImg.src = `/{{username}}/images/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
+                iconImg.src = `/images/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
             }
         setSafeText(iconImg, iconData.icon);
         iconImg.alt = iconData.icon;
