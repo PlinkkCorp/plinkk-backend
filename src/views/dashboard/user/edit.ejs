@@ -118,25 +118,52 @@
                                 <input id="profileLink" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="https://..." inputmode="url"/>
                             </label>
                             <label class="block text-sm">Texte du site
-                                <input id="profileSiteText" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                                <div class="relative">
+                                    <input id="profileSiteText" data-maskable="true" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                                    <button type="button" data-target="profileSiteText" aria-pressed="false" class="mask-toggle absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-white" aria-label="Masquer / afficher">
+                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                </div>
                             </label>
                             <label class="block text-sm">Nom affiché
                                 <input id="userName" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
                             </label>
                             <label class="block text-sm">Email
-                                <input id="email" type="email" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" inputmode="email" autocomplete="email" />
+                                <div class="relative">
+                                    <input id="email" data-maskable="true" type="email" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" inputmode="email" autocomplete="email" />
+                                    <button type="button" data-target="email" aria-pressed="false" class="mask-toggle absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-white" aria-label="Masquer / afficher">
+                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                </div>
                             </label>
                             <label class="block text-sm">Image de profil (URL)
-                                <input id="profileImage" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                                <div class="relative">
+                                    <input id="profileImage" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                                </div>
                             </label>
                             <label class="block text-sm">Icône de profil (URL)
-                                <input id="profileIcon" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                                <div class="relative">
+                                    <input id="profileIcon" data-maskable="true" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                                    <button type="button" data-target="profileIcon" aria-pressed="false" class="mask-toggle absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-white" aria-label="Masquer / afficher">
+                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                </div>
                             </label>
                             <label class="block text-sm">Icône d’onglet (URL)
-                                <input id="iconUrl" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                                <div class="relative">
+                                    <input id="iconUrl" data-maskable="true" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                                    <button type="button" data-target="iconUrl" aria-pressed="false" class="mask-toggle absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-white" aria-label="Masquer / afficher">
+                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                </div>
                             </label>
                             <label class="block text-sm md:col-span-2">Description
-                                <textarea id="description" rows="3" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50"></textarea>
+                                <div class="relative">
+                                    <textarea id="description" data-maskable="true" rows="3" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50"></textarea>
+                                    <button type="button" data-target="description" aria-pressed="false" class="mask-toggle absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-white" aria-label="Masquer / afficher">
+                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                </div>
                             </label>
                         </div>
                     </div>
@@ -443,6 +470,126 @@
                                 })();
                         </script>
                 <!-- Expose les données de configuration (thèmes, animations, canvas, boutons) au dashboard -->
+                <style>
+                    /* Visuel pour champs masqués : grisé et non éditable mais valeur visible */
+                    .masked-field { background-color: rgba(100,100,100,0.12) !important; opacity: 0.65; cursor: not-allowed; }
+                    .masked-field:disabled { color: inherit; }
+                    .masked-field[readonly] { color: inherit; }
+                    .mask-toggle { line-height: 1; }
+                </style>
+                <script>
+                    (function(){
+                        // Gestion des boutons "œil" pour masquer les inputs de profil, avec persistance locale
+                        const USER_ID = window.__PLINKK_USER_ID__ || 'self';
+                        const PLINKK_ID = window.__PLINKK_SELECTED_ID__ || 'default';
+                        const LS_PREFIX = 'PLK_MASK:'; // localStorage key prefix
+
+                        function lsGet(key){ try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } }
+                        function lsSet(key, val){ try { localStorage.setItem(key, JSON.stringify(val)); } catch { /* ignore */ } }
+                        function lsDel(key){ try { localStorage.removeItem(key); } catch { /* ignore */ } }
+                        function getKey(inputId){ return `${LS_PREFIX}${USER_ID}:${PLINKK_ID}:${inputId}`; }
+
+                        function applyMaskedState(input, btn, saved){
+                            // saved: { masked: boolean, value: string }
+                            if (!input || !btn) return;
+                            const isMasked = !!(saved && saved.masked);
+                            // Always ensure button a11y attributes
+                            btn.setAttribute('title', 'Masquer / afficher le champ');
+                            btn.setAttribute('aria-pressed', isMasked ? 'true' : 'false');
+
+                            if (isMasked) {
+                                // Conserver/forcer la valeur mémorisée
+                                if (saved && typeof saved.value !== 'undefined') {
+                                    input.value = saved.value;
+                                }
+                                input.dataset._originalValue = input.value ?? '';
+                                input.readOnly = true;
+                                input.disabled = true;
+                                input.classList.add('masked-field');
+                                // Icône œil barré (eye-off)
+                                btn.innerHTML = '<svg class="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a20.81 20.81 0 0 1 5.06-6.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.82 20.82 0 0 1-4.87 6.82M1 1l22 22"/></svg>';
+                            } else {
+                                // État non masqué
+                                if (typeof input.dataset._originalValue !== 'undefined') {
+                                    // restaurer la valeur en clair si nous l’avions mémorisée
+                                    input.value = input.dataset._originalValue;
+                                    delete input.dataset._originalValue;
+                                }
+                                input.readOnly = false;
+                                input.disabled = false;
+                                input.classList.remove('masked-field');
+                                btn.innerHTML = '<svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+                            }
+                        }
+
+                        // Initialisation + listeners
+                        const buttons = Array.from(document.querySelectorAll('.mask-toggle'));
+                        buttons.forEach(btn => {
+                            const targetId = btn.getAttribute('data-target');
+                            if (!targetId) return;
+                            const input = document.getElementById(targetId);
+                            if (!input) return;
+
+                            // Restaure l'état depuis localStorage
+                            const key = getKey(targetId);
+                            const saved = lsGet(key);
+                            applyMaskedState(input, btn, saved);
+
+                            // Listener clic
+                            btn.addEventListener('click', () => {
+                                const currentlyMasked = btn.getAttribute('aria-pressed') === 'true';
+                                if (!currentlyMasked) {
+                                    // activer masquage: mémoriser valeur+état
+                                    const value = input.value ?? '';
+                                    lsSet(key, { masked: true, value });
+                                    applyMaskedState(input, btn, { masked: true, value });
+                                } else {
+                                    // désactiver masquage: supprimer persistance + restaurer
+                                    lsDel(key);
+                                    applyMaskedState(input, btn, { masked: false });
+                                }
+                                // Déclencher une sauvegarde auto afin d’actualiser l’aperçu après le PUT
+                                if (window.__DASH_TRIGGER_SAVE__) {
+                                    window.__DASH_TRIGGER_SAVE__();
+                                }
+                            });
+                        });
+
+                        // Avant l'envoi (click sur save ou submit de form), remplacer les champs masqués par "" pour qu'ils n'envoient rien
+                        function clearMaskedValues() {
+                            document.querySelectorAll('[data-maskable]')
+                                .forEach(inp => {
+                                    const key = getKey(inp.id);
+                                    const saved = lsGet(key);
+                                    const isMasked = (typeof inp.dataset._originalValue !== 'undefined') || inp.classList.contains('masked-field') || (saved && saved.masked);
+                                    if (isMasked) {
+                                        inp.value = '';
+                                    }
+                                });
+                        }
+
+                        // Intercepter clics sur les boutons de sauvegarde (capture pour être sûr d'exécuter avant d'autres handlers)
+                        document.addEventListener('click', (e) => {
+                            const saveBtn = e.target.closest && e.target.closest('#saveBtn, #saveBtn--mobile, #saveBtn--fab');
+                            if (saveBtn) {
+                                clearMaskedValues();
+                            }
+                        }, true);
+
+                        // Si un formulaire enveloppe ces champs, intercepter son submit aussi (plus robuste)
+                        (function attachFormInterceptor(){
+                            // Cherche le formulaire parent le plus proche d'un des inputs maskable
+                            const sample = document.querySelector('[data-maskable]');
+                            if (!sample) return;
+                            const form = sample.closest('form');
+                            if (!form) return;
+                            form.addEventListener('submit', (ev) => {
+                                clearMaskedValues();
+                                // allow normal submit to proceed
+                            });
+                        })();
+                    })();
+                </script>
                 <script type="module">
                     import canvaData from '/public/config/canvaConfig.js';
                     import { animations, animationBackground } from '/public/config/animationConfig.js';

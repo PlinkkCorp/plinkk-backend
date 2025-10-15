@@ -78,6 +78,11 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     statusEl.textContent = text || '';
     statusEl.className = 'text-xs ' + (kind === 'error' ? 'text-red-400' : kind === 'success' ? 'text-emerald-400' : 'text-slate-400');
   };
+
+  // Expose un déclencheur global pour l’autosave depuis le template (ex: lors d’un clic sur le bouton de masquage)
+  window.__DASH_TRIGGER_SAVE__ = () => {
+    try { scheduleAutoSave(); } catch {}
+  };
   const schedulePreviewRefresh = () => {
     // Debounce: repousser si ça tape vite
     if (previewTimer) clearTimeout(previewTimer);
@@ -271,16 +276,30 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     suspendAutoSave = false;
   }
 
+  function isMasked(el) {
+    if (!el) return false;
+    // el peut être un input ou textarea
+    return !!(el.classList?.contains('masked-field') || (el.dataset && typeof el.dataset._originalValue !== 'undefined'));
+  }
+
+  function maskedOr(val, el) {
+    // Si masqué on renvoie null pour que le backend traite comme champ vide/absent
+    return isMasked(el) ? null : val;
+  }
+
   function collectPayloadPlinkk() {
     return {
+      // Champs non masquables gardent la valeur telle quelle
       profileLink: vOrNull(f.profileLink.value),
       profileImage: vOrNull(f.profileImage.value),
-      profileIcon: vOrNull(f.profileIcon.value),
-      profileSiteText: vOrNull(f.profileSiteText.value),
       userName: vOrNull(f.userName.value),
-      affichageEmail: vOrNull(f.email.value),
-      iconUrl: vOrNull(f.iconUrl.value),
-      description: vOrNull(f.description.value),
+
+      // Champs masquables: renvoyer null si masqués
+      profileIcon: maskedOr(vOrNull(f.profileIcon.value), f.profileIcon),
+      profileSiteText: maskedOr(vOrNull(f.profileSiteText.value), f.profileSiteText),
+      affichageEmail: maskedOr(vOrNull(f.email.value), f.email),
+      iconUrl: maskedOr(vOrNull(f.iconUrl.value), f.iconUrl),
+      description: maskedOr(vOrNull(f.description.value), f.description),
       profileHoverColor: vOrNull(f.profileHoverColor.value),
       degBackgroundColor: numOrNull(f.degBackgroundColor.value),
       neonEnable: state.neonColors.length > 0 && f.neonEnable?.checked ? 1 : 0,
