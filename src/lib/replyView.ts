@@ -33,6 +33,23 @@ export async function replyView(
       ...data,
     });
   }
+
+  // Resolve site messages for the user (await the promise so templates receive an array)
+  const siteMessages = await getActiveAnnouncementsForUser(user.id);
+
+  // Build a safe user object for templates and normalize role identifiers so older templates
+  // that compare `user.role.id === 'ADMIN'` keep working even if role.id is a nanoid.
+  const safe = toSafeUser(user as User);
+  if (safe && (safe as any).role) {
+    try {
+      // Align role.id with role.name for template compatibility
+      (safe as any).role.id = (safe as any).role.name;
+    } catch (e) {}
+    // Convenience flags for templates
+    (safe as any).isAdmin = (safe as any).role && (safe as any).role.name === 'ADMIN';
+    (safe as any).isStaff = (safe as any).role && ['ADMIN', 'DEVELOPER', 'MODERATOR'].includes((safe as any).role.name);
+  }
+
   return reply.view(template, {
     __SITE_MESSAGES__: await getActiveAnnouncementsForUser(user.id),
     user: toSafeUser(user),
