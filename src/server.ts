@@ -172,6 +172,7 @@ fastify.addHook("onRequest", async (request, reply) => {
           <p>Ce contenu est uniquement accessible via <b>plinkk.fr</b></p>
           <a href="https://plinkk.fr">Acceder au site officiel</a>
         </body>
+      <!doctype html>
       </html>
     `);
   }
