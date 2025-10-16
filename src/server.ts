@@ -351,7 +351,7 @@ fastify.addHook("onRequest", async (request, reply) => {
         </div>
       </div>
       <footer>
-        © Plinkk — Renvoyer vers <a href="https://plinkk.fr" style="color:inherit;text-decoration:underline" rel="noopener" target="_blank">plinkk.fr</a>
+        © Plinkk — Renvoyer vers <a href="https://plinkk.fr" style="color:inherit;text-decoration:underline" rel="noopener">plinkk.fr</a>
       </footer>
       </body>
       </html>
