@@ -13,7 +13,7 @@
     "prisma:migratedev": "prisma migrate dev",
     "prisma:dev": "prisma dev",
     "prisma:studio": "prisma studio",
-    "prisma:init": "prisma migrate deploy && prisma generate",
+    "prisma:init": "prisma migrate deploy",
     "postinstall": "prisma generate || true",
     "set-admin": "node scripts/set-admin.cjs",
     "migrate:plinkks": "node scripts/migrate-plinkks.cjs",
