@@ -134,7 +134,7 @@ export function renderBtnThemeCard(item, idx) {
   card.setAttribute('type', 'button');
   card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left flex items-center gap-3';
   const img = document.createElement('img');
-  const iconUrl = (item.icon || '').replace('{{username}}', `/${window.__PLINKK_USER_ID__}`);
+  const iconUrl = (item.icon || '')//.replace('{{username}}', `/${window.__PLINKK_USER_ID__}`);
   img.src = iconUrl;
   img.alt = item.name || '';
   img.className = 'h-8 w-8 object-contain rounded bg-slate-800 border border-slate-700';

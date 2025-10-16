@@ -9,11 +9,13 @@ import {
   User,
 } from "../../generated/prisma/client";
 
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 
 import { resolvePlinkkPage, parseIdentifier } from "../lib/resolvePlinkkPage";
-import { coerceThemeData } from "../lib/theme";
-import { build } from "esbuild";
+import { builtInThemesTypes, coerceThemeData } from "../lib/theme";
+import { generateBundle } from "../lib/generateBundle";
+import builtInThemes from "../lib/builtInThemes";
+import { generateTheme } from "../lib/generateTheme";
 
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
   fastify.get(
@@ -186,7 +188,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     }
   );
 
-  fastify.get("/:username/bundle.js", async function (request, reply) {
+  fastify.get("/:username.js", async function (request, reply) {
     const { username } = request.params as {
       username: string;
     };
@@ -195,31 +197,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       return;
     }
 
-    const entryFile = path.join(__dirname, "..", "public", "js", "init.js");
-    if (!existsSync(entryFile)) {
-      reply.code(404).send("// Fichier JS non trouvé");
-      return;
-    }
-
-    const result = await build({
-      entryPoints: [entryFile],
-      bundle: true,
-      minify: true,
-      platform: "browser",
-      format: "esm",
-      write: false, // on garde le résultat en mémoire
-      banner: {
-        js: "// JavaScript made by PlinkkCorp Dev",
-        css: "/* CSS made by PlinkkCorp Dev */",
-      },
-      legalComments: "eof",
-      drop: ["console"],
-      define: {
-        __plinkk_username__: JSON.stringify(username),
-      },
-    });
-
-    const js = result.outputFiles[0].text;
+    const js = await generateBundle();
 
     reply.type("application/javascript").send(js);
   });
@@ -250,344 +228,11 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     }
   );
 
-  /* fastify.get(
-    "/:username/js/config/:configFileName",
-    { config: { rateLimit: false } },
-    async function (request, reply) {
-      const { username, configFileName } = request.params as {
-        username: string;
-        configFileName: string;
-      };
-      if (username === "") {
-        reply.code(404).send({ error: "please specify a username" });
-        return;
-      }
-      if (configFileName === "") {
-        reply.code(404).send({ error: "please specify a config file" });
-        return;
-      }
-      if (configFileName === "profileConfig.js") {
-        // Eviter le cache pour garantir l'actualisation immédiate du preview
-        reply.header("Cache-Control", "no-store, max-age=0, must-revalidate");
-        reply.header("Vary", "Referer");
-        const profile = await prisma.user.findFirst({
-          where: { id: username },
-          include: { role: true },
-        });
-        if (!profile)
-          return reply.code(404).send({ error: "Profil introuvable" });
-
-        // Déterminer la page Plinkk à partir du query ?slug= ou du Referer (/:username ou /:username/:slug)
-        let identifier: string | undefined = undefined;
-        const q = request.query as { slug: string };
-        if (typeof q?.slug === "string") {
-          const s = (q.slug || "").trim();
-          // compat: slug=0 => page par défaut
-          identifier = s === "0" ? "" : s;
-        }
-        try {
-          if (!identifier) {
-            const ref = String(request.headers.referer || "");
-            if (ref) {
-              const u = new URL(ref);
-              const parts = u.pathname.split("/").filter(Boolean);
-              // parts: [username] ou [username, slug]
-              if (parts.length >= 2 && parts[0] === username) {
-                const candidate = parts[1];
-                if (
-                  !["css", "js", "images", "canvaAnimation"].includes(candidate)
-                ) {
-                  identifier = candidate;
-                }
-              }
-            }
-          }
-        } catch {}
-
-        // Résoudre la page
-        let page = null;
-        if (identifier) {
-          page = await prisma.plinkk.findFirst({
-            where: { userId: profile.id, slug: identifier },
-          });
-        }
-        if (!page) {
-          page =
-            (await prisma.plinkk.findFirst({
-              where: { userId: profile.id, isDefault: true },
-            })) ||
-            (await prisma.plinkk.findFirst({
-              where: { userId: profile.id, index: 0 },
-            })) ||
-            (await prisma.plinkk.findFirst({
-              where: { userId: profile.id },
-              orderBy: [{ index: "asc" }, { createdAt: "asc" }],
-            }));
-        }
-        if (!page) return reply.code(404).send({ error: "Page introuvable" });
-
-        // Charger les données par Plinkk
-        const [
-          settings,
-          background,
-          labels,
-          neonColors,
-          socialIcons,
-          links,
-          pageStatusbar,
-        ] = await Promise.all([
-          prisma.plinkkSettings.findUnique({ where: { plinkkId: page.id } }),
-          prisma.backgroundColor.findMany({
-            where: { userId: profile.id, plinkkId: page.id },
-          }),
-          prisma.label.findMany({
-            where: { userId: profile.id, plinkkId: page.id },
-          }),
-          prisma.neonColor.findMany({
-            where: { userId: profile.id, plinkkId: page.id },
-          }),
-          prisma.socialIcon.findMany({
-            where: { userId: profile.id, plinkkId: page.id },
-          }),
-          prisma.link.findMany({
-            where: { userId: profile.id, plinkkId: page.id },
-          }),
-          prisma.plinkkStatusbar.findUnique({ where: { plinkkId: page.id } }),
-        ]);
-        // Si un thème privé est sélectionné, récupérer ses données, les normaliser en "full shape"
-        // et l'injecter comme thème 0 pour le front.
-        let injectedThemeVar = "";
-        try {
-          // Helpers de normalisation (cohérents avec apiRoutes)
-          const normalizeHex = (v?: string) => {
-            if (!v || typeof v !== "string") return "#000000";
-            const s = v.trim();
-            if (/^#?[0-9a-fA-F]{3}$/.test(s)) {
-              const t = s.replace("#", "");
-              return (
-                "#" +
-                t
-                  .split("")
-                  .map((c) => c + c)
-                  .join("")
-              );
-            }
-            if (/^#?[0-9a-fA-F]{6}$/.test(s))
-              return s.startsWith("#") ? s : "#" + s;
-            return "#000000";
-          };
-          const luminance = (hex: string) => {
-            const h = normalizeHex(hex).slice(1);
-            const r = parseInt(h.slice(0, 2), 16) / 255;
-            const g = parseInt(h.slice(2, 4), 16) / 255;
-            const b = parseInt(h.slice(4, 6), 16) / 255;
-            const a = [r, g, b].map((v) =>
-              v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
-            );
-            return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
-          };
-          const contrastText = (bg: string) =>
-            luminance(bg) > 0.5 ? "#111827" : "#ffffff";
-          const mix = (hexA: string, hexB: string, ratio = 0.2) => {
-            const a = normalizeHex(hexA).slice(1);
-            const b = normalizeHex(hexB).slice(1);
-            const c = (i: number) =>
-              Math.round(
-                parseInt(a.slice(i, i + 2), 16) * (1 - ratio) +
-                  parseInt(b.slice(i, i + 2), 16) * ratio
-              );
-            const r = c(0),
-              g = c(2),
-              bl = c(4);
-            return `#${[r, g, bl]
-              .map((x) => x.toString(16).padStart(2, "0"))
-              .join("")}`;
-          };
-          const hoverVariant = (color: string) =>
-            luminance(color) > 0.5
-              ? mix(color, "#000000", 0.2)
-              : mix(color, "#ffffff", 0.2);
-          type SimplifiedVariant = {
-            bg: string;
-            button: string;
-            hover: string;
-          };
-          const toFullTheme = (
-            light: SimplifiedVariant,
-            dark: SimplifiedVariant
-          ) => {
-            const L = {
-              background: normalizeHex(light.bg),
-              hoverColor: normalizeHex(light.hover),
-              textColor: contrastText(light.bg),
-              buttonBackground: normalizeHex(light.button),
-              buttonHoverBackground: hoverVariant(light.button),
-              buttonTextColor: contrastText(light.button),
-              linkHoverColor: normalizeHex(light.hover),
-              articleHoverBoxShadow: `0 4px 12px ${normalizeHex(
-                light.hover
-              )}55`,
-              darkTheme: false,
-            };
-            const D = {
-              background: normalizeHex(dark.bg),
-              hoverColor: normalizeHex(dark.hover),
-              textColor: contrastText(dark.bg),
-              buttonBackground: normalizeHex(dark.button),
-              buttonHoverBackground: hoverVariant(dark.button),
-              buttonTextColor: contrastText(dark.button),
-              linkHoverColor: normalizeHex(dark.hover),
-              articleHoverBoxShadow: `0 4px 12px ${normalizeHex(dark.hover)}55`,
-              darkTheme: true,
-            };
-            return { ...L, opposite: D };
-          };
-
-          if (profile.selectedCustomThemeId) {
-            const t = await prisma.theme.findUnique({
-              where: { id: profile.selectedCustomThemeId },
-              select: { data: true, isPrivate: true, authorId: true },
-            });
-            if (t && t.authorId === profile.id) {
-              const full = coerceThemeData(t.data);
-              if (full) {
-                const safe = JSON.stringify(full);
-                injectedThemeVar = `window.__PLINKK_PRIVATE_THEME__ = ${safe};`;
-              }
-            }
-          }
-          // Fallback: si aucun thème sélectionné injecté, injecter le dernier SUBMITTED de l'utilisateur
-          if (!injectedThemeVar) {
-            const sub = await prisma.theme.findFirst({
-              where: { authorId: profile.id, status: "SUBMITTED" },
-              select: { data: true },
-              orderBy: { updatedAt: "desc" },
-            });
-            const candidate = sub
-              ? sub
-              : await prisma.theme.findFirst({
-                  where: { authorId: profile.id, status: "DRAFT" },
-                  select: { data: true },
-                  orderBy: { updatedAt: "desc" },
-                });
-            if (candidate && candidate.data) {
-              const full = coerceThemeData(candidate.data);
-              if (full) {
-                const safe = JSON.stringify(full);
-                injectedThemeVar = `window.__PLINKK_PRIVATE_THEME__ = ${safe};`;
-              }
-            }
-          }
-        } catch {}
-        // If we computed an injected theme, parse it to pass as object
-        let injectedObj = null;
-        try {
-          if (injectedThemeVar) {
-            // injectedThemeVar is like `window.__PLINKK_PRIVATE_THEME__ = {...};`
-            const idx = injectedThemeVar.indexOf("=");
-            const objStr = injectedThemeVar
-              .slice(idx + 1)
-              .trim()
-              .replace(/;$/, "");
-            injectedObj = JSON.parse(objStr);
-          }
-        } catch (e) {}
-
-        // Fusionner les réglages de page (PlinkkSettings) avec les valeurs par défaut du compte
-        const pageProfile: User & PlinkkSettings = {
-          plinkkId: null,
-          ...profile,
-          profileLink: settings?.profileLink ?? "",
-          profileImage: settings?.profileImage ?? "",
-          profileIcon: settings?.profileIcon ?? "",
-          profileSiteText: settings?.profileSiteText ?? "",
-          userName: settings?.userName ?? profile.userName,
-          iconUrl: settings?.iconUrl ?? "",
-          description: settings?.description ?? "",
-          profileHoverColor: settings?.profileHoverColor ?? "",
-          // Nouvel agencement: ordre des sections
-          layoutOrder: settings?.layoutOrder ?? null,
-          degBackgroundColor: settings?.degBackgroundColor ?? 45,
-          neonEnable: settings?.neonEnable ?? 1,
-          buttonThemeEnable: settings?.buttonThemeEnable ?? 1,
-          EnableAnimationArticle: settings?.EnableAnimationArticle ?? 1,
-          EnableAnimationButton: settings?.EnableAnimationButton ?? 1,
-          EnableAnimationBackground: settings?.EnableAnimationBackground ?? 1,
-          backgroundSize: settings?.backgroundSize ?? 50,
-          selectedThemeIndex: settings?.selectedThemeIndex ?? 13,
-          selectedAnimationIndex: settings?.selectedAnimationIndex ?? 0,
-          selectedAnimationButtonIndex:
-            settings?.selectedAnimationButtonIndex ?? 10,
-          selectedAnimationBackgroundIndex:
-            settings?.selectedAnimationBackgroundIndex ?? 0,
-          animationDurationBackground:
-            settings?.animationDurationBackground ?? 30,
-          delayAnimationButton: settings?.delayAnimationButton ?? 0.1,
-          // Support for per-Plinkk public email: if a PlinkkSettings.affichageEmail
-          // exists we must prefer it for the generated profile config. We expose it
-          // both as `affichageEmail` and override `publicEmail` so generateProfileConfig
-          // (which reads profile.publicEmail) will pick up the page-specific value.
-          affichageEmail: settings?.affichageEmail ?? null,
-          publicEmail:
-            settings &&
-            Object.prototype.hasOwnProperty.call(settings, "affichageEmail")
-              ? settings.affichageEmail
-              : profile.publicEmail ?? null,
-          canvaEnable: settings?.canvaEnable ?? 1,
-          selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
-        };
-
-        const generated = generateProfileConfig(
-          pageProfile,
-          links,
-          background,
-          labels,
-          neonColors,
-          socialIcons,
-          pageStatusbar,
-          injectedObj
-        ).replaceAll("{{username}}", username);
-
-        // If debug=1 in query, return the non-minified generated code for inspection
-        const isDebug = (request.query as { debug: string })?.debug === "1";
-        if (injectedObj) {
-          reply.header("X-Plinkk-Injected", "1");
-        }
-        if (isDebug) {
-          return reply.type("text/javascript").send(generated);
-        }
-        const mini = minify(generated);
-        return reply.type("text/javascript").send(mini.code || "");
-      }
-      if (
-        existsSync(
-          path.join(__dirname, "..", "public", "config", configFileName)
-        )
-      ) {
-        const file = readFileSync(
-          path.join(__dirname, "..", "public", "config", configFileName),
-          { encoding: "utf-8" }
-        );
-        if (configFileName === "btnIconThemeConfig.js") {
-          return reply
-            .type("text/javascript")
-            .send(
-              file.replaceAll("{{username}}", "https://plinkk.fr/" + username)
-            );
-        }
-        return reply
-          .type("text/javascript")
-          .send(file.replaceAll("{{username}}", username));
-      }
-      return reply.code(404).send({ error: "non existant file" });
-    }
-  ); */
-
   fastify.get(
-    "/:username/config.js",
+    "/config.js",
     { config: { rateLimit: false } },
     async function (request, reply) {
-      const { username } = request.params as {
+      const { username } = request.query as {
         username: string;
       };
       if (username === "") {
@@ -599,10 +244,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       reply.header("Vary", "Referer");
       const page = await prisma.plinkk.findFirst({
         where: { slug: username },
-        include: { user: true }
+        include: { user: true },
       });
-      if (!page)
-        return reply.code(404).send({ error: "Page introuvable" });
+      if (!page) return reply.code(404).send({ error: "Page introuvable" });
 
       // Charger les données par Plinkk
       const [
@@ -835,6 +479,17 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       }
       const mini = minify(generated);
       return reply.type("text/javascript").send(mini.code || "");
+    }
+  );
+
+  fastify.get(
+    "/themes.json",
+    { config: { rateLimit: false } },
+    async function (request, reply) {
+      const { userId } = request.query as { userId: string };
+
+      // Return built-ins first, then community and mine
+      return reply.send(await generateTheme(userId));
     }
   );
 

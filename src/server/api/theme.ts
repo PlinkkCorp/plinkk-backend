@@ -3,6 +3,7 @@ import { PrismaClient } from "../../../generated/prisma/client";
 import { builtInThemesTypes, coerceThemeData } from "../../lib/theme";
 import { verifyRoleIsStaff } from "../../lib/verifyRole";
 import { builtInThemes } from "../../lib/builtInThemes";
+import { generateTheme } from "../../lib/generateTheme";
 
 const prisma = new PrismaClient();
 
@@ -43,77 +44,10 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
 
   // List all themes: built-in + approved community themes (and optionally owner's themes if requested)
   fastify.get("/list", async (request, reply) => {
-    let builtIns: builtInThemesTypes[] = [];
-    try {
-      if (Array.isArray(builtInThemes)) builtIns = builtInThemes;
-    } catch (e) {
-      builtIns = [];
-    }
-
-    // Load approved community themes from DB
-    const community = await prisma.theme.findMany({
-      where: { status: "APPROVED", isPrivate: false },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        data: true,
-        author: { select: { id: true, userName: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-    const list = [];
-    // normalize community themes using coerceThemeData
-    for (const t of community) {
-      let full;
-      try {
-        full = coerceThemeData(t.data);
-      } catch {
-        full = t.data;
-      }
-      list.push({
-        id: t.id,
-        name: t.name,
-        description: t.description || "",
-        source: "community",
-        author: t.author,
-        ...(full || {}),
-      });
-    }
-
-    // Optionally include user's own themes when query userId is provided (for editor)
-    const userId = (request.query as { userId: string })?.userId;
-    if (userId && typeof userId === "string") {
-      const mine = await prisma.theme.findMany({
-        where: { authorId: userId },
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          data: true,
-          status: true,
-        },
-      });
-      for (const t of mine) {
-        let full;
-        try {
-          full = coerceThemeData(t.data);
-        } catch {
-          full = t.data;
-        }
-        list.push({
-          id: t.id,
-          name: t.name,
-          description: t.description || "",
-          source: "mine",
-          status: t.status,
-          ...(full || {}),
-        });
-      }
-    }
+    const { userId } = request.query as { userId: string };
 
     // Return built-ins first, then community and mine
-    return reply.send({ builtIns, themes: list });
+    return reply.send(await generateTheme(userId));
   });
 
   // Admin: approve a pending update -> replace data and clear pending

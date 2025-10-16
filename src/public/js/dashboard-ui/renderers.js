@@ -439,7 +439,7 @@ export function renderLinks({ container, addBtn, links, scheduleAutoSave }) {
               l.name = chosen.name;
             }
             if (chosen?.icon) {
-              const replaced = chosen.icon.replace('{{username}}', `/${window.__PLINKK_USER_ID__}`);
+              const replaced = chosen.icon//.replace('{{username}}', `/${window.__PLINKK_USER_ID__}`);
               icon.value = replaced;
               l.icon = replaced;
             }

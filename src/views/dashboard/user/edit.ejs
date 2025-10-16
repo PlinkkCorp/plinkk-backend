@@ -639,13 +639,13 @@
                     // Fetch built-ins + community themes from the server and expose
                     // them to the dashboard UI via window.__PLINKK_CFG__
                     try {
-                        const res = await fetch('/api/themes/list');
+                        const res = await fetch(`/themes.json?userId=${encodeURIComponent("<%= user.id %>")}`);
                         let builtIns = [];
                         let community = [];
                         if (res.ok) {
                             const payload = await res.json();
                             builtIns = Array.isArray(payload.builtIns) ? payload.builtIns : [];
-                            community = Array.isArray(payload.themes) ? payload.themes : [];
+                            community = Array.isArray(payload.theme) ? payload.theme : [];
                         }
                         const mergedThemes = builtIns.concat(community);
                         window.__PLINKK_CFG__ = { themes: mergedThemes, canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };

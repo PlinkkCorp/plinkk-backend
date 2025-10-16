@@ -24,7 +24,7 @@ export function createProfileContainer(profileData) {
         profilePic.src = profileData.profileImage;
     }
     else {
-        profilePic.src = username + "/images/logo.png";
+        profilePic.src = "/public/images/logo.png";
     }
     // Try a single fallback to the username logo, then stop retrying to avoid infinite loops
     profilePic.onerror = function () {
@@ -32,7 +32,7 @@ export function createProfileContainer(profileData) {
             if (!this._triedFallback) {
                 this._triedFallback = true;
                 // Attempt a single fallback
-                this.src = username + "/images/logo.png";
+                this.src = "/public/images/logo.png";
                 return;
             }
         }
@@ -70,14 +70,14 @@ export function createProfileContainer(profileData) {
         profileIcon.src = profileData.profileIcon;
     }
     else {
-        profileIcon.src = "public/images/icons/default-icon.svg";
+        profileIcon.src = "/public/images/icons/default-icon.svg";
     }
     // Single-attempt fallback for the icon, then stop retrying
     profileIcon.onerror = function () {
         try {
             if (!this._triedFallback) {
                 this._triedFallback = true;
-                this.src = "public/images/icons/default-icon.svg";
+                this.src = "/public/images/icons/default-icon.svg";
                 return;
             }
         }
@@ -408,7 +408,7 @@ export function createLinkBoxes(profileData) {
         // Créer le lien principal qui englobe tout le contenu
         const discordLink = document.createElement("a");
         if (isSafeUrl(link.url)) {
-            discordLink.href = "/click/" + link.id;
+            discordLink.href = window.location.hostname === "plinkk.fr" ? "/click/" + link.id : link.url;
             discordLink.target = "_blank";
             discordLink.rel = "noopener noreferrer";
         }
@@ -694,7 +694,7 @@ export function createIconList(profileData) {
             if (/^(https?:\/\/|\/|data:)/i.test(iconVal)) {
                 iconImg.src = iconVal;
             } else {
-                iconImg.src = `/images/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
+                iconImg.src = `/public/images/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
             }
         setSafeText(iconImg, iconData.icon);
         iconImg.alt = iconData.icon;

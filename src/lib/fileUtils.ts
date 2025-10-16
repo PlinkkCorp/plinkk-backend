@@ -1,3 +1,5 @@
+import https from "https";
+
 /** Rectangle arrondi générique **/
 export function roundedRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -25,4 +27,23 @@ export function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
     }
   }
   ctx.fillText(line, x, y);
+}
+
+/**
+ * Télécharge un fichier distant (stream -> string)
+ */
+export function fetchRemoteFile(url: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      if (res.statusCode !== 200) {
+        reject(new Error(`Erreur HTTP ${res.statusCode} pour ${url}`));
+        return;
+      }
+
+      let data = "";
+      res.setEncoding("utf8");
+      res.on("data", (chunk) => (data += chunk));
+      res.on("end", () => resolve(data));
+    }).on("error", reject);
+  });
 }
