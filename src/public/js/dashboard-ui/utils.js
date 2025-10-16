@@ -77,58 +77,93 @@ export function createGripSVG(size = 20) {
 }
 
 export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, renderFn, scheduleAutoSave = () => {}) {
-  let pointerId = null;
+  let dragging = false;
   let ghost = null;
   let placeholder = null;
+  let startRect = null;
+  let startIndex = -1;
+  let targetIndex = -1;
   let offsetX = 0;
   let offsetY = 0;
+  let prevUserSelect = '';
 
-  function createPlaceholder(h) {
+  const isDraggableRow = (el) => !!(el && el.dataset && el.dataset.dragIndex !== undefined && el.dataset.dragIndex !== null);
+
+  function createPlaceholder(height) {
     const p = document.createElement('div');
-    p.style.height = `${h}px`;
-    p.style.background = 'rgba(255,255,255,0.02)';
-    p.style.border = '1px dashed rgba(255,255,255,0.03)';
-    p.style.borderRadius = '6px';
-    p.style.margin = '4px 0';
+    p.style.height = `${height}px`;
+    p.style.border = '1px dashed rgba(148,163,184,0.35)';
+    p.style.borderRadius = '8px';
+    p.style.margin = '6px 0';
+    p.style.background = 'rgba(30,41,59,0.25)';
+    p.setAttribute('aria-hidden', 'true');
     return p;
   }
 
-  function onPointerDown(e) {
-    if (pointerId !== null) return;
-    e.preventDefault();
-    const p = e.pointerId || 'mouse';
-    pointerId = p;
-    rowEl.setPointerCapture && rowEl.setPointerCapture(pointerId);
-    const rect = rowEl.getBoundingClientRect();
-    offsetX = e.clientX - rect.left;
-    offsetY = e.clientY - rect.top;
+  function cleanup() {
+    dragging = false;
+    document.removeEventListener('pointermove', onPointerMove);
+    document.removeEventListener('pointerup', onPointerUp);
+    document.removeEventListener('pointercancel', onPointerUp);
+    if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost);
+    ghost = null;
+    if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
+    placeholder = null;
+    if (rowEl) rowEl.style.display = '';
+    if (prevUserSelect !== '') {
+      document.body.style.userSelect = prevUserSelect;
+      document.body.style.webkitUserSelect = prevUserSelect;
+    }
+  }
 
+  function onPointerDown(e) {
+    if (dragging) return;
+    // Commence uniquement si clic sur le handle (pas sur des inputs voisins)
+    e.preventDefault();
+    e.stopPropagation();
+
+    dragging = true;
+    startRect = rowEl.getBoundingClientRect();
+    offsetX = e.clientX - startRect.left;
+    offsetY = e.clientY - startRect.top;
+    prevUserSelect = document.body.style.userSelect || '';
+    document.body.style.userSelect = 'none';
+    document.body.style.webkitUserSelect = 'none';
+
+    // Construire le fantôme
     ghost = rowEl.cloneNode(true);
     ghost.style.position = 'fixed';
-    ghost.style.left = `${rect.left}px`;
-    ghost.style.top = `${rect.top}px`;
-    ghost.style.width = `${rect.width}px`;
+    ghost.style.left = `${startRect.left}px`;
+    ghost.style.top = `${startRect.top}px`;
+    ghost.style.width = `${startRect.width}px`;
     ghost.style.boxSizing = 'border-box';
     ghost.style.pointerEvents = 'none';
     ghost.style.zIndex = '9999';
-    ghost.style.transform = 'translateZ(0) scale(1.02)';
-    ghost.style.transition = 'transform 120ms ease, box-shadow 120ms ease';
-    ghost.style.boxShadow = '0 8px 30px rgba(2,6,23,0.6)';
+    ghost.style.transform = 'translateZ(0)';
+    ghost.style.willChange = 'transform, top, left';
+    ghost.style.boxShadow = '0 8px 30px rgba(2,6,23,0.55)';
     ghost.style.opacity = '0.98';
+    ghost.style.border = '1px solid rgba(99,102,241,0.45)';
+    ghost.style.background = 'rgba(15,23,42,0.96)';
     document.body.appendChild(ghost);
 
-    const ph = createPlaceholder(rect.height);
-    placeholder = ph;
-    rowEl.parentNode.insertBefore(ph, rowEl);
+    // Placeholder à la place de la ligne
+    placeholder = createPlaceholder(startRect.height);
+    const parent = rowEl.parentNode;
+    parent.insertBefore(placeholder, rowEl);
     rowEl.style.display = 'none';
 
-    document.addEventListener('pointermove', onPointerMove);
-    document.addEventListener('pointerup', onPointerUp);
-    document.addEventListener('pointercancel', onPointerUp);
+    // Indices
+    startIndex = Number(rowEl.dataset.dragIndex || '-1');
+    targetIndex = startIndex;
+
+    document.addEventListener('pointermove', onPointerMove, { passive: false });
+    document.addEventListener('pointerup', onPointerUp, { passive: false });
+    document.addEventListener('pointercancel', onPointerUp, { passive: false });
   }
 
   function onPointerMove(e) {
-    if (pointerId === null) return;
+    if (!dragging) return;
     e.preventDefault();
     const x = e.clientX - offsetX;
     const y = e.clientY - offsetY;
@@ -137,51 +172,45 @@ export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, rende
       ghost.style.top = `${y}px`;
     }
 
-  // Consider only elements that are draggable (have a data-drag-index) to compute insertion point
-  const children = Array.from(containerEl.children).filter((c) => c !== ghost && c !== placeholder && c.dataset && c.dataset.dragIndex !== undefined && c.dataset.dragIndex !== null);
-    let inserted = false;
-    for (const child of children) {
-      const r = child.getBoundingClientRect();
+    const rows = Array.from(containerEl.children).filter((c) => c !== ghost && c !== placeholder && isDraggableRow(c));
+    // Trouver la position d’insertion selon le centre vertical du fantôme
+    const ghostMidY = y + startRect.height / 2;
+    let newIndex = rows.length; // par défaut, à la fin
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i].getBoundingClientRect();
       const mid = r.top + r.height / 2;
-      if (e.clientY < mid) {
-        if (containerEl.contains(placeholder)) containerEl.insertBefore(placeholder, child);
-        else containerEl.insertBefore(placeholder, child);
-        inserted = true;
-        break;
-      }
+      if (ghostMidY < mid) { newIndex = i; break; }
     }
-    if (!inserted) containerEl.appendChild(placeholder);
+    // Déplacer le placeholder si besoin
+    const currentIndex = Array.from(containerEl.children).indexOf(placeholder);
+    const desiredEl = rows[newIndex];
+    if (desiredEl && containerEl.contains(desiredEl)) {
+      if (currentIndex > -1) containerEl.insertBefore(placeholder, desiredEl);
+    } else {
+      containerEl.appendChild(placeholder);
+    }
+    targetIndex = newIndex;
   }
 
   function onPointerUp(e) {
-    if (pointerId === null) return;
-    try {
-      document.removeEventListener('pointermove', onPointerMove);
-      document.removeEventListener('pointerup', onPointerUp);
-      document.removeEventListener('pointercancel', onPointerUp);
-    } catch {}
-    pointerId = null;
-
-  // Use the same filtering as onPointerMove: only draggable rows matter for final index
-  const all = Array.from(containerEl.children);
-  const filtered = all.filter((c) => c !== rowEl && c.dataset && c.dataset.dragIndex !== undefined && c.dataset.dragIndex !== null);
-  let insertAt = filtered.indexOf(placeholder);
-    if (insertAt === -1) {
-      insertAt = filtered.findIndex((c) => c.getBoundingClientRect().top > e.clientY);
-      if (insertAt === -1) insertAt = filtered.length;
-    }
-
-    if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost);
-    if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
-    rowEl.style.display = '';
-
+    if (!dragging) return;
+    e.preventDefault();
+    let desiredIndex = Math.max(0, Math.min(targetIndex, itemsArray.length)); // peut être égal à length (ajout en fin)
     const originalIdx = Number(rowEl.dataset.dragIndex || '-1');
-    if (originalIdx >= 0 && originalIdx < itemsArray.length) {
+
+    cleanup();
+
+    if (originalIdx >= 0 && originalIdx < itemsArray.length && desiredIndex !== originalIdx) {
       const item = itemsArray.splice(originalIdx, 1)[0];
-      const finalIndex = Math.max(0, Math.min(insertAt, itemsArray.length));
+      // Si on déplace vers le bas, l'index cible se décale d'une unité après retrait
+      if (originalIdx < desiredIndex) desiredIndex -= 1;
+      const finalIndex = Math.max(0, Math.min(desiredIndex, itemsArray.length));
       itemsArray.splice(finalIndex, 0, item);
       renderFn(itemsArray);
       scheduleAutoSave();
+    } else {
+      // Rien n’a changé, re-render pour rétablir les data-index cohérents
+      renderFn(itemsArray);
     }
   }
 

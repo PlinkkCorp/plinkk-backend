@@ -204,6 +204,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       delayAnimationButton: settings?.delayAnimationButton ?? null,
       canvaEnable: settings?.canvaEnable ?? 0,
       selectedCanvasIndex: settings?.selectedCanvasIndex ?? null,
+      layoutOrder: settings?.layoutOrder ?? null,
       background: background.map((c) => c.color),
       neonColors: neonColors.map((c) => c.color),
       labels: labels.map((l) => ({
@@ -272,6 +273,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       delayAnimationButton: body.delayAnimationButton,
       canvaEnable: body.canvaEnable,
       selectedCanvasIndex: body.selectedCanvasIndex,
+      layoutOrder: body.layoutOrder,
     });
 
     if (Object.keys(data).length > 0) {
@@ -291,6 +293,28 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
+  // Enregistrer l'ordre d'agencement des sections
+  fastify.put("/:id/config/layout", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const page = await prisma.plinkk.findFirst({
+      where: { id, userId: String(userId) },
+    });
+    if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
+
+    const body = request.body as { layoutOrder?: any };
+    const layoutOrder = body?.layoutOrder;
+    if (layoutOrder !== undefined) {
+      await prisma.plinkkSettings.upsert({
+        where: { plinkkId: id },
+        create: { plinkkId: id, layoutOrder },
+        update: { layoutOrder },
+      });
+    }
+    return reply.send({ ok: true });
+  });
+
   fastify.put("/:id/config/background", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -300,21 +324,29 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     });
     if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
 
-    const body = request.body as { background: BackgroundColor[] };
-    // Couleurs de fond
-    if (Array.isArray(body.background)) {
-      await prisma.backgroundColor.deleteMany({
-        where: { userId: String(userId), plinkkId: id },
+    const body = request.body as { background: any[] };
+    // Couleurs de fond: accepter string[] ou { color: string }[] et normaliser
+    const list = Array.isArray(body?.background) ? body.background : [];
+    const colors = list
+      .map((item) =>
+        typeof item === 'string'
+          ? item
+          : item && typeof item.color === 'string'
+          ? item.color
+          : null
+      )
+      .filter((c): c is string => !!c && typeof c === 'string' && c.trim() !== '');
+    await prisma.backgroundColor.deleteMany({
+      where: { userId: String(userId), plinkkId: id },
+    });
+    if (colors.length > 0) {
+      await prisma.backgroundColor.createMany({
+        data: colors.map((color: string) => ({
+          color,
+          userId: String(userId),
+          plinkkId: id,
+        })),
       });
-      if (body.background.length > 0) {
-        await prisma.backgroundColor.createMany({
-          data: body.background.map((backgroundColor: BackgroundColor) => ({
-            color: backgroundColor.color,
-            userId: String(userId),
-            plinkkId: id,
-          })),
-        });
-      }
     }
 
     return reply.send({ ok: true });

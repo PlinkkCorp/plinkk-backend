@@ -6,3 +6,4 @@ dist
 *.db
 /.vscode/
 /src/public/uploads
+**/migration_lock.toml

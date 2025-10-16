@@ -413,13 +413,15 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
         const totalPrivate = totalUsers - totalPublic;
         const allRoles = await prisma.role.findMany({
           where: {
-            id: { in: ["ADMIN", "DEVELOPER", "MODERATOR"] }
+            name: { in: ["ADMIN", "DEVELOPER", "MODERATOR"] }
           },
           include: {
             users: true
           }
         })
-        const moderators = allRoles[0].users.length
+        // Sum users for role 'MODERATOR' if present, otherwise fallback to 0
+        const moderatorsRole = allRoles.find(r => r.name === 'MODERATOR');
+        const moderators = moderatorsRole ? (moderatorsRole.users?.length || 0) : 0;
         return { totalUsers, totalPublic, totalPrivate, moderators };
       })(),
     ]);
