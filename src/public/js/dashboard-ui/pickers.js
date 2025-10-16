@@ -38,7 +38,7 @@ export async function populateIconGrid(filterText) {
       card.setAttribute('type', 'button');
       card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 flex flex-col items-center gap-2';
       const img = document.createElement('img');
-      img.src = `/${window.__PLINKK_USER_ID__}/images/icons/${i.slug}.svg`;
+      img.src = `/images/icons/${i.slug}.svg`;
       img.alt = i.displayName;
       img.className = 'h-10 w-10 object-contain';
       const label = document.createElement('div');
@@ -134,7 +134,7 @@ export function renderBtnThemeCard(item, idx) {
   card.setAttribute('type', 'button');
   card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left flex items-center gap-3';
   const img = document.createElement('img');
-  const iconUrl = (item.icon || '').replace('{{username}}', `/${window.__PLINKK_USER_ID__}`);
+  const iconUrl = (item.icon || '')//.replace('{{username}}', `/${window.__PLINKK_USER_ID__}`);
   img.src = iconUrl;
   img.alt = item.name || '';
   img.className = 'h-8 w-8 object-contain rounded bg-slate-800 border border-slate-700';

@@ -219,8 +219,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
       function setPreviewByValue(val) {
         if (isUrlish(val)) iconPreview.src = val;
         else {
-          const slug = (val || '').toLowerCase().trim().replace(/\s+/g, '-');
-          iconPreview.src = `/${window.__PLINKK_USER_ID__}/images/icons/${slug}.svg`;
+          iconPreview.src = `/images/icons/${val}.svg`;
         }
       }
       function updateFromCatalog() { s.icon = iconName.value; setPreviewByValue(s.icon); scheduleAutoSave(); }
@@ -251,7 +250,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
             card.type = 'button';
             card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left flex items-center gap-3';
             const img = document.createElement('img');
-            img.src = `/${window.__PLINKK_USER_ID__}/images/icons/${item.iconSlug}.svg`;
+            img.src = `/images/icons/${item.iconSlug}.svg`;
             img.className = 'h-8 w-8 rounded bg-slate-800 border border-slate-700';
             const col = document.createElement('div');
             const title = document.createElement('div');
@@ -395,7 +394,7 @@ export function renderLinks({ container, addBtn, links, scheduleAutoSave }) {
 
       function openIconPickerForLink() {
         openIconModal((slug) => {
-          const replaced = `/${window.__PLINKK_USER_ID__}/images/icons/${slug}.svg`;
+          const replaced = `/images/icons/${slug}.svg`;
           icon.value = replaced;
           l.icon = replaced;
           setPreviewByValue(l.icon);
@@ -440,7 +439,7 @@ export function renderLinks({ container, addBtn, links, scheduleAutoSave }) {
               l.name = chosen.name;
             }
             if (chosen?.icon) {
-              const replaced = chosen.icon.replace('{{username}}', `/${window.__PLINKK_USER_ID__}`);
+              const replaced = chosen.icon//.replace('{{username}}', `/${window.__PLINKK_USER_ID__}`);
               icon.value = replaced;
               l.icon = replaced;
             }

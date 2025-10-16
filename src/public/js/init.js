@@ -11,14 +11,14 @@ export const themes = [];
 // Start loading themes immediately and expose a promise to await completion.
 export const themesLoaded = (async () => {
     try {
-        const payload = await loadThemes();
+        const payload = await loadThemes((window.__PLINKK_IDENTIFIER__ || (location.pathname.split('/').filter(Boolean)[1] || '')).trim());
         if (payload && Array.isArray(payload.builtIns) && payload.builtIns.length) {
             // Copy built-ins into themes (they will be appended after injected)
             payload.builtIns.forEach(t => themes.push(t));
         }
-        if (payload && Array.isArray(payload.themes) && payload.themes.length) {
+        if (payload && Array.isArray(payload.theme) && payload.theme.length) {
             // community/mine themes appended after built-ins
-            payload.themes.forEach(t => themes.push(t));
+            payload.theme.forEach(t => themes.push(t));
         }
     } catch (e) {
         // ignore

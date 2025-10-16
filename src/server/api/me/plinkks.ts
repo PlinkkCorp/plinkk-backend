@@ -23,6 +23,9 @@ import path from "path";
 import { readdirSync } from "fs";
 import archiver from "archiver"
 import ejs from "ejs";
+import { fetchRemoteFile } from "../../../lib/fileUtils";
+import { canvaData } from "../../../public/config/canvaConfig"
+import { generateTheme } from "../../../lib/generateTheme";
 
 const prisma = new PrismaClient();
 
@@ -579,6 +582,8 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       page.statusbar
     );
 
+    const themes = await generateTheme(page.userId)
+
     // Création du flux d’archive
     const archive = archiver("zip", { zlib: { level: 9 } }); // niveau max de compression
 
@@ -592,18 +597,36 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
 
     // --- FICHIERS DYNAMIQUES ---
     archive.append(await ejs.renderFile(path.join(__dirname, "..", "..", "..", "views", "plinkk", "show.ejs"), { page: page, userId: page.userId, username: page.userId }), { name: "index.html" });
-    archive.append(js, { name: "bundle.js" });
+    archive.append(js, { name: page.slug + ".js" });
     archive.append(config, { name: "config.js" });
+    archive.append(JSON.stringify(themes), { name: "themes.json" });
+    const analyticsScript = await fetchRemoteFile("https://analytics.plinkk.fr/script.js");
+    archive.append(analyticsScript, { name: "umami_script.js" });
+    const canvaId = page.settings.canvaEnable ? page.settings.selectedCanvasIndex : null
+    if (canvaId !== null) {
+      archive.file(path.join(__dirname, "..", "..", "..", "public", "canvaAnimation", canvaData[canvaId].fileNames), { name: "canvaAnimation/" + canvaData[canvaId].fileNames })
+    }
 
     // --- FICHIERS CSS (statiques) ---
-    archive.file(path.join(__dirname, "..", "..", "..", "public", "css", "styles.css"), { name: "style.css" });
-    archive.file(path.join(__dirname, "..", "..", "..", "public", "css", "button.css"), { name: "button.css" });
+    archive.file(path.join(__dirname, "..", "..", "..", "public", "css", "styles.css"), { name: "css/styles.css" });
+    archive.file(path.join(__dirname, "..", "..", "..", "public", "css", "button.css"), { name: "css/button.css" });
 
     // --- LOGOS (statiques) ---
-    const logosPath = path.join(__dirname, "..", "..", "..", "public", "images", "icons");
+    /* const logosPath = path.join(__dirname, "..", "..", "..", "public", "images", "icons");
     const logos = readdirSync(logosPath);
     for (const logo of logos) {
-      archive.file(path.join(logosPath, logo), { name: `images/${logo}` });
+      archive.file(path.join(logosPath, logo), { name: `public/images/${logo}` });
+    } */
+
+    if (page.settings.profileImage.startsWith("/public/")) archive.file(path.join(__dirname, "..", "..", "..", ...page.settings.profileImage.split("/")), { name: page.settings.profileImage})
+    if (page.settings.profileIcon.startsWith("/public/")) archive.file(path.join(__dirname, "..", "..", "..", ...page.settings.profileIcon.split("/")), { name: page.settings.profileIcon})
+    if (page.settings.iconUrl.startsWith("/public/")) archive.file(path.join(__dirname, "..", "..", "..", ...page.settings.iconUrl.split("/")), { name: page.settings.iconUrl})
+
+    for (const link of page.links) {
+      if (link.icon.startsWith("/public/")) archive.file(path.join(__dirname, "..", "..", "..", ...link.icon.split("/")), { name: link.icon });
+    }
+    for (const socialIcon of page.socialIcons) {
+      archive.file(path.join(__dirname, "..", "..", "..", "public", "images", "icons", socialIcon.icon + ".svg"), { name: "public/images/icons/" + socialIcon.icon + ".svg" });
     }
 
     // Finaliser le ZIP
