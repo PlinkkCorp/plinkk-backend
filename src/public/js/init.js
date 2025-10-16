@@ -72,13 +72,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         const DEFAULT_LAYOUT = ['profile','username','statusbar','labels','social','email','links'];
         let order = Array.isArray(profileData.layoutOrder) ? profileData.layoutOrder.slice() : DEFAULT_LAYOUT;
         const KNOWN = new Set(DEFAULT_LAYOUT);
+    const DEFAULT_LAYOUT = ['profile','username','labels','social','email','links'];
         // Normaliser: garder seulement les connus puis ajouter les manquants dans l'ordre par défaut
         const filtered = order.filter(k => KNOWN.has(k));
         DEFAULT_LAYOUT.forEach(k => { if (!filtered.includes(k)) filtered.push(k); });
         const renderers = {
             profile: () => article.appendChild(createProfileContainer(profileData)),
             username: () => article.appendChild(createUserName(profileData)),
-            statusbar: () => createStatusBar(profileData),
             labels: () => createLabelButtons(profileData),
             social: () => createIconList(profileData),
             email: () => article.appendChild(createEmailAndDescription(profileData)),

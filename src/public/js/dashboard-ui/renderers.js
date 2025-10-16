@@ -462,7 +462,7 @@ export function renderLayout({ container, order, scheduleAutoSave }) {
   container.innerHTML = '';
   if (!Array.isArray(order)) order = [];
   // Normaliser: garder uniquement les clés connues et compléter l'ordre manquant
-  const KNOWN = ['profile', 'username', 'statusbar', 'labels', 'social', 'email', 'links'];
+  const KNOWN = ['profile', 'username', 'labels', 'social', 'email', 'links'];
   const seen = new Set();
   const normalized = [];
   order.forEach(k => { if (KNOWN.includes(k) && !seen.has(k)) { seen.add(k); normalized.push(k); } });
@@ -473,7 +473,6 @@ export function renderLayout({ container, order, scheduleAutoSave }) {
   const LABELS = {
     profile: 'Photo & lien de profil',
     username: 'Nom affiché',
-    statusbar: 'Statut (barre sous le profil)',
     labels: 'Labels (badges)',
     social: 'Icônes sociales',
     email: 'Email & Description',
