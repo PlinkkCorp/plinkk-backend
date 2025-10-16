@@ -219,8 +219,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
       function setPreviewByValue(val) {
         if (isUrlish(val)) iconPreview.src = val;
         else {
-          const slug = (val || '').toLowerCase().trim().replace(/\s+/g, '-');
-          iconPreview.src = `/public/images/icons/${slug}.svg`;
+          iconPreview.src = `/public/images/icons/${val}.svg`;
         }
       }
       function updateFromCatalog() { s.icon = iconName.value; setPreviewByValue(s.icon); scheduleAutoSave(); }

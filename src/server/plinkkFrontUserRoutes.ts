@@ -215,7 +215,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       legalComments: "eof",
       drop: ["console"],
       define: {
-        __plinkk_username__: username,
+        __plinkk_username__: JSON.stringify(username),
       },
     });
 
@@ -811,6 +811,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             : page.user.publicEmail ?? null,
         canvaEnable: settings?.canvaEnable ?? 1,
         selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
+        layoutOrder: settings?.layoutOrder ?? null,
       };
 
       const generated = generateProfileConfig(
