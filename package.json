@@ -7,7 +7,7 @@
     "dev": "ts-node-dev src/server.ts",
     "dev:tsx": "tsx watch src/server.ts",
     "init": "pnpm install && pnpm prisma:init && pnpm run create-key && pnpm run dev",
-    "create-key": "pnpx @fastify/secure-session > src/secret-key",
+    "create-key": "@fastify/secure-session > src/secret-key",
     "build": "tsc -p tsconfig.json && node scripts/copy-static.mjs",
     "start": "node dist/server.js",
     "prisma:migratedev": "prisma migrate dev",

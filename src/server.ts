@@ -35,7 +35,6 @@ import {
 import profileConfig from "./public/config/profileConfig";
 import { authenticator } from "otplib";
 import { replyView } from "./lib/replyView";
-import { toSafeUser } from "./types/user";
 import fastifyRateLimit from "@fastify/rate-limit";
 import fastifyHttpProxy from "@fastify/http-proxy";
 
@@ -43,7 +42,7 @@ const prisma = new PrismaClient();
 const fastify = Fastify({
   logger: true,
 });
-const PORT = Number(process.env.PORT) || 3001;
+const PORT = 3001;
 
 declare module "@fastify/secure-session" {
   interface SessionData {

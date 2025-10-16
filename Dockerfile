@@ -23,6 +23,8 @@ RUN npx prisma generate
 
 RUN npm run build
 
-CMD ["sh", "-c", "npm run prisma:init && npm run start"]
+RUN npm run prisma:init
+
+CMD ["sh", "-c", "npm run start"]
 
 EXPOSE 3001
