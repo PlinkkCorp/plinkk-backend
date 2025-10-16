@@ -20,7 +20,8 @@
 
           <!-- Nouvelle interface: barre de catégories en haut + contenu en dessous (style édition) -->
           <div id="accountRoot"
-            data-twofactor="<%= !!(user && ((user.totpSecret && user.totpSecret !== '') || user.twoFactorEnabled)) %>">
+            data-twofactor="<%= !!(user && ((user.totpSecret && user.totpSecret !== '') || user.twoFactorEnabled)) %>"
+            data-user-email="<%= user.email %>">
             <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-0">
               <!-- Top bar catégories -->
               <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-800/40 bg-transparent">
@@ -59,6 +60,12 @@
                       <div class="space-y-4">
                         <div>
                           <h4 class="text-lg font-semibold mb-2">Confidentialité</h4>
+                          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
+                            <div>
+                              <label class="block text-xs mb-1">Sélectionne le Plinkk</label>
+                              <select id="privacyPlinkkSelect" class="w-full h-9 px-2 rounded-md bg-slate-900/60 border border-slate-700 text-sm"></select>
+                            </div>
+                          </div>
                           <div class="flex items-center justify-between py-2">
                             <div>
                               <p class="text-sm font-medium">Profil public</p>
@@ -475,16 +482,92 @@
         }
       });
 
-      // Toggle profil public
-      document.getElementById('togglePublic')?.addEventListener('change', async (e) => {
-        const checked = e.currentTarget.checked;
-        await fetch('/api/me/visibility', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isPublic: checked }) });
-      });
+      // Confidentialité par Plinkk
+      window.addEventListener('load', () => {
+        const accountRoot = document.getElementById('accountRoot');
+        const userEmail = accountRoot?.getAttribute('data-user-email') || '';
+        const select = document.getElementById('privacyPlinkkSelect');
+        const chkPublic = document.getElementById('togglePublic');
+        const chkEmail = document.getElementById('toggleEmailPublic');
 
-      // Toggle email public
-      document.getElementById('toggleEmailPublic')?.addEventListener('change', async (e) => {
-        const checked = e.currentTarget.checked;
-        await fetch('/api/me/email-visibility', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isEmailPublic: checked }) });
+        // Charger la liste des plinkks depuis le template JSON
+        let plinkkList = [];
+        try {
+          const tpl = document.getElementById('account-plinkks-data');
+          const raw = tpl ? tpl.innerHTML : '[]';
+          plinkkList = JSON.parse(raw || '[]');
+        } catch (_) { plinkkList = []; }
+
+        function populateOptions() {
+          if (!select) return;
+          select.innerHTML = '';
+          if (!plinkkList.length) {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = 'Aucun plinkk';
+            select.appendChild(opt);
+            chkPublic && (chkPublic.disabled = true);
+            chkEmail && (chkEmail.disabled = true);
+            return;
+          }
+          let defaultId = null;
+          plinkkList.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = `${p.name || p.slug || p.id} (${p.slug || p.id})`;
+            if (p.isDefault) defaultId = p.id;
+            select.appendChild(opt);
+          });
+          if (defaultId) select.value = defaultId;
+        }
+
+        async function refreshToggles() {
+          const id = select?.value || '';
+          const p = plinkkList.find(x => x.id === id) || null;
+          if (!p) { if (chkPublic) chkPublic.checked = false; if (chkEmail) chkEmail.checked = false; return; }
+          // Public selon la propriété du plinkk
+          if (typeof p.isPublic === 'boolean' && chkPublic) chkPublic.checked = !!p.isPublic;
+          // Email: requête la config pour savoir si affichageEmail est null (=> caché) ou non
+          try {
+            const res = await fetch(`/api/me/plinkks/${encodeURIComponent(id)}/config`);
+            const j = await res.json().catch(() => ({}));
+            if (chkEmail) chkEmail.checked = j && j.email !== null;
+          } catch (_) { if (chkEmail) chkEmail.checked = false; }
+        }
+
+        populateOptions();
+        refreshToggles();
+        select?.addEventListener('change', refreshToggles);
+
+        // Toggle profil public (par plinkk)
+        chkPublic?.addEventListener('change', async (e) => {
+          const id = select?.value || '';
+          if (!id) return;
+          const checked = e.currentTarget.checked;
+          const res = await fetch(`/api/me/plinkks/${encodeURIComponent(id)}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isPublic: !!checked })
+          });
+          if (!res.ok) showAlert('Erreur lors du changement de visibilité', 'error');
+          else {
+            const p = plinkkList.find(x => x.id === id); if (p) p.isPublic = !!checked;
+          }
+        });
+
+        // Toggle email public (par plinkk)
+        chkEmail?.addEventListener('change', async (e) => {
+          const id = select?.value || '';
+          if (!id) return;
+          const checked = e.currentTarget.checked;
+          const payload = { affichageEmail: checked ? (userEmail || null) : null };
+          const res = await fetch(`/api/me/plinkks/${encodeURIComponent(id)}/config/plinkk`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) showAlert('Erreur lors du changement visibilité email', 'error');
+        });
       });
 
       // Mot de passe
