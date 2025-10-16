@@ -105,6 +105,12 @@
                                 Status & Labels
                             </button>
                         </li>
+                        <li>
+                            <button data-target="#section-layout" role="tab" aria-controls="section-layout" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800 flex items-center gap-2">
+                                <svg class="size-4 text-slate-300" viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16v2H4zM4 11h10v2H4zM4 17h13v2H4z"/></svg>
+                                Agencement
+                            </button>
+                        </li>
                     </ul>
                 </nav>
 
@@ -114,29 +120,56 @@
                     <div id="section-profile" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
                         <div class="mb-3"><h3 class="font-medium">Profil</h3><p class="text-xs text-slate-400">Informations de base affichées publiquement.</p></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="block text-sm">Lien du profil
+                            <label class="block text-sm">Lien du profil <span class="info-i" title="Lien externe vers ton profil principal (ex. site perso, X/Twitter). Affiché sous ton nom. Utilise https://">i</span>
                                 <input id="profileLink" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="https://..." inputmode="url"/>
                             </label>
-                            <label class="block text-sm">Texte du site
-                                <input id="profileSiteText" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                            <label class="block text-sm">Texte du site <span class="info-i" title="Texte court affiché à côté du lien (ex. ‘Mon site’, ‘Portfolio’).">i</span>
+                                <div class="relative">
+                                    <input id="profileSiteText" data-maskable="true" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                                    <button type="button" data-target="profileSiteText" aria-pressed="false" class="mask-toggle absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-white" aria-label="Masquer / afficher">
+                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                </div>
                             </label>
-                            <label class="block text-sm">Nom affiché
+                            <label class="block text-sm">Nom affiché <span class="info-i" title="Nom public visible sur ta page.">i</span>
                                 <input id="userName" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
                             </label>
-                            <label class="block text-sm">Email
-                                <input id="email" type="email" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" inputmode="email" autocomplete="email" />
+                            <label class="block text-sm">Email <span class="info-i" title="Adresse e‑mail de contact. Tu peux la masquer via l’icône œil avant d’enregistrer si tu ne souhaites pas l’afficher.">i</span>
+                                <div class="relative">
+                                    <input id="email" data-maskable="true" type="email" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" inputmode="email" autocomplete="email" />
+                                    <button type="button" data-target="email" aria-pressed="false" class="mask-toggle absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-white" aria-label="Masquer / afficher">
+                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                </div>
                             </label>
-                            <label class="block text-sm">Image de profil (URL)
-                                <input id="profileImage" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                            <label class="block text-sm">Image de profil (URL) <span class="info-i" title="URL d’une image carrée (idéalement 512×512) en .jpg/.png/.webp.">i</span>
+                                <div class="relative">
+                                    <input id="profileImage" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                                </div>
                             </label>
-                            <label class="block text-sm">Icône de profil (URL)
-                                <input id="profileIcon" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                            <label class="block text-sm">Icône de profil (URL) <span class="info-i" title="Petite icône affichée près de ton nom. Taille conseillée ≥64px.">i</span>
+                                <div class="relative">
+                                    <input id="profileIcon" data-maskable="true" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                                    <button type="button" data-target="profileIcon" aria-pressed="false" class="mask-toggle absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-white" aria-label="Masquer / afficher">
+                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                </div>
                             </label>
-                            <label class="block text-sm">Icône d’onglet (URL)
-                                <input id="iconUrl" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                            <label class="block text-sm">Icône d’onglet (URL) <span class="info-i" title="Favicon affichée dans l’onglet du navigateur. .png ou .ico (≈32×32).">i</span>
+                                <div class="relative">
+                                    <input id="iconUrl" data-maskable="true" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
+                                    <button type="button" data-target="iconUrl" aria-pressed="false" class="mask-toggle absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-white" aria-label="Masquer / afficher">
+                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                </div>
                             </label>
-                            <label class="block text-sm md:col-span-2">Description
-                                <textarea id="description" rows="3" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50"></textarea>
+                            <label class="block text-sm md:col-span-2">Description <span class="info-i" title="Courte bio affichée sur ta page. Idéalement 200–300 caractères.">i</span>
+                                <div class="relative">
+                                    <textarea id="description" data-maskable="true" rows="3" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50"></textarea>
+                                    <button type="button" data-target="description" aria-pressed="false" class="mask-toggle absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-white" aria-label="Masquer / afficher">
+                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </button>
+                                </div>
                             </label>
                         </div>
                     </div>
@@ -145,10 +178,10 @@
                     <div id="section-appearance" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
                         <div class="mb-3"><h3 class="font-medium">Apparence</h3><p class="text-xs text-slate-400">Couleurs et options d’affichage.</p></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="block text-sm">Couleur hover
+                            <label class="block text-sm">Couleur hover <span class="info-i" title="Couleur utilisée au survol des liens et boutons.">i</span>
                                 <input id="profileHoverColor" type="color" class="mt-1 h-10 w-full rounded bg-slate-900 border border-slate-800 p-1" />
                             </label>
-                            <label class="block text-sm">Thème
+                            <label class="block text-sm">Thème <span class="info-i" title="Palette de couleurs prédéfinie pour ta page.">i</span>
                                 <div class="mt-1 flex items-center gap-2">
                                     <select id="selectedThemeIndex" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-800"></select>
                                     <button id="openThemePicker" type="button" class="h-10 px-3 text-sm rounded-md bg-fuchsia-700/80 hover:bg-fuchsia-600 border border-fuchsia-500/40 text-white shadow transition-colors">Choisir</button>
@@ -159,7 +192,7 @@
                                 <span>Activer Néon</span>
                                 <span class="text-[10px] px-2 py-0.5 rounded-full border border-fuchsia-500/30 text-fuchsia-300/90 bg-fuchsia-950/30">À venir</span>
                             </label>
-                            <label class="flex items-center gap-2 text-sm"><input id="buttonThemeEnable" type="checkbox" class="size-4"/> Activer thème des boutons</label>
+                            <label class="flex items-center gap-2 text-sm"><input id="buttonThemeEnable" type="checkbox" class="size-4"/> Activer thème des boutons <span class="info-i" title="Applique le style de boutons du thème sélectionné.">i</span></label>
                         </div>
                         <!-- Néon (déplacé ici) -->
                         <div class="pt-4 mt-4 border-t border-slate-800">
@@ -203,11 +236,16 @@
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                            <label class="block text-sm">Angle du dégradé
-                                <input id="degBackgroundColor" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+                            <label class="block text-sm">Angle du dégradé <span class="info-i" title="Orientation du dégradé en degrés (0–359). 0° = haut, 90° = droite.">i</span>
+                                <div class="mt-1 flex items-center gap-3">
+                                    <input id="degBackgroundColor" type="number" class="w-24 px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+                                    <div id="degDial" class="deg-dial" tabindex="0" role="slider" aria-label="Angle du dégradé" aria-valuemin="0" aria-valuemax="359" aria-valuenow="0">
+                                        <div class="deg-dial-dot"></div>
+                                    </div>
+                                </div>
                             </label>
                         </div>
-                        <div id="backgroundList" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+                        <div id="backgroundList" class="flex flex-col gap-2" role="list"></div>
                         <!-- Canvas (déplacé ici) -->
                         <div class="pt-4 mt-4 border-t border-slate-800">
                             <div class="mb-2 flex items-center justify-between">
@@ -217,11 +255,11 @@
                                 </div>
                                 <label class="flex items-center gap-2 text-sm">
                                     <input id="canvaEnable" type="checkbox" class="size-4"/>
-                                    Activer Canvas
+                                    Activer Canvas <span class="info-i" title="Active ou désactive l’animation de fond (consomme davantage de ressources).">i</span>
                                 </label>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <label class="block text-sm md:col-span-2">
+                                <label class="block text-sm md:col-span-2">Animation <span class="info-i" title="Choisis l’animation de fond à utiliser.">i</span>
                                     <div class="mt-1">
                                         <select id="selectedCanvasIndex" class="hidden"></select>
                                         <div class="relative">
@@ -233,7 +271,7 @@
                                 <div class="flex items-center gap-2 md:col-span-2 -mt-2">
                                   <label class="inline-flex items-center text-xs">
                                     <input id="canvasPreviewEnable" type="checkbox" class="form-checkbox mr-2" />
-                                    Aperçu (réduit)
+                                    Aperçu (réduit) <span class="info-i" title="Affiche un petit aperçu de l’animation sélectionnée. Désactive pour économiser les ressources.">i</span>
                                   </label>
                                   <span class="text-[11px] text-slate-400">Désactive pour économiser les ressources</span>
                                 </div>
@@ -276,22 +314,34 @@
                     <div id="section-animations" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
                         <div class="mb-3"><h3 class="font-medium">Animations</h3><p class="text-xs text-slate-400">Ajustez les animations d’éléments et d’arrière‑plan.</p></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="block text-sm">Animation d'article
-                                <select id="selectedAnimationIndex" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800"></select>
+                            <label class="block text-sm">Animation d'article <span class="info-i" title="Effet d’apparition des blocs (sections, liens).">i</span>
+                                <select id="selectedAnimationIndex" class="hidden"></select>
+                                <div class="relative mt-1">
+                                    <input id="selectedAnimationLabel" type="text" class="pl-3 pr-20 py-2 w-full rounded bg-slate-900/60 border border-slate-800/60 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="Cliquer pour choisir" readonly />
+                                    <button id="openAnimArticlePicker" type="button" class="absolute right-1 top-1 h-8 px-2 text-xs rounded bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Choisir</button>
+                                </div>
                             </label>
-                            <label class="block text-sm">Animation de bouton
-                                <select id="selectedAnimationButtonIndex" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800"></select>
+                            <label class="block text-sm">Animation de bouton <span class="info-i" title="Effet appliqué aux boutons (au survol, au clic).">i</span>
+                                <select id="selectedAnimationButtonIndex" class="hidden"></select>
+                                <div class="relative mt-1">
+                                    <input id="selectedAnimationButtonLabel" type="text" class="pl-3 pr-20 py-2 w-full rounded bg-slate-900/60 border border-slate-800/60 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="Cliquer pour choisir" readonly />
+                                    <button id="openAnimButtonPicker" type="button" class="absolute right-1 top-1 h-8 px-2 text-xs rounded bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Choisir</button>
+                                </div>
                             </label>
-                            <label class="block text-sm">Animation d'arrière-plan
-                                <select id="selectedAnimationBackgroundIndex" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800"></select>
+                            <label class="block text-sm">Animation d'arrière-plan <span class="info-i" title="Effet d’animation appliqué à l’arrière‑plan (si utilisé).">i</span>
+                                <select id="selectedAnimationBackgroundIndex" class="hidden"></select>
+                                <div class="relative mt-1">
+                                    <input id="selectedAnimationBackgroundLabel" type="text" class="pl-3 pr-20 py-2 w-full rounded bg-slate-900/60 border border-slate-800/60 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="Cliquer pour choisir" readonly />
+                                    <button id="openAnimBackgroundPicker" type="button" class="absolute right-1 top-1 h-8 px-2 text-xs rounded bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Choisir</button>
+                                </div>
                             </label>
-                            <label class="block text-sm">Durée anim background (s)
+                            <label class="block text-sm">Durée anim background (s) <span class="info-i" title="Durée d’un cycle complet d’animation (en secondes).">i</span>
                                 <input id="animationDurationBackground" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
                             </label>
-                            <label class="block text-sm">Délai anim bouton (s)
+                            <label class="block text-sm">Délai anim bouton (s) <span class="info-i" title="Retard avant le déclenchement de l’animation des boutons (en secondes).">i</span>
                                 <input id="delayAnimationButton" step="0.01" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
                             </label>
-                            <label class="block text-sm">Taille background (%)
+                            <label class="block text-sm">Taille background (%) <span class="info-i" title="Échelle du motif d’arrière‑plan (en pourcentage).">i</span>
                                 <input id="backgroundSize" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
                             </label>
                         </div>
@@ -302,14 +352,14 @@
 
                         <div class="mb-3"><h3 class="font-medium">Barre de statut</h3><p class="text-xs text-slate-400">Message et style du statut affiché sous le profil.</p></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="block text-sm md:col-span-2">Texte
+                            <label class="block text-sm md:col-span-2">Texte <span class="info-i" title="Message affiché sous ton profil dans la barre de statut.">i</span>
                                 <input id="status_text" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
                             </label>
-                            <label class="block text-sm">FontTextColor (0 ou 1)
+                            <label class="block text-sm">FontTextColor (0 ou 1) <span class="info-i" title="Forcer la couleur du texte: 0 = texte clair, 1 = texte foncé (selon ton fond).">i</span>
                                 <input id="status_fontTextColor" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
                             </label>
                             <div class="md:col-span-1">
-                                <div class="text-sm mb-1">Statut</div>
+                                <div class="text-sm mb-1">Statut <span class="info-i" title="État visible sous ton profil (en ligne, occupé, absent, hors‑ligne).">i</span></div>
                                 <div class="relative inline-block" id="statusDropdown">
                                     <button id="statusDropdownBtn" type="button" aria-haspopup="menu" aria-expanded="false" class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-slate-800/80 border border-slate-700/60 hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-600/40 text-sm">
                                         <span class="inline-block size-2 rounded-full bg-slate-400"></span>
@@ -345,6 +395,13 @@
                             </div>
                             <div id="labelsList" class="space-y-3"></div>
                         </div>
+                    </div>
+
+                    <!-- Agencement -->
+                    <div id="section-layout" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
+                        <div class="mb-3"><h3 class="font-medium">Agencement</h3><p class="text-xs text-slate-400">Réordonne visuellement les sections de ta page par glisser‑déposer.</p></div>
+                        <div class="space-y-2" id="layoutList" role="list"></div>
+                        <p class="text-[11px] text-slate-400 mt-3">Astuce: fais glisser les éléments avec la poignée à gauche pour changer l’ordre.</p>
                     </div>
                 </div>
             </section>
@@ -443,6 +500,137 @@
                                 })();
                         </script>
                 <!-- Expose les données de configuration (thèmes, animations, canvas, boutons) au dashboard -->
+                <style>
+                    /* Visuel pour champs masqués : grisé et non éditable mais valeur visible */
+                    .masked-field { background-color: rgba(100,100,100,0.12) !important; opacity: 0.65; cursor: not-allowed; }
+                    .masked-field:disabled { color: inherit; }
+                    .masked-field[readonly] { color: inherit; }
+                    .mask-toggle { line-height: 1; }
+
+                    /* Petit (i) d'aide discret */
+                    .info-i { display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; font-size:10px; line-height:1; border-radius:9999px; border:1px solid rgba(148,163,184,0.35); color:#cbd5e1; margin-left:6px; cursor:help; background: rgba(15,23,42,0.5); }
+                    .info-i:hover { background: rgba(30,41,59,0.6); color:#e5e7eb; border-color: rgba(148,163,184,0.6); }
+
+                    /* Cadran d'angle (knob) */
+                    .deg-dial { position: relative; width: 72px; height: 72px; border-radius: 100%; border: 1px solid #334155; background: radial-gradient(closest-side, rgba(30,41,59,0.9), rgba(15,23,42,0.9)); box-shadow: inset 0 0 0 2px rgba(148,163,184,0.1); outline: none; user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab; }
+                    .deg-dial:focus { box-shadow: 0 0 0 2px rgba(99,102,241,0.55), inset 0 0 0 2px rgba(148,163,184,0.1); }
+                    .deg-dial.is-dragging { cursor: grabbing; }
+                    .deg-dial-dot { position: absolute; width: 14px; height: 14px; border-radius: 100%; background: #93c5fd; border: 2px solid #1f2937; top: 50%; left: 50%; box-shadow: 0 0 0 1px rgba(148,163,184,0.35); pointer-events: auto; cursor: grab; }
+                    .deg-dial:active .deg-dial-dot, .deg-dial.is-dragging .deg-dial-dot { background: #3b82f6; cursor: grabbing; }
+                </style>
+                <script>
+                    (function(){
+                        // Gestion des boutons "œil" pour masquer les inputs de profil, avec persistance locale
+                        const USER_ID = window.__PLINKK_USER_ID__ || 'self';
+                        const PLINKK_ID = window.__PLINKK_SELECTED_ID__ || 'default';
+                        const LS_PREFIX = 'PLK_MASK:'; // clé localStorage prefix
+
+                        function lsGet(key){ try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } }
+                        function lsSet(key, val){ try { localStorage.setItem(key, JSON.stringify(val)); } catch { /* ignore */ } }
+                        function lsDel(key){ try { localStorage.removeItem(key); } catch { /* ignore */ } }
+                        function getKey(inputId){ return `${LS_PREFIX}${USER_ID}:${PLINKK_ID}:${inputId}`; }
+
+                        function applyMaskedState(input, btn, saved){
+                            // saved: { masked: boolean, value: string }
+                            if (!input || !btn) return;
+                            const isMasked = !!(saved && saved.masked);
+                            
+                            btn.setAttribute('title', 'Masquer / afficher le champ');
+                            btn.setAttribute('aria-pressed', isMasked ? 'true' : 'false');
+
+                            if (isMasked) {
+                                // Conserver/forcer la valeur mémorisée
+                                if (saved && typeof saved.value !== 'undefined') {
+                                    input.value = saved.value;
+                                }
+                                input.dataset._originalValue = input.value ?? '';
+                                input.readOnly = true;
+                                input.disabled = true;
+                                input.classList.add('masked-field');
+                                // Icône œil barré (eye-off)
+                                btn.innerHTML = '<svg class="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a20.81 20.81 0 0 1 5.06-6.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.82 20.82 0 0 1-4.87 6.82M1 1l22 22"/></svg>';
+                            } else {
+                                // État non masqué
+                                if (typeof input.dataset._originalValue !== 'undefined') {
+                                    // restaurer la valeur en clair si nous l’avions mémorisée
+                                    input.value = input.dataset._originalValue;
+                                    delete input.dataset._originalValue;
+                                }
+                                input.readOnly = false;
+                                input.disabled = false;
+                                input.classList.remove('masked-field');
+                                btn.innerHTML = '<svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+                            }
+                        }
+
+                        // Initialisation + listeners
+                        const buttons = Array.from(document.querySelectorAll('.mask-toggle'));
+                        buttons.forEach(btn => {
+                            const targetId = btn.getAttribute('data-target');
+                            if (!targetId) return;
+                            const input = document.getElementById(targetId);
+                            if (!input) return;
+
+                            // Restaure l'état depuis localStorage
+                            const key = getKey(targetId);
+                            const saved = lsGet(key);
+                            applyMaskedState(input, btn, saved);
+
+                            // Listener clic
+                            btn.addEventListener('click', () => {
+                                const currentlyMasked = btn.getAttribute('aria-pressed') === 'true';
+                                if (!currentlyMasked) {
+                                    // activer masquage: mémoriser valeur+état
+                                    const value = input.value ?? '';
+                                    lsSet(key, { masked: true, value });
+                                    applyMaskedState(input, btn, { masked: true, value });
+                                } else {
+                                    // désactiver masquage: supprimer persistance + restaurer
+                                    lsDel(key);
+                                    applyMaskedState(input, btn, { masked: false });
+                                }
+                                // Déclencher une sauvegarde auto afin d’actualiser l’aperçu après le PUT
+                                if (window.__DASH_TRIGGER_SAVE__) {
+                                    window.__DASH_TRIGGER_SAVE__();
+                                }
+                            });
+                        });
+
+                        // Avant l'envoi (click sur save ou submit de form), remplacer les champs masqués par "" pour qu'ils n'envoient rien
+                        function clearMaskedValues() {
+                            document.querySelectorAll('[data-maskable]')
+                                .forEach(inp => {
+                                    const key = getKey(inp.id);
+                                    const saved = lsGet(key);
+                                    const isMasked = (typeof inp.dataset._originalValue !== 'undefined') || inp.classList.contains('masked-field') || (saved && saved.masked);
+                                    if (isMasked) {
+                                        inp.value = '';
+                                    }
+                                });
+                        }
+
+                        // Intercepter clics sur les boutons de sauvegarde (capture pour être sûr d'exécuter avant d'autres handlers)
+                        document.addEventListener('click', (e) => {
+                            const saveBtn = e.target.closest && e.target.closest('#saveBtn, #saveBtn--mobile, #saveBtn--fab');
+                            if (saveBtn) {
+                                clearMaskedValues();
+                            }
+                        }, true);
+
+                        // Si un formulaire enveloppe ces champs, intercepter son submit aussi (plus robuste)
+                        (function attachFormInterceptor(){
+                            // Cherche le formulaire parent le plus proche d'un des inputs maskable
+                            const sample = document.querySelector('[data-maskable]');
+                            if (!sample) return;
+                            const form = sample.closest('form');
+                            if (!form) return;
+                            form.addEventListener('submit', (ev) => {
+                                clearMaskedValues();
+                                // allow normal submit to proceed
+                            });
+                        })();
+                    })();
+                </script>
                 <script type="module">
                     import canvaData from '/public/config/canvaConfig.js';
                     import { animations, animationBackground } from '/public/config/animationConfig.js';
@@ -464,6 +652,92 @@
                     } catch (e) {
                         window.__PLINKK_CFG__ = { themes: [], canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
                     }
+                </script>
+                <script>
+                    // Synchronisation knob <-> input pour l'angle de dégradé
+                    (function(){
+                        const input = document.getElementById('degBackgroundColor');
+                        const dial = document.getElementById('degDial');
+                        const dot = dial ? dial.querySelector('.deg-dial-dot') : null;
+                        if (!input || !dial || !dot) return;
+
+                        function clampDeg(n){ n = Math.round(Number(n)||0); n %= 360; if (n < 0) n += 360; return n; }
+                        function setAria(val){ dial.setAttribute('aria-valuenow', String(val)); }
+                        function setDot(val){ dot.style.transform = `translate(-50%, -50%) rotate(${val - 90}deg) translate(26px, 0)`; }
+                        function syncFromInput(){ const v = clampDeg(input.value); setDot(v); setAria(v); }
+                        function syncFromDeg(val){ const v = clampDeg(val); input.value = String(v); setDot(v); setAria(v); if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); }
+
+                        // Init (attendre que le formulaire soit rempli)
+                        setTimeout(syncFromInput, 0);
+
+                        input.addEventListener('input', () => syncFromInput());
+                        input.addEventListener('change', () => { if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); });
+
+                        function posToDeg(clientX, clientY){
+                            const rect = dial.getBoundingClientRect();
+                            const cx = rect.left + rect.width/2; const cy = rect.top + rect.height/2;
+                            const dx = clientX - cx; const dy = clientY - cy;
+                            let angle = Math.atan2(dy, dx) * 180/Math.PI; // -180..180, 0 à droite
+                            angle = (angle + 360) % 360; // 0..359
+                            // On veut 0° en haut: ajouter 90° puis modulo 360
+                            angle = (angle + 90) % 360;
+                            return Math.round(angle);
+                        }
+
+                        let dragging = false;
+                        function onPointerMove(e){
+                            if (!dragging) return;
+                            const pt = e.touches?.[0] || e;
+                            syncFromDeg(posToDeg(pt.clientX, pt.clientY));
+                            e.preventDefault();
+                        }
+                        function onPointerUp(){
+                            dragging = false;
+                            dial.classList.remove('is-dragging');
+                            window.removeEventListener('mousemove', onPointerMove, { passive: false });
+                            window.removeEventListener('mouseup', onPointerUp);
+                            window.removeEventListener('touchmove', onPointerMove);
+                            window.removeEventListener('touchend', onPointerUp);
+                        }
+                        function startDrag(e){
+                            e.preventDefault();
+                            dragging = true;
+                            dial.classList.add('is-dragging');
+                            const pt = e.touches?.[0] || e;
+                            syncFromDeg(posToDeg(pt.clientX, pt.clientY));
+                            window.addEventListener('mousemove', onPointerMove, { passive: false });
+                            window.addEventListener('mouseup', onPointerUp);
+                            window.addEventListener('touchmove', onPointerMove, { passive: false });
+                            window.addEventListener('touchend', onPointerUp);
+                            // Focus pour activer le support à la molette ensuite
+                            dial.focus();
+                        }
+
+                        // Drag depuis n'importe où sur le dial (dot compris)
+                        dial.addEventListener('mousedown', startDrag);
+                        dial.addEventListener('touchstart', startDrag, { passive: false });
+
+                        // Molette (uniquement quand le dial a le focus, i.e. cliqué juste avant)
+                        dial.addEventListener('wheel', (e) => {
+                            if (document.activeElement !== dial) return;
+                            e.preventDefault();
+                            const delta = e.deltaY || e.deltaX || 0;
+                            const step = e.shiftKey ? 10 : 1;
+                            const dir = delta > 0 ? -step : step; // sens intuitif
+                            const val = clampDeg((Number(input.value)||0) + dir);
+                            syncFromDeg(val);
+                        }, { passive: false });
+
+                        // Accessibilité clavier
+                        dial.addEventListener('keydown', (e) => {
+                            const step = (e.shiftKey ? 10 : 1);
+                            let val = clampDeg(input.value);
+                            if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { val = clampDeg(val + step); syncFromDeg(val); e.preventDefault(); }
+                            if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { val = clampDeg(val - step); syncFromDeg(val); e.preventDefault(); }
+                            if (e.key === 'Home') { syncFromDeg(0); e.preventDefault(); }
+                            if (e.key === 'End') { syncFromDeg(359); e.preventDefault(); }
+                        });
+                    })();
                 </script>
                 <!-- Données utiles pour la sélection de page -->
                 <script type="application/json" id="pages-data"><%- JSON.stringify(typeof pages !== 'undefined' ? pages : []) %></script>

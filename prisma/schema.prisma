@@ -298,6 +298,8 @@ model PlinkkSettings {
   delayAnimationButton             Float?
   canvaEnable                      Int?
   selectedCanvasIndex              Int?
+  // Ordre d'agencement des sections (déplacement visuel dans le dashboard)
+  layoutOrder                      Json?
 }
 
 model PlinkkEvent {

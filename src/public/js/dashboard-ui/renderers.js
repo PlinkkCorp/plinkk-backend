@@ -456,3 +456,41 @@ export function renderLinks({ container, addBtn, links, scheduleAutoSave }) {
   }
   addBtn.onclick = () => { links.push({ url: 'https://', name: 'Nouveau', text: 'Link' }); renderLinks({ container, addBtn, links, scheduleAutoSave }); scheduleAutoSave(); };
 }
+
+// Agencement: réordonner les grandes sections de la page
+export function renderLayout({ container, order, scheduleAutoSave }) {
+  if (!container) return;
+  container.innerHTML = '';
+  if (!Array.isArray(order)) order = [];
+  // Normaliser: garder uniquement les clés connues et compléter l'ordre manquant
+  const KNOWN = ['profile', 'username', 'statusbar', 'labels', 'social', 'email', 'links'];
+  const seen = new Set();
+  const normalized = [];
+  order.forEach(k => { if (KNOWN.includes(k) && !seen.has(k)) { seen.add(k); normalized.push(k); } });
+  KNOWN.forEach(k => { if (!seen.has(k)) normalized.push(k); });
+  // Refléter dans l'array original (référence partagée)
+  order.splice(0, order.length, ...normalized);
+
+  const LABELS = {
+    profile: 'Photo & lien de profil',
+    username: 'Nom affiché',
+    statusbar: 'Statut (barre sous le profil)',
+    labels: 'Labels (badges)',
+    social: 'Icônes sociales',
+    email: 'Email & Description',
+    links: 'Boutons / Liens',
+  };
+
+  normalized.forEach((key, idx) => {
+    const row = el('div', { class: 'flex items-center gap-3 w-full rounded-md border border-slate-800 bg-slate-900/50 px-2 py-2' });
+    row.dataset.dragIndex = String(idx);
+    const gripBtn = el('button', { type: 'button', class: 'h-9 w-9 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700', title: 'Déplacer', 'aria-label': 'Déplacer' });
+    gripBtn.style.cursor = 'grab';
+    gripBtn.appendChild(createGripSVG(18));
+    const label = el('div', { class: 'text-sm text-slate-200' });
+    label.textContent = LABELS[key] || key;
+    row.append(gripBtn, label);
+    try { enableDragHandle(gripBtn, row, container, order, () => renderLayout({ container, order, scheduleAutoSave }), scheduleAutoSave); } catch {}
+    container.appendChild(row);
+  });
+}

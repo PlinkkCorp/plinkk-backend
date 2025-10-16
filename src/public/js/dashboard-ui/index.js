@@ -1,6 +1,6 @@
 import { qs, attachAutoSave, fillSelect, vOrNull, numOrNull } from './utils.js';
 import { openIconModal, openPicker, renderPickerGrid, renderBtnThemeCard, closePicker, ensurePlatformEntryModal, pickerSelect } from './pickers.js';
-import { renderBackground, renderNeon, renderLabels, renderSocial, renderLinks } from './renderers.js';
+import { renderBackground, renderNeon, renderLabels, renderSocial, renderLinks, renderLayout } from './renderers.js';
 import { ensureCanvasPreviewModal, openCanvasInlinePreview, buildCanvasPreviewUrl, refreshSelectedCanvasPreview, renderCanvasCard } from './canvas.js';
 import { setupStatusDropdown, updateStatusControlsDisabled, updateStatusPreview } from './status.js';
 
@@ -71,12 +71,18 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     addSocial: qs('#addSocial'),
     linksList: qs('#linksList'),
     addLink: qs('#addLink'),
+    layoutList: qs('#layoutList'),
   };
 
   const setStatus = (text, kind = '') => {
     if (!statusEl) return;
     statusEl.textContent = text || '';
     statusEl.className = 'text-xs ' + (kind === 'error' ? 'text-red-400' : kind === 'success' ? 'text-emerald-400' : 'text-slate-400');
+  };
+
+  // Expose un déclencheur global pour l’autosave depuis le template (ex: lors d’un clic sur le bouton de masquage)
+  window.__DASH_TRIGGER_SAVE__ = () => {
+    try { scheduleAutoSave(); } catch {}
   };
   const schedulePreviewRefresh = () => {
     // Debounce: repousser si ça tape vite
@@ -142,6 +148,10 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
         sectionsAPI = [ "statusBar", "labels" ]
         sectionsAPIFunction = [ collectPayloadStatusBar(), collectPayloadLabels() ]
         break;
+      case "layout":
+        sectionsAPI = [ "layout" ]
+        sectionsAPIFunction = [ collectPayloadLayout() ]
+        break;
       default:
         sectionsAPI = [ "plinkk" ]
         sectionsAPIFunction = [ collectPayloadPlinkk() ]
@@ -164,7 +174,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     }
   }
 
-  const state = { background: [], neonColors: [], labels: [], socialIcon: [], links: [] };
+  const state = { background: [], neonColors: [], labels: [], socialIcon: [], links: [], layoutOrder: [] };
 
   async function ensureCfg(maxWaitMs = 3000) {
     const start = Date.now();
@@ -187,6 +197,11 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     f.description.value = cfg.description || '';
     f.profileHoverColor.value = cfg.profileHoverColor || '#7289DA';
     f.degBackgroundColor.value = cfg.degBackgroundColor ?? 45;
+    // Synchroniser le cadran (dot) avec la valeur chargée après remplissage
+    try {
+      f.degBackgroundColor.dispatchEvent(new Event('input', { bubbles: true }));
+      f.degBackgroundColor.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch {}
     f.buttonThemeEnable.checked = (cfg.buttonThemeEnable ?? 1) === 1;
     f.canvaEnable.checked = (cfg.canvaEnable ?? 1) === 1;
 
@@ -242,14 +257,19 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     state.background = Array.isArray(cfg.background) ? [...cfg.background] : [];
     state.neonColors = Array.isArray(cfg.neonColors) ? [...cfg.neonColors] : [];
     state.labels = Array.isArray(cfg.labels) ? cfg.labels.map((x) => ({ ...x })) : [];
-    state.socialIcon = Array.isArray(cfg.socialIcon) ? cfg.socialIcon.map((x) => ({ ...x })) : [];
-    state.links = Array.isArray(cfg.links) ? cfg.links.map((x) => ({ ...x })) : [];
+  state.socialIcon = Array.isArray(cfg.socialIcon) ? cfg.socialIcon.map((x) => ({ ...x })) : [];
+  state.links = Array.isArray(cfg.links) ? cfg.links.map((x) => ({ ...x })) : [];
+  // Agencement: ordre des sections
+  const DEFAULT_LAYOUT = ['profile','username','statusbar','labels','social','email','links'];
+  state.layoutOrder = Array.isArray(cfg.layoutOrder) ? [...cfg.layoutOrder] : [...DEFAULT_LAYOUT];
 
     renderBackground({ container: f.backgroundList, addBtn: f.addBackgroundColor, colors: state.background, scheduleAutoSave });
     renderNeon({ container: f.neonList, addBtn: f.addNeonColor, colors: state.neonColors, neonEnableEl: f.neonEnable, scheduleAutoSave });
     renderLabels({ container: f.labelsList, addBtn: f.addLabel, labels: state.labels, scheduleAutoSave });
     renderSocial({ container: f.socialList, addBtn: f.addSocial, socials: state.socialIcon, scheduleAutoSave });
-    renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, scheduleAutoSave });
+  renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, scheduleAutoSave });
+  // Rendu de l'agencement
+  renderLayout({ container: f.layoutList, order: state.layoutOrder, scheduleAutoSave });
 
     // Inverser l'ordre des couleurs de background (bouton ajouté dans template)
     if (f.invertBackgroundColors) {
@@ -271,16 +291,30 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     suspendAutoSave = false;
   }
 
+  function isMasked(el) {
+    if (!el) return false;
+    // el peut être un input ou textarea
+    return !!(el.classList?.contains('masked-field') || (el.dataset && typeof el.dataset._originalValue !== 'undefined'));
+  }
+
+  function maskedOr(val, el) {
+    // Si masqué on renvoie null pour que le backend traite comme champ vide/absent
+    return isMasked(el) ? null : val;
+  }
+
   function collectPayloadPlinkk() {
     return {
+      // Champs non masquables gardent la valeur telle quelle
       profileLink: vOrNull(f.profileLink.value),
       profileImage: vOrNull(f.profileImage.value),
-      profileIcon: vOrNull(f.profileIcon.value),
-      profileSiteText: vOrNull(f.profileSiteText.value),
       userName: vOrNull(f.userName.value),
-      affichageEmail: vOrNull(f.email.value),
-      iconUrl: vOrNull(f.iconUrl.value),
-      description: vOrNull(f.description.value),
+
+      // Champs masquables: renvoyer null si masqués
+      profileIcon: maskedOr(vOrNull(f.profileIcon.value), f.profileIcon),
+      profileSiteText: maskedOr(vOrNull(f.profileSiteText.value), f.profileSiteText),
+      affichageEmail: maskedOr(vOrNull(f.email.value), f.email),
+      iconUrl: maskedOr(vOrNull(f.iconUrl.value), f.iconUrl),
+      description: maskedOr(vOrNull(f.description.value), f.description),
       profileHoverColor: vOrNull(f.profileHoverColor.value),
       degBackgroundColor: numOrNull(f.degBackgroundColor.value),
       neonEnable: state.neonColors.length > 0 && f.neonEnable?.checked ? 1 : 0,
@@ -318,6 +352,12 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
   function collectPayloadLinks() {
     return {
       links: state.links,
+    };
+  }
+
+  function collectPayloadLayout() {
+    return {
+      layoutOrder: state.layoutOrder,
     };
   }
 
@@ -404,6 +444,9 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     const cfg = await ensureCfg();
     const themeBtn = qs('#openThemePicker');
     const canvasBtn = qs('#openCanvasPicker');
+    const animArticleBtn = qs('#openAnimArticlePicker');
+    const animButtonBtn = qs('#openAnimButtonPicker');
+    const animBgBtn = qs('#openAnimBackgroundPicker');
     const canvasLabelEl = qs('#selectedCanvasLabel');
     if (themeBtn && f.selectedThemeIndex) {
       themeBtn.addEventListener('click', () => openPicker({
@@ -496,6 +539,113 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       selectedCanvasPreviewFrame,
       canvasPreviewEnable,
     }));
+
+    function ensureAnimationLoops(animStr) {
+      if (!animStr) return '';
+      // Insère 'infinite' si pas déjà présent
+      return /\binfinite\b/.test(animStr) ? animStr : `${animStr} infinite`;
+    }
+
+    function renderAnimCard(item, idx) {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left space-y-2';
+      const head = document.createElement('div'); head.className = 'flex items-center justify-between';
+      const title = document.createElement('div'); title.className = 'font-medium truncate'; title.textContent = `#${idx} · ${item?.name || 'Animation'}`;
+      const small = document.createElement('div'); small.className = 'text-xs text-slate-400'; small.textContent = item?.keyframes || '';
+      head.append(title, small);
+      const previewBox = document.createElement('div');
+      previewBox.className = 'rounded border border-slate-800 p-4 flex items-center justify-center';
+      const dot = document.createElement('div');
+      dot.className = 'h-6 w-6 rounded-full bg-indigo-400';
+      // Appliquer l'animation via style.animation, en prenant uniquement le nom s'il contient durée par défaut
+      // item.keyframes est du type "fade 1s ease-in-out"; on garde tel quel pour un aperçu parlant
+  dot.style.animation = ensureAnimationLoops(item?.keyframes || '');
+      previewBox.append(dot);
+      card.append(head, previewBox);
+      card.addEventListener('click', () => { window.__DASH_PICKERS__.pickerOnSelect?.(idx); closePicker(); });
+      return card;
+    }
+
+  function renderAnimBgCard(item, idx) {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left space-y-2';
+      const head = document.createElement('div'); head.className = 'flex items-center justify-between';
+      const title = document.createElement('div'); title.className = 'font-medium truncate'; title.textContent = `#${idx} · ${item?.name || 'Anim BG'}`;
+      const small = document.createElement('div'); small.className = 'text-xs text-slate-400'; small.textContent = item?.keyframes || '';
+      head.append(title, small);
+      const preview = document.createElement('div');
+      preview.className = 'rounded border border-slate-800 h-20';
+      preview.style.backgroundImage = 'linear-gradient(45deg, #1f2937 0%, #0f172a 100%)';
+      preview.style.backgroundSize = '200% 200%';
+  preview.style.animation = ensureAnimationLoops(item?.keyframes || '');
+      card.append(head, preview);
+      card.addEventListener('click', () => { window.__DASH_PICKERS__.pickerOnSelect?.(idx); closePicker(); });
+      return card;
+    }
+
+    const cfgReady = window.__PLINKK_CFG__ || await ensureCfg();
+    const anims = cfgReady.animations || [];
+    const animBgs = cfgReady.animationBackground || [];
+
+    // Helpers pour mise à jour des labels visibles
+    function setAnimLabel(inputEl, items, idx) {
+      if (!inputEl) return;
+      idx = Number(idx || 0) || 0;
+      const it = items[idx];
+      inputEl.value = it?.name ? `#${idx} · ${it.name}` : `#${idx}`;
+    }
+
+    const animArticleLabel = qs('#selectedAnimationLabel');
+    const animButtonLabel = qs('#selectedAnimationButtonLabel');
+    const animBgLabel = qs('#selectedAnimationBackgroundLabel');
+
+    // Remplir labels initiaux
+    setAnimLabel(animArticleLabel, anims, f.selectedAnimationIndex?.value);
+    setAnimLabel(animButtonLabel, anims, f.selectedAnimationButtonIndex?.value);
+    setAnimLabel(animBgLabel, animBgs, f.selectedAnimationBackgroundIndex?.value);
+
+    if (animArticleBtn && f.selectedAnimationIndex) {
+      animArticleBtn.addEventListener('click', () => openPicker({
+        title: "Choisir l'animation d'article", type: 'anim', items: anims,
+        renderCard: (it, i) => renderAnimCard(it, i),
+        onSelect: (i) => {
+          f.selectedAnimationIndex.value = String(i);
+          setAnimLabel(animArticleLabel, anims, i);
+          scheduleAutoSave();
+        },
+      }));
+      // Ouverture en cliquant sur le champ
+      animArticleLabel?.addEventListener('click', () => animArticleBtn.click());
+      animArticleLabel?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); animArticleBtn.click(); } });
+    }
+    if (animButtonBtn && f.selectedAnimationButtonIndex) {
+      animButtonBtn.addEventListener('click', () => openPicker({
+        title: "Choisir l'animation de bouton", type: 'anim', items: anims,
+        renderCard: (it, i) => renderAnimCard(it, i),
+        onSelect: (i) => {
+          f.selectedAnimationButtonIndex.value = String(i);
+          setAnimLabel(animButtonLabel, anims, i);
+          scheduleAutoSave();
+        },
+      }));
+      animButtonLabel?.addEventListener('click', () => animButtonBtn.click());
+      animButtonLabel?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); animButtonBtn.click(); } });
+    }
+    if (animBgBtn && f.selectedAnimationBackgroundIndex) {
+      animBgBtn.addEventListener('click', () => openPicker({
+        title: "Choisir l'animation d'arrière‑plan", type: 'anim-bg', items: animBgs,
+        renderCard: (it, i) => renderAnimBgCard(it, i),
+        onSelect: (i) => {
+          f.selectedAnimationBackgroundIndex.value = String(i);
+          setAnimLabel(animBgLabel, animBgs, i);
+          scheduleAutoSave();
+        },
+      }));
+      animBgLabel?.addEventListener('click', () => animBgBtn.click());
+      animBgLabel?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); animBgBtn.click(); } });
+    }
   })();
 
   setStatus('Chargement...');
