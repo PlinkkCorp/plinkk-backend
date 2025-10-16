@@ -164,14 +164,196 @@ fastify.addHook("onRequest", async (request, reply) => {
     }
 
     return reply.type("text/html").send(`
-      <html>
-        <head><title>Plinkk</title></head>
-        <body style="font-family:sans-serif;text-align:center;padding-top:40px">
-          <h1>Bienvenue sur Plinkk</h1>
-          <p>Ce contenu est uniquement accessible via <b>plinkk.fr</b></p>
-          <a href="https://plinkk.fr">Acceder au site officiel</a>
-        </body>
       <!doctype html>
+      <html lang="fr">
+      <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width,initial-scale=1" />
+      <title>Plinkk — Bienvenue</title>
+      <style>
+        :root{
+        --bg-1:#0f172a;
+        --bg-2:#0b1220;
+        --card:#0b1226;
+        --accent:#7c3aed;
+        --muted:rgba(255,255,255,0.72);
+        --glass:rgba(255,255,255,0.03);
+        }
+        @media (prefers-color-scheme: light){
+        :root{
+          --bg-1:#f7f8fb;
+          --bg-2:#eef2ff;
+          --card:#ffffff;
+          --accent:#6d28d9;
+          --muted:#334155;
+          --glass:rgba(13,17,25,0.04);
+        }
+        }
+        html,body{
+        height:100%;
+        margin:0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        background: linear-gradient(135deg,var(--bg-1),var(--bg-2));
+        -webkit-font-smoothing:antialiased;
+        -moz-osx-font-smoothing:grayscale;
+        color:var(--muted);
+        }
+        .wrap{
+        min-height:100%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:32px;
+        box-sizing:border-box;
+        }
+        .card{
+        width:100%;
+        max-width:920px;
+        background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        backdrop-filter: blur(8px);
+        border-radius:12px;
+        box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+        overflow:hidden;
+        display:flex;
+        gap:0;
+        }
+        .panel-left{
+        flex:1 1 420px;
+        padding:40px;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        gap:18px;
+        background:
+          linear-gradient(180deg, rgba(124,58,237,0.06), transparent 40%),
+          linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        }
+        .logo{
+        display:inline-grid;
+        place-items:center;
+        width:64px;
+        height:64px;
+        border-radius:12px;
+        background:linear-gradient(135deg,var(--accent),#4f46e5);
+        color:white;
+        font-weight:700;
+        font-size:24px;
+        box-shadow:0 6px 18px rgba(79,70,229,0.24);
+        }
+        h1{
+        margin:0;
+        color: white;
+        font-size:28px;
+        line-height:1.05;
+        }
+        p.lead{
+        margin:0;
+        color:var(--muted);
+        font-size:15px;
+        max-width:44ch;
+        }
+        .ctas{
+        margin-top:8px;
+        display:flex;
+        gap:12px;
+        flex-wrap:wrap;
+        }
+        .btn{
+        display:inline-flex;
+        align-items:center;
+        gap:10px;
+        padding:10px 16px;
+        border-radius:10px;
+        text-decoration:none;
+        color:white;
+        background:var(--accent);
+        box-shadow:0 8px 20px rgba(99,102,241,0.14);
+        font-weight:600;
+        transition:transform .12s ease, box-shadow .12s ease;
+        }
+        .btn.secondary{
+        background:transparent;
+        color:var(--muted);
+        border:1px solid var(--glass);
+        box-shadow:none;
+        font-weight:600;
+        }
+        .btn:active{ transform:translateY(1px) }
+        .panel-right{
+        width:320px;
+        min-width:260px;
+        background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        padding:22px;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        gap:10px;
+        border-left:1px solid rgba(255,255,255,0.03);
+        }
+        .meta{
+        font-size:13px;
+        color:var(--muted);
+        display:flex;
+        align-items:center;
+        gap:10px;
+        }
+        .badge{
+        background:var(--glass);
+        color:var(--muted);
+        padding:6px 10px;
+        border-radius:999px;
+        font-weight:600;
+        font-size:12px;
+        }
+        footer{
+        padding:18px;
+        text-align:center;
+        font-size:13px;
+        color:rgba(255,255,255,0.5);
+        background:linear-gradient(180deg, transparent, rgba(0,0,0,0.02));
+        }
+        @media (max-width:820px){
+        .card{ flex-direction:column; }
+        .panel-right{ width:100%; border-left:0; border-top:1px solid rgba(255,255,255,0.03); }
+        }
+      </style>
+      </head>
+      <body>
+      <div class="wrap" role="main">
+        <div class="card" aria-labelledby="welcome-title">
+        <div class="panel-left">
+          <div style="display:flex;align-items:center;gap:12px">
+          <div class="logo" aria-hidden="true"><img src="https://plinkk.fr/public/images/logo.svg" style="max-width:100%;height:auto" alt="Plinkk Logo" /></div>
+          <div style="display:flex;flex-direction:column">
+            <div class="meta"><span class="badge">plinkk.fr</span><span style="opacity:.9">Accès restreint</span></div>
+          </div>
+          </div>
+          <h1 id="welcome-title">Bienvenue sur Plinkk</h1>
+          <p class="lead">Ce contenu est réservé au domaine officiel. Pour accéder à l'intégralité du site et à votre profil, rendez-vous sur le site principal ou connectez-vous avec votre compte.</p>
+          <div class="ctas">
+          <a class="btn" href="https://plinkk.fr" rel="noopener" target="_blank">Accéder au site officiel ↗</a>
+          <a class="btn secondary" href="https://plinkk.fr/login">Se connecter</a>
+          </div>
+        </div>
+        <div class="panel-right" aria-hidden="false">
+          <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-weight:700;color:var(--muted);font-size:14px">Pourquoi cette page ?</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.45">
+            Pour protéger les profils et l'expérience utilisateur, l'accès direct à certains contenus est limité aux demandes depuis plinkk.fr. Si vous pensez que c'est une erreur, contactez le support à <a href="mailto:contact@plinkk.fr" style="color:inherit;text-decoration:underline">contact@plinkk.fr</a>.
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+            <span style="font-size:12px;color:var(--muted);background:var(--glass);padding:6px 8px;border-radius:8px">Sécurité</span>
+            <span style="font-size:12px;color:var(--muted);background:var(--glass);padding:6px 8px;border-radius:8px">Vie privée</span>
+            <span style="font-size:12px;color:var(--muted);background:var(--glass);padding:6px 8px;border-radius:8px">Support</span>
+          </div>
+          </div>
+        </div>
+        </div>
+      </div>
+      <footer>
+        © Plinkk — Renvoyer vers <a href="https://plinkk.fr" style="color:inherit;text-decoration:underline" rel="noopener" target="_blank">plinkk.fr</a>
+      </footer>
+      </body>
       </html>
     `);
   }
