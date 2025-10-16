@@ -603,6 +603,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
           : page.user.publicEmail ?? null,
       canvaEnable: settings?.canvaEnable ?? 1,
       selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
+      layoutOrder: settings?.layoutOrder ?? null,
     };
     const config = await generateProfileConfig(
       pageProfile,
