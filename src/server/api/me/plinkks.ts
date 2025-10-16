@@ -645,12 +645,6 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     archive.file(path.join(__dirname, "..", "..", "..", "public", "css", "button.css"), { name: "css/button.css" });
 
     // --- LOGOS (statiques) ---
-    /* const logosPath = path.join(__dirname, "..", "..", "..", "public", "images", "icons");
-    const logos = readdirSync(logosPath);
-    for (const logo of logos) {
-      archive.file(path.join(logosPath, logo), { name: `public/images/${logo}` });
-    } */
-
     if (page.settings.profileImage.startsWith("/public/")) archive.file(path.join(__dirname, "..", "..", "..", ...page.settings.profileImage.split("/")), { name: page.settings.profileImage})
     if (page.settings.profileIcon.startsWith("/public/")) archive.file(path.join(__dirname, "..", "..", "..", ...page.settings.profileIcon.split("/")), { name: page.settings.profileIcon})
     if (page.settings.iconUrl.startsWith("/public/")) archive.file(path.join(__dirname, "..", "..", "..", ...page.settings.iconUrl.split("/")), { name: page.settings.iconUrl})
