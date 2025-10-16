@@ -12,9 +12,8 @@ import {
 export const prisma = new PrismaClient();
 
 import { resolvePlinkkPage, parseIdentifier } from "../lib/resolvePlinkkPage";
-import { builtInThemesTypes, coerceThemeData } from "../lib/theme";
+import { coerceThemeData } from "../lib/theme";
 import { generateBundle } from "../lib/generateBundle";
-import builtInThemes from "../lib/builtInThemes";
 import { generateTheme } from "../lib/generateTheme";
 
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
