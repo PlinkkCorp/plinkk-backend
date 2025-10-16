@@ -526,6 +526,12 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     // Dérive la visibilité d'email depuis le champ `publicEmail` (présent
     // dans le schéma Prisma). Si publicEmail est défini -> l'email est public.
     const isEmailPublic = Boolean(userInfo.publicEmail);
+    // Récupère les Plinkks de l'utilisateur pour peupler le sélecteur de domaine
+    const pages = await prisma.plinkk.findMany({
+      where: { userId: userInfo.id },
+      select: { id: true, name: true, slug: true, isDefault: true, index: true, createdAt: true },
+      orderBy: [{ isDefault: "desc" }, { index: "asc" }, { createdAt: "asc" }],
+    });
     let publicPath
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
@@ -536,7 +542,10 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     } catch (e) {}
     return replyView(reply, "dashboard/user/account.ejs", userInfo, {
       isEmailPublic,
-      publicPath
+      publicPath,
+      // expose à la vue sous 2 noms par compatibilité
+      pages,
+      plinkks: pages,
     });
   });
 
