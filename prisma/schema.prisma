@@ -299,7 +299,7 @@ model PlinkkSettings {
   canvaEnable                      Int?
   selectedCanvasIndex              Int?
   // Ordre d'agencement des sections (déplacement visuel dans le dashboard)
-  layoutOrder                      Json?
+  layoutOrder                      Json?    @default("[\"profile\",\"username\",\"statusbar\",\"labels\",\"social\",\"email\",\"links\"]")
 }
 
 model PlinkkEvent {
