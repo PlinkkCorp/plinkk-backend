@@ -259,7 +259,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     state.labels = Array.isArray(cfg.labels) ? cfg.labels.map((x) => ({ ...x })) : [];
   state.socialIcon = Array.isArray(cfg.socialIcon) ? cfg.socialIcon.map((x) => ({ ...x })) : [];
   state.links = Array.isArray(cfg.links) ? cfg.links.map((x) => ({ ...x })) : [];
-  // Agencement: ordre des sections
+  // Agencement: ordre des sections (statusbar removed)
   const DEFAULT_LAYOUT = ['profile','username','labels','social','email','links'];
   state.layoutOrder = Array.isArray(cfg.layoutOrder) ? [...cfg.layoutOrder] : [...DEFAULT_LAYOUT];
 

@@ -126,4 +126,89 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     });
     return reply.send({ ok: true, changed: true });
   });
+
+  // API: basculer la visibilité publique/privée du profil d'un utilisateur (admin/dev/moderator)
+  fastify.post("/:id/visibility", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({
+      where: { id: meId as string },
+      select: { role: true },
+    });
+    if (!(me && verifyRoleIsStaff(me.role))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+
+    const { id } = request.params as { id: string };
+    const { isPublic } = (request.body as { isPublic?: boolean }) ?? {};
+    if (typeof isPublic !== "boolean") {
+      return reply.code(400).send({ error: "Invalid payload" });
+    }
+
+    const updated = await prisma.user.update({
+      where: { id },
+      data: { isPublic: Boolean(isPublic) },
+      select: { id: true, isPublic: true },
+    });
+    return reply.send(updated);
+  });
+
+  // API: basculer la visibilité publique de l'email d'un utilisateur (admin/dev/moderator)
+  fastify.post("/:id/email-visibility", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({
+      where: { id: meId as string },
+      select: { role: true },
+    });
+    if (!(me && verifyRoleIsStaff(me.role))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+
+    const { id } = request.params as { id: string };
+    const { isEmailPublic } = (request.body as { isEmailPublic?: boolean }) ?? {};
+    if (typeof isEmailPublic !== "boolean") {
+      return reply.code(400).send({ error: "Invalid payload" });
+    }
+
+    // Lire l'email courant pour exposer publiquement si demandé
+    const u = await prisma.user.findUnique({
+      where: { id },
+      select: { email: true, publicEmail: true },
+    });
+    if (!u) return reply.code(404).send({ error: "Utilisateur introuvable" });
+
+    const newPublicEmail = isEmailPublic ? (u.publicEmail || u.email) : null;
+    const updated = await prisma.user.update({
+      where: { id },
+      data: { publicEmail: newPublicEmail },
+      select: { id: true, publicEmail: true },
+    });
+    return reply.send({ id: updated.id, isEmailPublic: Boolean(updated.publicEmail) });
+  });
+
+  // API: forcer la réinitialisation du mot de passe (admin/dev/moderator)
+  fastify.post("/:id/force-password-reset", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({
+      where: { id: meId as string },
+      select: { role: true },
+    });
+    if (!(me && verifyRoleIsStaff(me.role))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+
+    const { id } = request.params as { id: string };
+    const { mustChange } = (request.body as { mustChange?: boolean }) ?? {};
+    if (typeof mustChange !== "boolean") {
+      return reply.code(400).send({ error: "Invalid payload" });
+    }
+    const updated = await prisma.user.update({
+      where: { id },
+      data: { mustChangePassword: mustChange },
+      select: { id: true, mustChangePassword: true },
+    });
+    return reply.send({ id: updated.id, mustChangePassword: updated.mustChangePassword });
+  });
 }

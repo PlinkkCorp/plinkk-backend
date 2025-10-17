@@ -426,20 +426,54 @@ export function renderLinks({ container, addBtn, links, scheduleAutoSave }) {
       description.addEventListener('input', () => { l.description = description.value; scheduleAutoSave(); });
       const openThemePicker = () => {
         const items = window.__PLINKK_CFG__?.btnIconThemeConfig || [];
+        // Injecter une option spéciale "Aucun" pour désactiver le thème
+        const itemsWithNone = [{ __none: true, name: 'Aucun' }, ...items];
         const { openPicker, renderBtnThemeCard } = window.__DASH_PICKERS__;
         openPicker({
           title: 'Choisir un thème de bouton',
           type: 'btn-theme',
-          items,
-          renderCard: renderBtnThemeCard,
+          items: itemsWithNone,
+          renderCard: (item, i) => {
+            // Rendu d'une carte simple pour l'option "Aucun"
+            if (item && item.__none) {
+              const card = document.createElement('button');
+              card.type = 'button';
+              card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left flex items-center gap-3';
+              const badge = document.createElement('div');
+              badge.className = 'h-8 w-8 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 text-slate-300 text-xs';
+              badge.textContent = 'Ø';
+              const col = document.createElement('div');
+              const title = document.createElement('div');
+              title.className = 'font-medium';
+              title.textContent = 'Aucun';
+              const small = document.createElement('div');
+              small.className = 'text-xs text-slate-400';
+              small.textContent = 'Désactiver le thème';
+              col.append(title, small);
+              card.append(badge, col);
+              card.addEventListener('click', () => { window.__DASH_PICKERS__.pickerOnSelect?.(i); });
+              return card;
+            }
+            // Sinon, déléguer au renderer existant
+            return renderBtnThemeCard(item, i);
+          },
           onSelect: (i) => {
-            const chosen = items[i];
+            const chosen = itemsWithNone[i];
+            if (!chosen) return;
+            // Si "Aucun" est choisi, on efface le thème sans toucher à l'icône
+            if (chosen.__none) {
+              // Vider explicitement le thème pour que la persistance écrase toute valeur précédente
+              themeDisplay.value = '';
+              l.name = null;
+              scheduleAutoSave();
+              return;
+            }
             if (chosen?.name) {
               themeDisplay.value = chosen.name;
               l.name = chosen.name;
             }
             if (chosen?.icon) {
-              const replaced = chosen.icon//.replace('{{username}}', `/${window.__PLINKK_USER_ID__}`);
+              const replaced = chosen.icon // .replace('{{username}}', `/${window.__PLINKK_USER_ID__}`);
               icon.value = replaced;
               l.icon = replaced;
             }
@@ -473,6 +507,7 @@ export function renderLayout({ container, order, scheduleAutoSave }) {
   const LABELS = {
     profile: 'Photo & lien de profil',
     username: 'Nom affiché',
+  // statusbar removed from layout
     labels: 'Labels (badges)',
     social: 'Icônes sociales',
     email: 'Email & Description',

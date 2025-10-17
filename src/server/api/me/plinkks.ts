@@ -449,7 +449,11 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
               icon: l.icon ?? undefined,
               url: l.url,
               text: l.text ?? undefined,
-              name: l.name ?? undefined,
+              // Important: si le client envoie null, on doit écraser en base avec null
+              // (au lieu d'ignorer le champ). Si non fourni, on laisse undefined.
+              name: (l).name === null
+                ? null
+                : (typeof (l).name === 'string' ? (l).name : undefined),
               description: l.description ?? undefined,
               showDescriptionOnHover: l.showDescriptionOnHover ?? undefined,
               showDescription: l.showDescription ?? undefined,
@@ -461,7 +465,10 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
               icon: l.icon ?? undefined,
               url: l.url,
               text: l.text ?? undefined,
-              name: l.name ?? undefined,
+              // Même logique pour la création: null explicite => stocker null, sinon undefined
+              name: (l).name === null
+                ? null
+                : (typeof (l).name === 'string' ? (l).name : undefined),
               description: l.description ?? undefined,
               showDescriptionOnHover: l.showDescriptionOnHover ?? undefined,
               showDescription: l.showDescription ?? undefined,
