@@ -44,6 +44,7 @@ import { resolvePlinkkPage } from "./lib/resolvePlinkkPage";
 import { generateProfileConfig } from "./lib/generateConfig";
 import { minify } from "uglify-js";
 import { coerceThemeData } from "./lib/theme";
+import { generateTheme } from "./lib/generateTheme";
 
 const prisma = new PrismaClient();
 const fastify = Fastify({
@@ -147,7 +148,7 @@ fastify.register(plinkkFrontUserRoutes);
 fastify.addHook("onRequest", async (request, reply) => {
   const host = request.headers.host || "";
 
-  if (host !== "plinkk.fr" && host !== "127.0.0.1:3001") {
+  if (host !== "plinkk.fr") {
     const hostDb = await prisma.host.findUnique({
       where: {
         id: host,
@@ -194,7 +195,7 @@ fastify.addHook("onRequest", async (request, reply) => {
         return reply.sendFile(`css/button.css`);
       } else if (request.url === "/umami_script.js") {
         return reply.sendFile(`https://analytics.plinkk.fr/script.js`);
-      } else if (request.url === "/config.js") {
+      } else if (request.url.startsWith("/config.js")) {
         const page = hostDb.plinkk
         if (!page) return reply.code(404).send({ error: "Page introuvable" });
 
@@ -422,15 +423,15 @@ fastify.addHook("onRequest", async (request, reply) => {
         );
         const mini = minify(generated);
         return reply.type("text/javascript").send(mini.code || "")
-      } else if (request.url.replace("/", "").replace(".js", "")) {
-        const plinkk = await prisma.plinkk.findUnique({
-          where: { id: request.url.replace("/", "").replace(".js", "") },
-        });
-        if (plinkk) {
-          const js = await generateBundle();
-
-          return reply.type("application/javascript").send(js);
-        }
+      } else if (request.url === "/themes.json") {
+        return reply.send(await generateTheme(hostDb.plinkk.userId));
+      } else if (request.url.replace("/", "").replace(".js", "").trim() === hostDb.plinkk.slug) {
+        const js = await generateBundle();
+        return reply.type("application/javascript").send(js);
+      } else if (request.url.startsWith("/canvaAnimation")) {
+        return reply.sendFile(`canvaAnimation/${request.url.replace("/canvaAnimation/", "")}`);
+      }  else if (request.url.startsWith("/public")) {
+        return reply.sendFile(`images/${request.url.replace("/public/images/", "")}`);
       }
     }
     return reply.type("text/html").send(`
@@ -970,6 +971,7 @@ fastify.post("/register", async (req, reply) => {
     );
     return reply.redirect(returnTo || "/dashboard");
   } catch (error) {
+    console.error(error)
     reply.redirect(
       "/login?error=" + encodeURIComponent("Utilisateur deja existant")
     );
