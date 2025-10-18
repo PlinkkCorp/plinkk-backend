@@ -1,0 +1,211 @@
+<%- include('../../partials/head.ejs', { title: 'Mes Plinkks', description: 'Gère jusqu\'à 2 profils Plinkk.', robots: 'noindex,nofollow' }) %>
+<%- include('../../partials/header-dash.ejs', { user: user }) %>
+
+<div class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
+  <%- include('../../partials/asside_dash.ejs', { active: 'plinkks' }) %>
+  <main class="col-span-12 lg:col-span-9 space-y-4">
+   <% const list = (plinkks && plinkks.length ? plinkks : (pages || [])); const currentCount = list.length; const maxPlinkks = (typeof maxPages !== 'undefined' ? maxPages : 2);
+     const isAdminView = (typeof user !== 'undefined' && user.role && user.role.id === 'ADMIN');
+     const maxPlinkksDisplay = (maxPlinkks === Infinity || isAdminView) ? '∞' : String(maxPlinkks);
+   %>
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-semibold">Mes Plinkks</h1>
+  <div class="text-sm text-slate-400 bg-slate-800 px-2 py-0.5 rounded"> <%= currentCount %> / <%= maxPlinkksDisplay %> </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <div id="plinkkMsg" class="text-sm text-amber-300"><% if (currentCount >= maxPlinkks) { %>Limite atteinte<% } %></div>
+  <% const reached = !(maxPlinkks === Infinity) && (currentCount >= maxPlinkks); %>
+  <button id="btnCreate" class="px-3 py-2 text-sm rounded-md <%= reached ? 'bg-slate-700 text-slate-400 opacity-50 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-500 text-white' %>" <%= reached ? 'disabled' : '' %>><%= 'Créer' %></button>
+      </div>
+    </div>
+
+    <div class="rounded-md border border-slate-800 bg-slate-900/60">
+      <% if (!list || !list.length) { %>
+        <div class="p-4 text-sm text-slate-300">Aucun plinkk. Crée ton premier profil secondaire.</div>
+      <% } else { %>
+        <ul>
+          <% list.forEach(p => { %>
+            <li class="flex items-center justify-between p-3 border-t border-slate-800 first:border-t-0">
+              <div>
+                <div class="font-medium"><%= p.name %></div>
+                <div class="text-xs text-slate-400">Slug: <code><%= p.slug %></code> · <%= p.isDefault ? 'Défaut' : 'Secondaire' %> · <%= (p.visibility === 'PUBLIC' || p.isPublic) ? 'Public' : 'Privé' %></div>
+                <div class="text-xs text-slate-400 mt-1">URL: <a class="text-indigo-300 hover:underline" href="/<%= p.slug %>" target="_blank">/<%= p.slug %></a></div>
+              </div>
+              <div class="flex items-center gap-2 text-xs">
+                <!-- <button class="btnDefault px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white <%= p.isDefault ? 'opacity-50 cursor-not-allowed' : '' %>" data-id="<%= p.id %>" <%= p.isDefault ? 'disabled' : '' %>>Définir par défaut</button> -->
+                <button type="button" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white btnExport" data-export-url="../api/me/plinkks/<%= p.id %>/export.zip" aria-label="Exporter le plinkk">Exporter le plinkk</button>
+                <button class="btnTogglePub px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white" data-id="<%= p.id %>" data-public="<%= (p.visibility === 'PUBLIC' || p.isPublic) ? '1' : '0' %>"><%= (p.visibility === 'PUBLIC' || p.isPublic) ? 'Rendre privé' : 'Rendre public' %></button>
+                <a class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white" href="/plinkks/<%= p.id %>/stats">Voir stats</a>
+                <a class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white" href="/plinkks/<%= p.id %>/edit">Éditer</a>
+                <button class="btnDelete px-2 py-1 rounded bg-red-600 text-white" data-id="<%= p.id %>">Supprimer</button>
+              </div>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </div>
+
+  <p class="text-xs text-slate-400">Limite actuelle: <%= maxPlinkksDisplay %> plinkks par utilisateur.</p>
+  </main>
+</div>
+
+    <script>
+  (function(){
+    const $ = (s,r=document)=>r.querySelector(s);
+    const btnCreate = $('#btnCreate');
+    const msgEl = document.getElementById('plinkkMsg');
+
+    // Inline confirmation modal used across the page (returns a Promise<boolean>)
+    function showConfirm(message){
+      return new Promise(resolve => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
+        overlay.innerHTML = `
+          <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
+            <div class="mb-4">${message.replace(/</g,'&lt;')}</div>
+            <div class="flex justify-end gap-2">
+              <button class="cancel px-3 py-1.5 rounded-md bg-slate-700 text-sm">Annuler</button>
+              <button class="ok px-3 py-1.5 rounded-md bg-rose-600 text-white text-sm">Supprimer</button>
+            </div>
+          </div>`;
+
+        const btnCancel = overlay.querySelector('.cancel');
+        const btnOk = overlay.querySelector('.ok');
+
+        function cleanup(result){
+          document.removeEventListener('keydown', onKey);
+          overlay.remove();
+          resolve(result);
+        }
+
+        function onKey(ev){
+          if (ev.key === 'Escape') { ev.preventDefault(); cleanup(false); }
+          if (ev.key === 'Enter') { ev.preventDefault(); cleanup(true); }
+        }
+
+        btnCancel.addEventListener('click', () => cleanup(false));
+        btnOk.addEventListener('click', () => cleanup(true));
+        overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(false); });
+        document.body.appendChild(overlay);
+        document.addEventListener('keydown', onKey);
+        btnCancel.focus();
+      });
+    }
+
+    // Simple alert modal (OK only)
+    function showAlert(message){
+      return new Promise(resolve => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
+        overlay.innerHTML = `
+          <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
+            <div class="mb-4">${message.replace(/</g,'&lt;')}</div>
+            <div class="flex justify-end gap-2">
+              <button class="ok px-3 py-1.5 rounded-md bg-indigo-600 text-white text-sm">OK</button>
+            </div>
+          </div>`;
+        const btnOk = overlay.querySelector('.ok');
+        function cleanup(){ overlay.remove(); resolve(); }
+        btnOk.addEventListener('click', cleanup);
+        overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(); });
+        document.body.appendChild(overlay);
+        btnOk.focus();
+      });
+    }
+
+    // Modal form to create a plinkk (returns {slug,name} or null)
+    function showFormCreatePlinkk(){
+      return new Promise(resolve => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
+        overlay.innerHTML = `
+          <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
+            <h3 class="font-medium mb-2">Créer un Plinkk</h3>
+            <div class="space-y-2">
+              <label class="text-xs">Slug (ex: pro, perso) — lettres/chiffres/"-" (2-32)</label>
+              <input id="_p_slug" class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700 text-sm" />
+              <label class="text-xs">Nom affiché</label>
+              <input id="_p_name" class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700 text-sm" />
+            </div>
+            <div class="flex justify-end gap-2 mt-4">
+              <button class="cancel px-3 py-1.5 rounded-md bg-slate-700 text-sm">Annuler</button>
+              <button class="ok px-3 py-1.5 rounded-md bg-emerald-600 text-white text-sm">Créer</button>
+            </div>
+          </div>`;
+
+        const btnCancel = overlay.querySelector('.cancel');
+        const btnOk = overlay.querySelector('.ok');
+        const inSlug = overlay.querySelector('#_p_slug');
+        const inName = overlay.querySelector('#_p_name');
+
+        function cleanup(result){ overlay.remove(); resolve(result); }
+        btnCancel.addEventListener('click', () => cleanup(null));
+        btnOk.addEventListener('click', () => {
+          const slug = String(inSlug.value||'').trim();
+          const name = String(inName.value||'').trim();
+          if (!slug || !name) return; // keep modal open
+          cleanup({ slug, name });
+        });
+        // Entrée: sur le champ slug -> passer au champ nom; sur le champ nom -> valider
+        inSlug.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); inName?.focus(); }
+        });
+        inName.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); btnOk.click(); }
+        });
+        overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(null); });
+        document.body.appendChild(overlay);
+        inSlug.focus();
+      });
+    }
+
+    function setMsg(t, ok){ if (!msgEl) return; msgEl.textContent = t||''; msgEl.className = ok? 'text-sm text-emerald-400':'text-sm text-rose-400'; }
+
+    btnCreate?.addEventListener('click', async () => {
+      const data = await showFormCreatePlinkk();
+      if (!data) return;
+      try {
+        const res = await fetch('/api/me/plinkks', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ slug: data.slug, name: data.name }) });
+        if (!res.ok) { const t = await res.text(); await showAlert('Erreur: ' + res.status + ' ' + t); return; }
+        const payload = await res.json();
+        setMsg('Plinkk créé ✓', true);
+        location.reload();
+      } catch (e) { await showAlert('Erreur réseau'); }
+    });
+
+    document.addEventListener('click', async (e) => {
+      // Détermination robuste de l'élément cliqué (bouton ou élément possédant des data-attrs)
+      const el = e.target.closest('button, [data-id], [data-export-url]');
+      if (!el) return;
+      const id = el.dataset?.id;
+
+      if (el.classList?.contains('btnDelete')) {
+        const ok = await showConfirm('Supprimer ce plinkk ?'); if (!ok) return;
+        const res = await fetch('/api/me/plinkks/' + encodeURIComponent(id), { method: 'DELETE' });
+        if (!res.ok) { await showAlert('Erreur'); return; }
+        location.reload();
+      }
+      else if (el.classList?.contains('btnDefault')) {
+        const res = await fetch('/api/me/plinkks/' + encodeURIComponent(id), { method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ isDefault: true }) });
+        if (!res.ok) { await showAlert('Erreur'); return; }
+        location.reload();
+      }
+      else if (el.classList?.contains('btnTogglePub')) {
+        const isPub = el.dataset.public === '1';
+        const res = await fetch('/api/me/plinkks/' + encodeURIComponent(id), { method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ isPublic: !isPub }) });
+        if (!res.ok) { await showAlert('Erreur'); return; }
+        location.reload();
+      }
+      else if (el.dataset?.exportUrl) {
+        const url = el.dataset.exportUrl;
+        try {
+          window.open(url, '_blank');
+        } catch (e) {
+          window.location.href = url;
+        }
+        return;
+      }
+    });
+  })();
+</script>

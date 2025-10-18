@@ -1,0 +1,57 @@
+<%- include('../partials/head', { title: 'Conditions d’utilisation', description: 'Conditions générales d’utilisation de Plinkk.' }) %>
+<%- include('../partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
+<main class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-10">
+  <article class="glass ring-gradient rounded-2xl p-6 prose prose-invert max-w-none">
+    <h1 class="mb-2">Conditions générales d’utilisation</h1>
+    <p class="text-slate-300 !mt-0">Dernière mise à jour : <time datetime="2025-09-29">29 septembre 2025</time></p>
+
+    <nav aria-label="Liens utiles" class="not-prose mt-4">
+      <ul class="flex flex-wrap gap-3 text-sm text-slate-300">
+        <li><a class="underline hover:text-white" href="/privacy">Confidentialité</a></li>
+        <li><a class="underline hover:text-white" href="/cookies">Cookies</a></li>
+        <li><a class="underline hover:text-white" href="/legal">Mentions légales</a></li>
+      </ul>
+    </nav>
+
+    <hr class="my-4 border-slate-800/60" />
+
+    <h2 id="objet">1. Objet</h2>
+    <p>Plinkk permet de créer une page publique de liens personnalisés. L’utilisation du service implique l’acceptation des présentes CGU.</p>
+
+    <h2 id="compte">2. Compte utilisateur</h2>
+    <ul>
+      <li>Vous êtes responsable de la confidentialité de vos identifiants.</li>
+      <li>Vous garantissez l’exactitude des informations fournies.</li>
+    </ul>
+
+    <h2 id="contenus">3. Contenus</h2>
+    <ul>
+      <li>Interdiction de publier des contenus illégaux, haineux, diffamatoires, contrefaisants ou nuisibles.</li>
+      <li>Le contenu que vous publiez reste sous votre responsabilité.</li>
+    </ul>
+
+    <h2 id="droits">4. Propriété intellectuelle</h2>
+    <p>Vous conservez vos droits sur vos contenus. Vous nous accordez une licence limitée pour l’affichage et l’hébergement nécessaires à la fourniture du service.</p>
+    <p>Nous nous engageons à respecter vos droits et à ne pas utiliser vos contenus à d’autres fins que celles prévues par le service.</p>
+  <p>Le code source de Plinkk est sous licence MIT (voir la <a href="#" class="openLicenseModal">licence</a>).</p>
+    <p>Les autres éléments du site (textes, images, logos, icônes) sont la propriété de Plinkk ou de ses partenaires et sont protégés. Toute reproduction non autorisée est interdite.</p>
+  <p>Pour toute demande de licence ou de réutilisation, contactez-nous à <%- include('../partials/contact-email') %>.</p>
+    <p>L'utilisateur s'engage à respecter les droits de propriété intellectuelle (droit d'auteur, droit voisin, droit des marques et des logos), et à n'utiliser que des images ou autres éléments dont il détient légalement les droits ou pour lesquels il dispose d'une autorisation expresse des titulaires.</p>
+
+    <h2 id="resiliation">5. Suspension et résiliation</h2>
+    <p>Nous pouvons suspendre ou résilier l’accès en cas de non‑respect manifeste des CGU, de fraude ou d’atteinte à la sécurité.</p>
+
+    <h2 id="responsabilite">6. Responsabilité</h2>
+    <p>Le service est fourni « en l’état ». Nous ne garantissons pas une disponibilité ininterrompue. Notre responsabilité ne saurait être engagée pour des dommages indirects.</p>
+
+  <h2 id="donnees">7. Données personnelles</h2>
+  <p>Le traitement des données est décrit dans la <a href="/privacy">Politique de confidentialité</a> et la <a href="/cookies">Politique des cookies</a>. En vous inscrivant sur Plinkk, vous acceptez expressément ces traitements et confirmez avoir pris connaissance de la Politique de confidentialité.</p>
+
+    <h2 id="modifications">8. Modifications</h2>
+    <p>Nous pouvons modifier les présentes CGU. Les modifications sont applicables dès leur publication. La date de mise à jour est indiquée en tête.</p>
+
+    <h2 id="droit">9. Droit applicable</h2>
+    <p>Droit français. Compétence des tribunaux du siège de l’éditeur en cas de litige.</p>
+  </article>
+</main>
+<%- include('../partials/footer') %>
