@@ -307,7 +307,9 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/host/verify", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const verified = await verifyDomain(userId);
+    const body = (request.body as { plinkkId: string });
+    const plinkkId = body.plinkkId
+    const verified = await verifyDomain(plinkkId);
     return reply.send({ verified: verified });
   });
 
