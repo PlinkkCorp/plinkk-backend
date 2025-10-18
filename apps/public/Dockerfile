@@ -14,7 +14,10 @@ RUN apk add --no-cache \
     pixman-dev \
     pangomm-dev
 
+COPY prisma ../../prisma
+
 COPY . .
+
 RUN npm install
 
 RUN npx @fastify/secure-session > src/secret-key
