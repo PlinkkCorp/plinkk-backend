@@ -511,7 +511,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       // Try to include `host` if the table exists in the DB/schema
       userInfo = await prisma.user.findFirst({
         where: { id: userId },
-        include: { cosmetics: true, host: true, role: true },
+        include: { cosmetics: true, role: true },
       });
     } catch (e) {
       // If the Host table is missing (e.g. migrations not applied), fallback to query without it

@@ -3,16 +3,16 @@ import { PrismaClient } from "../../generated/prisma/client";
 
 const prisma = new PrismaClient()
 
-export async function verifyDomain(userId: string) {
-  const user = await prisma.user.findUnique({ where: { id: userId }, include: { host: true } });
-  if (!user.host) throw new Error("No domain set");
+export async function verifyDomain(plinkkId: string) {
+  const plinkk = await prisma.plinkk.findUnique({ where: { id: plinkkId }, include: { host: true } });
+  if (!plinkk.host) throw new Error("No domain set");
 
   try {
-    const records = await dns.resolveTxt(`_plinkk-verification.${user.host.id}`);
+    const records = await dns.resolveTxt(`_plinkk-verification.${plinkk.host.id}`);
     const flat = records.flat().join(" ");
-    if (flat.includes(user.host.verifyToken)) {
+    if (flat.includes(plinkk.host.verifyToken)) {
       await prisma.host.update({
-        where: { id: user.host.id },
+        where: { id: plinkk.host.id },
         data: { verified: true }
       });
       return true;

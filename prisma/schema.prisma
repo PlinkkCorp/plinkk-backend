@@ -57,8 +57,6 @@ model User {
   themes          Theme[]
   announcement    AnnouncementTarget[]
 
-  host            Host?
-
   // Thème personnalisé sélectionné pour usage privé
   selectedCustomThemeId String?
 
@@ -116,8 +114,8 @@ model Host {
   verified               Boolean  @default(false)
   verifyToken            String   @unique
 
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  plinkkId String @unique
+  plinkk   Plinkk   @relation(fields: [plinkkId], references: [id])
 }
 
 model Label {
@@ -263,6 +261,8 @@ model Plinkk {
   statusbar     PlinkkStatusbar?
   settings      PlinkkSettings?
   pageStats     PageStat[] @relation("PageStats")
+
+  host          Host?
 
   @@unique([userId, slug])
   @@unique([userId, index])

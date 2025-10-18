@@ -279,14 +279,15 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/host", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const body = (request.body as { hostname: string });
+    const body = (request.body as { hostname: string, plinkkId: string });
     const hostname = body.hostname.trim();
+    const plinkkId = body.plinkkId
     const token = crypto.randomUUID();
     const updated = await prisma.host.upsert({
-      where: { userId: userId },
+      where: { plinkkId: plinkkId },
       create: {
         id: hostname,
-        userId: userId,
+        plinkkId: plinkkId,
         verified: false,
         verifyToken: token,
       },
@@ -306,7 +307,9 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/host/verify", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const verified = await verifyDomain(userId);
+    const body = (request.body as { plinkkId: string });
+    const plinkkId = body.plinkkId
+    const verified = await verifyDomain(plinkkId);
     return reply.send({ verified: verified });
   });
 
@@ -314,8 +317,10 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.delete("/host", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const body = (request.body as { plinkkId: string });
+    const plinkkId = body.plinkkId
     const deleted = await prisma.host.delete({
-      where: { userId: userId },
+      where: { plinkkId: plinkkId },
     });
     return reply.send({ successful: true });
   });
