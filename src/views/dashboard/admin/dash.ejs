@@ -70,15 +70,9 @@ users.filter(u=>
             <div class="mb-3 flex gap-2 flex-wrap">
                 <input id="searchInput" type="text" placeholder="Rechercher (nom, @id, email)"
                     class="flex-1 rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" />
-                <select id="roleFilter"
+                    <select id="roleFilter"
                     class="rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm">
                     <option value="all">Tous rôles</option>
-                    <option value="USER">USER</option>
-                    <option value="BETA">BETA</option>
-                    <option value="PARTNER">PARTNER</option>
-                    <option value="MODERATOR">MODERATOR</option>
-                    <option value="DEVELOPER">DEVELOPER</option>
-                    <option value="ADMIN">ADMIN</option>
                 </select>
                 <select id="visibilityFilter"
                     class="rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm">
@@ -273,8 +267,36 @@ users.filter(u=>
                                                 const frame = document.getElementById('plinkkPreviewFrameAdmin');
                                                 const title = document.getElementById('plinkkPreviewTitleAdmin');
                                                 const closeBtn = document.getElementById('closePlinkkPreviewAdmin');
-                                                function openModal(url,label){ const sep = url.includes('?') ? '&' : '?'; frame.src = url+sep+'preview=1'; title.textContent = label||'Prévisualisation'; modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.style.overflow='hidden'; }
-                                                function closeModal(){ frame.src='about:blank'; modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.style.overflow=''; }
+                                                function openModal(url,label){
+                                                    const sep = url.includes('?') ? '&' : '?';
+                                                    frame.src = url+sep+'preview=1';
+                                                    title.textContent = label||'Prévisualisation';
+                                                    modal.classList.remove('hidden');
+                                                    modal.classList.add('flex');
+                                                    // animate backdrop and panel
+                                                    const backdrop = modal.querySelector('[data-close]');
+                                                    const panel = modal.querySelector('.relative.w-full.max-w-4xl');
+                                                    backdrop?.classList.remove('animate-backdrop-out');
+                                                    backdrop?.classList.add('animate-backdrop-in');
+                                                    panel?.classList.remove('animate-pop-in'); // reset
+                                                    void panel?.offsetWidth;
+                                                    panel?.classList.add('animate-pop-in');
+                                                    document.body.style.overflow='hidden';
+                                                }
+                                                function closeModal(){
+                                                    const backdrop = modal.querySelector('[data-close]');
+                                                    const panel = modal.querySelector('.relative.w-full.max-w-4xl');
+                                                    backdrop?.classList.remove('animate-backdrop-in');
+                                                    backdrop?.classList.add('animate-backdrop-out');
+                                                    // fade out quickly
+                                                    panel?.classList.remove('animate-pop-in');
+                                                    panel?.classList.add('animate-fade-in'); // reuse subtle fade
+                                                    setTimeout(()=>{
+                                                        frame.src='about:blank';
+                                                        modal.classList.add('hidden'); modal.classList.remove('flex');
+                                                        document.body.style.overflow='';
+                                                    }, 160);
+                                                }
                                                 closeBtn?.addEventListener('click', closeModal); modal?.querySelector('[data-close]')?.addEventListener('click', closeModal);
                                                 document.addEventListener('click', (ev)=>{ const a = ev.target.closest && ev.target.closest('a.plinkk-link'); if (!a) return; ev.preventDefault(); const href=a.getAttribute('href')||''; const label = a.textContent && a.textContent.trim() ? a.textContent.trim() : href; openModal(href,label); });
                                                 document.addEventListener('keydown',(e)=>{ if(e.key==='Escape' && !modal.classList.contains('hidden')) closeModal(); });
@@ -295,61 +317,18 @@ users.filter(u=>
             <button id="umClose" class="px-3 py-1 text-xs rounded bg-slate-800 text-white">Fermer</button>
         </div>
         <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Colonne gauche -->
+            <!-- Colonne gauche: Compte -->
             <div class="space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Rôle -->
                 <div>
                     <label class="block text-xs text-slate-400 mb-1" data-tip="Définit les permissions et accès de l'utilisateur.">Rôle</label>
-                    <select id="umRole" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm">
-                        <option value="USER">USER</option>
-                        <option value="MODERATOR">MODERATOR</option>
-                        <option value="DEVELOPER">DEVELOPER</option>
-                        <option value="ADMIN">ADMIN</option>
-                    </select>
-                </div>
+                    <select id="umRole" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm"></select>
                 </div>
 
-                <!-- Gestion des Plinkks -->
+                <!-- Stats compte -->
                 <div class="rounded-md border border-slate-800/70 bg-slate-900/50 p-3">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="text-xs text-slate-400">Plinkks de l’utilisateur</div>
-                    <div id="umPlMeta" class="text-[11px] text-slate-500"></div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1" data-tip="Choisissez la page Plinkk à modifier">Sélection</label>
-                        <select id="umPlSelect" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm"></select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1" data-tip="Le slug détermine l’URL de la page (ex: /@id/slug)">Slug</label>
-                        <input id="umPlSlug" type="text" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" placeholder="ex: portfolio" />
-                    </div>
-                </div>
-                    <div class="mt-3 flex gap-2">
-                        <button id="umPlSave" class="px-3 py-1.5 rounded bg-indigo-600 text-white text-sm has-spinner" data-tip="Enregistrer les modifications de la page">
-                            <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                            <span>Enregistrer</span>
-                        </button>
-                        <a id="umPlPreview" target="_blank" class="px-3 py-1.5 rounded bg-slate-800 border border-slate-700 text-white text-sm" data-tip="Ouvrir un aperçu dans un nouvel onglet">Prévisualiser</a>
-                    </div>
-                </div>
-                <!-- Liens rapides -->
-                <div class="flex flex-wrap gap-2">
-                    <a id="umViewProfile" target="_blank" class="px-3 py-1.5 rounded bg-indigo-600 text-white text-sm" data-tip="Ouvrir le profil dans un nouvel onglet">Voir le profil</a>
-                    <button id="umCopyLink" class="px-3 py-1.5 rounded bg-slate-800 border border-slate-700 text-white text-sm" data-tip="Copier l’URL du profil">Copier le lien</button>
-                </div>
-            </div>
-
-            <!-- Colonne droite -->
-            <div class="space-y-4">
-                <!-- Stats utilisateur -->
-                <div class="rounded-md border border-slate-800/70 bg-slate-900/50 p-3">
-                    <div class="text-xs text-slate-400 mb-2">Statistiques</div>
+                    <div class="text-xs text-slate-400 mb-2">Statistiques du compte</div>
                     <div class="grid grid-cols-3 gap-2 text-center">
-                        <div class="rounded bg-slate-800/50 py-2">
-                            <div class="text-[10px] text-slate-400">Vues profil</div>
-                            <div id="umStatViews" class="text-base font-semibold text-white">0</div>
-                        </div>
                         <div class="rounded bg-slate-800/50 py-2">
                             <div class="text-[10px] text-slate-400">Plinkks</div>
                             <div id="umStatPlCount" class="text-base font-semibold text-white">0</div>
@@ -361,18 +340,102 @@ users.filter(u=>
                     </div>
                 </div>
 
-                <!-- Sécurité -->
+                <!-- Sécurité compte -->
                 <div class="rounded-md border border-slate-800/70 bg-slate-900/50 p-3">
                     <div class="text-xs text-slate-400 mb-2">Sécurité</div>
-                    <label class="inline-flex items-center gap-2 text-sm text-slate-200" data-tip="Oblige l’utilisateur à définir un nouveau mot de passe à sa prochaine connexion.">
-                        <input id="umForcePwd" type="checkbox" class="rounded border-slate-700 bg-slate-900"> Forcer le reset du mot de passe
-                        <svg id="umForcePwdSpin" class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                    </label>
+                    <div class="flex flex-col gap-2">
+                        <label class="inline-flex items-center gap-2 text-sm text-slate-200" data-tip="Oblige l’utilisateur à définir un nouveau mot de passe à sa prochaine connexion.">
+                            <input id="umForcePwd" type="checkbox" class="rounded border-slate-700 bg-slate-900"> Forcer le reset du mot de passe
+                            <svg id="umForcePwdSpin" class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                        </label>
+                        <button id="umDisable2fa" class="px-3 py-1.5 w-fit rounded bg-amber-600/90 text-white text-sm disabled:opacity-60 has-spinner" data-tip="Désactive l’authentification à deux facteurs pour cet utilisateur">
+                            <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                            <span>Désactiver la 2FA</span>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Contrôles page (toggles + suppression) -->
+                <!-- Modération: Ban par email -->
                 <div class="rounded-md border border-slate-800/70 bg-slate-900/50 p-3">
-                    <div class="text-xs text-slate-400 mb-2">Visibilité et statut de la page</div>
+                    <div class="text-xs text-slate-400 mb-2">Modération</div>
+                    <div id="umBanState" class="text-xs text-slate-300 hidden"></div>
+                    <div id="umBanForm" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs text-slate-400 mb-1">Raison</label>
+                            <input id="umBanReason" type="text" maxlength="500" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" placeholder="ex: spam massif" />
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1" data-tip="Durée en minutes; -1 pour permanent">Durée (min)</label>
+                            <input id="umBanMinutes" type="number" step="1" min="-1" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" placeholder="-1 (permanent)" />
+                        </div>
+                        <label class="inline-flex items-center gap-2 text-xs text-slate-300 sm:col-span-3">
+                            <input id="umBanDeletePlinkk" type="checkbox" class="rounded border-slate-700 bg-slate-900"> Supprimer les Plinkks si applicable
+                        </label>
+                        <div class="sm:col-span-3 flex gap-2">
+                            <button id="umBanApply" class="px-3 py-1.5 rounded bg-rose-700 text-white text-xs has-spinner">
+                                <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                                <span>Bannir</span>
+                            </button>
+                            <button id="umBanRevoke" class="px-3 py-1.5 rounded bg-slate-800 border border-slate-700 text-white text-xs hidden has-spinner">
+                                <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                                <span>Révoquer le ban</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Zone dangereuse: suppression compte -->
+                <div class="rounded-md border border-slate-800/70 bg-slate-900/50 p-3">
+                    <div class="text-xs text-rose-300 mb-2">Zone dangereuse</div>
+                    <button id="umDelete" class="px-3 py-1.5 rounded bg-rose-700 text-white text-sm has-spinner" data-tip="Supprimer définitivement le compte (irréversible)">
+                        <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                        <span>Supprimer le compte</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Colonne droite: Plinkk sélectionné -->
+            <div class="space-y-4">
+                <!-- Sélecteur + slug -->
+                <div class="rounded-md border border-slate-800/70 bg-slate-900/50 p-3">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-xs text-slate-400">Plinkks de l’utilisateur</div>
+                        <div id="umPlMeta" class="text-[11px] text-slate-500"></div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1" data-tip="Choisissez la page Plinkk à modifier">Sélection</label>
+                            <select id="umPlSelect" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1" data-tip="Le slug détermine l’URL de la page (ex: /@id/slug)">Slug</label>
+                            <input id="umPlSlug" type="text" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" placeholder="ex: portfolio" />
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center justify-between gap-2 flex-wrap">
+                        <div class="flex gap-2 flex-wrap">
+                            <a id="umPlPreview" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-slate-800/80 border border-slate-700 text-white text-sm hover:bg-slate-800" data-tip="Ouvrir un aperçu dans un nouvel onglet">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 opacity-90"><path d="M15.75 2.25a.75.75 0 0 0-.75.75v3a.75.75 0 0 0 1.28.53l1.22-1.22 3.22 3.22a.75.75 0 1 0 1.06-1.06l-3.22-3.22 1.22-1.22A.75.75 0 0 0 19.5 1.5h-3.75Z"/><path d="M3.75 6A2.25 2.25 0 0 1 6 3.75h6a.75.75 0 0 1 0 1.5H6A.75.75 0 0 0 5.25 6v12A.75.75 0 0 0 6 18.75h12a.75.75 0 0 0 .75-.75v-6a.75.75 0 0 1 1.5 0v6A2.25 2.25 0 0 1 18 20.25H6A2.25 2.25 0 0 1 3.75 18V6Z"/></svg>
+                                <span>Prévisualiser</span>
+                            </a>
+                            <a id="umViewProfile" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-slate-800/80 border border-slate-700 text-white text-sm hover:bg-slate-800" data-tip="Ouvrir le profil dans un nouvel onglet">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 opacity-90"><path d="M12 2.25a5.25 5.25 0 1 1 0 10.5 5.25 5.25 0 0 1 0-10.5Z"/><path d="M2.25 20.25a9.75 9.75 0 0 1 19.5 0v.75H2.25v-.75Z"/></svg>
+                                <span>Voir le profil</span>
+                            </a>
+                            <button id="umCopyLink" class="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-slate-800/80 border border-slate-700 text-white text-sm hover:bg-slate-800" data-tip="Copier l’URL du profil">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 opacity-90"><path d="M9 7.5A2.25 2.25 0 0 1 11.25 5h3A2.25 2.25 0 0 1 16.5 7.25v7.5A2.25 2.25 0 0 1 14.25 17h-3A2.25 2.25 0 0 1 9 14.75V7.5Zm-3 3A2.25 2.25 0 0 1 8.25 8.25H9v1.5h-.75a.75.75 0 0 0-.75.75v6A.75.75 0 0 0 8.25 18H12v1.5H8.25A2.25 2.25 0 0 1 6 17.25v-6Z"/></svg>
+                                <span>Copier le lien</span>
+                            </button>
+                        </div>
+                        <button id="umPlSave" class="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-sm has-spinner" data-tip="Enregistrer les modifications de la page">
+                            <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                            <span>Enregistrer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Plinkk + Toggles -->
+                <div class="rounded-md border border-slate-800/70 bg-slate-900/50 p-3">
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         <label class="inline-flex items-center gap-2 text-sm text-slate-200" data-tip="Rend la page visible publiquement">
                             <input id="umPlPublic" type="checkbox" class="rounded border-slate-700 bg-slate-900"> Public
@@ -383,26 +446,20 @@ users.filter(u=>
                         <label class="inline-flex items-center gap-2 text-sm text-slate-200 whitespace-nowrap" data-tip="Définit cette page comme page principale de l’utilisateur">
                             <input id="umPlDefault" type="checkbox" class="rounded border-slate-700 bg-slate-900"> <span class="whitespace-nowrap">Par défaut</span>
                         </label>
+                        <label class="inline-flex items-center gap-2 text-sm text-slate-200" data-tip="Affiche l’email de ce compte sur cette page uniquement">
+                            <input id="umPlEmailVisible" type="checkbox" class="rounded border-slate-700 bg-slate-900"> Email visible
+                        </label>
                     </div>
-                    <button id="umPlDelete" class="px-3 py-1.5 mt-2 rounded bg-rose-700 text-white text-xs has-spinner" data-tip="Supprimer définitivement cette page">
-                        <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                        <span>Supprimer</span>
-                    </button>
-                </div>
-
-                <!-- 2FA et Zone dangereuse -->
-                <div class="flex flex-col gap-3">
-                    <div>
-                        <button id="umDisable2fa" class="px-3 py-1.5 rounded bg-amber-600/90 text-white text-sm disabled:opacity-60 has-spinner" data-tip="Désactive l’authentification à deux facteurs pour cet utilisateur">
-                            <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                            <span>Désactiver la 2FA</span>
-                        </button>
+                    <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+                        <div class="rounded bg-slate-800/50 py-2">
+                            <div class="text-[10px] text-slate-400">Vues plinkk</div>
+                            <div id="umPlViews" class="text-base font-semibold text-white">0</div>
+                        </div>
                     </div>
-                    <div class="border-t border-slate-800 pt-3">
-                        <div class="text-xs text-rose-300 mb-2">Zone dangereuse</div>
-                        <button id="umDelete" class="px-3 py-1.5 rounded bg-rose-700 text-white text-sm has-spinner" data-tip="Supprimer définitivement le compte (irréversible)">
+                    <div class="mt-3 flex justify-end">
+                        <button id="umPlDelete" class="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-rose-700 hover:bg-rose-600 text-white text-xs has-spinner" data-tip="Supprimer définitivement cette page">
                             <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                            <span>Supprimer le compte</span>
+                            <span>Supprimer</span>
                         </button>
                     </div>
                 </div>
@@ -616,7 +673,8 @@ users.filter(u=>
         function confirmWithInput(displayName, userId) {
             return new Promise(resolve => {
                 const overlay = document.createElement('div');
-                overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
+                // Utiliser un z-index supérieur à la modale utilisateur (z-[2147483600])
+                overlay.className = 'fixed inset-0 z-[2147483800] flex items-center justify-center bg-black/50';
                 overlay.innerHTML = `
                     <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
                         <div class="mb-3">Pour confirmer la suppression du compte "<strong>${displayName}</strong>" (@${userId}), tapez <strong>${userId}</strong> ci‑dessous :</div>
@@ -655,6 +713,31 @@ users.filter(u=>
                 });
                 // attach document-level key handler for Enter/Escape
                 document.addEventListener('keydown', onKey);
+            });
+        }
+
+        // Boîte de dialogue simple (Oui/Non) — utilisation: suppression de Plinkk
+        function confirmSimple(message = 'Confirmer ?', { confirmText = 'Confirmer', cancelText = 'Annuler' } = {}) {
+            return new Promise(resolve => {
+                const overlay = document.createElement('div');
+                overlay.className = 'fixed inset-0 z-[2147483800] flex items-center justify-center bg-black/50';
+                overlay.innerHTML = `
+                    <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
+                        <div class="mb-3 text-slate-200">${message}</div>
+                        <div class="flex justify-end gap-2">
+                            <button class="cancel px-3 py-1.5 rounded-md bg-slate-700 text-white text-sm">${cancelText}</button>
+                            <button class="ok px-3 py-1.5 rounded-md bg-rose-600 text-white text-sm">${confirmText}</button>
+                        </div>
+                    </div>`;
+                const btnOk = overlay.querySelector('.ok');
+                const btnCancel = overlay.querySelector('.cancel');
+                document.body.appendChild(overlay);
+                function cleanup(val){ overlay.remove(); resolve(val); }
+                btnOk.addEventListener('click', () => cleanup(true));
+                btnCancel.addEventListener('click', () => cleanup(false));
+                overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(false); });
+                const onKey = (ev) => { if (ev.key === 'Escape') { ev.preventDefault(); cleanup(false); } if (ev.key === 'Enter') { ev.preventDefault(); cleanup(true); } };
+                document.addEventListener('keydown', onKey, { once: true });
             });
         }
 
@@ -714,6 +797,30 @@ users.filter(u=>
 
         // ========= Modale de gestion utilisateur =========
         const myRole = "<%= (user && user.role && (user.role.id || user.role.name)) ? (user.role.id || user.role.name) : 'USER' %>";
+        // Charger dynamiquement les rôles depuis l'API
+        const rolesCache = { list: [] };
+        async function loadRoles() {
+            try {
+                const res = await fetch('/api/roles');
+                if (!res.ok) return;
+                const json = await res.json();
+                const roles = Array.isArray(json.roles) ? json.roles : [];
+                rolesCache.list = roles;
+                // Peupler roleFilter
+                const rf = document.getElementById('roleFilter');
+                if (rf) {
+                    const current = rf.value;
+                    rf.innerHTML = '<option value="all">Tous rôles</option>' + roles.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+                    rf.value = current || 'all';
+                }
+                // Peupler umRole
+                const umRoleSel = document.getElementById('umRole');
+                if (umRoleSel) {
+                    umRoleSel.innerHTML = roles.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+                }
+            } catch {}
+        }
+        loadRoles();
         const um = {
             root: document.getElementById('userManageModal'),
             close: document.getElementById('umClose'),
@@ -726,8 +833,14 @@ users.filter(u=>
             del: document.getElementById('umDelete')
         };
         let currentLI = null;
+        let currentUserDetails = null;
+        let currentPlinkks = [];
 
-        function openUserModal(li){
+        async function fetchUserDetails(userId){
+            try { const res = await fetch('/api/users/' + encodeURIComponent(userId)); if (!res.ok) throw new Error('HTTP '+res.status); return await res.json(); } catch(e){ console.error(e); return null; }
+        }
+
+        async function openUserModal(li){
             currentLI = li;
             const displayName = li.querySelector('.font-semibold')?.textContent?.trim() || li.dataset.id;
             const id = li.dataset.id;
@@ -750,7 +863,8 @@ users.filter(u=>
             // Force reset password toggle
             const fp = document.getElementById('umForcePwd'); if (fp) fp.checked = !!mustChange;
 
-            // Plinkk manager: populate selector from card badges (links) or from dataset - here we rebuild from dataset in users list
+            // Charger les détails + plinkks depuis l'API
+            currentUserDetails = await fetchUserDetails(id);
             const plSelect = document.getElementById('umPlSelect');
             const plSlug = document.getElementById('umPlSlug');
             const plPublic = document.getElementById('umPlPublic');
@@ -758,42 +872,46 @@ users.filter(u=>
             const plDefault = document.getElementById('umPlDefault');
             const plMeta = document.getElementById('umPlMeta');
             const plPreview = document.getElementById('umPlPreview');
-
-            // Retrieve plinkk info embedded in the list item anchors (we didn’t embed all props: fallback to server later if needed)
-            // We’ll load via an admin endpoint if anchors don’t exist; for now, we infer from plinkk chips: default and others with slug/name
-            const chips = li.querySelectorAll('a[href^="/' + id + '"]');
-            // Build options
-            const opts = [];
-            // Default page is available at /@id (no slug)
-            opts.push({ id: null, slug: '', label: '<%- user.name || def.slug %> (Par défaut)', isDefault: true, url: '/' + id, isPublic: true, isActive: true });
-            chips.forEach((a)=>{
-                const href = a.getAttribute('href')||'';
-                const m = href.match(new RegExp('^/' + id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + '/([^/?#]+)'));
-                const slug = m ? m[1] : '';
-                if (slug) opts.push({ id: null, slug, label: a.textContent?.trim()||slug, isDefault: false, url: href, isPublic: true, isActive: true });
-            });
-            // Render options
+            const plEmailVisible = document.getElementById('umPlEmailVisible');
+            const plViews = document.getElementById('umPlViews');
+            currentPlinkks = Array.isArray(currentUserDetails?.plinkks) ? currentUserDetails.plinkks : [];
+            // Options: label = name||slug (+ Par défaut)
+            const opts = currentPlinkks.map(p => ({
+                id: p.id, slug: (p.slug||''), label: (p.isDefault ? (p.name||p.slug||'Par défaut')+ ' (Par défaut)' : (p.name||p.slug||'Sans nom')),
+                isDefault: !!p.isDefault, isPublic: !!p.isPublic, isActive: !!p.isActive,
+                url: p.isDefault ? ('/'+id) : ('/'+p.slug), views: (p.views||0), emailVisible: !!(p.settings && p.settings.affichageEmail)
+            }));
             if (plSelect){ plSelect.innerHTML = opts.map((o,i)=>`<option value="${i}">${o.label}${o.slug?` (${o.slug})`:''}</option>`).join(''); }
             function applyPl(i){
-                const o = opts[i|0]||opts[0];
-                if (!o) return;
+                const o = opts[i|0]||opts[0]; if (!o) return;
                 if (plSlug) plSlug.value = o.slug || '';
                 if (plPublic) plPublic.checked = !!o.isPublic;
-                    if (plActiveChk) plActiveChk.checked = !!o.isActive;
+                if (plActiveChk) plActiveChk.checked = !!o.isActive;
                 if (plDefault) plDefault.checked = !!o.isDefault;
+                if (plEmailVisible) plEmailVisible.checked = !!o.emailVisible;
                 if (plPreview) plPreview.href = o.url;
+                if (plViews) plViews.textContent = String(o.views||0);
                 if (plMeta) plMeta.textContent = o.slug ? `/${id}/${o.slug}` : `/${id}`;
+                // Mettre à jour les liens "Voir le profil" et "Copier le lien"
+                if (um.view) um.view.href = o.url;
+                um.copy?.setAttribute('data-url', o.url);
             }
-            if (plSelect){ applyPl(Number(plSelect.value||0)); plSelect.onchange = ()=> applyPl(Number(plSelect.value||0)); }
+            if (plSelect){ plSelect.value = '0'; applyPl(0); plSelect.onchange = ()=> applyPl(Number(plSelect.value||0)); }
 
             // Appliquer les restrictions de rôle selon mon rôle
-            const ranks = { USER:0, MODERATOR:1, DEVELOPER:2, ADMIN:3 };
+            // Appliquer restrictions même avec rôles dynamiques: on garde un mapping par défaut et on étend dynamiquement
+            const baseRanks = { USER:0, MODERATOR:1, DEVELOPER:2, ADMIN:3 };
+            const ranks = { ...baseRanks };
+            // Donner un rang par ordre alphabétique aux rôles inconnus pour éviter blocage, mais garder ADMIN au sommet
+            const dyn = (rolesCache.list || []).map(r => r.name).filter(n => !(n in ranks) && n !== 'ADMIN').sort();
+            dyn.forEach((name, i) => { ranks[name] = 1 + i; });
+            ranks['ADMIN'] = Math.max(...Object.values(ranks)) + 1;
             Array.from(um.role.options).forEach(opt => {
-                const target = opt.value;
+                const target = opt.textContent || opt.value;
                 let disabled = false;
                 if (myRole === 'ADMIN') disabled = false;
                 else if (myRole === 'DEVELOPER') disabled = (target === 'ADMIN');
-                else disabled = ranks[target] >= (ranks[myRole]||0);
+                else disabled = (ranks[target] ?? 0) >= (ranks[myRole]||0);
                 opt.disabled = !!disabled;
             });
 
@@ -834,8 +952,10 @@ users.filter(u=>
         // Actions dans la modale
         um.copy?.addEventListener('click', async ()=>{
             if (!currentLI) return;
-            const id = currentLI.dataset.id;
-            const url = (window.location && window.location.origin ? window.location.origin : '') + '/' + id;
+            // URL déjà calculée selon la page sélectionnée
+            const fallback = '/' + currentLI.dataset.id;
+            const raw = um.copy.getAttribute('data-url') || fallback;
+            const url = (window.location && window.location.origin ? window.location.origin : '') + raw;
             try { await navigator.clipboard?.writeText(url); showToast('Lien copié'); } catch(e){ showToast('Copie échouée'); }
         });
 
@@ -897,23 +1017,14 @@ users.filter(u=>
                 const plPublic = document.getElementById('umPlPublic');
                 const plActiveChk = document.getElementById('umPlActive');
                 const plDefault = document.getElementById('umPlDefault');
+                const plEmailVisible = document.getElementById('umPlEmailVisible');
             const plSave = document.getElementById('umPlSave');
             const plDelete = document.getElementById('umPlDelete');
             const plMeta = document.getElementById('umPlMeta');
 
-                                        async function getSelectedPlinkkId(userId){
-                // We don't have plinkk IDs in the DOM; fetch minimal list for this user and map by slug
-                // Admin helper endpoint (quick): re-use existing user listing data would be nicer; for now we query by userId
-                const res = await fetch('/api/users/' + encodeURIComponent(userId));
-                // If this endpoint doesn’t exist, consider adding a small admin read endpoint; fallback to not executing
-                if (!res.ok) return null;
-                const data = await res.json();
-                // Expected { plinkks: [{id,slug,isDefault}...] }
-                                            const idx = Number(plSelect && plSelect.value || 0);
-                const meta = (plMeta?.textContent||'').trim();
-                                            const currentSlug = plSlug && plSlug.value ? plSlug.value.trim() : '';
-                                            const isDefaultSelected = (plDefault && plDefault.checked) && (!currentSlug || meta.endsWith('/'+userId));
-                                            const p = (data.plinkks||[]).find(function(pp){ return isDefaultSelected ? pp.isDefault : (pp.slug === currentSlug); });
+            function getSelectedPlinkkId(userId){
+                const idx = Number(plSelect && plSelect.value || 0);
+                const p = Array.isArray(currentPlinkks) ? currentPlinkks[idx|0] : null;
                 return p ? p.id : null;
             }
 
@@ -932,8 +1043,14 @@ users.filter(u=>
                     const res = await fetch('/api/admin/plinkks/' + encodeURIComponent(pId), { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
                     if (!res.ok) throw new Error('HTTP '+res.status);
                     // Active toggle is a separate call if changed
-                                                const active = !!(plActiveChk && plActiveChk.checked);
+                    const active = !!(plActiveChk && plActiveChk.checked);
                     await fetch('/api/admin/plinkks/' + encodeURIComponent(pId) + '/active', { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ isActive: active }) });
+                    // Email visibilité (affichageEmail)
+                    if (plEmailVisible){
+                        const checked = !!plEmailVisible.checked;
+                        const uEmail = currentUserDetails?.publicEmail || currentUserDetails?.email || '';
+                        await fetch('/api/admin/plinkks/' + encodeURIComponent(pId) + '/config', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ affichageEmail: checked ? uEmail : null }) });
+                    }
                     showToast('Plinkk mis à jour');
                                             }catch(err){ console.error(err); showToast('Erreur: mise à jour Plinkk'); }
                                             finally{ if (saveBtn) saveBtn.disabled = false; if (s1) s1.classList.add('hidden'); if (l1) l1.textContent = prev || 'Enregistrer'; }
@@ -943,7 +1060,8 @@ users.filter(u=>
                 if (!currentLI) return; const userId = currentLI.dataset.id;
                 const pId = await getSelectedPlinkkId(userId);
                 if (!pId) { showToast('Impossible de trouver la page'); return; }
-                if (!confirm('Supprimer cette page ?')) return;
+                const ok = await confirmSimple('Supprimer cette page Plinkk ? Cette action est irréversible.', { confirmText: 'Supprimer', cancelText: 'Annuler' });
+                if (!ok) return;
                 const delBtn = document.getElementById('umPlDelete'); const s2 = delBtn?.querySelector('.plinkk-spinner'); const l2 = delBtn?.querySelector('span'); const prev2 = l2 ? l2.textContent : '';
                 if (delBtn) delBtn.disabled = true; if (s2) s2.classList.remove('hidden'); if (l2) l2.textContent = 'Suppression...';
                 try{
@@ -975,6 +1093,97 @@ users.filter(u=>
                 umForcePwd.checked = !!prev;
             } finally { umForcePwd.disabled = false; umForcePwdSpin?.classList.add('hidden'); }
         });
+
+        // Ban email (modération)
+        (function(){
+            const banState = document.getElementById('umBanState');
+            const banForm = document.getElementById('umBanForm');
+            const banReason = document.getElementById('umBanReason');
+            const banMinutes = document.getElementById('umBanMinutes');
+            const banDelete = document.getElementById('umBanDeletePlinkk');
+            const banApply = document.getElementById('umBanApply');
+            const banRevoke = document.getElementById('umBanRevoke');
+
+            async function loadBanState(userId){
+                try{
+                    const res = await fetch('/api/users/' + encodeURIComponent(userId) + '/ban-email');
+                    if (!res.ok) throw new Error('HTTP '+res.status);
+                    const json = await res.json();
+                    const active = !!json.active;
+                    if (active){
+                        banState.classList.remove('hidden');
+                        banForm.classList.add('hidden');
+                        banRevoke.classList.remove('hidden');
+                        banState.innerHTML = `Email banni: <strong>${json?.ban?.email||''}</strong> — Raison: ${json?.ban?.reason||''}${json?.until?` — Jusqu’au ${new Date(json.until).toLocaleString()}`:''}`;
+                    } else {
+                        banState.classList.add('hidden');
+                        banForm.classList.remove('hidden');
+                        banRevoke.classList.add('hidden');
+                    }
+                } catch (e){
+                    banState.classList.add('hidden');
+                    banForm.classList.remove('hidden');
+                    banRevoke.classList.add('hidden');
+                }
+            }
+
+            // Charger état ban à chaque ouverture de modale
+            const observer = new MutationObserver(()=>{
+                if (!currentLI) return;
+                const id = currentLI.dataset.id; loadBanState(id);
+            });
+            observer.observe(document.body, { attributes:true, subtree:false, attributeFilter:['style'] });
+
+            banApply?.addEventListener('click', async ()=>{
+                if (!currentLI) return; const id = currentLI.dataset.id;
+                const btn = banApply; const s = btn.querySelector('.plinkk-spinner'); const l = btn.querySelector('span'); const prev = l?l.textContent:'';
+                btn.disabled=true; s?.classList.remove('hidden'); if(l) l.textContent='Application...';
+                try{
+                    const payload = { reason: (banReason.value||'').trim(), time: Number(banMinutes.value||'-1'), deletePlinkk: !!banDelete.checked };
+                    const res = await fetch('/api/users/' + encodeURIComponent(id) + '/ban-email', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+                    if (!res.ok) {
+                        let msg = 'Erreur: ban';
+                        try {
+                            const e = await res.json();
+                            const code = e?.error || '';
+                            const map = {
+                              cannot_self_ban: "Vous ne pouvez pas vous bannir vous‑même.",
+                              cannot_ban_admin: "Vous ne pouvez pas bannir un administrateur.",
+                              forbidden_role: "Vous ne pouvez pas bannir un utilisateur d’un rôle égal ou supérieur au vôtre.",
+                              already_banned: "Cet email est déjà banni.",
+                              invalid_email: "Email invalide.",
+                              unauthorized: "Non autorisé.",
+                              forbidden: "Accès interdit."
+                            };
+                            msg = map[code] || msg;
+                        } catch {}
+                        showToast(msg);
+                        return;
+                    }
+                    showToast('Ban appliqué');
+                    await loadBanState(id);
+                } catch(e){ console.error(e); showToast('Erreur: ban'); }
+                finally{ btn.disabled=false; s?.classList.add('hidden'); if(l) l.textContent = prev || 'Bannir'; }
+            });
+            banRevoke?.addEventListener('click', async ()=>{
+                if (!currentLI) return; const id = currentLI.dataset.id;
+                if (!confirm('Révoquer le ban de cet email ?')) return;
+                const btn = banRevoke; const s = btn.querySelector('.plinkk-spinner'); const l = btn.querySelector('span'); const prev = l?l.textContent:'';
+                btn.disabled=true; s?.classList.remove('hidden'); if(l) l.textContent='Révocation...';
+                try{
+                    const res = await fetch('/api/users/' + encodeURIComponent(id) + '/ban-email', { method:'DELETE' });
+                    if (!res.ok) {
+                        let msg = 'Erreur: révocation';
+                        try{ const e = await res.json(); const code = e?.error || ''; const map = { no_active_ban: 'Aucun ban actif pour cet email.' }; msg = map[code] || msg; }catch{}
+                        showToast(msg);
+                        return;
+                    }
+                    showToast('Ban révoqué');
+                    await loadBanState(id);
+                } catch(e){ console.error(e); showToast('Erreur: révocation'); }
+                finally{ btn.disabled=false; s?.classList.add('hidden'); if(l) l.textContent = prev || 'Révoquer le ban'; }
+            });
+        })();
     })();
 </script>
 

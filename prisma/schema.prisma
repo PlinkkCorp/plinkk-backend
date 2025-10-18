@@ -33,6 +33,7 @@ model User {
   password                         String
   email                            String  @unique
   publicEmail                      String?
+  mustChangePassword               Boolean @default(false)
   twoFactorEnabled                 Boolean @default(false)
   twoFactorSecret                  String?
 
@@ -349,4 +350,14 @@ model BannedSlug {
   slug         String  @id
   reason       String?
   createdAt    DateTime @default(now())
+}
+
+model BannedEmail {
+  email        String  @id
+  reason       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+  deletePlinkk Boolean @default(false)
+  time        Int? @default(-1)
+  revoquedAt DateTime?
 }

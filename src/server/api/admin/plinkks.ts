@@ -42,10 +42,35 @@ export function apiAdminPlinkksRoutes(fastify: FastifyInstance) {
     // Set default requires transaction to clear previous default
     if (body.isDefault === true && !page.isDefault) {
       const prev = await prisma.plinkk.findFirst({ where: { userId: page.userId, isDefault: true } });
+      // Trouver un index élevé libre pour éviter tout conflit unique (userId,index)
+      const agg = await prisma.plinkk.aggregate({
+        where: { userId: page.userId },
+        _max: { index: true },
+      });
+      const maxIndex = (agg._max.index ?? 0) + 10; // marge de sécurité
+
       await prisma.$transaction([
-        ...(prev ? [prisma.plinkk.update({ where: { id: prev.id }, data: { isDefault: false, index: Math.max(1, prev.index || 1) } })] : []),
-        prisma.plinkk.update({ where: { id }, data: { isDefault: true, index: 0, ...(Object.keys(set).length ? set : {}) } }),
+        // 1) Déplacer un éventuel index 0 existant (hors page courante) vers un index temporaire élevé
+        prisma.plinkk.updateMany({
+          where: { userId: page.userId, index: 0, NOT: { id } },
+          data: { index: maxIndex + 1 },
+        }),
+        // 2) Si une ancienne par défaut existe, la passer non défaut et la mettre très loin pour éviter collisions
+        ...(prev
+          ? [
+              prisma.plinkk.update({
+                where: { id: prev.id },
+                data: { isDefault: false, index: maxIndex + 2 },
+              }),
+            ]
+          : []),
+        // 3) Passer la page courante en défaut avec index 0 et appliquer les autres modifications éventuelles
+        prisma.plinkk.update({
+          where: { id },
+          data: { isDefault: true, index: 0, ...(Object.keys(set).length ? set : {}) },
+        }),
       ]);
+      // 4) Repacker les index des non défaut proprement
       await reindexNonDefault(prisma, page.userId);
       return reply.send({ ok: true, id, isDefault: true });
     }

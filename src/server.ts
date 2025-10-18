@@ -714,41 +714,75 @@ fastify.post("/login", async (request, reply) => {
     return reply.redirect("/dashboard");
   }
   const { email, password } = request.body as {
-    email: string;
+    email?: string; // utilisé comme identifiant (email ou username)
     password: string;
   };
-  const emailTrim = (email || "").trim();
-  try {
-    z.email().parse(emailTrim);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return reply.redirect(
-        `/login?error=${encodeURIComponent(
-          "Email invalide"
-        )}&email=${encodeURIComponent(emailTrim)}`
-      );
+  const identifierRaw = (email || "").trim();
+  const identifier = identifierRaw;
+  const isEmail = identifier.includes("@");
+
+  if (isEmail) {
+    try {
+      z.email().parse(identifier);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return reply.redirect(
+          `/login?error=${encodeURIComponent(
+            "Email invalide"
+          )}&email=${encodeURIComponent(identifier)}`
+        );
+      }
     }
   }
-  const user = await prisma.user.findFirst({
-    where: {
-      email: emailTrim,
-    },
-    include: { role: true },
-  });
+
+  // Recherche utilisateur: si email => par email, sinon par id (avec slugify de l'@pseudo) ou nom d'utilisateur
+  let user: any = null;
+  if (isEmail) {
+    user = await prisma.user.findFirst({
+      where: { email: identifier },
+      include: { role: true },
+    });
+  } else {
+    // Supporter '@pseudo' et variantes: on slugify pour matcher l'id (généré à l'inscription)
+    const withoutAt = identifier.startsWith("@") ? identifier.slice(1) : identifier;
+    const candidateId = slugify(withoutAt);
+    user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { id: candidateId }, // id est basé sur slugify(username)
+          { userName: identifier }, // affichage (peut différer en casse)
+        ],
+      },
+      include: { role: true },
+    });
+  }
 
   if (!user)
     return reply.redirect(
       `/login?error=${encodeURIComponent(
         "Utilisateur introuvable"
-      )}&email=${encodeURIComponent(emailTrim)}`
+      )}&email=${encodeURIComponent(identifier)}`
     );
   const valid = await bcrypt.compare(password, user.password);
   if (!valid)
     return reply.redirect(
       `/login?error=${encodeURIComponent(
         "Mot de passe incorrect"
-      )}&email=${encodeURIComponent(emailTrim)}`
+      )}&email=${encodeURIComponent(identifier)}`
     );
+
+  // Vérifier si l'email est banni
+  try {
+    const ban = await prisma.bannedEmail.findFirst({ where: { email: user.email, revoquedAt: null } });
+    if (ban) {
+      const isActive =
+        ban.time == null || ban.time < 0 || new Date(ban.createdAt).getTime() + ban.time * 60000 > Date.now();
+      if (isActive) {
+        const msg = `Votre compte a été banni pour la raison suivante: ${ban.reason || "Violation des règles"}. Veuillez contacter l'administration pour plus de détails à contact@plinkk.fr`;
+        return reply.redirect(`/login?error=${encodeURIComponent(msg)}&email=${encodeURIComponent(identifier)}`);
+      }
+    }
+  } catch (e) {}
 
   if (user.twoFactorEnabled) {
     // Pass returnTo via query to TOTP step so it's preserved through the flow
@@ -762,11 +796,10 @@ fastify.post("/login", async (request, reply) => {
       }`
     );
   }
+  // Mise à jour lastLogin par id (compatible login par username ou email)
   await prisma.user.update({
-    where: { email: emailTrim },
-    data: {
-      lastLogin: new Date(Date.now()),
-    },
+    where: { id: user.id },
+    data: { lastLogin: new Date(Date.now()) },
   });
   const returnToLogin =
     (request.body as { returnTo: string })?.returnTo ||

@@ -5,6 +5,127 @@ import { verifyRoleIsStaff, verifyRoleAdmin, verifyRoleDeveloper } from "../../l
 const prisma = new PrismaClient();
 
 export function apiUsersRoutes(fastify: FastifyInstance) {
+  // API: lecture d'un utilisateur (infos minimales + plinkks + settings)
+  fastify.get("/:id", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({
+      where: { id: meId as string },
+      select: { role: true },
+    });
+    if (!(me && verifyRoleIsStaff(me.role))) {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+    const { id } = request.params as { id: string };
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        userName: true,
+        email: true,
+        publicEmail: true,
+        isPublic: true,
+        views: true,
+        role: { select: { id: true, name: true } },
+        plinkks: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            isDefault: true,
+            isPublic: true,
+            isActive: true,
+            views: true,
+            settings: { select: { affichageEmail: true } },
+          },
+          orderBy: { index: "asc" },
+        },
+      },
+    });
+    if (!user) return reply.code(404).send({ error: "Utilisateur introuvable" });
+    return reply.send(user);
+  });
+
+  // ====== API de ban par email (par utilisateur) ======
+  // Lire l'état de ban de l'email de l'utilisateur
+  fastify.get("/:id/ban-email", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: String(meId) }, select: { role: true } });
+    if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: "Forbidden" });
+    const { id } = request.params as { id: string };
+    const u = await prisma.user.findUnique({ where: { id }, select: { email: true } });
+    if (!u) return reply.code(404).send({ error: "Utilisateur introuvable" });
+    const ban = await prisma.bannedEmail.findFirst({
+      where: { email: u.email, revoquedAt: null },
+      orderBy: { createdAt: "desc" },
+    });
+    return reply.send({
+      active: !!ban,
+      ban,
+      // date de fin théorique si time>0 (time en minutes)
+      until: ban && typeof ban.time === "number" && ban.time! > 0
+        ? new Date(new Date(ban.createdAt).getTime() + (ban.time || 0) * 60 * 1000).toISOString()
+        : null,
+    });
+  });
+
+  // Bannir par email l'utilisateur ciblé
+  fastify.post("/:id/ban-email", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: String(meId) }, select: { role: true } });
+    if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: "Forbidden" });
+    const { id } = request.params as { id: string };
+    const body = (request.body as { reason?: string; time?: number; deletePlinkk?: boolean }) || {};
+    const u = await prisma.user.findUnique({ where: { id }, select: { email: true, id: true, role: { select: { name: true } } } });
+    if (!u) return reply.code(404).send({ error: "Utilisateur introuvable" });
+    // Interdictions: pas d'auto-ban, pas de ban d'admins, pas de ban d'un rôle >= au sien
+    const actor = await prisma.user.findUnique({ where: { id: String(meId) }, select: { id: true, role: { select: { name: true } } } });
+    if (!actor) return reply.code(401).send({ error: "Unauthorized" });
+    if (actor.id === u.id) return reply.code(403).send({ error: "cannot_self_ban" });
+    const rank: Record<string, number> = { USER: 0, MODERATOR: 1, DEVELOPER: 2, ADMIN: 3 };
+    const targetRole = u.role?.name || 'USER';
+    if (targetRole === 'ADMIN') return reply.code(403).send({ error: "cannot_ban_admin" });
+    const actorRole = actor.role?.name || 'USER';
+    if ((rank[actorRole] ?? 0) <= (rank[targetRole] ?? 0)) return reply.code(403).send({ error: "forbidden_role" });
+    // Check s'il y a déjà un ban actif
+    const existing = await prisma.bannedEmail.findFirst({ where: { email: u.email, revoquedAt: null } });
+    if (existing) return reply.code(409).send({ error: "already_banned" });
+    // Réactive un ancien ban si présent (évite P2002), sinon crée
+    const ban = await prisma.bannedEmail.upsert({
+      where: { email: u.email },
+      create: {
+        email: u.email,
+        reason: (body.reason || "").slice(0, 500),
+        deletePlinkk: !!body.deletePlinkk,
+        time: typeof body.time === "number" ? Math.max(-1, Math.floor(body.time)) : -1,
+      },
+      update: {
+        reason: (body.reason || "").slice(0, 500),
+        deletePlinkk: !!body.deletePlinkk,
+        time: typeof body.time === "number" ? Math.max(-1, Math.floor(body.time)) : -1,
+        revoquedAt: null,
+        createdAt: new Date(),
+      },
+    });
+    return reply.send({ ok: true, ban });
+  });
+
+  // Révoquer le ban (lever l'interdiction)
+  fastify.delete("/:id/ban-email", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const me = await prisma.user.findUnique({ where: { id: String(meId) }, select: { role: true } });
+    if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: "Forbidden" });
+    const { id } = request.params as { id: string };
+    const u = await prisma.user.findUnique({ where: { id }, select: { email: true } });
+    if (!u) return reply.code(404).send({ error: "Utilisateur introuvable" });
+    const ban = await prisma.bannedEmail.findFirst({ where: { email: u.email, revoquedAt: null }, orderBy: { createdAt: "desc" } });
+    if (!ban) return reply.code(404).send({ error: "no_active_ban" });
+    await prisma.bannedEmail.update({ where: { email: ban.email }, data: { revoquedAt: new Date() } });
+    return reply.send({ ok: true });
+  });
   // API: mise à jour de rôle (admin/dev/moderator)
   fastify.post("/:id/role", async (request, reply) => {
     const meId = request.session.get("data");
@@ -18,8 +139,12 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     }
     const { id } = request.params as { id: string };
     const { role } = request.body as { role: string };
-    if (!Object.values("").includes(role))
-      return reply.code(400).send({ error: "Invalid role" });
+    // Valider contre la table Role
+    const dbRole = await prisma.role.findFirst({
+      where: { OR: [{ id: role }, { name: role }] },
+      select: { id: true, name: true },
+    });
+    if (!dbRole) return reply.code(400).send({ error: "Invalid role" });
     // Enforce role hierarchy rules:
     // hierarchy: USER(0) < MODERATOR(1) < DEVELOPER(2) < ADMIN(3)
     const rank: Record<string, number> = {
@@ -29,7 +154,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       ADMIN: 3,
     };
     const meRole = me.role.name as string;
-    const targetRole = role as string;
+    const targetRole = dbRole.name as string;
 
     // Admin may do anything
     if (!verifyRoleAdmin(me.role)) {
@@ -46,7 +171,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
 
     const updated = await prisma.user.update({
       where: { id },
-      data: { roleId: role },
+      data: { roleId: dbRole.id },
       include: { role: true },
     });
     return reply.send({ id: updated.id, role: updated.role });

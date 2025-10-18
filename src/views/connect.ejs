@@ -203,10 +203,10 @@
         <form action="/login" method="post" class="space-y-3">
           <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
           <label class="block text-sm">
-            <span class="text-slate-300">Adresse e-mail</span>
-            <input type="email" name="email" required
+            <span class="text-slate-300">E‑mail ou nom d’utilisateur</span>
+            <input type="text" name="email" required
               class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 outline-none ring-0 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-600/30 transition"
-              placeholder="vous@exemple.com" />
+              placeholder="vous@exemple.com ou votrepseudo" />
           </label>
           <label class="block text-sm">
             <span class="text-slate-300">Mot de passe</span>

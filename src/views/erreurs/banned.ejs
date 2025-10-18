@@ -1,0 +1,54 @@
+<%- include("../partials/head")%>
+<%- include("../partials/header", { title: "Profil banni - Plinkk" }) %>
+  <div class="max-w-2xl w-full mx-auto mt-10 px-4">
+    <div class="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-b from-slate-900/80 to-slate-900/40">
+      <div class="absolute inset-0 pointer-events-none" aria-hidden="true"
+           style="background: radial-gradient(60% 60% at 50% 0%, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.05) 40%, transparent 70%);"></div>
+      <div class="p-6 md:p-8 relative">
+        <div class="flex items-start gap-4">
+          <div class="shrink-0 h-12 w-12 rounded-xl bg-rose-500/10 ring-1 ring-rose-400/30 flex items-center justify-center text-rose-400">
+            <!-- Heroicon: Exclamation Circle -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7">
+              <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-.75 5.25a.75.75 0 0 1 1.5 0v6a.75.75 0 0 1-1.5 0v-6Zm.75 9a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <h1 class="text-xl md:text-2xl font-semibold text-slate-100">Ce profil est indisponible</h1>
+            <p class="text-sm text-slate-300 mt-1">Cet utilisateur a été banni.</p>
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <span class="inline-flex items-center gap-2 rounded-full border border-rose-400/30 bg-rose-500/10 px-3 py-1 text-xs text-rose-300">
+                <span class="h-1.5 w-1.5 rounded-full bg-rose-400"></span>
+                Raison: <strong class="font-semibold text-rose-200"><%= reason %></strong>
+              </span>
+              <% if (typeof until !== 'undefined' && until) { %>
+                <span class="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-xs text-amber-300">
+                  <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
+                  Expire: <strong class="font-semibold text-amber-200"><%= new Date(until).toLocaleString() %></strong>
+                </span>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 text-sm text-slate-300 space-y-2">
+          <p>Si vous pensez qu’il s’agit d’une erreur ou souhaitez contester ce bannissement, vous pouvez nous contacter.</p>
+          <p class="text-xs text-slate-400">Avant de nous écrire, assurez-vous d’avoir lu les règles d’utilisation.</p>
+        </div>
+
+        <div class="mt-6 flex flex-wrap items-center gap-3">
+          <a href="/" class="inline-flex items-center gap-2 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700 px-4 py-2 text-sm text-slate-100 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 opacity-80"><path fill-rule="evenodd" d="M19.5 12a.75.75 0 0 1-.75.75H7.56l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 1.06l-3.22 3.22h11.19c.414 0 .75.336.75.75Z" clip-rule="evenodd"/></svg>
+            Retour à l’accueil
+          </a>
+          <a href="mailto:contact@plinkk.fr?subject=Demande%20suite%20%C3%A0%20bannissement%20pour%20<%= email %>" class="inline-flex items-center gap-2 rounded-md bg-rose-600 hover:bg-rose-700 px-4 py-2 text-sm text-white transition">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 opacity-90"><path d="M21.75 6.75v10.5A2.25 2.25 0 0 1 19.5 19.5h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.5a2.25 2.25 0 0 1-2.31 0l-7.5-4.5A2.25 2.25 0 0 1 2.25 6.993V6.75"/></svg>
+            Contacter l’administration
+          </a>
+        </div>
+      </div>
+    </div>
+    <p class="mt-4 text-center text-xs text-slate-500">Besoin d’aide ? Écrivez-nous: <a class="underline" href="mailto:contact@plinkk.fr">contact@plinkk.fr</a></p>
+  </div>
+  <%- include("../partials/footer") %>
+  </body>
+  </html>
