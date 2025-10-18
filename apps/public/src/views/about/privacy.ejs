@@ -1,0 +1,67 @@
+<%- include('../partials/head', { title: 'Confidentialité', description: 'Politique de confidentialité de Plinkk.' }) %>
+<%- include('../partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
+<main class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-10">
+  <article class="glass ring-gradient rounded-2xl p-6 prose prose-invert max-w-none">
+    <h1 class="mb-2">Politique de confidentialité</h1>
+    <p class="text-slate-300 !mt-0">Dernière mise à jour : <time datetime="2025-09-29">29 septembre 2025</time></p>
+
+    <nav aria-label="Liens utiles" class="not-prose mt-4">
+      <ul class="flex flex-wrap gap-3 text-sm text-slate-300">
+        <li><a class="underline hover:text-white" href="/terms">Conditions d’utilisation</a></li>
+        <li><a class="underline hover:text-white" href="/cookies">Politique des cookies</a></li>
+        <li><a class="underline hover:text-white" href="/legal">Mentions légales</a></li>
+      </ul>
+    </nav>
+
+    <hr class="my-4 border-slate-800/60" />
+
+    <h2 id="responsable">Responsable de traitement</h2>
+  <p>Plinkk — Klaynight (Elouan Passereau). Contact : <%- include('../partials/contact-email') %>.</p>
+
+    <h2 id="donnees">Données traitées</h2>
+    <ul>
+      <li><strong>Compte</strong> : email, nom d’utilisateur, mot de passe chiffré.</li>
+      <li><strong>Profil</strong> : liens, icônes sociales, couleurs, textes et préférences.</li>
+      <li><strong>Technique</strong> : logs d’accès minimaux à des fins de sécurité.</li>
+    </ul>
+
+    <h2 id="finalites">Finalités et base légale</h2>
+    <ul>
+      <li><strong>Fourniture du service</strong> (exécution du contrat) : création et gestion de votre page de liens.</li>
+      <li><strong>Sécurité</strong> (intérêt légitime) : prévention des abus et fraude.</li>
+      <li><strong>Communication</strong> (intérêt légitime) : réponses à vos demandes de support.</li>
+    </ul>
+
+    <h2 id="destinataires">Destinataires</h2>
+    <p>Accès restreint à l’équipe technique et aux sous‑traitants d’hébergement nécessaires (Contabo). Aucun partage à des fins marketing.</p>
+
+    <h2 id="conservation">Durées de conservation</h2>
+    <ul>
+      <li>Données de compte : pendant la durée d’utilisation, puis suppression sur demande ou inactivité prolongée.</li>
+      <li>Logs techniques : durée limitée nécessaire à la sécurité.</li>
+    </ul>
+
+    <h2 id="droits">Vos droits (RGPD)</h2>
+    <ul>
+      <li>Droit d’accès, de rectification, d’effacement, de limitation et d’opposition.</li>
+      <li>Droit à la portabilité des données.</li>
+  <li>Exercer vos droits : <%- include('../partials/contact-email') %>.</li>
+    </ul>
+
+  <h3 id="consentement">Consentement</h3>
+  <p>En vous inscrivant sur Plinkk, vous consentez au traitement des données nécessaires à la fourniture du service et acceptez nos <a href="/terms">Conditions générales d'utilisation</a>. Vous pouvez retirer votre consentement à tout moment en supprimant votre compte ou en nous contactant.</p>
+
+    <h2 id="securite">Sécurité</h2>
+    <p>Chiffrement des mots de passe (bcrypt), séparation des données, contrôles d’accès. Nous améliorons régulièrement nos mesures.</p>
+
+    <h2 id="cookies">Cookies</h2>
+    <p>Voir notre <a href="/cookies">Politique des cookies</a>. Nous n’utilisons pas de cookies publicitaires tiers.</p>
+
+    <h2 id="transferts">Transferts hors UE</h2>
+    <p>Les données sont principalement hébergées chez notre prestataire indiqué dans les <a href="/legal">Mentions légales</a>. En cas de transfert, nous utilisons des garanties appropriées.</p>
+
+    <h2 id="maj">Mises à jour</h2>
+    <p>Nous pouvons mettre à jour cette politique. La date de dernière mise à jour est indiquée en haut de page.</p>
+  </article>
+</main>
+<%- include('../partials/footer') %>

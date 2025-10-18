@@ -1,0 +1,19 @@
+<div class="admin-nav bg-slate-900/70 border-b border-slate-700/40 px-4 py-2">
+    <div class="max-w-7xl mx-auto flex items-center gap-3">
+        <a href="/admin" class="text-sm px-3 py-1 rounded hover:bg-slate-800">Tableau</a>
+        <a href="/admin/themes" class="text-sm px-3 py-1 rounded hover:bg-slate-800">Themes</a>
+        <a href="/admin/stats" class="text-sm px-3 py-1 rounded hover:bg-slate-800">Statistiques</a>
+        <a href="/admin/message" class="text-sm px-3 py-1 rounded hover:bg-slate-800">Message</a>
+        <a href="/admin/reports" aria-disabled="true" class="text-sm px-3 py-1 rounded text-slate-400 opacity-60 pointer-events-none">Signalements</a>
+        <a href="/admin/bans" class="text-sm px-3 py-1 rounded hover:bg-slate-800">Slugs bans</a>
+        <a href="/admin/logs" aria-disabled="true" class="text-sm px-3 py-1 rounded text-slate-400 opacity-60 pointer-events-none">Logs</a>
+        <div class="flex-1"></div>
+        <% if (user.role && (user.role.id === 'ADMIN' || user.role.id === 'DEVELOPER' || user.role.id === 'MODERATOR')) { %>
+            <a href="/" class="text-sm px-3 py-1 rounded bg-slate-800 text-white">Retour</a>
+        <% } %>
+    </div>
+</div>
+
+<style>
+    .admin-nav a.active { background: rgba(99,102,241,0.18); }
+</style>

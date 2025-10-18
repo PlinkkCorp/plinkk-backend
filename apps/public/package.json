@@ -1,0 +1,81 @@
+{
+  "name": "plinkk-backend-public",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev src/server.ts",
+    "dev:tsx": "tsx watch src/server.ts",
+    "init": "pnpm install && pnpm prisma:init && pnpm run create-key && pnpm run dev",
+    "create-key": "pnpx @fastify/secure-session > src/secret-key",
+    "build": "tsc -p tsconfig.json && node scripts/copy-static.mjs",
+    "start": "node dist/server.js",
+    "prisma:migratedev": "prisma migrate dev",
+    "prisma:dev": "prisma dev",
+    "prisma:studio": "prisma studio",
+    "prisma:init": "prisma migrate deploy && prisma generate --schema=../../prisma/schema.prisma",
+    "postinstall": "prisma generate --schema=../../prisma/schema.prisma || true",
+    "set-admin": "node scripts/set-admin.cjs",
+    "migrate:plinkks": "node scripts/migrate-plinkks.cjs",
+    "delete_inactive": "node scripts/delete_inactive_user.js ",
+    "seed:role": "ts-node prisma/seed.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.15.0",
+  "overrides": {
+    "glob": "11.0.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "glob": "11.0.3"
+    },
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "bcrypt",
+      "canvas",
+      "node",
+      "prisma"
+    ]
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^11.1.0",
+    "@fastify/formbody": "^8.0.2",
+    "@fastify/http-proxy": "^11.3.0",
+    "@fastify/multipart": "^9.2.1",
+    "@fastify/oauth2": "^8.1.2",
+    "@fastify/rate-limit": "^10.3.0",
+    "@fastify/secure-session": "^8.2.0",
+    "@fastify/static": "^8.2.0",
+    "@fastify/view": "^11.1.1",
+    "@prisma/client": "^6.17.0",
+    "@types/archiver": "^6.0.3",
+    "@types/uglify-js": "^3.17.5",
+    "archiver": "^7.0.1",
+    "bcrypt": "^6.0.0",
+    "canvas": "^3.2.0",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
+    "esbuild": "^0.25.10",
+    "fastify": "^5.6.1",
+    "fastify-cli": "^7.4.0",
+    "fastify-cron": "^1.4.0",
+    "otplib": "^12.0.1",
+    "qrcode": "^1.5.4",
+    "rimraf": "^5.0.10",
+    "ts-node": "^10.9.2",
+    "uglify-js": "^3.19.3",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/ejs": "^3.1.5",
+    "@types/node": "^24.7.0",
+    "prisma": "^6.17.1",
+    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}

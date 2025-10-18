@@ -1,0 +1,273 @@
+<%- include('../../partials/head.ejs', { title: 'Admin - Message global', description: '', robots: 'noindex,nofollow' }) %>
+<%- include('../../partials/header-dash.ejs', { user: user }) %>
+<%- include('../../partials/admin-nav.ejs', { user: user }) %>
+
+<main class="max-w-7xl mx-auto p-6">
+  <div class="space-y-4">
+    <h1 class="text-2xl font-bold">Message global</h1>
+    <p class="text-sm text-slate-400">Envoyer un message qui s'affichera dans le header des utilisateurs. Utile pour annonces, maintenances, shutdowns, etc.</p>
+
+    <form id="siteMessageForm" class="max-w-3xl space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <label class="block">
+          <div class="text-xs text-slate-400 mb-1">Niveau</div>
+          <select name="level" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm">
+            <option value="info">Info</option>
+            <option value="success">Succès</option>
+            <option value="warning">Alerte</option>
+            <option value="error">Erreur</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </label>
+
+        <label class="block">
+          <div class="text-xs text-slate-400 mb-1">Début (optionnel)</div>
+          <input type="datetime-local" name="startAt" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" />
+        </label>
+
+        <label class="block">
+          <div class="text-xs text-slate-400 mb-1">Fin (optionnel)</div>
+          <input type="datetime-local" name="endAt" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" />
+        </label>
+      </div>
+
+      <label class="block mt-1">
+        <div class="text-xs text-slate-400 mb-1">Texte (supports liens)</div>
+        <textarea name="text" rows="4" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" placeholder="Le message public..."></textarea>
+      </label>
+
+      <label class="inline-flex items-center gap-2">
+        <input type="checkbox" name="dismissible" />
+        <span class="text-xs text-slate-400">Dismissible (les utilisateurs peuvent masquer localement)</span>
+      </label>
+
+      <div class="grid grid-cols-1 gap-3 pt-1">
+        <div class="flex items-center gap-4">
+          <label class="inline-flex items-center gap-2">
+            <input type="checkbox" name="global" id="globalToggle" />
+            <span class="text-xs text-slate-300">Tous les utilisateurs</span>
+          </label>
+          <span id="globalBadge" class="text-[11px] px-2 py-0.5 rounded border border-emerald-600/50 bg-emerald-700/20 text-emerald-100 hidden">Mode global activé</span>
+        </div>
+
+        <div id="targetsPanel" class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-opacity">
+          <div>
+            <div class="text-xs text-slate-400 mb-2">Rôles à cibler</div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="rolesGroup">
+              <label class="inline-flex items-center gap-2"><input type="checkbox" value="USER" class="roleBox" /><span class="text-xs">USER</span></label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" value="PARTNER" class="roleBox" /><span class="text-xs">PARTNER</span></label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" value="ADMIN" class="roleBox" /><span class="text-xs">ADMIN</span></label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" value="DEVELOPER" class="roleBox" /><span class="text-xs">DEVELOPER</span></label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" value="MODERATOR" class="roleBox" /><span class="text-xs">MODERATOR</span></label>
+            </div>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400 mb-2">Utilisateurs (@mention pour rechercher)</div>
+            <div class="relative">
+              <input type="text" id="userMentions" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" placeholder="@id, @username, @email" />
+              <div id="userSuggestions" class="absolute z-10 mt-1 w-full rounded-md border border-slate-700 bg-slate-900 shadow-lg hidden max-h-56 overflow-auto"></div>
+            </div>
+            <div id="selectedUsers" class="flex flex-wrap gap-2 mt-2"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 mt-3">
+        <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white">Enregistrer</button>
+        <button type="button" id="clearBtn" class="px-4 py-2 rounded bg-rose-600 text-white">Supprimer</button>
+        <div class="flex-1"></div>
+        <div id="preview" class="rounded px-3 py-2 text-sm border"></div>
+      </div>
+    </form>
+
+    <div id="status" class="text-sm text-slate-400"></div>
+  </div>
+</main>
+
+<script>
+  (function(){
+    const form = document.getElementById('siteMessageForm');
+    const status = document.getElementById('status');
+  const clearBtn = document.getElementById('clearBtn');
+    const globalToggle = document.getElementById('globalToggle');
+    const globalBadge = document.getElementById('globalBadge');
+    const targetsPanel = document.getElementById('targetsPanel');
+    const rolesBoxes = Array.from(document.querySelectorAll('#rolesGroup .roleBox'));
+    const userInput = document.getElementById('userMentions');
+    const sugg = document.getElementById('userSuggestions');
+    const selectedUsers = document.getElementById('selectedUsers');
+    const picked = new Map(); // id -> {id, userName, email}
+
+    function setTargetsDisabled(disabled){
+      targetsPanel.style.pointerEvents = disabled ? 'none' : '';
+      targetsPanel.style.opacity = disabled ? '0.5' : '1';
+      if (disabled) {
+        globalBadge.classList.remove('hidden');
+      } else {
+        globalBadge.classList.add('hidden');
+      }
+    }
+    globalToggle.addEventListener('change', ()=> setTargetsDisabled(globalToggle.checked));
+    setTargetsDisabled(false);
+
+    function renderPicked(){
+      selectedUsers.innerHTML = '';
+      for (const u of picked.values()){
+        const chip = document.createElement('span');
+        chip.className = 'inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border border-slate-700 bg-slate-800/70';
+        chip.innerHTML = `<span class="font-medium">@${u.id}</span><button type="button" aria-label="Retirer" class="ml-1 text-slate-300 hover:text-white">×</button>`;
+        chip.querySelector('button').addEventListener('click', ()=>{ picked.delete(u.id); renderPicked(); });
+        selectedUsers.appendChild(chip);
+      }
+    }
+
+    let lastQ = ''; let lastCtl = 0;
+    async function searchUsers(q){
+      if (!q || q.length < 1) { sugg.classList.add('hidden'); sugg.innerHTML=''; return; }
+      const ctl = ++lastCtl;
+      const res = await fetch(`/admin/users/search?q=${encodeURIComponent(q)}&limit=8`);
+      if (!res.ok) return; const json = await res.json(); if (ctl !== lastCtl) return;
+      const users = Array.isArray(json.users) ? json.users : [];
+      if (!users.length) { sugg.classList.add('hidden'); sugg.innerHTML=''; return; }
+      sugg.innerHTML = users.map(u => (
+        `<button type="button" data-id="${u.id}" class="w-full text-left px-3 py-2 text-sm hover:bg-slate-800 flex items-center gap-2">
+           <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-indigo-700/70 text-[10px] text-white overflow-hidden">${(u.userName||u.id).slice(0,2).toUpperCase()}</span>
+           <span class="flex-1">
+             <span class="font-medium">@${u.id}</span>
+             <span class="block text-xs text-slate-400">${(u.userName||'')} ${(u.email?(' · '+u.email):'')}</span>
+           </span>
+         </button>`
+      )).join('');
+      sugg.classList.remove('hidden');
+      Array.from(sugg.querySelectorAll('button[data-id]')).forEach(b => b.addEventListener('click', ()=>{
+        const id = b.getAttribute('data-id');
+        const u = users.find(x=>x.id===id); if (!u) return; picked.set(u.id, u); renderPicked(); sugg.classList.add('hidden'); userInput.value=''; userInput.focus();
+      }));
+    }
+    userInput.addEventListener('input', ()=>{
+      const v = userInput.value.trim();
+      const q = v.startsWith('@') ? v.slice(1) : v;
+      if (q !== lastQ) { lastQ = q; searchUsers(q); }
+    });
+    userInput.addEventListener('blur', ()=> setTimeout(()=>sugg.classList.add('hidden'), 150));
+
+    function renderPreview(data){
+      const p = document.getElementById('preview');
+      if (!p) return;
+      if (!data || !data.text) {
+        p.innerHTML = '<span class="text-xs text-slate-400">Aperçu vide</span>';
+        p.style.background='';
+        p.style.color='';
+        p.style.borderColor='';
+        return;
+      }
+      const lvl = String(data.level||'info').toLowerCase();
+      const styles = {
+        info: { bg:'#0ea5e9', border:'#0284c7', text:'#e0f2fe', icon:'i' },
+        success: { bg:'#10b981', border:'#059669', text:'#ecfdf5', icon:'c' },
+        warning: { bg:'#f59e0b', border:'#d97706', text:'#fffbeb', icon:'w' },
+        error: { bg:'#ef4444', border:'#dc2626', text:'#fee2e2', icon:'e' },
+        maintenance: { bg:'#6366f1', border:'#4f46e5', text:'#eef2ff', icon:'m' }
+      };
+      const s = styles[lvl] || styles.info;
+      p.style.background = `${s.bg}22`;
+      p.style.color = s.text;
+      p.style.borderColor = `${s.border}66`;
+      const iconHtml = {
+        i: '<svg class="inline w-4 h-4 align-[-1px]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16Zm-.75-9.25a.75.75 0 011.5 0v5.5a.75.75 0 01-1.5 0v-5.5ZM10 6a1 1 0 100 2 1 1 0 000-2Z" clip-rule="evenodd"/></svg>',
+        c: '<svg class="inline w-4 h-4 align-[-1px]" viewBox="0 0 24 24" fill="currentColor"><path d="M9 12.75l-2.25-2.25-1.5 1.5L9 15.75l9-9-1.5-1.5z"/></svg>',
+        w: '<svg class="inline w-4 h-4 align-[-1px]" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v2h2v-2zm0-8h-2v6h2V10z"/></svg>',
+        e: '<svg class="inline w-4 h-4 align-[-1px]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 110 20 10 10 0 010-20zm-1 5h2v7h-2V7zm0 9h2v2h-2v-2z"/></svg>',
+        m: '<svg class="inline w-4 h-4 align-[-1px]" viewBox="0 0 24 24" fill="currentColor"><path d="M22.7 19.3l-6.5-6.5a6 6 0 11-3.2-3.2l6.5 6.5a2.25 2.25 0 103.2 3.2zM10 14a4 4 0 100-8 4 4 0 000 8z"/></svg>'
+      }[s.icon];
+      p.innerHTML = `${iconHtml}<span class="ml-2 align-middle">${escapeHtml(data.text)}</span>`;
+    }
+
+    async function load(){
+      const res = await fetch('/admin/message/api');
+      if (!res.ok) return;
+      const json = await res.json();
+      const m = (json && Array.isArray(json.messages) && json.messages.length) ? json.messages[0] : null;
+      if (m) {
+        form.elements['level'].value = m.level || 'info';
+        form.elements['text'].value = m.text || '';
+        if (m.startAt) form.elements['startAt'].value = new Date(m.startAt).toISOString().slice(0,16);
+        if (m.endAt) form.elements['endAt'].value = new Date(m.endAt).toISOString().slice(0,16);
+        form.elements['dismissible'].checked = !!m.dismissible;
+        renderPreview(m);
+      } else {
+        renderPreview(null);
+      }
+    }
+
+    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+  const data = { level: form.elements['level'].value, text: form.elements['text'].value, dismissible: !!form.elements['dismissible'].checked };
+      if (form.elements['startAt'].value) data.startAt = new Date(form.elements['startAt'].value).toISOString();
+      if (form.elements['endAt'].value) data.endAt = new Date(form.elements['endAt'].value).toISOString();
+      data.global = !!globalToggle.checked;
+      if (!data.global) {
+        const rolesSel = rolesBoxes.filter(b => b.checked).map(b => b.value);
+        const userIds = Array.from(picked.keys());
+        if (rolesSel.length) data.targetRoles = rolesSel;
+        if (userIds.length) data.targetUserIds = userIds;
+      }
+      const res = await fetch('/admin/message/api', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(data) });
+      if (res.ok) {
+        status.textContent = 'Message enregistré.';
+        renderPreview(data);
+      } else {
+        status.textContent = 'Erreur lors de l\'enregistrement.';
+      }
+    });
+
+    // Confirmation intégrée (petite modale)
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 z-50 hidden';
+    modal.innerHTML = `
+      <div class="absolute inset-0 bg-black/50"></div>
+      <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="w-full max-w-sm rounded-lg bg-slate-900 border border-slate-700 shadow-xl">
+          <div class="px-4 py-3 border-b border-slate-700 flex items-center justify-between">
+            <h3 class="text-sm font-medium">Supprimer le message</h3>
+            <button type="button" id="dlgClose" class="text-slate-300 hover:text-white">×</button>
+          </div>
+          <div class="px-4 py-4 text-sm text-slate-300">Êtes-vous sûr de vouloir supprimer le message affiché dans les headers ?</div>
+          <div class="px-4 py-3 border-t border-slate-700 flex items-center justify-end gap-2">
+            <button type="button" id="dlgCancel" class="px-3 py-1.5 text-xs rounded border border-slate-700 bg-slate-800 hover:bg-slate-700">Annuler</button>
+            <button type="button" id="dlgConfirm" class="px-3 py-1.5 text-xs rounded border border-rose-600/50 bg-rose-700/30 hover:bg-rose-700/40 text-rose-100">Supprimer</button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    const openModal = ()=> modal.classList.remove('hidden');
+    const closeModal = ()=> modal.classList.add('hidden');
+    clearBtn.addEventListener('click', openModal);
+    modal.addEventListener('click', (e)=>{ if (e.target === modal) closeModal(); });
+    modal.querySelector('#dlgClose').addEventListener('click', closeModal);
+    modal.querySelector('#dlgCancel').addEventListener('click', closeModal);
+    modal.querySelector('#dlgConfirm').addEventListener('click', async ()=>{
+      // Suppression DB: si un message courant est chargé, on peut le cibler; sinon on supprime le plus récent global
+      // On récupère le premier message via l'API et on envoie son id côté DELETE.
+      let ok = false; let id = null;
+      try { const res = await fetch('/admin/message/api'); if (res.ok){ const j = await res.json(); if (j && Array.isArray(j.messages) && j.messages.length) id = j.messages[0].id; } } catch(e){}
+      try {
+        const url = id ? (`/admin/message/api?id=${encodeURIComponent(id)}`) : '/admin/message/api?id=';
+        const resDb = await fetch(url, { method: 'DELETE' });
+        ok = resDb.ok;
+      } catch(e) {}
+      if (ok) {
+        form.reset();
+        renderPreview(null);
+        status.textContent = 'Message supprimé.';
+      } else {
+        status.textContent = 'Erreur lors de la suppression.';
+      }
+      closeModal();
+    });
+
+    load();
+  })();
+</script>

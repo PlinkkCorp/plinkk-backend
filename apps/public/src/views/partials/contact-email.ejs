@@ -1,0 +1,13 @@
+<%-
+  // Partial: contact-email.ejs
+  // Params:
+  //  - email: the email address to use (defaults to 'contact@plinkk.fr')
+  //  - linkClass: optional class attribute for the <a>
+  //  - linkText: optional text for the link (defaults to the email)
+-%>
+<%
+  var emailAddr = typeof email !== 'undefined' ? email : 'contact@plinkk.fr';
+  var cls = typeof linkClass !== 'undefined' ? linkClass : '';
+  var text = typeof linkText !== 'undefined' ? linkText : emailAddr;
+%>
+<a href="mailto:<%= emailAddr %>" <%= cls ? ('class="' + cls + '"') : '' %>><%= text %></a>

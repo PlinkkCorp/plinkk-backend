@@ -1,0 +1,284 @@
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-[#0B1020]/60 backdrop-blur border-b border-slate-800/50" style="position: sticky">
+      <!-- SPA top loader (fixed, NProgress-like) -->
+      <style>
+        #spaTopLoader { position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 10000; pointer-events: none; opacity: 0; transition: opacity .15s ease; }
+        #spaTopLoader.active { opacity: 1; }
+        #spaTopLoader .prog { width: 0%; height: 100%;
+          background: linear-gradient(90deg, #6366f1, #8b5cf6);
+          box-shadow: 0 0 8px rgba(99, 102, 241, .6);
+          transition: width .18s ease; }
+      </style>
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2">
+          <img src="/public/images/logo.svg" alt="Plinkk" class="h-8 w-8 rounded" />
+          <span class="font-semibold brand-gradient">Plinkk</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-6 text-sm text-slate-300">
+          <a href="/about" class="hover:text-white">À propos</a>
+          
+          <a href="/users" class="hover:text-white">Utilisateurs</a>
+          <a href="/" class="hover:text-white">Dashboard</a>
+        </nav>
+        <div class="hidden md:flex items-center gap-3">
+          <% if (typeof user !== 'undefined' && user) { %>
+            <div class="flex items-center gap-2 relative" id="accountMenuRoot">
+              <% if (isAdmin) { %>
+                <a href="/admin" class="px-3 py-2 text-sm rounded-md flex items-center gap-2 bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-700 hover:to-rose-600 border border-rose-700 text-white transition transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-rose-400" title="Dashboard administrateur" aria-label="Accéder au dashboard administrateur">Admin</a>
+              <% } %>
+              <a href="/" class="px-3 py-2 text-sm rounded-md bg-slate-800/60 hover:bg-slate-800 border border-slate-700">Mon dashboard</a>
+              <button id="accountBtn" class="flex items-center gap-2 px-2.5 py-1.5 rounded-full border border-slate-700/70 bg-slate-800/60 hover:bg-slate-800 focus:outline-none">
+                <span class="inline-flex h-7 min-w-[28px] w-7 items-center justify-center rounded-full bg-indigo-700/70 text-xs font-semibold overflow-hidden" data-avatar>
+                  <%- include('avatar.ejs', { user: user }) %>
+                </span>
+                <span class="hidden sm:inline text-sm text-slate-200 max-w-[220px] truncate inline-block">@<%= user.userName || user.id %></span>
+                <svg class="w-4 h-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+              </button>
+              <div id="accountPanel" class="absolute right-0 top-full mt-2 w-auto min-w-[18rem] max-w-sm rounded-xl border border-slate-800/70 bg-slate-900/95 backdrop-blur shadow-xl p-2 hidden">
+                <!-- Account card -->
+                <div class="flex items-center gap-3 px-3 py-2">
+                  <div class="h-10 w-10 rounded-full grid place-items-center bg-indigo-700/70 font-semibold text-white overflow-hidden" data-avatar>
+                    <%- include('avatar.ejs', { user: user }) %>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <p class="font-medium truncate text-slate-100"><%= user.userName || user.id %></p>
+                      <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800/80 border border-slate-700 text-slate-300 truncate inline-block">@<%= user.id %></span>
+                    </div>
+                    <% if (user.email) { %>
+                      <p class="text-[11px] text-slate-400 truncate" data-current-email><%= user.email %></p>
+                    <% } %>
+                  </div>
+                </div>
+                <div class="px-3 pb-2">
+                  <a href="/account" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-md bg-slate-800/70 hover:bg-slate-800 border border-slate-700 text-slate-200">Gérer mon compte</a>
+                </div>
+                <div class="my-1 border-t border-slate-800"></div>
+                <!-- Quick links -->
+                <div class="grid grid-cols-2 gap-2 px-2 py-2">
+                  <a href="/<%= user.id %>" class="px-3 py-2 text-xs rounded-md border border-slate-700 bg-slate-800/60 hover:bg-slate-800">Voir mon profil</a>
+                  <a href="/cosmetics" class="px-3 py-2 text-xs rounded-md border border-slate-700 bg-slate-800/60 hover:bg-slate-800">Cosmétiques</a>
+                </div>
+                <div class="my-1 border-t border-slate-800"></div>
+                <div class="px-2 py-1">
+                  <a href="/logout" class="block w-full text-left px-3 py-2 text-sm rounded-md hover:bg-slate-800/80">Se déconnecter</a>
+                </div>
+              </div>
+            </div>
+          <% } else { %>
+            <a href="/login" class="px-3 py-2 text-sm text-slate-200 hover:text-white btn-ghost rounded-md">Se connecter</a>
+            <a href="/login#signup" class="px-3 py-2 text-sm rounded-md btn-brand shadow">S'inscrire</a>
+          <% } %>
+        </div>
+        <% const __SMS__ = (typeof __SITE_MESSAGES__ !== 'undefined' && Array.isArray(__SITE_MESSAGES__)) ? __SITE_MESSAGES__ : ((typeof __SITE_MESSAGE__ !== 'undefined' && __SITE_MESSAGE__ && __SITE_MESSAGE__.message) ? [__SITE_MESSAGE__.message] : []); %>
+        <% if (__SMS__.length) { %>
+          <% __SMS__.slice(0,3).forEach(function(__SM__, idx){ %>
+          <% const lvl = (__SM__.level || 'info').toLowerCase();
+             let bg='bg-slate-700/20', br='border-slate-600/40', tx='text-slate-100', btn='bg-slate-600/80 hover:bg-slate-600', icon='info';
+             if (lvl==='info') { bg='bg-sky-700/20'; br='border-sky-600/40'; tx='text-sky-50'; btn='bg-sky-600/80 hover:bg-sky-600'; icon='info'; }
+             else if (lvl==='success') { bg='bg-emerald-700/20'; br='border-emerald-600/40'; tx='text-emerald-50'; btn='bg-emerald-600/80 hover:bg-emerald-600'; icon='check'; }
+             else if (lvl==='warning') { bg='bg-amber-700/20'; br='border-amber-600/40'; tx='text-amber-50'; btn='bg-amber-600/80 hover:bg-amber-600'; icon='warn'; }
+             else if (lvl==='error' || lvl==='critical') { bg='bg-rose-700/20'; br='border-rose-600/40'; tx='text-rose-50'; btn='bg-rose-600/80 hover:bg-rose-600'; icon='error'; }
+             else if (lvl==='maintenance') { bg='bg-indigo-700/20'; br='border-indigo-600/40'; tx='text-indigo-50'; btn='bg-indigo-600/80 hover:bg-indigo-600'; icon='wrench'; }
+          %>
+          <div class="ml-4 hidden lg:block" id="siteMessageWrap_<%- idx %>" data-msg='<%- JSON.stringify(__SM__ || null).replace(/'/g, "&#39;") %>'>
+            <div class="<%= `mt-1 px-3 py-1 text-xs rounded-md border ${br} ${bg} ${tx} flex items-center gap-2` %>" role="status" aria-live="polite" style="align-items:center">
+              <span aria-hidden="true">
+                <% if (icon==='info') { %>
+                  <svg class="w-4 h-4 align-middle" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16Zm-.75-9.25a.75.75 0 011.5 0v5.5a.75.75 0 01-1.5 0v-5.5ZM10 6a1 1 0 100 2 1 1 0 000-2Z" clip-rule="evenodd"/></svg>
+                <% } else if (icon==='check') { %>
+                  <svg class="w-4 h-4 align-middle" viewBox="0 0 24 24" fill="currentColor"><path d="M9 12.75l-2.25-2.25-1.5 1.5L9 15.75l9-9-1.5-1.5z"/></svg>
+                <% } else if (icon==='warn') { %>
+                  <svg class="w-4 h-4 align-middle" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v2h2v-2zm0-8h-2v6h2V10z"/></svg>
+                <% } else if (icon==='error') { %>
+                  <svg class="w-4 h-4 align-middle" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 110 20 10 10 0 010-20zm-1 5h2v7h-2V7zm0 9h2v2h-2v-2z"/></svg>
+                <% } else if (icon==='wrench') { %>
+                  <svg class="w-4 h-4 align-middle" viewBox="0 0 24 24" fill="currentColor"><path d="M22.7 19.3l-6.5-6.5a6 6 0 11-3.2-3.2l6.5 6.5a2.25 2.25 0 103.2 3.2zM10 14a4 4 0 100-8 4 4 0 000 8z"/></svg>
+                <% } %>
+              </span>
+              <span class="ml-1 flex-1"><%= __SM__.text %></span>
+              <% if (__SM__.dismissible) { %>
+                <button id="dismissSiteMessage_<%- idx %>" aria-label="Fermer l'alerte" class="inline-flex items-center justify-center rounded hover:opacity-90 transition focus:outline-none focus:ring-1 focus:ring-white/40" style="width:22px;height:22px">
+                  <svg class="w-3.5 h-3.5 align-middle" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z"/></svg>
+                </button>
+              <% } %>
+            </div>
+          </div>
+          <% }) %>
+        <% } %>
+        <!-- Mobile -->
+        <button id="menuBtn" class="md:hidden inline-flex items-center justify-center h-9 w-9 rounded-md border border-slate-800/60 text-slate-300 hover:text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5"><path d="M3.75 6.75h16.5v1.5H3.75v-1.5Zm0 4.5h16.5v1.5H3.75v-1.5Zm0 4.5h16.5v1.5H3.75v-1.5Z"/></svg>
+        </button>
+      </div>
+      <div id="mobileMenu" class="md:hidden hidden border-t border-slate-800/60">
+        <div class="px-4 py-3 space-y-2 text-sm">
+          <a href="/about" class="block py-1 text-slate-300 hover:text-white">À propos</a>
+          
+          <a href="/users" class="block py-1 text-slate-300 hover:text-white">Utilisateurs</a>
+          <a href="/" class="block py-1 text-slate-300 hover:text-white">Dashboard</a>
+          <% if (typeof user !== 'undefined' && user) { %>
+            <div class="pt-2 space-y-2">
+              <div class="flex items-center gap-2">
+                <div class="h-8 w-8 rounded-full grid place-items-center bg-indigo-700/70 font-semibold text-white overflow-hidden" data-avatar>
+                  <%- include('avatar.ejs', { user: user }) %>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-slate-200 truncate"><%= user.userName || user.id %></p>
+                  <% if (user.email) { %>
+                    <p class="text-[11px] text-slate-400 truncate" data-current-email><%= user.email %></p>
+                  <% } %>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <a class="text-center px-3 py-2 rounded bg-slate-800/60 hover:bg-slate-800 border border-slate-700" href="/">Dashboard</a>
+                <a class="text-center px-3 py-2 rounded bg-slate-800/60 hover:bg-slate-800 border border-slate-700" href="/account">Compte</a>
+                <a class="text-center px-3 py-2 rounded bg-slate-800/60 hover:bg-slate-800 border border-slate-700" href="/cosmetics">Cosmétiques</a>
+                <a class="text-center px-3 py-2 rounded bg-slate-800/60 hover:bg-slate-800 border border-slate-700" href="/<%= user.id %>">Mon profil</a>
+              </div>
+              <div class="flex items-center justify-between px-1">
+                <span>Public</span>
+                <label class="inline-flex items-center cursor-pointer">
+                  <input id="visibilityToggleMobile" type="checkbox" class="sr-only" <%= user.isPublic ? 'checked' : '' %> />
+                  <span class="w-10 h-6 bg-slate-700 rounded-full p-1 transition-all">
+                    <span class="block w-4 h-4 bg-white rounded-full transition-transform <%= user.isPublic ? 'translate-x-4' : '' %>"></span>
+                  </span>
+                </label>
+              </div>
+              <a class="block text-center px-3 py-2 rounded hover:bg-slate-800/80" href="/<%= user.id %>">Voir mon profil</a>
+              <a class="block text-center px-3 py-2 rounded hover:bg-slate-800/80" href="/logout">Se déconnecter</a>
+            </div>
+          <% } else { %>
+            <div class="pt-2 flex gap-2">
+              <a href="/login" class="flex-1 text-center px-3 py-2 text-slate-200 hover:text-white border border-slate-800/60 rounded btn-ghost">Connexion</a>
+              <a href="/login#signup" class="flex-1 text-center px-3 py-2 rounded text-white btn-brand">Inscription</a>
+            </div>
+          <% } %>
+        </div>
+      </div>
+      <div id="spaTopLoader" aria-hidden="true"><div class="prog" id="spaTopLoaderProg"></div></div>
+    </header>
+    <script>
+      (function(){
+        // Minimal SPA loader controller usable from anywhere
+        const el = document.getElementById('spaTopLoader');
+        const bar = document.getElementById('spaTopLoaderProg');
+        let _active = false, _timer = null, _val = 0, _t0 = 0;
+        const MIN_VISIBLE = 300; // ms
+        function setProgress(p){ if (!bar) return; _val = Math.max(0, Math.min(100, p)); bar.style.width = _val + '%'; }
+        function tick(){ if (!_active) return; // ease towards 80%
+          const target = 80; const delta = Math.max(0.5, (target - _val) * 0.1); setProgress(_val + delta); _timer = setTimeout(tick, 200); }
+        function start(){
+          if (!el || !bar) return;
+          if (_active) return; _active = true; _t0 = Date.now();
+          el.classList.add('active'); setProgress(5);
+          clearTimeout(_timer); _timer = setTimeout(tick, 160);
+        }
+        function end(){
+          if (!el || !bar) return;
+          clearTimeout(_timer); setProgress(100);
+          const elapsed = Date.now() - _t0; const extra = Math.max(0, MIN_VISIBLE - elapsed);
+          setTimeout(()=>{ el.classList.remove('active'); setProgress(0); _active = false; }, 250 + extra);
+        }
+        // Expose programmatic API
+        if (!window.__spaLoadingStart) window.__spaLoadingStart = start;
+        if (!window.__spaLoadingEnd) window.__spaLoadingEnd = end;
+        // Listen to generic custom events
+        window.addEventListener('spa:loading-start', start);
+        window.addEventListener('spa:loading-end', end);
+        // Full navigation: start before unload, then finish after new page load
+        window.addEventListener('beforeunload', ()=>{ try { sessionStorage.setItem('spa_nav','1'); start(); } catch{} });
+        try {
+          if (sessionStorage.getItem('spa_nav') === '1') {
+            sessionStorage.removeItem('spa_nav');
+            start();
+            const fin = ()=> setTimeout(end, 120);
+            if (document.readyState === 'complete') fin(); else window.addEventListener('load', fin, { once: true });
+          }
+        } catch {}
+        // Automatic triggers for internal navigations (progressive enhancement)
+        function isModifiedClick(e){ return e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0; }
+        function isSameOrigin(url){ try { const u=new URL(url, location.href); return u.origin===location.origin; } catch { return false; } }
+        function looksLikeHtmlRequest(url){ return isSameOrigin(url) && !/\.(?:png|jpe?g|webp|gif|svg|ico|css|js|map|json|txt|woff2?|ttf|otf)(?:[?#].*)?$/i.test(url); }
+        document.addEventListener('click', (e)=>{
+          const a = e.target && (e.target.closest ? e.target.closest('a') : null);
+          if (!a) return;
+          const href = a.getAttribute('href') || '';
+          if (!href || href.startsWith('#')) return;
+          if (a.target === '_blank' || a.download != null) return;
+          if (isModifiedClick(e)) return;
+          if (!looksLikeHtmlRequest(href)) return;
+          // Start loader; if it's a full navigation, page unload hides it; if SPA intercepts, fetch wrapper/end event should hide it.
+          try { window.dispatchEvent(new Event('spa:loading-start')); } catch {}
+          // Safety net: auto-hide after 8s if nothing closes it (avoids stuck state on custom handlers)
+          setTimeout(()=>{ try { window.dispatchEvent(new Event('spa:loading-end')); } catch {} }, 8000);
+        }, true);
+
+        // Patch fetch to show loader for GET HTML navigations (not for /api/*)
+        try {
+          const origFetch = window.fetch.bind(window);
+          let inflight = 0; const onBegin=()=>{ if (inflight++===0) window.dispatchEvent(new Event('spa:loading-start')); };
+          const onEnd=()=>{ if (inflight>0 && --inflight===0) window.dispatchEvent(new Event('spa:loading-end')); };
+          window.fetch = function(input, init){
+            try {
+              const url = typeof input === 'string' ? input : (input && input.url) || '';
+              const method = (init && (init.method||'GET')) || (typeof input!=='string' && input && input.method) || 'GET';
+              const headers = new Headers((init && init.headers) || (typeof input!=='string' && input && input.headers) || undefined);
+              const accept = (headers.get('Accept') || headers.get('accept') || '').toLowerCase();
+              const isHtmlAccept = accept.includes('text/html') || accept === '';
+              const qualifies = method.toUpperCase()==='GET' && looksLikeHtmlRequest(url) && !url.startsWith('/api');
+              if (qualifies && isHtmlAccept) onBegin();
+              const p = origFetch(input, init);
+              if (qualifies && isHtmlAccept) {
+                p.finally(()=>{ setTimeout(onEnd, 80); });
+              }
+              return p;
+            } catch {
+              return origFetch(input, init);
+            }
+          };
+        } catch {}
+      })();
+    </script>
+    <script>
+      (function(){
+        const postVisibility = (on) => fetch('/api/me/visibility', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ isPublic: !!on })});
+        const t = document.getElementById('visibilityToggle');
+        const tm = document.getElementById('visibilityToggleMobile');
+        if (t) t.addEventListener('change', () => postVisibility(t.checked).catch(()=>{ t.checked=!t.checked; }));
+        if (tm) tm.addEventListener('change', () => postVisibility(tm.checked).catch(()=>{ tm.checked=!tm.checked; }));
+        const menuBtn = document.getElementById('menuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (menuBtn && mobileMenu) menuBtn.addEventListener('click', ()=> mobileMenu.classList.toggle('hidden'));
+
+        // Account dropdown open/close
+        const accountBtn = document.getElementById('accountBtn');
+        const accountPanel = document.getElementById('accountPanel');
+        const root = document.getElementById('accountMenuRoot');
+        const closeMenu = () => { accountPanel?.classList.add('hidden'); accountBtn?.setAttribute('aria-expanded','false'); };
+        const openMenu = () => { accountPanel?.classList.remove('hidden'); accountBtn?.setAttribute('aria-expanded','true'); };
+        if (accountBtn && accountPanel && root) {
+          accountBtn.addEventListener('click', (e)=>{ e.stopPropagation(); const isOpen = !accountPanel.classList.contains('hidden'); if (isOpen) closeMenu(); else openMenu(); });
+          document.addEventListener('click', (e)=>{ if (!root.contains(e.target)) closeMenu(); });
+          document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeMenu(); });
+        }
+      })();
+    </script>
+    <script>
+      (function(){
+        try {
+          const nodes = Array.from(document.querySelectorAll('[id^="siteMessageWrap_"], #siteMessageWrap'));
+          nodes.forEach((wrap) => {
+            const raw = wrap.getAttribute('data-msg');
+            if (!raw) return;
+            const safe = raw.replace(/&#39;/g, "'");
+            let msg = null; try { msg = JSON.parse(safe); } catch(e) {}
+            if (!msg || !msg.id) return;
+            const key = 'dismissed_site_message_' + msg.id;
+            if (localStorage.getItem(key)) { wrap.style.display = 'none'; return; }
+            const btn = wrap.querySelector('button[id^="dismissSiteMessage"]');
+            if (btn) btn.addEventListener('click', ()=>{ localStorage.setItem(key,'1'); wrap.style.display='none'; });
+          });
+        } catch(e){ /* ignore */ }
+      })();
+    </script>

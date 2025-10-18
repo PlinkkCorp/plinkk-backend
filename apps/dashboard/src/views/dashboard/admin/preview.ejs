@@ -1,0 +1,259 @@
+<%- include('../../partials/head.ejs', { title: 'Admin - Prévisualisation thème', description: '', robots: 'noindex,nofollow' }) %>
+<%- include('../../partials/header-dash.ejs', { user: user }) %>
+<%- include('../../partials/admin-nav.ejs', { user: user }) %>
+
+<main class="max-w-5xl mx-auto p-4 space-y-5">
+  <div class="flex items-start justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold"><%= theme.name %></h1>
+      <p class="text-sm text-slate-400">par @<%= theme.author.userName %></p>
+    </div>
+    <div class="flex gap-2">
+      <% if (theme.pendingUpdate) { %>
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200" title="Une mise à jour est en attente">
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"></svg>
+        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.72-1.36 3.486 0l6.518 11.59A2 2 0 0116.518 18H3.482a2 2 0 01-1.743-3.311L8.257 3.1zM9 7a1 1 0 112 0v3a1 1 0 11-2 0V7zm1 6.5a1.25 1.25 0 100-2.5 1.25 1.25 0 000 2.5z" clip-rule="evenodd"/>
+          </svg>
+          <span>MAJ en attente</span>
+        </span>
+        <button id="approveUpdateBtn" class="px-3 py-2 rounded bg-emerald-600 text-white text-sm">Approuver la MAJ</button>
+        <button id="rejectBtn" class="px-3 py-2 rounded bg-rose-600 text-white text-sm">Rejeter</button>
+      <% } else if (theme.pending || theme.pendingApproval || theme.status === 'pending' || (!theme.approved && !theme.isApproved && !theme.archived)) { %>
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100" title="En attente d'approbation">
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 8v4"/>
+        <path d="M12 16h.01"/>
+        <path d="M21 15a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h2l1-3h6l1 3h2a2 2 0 012 2z"/>
+          </svg>
+          <span>En attente</span>
+        </span>
+        <button id="approveBtn" class="px-3 py-2 rounded bg-emerald-600 text-white text-sm">Approuver</button>
+        <button id="rejectBtn" class="px-3 py-2 rounded bg-rose-600 text-white text-sm">Rejeter</button>
+      <% } else if (theme.archived) { %>
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-100 border border-slate-700" title="Thème archivé">
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <!-- cleaner archive box icon -->
+        <path d="M21 8v10a2 2 0 01-2 2H5a2 2 0 01-2-2V8" />
+        <path d="M3 8l9-5 9 5" />
+        <path d="M9 13h6" />
+          </svg>
+          <span>Archivé</span>
+        </span>
+        <button id="unarchiveBtn" class="px-3 py-2 rounded bg-slate-700 text-white text-sm">Désarchiver</button>
+        <button id="deleteBtn" class="px-3 py-2 rounded bg-rose-700 text-white text-sm">Supprimer</button>
+      <% } else if (theme.approved) { %>
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200" title="Thème approuvé">
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 10-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <span>Approuvé</span>
+        </span>
+        <button id="archiveBtn" class="px-3 py-2 rounded bg-slate-700 text-white text-sm">Archiver</button>
+        <button id="deleteBtn" class="px-3 py-2 rounded bg-rose-700 text-white text-sm">Supprimer</button>
+      <% } else if (theme.isApproved) { %>
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100" title="Thème en attente d'approbation">
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 6v6l4 2"/>
+        <path d="M7 20h10"/>
+        <path d="M7 4h10"/>
+          </svg>
+          <span>En attente d'approbation</span>
+        </span>
+        <button id="archiveBtn" class="px-3 py-2 rounded bg-slate-700 text-white text-sm">Archiver</button>
+        <button id="deleteBtn" class="px-3 py-2 rounded bg-rose-700 text-white text-sm">Supprimer</button>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="text-sm text-slate-300"><%= theme.description || '' %></div>
+  <div class="flex items-center gap-2 text-xs mt-2">
+    <span class="text-slate-400">Aperçu:</span>
+    <span class="text-xs text-slate-400">Light & Dark affichés simultanément</span>
+  </div>
+  <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div id="previewBoxLight" class="rounded p-4 border border-slate-800">
+      <div class="flex items-center justify-between">
+        <strong class="text-sm">Light</strong>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button id="btnPrimaryLight" class="px-3 py-2 text-sm rounded">Bouton</button>
+        <button id="btnHoverLight" class="px-3 py-2 text-sm rounded">Hover</button>
+      </div>
+      <p class="mt-3 text-sm">Texte d'exemple</p>
+    </div>
+    <div id="previewBoxDark" class="rounded p-4 border border-slate-800">
+      <div class="flex items-center justify-between">
+        <strong class="text-sm">Dark</strong>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button id="btnPrimaryDark" class="px-3 py-2 text-sm rounded">Bouton</button>
+        <button id="btnHoverDark" class="px-3 py-2 text-sm rounded">Hover</button>
+      </div>
+      <p class="mt-3 text-sm">Texte d'exemple</p>
+    </div>
+  </div>
+</main>
+
+<script>
+(function(){
+  const raw = JSON.parse(String.raw`<%- JSON.stringify(JSON.stringify(theme.data)) %>`);
+  const id = '<%= theme.id %>';
+
+  // DOM refs for both previews
+  const previewBoxLight = document.getElementById('previewBoxLight');
+  const previewBoxDark = document.getElementById('previewBoxDark');
+  const btnPrimaryLight = document.getElementById('btnPrimaryLight');
+  const btnHoverLight = document.getElementById('btnHoverLight');
+  const btnPrimaryDark = document.getElementById('btnPrimaryDark');
+  const btnHoverDark = document.getElementById('btnHoverDark');
+
+  // Coerce to full theme shape {background, textColor, buttonBackground, buttonHoverBackground, linkHoverColor, articleHoverBoxShadow, darkTheme, opposite}
+  function normalizeHex(v){ if(!v) return '#000000'; let s=String(v).trim(); if(!s.startsWith('#')) s='#'+s; if(/^#[0-9a-fA-F]{3}$/.test(s)) s='#'+s.slice(1).split('').map(c=>c+c).join(''); return s; }
+  function lum(hex){ const h=normalizeHex(hex).slice(1); const r=parseInt(h.slice(0,2),16)/255,g=parseInt(h.slice(2,4),16)/255,b=parseInt(h.slice(4,6),16)/255; const a=[r,g,b].map(v=>v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)); return 0.2126*a[0]+0.7152*a[1]+0.0722*a[2]; }
+  function contrast(bg){ return lum(bg)>0.5 ? '#111827' : '#ffffff'; }
+  function mix(a,b,ratio=0.2){ a=normalizeHex(a).slice(1); b=normalizeHex(b).slice(1); const c=i=>Math.round(parseInt(a.slice(i,i+2),16)*(1-ratio)+parseInt(b.slice(i,i+2),16)*ratio); const r=c(0),g=c(2),bl=c(4); return '#'+[r,g,bl].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+  function hoverVariant(color){ return lum(color)>0.5 ? mix(color,'#000000',0.2) : mix(color,'#ffffff',0.2); }
+  function coerce(data){
+    if (data && data.background && (data.opposite || data.darkTheme!==undefined)) return data;
+    if (data && data.light && data.dark){
+      const L=data.light,D=data.dark;
+      const l={
+        background: normalizeHex(L.bg),
+        hoverColor: normalizeHex(L.hover),
+        textColor: contrast(L.bg),
+        buttonBackground: normalizeHex(L.button),
+        buttonHoverBackground: hoverVariant(L.button),
+        buttonTextColor: contrast(L.button),
+        linkHoverColor: normalizeHex(L.hover),
+        articleHoverBoxShadow: `0 4px 12px ${normalizeHex(L.hover)}55`,
+        darkTheme: false,
+      };
+      const d={
+        background: normalizeHex(D.bg),
+        hoverColor: normalizeHex(D.hover),
+        textColor: contrast(D.bg),
+        buttonBackground: normalizeHex(D.button),
+        buttonHoverBackground: hoverVariant(D.button),
+        buttonTextColor: contrast(D.button),
+        linkHoverColor: normalizeHex(D.hover),
+        articleHoverBoxShadow: `0 4px 12px ${normalizeHex(D.hover)}55`,
+        darkTheme: true,
+      };
+      return { ...l, opposite: d };
+    }
+    if (data && data.bg && data.button && data.hover){
+      const l={ bg:data.bg, button:data.button, hover:data.hover };
+      const d={ bg:hoverVariant(data.bg), button:hoverVariant(data.button), hover:data.hover };
+      return coerce({ light:l, dark:d });
+    }
+    return { background:'#111827', textColor:'#e5e7eb', buttonBackground:'#4f46e5', buttonHoverBackground:'#6366f1', buttonTextColor:'#111827', linkHoverColor:'#22c55e', articleHoverBoxShadow:'', darkTheme:false, opposite:{ background:'#0b1020', textColor:'#e5e7eb', buttonBackground:'#4f46e5', buttonHoverBackground:'#6366f1', buttonTextColor:'#ffffff', linkHoverColor:'#22c55e', articleHoverBoxShadow:'', darkTheme:true } };
+  }
+
+  const dataObj = (typeof raw === 'string') ? (function(){ try { return JSON.parse(raw); } catch(_) { return {}; } })() : raw;
+  const d = coerce(dataObj);
+
+  // Determine explicit light and dark theme objects
+  const lightTheme = d.darkTheme ? (d.opposite || d) : d;
+  const darkTheme = d.darkTheme ? d : (d.opposite || d);
+
+  function applyThemeTo(box, btnPrimary, btnHover, t){
+    if (!box) return;
+    box.style.background = t.background || '#111827';
+    box.style.color = t.textColor || '#e5e7eb';
+    if (btnPrimary) { btnPrimary.style.background = t.buttonBackground || '#4f46e5'; btnPrimary.style.color = t.buttonTextColor || '#111827'; }
+    if (btnHover) { btnHover.style.background = t.hoverColor || t.linkHoverColor || '#22c55e'; btnHover.style.color = t.textColor || '#e5e7eb'; }
+    if (t.articleHoverBoxShadow) box.style.boxShadow = t.articleHoverBoxShadow;
+  }
+
+  // Apply both themes immediately
+  applyThemeTo(previewBoxLight, btnPrimaryLight, btnHoverLight, lightTheme);
+  applyThemeTo(previewBoxDark, btnPrimaryDark, btnHoverDark, darkTheme);
+
+  const goBack = (msg) => { if (msg) console.info(msg); window.location.href = '/admin/themes'; };
+  // Helper to attach safe handlers only if the element exists
+  const on = (sel, fn) => { const el = document.getElementById(sel); if (!el) return; fn(el); };
+
+  on('approveBtn', (el) => el.addEventListener('click', async ()=>{
+    el.disabled = true;
+    try{
+      const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/approve', { method: 'POST' });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      goBack('approved');
+    }catch(e){ console.error(e); alert('Erreur'); el.disabled = false; }
+  }));
+
+  on('approveUpdateBtn', (el) => el.addEventListener('click', async ()=>{
+    el.disabled = true;
+    try{
+      const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/approve-update', { method: 'POST' });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      goBack('approved-update');
+    }catch(e){ console.error(e); alert('Erreur'); el.disabled = false; }
+  }));
+
+  on('rejectBtn', (el) => el.addEventListener('click', async ()=>{
+    el.disabled = true;
+    try{
+      const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/reject', { method: 'POST' });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      goBack('rejected');
+    }catch(e){ console.error(e); alert('Erreur'); el.disabled = false; }
+  }));
+
+  on('archiveBtn', (el) => el.addEventListener('click', async ()=>{
+    el.disabled = true;
+    try{
+      const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/archive', { method: 'POST' });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      goBack('archived');
+    }catch(e){ console.error(e); alert('Erreur'); el.disabled = false; }
+  }));
+
+  on('unarchiveBtn', (el) => el.addEventListener('click', async ()=>{
+    el.disabled = true;
+    try{
+      const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/unarchive', { method: 'POST' });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      goBack('unarchived');
+    }catch(e){ console.error(e); alert('Erreur'); el.disabled = false; }
+  }));
+
+  on('deleteBtn', (el) => el.addEventListener('click', ()=> createModal()));
+
+  // Delete flow: show modal in page instead of alert
+  const deleteBtn = document.getElementById('deleteBtn');
+  function createModal(){
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
+    overlay.innerHTML = `
+      <div class="w-full max-w-md bg-slate-900 border border-slate-700 rounded p-4 text-sm">
+        <h3 class="font-semibold mb-2">Confirmer la suppression</h3>
+        <p class="text-xs text-slate-400 mb-3">Voulez-vous vraiment supprimer ce thème ? Cette action est irréversible.</p>
+        <div class="flex justify-end gap-2">
+          <button class="cancel px-3 py-1.5 rounded bg-slate-700">Annuler</button>
+          <button class="confirm px-3 py-1.5 rounded bg-rose-600 text-white">Supprimer</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const cancel = overlay.querySelector('.cancel');
+    const confirm = overlay.querySelector('.confirm');
+    function cleanup() { document.removeEventListener('keydown', onKey); overlay.remove(); }
+    cancel.addEventListener('click', ()=> { cleanup(); });
+    confirm.addEventListener('click', async ()=>{
+      confirm.disabled = true; confirm.textContent = 'Suppression...';
+      try {
+        const res = await fetch('/api/themes/'+encodeURIComponent(id), { method: 'DELETE' });
+        if (!res.ok) throw new Error('HTTP '+res.status);
+        cleanup();
+        goBack('deleted');
+      } catch(e){ alert('Impossible de supprimer'); confirm.disabled = false; confirm.textContent = 'Supprimer'; }
+    });
+    function onKey(ev){
+      if (ev.key === 'Escape') { ev.preventDefault(); cleanup(); }
+      if (ev.key === 'Enter') { ev.preventDefault(); confirm.click(); }
+    }
+    document.addEventListener('keydown', onKey);
+  }
+  if (deleteBtn) deleteBtn.addEventListener('click', ()=> createModal());
+})();
+</script>
