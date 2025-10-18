@@ -19,7 +19,7 @@ RUN npm install
 
 RUN npx @fastify/secure-session > src/secret-key
 
-RUN npx prisma generate --schema=../../prisma/schema.prisma
+RUN npx prisma generate
 
 RUN npm run build
 
