@@ -491,7 +491,6 @@ export function createLinkBoxes(profileData) {
             desc.style.padding = "0 8px";
             desc.style.borderRadius = "5px";
             desc.style.border = "1px solid rgba(255, 255, 255, 0.5)";
-            desc.style.marginTop = "-1em";
             desc.style.display = "block";
             desc.style.width = "100%";
             desc.style.fontSize = "0.9em";
@@ -504,6 +503,7 @@ export function createLinkBoxes(profileData) {
             // (sous le contenu principal) afin qu'il n'expulse pas le texte.
             let showDescBtn = null;
             if (isTouchDevice) {
+                desc.style.marginTop = "-1em";
                 // Sur mobile/tactile : bouton pour afficher/masquer la description
                 showDescBtn = document.createElement("button");
                 showDescBtn.textContent = "Afficher la description";
