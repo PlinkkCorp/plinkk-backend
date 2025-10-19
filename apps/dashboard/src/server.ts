@@ -572,56 +572,6 @@ fastify.get("/logout", (req, reply) => {
   reply.redirect("/login");
 });
 
-// Liste publique de tous les profils
-fastify.get("/users", async (request, reply) => {
-  const currentUserId = request.session.get("data") as string | undefined;
-  const currentUser = currentUserId
-    ? await prisma.user.findUnique({
-        where: { id: currentUserId },
-        include: { role: true },
-      })
-    : null;
-  const plinkks = await prisma.plinkk.findMany({
-    where: { isPublic: true },
-    include: { settings: true },
-    orderBy: { createdAt: "asc" },
-  });
-  // Annonces DB pour la page publique des utilisateurs: on affiche seulement les globales si non connecté
-  let msgs: Announcement[] = [];
-  try {
-    const now = new Date();
-    const anns = await prisma.announcement.findMany({
-      where: {
-        AND: [
-          { OR: [{ startAt: null }, { startAt: { lte: now } }] },
-          { OR: [{ endAt: null }, { endAt: { gte: now } }] },
-        ],
-      },
-      include: { targets: true, roleTargets: true },
-      orderBy: { createdAt: "desc" },
-    });
-    if (currentUser) {
-      for (const a of anns) {
-        const toUser =
-          a.global ||
-          a.targets.some(
-            (t: AnnouncementTarget) => t.userId === currentUser.id
-          ) ||
-          a.roleTargets.some(
-            (rt: AnnouncementRoleTarget & { role: Role }) =>
-              rt.role.name === currentUser.role.name
-          );
-        if (toUser) msgs.push(a);
-      }
-    } else {
-      msgs = anns.filter((a) => a.global);
-    }
-  } catch (e) {}
-  return await replyView(reply, "users.ejs", currentUser, {
-    plinkks: plinkks,
-  });
-});
-
 // SPA fallback: serve the main index for non-API, non-static HTML navigations
 // This enables client-side routing across the site without breaking existing server routes.
 fastify.get("/*", async (request, reply) => {

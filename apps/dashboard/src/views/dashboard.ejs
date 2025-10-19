@@ -16,7 +16,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <a href="/edit" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow">Éditer le profil</a>
-                            <a target="_blank" href="/<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : user.id %>" class="px-3 py-2 text-sm rounded-md bg-emerald-700/80 hover:bg-emerald-600 text-white border border-emerald-500/40 shadow">Voir le profil</a>
+                            <a target="_blank" href="<%= frontendUrl %>/<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : user.id %>" class="px-3 py-2 text-sm rounded-md bg-emerald-700/80 hover:bg-emerald-600 text-white border border-emerald-500/40 shadow">Voir le profil</a>
                         </div>
                     </div>
 
@@ -96,7 +96,7 @@
                                                 <div class="text-xs text-slate-400">/<%= p.slug ? p.slug : user.id %></div>
                                             </div>
                                             <div class="flex items-center gap-2">
-                                                <a target="_blank" href="/<%= p.slug ? p.slug : user.id %>" class="px-3 py-1.5 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white">Ouvrir</a>
+                                                <a target="_blank" href="<%= frontendUrl %>/<%= p.slug ? p.slug : user.id %>" class="px-3 py-1.5 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white">Ouvrir</a>
                                                 <a href="/edit?plinkkId=<%= p.id %>" class="px-3 py-1.5 text-xs rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200">Éditer</a>
                                             </div>
                                         </li>

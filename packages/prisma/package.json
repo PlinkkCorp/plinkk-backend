@@ -6,7 +6,8 @@
   "scripts": {
     "generate": "prisma generate",
     "deploy": "prisma migrate deploy",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "postinstall": "prisma generate --schema=prisma/schema.prisma || true"
   },
   "dependencies": {
     "@prisma/client": "^6.17.1",

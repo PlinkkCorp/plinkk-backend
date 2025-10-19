@@ -101,30 +101,6 @@ fastify.register(fastifyHttpProxy, {
   },
 });
 
-fastify.register(fastifyCron, {
-  jobs: [
-    {
-      name: "Delete all inactive account",
-      cronTime: "0 0 * * MON",
-      onTick: async () => {
-        const date = new Date(Date.now());
-        date.setUTCFullYear(date.getUTCFullYear() - 3);
-        console.log("Delete all to " + date.toISOString());
-        const before = await prisma.user.count();
-        await prisma.user.deleteMany({
-          where: { lastLogin: { lte: date } },
-        });
-        const after = await prisma.user.count();
-        console.log(
-          `Finished deleted ${
-            before - after
-          } User(s) ( Before : ${before} User(s) / After : ${after} User(s) )`
-        );
-      },
-    },
-  ],
-});
-
 fastify.register(staticPagesRoutes);
 fastify.register(plinkkFrontUserRoutes);
 

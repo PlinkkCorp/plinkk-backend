@@ -14,7 +14,6 @@
     "prisma:dev": "prisma dev",
     "prisma:studio": "prisma studio",
     "prisma:init": "prisma migrate deploy",
-    "postinstall": "prisma generate --schema=../../prisma/schema.prisma || true",
     "set-admin": "node scripts/set-admin.cjs",
     "migrate:plinkks": "node scripts/migrate-plinkks.cjs",
     "delete_inactive": "node scripts/delete_inactive_user.js ",
