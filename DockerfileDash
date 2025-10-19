@@ -30,6 +30,6 @@ RUN pnpx @fastify/secure-session > apps/dashboard/src/secret-key
 
 RUN pnpm --filter @plinkk/dashboard run build
 
-CMD ["sh", "-c", "pnpm --filter @plinkk/prisma run generate && pnpm --filter @plinkk/prisma run deploy && pnpm --filter @plinkk/prisma run seed && pnpm --filter @plinkk/dashboard run start"]
+CMD ["sh", "-c", "pnpm --filter @plinkk/prisma run generate && pnpm --filter @plinkk/prisma run deploy && pnpm --filter @plinkk/dashboard run start"]
 
 EXPOSE 3001
