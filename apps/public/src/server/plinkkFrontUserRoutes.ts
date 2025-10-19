@@ -68,6 +68,39 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             request
           );
           if (resolved.status === 200) {
+            // Vérifier si l'utilisateur est banni par email
+            try {
+              const u = await prisma.user.findUnique({
+                where: { id: resolved.user.id },
+                select: { email: true },
+              });
+              if (u?.email) {
+                const ban = await prisma.bannedEmail.findFirst({
+                  where: { email: u.email, revoquedAt: null },
+                });
+                if (ban) {
+                  const isActive =
+                    ban.time == null ||
+                    ban.time < 0 ||
+                    new Date(ban.createdAt).getTime() + ban.time * 60000 >
+                      Date.now();
+                  if (isActive) {
+                    const until =
+                      typeof ban.time === "number" && ban.time > 0
+                        ? new Date(
+                            new Date(ban.createdAt).getTime() + ban.time * 60000
+                          ).toISOString()
+                        : null;
+                    return reply.view("erreurs/banned.ejs", {
+                      reason: ban.reason || "Violation des règles",
+                      email: u.email,
+                      until,
+                    });
+                  }
+                }
+              }
+            } catch (e) {}
+
             const links = await prisma.link.findMany({
               where: { plinkkId: resolved.page.id, userId: resolved.user.id },
             });
@@ -148,6 +181,38 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           .code(resolved.status)
           .view("erreurs/404.ejs", { user: null });
       }
+      // Si utilisateur banni -> afficher page bannie
+      try {
+        const u = await prisma.user.findUnique({
+          where: { id: resolved.user.id },
+          select: { email: true },
+        });
+        if (u?.email) {
+          const ban = await prisma.bannedEmail.findFirst({
+            where: { email: u.email, revoquedAt: null },
+          });
+          if (ban) {
+            const isActive =
+              ban.time == null ||
+              ban.time < 0 ||
+              new Date(ban.createdAt).getTime() + ban.time * 60000 > Date.now();
+            if (isActive) {
+              const until =
+                typeof ban.time === "number" && ban.time > 0
+                  ? new Date(
+                      new Date(ban.createdAt).getTime() + ban.time * 60000
+                    ).toISOString()
+                  : null;
+              return reply.view("erreurs/banned.ejs", {
+                reason: ban.reason || "Violation des règles",
+                email: u.email,
+                until,
+              });
+            }
+          }
+        }
+      } catch (e) {}
+
       const links = await prisma.link.findMany({
         where: { plinkkId: resolved.page.id, userId: resolved.user.id },
       });

@@ -450,9 +450,13 @@ export function createLinkBoxes(profileData) {
         mainContent.appendChild(discordIcon);
         // Créer un span pour le texte
         const textSpan = document.createElement("span");
-        textSpan.style.position = "relative";
-        textSpan.style.left = "50%";
-        textSpan.style.transform = "translateX(-50%)";
+        textSpan.style.display = "inline-block";
+        textSpan.style.flex = "1 1 auto";
+        textSpan.style.minWidth = "0"; // important pour empêcher l'overflow dans les flex containers
+        textSpan.style.textAlign = "center";
+        textSpan.style.whiteSpace = "nowrap";
+        textSpan.style.overflow = "hidden";
+        textSpan.style.textOverflow = "ellipsis";
         textSpan.textContent = link.text;
         // Gérer les descriptions
         if (link.description && link.description.trim() !== "" && link.showDescription) {
@@ -485,8 +489,6 @@ export function createLinkBoxes(profileData) {
             desc.style.padding = "0 8px";
             desc.style.borderRadius = "5px";
             desc.style.border = "1px solid rgba(255, 255, 255, 0.5)";
-            desc.style.marginTop = "0";
-            desc.style.marginBottom = "0";
             desc.style.display = "block";
             desc.style.width = "100%";
             desc.style.fontSize = "0.9em";
@@ -495,20 +497,27 @@ export function createLinkBoxes(profileData) {
                 discordIcon.style.transform = "translateY(3px)";
             }
             arrow.style.transform = "translateY(3px)";
+
+            let showDescBtn = null;
             if (isTouchDevice) {
+                desc.style.marginTop = "-1em"
                 // Sur mobile/tactile : bouton pour afficher/masquer la description
-                const showDescBtn = document.createElement("button");
+                showDescBtn = document.createElement("button");
                 showDescBtn.textContent = "Afficher la description";
                 showDescBtn.className = "show-desc-btn";
-                showDescBtn.style.marginLeft = "10px";
-                showDescBtn.style.fontSize = "0.9em";
-                showDescBtn.style.padding = "2px 8px";
+                showDescBtn.style.display = "block";
+                showDescBtn.style.width = "100%";
+                showDescBtn.style.boxSizing = "border-box";
+                showDescBtn.style.marginTop = "8px";
+                showDescBtn.style.fontSize = "0.95em";
+                showDescBtn.style.padding = "6px 10px";
                 showDescBtn.style.borderRadius = "6px";
                 showDescBtn.style.border = "none";
                 showDescBtn.style.background = "#eee";
                 showDescBtn.style.cursor = "pointer";
                 showDescBtn.style.transition = "background 0.2s";
                 showDescBtn.style.pointerEvents = "auto";
+                arrow.style.display = "none";
                 let descVisible = false;
                 showDescBtn.addEventListener("click", (e) => {
                     e.preventDefault();
@@ -517,8 +526,7 @@ export function createLinkBoxes(profileData) {
                     if (descVisible) {
                         desc.style.maxHeight = "200px";
                         desc.style.opacity = "1";
-                        desc.style.marginTop = "8px";
-                        desc.style.marginBottom = "0";
+                        desc.style.marginTop = "-0.5em";
                         desc.style.padding = "8px";
                         arrow.style.opacity = "0";
                         showDescBtn.textContent = "Masquer la description";
@@ -526,15 +534,12 @@ export function createLinkBoxes(profileData) {
                     else {
                         desc.style.maxHeight = "0";
                         desc.style.opacity = "0";
-                        desc.style.marginTop = "0";
-                        desc.style.marginBottom = "0";
+                        desc.style.marginTop = "-1em";
                         desc.style.padding = "0 8px";
                         arrow.style.opacity = "1";
                         showDescBtn.textContent = "Afficher la description";
                     }
                 });
-                // Ajouter le bouton au conteneur principal au lieu du discordBox
-                mainContent.appendChild(showDescBtn);
             }
             else {
                 // Desktop : hover classique sur le lien entier
@@ -555,9 +560,15 @@ export function createLinkBoxes(profileData) {
                     arrow.style.opacity = "1";
                 });
             }
-            // Ajouter la description au lien (en bas)
+            // Ajouter la description au lien (en bas). Sur mobile on insère
+            // le bouton "Afficher la description" entre le contenu principal
+            // et la description.
             mainContent.appendChild(textSpan);
             discordLink.appendChild(mainContent);
+            if (showDescBtn) {
+                // Append the mobile toggle button as a block under the main content
+                discordLink.appendChild(showDescBtn);
+            }
             discordLink.appendChild(desc);
         }
         else {

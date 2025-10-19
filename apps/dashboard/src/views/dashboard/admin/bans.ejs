@@ -1,90 +1,250 @@
 <%- include('../../partials/head.ejs') -%>
-<%- include('../../partials/header-dash.ejs', { user: user }) -%>
-<%- include('../../partials/admin-nav.ejs', { user: user }) %>
+  <%- include('../../partials/header-dash.ejs', { user: user }) -%>
+    <%- include('../../partials/admin-nav.ejs', { user: user }) %>
 
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h1 class="text-2xl font-semibold text-slate-100">Slugs bannis</h1>
-          <p class="text-sm text-slate-400">Gère les slugs interdits pour l'inscription et la création de pages.</p>
-        </div>
-        <div class="text-sm text-slate-400">Les changements sont appliqués immédiatement.</div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Form -->
-        <div class="md:col-span-1 bg-slate-900/60 border border-slate-800 rounded-lg p-4 h-fit">
-          <form id="add-ban-form" class="space-y-3">
-            <div>
-              <label class="text-xs text-slate-300">Slug à bannir</label>
-              <input name="slug" type="text" required placeholder="ex: admin, support, api"
-                class="mt-1 block w-full rounded-md border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500" />
-            </div>
-            <div>
-              <label class="text-xs text-slate-300">Raison (optionnel)</label>
-              <input name="reason" type="text" placeholder="ex: réservé système"
-                class="mt-1 block w-full rounded-md border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500" />
-            </div>
-            <div class="flex items-center gap-2">
-              <button id="addBtn" type="submit"
-                class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-sky-600 hover:bg-sky-700 text-white text-sm">Ajouter</button>
-              <button id="clearBtn" type="button"
-                class="px-3 py-2 rounded-md border border-slate-700 text-sm text-slate-200">Réinitialiser</button>
-            </div>
-            <div id="formMsg" class="text-sm" aria-live="polite"></div>
-          </form>
-        </div>
-
-        <!-- Table -->
-        <div class="md:col-span-2 bg-slate-900/60 border border-slate-800 rounded-lg p-4">
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2">
-              <input id="searchInput" type="text" placeholder="Rechercher un slug..."
-                class="rounded-md border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-200 focus:outline-none" />
-              <button id="refreshBtn"
-                class="px-2 py-1 rounded-md border border-slate-700 text-sm text-slate-200">Rafraîchir</button>
-            </div>
-            <div id="loadingIndicator" class="text-sm text-slate-400 hidden">Chargement…</div>
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-6">
+          <div class="flex items-center justify-between">
+            <h1 class="text-2xl font-semibold text-slate-100">Bannissements</h1>
+            <div class="text-sm text-slate-400">Les changements sont appliqués immédiatement.</div>
           </div>
-
-          <div class="overflow-x-auto">
-            <table id="bans-table" class="w-full table-auto text-sm text-slate-200">
-              <thead>
-                <tr class="text-left text-xs text-slate-400 border-b border-slate-800/60">
-                  <th class="px-3 py-2">Slug</th>
-                  <th class="px-3 py-2">Raison</th>
-                  <th class="px-3 py-2">Ajouté</th>
-                  <th class="px-3 py-2">Action</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-800/60" id="bans-tbody"></tbody>
-            </table>
+          <div class="mt-4 border-b border-slate-800/60">
+            <nav class="flex gap-2" aria-label="Tabs">
+              <button data-tab="slugs"
+                class="tab-btn px-3 py-2 text-sm rounded-t-md bg-slate-900/70 border border-b-0 border-slate-800 text-white">Slugs</button>
+              <button data-tab="emails"
+                class="tab-btn px-3 py-2 text-sm rounded-t-md border border-b-0 border-slate-800 text-slate-300">Emails</button>
+            </nav>
           </div>
         </div>
+
+        <div id="tab-slugs" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Form -->
+          <div class="md:col-span-1 bg-slate-900/60 border border-slate-800 rounded-lg p-4 h-fit">
+            <form id="add-ban-form" class="space-y-3">
+              <div>
+                <label class="text-xs text-slate-300">Slug à bannir</label>
+                <input name="slug" type="text" required placeholder="ex: admin, support, api"
+                  class="mt-1 block w-full rounded-md border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-300">Raison (optionnel)</label>
+                <input name="reason" type="text" placeholder="ex: réservé système"
+                  class="mt-1 block w-full rounded-md border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500" />
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="addBtn" type="submit"
+                  class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-sky-600 hover:bg-sky-700 text-white text-sm">Ajouter</button>
+                <button id="clearBtn" type="button"
+                  class="px-3 py-2 rounded-md border border-slate-700 text-sm text-slate-200">Réinitialiser</button>
+              </div>
+              <div id="formMsg" class="text-sm" aria-live="polite"></div>
+            </form>
+          </div>
+
+          <!-- Table -->
+          <div class="md:col-span-2 bg-slate-900/60 border border-slate-800 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <input id="searchInput" type="text" placeholder="Rechercher un slug..."
+                  class="rounded-md border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-200 focus:outline-none" />
+                <button id="refreshBtn"
+                  class="px-2 py-1 rounded-md border border-slate-700 text-sm text-slate-200">Rafraîchir</button>
+              </div>
+              <div id="loadingIndicator" class="text-sm text-slate-400 hidden">Chargement…</div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table id="bans-table" class="w-full table-auto text-sm text-slate-200">
+                <thead>
+                  <tr class="text-left text-xs text-slate-400 border-b border-slate-800/60">
+                    <th class="px-3 py-2">Slug</th>
+                    <th class="px-3 py-2">Raison</th>
+                    <th class="px-3 py-2">Ajouté</th>
+                    <th class="px-3 py-2">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/60" id="bans-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Onglet Emails -->
+        <div id="tab-emails" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="md:col-span-1 bg-slate-900/60 border border-slate-800 rounded-lg p-4 h-fit">
+            <form id="add-emailban-form" class="space-y-3">
+              <div>
+                <label class="text-xs text-slate-300">Email à bannir</label>
+                <input name="email" type="email" required placeholder="ex: user@example.com"
+                  class="mt-1 block w-full rounded-md border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-300">Raison</label>
+                <input name="reason" type="text" placeholder="ex: spam massif"
+                  class="mt-1 block w-full rounded-md border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-300">Durée (minutes, -1 permanent)</label>
+                <input name="time" type="number" step="1" min="-1" placeholder="-1"
+                  class="mt-1 block w-full rounded-md border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm" />
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="addEmailBanBtn" type="submit"
+                  class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-rose-600 hover:bg-rose-700 text-white text-sm">Bannir</button>
+                <button id="clearEmailBanBtn" type="button"
+                  class="px-3 py-2 rounded-md border border-slate-700 text-sm text-slate-200">Réinitialiser</button>
+              </div>
+              <div id="emailFormMsg" class="text-sm" aria-live="polite"></div>
+            </form>
+          </div>
+          <div class="md:col-span-2 bg-slate-900/60 border border-slate-800 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <input id="searchEmailInput" type="text" placeholder="Rechercher un email..."
+                  class="rounded-md border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-200 focus:outline-none" />
+                <button id="refreshEmailBtn"
+                  class="px-2 py-1 rounded-md border border-slate-700 text-sm text-slate-200">Rafraîchir</button>
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="openBulkBtn"
+                  class="px-2 py-1 rounded-md bg-rose-600 hover:bg-rose-700 text-white text-sm">Ban massif</button>
+                <div id="loadingEmailIndicator" class="text-sm text-slate-400 hidden">Chargement…</div>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table id="emailbans-table" class="w-full table-auto text-sm text-slate-200">
+                <thead>
+                  <tr class="text-left text-xs text-slate-400 border-b border-slate-800/60">
+                    <th class="px-3 py-2">Email</th>
+                    <th class="px-3 py-2">Raison</th>
+                    <th class="px-3 py-2">Ajouté</th>
+                    <th class="px-3 py-2">Expire</th>
+                    <th class="px-3 py-2">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/60" id="emailbans-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Drawer Ban massif -->
+          <div id="bulkDrawer" class="fixed inset-0 z-50 hidden" aria-hidden="true">
+            <div id="bulkBackdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+            <aside
+              class="absolute right-0 top-0 h-full w-full sm:w-[480px] md:w-[560px] bg-slate-950 border-l border-slate-800 shadow-xl translate-x-0 overflow-y-auto">
+              <div
+                class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800 bg-slate-950/90 px-4 py-3">
+                <h2 class="text-slate-100 font-semibold">Ban massif par emails</h2>
+                <button id="closeBulkBtn"
+                  class="rounded-md border border-slate-700 px-2 py-1 text-slate-300 hover:bg-slate-800">Fermer</button>
+              </div>
+              <div class="p-4 space-y-6">
+                <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-4">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
+                    <div>
+                      <label class="text-xs text-slate-300">Raison</label>
+                      <input id="bulkReason" type="text"
+                        class="mt-1 block w-full rounded-md border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-100"
+                        placeholder="ex: spam" />
+                    </div>
+                    <div>
+                      <label class="text-xs text-slate-300">Durée (min, -1 permanent)</label>
+                      <input id="bulkTime" type="number" min="-1" step="1" value="-1"
+                        class="mt-1 block w-full rounded-md border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-100" />
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-4">
+                  <h3 class="text-slate-200 font-medium">Recherche de comptes</h3>
+                  <p class="text-xs text-slate-400 mb-2">Tapez un pseudo, email ou id. Cliquez pour ajouter à la
+                    sélection.</p>
+                  <input id="userSearchInput" type="text" placeholder="Rechercher..."
+                    class="block w-full rounded-md border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500" />
+                  <div id="userSearchDropdown"
+                    class="mt-2 hidden max-h-56 overflow-y-auto bg-slate-900 border border-slate-800 rounded-md shadow-lg">
+                  </div>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-4">
+                  <h3 class="text-slate-200 font-medium">Import liste (CSV ou collage)</h3>
+                  <p class="text-xs text-slate-400">Collez une liste d'emails (séparés par virgule, point-virgule,
+                    tabulation ou nouvelle ligne) ou importez un fichier CSV exporté depuis Excel.</p>
+                  <textarea id="bulkPasteArea" rows="4" placeholder="email1@xx\nemail2@yy; email3@zz"
+                    class="mt-2 block w-full rounded-md border border-slate-700 bg-slate-800/60 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"></textarea>
+                  <div class="mt-2 flex items-center gap-2">
+                    <input id="bulkFileInput" type="file" accept=".csv,.txt" class="text-xs text-slate-300" />
+                    <button id="bulkParseBtn"
+                      class="px-2 py-1 rounded-md border border-slate-700 text-sm text-slate-200">Ajouter à la
+                      sélection</button>
+                  </div>
+                  <div class="text-xs text-slate-500 mt-1">Astuce: pour .xlsx, exportez en CSV depuis Excel puis
+                    importez le CSV.</div>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-4">
+                  <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-slate-200 font-medium">Sélection</h3>
+                    <button id="bulkBanBtn"
+                      class="px-3 py-1.5 rounded-md bg-rose-600 hover:bg-rose-700 text-white text-sm">Bannir la
+                      sélection</button>
+                  </div>
+                  <div class="overflow-x-auto">
+                    <table class="w-full table-auto text-sm text-slate-200">
+                      <thead>
+                        <tr class="text-left text-xs text-slate-400 border-b border-slate-800/60">
+                          <th class="px-3 py-2">Email</th>
+                          <th class="px-3 py-2">Source</th>
+                          <th class="px-3 py-2">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody id="bulkSelectedTbody" class="divide-y divide-slate-800/60"></tbody>
+                    </table>
+                  </div>
+                  <div id="bulkMsg" class="text-sm mt-2"></div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <script src="/public/js/pagination.js"></script>
-    <script>
-      (function () {
-        let paginator = null;
+      <script src="/public/js/pagination.js"></script>
+      <script>
+        (function () {
+          // Tabs
+          const tabBtns = Array.from(document.querySelectorAll('.tab-btn'));
+          const tabSlugs = document.getElementById('tab-slugs');
+          const tabEmails = document.getElementById('tab-emails');
+          tabBtns.forEach(btn => btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('bg-slate-900/70', 'text-white'));
+            btn.classList.add('bg-slate-900/70', 'text-white');
+            const sel = btn.getAttribute('data-tab');
+            // switch with subtle fade
+            const showEl = sel === 'slugs' ? tabSlugs : tabEmails;
+            const hideEl = sel === 'slugs' ? tabEmails : tabSlugs;
+            hideEl.classList.add('hidden');
+            showEl.classList.remove('hidden');
+            showEl.classList.remove('animate-tab-switch');
+            void showEl.offsetWidth;
+            showEl.classList.add('animate-tab-switch');
+          }));
+          let paginator = null;
 
-        function renderTable(list) {
-          const q = (searchInput.value || '').toLowerCase().trim();
-          const filtered = q ? list.filter(b =>
-            b.slug.toLowerCase().includes(q) || (b.reason || '').toLowerCase().includes(q)
-          ) : list;
+          function renderTable(list) {
+            const q = (searchInput.value || '').toLowerCase().trim();
+            const filtered = q ? list.filter(b =>
+              b.slug.toLowerCase().includes(q) || (b.reason || '').toLowerCase().includes(q)
+            ) : list;
 
-          if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td class="px-3 py-4 text-slate-400" colspan="4">Aucun slug banni.</td></tr>`;
-            return;
-          }
+            if (filtered.length === 0) {
+              tbody.innerHTML = `<tr><td class="px-3 py-4 text-slate-400" colspan="4">Aucun slug banni.</td></tr>`;
+              return;
+            }
 
-          tbody.innerHTML = '';
-          for (const b of filtered) {
-            const tr = document.createElement('tr');
-            tr.className = 'odd:bg-slate-900 even:bg-slate-800/40';
-            tr.innerHTML = `
+            tbody.innerHTML = '';
+            for (const b of filtered) {
+              const tr = document.createElement('tr');
+              tr.className = 'odd:bg-slate-900 even:bg-slate-800/40';
+              tr.innerHTML = `
         <td class="px-3 py-3"><code class="bg-slate-800/50 px-2 py-1 rounded text-slate-100">${escapeHtml(b.slug)}</code></td>
         <td class="px-3 py-3 text-slate-300">${escapeHtml(b.reason || '')}</td>
         <td class="px-3 py-3 text-slate-300">${new Date(b.createdAt).toLocaleString()}</td>
@@ -92,89 +252,89 @@
           <button data-id="${b.id}" class="del-btn inline-flex items-center gap-2 px-2 py-1 rounded-md border border-rose-700 text-rose-300 hover:bg-rose-700/10">Supprimer</button>
         </td>
       `;
-            tbody.appendChild(tr);
+              tbody.appendChild(tr);
+            }
+
+            // --- INITIALISATION OU MISE À JOUR DU PAGINATEUR ---
+            if (!paginator) {
+              paginator = __PlinkkPaginator.createPaginator(tbody, {
+                pageSize: 10,
+                selectors: { items: 'tr' },
+                onRender: (pageItems, meta) => {
+                  console.debug(`Page ${meta.currentPage}/${Math.ceil(meta.totalItems / meta.pageSize)}`);
+                }
+              });
+            } else {
+              paginator.setFiltered(Array.from(tbody.querySelectorAll('tr')));
+            }
+
+            // Liaisons des boutons de suppression (uniquement sur la page affichée)
+            Array.from(document.getElementsByClassName('del-btn')).forEach(btn =>
+              btn.addEventListener('click', onDelete)
+            );
           }
 
-          // --- INITIALISATION OU MISE À JOUR DU PAGINATEUR ---
-          if (!paginator) {
-            paginator = __PlinkkPaginator.createPaginator(tbody, {
-              pageSize: 10,
-              selectors: { items: 'tr' },
-              onRender: (pageItems, meta) => {
-                console.debug(`Page ${meta.currentPage}/${Math.ceil(meta.totalItems / meta.pageSize)}`);
-              }
-            });
-          } else {
-            paginator.setFiltered(Array.from(tbody.querySelectorAll('tr')));
+        })();
+      </script>
+      <script>
+        (() => {
+          const apiList = '/api/bans';
+          const tbody = document.getElementById('bans-tbody');
+          const addForm = document.getElementById('add-ban-form');
+          const addBtn = document.getElementById('addBtn');
+          const clearBtn = document.getElementById('clearBtn');
+          const formMsg = document.getElementById('formMsg');
+          const loadingIndicator = document.getElementById('loadingIndicator');
+          const refreshBtn = document.getElementById('refreshBtn');
+          const searchInput = document.getElementById('searchInput');
+
+          let bansCache = [];
+
+          function showMessage(target, text, kind = 'info') {
+            target.textContent = text;
+            target.className = kind === 'error' ? 'text-rose-400' : 'text-emerald-400';
+            setTimeout(() => { target.textContent = ''; target.className = 'text-sm'; }, 4000);
           }
 
-          // Liaisons des boutons de suppression (uniquement sur la page affichée)
-          Array.from(document.getElementsByClassName('del-btn')).forEach(btn =>
-            btn.addEventListener('click', onDelete)
-          );
-        }
-
-      })();
-    </script>
-    <script>
-      (() => {
-        const apiList = '/api/bans';
-        const tbody = document.getElementById('bans-tbody');
-        const addForm = document.getElementById('add-ban-form');
-        const addBtn = document.getElementById('addBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const formMsg = document.getElementById('formMsg');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const refreshBtn = document.getElementById('refreshBtn');
-        const searchInput = document.getElementById('searchInput');
-
-        let bansCache = [];
-
-        function showMessage(target, text, kind = 'info') {
-          target.textContent = text;
-          target.className = kind === 'error' ? 'text-rose-400' : 'text-emerald-400';
-          setTimeout(() => { target.textContent = ''; target.className = 'text-sm'; }, 4000);
-        }
-
-        function setLoading(on) {
-          loadingIndicator.classList.toggle('hidden', !on);
-          refreshBtn.disabled = on;
-          addBtn.disabled = on;
-        }
-
-        async function fetchBans() {
-          try {
-            setLoading(true);
-            const res = await fetch(apiList);
-            if (!res.ok) throw new Error('fetch_failed');
-            const data = await res.json();
-            bansCache = Array.isArray(data.bans) ? data.bans : [];
-            renderTable(bansCache);
-          } catch (e) {
-            tbody.innerHTML = `<tr><td class="px-3 py-4 text-slate-400" colspan="4">Impossible de charger la liste des bans.</td></tr>`;
-          } finally {
-            setLoading(false);
-          }
-        }
-
-        let paginator = null;
-
-        function renderTable(list) {
-          const q = (searchInput.value || '').toLowerCase().trim();
-          const filtered = q ? list.filter(b =>
-            b.slug.toLowerCase().includes(q) || (b.reason || '').toLowerCase().includes(q)
-          ) : list;
-
-          if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td class="px-3 py-4 text-slate-400" colspan="4">Aucun slug banni.</td></tr>`;
-            return;
+          function setLoading(on) {
+            loadingIndicator.classList.toggle('hidden', !on);
+            refreshBtn.disabled = on;
+            addBtn.disabled = on;
           }
 
-          tbody.innerHTML = '';
-          for (const b of filtered) {
-            const tr = document.createElement('tr');
-            tr.className = 'odd:bg-slate-900 even:bg-slate-800/40';
-            tr.innerHTML = `
+          async function fetchBans() {
+            try {
+              setLoading(true);
+              const res = await fetch(apiList);
+              if (!res.ok) throw new Error('fetch_failed');
+              const data = await res.json();
+              bansCache = Array.isArray(data.bans) ? data.bans : [];
+              renderTable(bansCache);
+            } catch (e) {
+              tbody.innerHTML = `<tr><td class="px-3 py-4 text-slate-400" colspan="4">Impossible de charger la liste des bans.</td></tr>`;
+            } finally {
+              setLoading(false);
+            }
+          }
+
+          let paginator = null;
+
+          function renderTable(list) {
+            const q = (searchInput.value || '').toLowerCase().trim();
+            const filtered = q ? list.filter(b =>
+              b.slug.toLowerCase().includes(q) || (b.reason || '').toLowerCase().includes(q)
+            ) : list;
+
+            if (filtered.length === 0) {
+              tbody.innerHTML = `<tr><td class="px-3 py-4 text-slate-400" colspan="4">Aucun slug banni.</td></tr>`;
+              return;
+            }
+
+            tbody.innerHTML = '';
+            for (const b of filtered) {
+              const tr = document.createElement('tr');
+              tr.className = 'odd:bg-slate-900 even:bg-slate-800/40';
+              tr.innerHTML = `
       <td class="px-3 py-3"><code class="bg-slate-800/50 px-2 py-1 rounded text-slate-100">${escapeHtml(b.slug)}</code></td>
       <td class="px-3 py-3 text-slate-300">${escapeHtml(b.reason || '')}</td>
       <td class="px-3 py-3 text-slate-300">${new Date(b.createdAt).toLocaleString()}</td>
@@ -182,75 +342,320 @@
         <button data-id="${b.slug}" class="del-btn inline-flex items-center gap-2 px-2 py-1 rounded-md border border-rose-700 text-rose-300 hover:bg-rose-700/10">Supprimer</button>
       </td>
     `;
-            tbody.appendChild(tr);
-          }
-
-          // --- INITIALISATION OU MISE À JOUR DU PAGINATEUR ---
-          if (!paginator) {
-            paginator = __PlinkkPaginator.createPaginator(tbody, {
-              pageSize: 10,
-              selectors: { items: 'tr' },
-              onRender: (pageItems, meta) => {
-                console.debug(`Page ${meta.currentPage}/${Math.ceil(meta.totalItems / meta.pageSize)}`);
-              }
-            });
-          } else {
-            paginator.setFiltered(Array.from(tbody.querySelectorAll('tr')));
-          }
-
-          // Liaisons des boutons de suppression (pour la page actuelle)
-          Array.from(document.getElementsByClassName('del-btn')).forEach(btn =>
-            btn.addEventListener('click', onDelete)
-          );
-        }
-
-
-        function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" })[c]); }
-
-        async function onDelete(e) {
-          const id = e.currentTarget.getAttribute('data-id');
-          if (!id) return;
-          if (!confirm('Confirmer la suppression de ce ban ?')) return;
-          try {
-            setLoading(true);
-            const res = await fetch(apiList + '?id=' + encodeURIComponent(id), { method: 'DELETE' });
-            if (!res.ok) throw new Error('delete_failed');
-            showMessage(formMsg, 'Ban supprimé', 'ok');
-            await fetchBans();
-          } catch (err) {
-            showMessage(formMsg, 'Échec suppression', 'error');
-          } finally { setLoading(false); }
-        }
-
-        addForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const fd = new FormData(addForm);
-          const slug = (fd.get('slug') || '').toString().trim();
-          const reason = (fd.get('reason') || '').toString().trim();
-          if (!slug) return showMessage(formMsg, 'Slug requis', 'error');
-          try {
-            setLoading(true);
-            const res = await fetch(apiList, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug, reason }) });
-            if (res.ok) {
-              addForm.reset();
-              showMessage(formMsg, 'Ban ajouté', 'ok');
-              await fetchBans();
-            } else {
-              const body = await res.json().catch(() => ({ error: 'error' }));
-              showMessage(formMsg, body.error || 'Erreur', 'error');
+              tbody.appendChild(tr);
             }
-          } catch (err) {
-            showMessage(formMsg, 'Erreur réseau', 'error');
-          } finally { setLoading(false); }
-        });
 
-        clearBtn.addEventListener('click', () => addForm.reset());
-        refreshBtn.addEventListener('click', () => fetchBans());
-        searchInput.addEventListener('input', () => renderTable(bansCache));
+            // --- INITIALISATION OU MISE À JOUR DU PAGINATEUR ---
+            if (!paginator) {
+              paginator = __PlinkkPaginator.createPaginator(tbody, {
+                pageSize: 10,
+                selectors: { items: 'tr' },
+                onRender: (pageItems, meta) => {
+                  console.debug(`Page ${meta.currentPage}/${Math.ceil(meta.totalItems / meta.pageSize)}`);
+                }
+              });
+            } else {
+              paginator.setFiltered(Array.from(tbody.querySelectorAll('tr')));
+            }
 
-        // initial
-        fetchBans();
-      })();
-    </script>
+            // Liaisons des boutons de suppression (pour la page actuelle)
+            Array.from(document.getElementsByClassName('del-btn')).forEach(btn =>
+              btn.addEventListener('click', onDelete)
+            );
+          }
 
-    <%- include('../../partials/footer.ejs') -%>
+
+          function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" })[c]); }
+
+          async function onDelete(e) {
+            const id = e.currentTarget.getAttribute('data-id');
+            if (!id) return;
+            if (!confirm('Confirmer la suppression de ce ban ?')) return;
+            try {
+              setLoading(true);
+              const res = await fetch(apiList + '?id=' + encodeURIComponent(id), { method: 'DELETE' });
+              if (!res.ok) throw new Error('delete_failed');
+              showMessage(formMsg, 'Ban supprimé', 'ok');
+              await fetchBans();
+            } catch (err) {
+              showMessage(formMsg, 'Échec suppression', 'error');
+            } finally { setLoading(false); }
+          }
+
+          addForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fd = new FormData(addForm);
+            const slug = (fd.get('slug') || '').toString().trim();
+            const reason = (fd.get('reason') || '').toString().trim();
+            if (!slug) return showMessage(formMsg, 'Slug requis', 'error');
+            try {
+              setLoading(true);
+              const res = await fetch(apiList, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug, reason }) });
+              if (res.ok) {
+                addForm.reset();
+                showMessage(formMsg, 'Ban ajouté', 'ok');
+                await fetchBans();
+              } else {
+                const body = await res.json().catch(() => ({ error: 'error' }));
+                showMessage(formMsg, body.error || 'Erreur', 'error');
+              }
+            } catch (err) {
+              showMessage(formMsg, 'Erreur réseau', 'error');
+            } finally { setLoading(false); }
+          });
+
+          clearBtn.addEventListener('click', () => addForm.reset());
+          refreshBtn.addEventListener('click', () => fetchBans());
+          searchInput.addEventListener('input', () => renderTable(bansCache));
+
+          // initial
+          fetchBans();
+        })();
+      </script>
+      <script>
+        // Email bans (lecture basique depuis Prisma via endpoint à créer ultérieurement)
+        (() => {
+          const tbody = document.getElementById('emailbans-tbody');
+          const refreshBtn = document.getElementById('refreshEmailBtn');
+          const loading = document.getElementById('loadingEmailIndicator');
+          const search = document.getElementById('searchEmailInput');
+          const addForm = document.getElementById('add-emailban-form');
+          const addBtn = document.getElementById('addEmailBanBtn');
+          const clearBtn = document.getElementById('clearEmailBanBtn');
+          const formMsg = document.getElementById('emailFormMsg');
+          const openBulkBtn = document.getElementById('openBulkBtn');
+          const bulkDrawer = document.getElementById('bulkDrawer');
+          const bulkBackdrop = document.getElementById('bulkBackdrop');
+          const closeBulkBtn = document.getElementById('closeBulkBtn');
+          let cache = [];
+
+          function setLoading(on) { loading.classList.toggle('hidden', !on); refreshBtn.disabled = on; addBtn.disabled = on; }
+          function showMsg(t, msg, ok) { t.textContent = msg; t.className = ok ? 'text-emerald-400' : 'text-rose-400'; setTimeout(() => { t.textContent = ''; t.className = 'text-sm'; }, 3000); }
+
+          async function fetchList() {
+            try {
+              setLoading(true);
+              const res = await fetch('/api/users/bans/emails');
+              if (!res.ok) throw new Error('fetch_failed');
+              const json = await res.json();
+              cache = Array.isArray(json.bans) ? json.bans : [];
+              render();
+            } catch (e) { tbody.innerHTML = `<tr><td class="px-3 py-3 text-slate-400" colspan="5">Impossible de charger la liste.</td></tr>`; }
+            finally { setLoading(false); }
+          }
+          function render() {
+            const q = (search.value || '').toLowerCase();
+            const list = q ? cache.filter(b => String(b.email || '').toLowerCase().includes(q) || String(b.reason || '').toLowerCase().includes(q)) : cache;
+            if (list.length === 0) { tbody.innerHTML = `<tr><td class="px-3 py-3 text-slate-400" colspan="5">Aucun email banni.</td></tr>`; return; }
+            tbody.innerHTML = '';
+            const now = Date.now();
+            for (const b of list) {
+              const until = (b.time == null || b.time < 0) ? null : (new Date(b.createdAt).getTime() + b.time * 60000);
+              const tr = document.createElement('tr'); tr.className = 'odd:bg-slate-900 even:bg-slate-800/40';
+              tr.innerHTML = `
+              <td class="px-3 py-3"><code class="bg-slate-800/50 px-2 py-1 rounded">${escapeHtml(b.email)}</code></td>
+              <td class="px-3 py-3 text-slate-300">${escapeHtml(b.reason || '')}</td>
+              <td class="px-3 py-3 text-slate-300">${new Date(b.createdAt).toLocaleString()}</td>
+              <td class="px-3 py-3 text-slate-300">${until ? new Date(until).toLocaleString() : 'Permanent'}</td>
+              <td class="px-3 py-3"><button data-email="${b.email}" class="revoke-btn inline-flex items-center gap-2 px-2 py-1 rounded-md border border-slate-700 text-slate-200 hover:bg-slate-800">Révoquer</button></td>
+            `;
+              tbody.appendChild(tr);
+            }
+            Array.from(tbody.querySelectorAll('.revoke-btn')).forEach(btn => btn.addEventListener('click', onRevoke));
+          }
+          function escapeHtml(s) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+            return String(s).replace(/[&<>"']/g, function (c) { return map[c] || c; });
+          }
+          async function onRevoke(e) { const email = e.currentTarget.getAttribute('data-email'); if (!email) return; if (!confirm('Révoquer ce ban ?')) return; try { setLoading(true); const res = await fetch('/api/users/bans/emails?email=' + encodeURIComponent(email), { method: 'DELETE' }); if (!res.ok) throw new Error('revoke_failed'); showMsg(formMsg, 'Ban révoqué', true); await fetchList(); } catch (err) { showMsg(formMsg, 'Erreur', false); } finally { setLoading(false); } }
+          addForm.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const fd = new FormData(addForm);
+            const email = String(fd.get('email') || '').trim();
+            const reason = String(fd.get('reason') || '').trim();
+            const time = Number(fd.get('time') || '-1');
+            if (!email) return showMsg(formMsg, 'Email requis', false);
+            try {
+              setLoading(true);
+              const res = await fetch('/api/users/bans/emails', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, reason, time }) });
+              if (!res.ok) {
+                const e = await res.json().catch(() => ({}));
+                const code = e?.error || 'create_failed';
+                const map = {
+                  cannot_self_ban: "Vous ne pouvez pas vous bannir vous‑même.",
+                  cannot_ban_admin: "Vous ne pouvez pas bannir un administrateur.",
+                  forbidden_role: "Vous ne pouvez pas bannir un utilisateur d’un rôle égal ou supérieur au vôtre.",
+                  already_banned: "Cet email est déjà banni.",
+                  invalid_email: "Email invalide.",
+                  unauthorized: "Non autorisé.",
+                  forbidden: "Accès interdit.",
+                };
+                return showMsg(formMsg, map[code] || 'Échec de la création du ban', false);
+              }
+              addForm.reset();
+              showMsg(formMsg, 'Ban créé', true);
+              await fetchList();
+            } catch (err) {
+              showMsg(formMsg, 'Erreur réseau', false);
+            } finally { setLoading(false); }
+          });
+          clearBtn.addEventListener('click', () => addForm.reset());
+          refreshBtn.addEventListener('click', () => fetchList());
+          search.addEventListener('input', () => render());
+          // init lazy: only load when tab clicked to Emails
+          document.querySelector('[data-tab="emails"]').addEventListener('click', () => { if (!cache.length) fetchList(); });
+
+          // ==== Recherche type Discord ====
+          const userInput = document.getElementById('userSearchInput');
+          const userDropdown = document.getElementById('userSearchDropdown');
+          const selectedTbody = document.getElementById('bulkSelectedTbody');
+          const bulkMsg = document.getElementById('bulkMsg');
+          const bulkBanBtn = document.getElementById('bulkBanBtn');
+          const bulkReason = document.getElementById('bulkReason');
+          const bulkTime = document.getElementById('bulkTime');
+          const bulkPasteArea = document.getElementById('bulkPasteArea');
+          const bulkFileInput = document.getElementById('bulkFileInput');
+          const bulkParseBtn = document.getElementById('bulkParseBtn');
+          const selected = new Set(); // emails sélectionnés
+
+          function openDrawer() {
+            bulkDrawer.classList.remove('hidden');
+            const backdrop = document.getElementById('bulkBackdrop');
+            const aside = bulkDrawer.querySelector('aside');
+            backdrop?.classList.remove('animate-backdrop-out');
+            backdrop?.classList.add('animate-backdrop-in');
+            aside?.classList.remove('animate-drawer-out');
+            void aside?.offsetWidth;
+            aside?.classList.add('animate-drawer-in');
+            document.body.classList.add('overflow-hidden');
+            userInput?.focus();
+          }
+          function closeDrawer() {
+            const backdrop = document.getElementById('bulkBackdrop');
+            const aside = bulkDrawer.querySelector('aside');
+            backdrop?.classList.remove('animate-backdrop-in');
+            backdrop?.classList.add('animate-backdrop-out');
+            aside?.classList.remove('animate-drawer-in');
+            aside?.classList.add('animate-drawer-out');
+            setTimeout(() => {
+              bulkDrawer.classList.add('hidden');
+              document.body.classList.remove('overflow-hidden');
+              userDropdown.classList.add('hidden');
+            }, 220);
+          }
+          openBulkBtn.addEventListener('click', openDrawer);
+          closeBulkBtn.addEventListener('click', closeDrawer);
+          bulkBackdrop.addEventListener('click', closeDrawer);
+          document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !bulkDrawer.classList.contains('hidden')) closeDrawer(); });
+
+          let searchTimer;
+          userInput.addEventListener('input', () => {
+            clearTimeout(searchTimer);
+            const q = userInput.value.trim();
+            if (!q) { userDropdown.classList.add('hidden'); userDropdown.innerHTML = ''; return; }
+            searchTimer = setTimeout(async () => {
+              try {
+                const res = await fetch(`/dashboard/admin/users/search?q=${encodeURIComponent(q)}&limit=8`);
+                if (!res.ok) { userDropdown.classList.add('hidden'); return; }
+                const data = await res.json();
+                const users = Array.isArray(data.users) ? data.users : [];
+                if (users.length === 0) { userDropdown.classList.add('hidden'); userDropdown.innerHTML = ''; return; }
+                userDropdown.innerHTML = users.map(u => {
+                  const email = String(u.email || '');
+                  const name = String(u.userName || u.id || '');
+                  const disabled = selected.has(email);
+                  return `<button data-email="${email}" class="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-slate-800 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}">
+                  <span class="inline-flex h-6 w-6 items-center justify-center rounded bg-slate-800 text-xs">${(name || 'U').slice(0, 1).toUpperCase()}</span>
+                  <span class="flex-1">
+                    <span class="text-slate-200">${escapeHtml(name)}</span>
+                    <span class="block text-xs text-slate-400">${escapeHtml(email)}</span>
+                  </span>
+                  <span class="text-xs text-slate-300">Ajouter</span>
+                </button>`;
+                }).join('');
+                userDropdown.classList.remove('hidden');
+                Array.from(userDropdown.querySelectorAll('button')).forEach(b => b.addEventListener('click', (ev) => {
+                  const email = ev.currentTarget.getAttribute('data-email');
+                  if (!email || selected.has(email)) return;
+                  selected.add(email);
+                  renderSelected();
+                }));
+              } catch (e) { userDropdown.classList.add('hidden'); }
+            }, 250);
+          });
+          document.addEventListener('click', (e) => { if (!userDropdown.contains(e.target) && e.target !== userInput) { userDropdown.classList.add('hidden'); } });
+
+          function renderSelected() {
+            const arr = Array.from(selected.values()).sort((a, b) => a.localeCompare(b));
+            if (arr.length === 0) { selectedTbody.innerHTML = `<tr><td colspan="3" class="px-3 py-3 text-slate-400">Aucune sélection pour l'instant.</td></tr>`; return; }
+            selectedTbody.innerHTML = '';
+            for (const email of arr) {
+              const tr = document.createElement('tr'); tr.className = 'odd:bg-slate-900 even:bg-slate-800/40';
+              tr.innerHTML = `
+              <td class="px-3 py-3"><code class="bg-slate-800/50 px-2 py-1 rounded">${escapeHtml(email)}</code></td>
+              <td class="px-3 py-3 text-slate-300">Recherche/Import</td>
+              <td class="px-3 py-3"><button data-email="${email}" class="rm-btn px-2 py-1 rounded-md border border-slate-700 text-slate-200 hover:bg-slate-800">Retirer</button></td>`;
+              selectedTbody.appendChild(tr);
+            }
+            Array.from(selectedTbody.querySelectorAll('.rm-btn')).forEach(btn => btn.addEventListener('click', (ev) => {
+              const email = ev.currentTarget.getAttribute('data-email'); if (!email) return; selected.delete(email); renderSelected();
+            }));
+          }
+
+          function addEmailsToSelection(list) {
+            let added = 0; const reEmail = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/ig;
+            for (const raw of list) {
+              const s = String(raw || '');
+              const matches = s.match(reEmail);
+              if (matches) { matches.forEach(m => { if (!selected.has(m.toLowerCase())) { selected.add(m.toLowerCase()); added++; } }); }
+            }
+            if (added > 0) renderSelected();
+            return added;
+          }
+
+          bulkParseBtn.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            const text = String(bulkPasteArea.value || '');
+            const chunks = text.split(/[\n,;\t\s]+/).filter(Boolean);
+            const added = addEmailsToSelection(chunks);
+            showMsg(bulkMsg, added > 0 ? `${added} email(s) ajouté(s)` : 'Aucun email détecté', added > 0);
+          });
+          bulkFileInput.addEventListener('change', () => {
+            const f = bulkFileInput.files?.[0]; if (!f) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+              const text = String(reader.result || '');
+              const rows = text.split(/[\r\n]+/);
+              const cells = rows.flatMap(r => r.split(/[;,\t]+/));
+              const added = addEmailsToSelection(cells);
+              showMsg(bulkMsg, added > 0 ? `${added} email(s) ajouté(s)` : 'Aucun email détecté', added > 0);
+            };
+            reader.readAsText(f);
+          });
+
+          bulkBanBtn.addEventListener('click', async () => {
+            const emails = Array.from(selected.values());
+            if (emails.length === 0) return showMsg(bulkMsg, 'Sélection vide', false);
+            try {
+              setLoading(true);
+              const payload = { emails, reason: String(bulkReason.value || ''), time: Number(bulkTime.value || '-1') };
+              const res = await fetch('/api/users/bans/emails/bulk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+              if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e?.error || 'bulk_failed'); }
+              const out = await res.json();
+              const created = out?.created?.length || 0;
+              const skipped = out?.alreadyBanned?.length || 0;
+              const invalid = out?.invalid?.length || 0;
+              const forbidden = out?.skippedForbidden?.length || 0;
+              const extra = forbidden > 0 ? " (interdits = auto‑ban, admin ou rôle ≥ au vôtre)" : "";
+              showMsg(bulkMsg, `Créés: ${created} | Existants: ${skipped} | Invalides: ${invalid} | Interdits: ${forbidden}${extra}`, true);
+              // retirer de la sélection ceux qui sont créés ou déjà bannis
+              [...(out?.created || []), ...(out?.alreadyBanned || [])].forEach((em) => selected.delete(String(em).toLowerCase()));
+              renderSelected();
+              await fetchList();
+            } catch (err) { showMsg(bulkMsg, 'Erreur pendant le ban massif', false); }
+            finally { setLoading(false); }
+          });
+        })();
+      </script>
+
+      <%- include('../../partials/footer.ejs') -%>

@@ -1,5 +1,10 @@
 import { FastifyInstance } from "fastify";
-import { Announcement, Prisma, PrismaClient, Role } from "@plinkk/prisma/generated/prisma/client";
+import {
+  Announcement,
+  Prisma,
+  PrismaClient,
+  Role,
+} from "@plinkk/prisma/generated/prisma/client";
 import { replyView, getActiveAnnouncementsForUser } from "../../lib/replyView";
 import { verifyRoleIsStaff } from "../../lib/verifyRole";
 
@@ -300,7 +305,10 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       }
       if (targetRoles.length) {
         await prisma.announcementRoleTarget.createMany({
-          data: targetRoles.map((r) => ({ announcementId: ann.id, roleId: r.id })),
+          data: targetRoles.map((r) => ({
+            announcementId: ann.id,
+            roleId: r.id,
+          })),
         });
       }
     }
@@ -366,19 +374,15 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.get("/", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) {
-      return reply.redirect(
-        `/login?returnTo=${encodeURIComponent("/admin")}`
-      );
+      return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin")}`);
     }
 
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      include: { role: true }
+      include: { role: true },
     });
     if (!userInfo) {
-      return reply.redirect(
-        `/login?returnTo=${encodeURIComponent("/admin")}`
-      );
+      return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin")}`);
     }
     if (!verifyRoleIsStaff(userInfo.role)) {
       request.log?.info(
@@ -387,7 +391,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       );
       return reply.redirect("/");
     }
-    const [users, totals] = await Promise.all([
+    const [usersRaw, totals] = await Promise.all([
       prisma.user.findMany({
         // Voir tous les utilisateurs pour l'admin (pas seulement isPublic)
         select: {
@@ -401,7 +405,16 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
           createdAt: true,
           twoFactorEnabled: true,
           twoFactorSecret: true,
-          plinkks: { select: { id: true, name: true, slug: true, isDefault: true } },
+          plinkks: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              isDefault: true,
+              isActive: true,
+              views: true,
+            },
+          },
         },
         orderBy: { createdAt: "desc" },
       }),
@@ -413,18 +426,44 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
         const totalPrivate = totalUsers - totalPublic;
         const allRoles = await prisma.role.findMany({
           where: {
-            name: { in: ["ADMIN", "DEVELOPER", "MODERATOR"] }
+            name: { in: ["ADMIN", "DEVELOPER", "MODERATOR"] },
           },
           include: {
-            users: true
-          }
-        })
+            users: true,
+          },
+        });
         // Sum users for role 'MODERATOR' if present, otherwise fallback to 0
-        const moderatorsRole = allRoles.find(r => r.name === 'MODERATOR');
-        const moderators = moderatorsRole ? (moderatorsRole.users?.length || 0) : 0;
+        const moderatorsRole = allRoles.find((r) => r.name === "MODERATOR");
+        const moderators = moderatorsRole
+          ? moderatorsRole.users?.length || 0
+          : 0;
         return { totalUsers, totalPublic, totalPrivate, moderators };
       })(),
     ]);
+
+    // Exclure les utilisateurs bannis par email (bans actifs uniquement)
+    let users = usersRaw;
+    try {
+      const bans = await prisma.bannedEmail.findMany({
+        where: { revoquedAt: null },
+      });
+      const now = Date.now();
+      const activeEmails = new Set(
+        bans
+          .filter((b) => {
+            if (b.revoquedAt) return false;
+            if (b.time == null || b.time < 0) return true; // permanent
+            const until = new Date(b.createdAt).getTime() + b.time * 60000;
+            return until > now;
+          })
+          .map((b) => String(b.email).toLowerCase())
+      );
+      users = users.filter(
+        (u) => !activeEmails.has(String(u.email).toLowerCase())
+      );
+    } catch (e) {
+      request.log?.warn({ e }, "Failed to filter banned users");
+    }
 
     // Also fetch recent submitted themes for quick moderation view
     const pendingThemes = await prisma.theme.findMany({
@@ -441,7 +480,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       take: 10,
     });
 
-    let publicPath
+    let publicPath;
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
@@ -453,7 +492,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       users,
       totals,
       pendingThemes,
-      publicPath
+      publicPath,
     });
   });
 
@@ -467,7 +506,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      include: { role: true }
+      include: { role: true },
     });
     if (!userInfo) {
       return reply.redirect(
@@ -481,7 +520,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       );
       return reply.redirect("/");
     }
-    let publicPath
+    let publicPath;
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
@@ -489,7 +528,9 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
-    return replyView(reply, "dashboard/admin/stats.ejs", userInfo, { publicPath });
+    return replyView(reply, "dashboard/admin/stats.ejs", userInfo, {
+      publicPath,
+    });
   });
 
   // Admin API: séries d'inscriptions d'utilisateurs par jour (filtrable)
@@ -500,12 +541,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       where: { id: userId },
       select: { role: true },
     });
-    if (
-      !(
-        me &&
-        (verifyRoleIsStaff(me.role))
-      )
-    ) {
+    if (!(me && verifyRoleIsStaff(me.role))) {
       return reply.code(403).send({ error: "forbidden" });
     }
     const {
@@ -513,7 +549,12 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       to,
       role = "all",
       visibility = "all",
-    } = request.query as { from: string, to: string, role: string, visibility: string };
+    } = request.query as {
+      from: string;
+      to: string;
+      role: string;
+      visibility: string;
+    };
     // default range: dernière 30j (UTC)
     const now = new Date();
     const end = to
@@ -538,7 +579,9 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       const d = String(dt.getUTCDate()).padStart(2, "0");
       return `${y}-${m}-${d}`;
     };
-    const where: Prisma.UserWhereInput = { createdAt: { gte: start, lte: end } };
+    const where: Prisma.UserWhereInput = {
+      createdAt: { gte: start, lte: end },
+    };
     if (role && role !== "all") where.role.name = role;
     if (visibility && visibility !== "all")
       where.isPublic = visibility === "public";
@@ -572,12 +615,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       where: { id: userId },
       select: { role: true },
     });
-    if (
-      !(
-        me &&
-        (verifyRoleIsStaff(me.role))
-      )
-    ) {
+    if (!(me && verifyRoleIsStaff(me.role))) {
       return reply.code(403).send({ error: "forbidden" });
     }
     const {
@@ -585,7 +623,12 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       to,
       role = "all",
       visibility = "all",
-    } = request.query as { from: string, to: string, role: string, visibility: string };
+    } = request.query as {
+      from: string;
+      to: string;
+      role: string;
+      visibility: string;
+    };
     const now = new Date();
     const end = to
       ? new Date(to + "T23:59:59.999Z")
@@ -603,26 +646,185 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     const start = from
       ? new Date(from + "T00:00:00.000Z")
       : new Date(end.getTime() - 29 * 86400000);
-    const where: Prisma.UserWhereInput = { createdAt: { gte: start, lte: end } };
+    const where: Prisma.UserWhereInput = {
+      createdAt: { gte: start, lte: end },
+    };
     if (role && role !== "all") where.role.name = role;
     if (visibility && visibility !== "all")
       where.isPublic = visibility === "public";
     const rows = await prisma.user.findMany({
       where,
-      include: { role: true }
+      include: { role: true },
     });
     const total = rows.length;
     const publics = rows.filter((r) => r.isPublic).length;
     const privates = total - publics;
-    const byRole: Record<string, number> = {
-      USER: 0,
-      MODERATOR: 0,
-      DEVELOPER: 0,
-      ADMIN: 0,
-    };
+    const byRole: Record<string, number> = {};
     rows.forEach((r) => {
-      byRole[r.role.name] = (byRole[r.role.name] || 0) + 1;
+      const name = r.role?.name || 'UNKNOWN';
+      byRole[name] = (byRole[name] || 0) + 1;
     });
     return reply.send({ total, publics, privates, byRole });
+  });
+
+  // Admin API: séries de connexions (basées sur lastLogin, une fois par utilisateur dans l'intervalle)
+  fastify.get("/stats/logins/series", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: "forbidden" });
+    const { from, to } = request.query as { from?: string; to?: string };
+    const now = new Date();
+    const end = to
+      ? new Date(to + "T23:59:59.999Z")
+      : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
+    const start = from ? new Date(from + "T00:00:00.000Z") : new Date(end.getTime() - 29 * 86400000);
+    const fmt = (dt: Date) => {
+      const y = dt.getUTCFullYear(); const m = String(dt.getUTCMonth()+1).padStart(2,'0'); const d = String(dt.getUTCDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    };
+    const rows = await prisma.user.findMany({ where: { lastLogin: { gte: start, lte: end } }, select: { lastLogin: true } });
+    const byDate = new Map<string, number>();
+    for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) byDate.set(fmt(t), 0);
+    for (const r of rows) { const key = fmt(new Date(r.lastLogin)); if (byDate.has(key)) byDate.set(key, (byDate.get(key) || 0) + 1); }
+    const series = Array.from(byDate.entries()).sort((a,b)=>a[0].localeCompare(b[0])).map(([date,count])=>({date, count}));
+    return reply.send({ from: fmt(start), to: fmt(end), series });
+  });
+
+  // Admin API: liste des connexions récentes (top N)
+  fastify.get("/stats/logins/recent", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: "forbidden" });
+    const limit = Math.min(50, Math.max(1, Number((request.query as any)?.limit || 20)));
+    const rows = await prisma.user.findMany({
+      select: { id: true, userName: true, email: true, lastLogin: true, role: true },
+      orderBy: { lastLogin: 'desc' },
+      take: limit,
+    });
+    return reply.send({ users: rows });
+  });
+
+  // Admin API: séries des bans (créés/révoqués par jour) + résumé
+  fastify.get("/stats/bans/series", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: "forbidden" });
+    const { from, to } = request.query as { from?: string; to?: string };
+    const now = new Date();
+    const end = to
+      ? new Date(to + "T23:59:59.999Z")
+      : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
+    const start = from ? new Date(from + "T00:00:00.000Z") : new Date(end.getTime() - 29 * 86400000);
+    const fmt = (dt: Date) => { const y=dt.getUTCFullYear(); const m=String(dt.getUTCMonth()+1).padStart(2,'0'); const d=String(dt.getUTCDate()).padStart(2,'0'); return `${y}-${m}-${d}`; };
+    const bansCreated = await prisma.bannedEmail.findMany({ where: { createdAt: { gte: start, lte: end } }, select: { createdAt: true } });
+    const bansRevoked = await prisma.bannedEmail.findMany({ where: { revoquedAt: { not: null, gte: start, lte: end } }, select: { revoquedAt: true } });
+    const byDate = new Map<string, { created: number; revoked: number }>();
+    for (let t=new Date(start.getTime()); t<=end; t=new Date(t.getTime()+86400000)) byDate.set(fmt(t), {created:0, revoked:0});
+    for (const b of bansCreated) { const key = fmt(new Date(b.createdAt)); const v = byDate.get(key); if (v) v.created += 1; }
+    for (const b of bansRevoked) { const dt = (b).revoquedAt as Date; const key = fmt(new Date(dt)); const v = byDate.get(key); if (v) v.revoked += 1; }
+    const series = Array.from(byDate.entries()).sort((a,b)=>a[0].localeCompare(b[0])).map(([date,v])=>({ date, created: v.created, revoked: v.revoked }));
+    // résumé actuel
+    const bansAll = await prisma.bannedEmail.findMany();
+    const activeNow = (()=>{
+      const nowTs = Date.now();
+      let c=0; for (const b of bansAll) {
+        if (b.revoquedAt) continue;
+        if (b.time == null || b.time < 0) { c++; continue; }
+        const until = new Date(b.createdAt).getTime() + b.time*60000; if (until > nowTs) c++;
+      }
+      return c;
+    })();
+    const totalBanned = bansAll.length;
+    const totalRevoked = bansAll.filter(b=>!!b.revoquedAt).length;
+    return reply.send({ from: fmt(start), to: fmt(end), series, summary: { activeNow, totalBanned, totalRevoked } });
+  });
+
+  // Admin API: séries par visibilité (public/privé) par jour
+  fastify.get("/stats/users/series/by-visibility", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: "forbidden" });
+    const { from, to } = request.query as { from?: string; to?: string };
+    const now = new Date();
+    const end = to
+      ? new Date(to + "T23:59:59.999Z")
+      : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
+    const start = from ? new Date(from + "T00:00:00.000Z") : new Date(end.getTime() - 29 * 86400000);
+    const fmt = (dt: Date) => {
+      const y = dt.getUTCFullYear();
+      const m = String(dt.getUTCMonth() + 1).padStart(2, "0");
+      const d = String(dt.getUTCDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    };
+    const rows = await prisma.user.findMany({
+      where: { createdAt: { gte: start, lte: end } },
+      select: { createdAt: true, isPublic: true },
+    });
+    const byDate = new Map<string, { public: number; private: number }>();
+    for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
+      byDate.set(fmt(t), { public: 0, private: 0 });
+    }
+    for (const r of rows) {
+      const key = fmt(new Date(r.createdAt));
+      const bucket = byDate.get(key);
+      if (bucket) {
+        if (r.isPublic) bucket.public += 1;
+        else bucket.private += 1;
+      }
+    }
+    const series = Array.from(byDate.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, v]) => ({ date, public: v.public, private: v.private }));
+    return reply.send({ from: fmt(start), to: fmt(end), series });
+  });
+
+  // Admin API: séries par rôle par jour (rôles dynamiques selon BDD)
+  fastify.get("/stats/users/series/by-role", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const me = await prisma.user.findFirst({ where: { id: userId }, select: { role: true } });
+    if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: "forbidden" });
+    const { from, to } = request.query as { from?: string; to?: string };
+    const now = new Date();
+    const end = to
+      ? new Date(to + "T23:59:59.999Z")
+      : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
+    const start = from ? new Date(from + "T00:00:00.000Z") : new Date(end.getTime() - 29 * 86400000);
+    const fmt = (dt: Date) => {
+      const y = dt.getUTCFullYear();
+      const m = String(dt.getUTCMonth() + 1).padStart(2, "0");
+      const d = String(dt.getUTCDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    };
+    const rows = await prisma.user.findMany({
+      where: { createdAt: { gte: start, lte: end } },
+      select: { createdAt: true, role: { select: { name: true } } },
+    });
+    // Découvrir dynamiquement tous les rôles présents dans l'intervalle
+    const roleSet = new Set<string>();
+    for (const r of rows) { if (r.role?.name) roleSet.add(r.role.name); }
+    const roles = Array.from(roleSet.values()).sort();
+    const makeZero = () => Object.fromEntries(roles.map(r=>[r,0])) as Record<string, number>;
+    const byDate = new Map<string, Record<string, number>>();
+    for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
+      byDate.set(fmt(t), makeZero());
+    }
+    for (const r of rows) {
+      const key = fmt(new Date(r.createdAt));
+      const bucket = byDate.get(key);
+      if (bucket && r.role?.name) {
+        const name = r.role.name;
+        if (bucket[name] === undefined) bucket[name] = 0;
+        bucket[name] += 1;
+      }
+    }
+    const series = Array.from(byDate.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, v]) => ({ date, ...v }));
+    return reply.send({ from: fmt(start), to: fmt(end), roles, series });
   });
 }

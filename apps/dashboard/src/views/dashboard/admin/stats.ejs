@@ -1,284 +1,823 @@
-<%- include('../../partials/head.ejs', { title: 'Admin - Statistiques', description: 'Statistiques des utilisateurs', robots: 'noindex,nofollow' }) %>
-<%- include('../../partials/header-dash.ejs', { user: user }) %>
-<%- include('../../partials/admin-nav.ejs', { user: user }) %>
+<%- include('../../partials/head.ejs', { title: 'Admin - Statistiques' , description: 'Statistiques des utilisateurs' ,
+  robots: 'noindex,nofollow' }) %>
+  <%- include('../../partials/header-dash.ejs', { user: user }) %>
+    <%- include('../../partials/admin-nav.ejs', { user: user }) %>
 
-<main class="max-w-7xl mx-auto p-4 space-y-5">
-  <div>
-    <h1 class="text-2xl font-bold tracking-tight">Statistiques — Utilisateurs</h1>
-    <p class="text-xs text-slate-400">Filtre par dates, rôle et visibilité. Graphique des inscriptions/jour.</p>
-  </div>
+      <main class="max-w-7xl mx-auto p-4 space-y-5">
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight">Statistiques — Utilisateurs</h1>
+          <p class="text-xs text-slate-400">Filtre par dates, rôle et visibilité. Graphique des inscriptions/jour.</p>
+        </div>
 
-  <!-- Filtres -->
-  <section class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3">
-      <label class="text-sm">Du
-        <input type="date" id="from" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-700" />
-      </label>
-      <label class="text-sm">Au
-        <input type="date" id="to" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-700" />
-      </label>
-    </div>
-    <div class="mt-3 flex flex-wrap items-center gap-2">
-      <div class="flex items-center gap-2 text-sm">
-        <label for="customDays" class="text-slate-300">Durée</label>
-        <input id="customDays" type="number" min="1" value="15" class="w-20 px-2 py-1 rounded bg-slate-900/60 border border-slate-700" />
-        <span class="text-slate-400">jours</span>
-      </div>
-      <button id="last24h" class="px-3 py-2 rounded bg-slate-800 border border-slate-700 text-slate-200 text-sm">24 h</button>
-      <button id="last7" class="px-3 py-2 rounded bg-slate-800 border border-slate-700 text-slate-200 text-sm">7 jours</button>
-      <button id="last30" class="px-3 py-2 rounded bg-slate-800 border border-slate-700 text-slate-200 text-sm">30 jours</button>
-      <button id="last90" class="px-3 py-2 rounded bg-slate-800 border border-slate-700 text-slate-200 text-sm">90 jours</button>
-    </div>
-  </section>
+        <!-- Onglets -->
+        <nav class="flex items-center gap-2 text-sm mb-2" role="tablist" aria-label="Statistiques">
+          <button id="tabSignups" class="px-3 py-1.5 rounded bg-indigo-600 text-white" role="tab"
+            aria-selected="true">Inscriptions</button>
+          <button id="tabLogins" class="px-3 py-1.5 rounded bg-slate-800 text-slate-200 border border-slate-700"
+            role="tab" aria-selected="false">Connexions</button>
+          <button id="tabBans" class="px-3 py-1.5 rounded bg-slate-800 text-slate-200 border border-slate-700"
+            role="tab" aria-selected="false">Bans</button>
+        </nav>
 
-
-  <!-- Graphique -->
-  <section class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
-    <div class="flex items-center justify-between mb-2">
-      <h2 class="font-medium">Inscriptions par jour</h2>
-      <div class="text-xs text-slate-400" id="rangeLabel"></div>
-    </div>
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch">
-      <div class="lg:col-span-4">
-        <canvas id="chart" class="w-full block" style="width:100%" height="260"></canvas>
-      </div>
-      <aside class="lg:col-span-1">
-        <div class="p-3">
-          <div class="text-xs text-slate-400 mb-2">Résumé</div>
-          <div class="bg-slate-900/50 border border-slate-800 rounded overflow-hidden">
-            <div class="flex items-center justify-between px-3 py-2 border-b border-slate-800 bg-gradient-to-r from-indigo-600/6 to-transparent">
-              <div class="text-sm text-slate-300">Total</div>
-              <div id="statTotal" class="text-lg font-bold text-white">–</div>
+        <!-- Filtres -->
+        <section class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3">
+            <label class="text-sm">Du
+              <input type="date" id="from"
+                class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-700" />
+            </label>
+            <label class="text-sm">Au
+              <input type="date" id="to"
+                class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-700" />
+            </label>
+          </div>
+          <div class="mt-3 flex flex-wrap items-center gap-2">
+            <div class="flex items-center gap-2 text-sm">
+              <label for="customDays" class="text-slate-300">Durée</label>
+              <input id="customDays" type="number" min="1" value="15"
+                class="w-20 px-2 py-1 rounded bg-slate-900/60 border border-slate-700" />
+              <span class="text-slate-400">jours</span>
             </div>
-            <div class="flex items-center justify-between px-3 py-2 border-b border-slate-800">
-              <div class="text-sm text-slate-400">Publics</div>
-              <div id="statPub" class="text-sm font-semibold text-slate-100">–</div>
+            <button id="last24h"
+              class="px-3 py-2 rounded bg-slate-800 border border-slate-700 text-slate-200 text-sm">24 h</button>
+            <button id="last7" class="px-3 py-2 rounded bg-slate-800 border border-slate-700 text-slate-200 text-sm">7
+              jours</button>
+            <button id="last30" class="px-3 py-2 rounded bg-slate-800 border border-slate-700 text-slate-200 text-sm">30
+              jours</button>
+            <button id="last90" class="px-3 py-2 rounded bg-slate-800 border border-slate-700 text-slate-200 text-sm">90
+              jours</button>
+          </div>
+        </section>
+
+
+        <!-- PANNEAU INSCRIPTIONS -->
+        <section id="panelSignups" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
+          <nav class="flex flex-wrap items-center gap-2 text-xs mb-3" role="tablist"
+            aria-label="Sous-stats Inscriptions">
+            <button id="tabSU1" class="px-2.5 py-1 rounded bg-indigo-600 text-white" role="tab" aria-selected="true">Par
+              jour</button>
+            <button id="tabSU2" class="px-2.5 py-1 rounded bg-slate-800 text-slate-200 border border-slate-700"
+              role="tab" aria-selected="false">Visibilité</button>
+            <button id="tabSU3" class="px-2.5 py-1 rounded bg-slate-800 text-slate-200 border border-slate-700"
+              role="tab" aria-selected="false">Rôles</button>
+            <button id="tabSU4" class="px-2.5 py-1 rounded bg-slate-800 text-slate-200 border border-slate-700"
+              role="tab" aria-selected="false">Cumul</button>
+          </nav>
+          <section id="su1" class="rounded-lg">
+            <div class="flex items-center justify-between mb-2">
+              <h2 class="font-medium">Inscriptions par jour</h2>
+              <div class="text-xs text-slate-400" id="rangeLabel"></div>
             </div>
-            <div class="flex items-center justify-between px-3 py-2 border-b border-slate-800">
-              <div class="text-sm text-slate-400">Privés</div>
-              <div id="statPriv" class="text-sm font-semibold text-slate-100">–</div>
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch">
+              <div class="lg:col-span-4 relative" id="chart1Wrap">
+                <canvas id="chart" class="w-full block" style="width:100%" height="260"></canvas>
+                <div id="tt1"
+                  class="hidden absolute px-2.5 py-1.5 text-xs rounded bg-slate-800/95 border border-slate-700 text-slate-100 shadow z-10">
+                </div>
+                <div id="load1" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/40">
+                  <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2">
+                  </div>
+                  <span class="text-xs text-slate-300">Chargement…</span>
+                </div>
+              </div>
+              <aside class="lg:col-span-1">
+                <div class="p-3">
+                  <div class="text-xs text-slate-400 mb-2">Résumé</div>
+                  <div class="bg-slate-900/50 border border-slate-800 rounded overflow-hidden">
+                    <div
+                      class="flex items-center justify-between px-3 py-2 border-b border-slate-800 bg-gradient-to-r from-indigo-600/6 to-transparent">
+                      <div class="text-sm text-slate-300">Total</div>
+                      <div id="statTotal" class="text-lg font-bold text-white">–</div>
+                    </div>
+                    <div class="flex items-center justify-between px-3 py-2 border-b border-slate-800">
+                      <div class="text-sm text-slate-400">Publics</div>
+                      <div id="statPub" class="text-sm font-semibold text-slate-100">–</div>
+                    </div>
+                    <div class="flex items-center justify-between px-3 py-2 border-b border-slate-800">
+                      <div class="text-sm text-slate-400">Privés</div>
+                      <div id="statPriv" class="text-sm font-semibold text-slate-100">–</div>
+                    </div>
+                    <div class="flex items-center justify-between px-3 py-2">
+                      <div class="text-sm text-slate-400">Staff</div>
+                      <div id="statStaff" class="text-sm font-semibold text-slate-100">–</div>
+                    </div>
+                  </div>
+                </div>
+              </aside>
             </div>
-            <div class="flex items-center justify-between px-3 py-2">
-              <div class="text-sm text-slate-400">Staff</div>
-              <div id="statStaff" class="text-sm font-semibold text-slate-100">–</div>
+          </section>
+        </section>
+
+        <!-- Graphique: Public vs Privé par jour -->
+        <section id="su2" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4 hidden">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="font-medium">Visibilité des nouvelles inscriptions</h2>
+            <div class="text-xs text-slate-400" id="rangeLabel2"></div>
+          </div>
+          <div class="relative" id="chart2Wrap">
+            <canvas id="chartVisibility" class="w-full block" style="width:100%" height="260"></canvas>
+            <div id="tt2"
+              class="hidden absolute px-2.5 py-1.5 text-xs rounded bg-slate-800/95 border border-slate-700 text-slate-100 shadow z-10">
+            </div>
+            <div id="load2" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/40">
+              <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2"></div>
+              <span class="text-xs text-slate-300">Chargement…</span>
             </div>
           </div>
-        </div>
-      </aside>
-    </div>
-  </section>
-</main>
+          <div class="mt-2 flex items-center gap-3 text-xs text-slate-400">
+            <span class="inline-flex items-center gap-1"><span
+                class="inline-block w-3 h-1 rounded bg-emerald-500"></span>Public</span>
+            <span class="inline-flex items-center gap-1"><span
+                class="inline-block w-3 h-1 rounded bg-rose-500"></span>Privé</span>
+          </div>
+        </section>
 
-<script>
-(function(){
-  const $ = (s,r=document)=>r.querySelector(s);
-  function fmtDate(d){ const y=d.getUTCFullYear(); const m=String(d.getUTCMonth()+1).padStart(2,'0'); const dd=String(d.getUTCDate()).padStart(2,'0'); return `${y}-${m}-${dd}`; }
-  function setRange(days){ const to=new Date(); const from=new Date(to.getTime()- (days-1)*86400000); $('#from').value=fmtDate(from); $('#to').value=fmtDate(to); }
-  // init défaut: 30 jours
-  if(!$('#from').value || !$('#to').value) setRange(30);
+        <!-- Graphique: Inscriptions par rôle -->
+        <section id="su3" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4 hidden">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="font-medium">Inscriptions par rôle</h2>
+            <div class="text-xs text-slate-400" id="rangeLabel3"></div>
+          </div>
+          <div class="relative" id="chart3Wrap">
+            <canvas id="chartRoles" class="w-full block" style="width:100%" height="280"></canvas>
+            <div id="tt3"
+              class="hidden absolute px-2.5 py-1.5 text-xs rounded bg-slate-800/95 border border-slate-700 text-slate-100 shadow z-10">
+            </div>
+            <div id="load3" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/40">
+              <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2"></div>
+              <span class="text-xs text-slate-300">Chargement…</span>
+            </div>
+          </div>
+          <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-400">
+            <span class="inline-flex items-center gap-1"><span
+                class="inline-block w-3 h-1 rounded bg-slate-400"></span>USER</span>
+            <span class="inline-flex items-center gap-1"><span
+                class="inline-block w-3 h-1 rounded bg-amber-500"></span>MODERATOR</span>
+            <span class="inline-flex items-center gap-1"><span
+                class="inline-block w-3 h-1 rounded bg-emerald-500"></span>DEVELOPER</span>
+            <span class="inline-flex items-center gap-1"><span
+                class="inline-block w-3 h-1 rounded bg-rose-500"></span>ADMIN</span>
+          </div>
+        </section>
 
-  const ctx = $('#chart').getContext('2d');
-  let lastSeries = [];
-  function renderChart(series){
-    lastSeries = series || [];
-    const labels = lastSeries.map(p=>p.date);
-    const data = lastSeries.map(p=>p.count);
+        <!-- Graphique: Cumul des inscriptions -->
+        <section id="su4" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4 hidden">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="font-medium">Cumul des inscriptions</h2>
+            <div class="text-xs text-slate-400" id="rangeLabel4"></div>
+          </div>
+          <div class="relative" id="chart4Wrap">
+            <canvas id="chartCumul" class="w-full block" style="width:100%" height="240"></canvas>
+            <div id="tt4"
+              class="hidden absolute px-2.5 py-1.5 text-xs rounded bg-slate-800/95 border border-slate-700 text-slate-100 shadow z-10">
+            </div>
+            <div id="load4" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/40">
+              <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2"></div>
+              <span class="text-xs text-slate-300">Chargement…</span>
+            </div>
+          </div>
+        </section>
 
-    // Gestion HiDPI et largeur 100%
-    const dpr = window.devicePixelRatio || 1;
-    const cssW = ctx.canvas.clientWidth;
-    // IMPORTANT: utiliser la hauteur CSS pour éviter l'agrandissement cumulatif
-    const cssH = 260;
-    ctx.canvas.width = Math.max(1, Math.floor(cssW * dpr));
-    ctx.canvas.height = Math.floor(cssH * dpr);
-    const w = ctx.canvas.width;
-    const h = ctx.canvas.height;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // coord en CSS px
-    ctx.clearRect(0,0,cssW,cssH);
+        <!-- PANNEAU CONNEXIONS -->
+        <section id="panelLogins" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4 hidden">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="font-medium">Connexions par jour</h2>
+            <div class="text-xs text-slate-400" id="rangeLabelL"></div>
+          </div>
+          <div class="relative" id="chartLWrap">
+            <canvas id="chartLogins" class="w-full block" style="width:100%" height="260"></canvas>
+            <div id="ttL"
+              class="hidden absolute px-2.5 py-1.5 text-xs rounded bg-slate-800/95 border border-slate-700 text-slate-100 shadow z-10">
+            </div>
+            <div id="loadL" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/40">
+              <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2"></div>
+              <span class="text-xs text-slate-300">Chargement…</span>
+            </div>
+          </div>
+          <div class="mt-4">
+            <h3 class="text-sm text-slate-300 mb-2">Connexions récentes</h3>
+            <div id="recentLogins" class="text-xs text-slate-300 grid md:grid-cols-2 gap-2"></div>
+          </div>
+        </section>
 
-    const padL = 40; // padding gauche pour labels Y
-    const padB = 28; // padding bas pour labels X
-    const padT = 10; const padR = 10;
-    const innerW = cssW - padL - padR;
-    const innerH = cssH - padT - padB;
+        <!-- PANNEAU BANS -->
+        <section id="panelBans" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4 hidden">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="font-medium">Bans par jour</h2>
+            <div class="text-xs text-slate-400" id="rangeLabelB"></div>
+          </div>
+          <div class="relative" id="chartBWrap">
+            <canvas id="chartBans" class="w-full block" style="width:100%" height="260"></canvas>
+            <div id="ttB"
+              class="hidden absolute px-2.5 py-1.5 text-xs rounded bg-slate-800/95 border border-slate-700 text-slate-100 shadow z-10">
+            </div>
+            <div id="loadB" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/40">
+              <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2"></div>
+              <span class="text-xs text-slate-300">Chargement…</span>
+            </div>
+          </div>
+          <div class="mt-3 text-xs text-slate-400" id="banSummary"></div>
+        </section>
+      </main>
 
-    const maxVal = Math.max(1, ...data);
-    const yTicks = 5;
-    const stepY = Math.max(1, Math.ceil(maxVal / yTicks));
-    const maxRounded = Math.max(stepY, stepY * yTicks);
-    const stepX = data.length > 1 ? (innerW / (data.length - 1)) : 0;
-    const scaleY = innerH / maxRounded;
+      <script>
+        (function () {
+          // Utilitaires DOM
+          const $ = (s, r = document) => r.querySelector(s);
+          const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+          // Onglets panneaux
+          function activateTab(which) {
+            const tabs = { signups: $('#tabSignups'), logins: $('#tabLogins'), bans: $('#tabBans') };
+            const panels = { signups: $('#panelSignups'), logins: $('#panelLogins'), bans: $('#panelBans') };
+            Object.entries(tabs).forEach(([k, btn]) => {
+              const active = k === which; btn.setAttribute('aria-selected', active ? 'true' : 'false');
+              btn.classList.toggle('bg-indigo-600', active); btn.classList.toggle('text-white', active);
+              btn.classList.toggle('bg-slate-800', !active); btn.classList.toggle('text-slate-200', !active); btn.classList.toggle('border', !active); btn.classList.toggle('border-slate-700', !active);
+            });
+            Object.entries(panels).forEach(([k, el]) => { el.classList.toggle('hidden', k !== which); });
+            // Après changement de visibilité, forcer un re-render une fois le layout stabilisé
+            scheduleRerender();
+          }
+          $('#tabSignups').addEventListener('click', () => { activateTab('signups'); });
+          $('#tabLogins').addEventListener('click', () => { activateTab('logins'); applyLogins(); });
+          $('#tabBans').addEventListener('click', () => { activateTab('bans'); applyBans(); });
+          activateTab('signups');
 
-    // axes
-    ctx.strokeStyle = 'rgba(148,163,184,0.35)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(padL, padT);
-    ctx.lineTo(padL, padT + innerH);
-    ctx.lineTo(padL + innerW, padT + innerH);
-    ctx.stroke();
+          // Sous-onglets Inscriptions
+          let currentSub = 'su1';
+          function activateSub(which) {
+            const tabs = { su1: $('#tabSU1'), su2: $('#tabSU2'), su3: $('#tabSU3'), su4: $('#tabSU4') };
+            const sections = { su1: $('#su1'), su2: $('#su2'), su3: $('#su3'), su4: $('#su4') };
+            Object.entries(tabs).forEach(([k, btn]) => {
+              if (!btn) return; const active = k === which; btn.setAttribute('aria-selected', active ? 'true' : 'false');
+              btn.classList.toggle('bg-indigo-600', active); btn.classList.toggle('text-white', active);
+              btn.classList.toggle('bg-slate-800', !active); btn.classList.toggle('text-slate-200', !active); btn.classList.toggle('border', !active); btn.classList.toggle('border-slate-700', !active);
+            });
+            Object.entries(sections).forEach(([k, el]) => { if (el) el.classList.toggle('hidden', k !== which); });
+            currentSub = which;
+            // Re-render après affichage du sous-onglet
+            scheduleRerender();
+          }
+          $('#tabSU1')?.addEventListener('click', () => activateSub('su1'));
+          $('#tabSU2')?.addEventListener('click', () => activateSub('su2'));
+          $('#tabSU3')?.addEventListener('click', () => activateSub('su3'));
+          $('#tabSU4')?.addEventListener('click', () => activateSub('su4'));
+          activateSub('su1');
 
-    // grille et ticks Y
-    ctx.fillStyle = 'rgba(148,163,184,0.7)';
-    ctx.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle';
-    for(let y=0; y<=maxRounded; y+=stepY){
-      const py = padT + innerH - y*scaleY;
-      ctx.strokeStyle = 'rgba(148,163,184,0.15)';
-      ctx.beginPath(); ctx.moveTo(padL, py); ctx.lineTo(padL + innerW, py); ctx.stroke();
-      ctx.fillStyle = 'rgba(148,163,184,0.7)';
-      ctx.fillText(String(y), padL - 6, py);
-    }
+          // Re-render différé pour gérer les canvas initialement cachés
+          function scheduleRerender() {
+            // Deux RAF pour garantir que le layout est appliqué et les tailles CSS calculées
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                // Si le panneau Inscriptions est visible, re-render du sous-onglet courant
+                const isSignupsVisible = !document.getElementById('panelSignups')?.classList.contains('hidden');
+                if (isSignupsVisible) {
+                  rerenderCurrentSub();
+                }
+                // Si Connexions visible, re-render si données déjà chargées
+                const isLoginsVisible = !document.getElementById('panelLogins')?.classList.contains('hidden');
+                if (isLoginsVisible) {
+                  if (seriesL && seriesL.length) { renderChartL({ series: seriesL }, hoverIndexL); }
+                }
+                // Si Bans visible
+                const isBansVisible = !document.getElementById('panelBans')?.classList.contains('hidden');
+                if (isBansVisible) {
+                  if (seriesB && seriesB.length) { renderChartB({ series: seriesB }, hoverIndexB); }
+                }
+              });
+            });
+          }
 
-    // ticks X (dates espacées)
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
-    labels.forEach((lab, i)=>{
-      if(i % xLabelEvery !== 0 && i !== labels.length - 1) return;
-      const x = padL + i*stepX;
-      ctx.strokeStyle = 'rgba(148,163,184,0.15)';
-      ctx.beginPath(); ctx.moveTo(x, padT + innerH); ctx.lineTo(x, padT + innerH + 4); ctx.stroke();
-      const shortLab = lab?.slice(5) || '';// MM-DD si YYYY-MM-DD
-      ctx.fillStyle = 'rgba(148,163,184,0.7)';
-      ctx.fillText(shortLab, x, padT + innerH + 6);
-    });
+          function rerenderCurrentSub() {
+            switch (currentSub) {
+              case 'su1':
+                if (lastSeries && lastSeries.length) { renderChart(lastSeries, hoverIndex1); }
+                break;
+              case 'su2':
+                if (series2 && series2.length) { renderChart2({ series: series2 }, hoverIndex2); }
+                break;
+              case 'su3':
+                if (series3 && series3.length) { renderChart3({ series: series3 }, hoverIndex3); }
+                break;
+              case 'su4':
+                if (series4 && series4.length) { renderChart4(series4, hoverIndex4); }
+                break;
+            }
+          }
 
-    // polyline
-    ctx.strokeStyle = '#6366f1';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    data.forEach((v,i)=>{
-      const x = padL + i*stepX;
-      const y = padT + innerH - v*scaleY;
-      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    });
-    ctx.stroke();
+          function fmtDate(d) { const y = d.getUTCFullYear(); const m = String(d.getUTCMonth() + 1).padStart(2, '0'); const dd = String(d.getUTCDate()).padStart(2, '0'); return `${y}-${m}-${dd}`; }
+          function setRange(days) { const to = new Date(); const from = new Date(to.getTime() - (days - 1) * 86400000); $('#from').value = fmtDate(from); $('#to').value = fmtDate(to); }
+          // init défaut: 30 jours
+          if (!$('#from').value || !$('#to').value) setRange(30);
 
-    // points
-    ctx.fillStyle = '#818cf8';
-    data.forEach((v,i)=>{
-      const x = padL + i*stepX;
-      const y = padT + innerH - v*scaleY;
-      ctx.beginPath(); ctx.arc(x,y,2.5,0,Math.PI*2); ctx.fill();
-    });
+          // ---------- Chart 1: Inscriptions par jour (mono-série) ----------
+          const ctx = $('#chart').getContext('2d');
+          const wrap1 = document.getElementById('chart1Wrap');
+          const tt1 = document.getElementById('tt1');
+          let lastSeries = [];
+          let hoverIndex1 = -1;
+          function renderChart(series, hoverIndex = -1) {
+            lastSeries = Array.isArray(series) ? series : [];
+            hoverIndex1 = hoverIndex;
+            const labels = lastSeries.map(p => p.date);
+            const data = lastSeries.map(p => p.count);
 
-    // titres axes
-    ctx.fillStyle = 'rgba(148,163,184,0.9)';
-    ctx.font = '12px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-    // X
-    ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
-    ctx.fillText('Date', padL + innerW, padT + innerH + 24);
-    // Y
-    ctx.save();
-    ctx.translate(12, padT + innerH/2);
-    ctx.rotate(-Math.PI/2);
-    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-    ctx.fillText('Utilisateurs', 0, 0);
-    ctx.restore();
-  }
+            // Gestion HiDPI et largeur 100%
+            const dpr = window.devicePixelRatio || 1;
+            const cssW = ctx.canvas.clientWidth;
+            // IMPORTANT: utiliser la hauteur CSS pour éviter l'agrandissement cumulatif
+            const cssH = 260;
+            ctx.canvas.width = Math.max(1, Math.floor(cssW * dpr));
+            ctx.canvas.height = Math.floor(cssH * dpr);
+            const w = ctx.canvas.width;
+            const h = ctx.canvas.height;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // coord en CSS px
+            ctx.clearRect(0, 0, cssW, cssH);
 
-  async function fetchSeries(){
-    const q = new URLSearchParams({
-      from: $('#from').value,
-      to: $('#to').value,
-    });
-    const res = await fetch(`/admin/stats/users/series?${q.toString()}`);
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    return res.json();
-  }
-  async function fetchSummary(){
-    const q = new URLSearchParams({
-      from: $('#from').value,
-      to: $('#to').value,
-    });
-    const res = await fetch(`/admin/stats/users/summary?${q.toString()}`);
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    return res.json();
-  }
+            const padL = 40; // padding gauche pour labels Y
+            const padB = 28; // padding bas pour labels X
+            const padT = 10; const padR = 10;
+            const innerW = cssW - padL - padR;
+            const innerH = cssH - padT - padB;
 
-  async function apply(){
-    try{
-      const [seriesPayload, summary] = await Promise.all([fetchSeries(), fetchSummary()]);
-      $('#rangeLabel').textContent = `${seriesPayload.from} → ${seriesPayload.to}`;
-      renderChart(seriesPayload.series || []);
-      // résumé
-      $('#statTotal').textContent = (summary.total ?? 0);
-      $('#statPub').textContent = (summary.publics ?? 0);
-      $('#statPriv').textContent = (summary.privates ?? 0);
-      const staff = (summary.byRole?.ADMIN||0) + (summary.byRole?.DEVELOPER||0) + (summary.byRole?.MODERATOR||0);
-      $('#statStaff').textContent = staff;
-    } catch(e) {
-      console.error(e);
-    }
-  }
+            const maxVal = Math.max(1, ...data);
+            const yTicks = 5;
+            const stepY = Math.max(1, Math.ceil(maxVal / yTicks));
+            const maxRounded = Math.max(stepY, stepY * yTicks);
+            const stepX = data.length > 1 ? (innerW / (data.length - 1)) : 0;
+            const scaleY = innerH / maxRounded;
 
-  // setup preset buttons and custom-days input safely
-  const presetIds = ['last24h','last7','last30','last90'];
-  const presetButtons = presetIds.map(id=>document.getElementById(id));
-  function setActive(btn){
-    presetButtons.forEach(b=>{
-      if(!b) return;
-      b.classList.remove('bg-indigo-600','text-white','border-indigo-500');
-      b.classList.add('bg-slate-800','text-slate-200','border-slate-700');
-    });
-    if(btn){
-      btn.classList.remove('bg-slate-800','text-slate-200','border-slate-700');
-      btn.classList.add('bg-indigo-600','text-white','border-indigo-500');
-    }
-  }
+            // axes
+            ctx.strokeStyle = 'rgba(148,163,184,0.35)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padL, padT);
+            ctx.lineTo(padL, padT + innerH);
+            ctx.lineTo(padL + innerW, padT + innerH);
+            ctx.stroke();
 
-  presetIds.forEach(id=>{
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.addEventListener('click', (e)=>{
-      const val = id==='last24h'?1:(id==='last7'?7:(id==='last30'?30:90));
-      setRange(val);
-      setActive(e.currentTarget);
-      apply();
-    });
-  });
+            // grille et ticks Y
+            ctx.fillStyle = 'rgba(148,163,184,0.7)';
+            ctx.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            for (let y = 0; y <= maxRounded; y += stepY) {
+              const py = padT + innerH - y * scaleY;
+              ctx.strokeStyle = 'rgba(148,163,184,0.15)';
+              ctx.beginPath(); ctx.moveTo(padL, py); ctx.lineTo(padL + innerW, py); ctx.stroke();
+              ctx.fillStyle = 'rgba(148,163,184,0.7)';
+              ctx.fillText(String(y), padL - 6, py);
+            }
 
-  const customEl = document.getElementById('customDays');
-  if(customEl){
-    customEl.addEventListener('input', ()=>{
-      const n = Math.max(1, parseInt(customEl.value, 10) || 1);
-      setRange(n);
-      setActive(null);
-      apply();
-    });
-    customEl.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') {
-        ev.preventDefault();
-        const n = Math.max(1, parseInt(customEl.value, 10) || 1);
-        setRange(n);
-        setActive(null);
-        apply();
-      }
-    });
-  }
+            // ticks X (dates espacées)
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
+            labels.forEach((lab, i) => {
+              if (i % xLabelEvery !== 0 && i !== labels.length - 1) return;
+              const x = padL + i * stepX;
+              ctx.strokeStyle = 'rgba(148,163,184,0.15)';
+              ctx.beginPath(); ctx.moveTo(x, padT + innerH); ctx.lineTo(x, padT + innerH + 4); ctx.stroke();
+              const shortLab = lab?.slice(5) || '';// MM-DD si YYYY-MM-DD
+              ctx.fillStyle = 'rgba(148,163,184,0.7)';
+              ctx.fillText(shortLab, x, padT + innerH + 6);
+            });
 
-  // auto-apply when date inputs change (like presets/customDays)
-  const fromEl = document.getElementById('from');
-  const toEl = document.getElementById('to');
-  if(fromEl){
-    fromEl.addEventListener('change', ()=>{ setActive(null); apply(); });
-  }
-  if(toEl){
-    toEl.addEventListener('change', ()=>{ setActive(null); apply(); });
-  }
+            // polyline
+            ctx.strokeStyle = '#6366f1';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            data.forEach((v, i) => {
+              const x = padL + i * stepX;
+              const y = padT + innerH - v * scaleY;
+              if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
 
-  // auto-appliquer au chargement
-  apply();
+            // points
+            ctx.fillStyle = '#818cf8';
+            data.forEach((v, i) => {
+              const x = padL + i * stepX;
+              const y = padT + innerH - v * scaleY;
+              ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill();
+            });
 
-  // Re-rendu sur resize pour garder la largeur à 100%
-  window.addEventListener('resize', ()=>{
-    if(lastSeries && lastSeries.length){
-      renderChart(lastSeries);
-    }
-  });
-})();
-</script>
-</body>
-</html>
+            // hover highlight + tooltip
+            if (hoverIndex >= 0 && hoverIndex < data.length) {
+              const x = padL + hoverIndex * stepX;
+              const y = padT + innerH - data[hoverIndex] * scaleY;
+              // crosshair vertical
+              ctx.strokeStyle = 'rgba(99,102,241,0.35)';
+              ctx.lineWidth = 1;
+              ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + innerH); ctx.stroke();
+              // highlight point
+              ctx.fillStyle = '#a5b4fc';
+              ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
+              // tooltip position/content
+              const rect = wrap1.getBoundingClientRect();
+              tt1.textContent = `${labels[hoverIndex]} — ${data[hoverIndex]} inscrits`;
+              const ttX = Math.min(rect.width - 140, Math.max(8, x + 8));
+              const ttY = Math.max(8, y - 10);
+              tt1.style.left = ttX + 'px';
+              tt1.style.top = ttY + 'px';
+              tt1.classList.remove('hidden');
+            } else {
+              tt1.classList.add('hidden');
+            }
+
+            // titres axes
+            ctx.fillStyle = 'rgba(148,163,184,0.9)';
+            ctx.font = '12px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+            // X
+            ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
+            ctx.fillText('Date', padL + innerW, padT + innerH + 24);
+            // Y
+            ctx.save();
+            ctx.translate(12, padT + innerH / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+            ctx.fillText('Utilisateurs', 0, 0);
+            ctx.restore();
+          }
+
+          async function fetchSeries() {
+            const q = new URLSearchParams({
+              from: $('#from').value,
+              to: $('#to').value,
+            });
+            const res = await fetch(`/dashboard/admin/stats/users/series?${q.toString()}`);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          }
+          async function fetchSummary() {
+            const q = new URLSearchParams({ from: $('#from').value, to: $('#to').value });
+            const res = await fetch(`/dashboard/admin/stats/users/summary?${q.toString()}`);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          }
+          async function fetchLoginsSeries() {
+            const q = new URLSearchParams({ from: $('#from').value, to: $('#to').value });
+            const res = await fetch(`/dashboard/admin/stats/logins/series?${q.toString()}`);
+            if (!res.ok) throw new Error('HTTP ' + res.status); return res.json();
+          }
+          async function fetchRecentLogins() {
+            const res = await fetch(`/dashboard/admin/stats/logins/recent?limit=20`);
+            if (!res.ok) throw new Error('HTTP ' + res.status); return res.json();
+          }
+          async function fetchBansSeries() {
+            const q = new URLSearchParams({ from: $('#from').value, to: $('#to').value });
+            const res = await fetch(`/dashboard/admin/stats/bans/series?${q.toString()}`);
+            if (!res.ok) throw new Error('HTTP ' + res.status); return res.json();
+          }
+
+
+          async function fetchSeriesByVisibility() {
+            const q = new URLSearchParams({ from: $('#from').value, to: $('#to').value });
+            const res = await fetch(`/dashboard/admin/stats/users/series/by-visibility?${q.toString()}`);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          }
+
+          async function fetchSeriesByRole() {
+            const q = new URLSearchParams({ from: $('#from').value, to: $('#to').value });
+            const res = await fetch(`/dashboard/admin/stats/users/series/by-role?${q.toString()}`);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          }
+
+          function makeCumul(series) {
+            let run = 0; return (series || []).map(p => { run += (p.count || 0); return { date: p.date, count: run }; });
+          }
+
+          // ---------- Chart 2: Public/Privé ----------
+          const ctx2 = document.getElementById('chartVisibility').getContext('2d');
+          const wrap2 = document.getElementById('chart2Wrap');
+          const tt2 = document.getElementById('tt2');
+          let series2 = [];
+          let hoverIndex2 = -1;
+          function renderChart2(payload, hoverIndex = -1) {
+            series2 = Array.isArray(payload?.series) ? payload.series : [];
+            hoverIndex2 = hoverIndex;
+            const labels = series2.map(p => p.date);
+            const pub = series2.map(p => p.public || 0);
+            const pri = series2.map(p => p.private || 0);
+
+            const dpr = window.devicePixelRatio || 1;
+            const cssW = ctx2.canvas.clientWidth; const cssH = 260;
+            ctx2.canvas.width = Math.max(1, Math.floor(cssW * dpr)); ctx2.canvas.height = Math.floor(cssH * dpr);
+            ctx2.setTransform(dpr, 0, 0, dpr, 0, 0); ctx2.clearRect(0, 0, cssW, cssH);
+
+            const padL = 40, padB = 28, padT = 10, padR = 10; const innerW = cssW - padL - padR, innerH = cssH - padT - padB;
+            const maxVal = Math.max(1, ...pub, ...pri);
+            const yTicks = 5, stepY = Math.max(1, Math.ceil(maxVal / yTicks)); const maxRounded = Math.max(stepY, stepY * yTicks);
+            const stepX = pub.length > 1 ? innerW / (pub.length - 1) : 0; const scaleY = innerH / maxRounded;
+
+            // axes + grille
+            ctx2.strokeStyle = 'rgba(148,163,184,0.35)'; ctx2.lineWidth = 1; ctx2.beginPath(); ctx2.moveTo(padL, padT); ctx2.lineTo(padL, padT + innerH); ctx2.lineTo(padL + innerW, padT + innerH); ctx2.stroke();
+            ctx2.fillStyle = 'rgba(148,163,184,0.7)'; ctx2.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'; ctx2.textAlign = 'right'; ctx2.textBaseline = 'middle';
+            for (let y = 0; y <= maxRounded; y += stepY) { const py = padT + innerH - y * scaleY; ctx2.strokeStyle = 'rgba(148,163,184,0.15)'; ctx2.beginPath(); ctx2.moveTo(padL, py); ctx2.lineTo(padL + innerW, py); ctx2.stroke(); ctx2.fillText(String(y), padL - 6, py); }
+            ctx2.textAlign = 'center'; ctx2.textBaseline = 'top'; const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
+            labels.forEach((lab, i) => { if (i % xLabelEvery !== 0 && i !== labels.length - 1) return; const x = padL + i * stepX; ctx2.strokeStyle = 'rgba(148,163,184,0.15)'; ctx2.beginPath(); ctx2.moveTo(x, padT + innerH); ctx2.lineTo(x, padT + innerH + 4); ctx2.stroke(); ctx2.fillText(lab?.slice(5) || '', x, padT + innerH + 6); });
+
+            // lines
+            function drawLine(data, color) { ctx2.strokeStyle = color; ctx2.lineWidth = 2; ctx2.beginPath(); data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctx2.moveTo(x, y); else ctx2.lineTo(x, y); }); ctx2.stroke(); }
+            drawLine(pub, '#10b981'); // emerald-500
+            drawLine(pri, '#f43f5e'); // rose-500
+
+            // points
+            function drawDots(data, color) { ctx2.fillStyle = color; data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctx2.beginPath(); ctx2.arc(x, y, 2.5, 0, Math.PI * 2); ctx2.fill(); }); }
+            drawDots(pub, '#34d399'); drawDots(pri, '#fb7185');
+
+            // hover
+            if (hoverIndex >= 0 && hoverIndex < labels.length) {
+              const x = padL + hoverIndex * stepX; ctx2.strokeStyle = 'rgba(148,163,184,0.35)'; ctx2.beginPath(); ctx2.moveTo(x, padT); ctx2.lineTo(x, padT + innerH); ctx2.stroke();
+              const rect = wrap2.getBoundingClientRect();
+              const ttX = Math.min(rect.width - 160, Math.max(8, x + 8)); const ttY = 14;
+              tt2.innerHTML = `<div class="font-medium text-slate-100">${labels[hoverIndex]}</div><div><span class="inline-block w-2 h-2 rounded-full mr-1" style="background:#10b981"></span>Public: <b>${pub[hoverIndex]}</b></div><div><span class="inline-block w-2 h-2 rounded-full mr-1" style="background:#f43f5e"></span>Privé: <b>${pri[hoverIndex]}</b></div>`;
+              tt2.style.left = ttX + 'px'; tt2.style.top = ttY + 'px'; tt2.classList.remove('hidden');
+            } else { tt2.classList.add('hidden'); }
+          }
+
+          // ---------- Chart 3: Par rôle ----------
+          const ctx3 = document.getElementById('chartRoles').getContext('2d');
+          const wrap3 = document.getElementById('chart3Wrap');
+          const tt3 = document.getElementById('tt3');
+          let series3 = []; let hoverIndex3 = -1;
+          function renderChart3(payload, hoverIndex = -1) {
+            series3 = Array.isArray(payload?.series) ? payload.series : [];
+            hoverIndex3 = hoverIndex;
+            const labels = series3.map(p => p.date);
+            // Détecter dynamiquement les clés de rôle depuis le premier point
+            const roleKeys = (() => {
+              const first = series3[0] || {};
+              return Object.keys(first).filter(k => k !== 'date');
+            })();
+            const palette = ['#94a3b8', '#f59e0b', '#10b981', '#f43f5e', '#6366f1', '#06b6d4', '#22c55e', '#eab308', '#ef4444'];
+            const colors = roleKeys.map((_, i) => palette[i % palette.length]);
+            const dsets = roleKeys.map(r => series3.map(p => p[r] || 0));
+
+            const dpr = window.devicePixelRatio || 1; const cssW = ctx3.canvas.clientWidth; const cssH = 280;
+            ctx3.canvas.width = Math.max(1, Math.floor(cssW * dpr)); ctx3.canvas.height = Math.floor(cssH * dpr);
+            ctx3.setTransform(dpr, 0, 0, dpr, 0, 0); ctx3.clearRect(0, 0, cssW, cssH);
+            const padL = 40, padB = 28, padT = 10, padR = 10; const innerW = cssW - padL - padR, innerH = cssH - padT - padB;
+            const maxVal = Math.max(1, ...dsets.flat());
+            const yTicks = 5, stepY = Math.max(1, Math.ceil(maxVal / yTicks)); const maxRounded = Math.max(stepY, stepY * yTicks);
+            const stepX = labels.length > 1 ? innerW / (labels.length - 1) : 0; const scaleY = innerH / maxRounded;
+            // axes + grille
+            ctx3.strokeStyle = 'rgba(148,163,184,0.35)'; ctx3.lineWidth = 1; ctx3.beginPath(); ctx3.moveTo(padL, padT); ctx3.lineTo(padL, padT + innerH); ctx3.lineTo(padL + innerW, padT + innerH); ctx3.stroke();
+            ctx3.fillStyle = 'rgba(148,163,184,0.7)'; ctx3.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'; ctx3.textAlign = 'right'; ctx3.textBaseline = 'middle';
+            for (let y = 0; y <= maxRounded; y += stepY) { const py = padT + innerH - y * scaleY; ctx3.strokeStyle = 'rgba(148,163,184,0.15)'; ctx3.beginPath(); ctx3.moveTo(padL, py); ctx3.lineTo(padL + innerW, py); ctx3.stroke(); ctx3.fillText(String(y), padL - 6, py); }
+            ctx3.textAlign = 'center'; ctx3.textBaseline = 'top'; const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
+            labels.forEach((lab, i) => { if (i % xLabelEvery !== 0 && i !== labels.length - 1) return; const x = padL + i * stepX; ctx3.strokeStyle = 'rgba(148,163,184,0.15)'; ctx3.beginPath(); ctx3.moveTo(x, padT + innerH); ctx3.lineTo(x, padT + innerH + 4); ctx3.stroke(); ctx3.fillText(lab?.slice(5) || '', x, padT + innerH + 6); });
+            // lines + points
+            dsets.forEach((arr, idx) => { const color = colors[idx]; ctx3.strokeStyle = color; ctx3.lineWidth = 2; ctx3.beginPath(); arr.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctx3.moveTo(x, y); else ctx3.lineTo(x, y); }); ctx3.stroke(); ctx3.fillStyle = color; arr.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctx3.beginPath(); ctx3.arc(x, y, 2.3, 0, Math.PI * 2); ctx3.fill(); }); });
+            if (hoverIndex >= 0 && hoverIndex < labels.length) {
+              const x = padL + hoverIndex * stepX; ctx3.strokeStyle = 'rgba(148,163,184,0.35)'; ctx3.beginPath(); ctx3.moveTo(x, padT); ctx3.lineTo(x, padT + innerH); ctx3.stroke();
+              const rect = wrap3.getBoundingClientRect(); const ttX = Math.min(rect.width - 180, Math.max(8, x + 8)); const ttY = 14;
+              const rows = roleKeys.map((r, i) => `<div><span class=\"inline-block w-2 h-2 rounded-full mr-1\" style=\"background:${colors[i]}\"></span>${r}: <b>${dsets[i][hoverIndex]}</b></div>`).join('');
+              tt3.innerHTML = `<div class=\"font-medium text-slate-100\">${labels[hoverIndex]}</div>${rows}`;
+              tt3.style.left = ttX + 'px'; tt3.style.top = ttY + 'px'; tt3.classList.remove('hidden');
+            } else { tt3.classList.add('hidden'); }
+          }
+
+          // ---------- Chart 4: Cumul ----------
+          // ---------- Chart L: Connexions ----------
+          const ctxL = document.getElementById('chartLogins')?.getContext('2d');
+          const wrapL = document.getElementById('chartLWrap');
+          const ttL = document.getElementById('ttL');
+          let seriesL = []; let hoverIndexL = -1;
+          function renderChartL(payload, hoverIndex = -1) {
+            if (!ctxL) return; seriesL = payload?.series || []; hoverIndexL = hoverIndex;
+            const labels = seriesL.map(p => p.date); const data = seriesL.map(p => p.count || 0);
+            const dpr = window.devicePixelRatio || 1; const cssW = ctxL.canvas.clientWidth; const cssH = 260;
+            ctxL.canvas.width = Math.max(1, Math.floor(cssW * dpr)); ctxL.canvas.height = Math.floor(cssH * dpr); ctxL.setTransform(dpr, 0, 0, dpr, 0, 0); ctxL.clearRect(0, 0, cssW, cssH);
+            const padL = 40, padB = 28, padT = 10, padR = 10; const innerW = cssW - padL - padR, innerH = cssH - padT - padB;
+            const maxVal = Math.max(1, ...data); const yTicks = 5, stepY = Math.max(1, Math.ceil(maxVal / yTicks)); const maxRounded = Math.max(stepY, stepY * yTicks);
+            const stepX = data.length > 1 ? innerW / (data.length - 1) : 0; const scaleY = innerH / maxRounded;
+            // axes + grille
+            ctxL.strokeStyle = 'rgba(148,163,184,0.35)'; ctxL.lineWidth = 1; ctxL.beginPath(); ctxL.moveTo(padL, padT); ctxL.lineTo(padL, padT + innerH); ctxL.lineTo(padL + innerW, padT + innerH); ctxL.stroke();
+            ctxL.fillStyle = 'rgba(148,163,184,0.7)'; ctxL.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'; ctxL.textAlign = 'right'; ctxL.textBaseline = 'middle';
+            for (let y = 0; y <= maxRounded; y += stepY) { const py = padT + innerH - y * scaleY; ctxL.strokeStyle = 'rgba(148,163,184,0.15)'; ctxL.beginPath(); ctxL.moveTo(padL, py); ctxL.lineTo(padL + innerW, py); ctxL.stroke(); ctxL.fillText(String(y), padL - 6, py); }
+            ctxL.textAlign = 'center'; ctxL.textBaseline = 'top'; const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
+            labels.forEach((lab, i) => { if (i % xLabelEvery !== 0 && i !== labels.length - 1) return; const x = padL + i * stepX; ctxL.strokeStyle = 'rgba(148,163,184,0.15)'; ctxL.beginPath(); ctxL.moveTo(x, padT + innerH); ctxL.lineTo(x, padT + innerH + 4); ctxL.stroke(); ctxL.fillText(lab?.slice(5) || '', x, padT + innerH + 6); });
+            // line + points
+            ctxL.strokeStyle = '#06b6d4'; ctxL.lineWidth = 2; ctxL.beginPath(); data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctxL.moveTo(x, y); else ctxL.lineTo(x, y); }); ctxL.stroke();
+            ctxL.fillStyle = '#67e8f9'; data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctxL.beginPath(); ctxL.arc(x, y, 2.5, 0, Math.PI * 2); ctxL.fill(); });
+            if (hoverIndex >= 0 && hoverIndex < labels.length) { const x = padL + hoverIndex * stepX; const y = padT + innerH - data[hoverIndex] * scaleY; ctxL.strokeStyle = 'rgba(6,182,212,0.35)'; ctxL.beginPath(); ctxL.moveTo(x, padT); ctxL.lineTo(x, padT + innerH); ctxL.stroke(); ctxL.fillStyle = '#a5f3fc'; ctxL.beginPath(); ctxL.arc(x, y, 4, 0, Math.PI * 2); ctxL.fill(); const rect = wrapL.getBoundingClientRect(); const ttX = Math.min(rect.width - 140, Math.max(8, x + 8)); const ttY = Math.max(8, y - 10); ttL.textContent = `${labels[hoverIndex]} — ${data[hoverIndex]} connexions`; ttL.style.left = ttX + 'px'; ttL.style.top = ttY + 'px'; ttL.classList.remove('hidden'); } else { ttL.classList.add('hidden'); }
+          }
+
+          async function applyLogins() {
+            try {
+              document.getElementById('loadL')?.classList.remove('hidden');
+              const [payload, recent] = await Promise.all([fetchLoginsSeries(), fetchRecentLogins()]);
+              document.getElementById('rangeLabelL').textContent = `${payload.from} → ${payload.to}`;
+              renderChartL(payload);
+              const list = recent.users || [];
+              const fmt = (s) => new Date(s).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+              document.getElementById('recentLogins').innerHTML = list.map(u => `<div class='flex items-center justify-between gap-2 border border-slate-800 rounded px-2 py-1.5'><span class='truncate'>@${u.userName} <span class='text-slate-400'>(${u.email})</span></span><span class='text-slate-400'>${fmt(u.lastLogin)}</span></div>`).join('');
+            } catch (e) { console.error(e); }
+            finally { document.getElementById('loadL')?.classList.add('hidden'); }
+          }
+
+          // ---------- Chart B: Bans ----------
+          const ctxB = document.getElementById('chartBans')?.getContext('2d');
+          const wrapB = document.getElementById('chartBWrap');
+          const ttB = document.getElementById('ttB');
+          let seriesB = []; let hoverIndexB = -1;
+          function renderChartB(payload, hoverIndex = -1) {
+            if (!ctxB) return; seriesB = payload?.series || []; hoverIndexB = hoverIndex;
+            const labels = seriesB.map(p => p.date); const created = seriesB.map(p => p.created || 0); const revoked = seriesB.map(p => p.revoked || 0);
+            const dpr = window.devicePixelRatio || 1; const cssW = ctxB.canvas.clientWidth; const cssH = 260; ctxB.canvas.width = Math.max(1, Math.floor(cssW * dpr)); ctxB.canvas.height = Math.floor(cssH * dpr); ctxB.setTransform(dpr, 0, 0, dpr, 0, 0); ctxB.clearRect(0, 0, cssW, cssH);
+            const padL = 40, padB = 28, padT = 10, padR = 10; const innerW = cssW - padL - padR, innerH = cssH - padT - padB;
+            const maxVal = Math.max(1, ...created, ...revoked); const yTicks = 5, stepY = Math.max(1, Math.ceil(maxVal / yTicks)); const maxRounded = Math.max(stepY, stepY * yTicks);
+            const stepX = labels.length > 1 ? innerW / (labels.length - 1) : 0; const scaleY = innerH / maxRounded;
+            // axes + grille
+            ctxB.strokeStyle = 'rgba(148,163,184,0.35)'; ctxB.lineWidth = 1; ctxB.beginPath(); ctxB.moveTo(padL, padT); ctxB.lineTo(padL, padT + innerH); ctxB.lineTo(padL + innerW, padT + innerH); ctxB.stroke();
+            ctxB.fillStyle = 'rgba(148,163,184,0.7)'; ctxB.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'; ctxB.textAlign = 'right'; ctxB.textBaseline = 'middle';
+            for (let y = 0; y <= maxRounded; y += stepY) { const py = padT + innerH - y * scaleY; ctxB.strokeStyle = 'rgba(148,163,184,0.15)'; ctxB.beginPath(); ctxB.moveTo(padL, py); ctxB.lineTo(padL + innerW, py); ctxB.stroke(); ctxB.fillText(String(y), padL - 6, py); }
+            ctxB.textAlign = 'center'; ctxB.textBaseline = 'top'; const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
+            labels.forEach((lab, i) => { if (i % xLabelEvery !== 0 && i !== labels.length - 1) return; const x = padL + i * stepX; ctxB.strokeStyle = 'rgba(148,163,184,0.15)'; ctxB.beginPath(); ctxB.moveTo(x, padT + innerH); ctxB.lineTo(x, padT + innerH + 4); ctxB.stroke(); ctxB.fillText(lab?.slice(5) || '', x, padT + innerH + 6); });
+            // lignes
+            function drawLine(data, color) { ctxB.strokeStyle = color; ctxB.lineWidth = 2; ctxB.beginPath(); data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctxB.moveTo(x, y); else ctxB.lineTo(x, y); }); ctxB.stroke(); }
+            drawLine(created, '#ef4444'); drawLine(revoked, '#22c55e');
+            function drawDots(data, color) { ctxB.fillStyle = color; data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctxB.beginPath(); ctxB.arc(x, y, 2.3, 0, Math.PI * 2); ctxB.fill(); }); }
+            drawDots(created, '#f87171'); drawDots(revoked, '#86efac');
+            if (hoverIndex >= 0 && hoverIndex < labels.length) { const x = padL + hoverIndex * stepX; ctxB.strokeStyle = 'rgba(148,163,184,0.35)'; ctxB.beginPath(); ctxB.moveTo(x, padT); ctxB.lineTo(x, padT + innerH); ctxB.stroke(); const rect = wrapB.getBoundingClientRect(); const ttX = Math.min(rect.width - 170, Math.max(8, x + 8)); const ttY = 14; ttB.innerHTML = `<div class='font-medium text-slate-100'>${labels[hoverIndex]}</div><div><span class='inline-block w-2 h-2 rounded-full mr-1' style='background:#ef4444'></span>Créés: <b>${created[hoverIndex]}</b></div><div><span class='inline-block w-2 h-2 rounded-full mr-1' style='background:#22c55e'></span>Révoqués: <b>${revoked[hoverIndex]}</b></div>`; ttB.style.left = ttX + 'px'; ttB.style.top = ttY + 'px'; ttB.classList.remove('hidden'); } else { ttB.classList.add('hidden'); }
+          }
+
+          async function applyBans() {
+            try {
+              document.getElementById('loadB')?.classList.remove('hidden');
+              const payload = await fetchBansSeries();
+              document.getElementById('rangeLabelB').textContent = `${payload.from} → ${payload.to}`;
+              renderChartB(payload);
+              const s = payload.summary || {}; document.getElementById('banSummary').textContent = `Actifs: ${s.activeNow || 0} • Total créés: ${s.totalBanned || 0} • Total révoqués: ${s.totalRevoked || 0}`;
+            } catch (e) { console.error(e); }
+            finally { document.getElementById('loadB')?.classList.add('hidden'); }
+          }
+          const ctx4 = document.getElementById('chartCumul').getContext('2d');
+          const wrap4 = document.getElementById('chart4Wrap');
+          const tt4 = document.getElementById('tt4');
+          let series4 = []; let hoverIndex4 = -1;
+          function renderChart4(series, hoverIndex = -1) {
+            series4 = Array.isArray(series) ? series : [];
+            hoverIndex4 = hoverIndex;
+            const labels = series4.map(p => p.date);
+            const data = series4.map(p => p.count);
+            const dpr = window.devicePixelRatio || 1; const cssW = ctx4.canvas.clientWidth; const cssH = 240;
+            ctx4.canvas.width = Math.max(1, Math.floor(cssW * dpr)); ctx4.canvas.height = Math.floor(cssH * dpr);
+            ctx4.setTransform(dpr, 0, 0, dpr, 0, 0); ctx4.clearRect(0, 0, cssW, cssH);
+            const padL = 40, padB = 28, padT = 10, padR = 10; const innerW = cssW - padL - padR, innerH = cssH - padT - padB;
+            const maxVal = Math.max(1, ...data); const yTicks = 5, stepY = Math.max(1, Math.ceil(maxVal / yTicks)); const maxRounded = Math.max(stepY, stepY * yTicks);
+            const stepX = data.length > 1 ? innerW / (data.length - 1) : 0; const scaleY = innerH / maxRounded;
+            // axes
+            ctx4.strokeStyle = 'rgba(148,163,184,0.35)'; ctx4.lineWidth = 1; ctx4.beginPath(); ctx4.moveTo(padL, padT); ctx4.lineTo(padL, padT + innerH); ctx4.lineTo(padL + innerW, padT + innerH); ctx4.stroke();
+            ctx4.fillStyle = 'rgba(148,163,184,0.7)'; ctx4.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'; ctx4.textAlign = 'right'; ctx4.textBaseline = 'middle';
+            for (let y = 0; y <= maxRounded; y += stepY) { const py = padT + innerH - y * scaleY; ctx4.strokeStyle = 'rgba(148,163,184,0.15)'; ctx4.beginPath(); ctx4.moveTo(padL, py); ctx4.lineTo(padL + innerW, py); ctx4.stroke(); ctx4.fillText(String(y), padL - 6, py); }
+            ctx4.textAlign = 'center'; ctx4.textBaseline = 'top'; const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
+            labels.forEach((lab, i) => { if (i % xLabelEvery !== 0 && i !== labels.length - 1) return; const x = padL + i * stepX; ctx4.strokeStyle = 'rgba(148,163,184,0.15)'; ctx4.beginPath(); ctx4.moveTo(x, padT + innerH); ctx4.lineTo(x, padT + innerH + 4); ctx4.stroke(); ctx4.fillText(lab?.slice(5) || '', x, padT + innerH + 6); });
+            // line
+            ctx4.strokeStyle = '#22d3ee'; ctx4.lineWidth = 2; ctx4.beginPath(); data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctx4.moveTo(x, y); else ctx4.lineTo(x, y); }); ctx4.stroke();
+            ctx4.fillStyle = '#67e8f9'; data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctx4.beginPath(); ctx4.arc(x, y, 2.3, 0, Math.PI * 2); ctx4.fill(); });
+            if (hoverIndex >= 0 && hoverIndex < labels.length) {
+              const x = padL + hoverIndex * stepX; const y = padT + innerH - data[hoverIndex] * scaleY; ctx4.strokeStyle = 'rgba(34,211,238,0.4)'; ctx4.beginPath(); ctx4.moveTo(x, padT); ctx4.lineTo(x, padT + innerH); ctx4.stroke(); ctx4.fillStyle = '#a5f3fc'; ctx4.beginPath(); ctx4.arc(x, y, 4, 0, Math.PI * 2); ctx4.fill();
+              const rect = wrap4.getBoundingClientRect(); const ttX = Math.min(rect.width - 140, Math.max(8, x + 8)); const ttY = Math.max(8, y - 10); tt4.textContent = `${labels[hoverIndex]} — cumul: ${data[hoverIndex]}`; tt4.style.left = ttX + 'px'; tt4.style.top = ttY + 'px'; tt4.classList.remove('hidden');
+            } else { tt4.classList.add('hidden'); }
+          }
+
+          async function apply() {
+            try {
+              document.getElementById('load1')?.classList.remove('hidden');
+              document.getElementById('load2')?.classList.remove('hidden');
+              document.getElementById('load3')?.classList.remove('hidden');
+              document.getElementById('load4')?.classList.remove('hidden');
+              const [seriesPayload, summary, visPayload, rolePayload] = await Promise.all([
+                fetchSeries(), fetchSummary(), fetchSeriesByVisibility(), fetchSeriesByRole()
+              ]);
+              $('#rangeLabel').textContent = `${seriesPayload.from} → ${seriesPayload.to}`;
+              renderChart(seriesPayload.series || []);
+              $('#rangeLabel2').textContent = `${visPayload.from} → ${visPayload.to}`;
+              renderChart2(visPayload);
+              $('#rangeLabel3').textContent = `${rolePayload.from} → ${rolePayload.to}`;
+              renderChart3(rolePayload);
+              $('#rangeLabel4').textContent = `${seriesPayload.from} → ${seriesPayload.to}`;
+              renderChart4(makeCumul(seriesPayload.series || []));
+              // résumé
+              $('#statTotal').textContent = (summary.total ?? 0);
+              $('#statPub').textContent = (summary.publics ?? 0);
+              $('#statPriv').textContent = (summary.privates ?? 0);
+              const staff = (summary.byRole?.ADMIN || 0) + (summary.byRole?.DEVELOPER || 0) + (summary.byRole?.MODERATOR || 0);
+              $('#statStaff').textContent = staff;
+            } catch (e) {
+              console.error(e);
+            } finally {
+              document.getElementById('load1')?.classList.add('hidden');
+              document.getElementById('load2')?.classList.add('hidden');
+              document.getElementById('load3')?.classList.add('hidden');
+              document.getElementById('load4')?.classList.add('hidden');
+            }
+          }
+
+          // setup preset buttons and custom-days input safely
+          const presetIds = ['last24h', 'last7', 'last30', 'last90'];
+          const presetButtons = presetIds.map(id => document.getElementById(id));
+          function setActive(btn) {
+            presetButtons.forEach(b => {
+              if (!b) return;
+              b.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500');
+              b.classList.add('bg-slate-800', 'text-slate-200', 'border-slate-700');
+            });
+            if (btn) {
+              btn.classList.remove('bg-slate-800', 'text-slate-200', 'border-slate-700');
+              btn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-500');
+            }
+          }
+
+          presetIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('click', (e) => {
+              const val = id === 'last24h' ? 1 : (id === 'last7' ? 7 : (id === 'last30' ? 30 : 90));
+              setRange(val);
+              setActive(e.currentTarget);
+              apply();
+              // si onglets actifs, maj connexions/bans aussi
+              if (document.getElementById('tabLogins')?.getAttribute('aria-selected') === 'true') applyLogins();
+              if (document.getElementById('tabBans')?.getAttribute('aria-selected') === 'true') applyBans();
+            });
+          });
+
+          const customEl = document.getElementById('customDays');
+          if (customEl) {
+            customEl.addEventListener('input', () => {
+              const n = Math.max(1, parseInt(customEl.value, 10) || 1);
+              setRange(n);
+              setActive(null);
+              apply();
+              if (document.getElementById('tabLogins')?.getAttribute('aria-selected') === 'true') applyLogins();
+              if (document.getElementById('tabBans')?.getAttribute('aria-selected') === 'true') applyBans();
+            });
+            customEl.addEventListener('keydown', (ev) => {
+              if (ev.key === 'Enter') {
+                ev.preventDefault();
+                const n = Math.max(1, parseInt(customEl.value, 10) || 1);
+                setRange(n);
+                setActive(null);
+                apply();
+                if (document.getElementById('tabLogins')?.getAttribute('aria-selected') === 'true') applyLogins();
+                if (document.getElementById('tabBans')?.getAttribute('aria-selected') === 'true') applyBans();
+              }
+            });
+          }
+
+          // auto-apply when date inputs change (like presets/customDays)
+          const fromEl = document.getElementById('from');
+          const toEl = document.getElementById('to');
+          if (fromEl) {
+            fromEl.addEventListener('change', () => { setActive(null); apply(); if (document.getElementById('tabLogins')?.getAttribute('aria-selected') === 'true') applyLogins(); if (document.getElementById('tabBans')?.getAttribute('aria-selected') === 'true') applyBans(); });
+          }
+          if (toEl) {
+            toEl.addEventListener('change', () => { setActive(null); apply(); if (document.getElementById('tabLogins')?.getAttribute('aria-selected') === 'true') applyLogins(); if (document.getElementById('tabBans')?.getAttribute('aria-selected') === 'true') applyBans(); });
+          }
+
+          // auto-appliquer au chargement
+          apply();
+
+          // Hover handlers
+          function bindHover(canvas, render, getCount) {
+            const rectWrap = canvas.parentElement;
+            canvas.addEventListener('mousemove', (ev) => {
+              const rect = canvas.getBoundingClientRect();
+              const x = ev.clientX - rect.left; const y = ev.clientY - rect.top;
+              // We recompute index by reading innerW & stepX from current draw by approximating with last known series lengths
+              const cssW = canvas.clientWidth; const padL = 40, padR = 10; const count = getCount();
+              const innerW = Math.max(1, cssW - padL - padR);
+              const stepX = count > 1 ? innerW / (count - 1) : 0;
+              const idx = stepX > 0 ? Math.round((x - padL) / stepX) : -1;
+              const clamped = Math.max(0, Math.min(count - 1, idx));
+              if (count > 0) render(clamped);
+            });
+            canvas.addEventListener('mouseleave', () => { render(-1); });
+          }
+
+          bindHover(document.getElementById('chart'), (hi) => renderChart(lastSeries, hi), () => lastSeries.length);
+          bindHover(document.getElementById('chartVisibility'), (hi) => renderChart2({ series: series2 }, hi), () => series2.length);
+          bindHover(document.getElementById('chartRoles'), (hi) => renderChart3({ series: series3 }, hi), () => series3.length);
+          bindHover(document.getElementById('chartCumul'), (hi) => renderChart4(series4, hi), () => series4.length);
+          bindHover(document.getElementById('chartLogins'), (hi) => renderChartL({ series: seriesL }, hi), () => seriesL.length);
+          bindHover(document.getElementById('chartBans'), (hi) => renderChartB({ series: seriesB }, hi), () => seriesB.length);
+
+          // Re-rendu sur resize pour garder la largeur à 100%
+          window.addEventListener('resize', () => {
+            if (lastSeries && lastSeries.length) renderChart(lastSeries, hoverIndex1);
+            if (series2 && series2.length) renderChart2({ series: series2 }, hoverIndex2);
+            if (series3 && series3.length) renderChart3({ series: series3 }, hoverIndex3);
+            if (series4 && series4.length) renderChart4(series4, hoverIndex4);
+            if (seriesL && seriesL.length) renderChartL({ series: seriesL }, hoverIndexL);
+            if (seriesB && seriesB.length) renderChartB({ series: seriesB }, hoverIndexB);
+          });
+        })();
+      </script>
+      </body>
+
+      </html>

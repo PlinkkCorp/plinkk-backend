@@ -18,7 +18,6 @@ import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
 import fastifyCors from "@fastify/cors";
-import fastifyCron from "fastify-cron";
 import fastifySecureSession from "@fastify/secure-session";
 import { staticPagesRoutes } from "./server/staticPagesRoutes";
 import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
@@ -763,5 +762,4 @@ fastify.listen({ port: PORT, host: "0.0.0.0" }, function (err, address) {
     process.exit(1);
   }
   console.info(`Server is now listening on ${address}`);
-  fastify.cron.startAllJobs();
 });

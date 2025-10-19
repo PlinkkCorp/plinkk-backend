@@ -1,0 +1,562 @@
+<%- include('../partials/head', { title: (__DOC__ ? `Documentation — ${__DOC__.title}` : 'Plinkk — Documentation' ),
+    description: (__DOC__ && __DOC__.excerpt) ? __DOC__.excerpt
+    : 'Guide complet Plinkk: démarrage, thèmes, admin, auto-hébergement, sécurité et plus.' , extraHead: ` <meta
+    name="robots" content="index,follow" />
+<link rel="canonical" href="${__DOC__ ? __DOC__.path : '/docs'}" />
+<meta property="og:title" content="${__DOC__ ? `Plinkk — ${__DOC__.title}` : 'Plinkk — Documentation'}" />
+<meta property="og:description"
+    content="${(__DOC__ && __DOC__.excerpt) ? __DOC__.excerpt : 'Tout Plinkk, bien organisé.'}" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="${__DOC__ ? __DOC__.path : '/docs'}" />
+<meta property="og:image" content="/public/images/logo.svg" />
+<style>
+    /* Liens plus lisibles dans la prose */
+    .prose a {
+        color: #a5b4fc;
+        text-decoration: none;
+    }
+
+    .prose a:hover {
+        color: #c7d2fe;
+        text-decoration: underline;
+    }
+
+    /* Callouts (info / warn / tip) */
+    .doc-callout {
+        border-left: 3px solid;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        margin: 1rem 0;
+        background: rgba(15, 23, 42, 0.5);
+    }
+
+    .doc-callout.info {
+        border-color: #38bdf8;
+        background: rgba(56, 189, 248, 0.08);
+    }
+
+    .doc-callout.warn {
+        border-color: #fbbf24;
+        background: rgba(251, 191, 36, 0.08);
+    }
+
+    .doc-callout.tip {
+        border-color: #34d399;
+        background: rgba(52, 211, 153, 0.08);
+    }
+
+    .doc-callout.success {
+        border-color: #22c55e;
+        background: rgba(34, 197, 94, 0.1);
+    }
+
+    .doc-callout.error {
+        border-color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    .doc-callout strong {
+        color: #e5e7eb;
+    }
+
+    /* Mini chips docs */
+    .doc-chip {
+        display: inline-block;
+        padding: 0.15rem 0.5rem;
+        border-radius: 9999px;
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(51, 65, 85, 0.8);
+        color: #cbd5e1;
+        font-size: 0.75rem;
+    }
+
+    /* TOC de droite */
+    .doc-toc a {
+        display: block;
+        padding: 4px 0;
+        color: #94a3b8;
+    }
+
+    .doc-toc a:hover {
+        color: #e2e8f0;
+    }
+
+    .doc-toc a.active {
+        color: #ffffff;
+    }
+
+    .doc-toc .toc-h3 {
+        padding-left: 12px;
+        font-size: 0.9em;
+    }
+
+    /* Ancres de titres (#) au survol */
+    h1,
+    h2,
+    h3 {
+        position: relative;
+    }
+
+    .heading-anchor {
+        opacity: 0;
+        margin-left: .4rem;
+        display: inline-flex;
+        align-items: center;
+        transition: opacity .15s ease;
+    }
+
+    h1:hover .heading-anchor,
+    h2:hover .heading-anchor,
+    h3:hover .heading-anchor {
+        opacity: .9;
+    }
+
+    .heading-anchor svg {
+        width: 14px;
+        height: 14px;
+        color: #94a3b8;
+    }
+
+    .heading-anchor:hover svg {
+        color: #e2e8f0;
+    }
+
+    .heading-anchor:focus-visible {
+        opacity: 1;
+        outline: 2px solid #475569;
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+
+    /* TOC collapsible */
+    .toc-group {
+        margin-bottom: 8px;
+    }
+
+    .toc-group .toc-toggle {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        text-align: left;
+        gap: 6px;
+        color: #94a3b8;
+    }
+
+    .toc-group .toc-toggle:hover {
+        color: #e2e8f0;
+    }
+
+    .toc-group .toc-children {
+        margin-left: 14px;
+        margin-top: 4px;
+        display: none;
+    }
+
+    .toc-group.expanded .toc-children {
+        display: block;
+    }
+
+    .toc-caret {
+        width: 12px;
+        height: 12px;
+        transition: transform .15s ease;
+    }
+
+    .toc-group.expanded .toc-caret {
+        transform: rotate(90deg);
+    }
+
+    /* Back to top */
+    #backToTop {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 50;
+        display: none;
+    }
+
+    #backToTop.show {
+        display: inline-flex;
+    }
+
+    /* Emojis convertis en SVG (conteneur) */
+    .doc-emoji {
+        display: inline-flex;
+        vertical-align: text-bottom;
+        margin-left: .2rem;
+    }
+
+    .doc-emoji svg {
+        width: 1em;
+        height: 1em;
+    }
+
+    @media print {
+        #backToTop {
+            display: none !important;
+        }
+    }
+
+    /* Impression */
+    @media print {
+        body {
+            background: #ffffff;
+            color: #111827;
+        }
+
+        header,
+        footer,
+        #doc-search,
+        #doc-search-results,
+        aside,
+        .ring-brand {
+            display: none !important;
+        }
+
+        .prose {
+            max-width: 100%;
+            color: #111827;
+        }
+
+        a {
+            color: #0000EE;
+            text-decoration: underline;
+        }
+
+        .doc-callout {
+            border-left-width: 2px;
+            background: #f8fafc !important;
+            color: #0f172a;
+        }
+
+        .doc-chip {
+            border-color: #94a3b8;
+            color: #0f172a;
+            background: #f1f5f9;
+        }
+
+        section {
+            padding: 0 !important;
+        }
+    }
+</style>
+`
+}) %>
+
+<%- include('../partials/header', { user: (typeof user !=='undefined' ? user : null) }) %>
+
+    <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-12 gap-6">
+            <!-- Sidebar navigation (gauche) -->
+            <aside class="col-span-12 lg:col-span-3">
+                <div class="sticky top-20">
+                    <div class="mb-4">
+                        <input id="doc-search" type="search" placeholder="Rechercher…"
+                            class="w-full px-3 py-2 rounded-md bg-slate-800/70 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand" />
+                        <ul id="doc-search-results" class="mt-2 space-y-1 text-sm hidden"></ul>
+                    </div>
+                    <nav aria-label="Documentation" class="text-sm">
+                        <ul class="space-y-2 text-slate-300">
+                            <% __DOCS__.filter(d=> d.segments.length <= 1).forEach(root=> { %>
+                                    <li>
+                                        <a class="block hover:text-white <%= (__DOC__ && __DOC__.path === root.path ? 'text-white font-medium' : '') %>"
+                                            href="<%= root.path %>">
+                                            <%= root.title %>
+                                        </a>
+                                        <% const children=__DOCS__.filter(c=> c.segments.length === 2 && c.segments[0]
+                                            === root.segments[0]); if (children.length) { %>
+                                            <ul class="mt-1 pl-3 border-l border-slate-700 space-y-1">
+                                                <% children.forEach(c=> { %>
+                                                    <li>
+                                                        <a class="block hover:text-white <%= (__DOC__ && __DOC__.path === c.path ? 'text-white' : '') %>"
+                                                            href="<%= c.path %>">
+                                                            <%= c.title %>
+                                                        </a>
+                                                    </li>
+                                                    <% }) %>
+                                            </ul>
+                                            <% } %>
+                                    </li>
+                                    <% }) %>
+                        </ul>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Contenu principal (centre) -->
+            <article id="doc-article" class="col-span-12 lg:col-span-7 prose prose-invert max-w-none">
+                <!-- Breadcrumbs -->
+                <nav aria-label="Fil d'Ariane" class="mb-4 text-sm text-slate-400">
+                    <a class="hover:text-white" href="/docs">Documentation</a>
+                    <% (__DOC__?.parents || []).forEach(p=> { %>
+                        <span class="mx-1">/</span>
+                        <a class="hover:text-white" href="<%= p.path %>">
+                            <%= p.title %>
+                        </a>
+                        <% }) %>
+                            <% if (__DOC__ && __DOC__.segments.length) { %>
+                                <span class="mx-1">/</span>
+                                <span class="text-white">
+                                    <%= __DOC__.title %>
+                                </span>
+                                <% } %>
+                </nav>
+
+                <!-- Mini TOC (insérée dynamiquement) -->
+                <div id="doc-mini-toc" class="mb-6 hidden">
+                    <div class="text-xs uppercase tracking-wide text-slate-400 mb-1">Dans cette page</div>
+                    <div class="flex flex-wrap gap-2" id="doc-mini-toc-items"></div>
+                </div>
+
+                <!-- Inject page content -->
+                <% if (!__DOC__) { %>
+                    <%- include('./pages/index.ejs') %>
+                        <% } else { %>
+                            <%- include('./' + __DOC__.file.replace('docs/pages/','pages/')) %>
+                                <% } %>
+
+                                    <!-- Prev/Next -->
+                                    <div class="mt-10 flex items-center justify-between gap-4">
+                                        <% if (__PREVNEXT__?.prev) { %>
+                                            <a class="px-3 py-2 rounded-md bg-slate-800/60 border border-slate-700 hover:bg-slate-800"
+                                                href="<%= __PREVNEXT__.prev.path %>">← <%= __PREVNEXT__.prev.title %>
+                                                    </a>
+                                            <% } else { %>
+                                                <span></span>
+                                                <% } %>
+                                                    <% if (__PREVNEXT__?.next) { %>
+                                                        <a class="px-3 py-2 rounded-md bg-slate-800/60 border border-slate-700 hover:bg-slate-800"
+                                                            href="<%= __PREVNEXT__.next.path %>">
+                                                            <%= __PREVNEXT__.next.title %> →
+                                                        </a>
+                                                        <% } %>
+                                    </div>
+            </article>
+
+            <!-- TOC de droite (auto H2/H3) -->
+            <aside class="col-span-12 lg:col-span-2 hidden lg:block">
+                <div class="sticky top-20">
+                    <div class="text-xs uppercase tracking-wide text-slate-400 mb-2">Sur cette page</div>
+                    <nav id="doc-page-toc" class="doc-toc text-sm"></nav>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <script>
+        // Client-side search
+        const input = document.getElementById('doc-search');
+        const results = document.getElementById('doc-search-results');
+        let index = [];
+        fetch('/docs/search-index.json').then(r => r.json()).then(j => index = j).catch(() => { });
+        input?.addEventListener('input', () => {
+            const q = input.value.trim().toLowerCase();
+            if (!q) { results.classList.add('hidden'); results.innerHTML = ''; return; }
+            const items = index.filter(i => i.title.toLowerCase().includes(q) || (i.excerpt || '').toLowerCase().includes(q)).slice(0, 8);
+            results.classList.toggle('hidden', items.length === 0);
+            results.innerHTML = items.map(i => `<li><a class="block px-2 py-1 rounded hover:bg-slate-800" href="${i.path}"><strong>${i.title}</strong><br><span class="text-xs text-slate-400">${i.excerpt || ''}</span></a></li>`).join('');
+        });
+
+        // Génère des IDs de titres et la TOC (H2/H3)
+        function slugify(text) {
+            return text.toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^a-z0-9\-]/g, '')
+                .replace(/\-+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+        const article = document.getElementById('doc-article');
+        const tocEl = document.getElementById('doc-page-toc');
+        if (article && tocEl) {
+            // Remplace les emojis de fin de H1/H2/H3 par des SVG
+            const emojiMap = new Map([
+                ['🚀', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13c4-4 9-7 15-8-1 6-4 11-8 15l-4-1 1-4z"/><path d="M14 10l-4 4"/><path d="M5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>'],
+                ['✏️', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>'],
+                ['🌐', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>'],
+                ['🧭', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8l-4 8-4-4 8-4z"/></svg>'],
+                ['🌟', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/></svg>'],
+                ['🔄', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 6.5 5l-.5 5"/><path d="M3.51 15A9 9 0 0 0 17.5 19l.5-5"/></svg>'],
+                ['🛡️', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'],
+                ['🟢', '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>'],
+                ['🎨', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 1 0-14h1a3 3 0 0 1 0 6h-1"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="10.5" r="1"/></svg>'],
+                ['⚡', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'],
+                ['🐳', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="7" rx="2"/><path d="M7 11V7h4v4"/><path d="M13 11V5h4v6"/></svg>'],
+                ['💡', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M2 12a10 10 0 1 1 20 0c0 3-1.5 4.5-3 6H5c-1.5-1.5-3-3-3-6z"/></svg>'],
+                ['✍️', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>'],
+                ['🎛️', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><circle cx="4" cy="12" r="2"/><circle cx="12" cy="10" r="2"/><circle cx="20" cy="14" r="2"/></svg>'],
+                ['📣', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a4 4 0 0 0 4 4h1"/><path d="M21 8v8"/><path d="M7 11h11l5-3v10l-5-3H7v6H5a2 2 0 0 1-2-2v-2"/></svg>'],
+                ['📚', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 4v15.5A2.5 2.5 0 0 1 6.5 17H20V6a2 2 0 0 0-2-2H6"/></svg>'],
+                ['📋', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h1a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1"/></svg>'],
+                ['🧰', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5h8v2"/><path d="M12 12v4"/></svg>'],
+                ['⚠️', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg>'],
+                ['✅', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'],
+                ['🔒', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'],
+                ['👀', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>'],
+                ['🧱', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v6M9 9v12M15 9v12"/></svg>'],
+                ['📝', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>'],
+                ['🖼️', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>'],
+                ['♿', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v5l3 3"/><path d="M7 11h5"/><path d="M7 20a5 5 0 1 0 10 0"/></svg>'],
+                ['📦', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96L12 12l8.73-5.04"/></svg>'],
+                ['🧊', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>'],
+                ['🏷️', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v10l7 4 11-6V5L10 11 3 7z"/></svg>'],
+                ['👓', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="15" r="4"/><circle cx="17" cy="15" r="4"/><path d="M3 15h2m14 0h2 M11 15h2"/></svg>'],
+                ['🗄️', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="8" rx="2"/><rect x="3" y="13" width="18" height="8" rx="2"/></svg>'],
+                ['🧪', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12"/><path d="M7 2v7a6 6 0 1 0 10 0V2"/></svg>'],
+                ['⬆️', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>'],
+                ['⬇️', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>'],
+                ['❓', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9a3 3 0 1 1 6 0c0 3-3 3-3 6"/><line x1="12" y1="17" x2="12" y2="17"/></svg>'],
+            ]);
+
+            function convertHeadingEmojis(h) {
+                const text = h.textContent || '';
+                const last = text.trim().slice(-2); // some emojis are two chars
+                const keys = Array.from(emojiMap.keys());
+                let matched = keys.find(k => text.endsWith(k));
+                if (!matched) {
+                    matched = keys.find(k => last.includes(k));
+                }
+                if (matched) {
+                    h.textContent = text.replace(matched, '').trimEnd();
+                    const span = document.createElement('span');
+                    span.className = 'doc-emoji';
+                    span.innerHTML = emojiMap.get(matched);
+                    h.appendChild(span);
+                }
+            }
+
+            const allHeadings = Array.from(article.querySelectorAll('h1, h2, h3'));
+            allHeadings.forEach(convertHeadingEmojis);
+
+            // H1 anchor copy with '#'
+            const firstH1 = article.querySelector('h1');
+            if (firstH1) {
+                if (!firstH1.id) firstH1.id = slugify(firstH1.textContent || '');
+                const a = document.createElement('a');
+                a.href = '#' + firstH1.id;
+                a.className = 'heading-anchor';
+                a.title = 'Copier le lien de cette page';
+                a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v4M15 4v4M4 9h16M4 15h16M9 16v4M15 16v4"/></svg>';
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const url = location.origin + location.pathname + '#' + firstH1.id;
+                    navigator.clipboard?.writeText(url);
+                    a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+                    setTimeout(() => a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v4M15 4v4M4 9h16M4 15h16M9 16v4M15 16v4"/></svg>', 1200);
+                });
+                firstH1.appendChild(a);
+            }
+
+            // Build TOC (H2/H3) and add anchors on H2/H3 with '#'
+            const headings = Array.from(article.querySelectorAll('h2, h3'));
+            const items = [];
+            headings.forEach(h => {
+                if (!h.id) { h.id = slugify(h.textContent || ''); }
+                items.push({ id: h.id, text: h.textContent || '', level: h.tagName.toLowerCase() });
+                // Ajoute un lien d’ancrage (SVG '#') sur H2/H3
+                if (h.tagName === 'H2' || h.tagName === 'H3') {
+                    const a = document.createElement('a');
+                    a.href = '#' + h.id;
+                    a.title = 'Copier le lien de cette section';
+                    a.className = 'heading-anchor';
+                    a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v4M15 4v4M4 9h16M4 15h16M9 16v4M15 16v4"/></svg>';
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const url = location.origin + location.pathname + '#' + h.id;
+                        navigator.clipboard?.writeText(url);
+                        a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+                        setTimeout(() => a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v4M15 4v4M4 9h16M4 15h16M9 16v4M15 16v4"/></svg>', 1200);
+                    });
+                    h.appendChild(a);
+                }
+            });
+            // Group TOC by H2 and H3, collapsible
+            const groups = [];
+            let currentGroup = null;
+            items.forEach(it => {
+                if (it.level === 'h2') { currentGroup = { h2: it, children: [] }; groups.push(currentGroup); }
+                else if (it.level === 'h3' && currentGroup) { currentGroup.children.push(it); }
+            });
+            tocEl.innerHTML = groups.map(g => {
+                const caret = '<svg class="toc-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l4 4 4-4"/></svg>';
+                const h2Btn = `<button class="toc-toggle" data-target="#${g.h2.id}">${caret}<span>${g.h2.text}</span></button>`;
+                const children = g.children.map(c => `<a href="#${c.id}" class="toc-h3">${c.text}</a>`).join('');
+                return `<div class="toc-group">${h2Btn}<div class="toc-children">${children}</div></div>`;
+            }).join('');
+            const tocLinks = Array.from(tocEl.querySelectorAll('a'));
+            const tocGroups = Array.from(tocEl.querySelectorAll('.toc-group'));
+            tocEl.addEventListener('click', (e) => {
+                const btn = e.target.closest('.toc-toggle');
+                if (btn) {
+                    const group = btn.parentElement;
+                    group.classList.toggle('expanded');
+                    const id = btn.getAttribute('data-target').slice(1);
+                    const target = document.getElementById(id);
+                    if (target) window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+                }
+                const a = e.target.closest('a');
+                if (a && a.getAttribute('href')?.startsWith('#')) {
+                    e.preventDefault();
+                    const target = document.getElementById(a.getAttribute('href').slice(1));
+                    if (target) window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+                }
+            });
+            const onScroll = () => {
+                const scrollY = window.scrollY + 120;
+                let activeId = null;
+                headings.forEach(h => { if (h.offsetTop <= scrollY) activeId = h.id; });
+                tocLinks.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + activeId); });
+                // auto-expand group containing active link
+                tocGroups.forEach(g => {
+                    const links = Array.from(g.querySelectorAll('a'));
+                    const contains = links.some(a => a.getAttribute('href') === '#' + activeId);
+                    if (contains) g.classList.add('expanded');
+                });
+            };
+            document.addEventListener('scroll', onScroll, { passive: true });
+            window.addEventListener('load', onScroll);
+
+            tocEl.addEventListener('click', (e) => {
+                const a = e.target.closest('a');
+                if (a) {
+                    e.preventDefault();
+                    const target = document.getElementById(a.getAttribute('href').slice(1));
+                    if (target) {
+                        window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+                    }
+                }
+            });
+
+            // Mini TOC (premiers H2) sous H1
+            const miniToc = document.getElementById('doc-mini-toc');
+            const miniWrap = document.getElementById('doc-mini-toc-items');
+            if (miniToc && miniWrap) {
+                const h2s = items.filter(i => i.level === 'h2').slice(0, 6);
+                if (h2s.length) {
+                    miniWrap.innerHTML = h2s.map(i => `<a href="#${i.id}" class="doc-chip">${i.text}</a>`).join('');
+                    miniToc.classList.remove('hidden');
+                    miniWrap.addEventListener('click', (e) => {
+                        const a = e.target.closest('a');
+                        if (a) {
+                            e.preventDefault();
+                            const target = document.getElementById(a.getAttribute('href').slice(1));
+                            if (target) window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+                        }
+                    });
+                }
+            }
+        }
+
+        // Back to top floating button
+        const back = document.createElement('button');
+        back.id = 'backToTop';
+        back.className = 'rounded-full p-2 bg-slate-800/70 border border-slate-700 text-slate-200 hover:bg-slate-800 shadow';
+        back.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>';
+        back.title = 'Retour en haut';
+        back.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        document.body.appendChild(back);
+        const toggleBack = () => { if (window.scrollY > 300) back.classList.add('show'); else back.classList.remove('show'); };
+        document.addEventListener('scroll', toggleBack, { passive: true });
+        window.addEventListener('load', toggleBack);
+    </script>
+
+    <%- include('../partials/footer') %>

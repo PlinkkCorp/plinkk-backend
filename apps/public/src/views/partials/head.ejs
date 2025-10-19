@@ -137,6 +137,11 @@
                   }
                 }
 
+                @keyframes fade-out {
+                  from { opacity: 1 }
+                  to { opacity: 0 }
+                }
+
                 @keyframes slide-up {
                   from {
                     opacity: 0;
@@ -161,6 +166,15 @@
                   }
                 }
 
+                 @keyframes drawer-in {
+                  from { opacity: 0; transform: translateX(100%); }
+                  to { opacity: 1; transform: translateX(0); }
+                }
+                @keyframes drawer-out {
+                  from { opacity: 1; transform: translateX(0); }
+                  to { opacity: 0; transform: translateX(100%); }
+                }
+
                 .animate-fade-in {
                   animation: fade-in .36s var(--ease-out-quad) both
                 }
@@ -173,6 +187,20 @@
                   animation: pop-in .28s var(--ease-out-quad) both
                 }
 
+                .animate-backdrop-in {
+                  animation: fade-in .25s var(--ease-out-quad) both
+                }
+                .animate-backdrop-out {
+                  animation: fade-out .16s ease-in both
+                }
+                .animate-drawer-in {
+                  animation: drawer-in .32s var(--ease-out-quad) both
+                }
+                .animate-drawer-out {
+                  animation: drawer-out .22s cubic-bezier(.4,0,1,1) both
+                }
+                .animate-tab-switch { animation: fade-in .22s var(--ease-out-quad) both }
+
                 .glass {
                   background: linear-gradient(to bottom right, rgba(8, 8, 20, .6), rgba(15, 15, 40, .55));
                   backdrop-filter: blur(10px)
@@ -180,6 +208,11 @@
 
                 .ring-gradient {
                   box-shadow: 0 0 0 1px rgb(30 41 59 / .5), inset 0 0 0 1px rgb(99 102 241 / .25)
+                }
+
+                 /* Accessibilité: réduire les animations si demandé par l’utilisateur */
+                @media (prefers-reduced-motion: reduce) {
+                  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
                 }
               </style>
               <%- (typeof extraHead !=='undefined' ? extraHead : '' ) %>

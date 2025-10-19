@@ -1,6 +1,5 @@
 import { FastifyInstance } from "fastify";
 import {
-  BackgroundColor,
   Label,
   Link,
   NeonColor,
@@ -20,7 +19,6 @@ import {
 import { generateBundle } from "../../../lib/generateBundle";
 import { generateProfileConfig } from "../../../lib/generateConfig";
 import path from "path";
-import { readdirSync } from "fs";
 import archiver from "archiver"
 import ejs from "ejs";
 import { fetchRemoteFile } from "../../../lib/fileUtils";
@@ -449,7 +447,9 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
               icon: l.icon ?? undefined,
               url: l.url,
               text: l.text ?? undefined,
-              name: l.name ?? undefined,
+              name: (l).name === null
+                ? null
+                : (typeof (l).name === 'string' ? (l).name : undefined),
               description: l.description ?? undefined,
               showDescriptionOnHover: l.showDescriptionOnHover ?? undefined,
               showDescription: l.showDescription ?? undefined,
@@ -461,7 +461,9 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
               icon: l.icon ?? undefined,
               url: l.url,
               text: l.text ?? undefined,
-              name: l.name ?? undefined,
+              name: (l).name === null
+                ? null
+                : (typeof (l).name === 'string' ? (l).name : undefined),
               description: l.description ?? undefined,
               showDescriptionOnHover: l.showDescriptionOnHover ?? undefined,
               showDescription: l.showDescription ?? undefined,

@@ -5,7 +5,9 @@
   "types": "index.d.ts",
   "scripts": {
     "generate": "prisma generate",
+    "migrate:dev": "prisma migrate dev",
     "deploy": "prisma migrate deploy",
+    "studio": "prisma studio",
     "seed": "ts-node prisma/seed.ts",
     "postinstall": "prisma generate --schema=prisma/schema.prisma || true"
   },

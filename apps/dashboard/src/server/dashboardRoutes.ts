@@ -7,25 +7,20 @@ import { dashboardAdminRoutes } from "./dashboard/admin";
 const prisma = new PrismaClient();
 
 export function dashboardRoutes(fastify: FastifyInstance) {
-
-  fastify.register(dashboardAdminRoutes, { prefix: "/admin" })
+  fastify.register(dashboardAdminRoutes, { prefix: "/admin" });
 
   fastify.get("/", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) {
-      return reply.redirect(
-        `/login?returnTo=${encodeURIComponent("/")}`
-      );
+      return reply.redirect(`/login?returnTo=${encodeURIComponent("/")}`);
     }
 
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      include: { role: true }
+      include: { role: true },
     });
     if (!userInfo) {
-      return reply.redirect(
-        `/login?returnTo=${encodeURIComponent("/")}`
-      );
+      return reply.redirect(`/login?returnTo=${encodeURIComponent("/")}`);
     }
 
     const [linksCount, socialsCount, labelsCount, recentLinks, plinkks] =
@@ -38,7 +33,11 @@ export function dashboardRoutes(fastify: FastifyInstance) {
           orderBy: { id: "desc" },
           take: 10,
         }),
-        prisma.plinkk.findMany({ where: { userId: userId as string }, select: { id: true, name: true, slug: true, isDefault: true }, orderBy: [{ isDefault: 'desc' }, { index: 'asc' }] }),
+        prisma.plinkk.findMany({
+          where: { userId: userId as string },
+          select: { id: true, name: true, slug: true, isDefault: true },
+          orderBy: [{ isDefault: "desc" }, { index: "asc" }],
+        }),
       ]);
 
     // compute publicPath for user views (prefer default plinkk slug if present)
@@ -55,7 +54,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       stats: { links: linksCount, socials: socialsCount, labels: labelsCount },
       links: recentLinks,
       plinkks,
-      publicPath
+      publicPath,
     });
   });
 
@@ -144,12 +143,13 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
       });
-      publicPath = defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+      publicPath =
+        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
     return await replyView(reply, "dashboard/user/cosmetics.ejs", userInfo, {
       cosmetics,
       catalog,
-      publicPath
+      publicPath,
     });
   });
 
@@ -164,18 +164,14 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     );
     const userId = request.session.get("data");
     if (!userId) {
-      return reply.redirect(
-        `/login?returnTo=${encodeURIComponent("/edit")}`
-      );
+      return reply.redirect(`/login?returnTo=${encodeURIComponent("/edit")}`);
     }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      include: { role: true }
+      include: { role: true },
     });
     if (!userInfo) {
-      return reply.redirect(
-        `/login?returnTo=${encodeURIComponent("/edit")}`
-      );
+      return reply.redirect(`/login?returnTo=${encodeURIComponent("/edit")}`);
     }
     // Sélection de la page Plinkk à éditer
     const q = request.query as { plinkkId: string };
@@ -200,12 +196,13 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         }
       : null;
     const autoOpenPlinkkModal = !q?.plinkkId && pages.length > 1;
-    let publicPath
+    let publicPath;
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
       });
-      publicPath = defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
+      publicPath =
+        defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
     // Ajout d'un champ top-level `affichageEmail` par page pour simplifier l'usage côté client
     const pagesForView = pages.map((p) => ({
@@ -216,7 +213,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       plinkk: selectedForView,
       pages: pagesForView,
       autoOpenPlinkkModal,
-      publicPath
+      publicPath,
     });
   });
 
@@ -231,21 +228,17 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     );
     const userId = request.session.get("data");
     if (!userId) {
-      return reply.redirect(
-        `/login?returnTo=${encodeURIComponent("/stats")}`
-      );
+      return reply.redirect(`/login?returnTo=${encodeURIComponent("/stats")}`);
     }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
       include: {
         links: true,
-        role: true
+        role: true,
       },
     });
     if (!userInfo) {
-      return reply.redirect(
-        `/login?returnTo=${encodeURIComponent("/stats")}`
-      );
+      return reply.redirect(`/login?returnTo=${encodeURIComponent("/stats")}`);
     }
     // Pages de l'utilisateur et sélection
     const q = request.query as { plinkkId: string };
@@ -321,7 +314,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       orderBy: { id: "desc" },
       take: 100,
     });
-    let publicPath
+    let publicPath;
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
@@ -341,7 +334,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       totalViews,
       totalClicks,
       links,
-      publicPath
+      publicPath,
     });
   });
 
@@ -456,9 +449,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.get("/versions", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) {
-      const dest = `/login?returnTo=${encodeURIComponent(
-        "/versions"
-      )}`;
+      const dest = `/login?returnTo=${encodeURIComponent("/versions")}`;
       request.log?.info(
         { returnTo: request.raw.url },
         "redirecting to login with returnTo"
@@ -467,19 +458,17 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      include: { role: true }
+      include: { role: true },
     });
     if (!userInfo) {
-      const dest = `/login?returnTo=${encodeURIComponent(
-        "/versions"
-      )}`;
+      const dest = `/login?returnTo=${encodeURIComponent("/versions")}`;
       request.log?.info(
         { returnTo: request.raw.url },
         "redirecting to login with returnTo"
       );
       return reply.redirect(dest);
     }
-    let publicPath
+    let publicPath;
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
@@ -487,7 +476,9 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
-    return replyView(reply, "dashboard/user/versions.ejs", userInfo, { publicPath });
+    return replyView(reply, "dashboard/user/versions.ejs", userInfo, {
+      publicPath,
+    });
   });
 
   // Dashboard: Compte (gestion infos, confidentialité, cosmétiques)
@@ -507,8 +498,14 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       });
     } catch (e) {
       // If the Host table is missing (e.g. migrations not applied), fallback to query without it
-      request.log?.warn({ err: e }, 'Failed to include host when fetching userInfo; retrying without host (fallback)');
-      userInfo = await prisma.user.findFirst({ where: { id: userId }, include: { cosmetics: true, role: true } });
+      request.log?.warn(
+        { err: e },
+        "Failed to include host when fetching userInfo; retrying without host (fallback)"
+      );
+      userInfo = await prisma.user.findFirst({
+        where: { id: userId },
+        include: { cosmetics: true, role: true },
+      });
     }
     if (!userInfo) {
       return reply.redirect(
@@ -518,7 +515,19 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     // Dérive la visibilité d'email depuis le champ `publicEmail` (présent
     // dans le schéma Prisma). Si publicEmail est défini -> l'email est public.
     const isEmailPublic = Boolean(userInfo.publicEmail);
-    let publicPath
+    const pages = await prisma.plinkk.findMany({
+      where: { userId: userInfo.id },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        isDefault: true,
+        index: true,
+        createdAt: true,
+      },
+      orderBy: [{ isDefault: "desc" }, { index: "asc" }, { createdAt: "asc" }],
+    });
+    let publicPath;
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
@@ -528,7 +537,9 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     } catch (e) {}
     return replyView(reply, "dashboard/user/account.ejs", userInfo, {
       isEmailPublic,
-      publicPath
+      publicPath,
+      pages,
+      plinkks: pages
     });
   });
 
@@ -536,18 +547,14 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.get("/themes", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) {
-      return reply.redirect(
-        `/login?returnTo=${encodeURIComponent("/themes")}`
-      );
+      return reply.redirect(`/login?returnTo=${encodeURIComponent("/themes")}`);
     }
     const userInfo = await prisma.user.findFirst({
       where: { id: userId },
-      include: { role: true }
+      include: { role: true },
     });
     if (!userInfo) {
-      return reply.redirect(
-        `/login?returnTo=${encodeURIComponent("/themes")}`
-      );
+      return reply.redirect(`/login?returnTo=${encodeURIComponent("/themes")}`);
     }
     const myThemes = await prisma.theme.findMany({
       where: { authorId: userId as string },
@@ -565,7 +572,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         isPrivate: true,
       },
     });
-    let publicPath
+    let publicPath;
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
         where: { userId: userInfo.id, isDefault: true },
@@ -576,7 +583,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     return replyView(reply, "dashboard/user/themes.ejs", userInfo, {
       myThemes,
       selectedCustomThemeId: userInfo.selectedCustomThemeId || null,
-      publicPath
+      publicPath,
     });
   });
 }

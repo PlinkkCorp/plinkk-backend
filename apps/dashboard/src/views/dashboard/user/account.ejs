@@ -12,7 +12,7 @@
           <div class="mb-4">
             <div class="flex items-center justify-between">
               <h1 class="text-2xl font-semibold">Mon compte</h1>
-              <a href="/cosmetics"
+              <a href="/dashboard/cosmetics"
                 class="px-3 py-2 text-sm rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200">Cosmétiques
                 ➜</a>
             </div>
@@ -20,7 +20,8 @@
 
           <!-- Nouvelle interface: barre de catégories en haut + contenu en dessous (style édition) -->
           <div id="accountRoot"
-            data-twofactor="<%= !!(user && ((user.totpSecret && user.totpSecret !== '') || user.twoFactorEnabled)) %>">
+            data-twofactor="<%= !!(user && ((user.totpSecret && user.totpSecret !== '') || user.twoFactorEnabled)) %>"
+            data-user-email="<%= user.email %>">
             <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-0">
               <!-- Top bar catégories -->
               <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-800/40 bg-transparent">
@@ -59,6 +60,13 @@
                       <div class="space-y-4">
                         <div>
                           <h4 class="text-lg font-semibold mb-2">Confidentialité</h4>
+                          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
+                            <div>
+                              <label class="block text-xs mb-1">Sélectionne le Plinkk</label>
+                              <select id="privacyPlinkkSelect"
+                                class="w-full h-9 px-2 rounded-md bg-slate-900/60 border border-slate-700 text-sm"></select>
+                            </div>
+                          </div>
                           <div class="flex items-center justify-between py-2">
                             <div>
                               <p class="text-sm font-medium">Profil public</p>
@@ -111,6 +119,47 @@
                                     <button id="btnLearn2fa"
                                       class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 text-white">Comment
                                       ça marche</button>
+                            </div>
+                          </div>
+                          <div class="space-y-3 mt-4">
+                            <h4 class="font-medium mb-1">Domaines (par Plinkk)</h4>
+                            <p class="text-xs text-slate-400">Associe un CNAME à l'un de tes Plinkks. 1 domaine par
+                              Plinkk.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <div>
+                                <label class="block text-xs mb-1">Sélectionne le Plinkk</label>
+                                <select id="domainPlinkkSelect"
+                                  class="w-full h-9 px-2 rounded-md bg-slate-900/60 border border-slate-700 text-sm"></select>
+                              </div>
+                              <div>
+                                <label class="block text-xs mb-1">Nom de domaine (ex: plinkk.example.fr)</label>
+                                <input id="domainHostname"
+                                  class="w-full h-9 px-3 rounded-md bg-slate-900/60 border border-slate-700 text-sm"
+                                  placeholder="plinkk.example.fr" />
+                              </div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                              <button id="btnDomainSave"
+                                class="px-3 py-2 text-sm rounded-md bg-emerald-600 hover:bg-emerald-500 text-white">Activer
+                                / Mettre à jour</button>
+                              <button id="btnDomainVerify"
+                                class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white">Vérifier</button>
+                              <button id="btnDomainDelete"
+                                class="px-3 py-2 text-sm rounded-md bg-amber-600 hover:bg-amber-500 text-white">Désactiver</button>
+                            </div>
+                            <div id="domainDnsHints" class="hidden space-y-3 mt-2">
+                              <div>
+                                <label class="block text-xs mb-1">Enregistrement TXT (vérification)</label>
+                                <input id="domainTXT" readonly
+                                  class="w-full h-9 px-3 rounded-md bg-slate-900/60 border border-slate-700 text-xs text-slate-300" />
+                              </div>
+                              <div>
+                                <label class="block text-xs mb-1">Enregistrement CNAME</label>
+                                <input id="domainCNAME" readonly
+                                  class="w-full h-9 px-3 rounded-md bg-slate-900/60 border border-slate-700 text-xs text-slate-300" />
+                              </div>
+                              <p class="text-[11px] text-slate-400">Après avoir ajouté ces enregistrements, patiente ~15
+                                minutes puis clique sur "Vérifier".</p>
                             </div>
                           </div>
                         </div>
@@ -271,6 +320,8 @@
         </div>
       </div>
     </div>
+
+    <!-- Host modals supprimés: gestion inline dans l'onglet Sécurité -->
 
     <!-- Toasts container pour les alertes in-page -->
     <div id="toasts" class="fixed top-4 right-4 z-50 flex flex-col items-end gap-2 pointer-events-none"></div>
@@ -443,16 +494,92 @@
         }
       });
 
-      // Toggle profil public
-      document.getElementById('togglePublic')?.addEventListener('change', async (e) => {
-        const checked = e.currentTarget.checked;
-        await fetch('/api/me/visibility', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isPublic: checked }) });
-      });
+      // Confidentialité par Plinkk
+      window.addEventListener('load', () => {
+        const accountRoot = document.getElementById('accountRoot');
+        const userEmail = accountRoot?.getAttribute('data-user-email') || '';
+        const select = document.getElementById('privacyPlinkkSelect');
+        const chkPublic = document.getElementById('togglePublic');
+        const chkEmail = document.getElementById('toggleEmailPublic');
 
-      // Toggle email public
-      document.getElementById('toggleEmailPublic')?.addEventListener('change', async (e) => {
-        const checked = e.currentTarget.checked;
-        await fetch('/api/me/email-visibility', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isEmailPublic: checked }) });
+        // Charger la liste des plinkks depuis le template JSON
+        let plinkkList = [];
+        try {
+          const tpl = document.getElementById('account-plinkks-data');
+          const raw = tpl ? tpl.innerHTML : '[]';
+          plinkkList = JSON.parse(raw || '[]');
+        } catch (_) { plinkkList = []; }
+
+        function populateOptions() {
+          if (!select) return;
+          select.innerHTML = '';
+          if (!plinkkList.length) {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = 'Aucun plinkk';
+            select.appendChild(opt);
+            chkPublic && (chkPublic.disabled = true);
+            chkEmail && (chkEmail.disabled = true);
+            return;
+          }
+          let defaultId = null;
+          plinkkList.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = `${p.name || p.slug || p.id} (${p.slug || p.id})`;
+            if (p.isDefault) defaultId = p.id;
+            select.appendChild(opt);
+          });
+          if (defaultId) select.value = defaultId;
+        }
+
+        async function refreshToggles() {
+          const id = select?.value || '';
+          const p = plinkkList.find(x => x.id === id) || null;
+          if (!p) { if (chkPublic) chkPublic.checked = false; if (chkEmail) chkEmail.checked = false; return; }
+          // Public selon la propriété du plinkk
+          if (typeof p.isPublic === 'boolean' && chkPublic) chkPublic.checked = !!p.isPublic;
+          // Email: requête la config pour savoir si affichageEmail est null (=> caché) ou non
+          try {
+            const res = await fetch(`/api/me/plinkks/${encodeURIComponent(id)}/config`);
+            const j = await res.json().catch(() => ({}));
+            if (chkEmail) chkEmail.checked = j && j.email !== null;
+          } catch (_) { if (chkEmail) chkEmail.checked = false; }
+        }
+
+        populateOptions();
+        refreshToggles();
+        select?.addEventListener('change', refreshToggles);
+
+        // Toggle profil public (par plinkk)
+        chkPublic?.addEventListener('change', async (e) => {
+          const id = select?.value || '';
+          if (!id) return;
+          const checked = e.currentTarget.checked;
+          const res = await fetch(`/api/me/plinkks/${encodeURIComponent(id)}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isPublic: !!checked })
+          });
+          if (!res.ok) showAlert('Erreur lors du changement de visibilité', 'error');
+          else {
+            const p = plinkkList.find(x => x.id === id); if (p) p.isPublic = !!checked;
+          }
+        });
+
+        // Toggle email public (par plinkk)
+        chkEmail?.addEventListener('change', async (e) => {
+          const id = select?.value || '';
+          if (!id) return;
+          const checked = e.currentTarget.checked;
+          const payload = { affichageEmail: checked ? (userEmail || null) : null };
+          const res = await fetch(`/api/me/plinkks/${encodeURIComponent(id)}/config/plinkk`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) showAlert('Erreur lors du changement visibilité email', 'error');
+        });
       });
 
       // Mot de passe
@@ -746,5 +873,103 @@
         btnClose?.addEventListener('click', () => { modal.classList.add('hidden'); });
         overlay?.addEventListener('click', () => { modal.classList.add('hidden'); });
         btnReload?.addEventListener('click', () => { location.reload(); });
+      })();
+    </script>
+
+    <!-- Données Plinkk sérialisées (inertes) pour la section Domaines -->
+    <template id="account-plinkks-data"><%- JSON.stringify((typeof plinkks !=='undefined' ) ? plinkks : ((typeof pages
+        !=='undefined' ) ? pages : [])) %></template>
+
+    <script>
+      // Gestion Domaines (inline, par Plinkk)
+      (function () {
+        const selectPlinkk = document.getElementById('domainPlinkkSelect');
+        const inputHost = document.getElementById('domainHostname');
+        const btnSave = document.getElementById('btnDomainSave');
+        const btnVerify = document.getElementById('btnDomainVerify');
+        const btnDelete = document.getElementById('btnDomainDelete');
+        const hints = document.getElementById('domainDnsHints');
+        const txt = document.getElementById('domainTXT');
+        const cname = document.getElementById('domainCNAME');
+
+        if (!selectPlinkk || !inputHost) return;
+
+        // Injecter la liste des plinkks depuis la variable globale définie juste avant
+        let list = [];
+        try {
+          const tpl = document.getElementById('account-plinkks-data');
+          const raw = tpl ? tpl.innerHTML : '[]';
+          list = JSON.parse(raw || '[]');
+        } catch (_) { list = []; }
+        selectPlinkk.innerHTML = '';
+        if (!list.length) {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = 'Aucun plinkk';
+          selectPlinkk.appendChild(opt);
+        } else {
+          list.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = `${p.name || p.slug || p.id} (${p.slug || p.id})`;
+            selectPlinkk.appendChild(opt);
+          });
+        }
+
+        function buildTxtRecord(hostname, token) {
+          return `_plinkk-verification.${hostname} IN TXT "plinkk-verify=${token}"`;
+        }
+        function buildCnameRecord(hostname) {
+          return `${hostname} CNAME page.plinkk.fr`;
+        }
+
+        btnSave?.addEventListener('click', async () => {
+          const hostname = (inputHost.value || '').trim();
+          if (!hostname) { showAlert('Entre un nom de domaine', 'error'); return; }
+          try {
+            btnSave.disabled = true;
+            const res = await fetch('/api/me/host', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hostname }) });
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok) { showAlert(j.error || 'Erreur lors de la configuration du domaine', 'error'); return; }
+            if (j.token || (j.verified === false)) {
+              hints?.classList.remove('hidden');
+              if (txt) txt.value = buildTxtRecord(hostname, j.token || 'TOKEN');
+              if (cname) cname.value = buildCnameRecord(hostname);
+              showAlert('Ajoute les enregistrements DNS puis clique sur Vérifier', 'success');
+            } else {
+              showAlert('Domaine enregistré', 'success');
+            }
+          } catch (e) {
+            console.error(e);
+            showAlert('Erreur réseau', 'error');
+          } finally {
+            btnSave.disabled = false;
+          }
+        });
+
+        btnVerify?.addEventListener('click', async () => {
+          try {
+            btnVerify.disabled = true;
+            const res = await fetch('/api/me/host/verify', { method: 'POST' });
+            const j = await res.json().catch(() => ({}));
+            if (j.verified) {
+              showAlert('Domaine vérifié ✓', 'success');
+            } else {
+              showAlert('TXT non détecté, réessaye dans quelques minutes', 'error');
+            }
+          } catch (e) { console.error(e); showAlert('Erreur réseau', 'error'); }
+          finally { btnVerify.disabled = false; }
+        });
+
+        btnDelete?.addEventListener('click', async () => {
+          try {
+            btnDelete.disabled = true;
+            const res = await fetch('/api/me/host', { method: 'DELETE' });
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok) { showAlert(j.error || 'Suppression impossible', 'error'); return; }
+            showAlert('Domaine désactivé', 'success');
+          } catch (e) { console.error(e); showAlert('Erreur réseau', 'error'); }
+          finally { btnDelete.disabled = false; }
+        });
       })();
     </script>
