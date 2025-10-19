@@ -448,12 +448,18 @@ export function createLinkBoxes(profileData) {
         mainContent.style.gap = "12px";
         // Ajouter l'icône au conteneur principal
         mainContent.appendChild(discordIcon);
-        // Créer un span pour le texte
-        const textSpan = document.createElement("span");
-        textSpan.style.position = "relative";
-        textSpan.style.left = "50%";
-        textSpan.style.transform = "translateX(-50%)";
-        textSpan.textContent = link.text;
+    // Créer un span pour le texte et centrer correctement en flex pour éviter
+    // que le bouton "Afficher la description" n'expulse le texte hors du bouton
+    const textSpan = document.createElement("span");
+    // Utiliser flex pour centrer et permettre le wrapping/truncation sans overflow
+    textSpan.style.display = "inline-block";
+    textSpan.style.flex = "1 1 auto";
+    textSpan.style.minWidth = "0"; // important pour empêcher l'overflow dans les flex containers
+    textSpan.style.textAlign = "center";
+    textSpan.style.whiteSpace = "nowrap";
+    textSpan.style.overflow = "hidden";
+    textSpan.style.textOverflow = "ellipsis";
+    textSpan.textContent = link.text;
         // Gérer les descriptions
         if (link.description && link.description.trim() !== "" && link.showDescription) {
             // Create the arrow emoji element
@@ -485,8 +491,7 @@ export function createLinkBoxes(profileData) {
             desc.style.padding = "0 8px";
             desc.style.borderRadius = "5px";
             desc.style.border = "1px solid rgba(255, 255, 255, 0.5)";
-            desc.style.marginTop = "0";
-            desc.style.marginBottom = "0";
+            desc.style.marginTop = "-1em";
             desc.style.display = "block";
             desc.style.width = "100%";
             desc.style.fontSize = "0.9em";
@@ -495,20 +500,28 @@ export function createLinkBoxes(profileData) {
                 discordIcon.style.transform = "translateY(3px)";
             }
             arrow.style.transform = "translateY(3px)";
+            // Pour mobile/tactile on crée un bouton mais on l'ajoute plus bas
+            // (sous le contenu principal) afin qu'il n'expulse pas le texte.
+            let showDescBtn = null;
             if (isTouchDevice) {
                 // Sur mobile/tactile : bouton pour afficher/masquer la description
-                const showDescBtn = document.createElement("button");
+                showDescBtn = document.createElement("button");
                 showDescBtn.textContent = "Afficher la description";
                 showDescBtn.className = "show-desc-btn";
-                showDescBtn.style.marginLeft = "10px";
-                showDescBtn.style.fontSize = "0.9em";
-                showDescBtn.style.padding = "2px 8px";
+                // Styles pour le rendre en bloc sous le bouton principal
+                showDescBtn.style.display = "block";
+                showDescBtn.style.width = "100%";
+                showDescBtn.style.boxSizing = "border-box";
+                showDescBtn.style.marginTop = "8px";
+                showDescBtn.style.fontSize = "0.95em";
+                showDescBtn.style.padding = "6px 10px";
                 showDescBtn.style.borderRadius = "6px";
                 showDescBtn.style.border = "none";
                 showDescBtn.style.background = "#eee";
                 showDescBtn.style.cursor = "pointer";
                 showDescBtn.style.transition = "background 0.2s";
                 showDescBtn.style.pointerEvents = "auto";
+                arrow.style.display = "none"; // cacher la flèche sur mobile
                 let descVisible = false;
                 showDescBtn.addEventListener("click", (e) => {
                     e.preventDefault();
@@ -517,24 +530,20 @@ export function createLinkBoxes(profileData) {
                     if (descVisible) {
                         desc.style.maxHeight = "200px";
                         desc.style.opacity = "1";
-                        desc.style.marginTop = "8px";
-                        desc.style.marginBottom = "0";
                         desc.style.padding = "8px";
+                        desc.style.marginTop = "-0.5em";
                         arrow.style.opacity = "0";
                         showDescBtn.textContent = "Masquer la description";
                     }
                     else {
                         desc.style.maxHeight = "0";
                         desc.style.opacity = "0";
-                        desc.style.marginTop = "0";
-                        desc.style.marginBottom = "0";
+                        desc.style.marginTop = "-1em";
                         desc.style.padding = "0 8px";
                         arrow.style.opacity = "1";
                         showDescBtn.textContent = "Afficher la description";
                     }
                 });
-                // Ajouter le bouton au conteneur principal au lieu du discordBox
-                mainContent.appendChild(showDescBtn);
             }
             else {
                 // Desktop : hover classique sur le lien entier
@@ -555,9 +564,15 @@ export function createLinkBoxes(profileData) {
                     arrow.style.opacity = "1";
                 });
             }
-            // Ajouter la description au lien (en bas)
+            // Ajouter la description au lien (en bas). Sur mobile on insère
+            // le bouton "Afficher la description" entre le contenu principal
+            // et la description.
             mainContent.appendChild(textSpan);
             discordLink.appendChild(mainContent);
+            if (showDescBtn) {
+                // Append the mobile toggle button as a block under the main content
+                discordLink.appendChild(showDescBtn);
+            }
             discordLink.appendChild(desc);
         }
         else {
