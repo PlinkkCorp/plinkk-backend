@@ -56,6 +56,21 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
     return await replyView(reply, "about/legal.ejs", currentUser, {});
   });
 
+  fastify.get("/docs", async (request, reply) => {
+    const currentUserId = request.session.get("data") as string | undefined;
+    const currentUser = currentUserId
+      ? await prisma.user.findUnique({
+          where: { id: currentUserId },
+        })
+      : null;
+    return await replyView(reply, "docs.ejs", currentUser, {});
+  });
+
+  // Accept trailing slash as well and redirect to canonical path
+  fastify.get("/docs/", async (request, reply) => {
+    return reply.code(301).redirect("/docs");
+  });
+
   // robots.txt
   fastify.get("/robots.txt", async (request, reply) => {
     const host =
@@ -128,6 +143,7 @@ Sitemap: ${base}/sitemap.xml
       "legal",
       "users",
       "dashboard",
+      "docs",
     ].map((p) => (p ? `${base}/${p}` : `${base}/`));
     const users = await prisma.user.findMany({
       select: { id: true },

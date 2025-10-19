@@ -2,7 +2,6 @@ import { FastifyInstance } from "fastify";
 import { PrismaClient } from "../../../generated/prisma/client";
 import { builtInThemesTypes, coerceThemeData } from "../../lib/theme";
 import { verifyRoleIsStaff } from "../../lib/verifyRole";
-import { builtInThemes } from "../../lib/builtInThemes";
 import { generateTheme } from "../../lib/generateTheme";
 
 const prisma = new PrismaClient();

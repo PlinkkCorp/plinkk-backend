@@ -1,0 +1,36 @@
+<%- include('partials/head', {
+  title: 'Plinkk — Documentation (En construction)',
+  description: 'La documentation est en construction. Revenez bientôt pour le guide complet et les fonctionnalités détaillées.',
+  extraHead: `
+    <meta name="robots" content="index,follow" />
+    <meta name="author" content="Plinkk Devs" />
+    <link rel="canonical" href="/docs" />
+    <meta property="og:title" content="Plinkk — Documentation (En construction)" />
+    <meta property="og:description" content="La documentation arrive très bientôt. Merci pour votre patience !" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="/docs" />
+    <meta property="og:image" content="/public/images/logo.svg" />
+  `
+}) %>
+
+<%- include('partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
+
+<section class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16">
+  <div class="glass rounded-xl border border-slate-800/60 px-6 sm:px-10 py-12 text-center">
+    <div class="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-yellow-500/10 text-yellow-300 border border-yellow-500/30">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12" y2="17"/>
+      </svg>
+    </div>
+    <h1 class="text-3xl sm:text-4xl font-semibold text-white">Documentation en construction</h1>
+    <p class="mt-3 text-slate-300 max-w-2xl mx-auto">Nous préparons une documentation claire et complète. Elle sera disponible très bientôt. Merci pour votre patience !</p>
+    <div class="mt-8 flex items-center justify-center gap-3">
+      <a href="/" class="px-4 py-2.5 rounded-md btn-ghost">Retour à l’accueil</a>
+      <a href="/login#signup" class="px-4 py-2.5 rounded-md btn-brand">Créer mon profil</a>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
