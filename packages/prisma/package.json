@@ -1,0 +1,16 @@
+{
+  "name": "@plinkk/prisma",
+  "version": "1.0.0",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "generate": "prisma generate",
+    "deploy": "prisma migrate deploy",
+    "seed": "ts-node prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.17.1",
+    "prisma": "^6.17.1",
+    "ts-node": "^10.9.2"
+  }
+}

@@ -1,5 +1,5 @@
 import dns from "dns/promises";
-import { PrismaClient } from "../../../../generated/prisma/client";
+import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
 
 const prisma = new PrismaClient()
 

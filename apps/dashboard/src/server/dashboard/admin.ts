@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { Announcement, Prisma, PrismaClient, Role } from "../../../../../generated/prisma/client";
+import { Announcement, Prisma, PrismaClient, Role } from "@plinkk/prisma/generated/prisma/client";
 import { replyView, getActiveAnnouncementsForUser } from "../../lib/replyView";
 import { verifyRoleIsStaff } from "../../lib/verifyRole";
 

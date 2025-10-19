@@ -1,0 +1,7 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+overrides:
+  globe:
+    version: 11.0.3

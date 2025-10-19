@@ -4,13 +4,6 @@ import Fastify from "fastify";
 import path from "path";
 import ejs from "ejs";
 import { readFileSync } from "fs";
-import {
-  Announcement,
-  AnnouncementRoleTarget,
-  AnnouncementTarget,
-  PrismaClient,
-  Role,
-} from "../../../generated/prisma/client";
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
@@ -34,9 +27,10 @@ import { authenticator } from "otplib";
 import { replyView } from "./lib/replyView";
 import fastifyRateLimit from "@fastify/rate-limit";
 import "dotenv/config"
+import { Announcement, AnnouncementRoleTarget, AnnouncementTarget, PrismaClient, Role } from "@plinkk/prisma/generated/prisma/client";
 
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 const fastify = Fastify({
   logger: true,
 });

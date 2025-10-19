@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from "../../../../generated/prisma/client";
+import { PrismaClient, Role } from "@plinkk/prisma/generated/prisma/client";
 import { RESERVED_SLUGS } from "./reservedSlugs";
 import { isBannedSlug } from "./bannedSlugs";
 import profileConfig from "../public/config/profileConfig";

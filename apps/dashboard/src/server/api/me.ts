@@ -5,7 +5,7 @@ import { verifyDomain } from "../../lib/verifyDNS";
 import bcrypt from "bcrypt";
 import QRCode from "qrcode";
 import { existsSync, mkdirSync, writeFileSync, unlinkSync } from "fs";
-import { PrismaClient, User } from "../../../../../generated/prisma/client";
+import { PrismaClient, User } from "@plinkk/prisma/generated/prisma/client";
 import { apiMeThemesRoutes } from "./me/theme";
 import { apiMePlinkksRoutes } from "./me/plinkks";
 import path from "path";

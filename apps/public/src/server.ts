@@ -4,7 +4,7 @@ import fastifyView from "@fastify/view";
 import Fastify from "fastify";
 import path from "path";
 import ejs from "ejs";
-import { existsSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import {
   Announcement,
   AnnouncementRoleTarget,
@@ -13,7 +13,7 @@ import {
   PrismaClient,
   Role,
   User,
-} from "../../../generated/prisma/client";
+} from "@plinkk/prisma/generated/prisma/client";
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
@@ -131,7 +131,7 @@ fastify.register(plinkkFrontUserRoutes);
 fastify.addHook("onRequest", async (request, reply) => {
   const host = request.headers.host || "";
 
-  if (host !== "plinkk.fr" && host !== "127.0.0.1:3002") {
+  if (host !== "plinkk.fr" && host !== "beta.plinkk.fr" && host !== "127.0.0.1:3002") {
     const hostDb = await prisma.host.findUnique({
       where: {
         id: host,

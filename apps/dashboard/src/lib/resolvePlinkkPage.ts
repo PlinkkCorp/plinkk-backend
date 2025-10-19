@@ -1,4 +1,4 @@
-import { PrismaClient, Visibility } from "../../../../generated/prisma/client";
+import { PrismaClient, Visibility } from "@plinkk/prisma/generated/prisma/client";
 import { FastifyRequest } from "fastify";
 
 // Détermine si l'identifiant est numérique (index) ou un slug

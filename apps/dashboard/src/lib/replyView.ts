@@ -6,7 +6,7 @@ import {
   RouteGenericInterface,
 } from "fastify";
 import ejs from "ejs";
-import { Announcement, AnnouncementRoleTarget, AnnouncementTarget, PrismaClient, Role } from "../../../../generated/prisma/client";
+import { Announcement, AnnouncementRoleTarget, AnnouncementTarget, PrismaClient, Role } from "@plinkk/prisma/generated/prisma/client";
 import { IncomingMessage, ServerResponse } from "http";
 import { toSafeUser, UserWithInclude } from "../types/user";
 import "dotenv/config"

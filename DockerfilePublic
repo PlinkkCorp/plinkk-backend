@@ -1,0 +1,35 @@
+FROM node:24-alpine
+
+RUN apk add --no-cache \
+    openssl \
+    libc6-compat \
+    bash \
+    python3 \
+    make \
+    g++ \
+    cairo-dev \
+    pango-dev \
+    jpeg-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev
+
+WORKDIR /app
+
+COPY . .
+
+RUN npm install -g pnpm@9.12.3
+
+ENV CI=true
+
+RUN pnpm install && pnpm rebuild canvas
+
+RUN pnpm --filter @plinkk/prisma run generate
+
+RUN pnpx @fastify/secure-session > apps/public/src/secret-key
+
+RUN pnpm --filter @plinkk/public run build
+
+CMD ["sh", "-c", "pnpm --filter @plinkk/public run start"]
+
+EXPOSE 3001

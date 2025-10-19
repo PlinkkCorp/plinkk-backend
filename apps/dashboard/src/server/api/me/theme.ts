@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient, Theme } from "../../../../../../generated/prisma/client";
+import { PrismaClient, Theme } from "@plinkk/prisma/generated/prisma/client";
 import { coerceThemeData, readBuiltInThemes } from "../../../lib/theme";
 
 const prisma = new PrismaClient();

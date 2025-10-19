@@ -10,6 +10,9 @@
         "esModuleInterop": true,
         "skipLibCheck": true
     },
+    "paths": {
+      "@plinkk/prisma": ["../../packages/prisma"]
+    },
     "include": ["src"],
     "exclude": ["dist", "src/public"]
 }

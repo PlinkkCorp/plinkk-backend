@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient, User } from "../../../../generated/prisma/client";
+import { PrismaClient, User } from "@plinkk/prisma/generated/prisma/client";
 import { replyView } from "../lib/replyView";
 import { verifyRoleAdmin, verifyRoleDeveloper } from "../lib/verifyRole";
 import { dashboardAdminRoutes } from "./dashboard/admin";

@@ -1,4 +1,4 @@
-import { Role } from "../../../../generated/prisma";
+import { Role } from "@plinkk/prisma/generated/prisma";
 
 // Retourne true si l'utilisateur a le rôle USER (ou pas de rôle)
 export function verifyRoleUser(role: Role | null | undefined): boolean {

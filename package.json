@@ -8,12 +8,15 @@
     "set-admin": "node scripts/set-admin.cjs",
     "migrate:plinkks": "node scripts/migrate-plinkks.cjs",
     "delete_inactive": "node scripts/delete_inactive_user.js ",
-    "seed:role": "ts-node prisma/seed.ts"
+    "seed:role": "ts-node prisma/seed.ts",
+    "prisma:generate": "prisma generate --generator=dashboard && prisma generate --generator=public",
+    "build": "pnpm -r build"
   },
   "devDependencies": {
     "prisma": "^6.17.1"
   },
   "dependencies": {
     "@prisma/client": "^6.17.1"
-  }
+  },
+  "private": true
 }

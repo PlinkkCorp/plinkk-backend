@@ -7,7 +7,7 @@ import {
   PlinkkSettings,
   PrismaClient,
   User,
-} from "../../../../generated/prisma/client";
+} from "@plinkk/prisma/generated/prisma/client";
 
 export const prisma = new PrismaClient();
 

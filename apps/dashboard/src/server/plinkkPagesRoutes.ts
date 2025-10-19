@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { Plinkk, PrismaClient } from "../../../../generated/prisma/client";
+import { Plinkk, PrismaClient } from "@plinkk/prisma/generated/prisma/client";
 import {
   getMaxPagesForRole,
   reindexNonDefault,

@@ -1,5 +1,5 @@
 node_modules/
-generated/prisma/
+generated/
 dist
 /src/secret-key
 .env

@@ -7,7 +7,7 @@ import {
   PlinkkStatusbar,
   PlinkkSettings,
   User,
-} from "../../generated/prisma";
+} from "@plinkk/prisma/generated/prisma";
 
 export function generateProfileConfig(
   profile: User & PlinkkSettings,

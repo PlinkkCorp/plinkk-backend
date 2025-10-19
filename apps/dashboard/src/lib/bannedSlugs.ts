@@ -1,4 +1,4 @@
-import { BannedSlug, PrismaClient } from '../../../../generated/prisma/client';
+import { BannedSlug, PrismaClient } from '@plinkk/prisma/generated/prisma/client';
 
 const prisma = new PrismaClient();
 

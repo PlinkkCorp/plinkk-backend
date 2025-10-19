@@ -9,7 +9,7 @@ import {
   PrismaClient,
   SocialIcon,
   User,
-} from "../../../../../../generated/prisma/client";
+} from "@plinkk/prisma/generated/prisma/client";
 import {
   reindexNonDefault,
   slugify,
