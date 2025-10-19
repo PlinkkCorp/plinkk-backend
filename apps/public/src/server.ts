@@ -131,7 +131,11 @@ fastify.register(plinkkFrontUserRoutes);
 fastify.addHook("onRequest", async (request, reply) => {
   const host = request.headers.host || "";
 
-  if (host !== "plinkk.fr" && host !== "beta.plinkk.fr" && host !== "127.0.0.1:3002") {
+  if (
+    host !== "plinkk.fr" &&
+    host !== "beta.plinkk.fr" &&
+    host !== "127.0.0.1:3002"
+  ) {
     const hostDb = await prisma.host.findUnique({
       where: {
         id: host,
@@ -179,7 +183,7 @@ fastify.addHook("onRequest", async (request, reply) => {
       } else if (request.url === "/umami_script.js") {
         return reply.sendFile(`https://analytics.plinkk.fr/script.js`);
       } else if (request.url.startsWith("/config.js")) {
-        const page = hostDb.plinkk
+        const page = hostDb.plinkk;
         if (!page) return reply.code(404).send({ error: "Page introuvable" });
 
         // Charger les données par Plinkk
@@ -405,16 +409,23 @@ fastify.addHook("onRequest", async (request, reply) => {
           injectedObj
         );
         const mini = minify(generated);
-        return reply.type("text/javascript").send(mini.code || "")
+        return reply.type("text/javascript").send(mini.code || "");
       } else if (request.url === "/themes.json") {
         return reply.send(await generateTheme(hostDb.plinkk.userId));
-      } else if (request.url.replace("/", "").replace(".js", "").trim() === hostDb.plinkk.slug) {
+      } else if (
+        request.url.replace("/", "").replace(".js", "").trim() ===
+        hostDb.plinkk.slug
+      ) {
         const js = await generateBundle();
         return reply.type("application/javascript").send(js);
       } else if (request.url.startsWith("/canvaAnimation")) {
-        return reply.sendFile(`canvaAnimation/${request.url.replace("/canvaAnimation/", "")}`);
-      }  else if (request.url.startsWith("/public")) {
-        return reply.sendFile(`images/${request.url.replace("/public/images/", "")}`);
+        return reply.sendFile(
+          `canvaAnimation/${request.url.replace("/canvaAnimation/", "")}`
+        );
+      } else if (request.url.startsWith("/public")) {
+        return reply.sendFile(
+          `images/${request.url.replace("/public/images/", "")}`
+        );
       }
     }
     return reply.type("text/html").send(`
@@ -750,7 +761,10 @@ fastify.setNotFoundHandler((request, reply) => {
   const userId = request.session.get("data");
   return reply
     .code(404)
-    .view("erreurs/404.ejs", { currentUser: userId ? { id: userId } : null });
+    .view("erreurs/404.ejs", {
+      currentUser: userId ? { id: userId } : null,
+      dashboardUrl: process.env.DASHBOARD_URL,
+    });
 });
 
 // Error handler
@@ -763,6 +777,7 @@ fastify.setErrorHandler((error, request, reply) => {
   return reply.code(500).view("erreurs/500.ejs", {
     message: error?.message ?? "",
     currentUser: userId ? { id: userId } : null,
+    dashboardUrl: process.env.DASHBOARD_URL,
   });
 });
 
