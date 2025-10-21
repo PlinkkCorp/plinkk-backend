@@ -10,7 +10,7 @@
     "dev": "prisma dev",
     "studio": "prisma studio",
     "seed": "ts-node prisma/seed.ts",
-    "postinstall": "prisma generate --schema=prisma/schema.prisma || true"
+    "postinstall": "prisma generate || true"
   },
   "dependencies": {
     "@prisma/client": "^6.17.1",
