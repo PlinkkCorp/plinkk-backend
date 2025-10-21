@@ -9,7 +9,7 @@ import {
   User,
 } from "@plinkk/prisma/generated/prisma/client";
 
-export const prisma = new PrismaClient();
+const prisma = new PrismaClient();
 
 import { resolvePlinkkPage, parseIdentifier } from "../lib/resolvePlinkkPage";
 import { coerceThemeData } from "../lib/theme";

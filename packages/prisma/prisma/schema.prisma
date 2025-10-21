@@ -1,9 +1,8 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  provider      = "prisma-client-js"
+  output        = "../generated/prisma"
   binaryTargets = ["native", "windows", "debian-openssl-3.0.x"]
 }
-
 
 datasource db {
   provider = "postgresql"
@@ -29,66 +28,66 @@ enum PlinkkEventType {
 }
 
 model User {
-  id                               String  @id @unique
-  userName                         String
-  password                         String
-  email                            String  @unique
-  publicEmail                      String?
-  mustChangePassword               Boolean @default(false)
-  twoFactorEnabled                 Boolean @default(false)
-  twoFactorSecret                  String?
+  id                 String  @id @unique
+  userName           String
+  password           String
+  email              String  @unique
+  publicEmail        String?
+  mustChangePassword Boolean @default(false)
+  twoFactorEnabled   Boolean @default(false)
+  twoFactorSecret    String?
 
   name          String
-  emailVerified Boolean           @default(false)
+  emailVerified Boolean  @default(false)
   image         String?
-  lastLogin     DateTime          @default(now())
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @default(now()) @updatedAt
+  lastLogin     DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
 
-  roleId          String?
-  role            Role?     @relation(fields: [roleId], references: [id])
-  rankScore       Int       @default(0)
-  bumpedAt        DateTime?
-  bumpExpiresAt   DateTime?
-  bumpPaidUntil   DateTime?
+  roleId        String?
+  role          Role?     @relation(fields: [roleId], references: [id])
+  rankScore     Int       @default(0)
+  bumpedAt      DateTime?
+  bumpExpiresAt DateTime?
+  bumpPaidUntil DateTime?
 
-  cosmetics       Cosmetic?
-  isPublic        Boolean   @default(true)
-  views           Int       @default(0)
+  cosmetics Cosmetic?
+  isPublic  Boolean   @default(true)
+  views     Int       @default(0)
 
-  themes          Theme[]
-  announcement    AnnouncementTarget[]
+  themes       Theme[]
+  announcement AnnouncementTarget[]
 
   // Thème personnalisé sélectionné pour usage privé
   selectedCustomThemeId String?
 
-  plinkks        Plinkk[]
+  plinkks          Plinkk[]
   // Relations vers d'autres modèles
-  links          Link[]
-  labels         Label[]
-  socialIcons    SocialIcon[]
+  links            Link[]
+  labels           Label[]
+  socialIcons      SocialIcon[]
   backgroundColors BackgroundColor[]
-  neonColors     NeonColor[]
-  statusbar      Statusbar?
+  neonColors       NeonColor[]
+  statusbar        Statusbar?
 
-  slags          Json     @default("[]")
+  slags Json @default("[]")
 }
 
 model Role {
-  id    String  @id @default(nanoid(16))
-  name  String  @unique
+  id    String @id @default(nanoid(16))
+  name  String @unique
   users User[]
 
   AnnouncementRoleTarget AnnouncementRoleTarget[]
 }
 
 model Cosmetic {
-  id            String  @id @default(nanoid(16))
-  flair         String? @default("OG")
-  frame         String? @default("none")
-  theme         String? @default("system")
-  bannerUrl     String? @default("")
-  banner        String? @default("")
+  id        String  @id @default(nanoid(16))
+  flair     String? @default("OG")
+  frame     String? @default("none")
+  theme     String? @default("system")
+  bannerUrl String? @default("")
+  banner    String? @default("")
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
@@ -105,19 +104,19 @@ model Link {
   showDescription        Boolean? @default(true)
   clicks                 Int      @default(0)
 
-  userId    String
-  user      User    @relation(fields: [userId], references: [id])
-  plinkkId  String?
-  plinkk    Plinkk? @relation(fields: [plinkkId], references: [id])
+  userId   String
+  user     User    @relation(fields: [userId], references: [id])
+  plinkkId String?
+  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id])
 }
 
 model Host {
-  id                     String   @id
-  verified               Boolean  @default(false)
-  verifyToken            String   @unique
+  id          String  @id
+  verified    Boolean @default(false)
+  verifyToken String  @unique
 
   plinkkId String @unique
-  plinkk   Plinkk   @relation(fields: [plinkkId], references: [id])
+  plinkk   Plinkk @relation(fields: [plinkkId], references: [id])
 }
 
 model Label {
@@ -188,16 +187,16 @@ model PlinkkStatusbar {
 }
 
 model Announcement {
-  id          String   @id @default(nanoid(16))
-  level       String   @default("info")
+  id          String    @id @default(nanoid(16))
+  level       String    @default("info")
   text        String
-  dismissible Boolean  @default(true)
+  dismissible Boolean   @default(true)
   startAt     DateTime?
   endAt       DateTime?
-  createdAt   DateTime @default(now())
-  global      Boolean  @default(false)
+  createdAt   DateTime  @default(now())
+  global      Boolean   @default(false)
 
-  targets AnnouncementTarget[]
+  targets     AnnouncementTarget[]
   roleTargets AnnouncementRoleTarget[]
 }
 
@@ -214,7 +213,7 @@ model AnnouncementTarget {
 model AnnouncementRoleTarget {
   announcementId String
   roleId         String
-  role           Role         @relation(fields: [roleId], references: [id])
+  role           Role   @relation(fields: [roleId], references: [id])
 
   announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
 
@@ -222,58 +221,58 @@ model AnnouncementRoleTarget {
 }
 
 model Theme {
-  id        String      @id @default(nanoid(16))
-  name      String
+  id          String      @id @default(nanoid(16))
+  name        String
   description String?
-  data      Json
-  status    ThemeStatus @default(DRAFT)
-  isPrivate Boolean     @default(false)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @default(now()) @updatedAt
+  data        Json
+  status      ThemeStatus @default(DRAFT)
+  isPrivate   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @default(now()) @updatedAt
 
   pendingUpdate        Json?
   pendingUpdateAt      DateTime?
   pendingUpdateMessage String?
 
   authorId String
-  author   User        @relation(fields: [authorId], references: [id])
+  author   User   @relation(fields: [authorId], references: [id])
 }
 
 model Plinkk {
-  id        String   @id @default(nanoid(16))
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(nanoid(16))
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  name      String
-  slug      String
-  index     Int      @default(0)
-  isDefault Boolean  @default(false)
-  isPublic  Boolean  @default(true)
+  name       String
+  slug       String
+  index      Int        @default(0)
+  isDefault  Boolean    @default(false)
+  isPublic   Boolean    @default(true)
   visibility Visibility @default(PUBLIC)
-  isActive  Boolean  @default(true)
-  views     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  isActive   Boolean    @default(true)
+  views      Int        @default(0)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @default(now()) @updatedAt
 
-  links         Link[]
-  labels        Label[]
-  socialIcons   SocialIcon[]
-  background    BackgroundColor[]
-  neonColors    NeonColor[]
-  statusbar     PlinkkStatusbar?
-  settings      PlinkkSettings?
-  pageStats     PageStat[] @relation("PageStats")
+  links       Link[]
+  labels      Label[]
+  socialIcons SocialIcon[]
+  background  BackgroundColor[]
+  neonColors  NeonColor[]
+  statusbar   PlinkkStatusbar?
+  settings    PlinkkSettings?
+  pageStats   PageStat[]        @relation("PageStats")
 
-  host          Host?
+  host Host?
 
   @@unique([userId, slug])
   @@unique([userId, index])
 }
 
 model PlinkkSettings {
-  id                               String  @id @default(nanoid(16))
-  plinkkId                         String  @unique
-  plinkk                           Plinkk  @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+  id       String @id @default(nanoid(16))
+  plinkkId String @unique
+  plinkk   Plinkk @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
 
   profileLink                      String?
   profileImage                     String?
@@ -301,7 +300,7 @@ model PlinkkSettings {
   canvaEnable                      Int?
   selectedCanvasIndex              Int?
   // Ordre d'agencement des sections (déplacement visuel dans le dashboard)
-  layoutOrder                      Json?    @default("[\"profile\",\"username\",\"statusbar\",\"labels\",\"social\",\"email\",\"links\"]")
+  layoutOrder                      Json?   @default("[\"profile\",\"username\",\"statusbar\",\"labels\",\"social\",\"email\",\"links\"]")
 }
 
 model PlinkkEvent {
@@ -316,6 +315,7 @@ model UserViewDaily {
   userId String
   date   String
   count  Int
+
   @@id([userId, date])
   @@map("UserViewDaily")
 }
@@ -324,6 +324,7 @@ model LinkClickDaily {
   linkId String
   date   String
   count  Int
+
   @@id([linkId, date])
   @@map("LinkClickDaily")
 }
@@ -332,33 +333,35 @@ model PlinkkViewDaily {
   plinkkId String
   date     String
   count    Int
+
   @@id([plinkkId, date])
   @@map("PlinkkViewDaily")
 }
 
 model PageStat {
-  id           String   @id @default(nanoid(16))
-  plinkkId     String
-  plinkk       Plinkk   @relation("PageStats", fields: [plinkkId], references: [id], onDelete: Cascade)
-  eventType    String
-  meta         Json?
-  ip           String?
-  createdAt    DateTime @default(now())
+  id        String   @id @default(nanoid(16))
+  plinkkId  String
+  plinkk    Plinkk   @relation("PageStats", fields: [plinkkId], references: [id], onDelete: Cascade)
+  eventType String
+  meta      Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
   @@index([plinkkId, eventType, createdAt])
 }
 
 model BannedSlug {
-  slug         String  @id
-  reason       String?
-  createdAt    DateTime @default(now())
+  slug      String   @id
+  reason    String?
+  createdAt DateTime @default(now())
 }
 
 model BannedEmail {
-  email        String  @id
+  email        String    @id
   reason       String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now()) @updatedAt
-  deletePlinkk Boolean @default(false)
-  time        Int? @default(-1)
-  revoquedAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+  deletePlinkk Boolean   @default(false)
+  time         Int?      @default(-1)
+  revoquedAt   DateTime?
 }

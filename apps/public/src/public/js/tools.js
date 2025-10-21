@@ -409,6 +409,7 @@ export function createLinkBoxes(profileData) {
         const discordLink = document.createElement("a");
         if (isSafeUrl(link.url)) {
             discordLink.href = window.location.hostname === "plinkk.fr" ? "/click/" + link.id : link.url;
+            discordLink.id = link.id
             discordLink.target = "_blank";
             discordLink.rel = "noopener noreferrer";
         }

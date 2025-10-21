@@ -58,15 +58,16 @@
   </div>
 
 </div>
-<a href="https://plinkk.fr" rel="noopener noreferrer" aria-label="Retour vers Plinkk"
+<!-- <a href="https://plinkk.fr" rel="noopener noreferrer" aria-label="Retour vers Plinkk"
   style="z-index: 999999;bottom: 2em;position: absolute; right: 2em; color: white; text-decoration: none; font-family: Arial, sans-serif; font-size: 1rem; background: rgba(0,0,0,0.3); padding: 0.5em 1em; border-radius: 0.5em;">
   Retour vers Plinkk
-</a>
+</a> -->
 <script>(function () {
     // Use the overlay as the element to hide/remove so the whole screen is covered
     const overlay = document.querySelector('.loader-overlay');
-    const returnBtn = document.querySelector('a[aria-label="Retour vers Plinkk"]');
-    if (!overlay && !returnBtn) return;
+    // const returnBtn = document.querySelector('a[aria-label="Retour vers Plinkk"]');
+    // if (!overlay && !returnBtn) return;
+    if (!overlay) return;
     const loader = overlay.querySelector('.loader');
 
     // Utility: detect prefers-reduced-motion
@@ -81,7 +82,7 @@
         if (immediate || prefersReduced) {
             // Remove immediately to avoid animation
             overlay.style.display = 'none';
-            if (returnBtn) returnBtn.style.display = 'none';
+            // if (returnBtn) returnBtn.style.display = 'none';
             removeFromDom();
             return;
         }

@@ -1,6 +1,8 @@
-import { prisma } from "../server/plinkkFrontUserRoutes";
+import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
 import builtInThemes from "./builtInThemes";
 import { builtInThemesTypes, coerceThemeData } from "./theme";
+
+const prisma = new PrismaClient()
 
 export async function generateTheme(userId?: string) {
   let builtIns: builtInThemesTypes[] = [];
