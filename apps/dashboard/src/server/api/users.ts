@@ -270,16 +270,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       return reply.code(403).send({ error: "Forbidden" });
     }
     const { id } = request.params as { id: string };
-    await prisma.$transaction([
-      prisma.link.deleteMany({ where: { userId: id } }),
-      prisma.label.deleteMany({ where: { userId: id } }),
-      prisma.socialIcon.deleteMany({ where: { userId: id } }),
-      prisma.backgroundColor.deleteMany({ where: { userId: id } }),
-      prisma.neonColor.deleteMany({ where: { userId: id } }),
-      prisma.statusbar.deleteMany({ where: { userId: id } }),
-      prisma.cosmetic.deleteMany({ where: { userId: id } }),
-      prisma.user.delete({ where: { id } }),
-    ]);
+    await prisma.user.delete({ where: { id } });
     return reply.send({ ok: true });
   });
 
@@ -395,5 +386,208 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       select: { id: true, mustChangePassword: true },
     });
     return reply.send({ id: updated.id, mustChangePassword: updated.mustChangePassword });
+  });
+
+  // ===== Banned Emails (global) =====
+  // Liste des bans par email (actifs)
+  fastify.get("/bans/emails", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const me = await prisma.user.findFirst({
+      where: { id: userId },
+      select: { role: true },
+    });
+    if (!(me && verifyRoleIsStaff(me.role)))
+      return reply.code(403).send({ error: "forbidden" });
+    const bans = await prisma.bannedEmail.findMany({
+      where: { revoquedAt: null },
+      select: { email: true, reason: true, time: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
+    });
+    return reply.send({ bans });
+  });
+
+  // Créer un ban email (global)
+  fastify.post("/bans/emails", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const me = await prisma.user.findFirst({
+      where: { id: userId },
+      select: { role: true, id: true },
+    });
+    if (!(me && verifyRoleIsStaff(me.role)))
+      return reply.code(403).send({ error: "forbidden" });
+    const body = request.body as {
+      email?: string;
+      reason?: string;
+      time?: number;
+    };
+    const email = String(body?.email || "")
+      .trim()
+      .toLowerCase();
+    if (!email || !email.includes("@") || email.length < 3) {
+      return reply.code(400).send({ error: "invalid_email" });
+    }
+    // Règles de protection
+    const targetUser = await prisma.user.findFirst({
+      where: { email },
+      select: { id: true, role: { select: { name: true } } },
+    });
+    const rank: Record<string, number> = {
+      USER: 0,
+      MODERATOR: 1,
+      DEVELOPER: 2,
+      ADMIN: 3,
+    };
+    if (targetUser) {
+      if (targetUser.id === me.id)
+        return reply.code(403).send({ error: "cannot_self_ban" });
+      const targetRole = targetUser.role?.name || "USER";
+      if (targetRole === "ADMIN")
+        return reply.code(403).send({ error: "cannot_ban_admin" });
+      const actorRole = me.role?.name || "USER";
+      if ((rank[actorRole] ?? 0) <= (rank[targetRole] ?? 0))
+        return reply.code(403).send({ error: "forbidden_role" });
+    }
+    const existing = await prisma.bannedEmail.findFirst({
+      where: { email, revoquedAt: null },
+    });
+    if (existing) return reply.code(409).send({ error: "already_banned" });
+    const reason = String(body?.reason || "").slice(0, 500);
+    const time =
+      typeof body?.time === "number"
+        ? Math.max(-1, Math.floor(body!.time!))
+        : -1;
+    const created = await prisma.bannedEmail.create({
+      data: { email, reason, time },
+    });
+    return reply.send({
+      ok: true,
+      ban: {
+        email: created.email,
+        reason: created.reason,
+        time: created.time,
+        createdAt: created.createdAt,
+      },
+    });
+  });
+
+  // Révoquer un ban email (global)
+  fastify.delete("/bans/emails", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const me = await prisma.user.findFirst({
+      where: { id: userId },
+      select: { role: true },
+    });
+    if (!(me && verifyRoleIsStaff(me.role)))
+      return reply.code(403).send({ error: "forbidden" });
+    const { email } = request.query as { email?: string };
+    const target = String(email || "")
+      .trim()
+      .toLowerCase();
+    if (!target) return reply.code(400).send({ error: "missing_email" });
+    const res = await prisma.bannedEmail.updateMany({
+      where: { email: target, revoquedAt: null },
+      data: { revoquedAt: new Date() },
+    });
+    if (!res.count) return reply.code(404).send({ error: "not_found" });
+    return reply.send({ ok: true, count: res.count });
+  });
+
+  // Ban massif par emails (global)
+  fastify.post("/bans/emails/bulk", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const me = await prisma.user.findFirst({
+      where: { id: userId },
+      select: { role: true, id: true },
+    });
+    if (!(me && verifyRoleIsStaff(me.role)))
+      return reply.code(403).send({ error: "forbidden" });
+    const body = request.body as {
+      emails?: string[];
+      reason?: string;
+      time?: number;
+    };
+    const list = Array.isArray(body?.emails) ? body!.emails! : [];
+    const reason = String(body?.reason || "").slice(0, 500);
+    const time =
+      typeof body?.time === "number"
+        ? Math.max(-1, Math.floor(body!.time!))
+        : -1;
+    const re = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    const emails = Array.from(
+      new Set(
+        list
+          .map((e) =>
+            String(e || "")
+              .trim()
+              .toLowerCase()
+          )
+          .filter(Boolean)
+      )
+    );
+    const invalid: string[] = [];
+    const toCreate: string[] = [];
+    for (const e of emails) {
+      if (!re.test(e)) invalid.push(e);
+      else toCreate.push(e);
+    }
+    const alreadyBanned: string[] = [];
+    const created: string[] = [];
+    // lire bans existants
+    const existing = await prisma.bannedEmail.findMany({
+      where: { email: { in: toCreate }, revoquedAt: null },
+      select: { email: true },
+    });
+    const existingSet = new Set(existing.map((x) => x.email.toLowerCase()));
+    // Interdictions: auto-ban et rôles protégés
+    const targets = await prisma.user.findMany({
+      where: { email: { in: toCreate } },
+      select: { email: true, id: true, role: { select: { name: true } } },
+    });
+    const rank: Record<string, number> = {
+      USER: 0,
+      MODERATOR: 1,
+      DEVELOPER: 2,
+      ADMIN: 3,
+    };
+    const forbidden = new Set<string>();
+    for (const t of targets) {
+      if (t.id === me.id) {
+        forbidden.add(t.email.toLowerCase());
+        continue;
+      }
+      const role = t.role?.name || "USER";
+      if (role === "ADMIN") {
+        forbidden.add(t.email.toLowerCase());
+        continue;
+      }
+      const actorRole = me.role?.name || "USER";
+      if ((rank[actorRole] ?? 0) <= (rank[role] ?? 0)) {
+        forbidden.add(t.email.toLowerCase());
+        continue;
+      }
+    }
+    const final = toCreate.filter(
+      (e) => !existingSet.has(e) && !forbidden.has(e)
+    );
+    // createMany en batch
+    if (final.length) {
+      await prisma.bannedEmail.createMany({
+        data: final.map((email) => ({ email, reason, time })),
+      });
+      created.push(...final);
+    }
+    alreadyBanned.push(...toCreate.filter((e) => existingSet.has(e)));
+    const skippedForbidden = toCreate.filter((e) => forbidden.has(e));
+    return reply.send({
+      ok: true,
+      created,
+      alreadyBanned,
+      invalid,
+      skippedForbidden,
+    });
   });
 }

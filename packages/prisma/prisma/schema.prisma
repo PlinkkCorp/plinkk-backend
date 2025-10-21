@@ -90,7 +90,7 @@ model Cosmetic {
   banner    String? @default("")
 
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Link {
@@ -105,9 +105,9 @@ model Link {
   clicks                 Int      @default(0)
 
   userId   String
-  user     User    @relation(fields: [userId], references: [id])
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   plinkkId String?
-  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id])
+  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
 }
 
 model Host {
@@ -116,7 +116,7 @@ model Host {
   verifyToken String  @unique
 
   plinkkId String @unique
-  plinkk   Plinkk @relation(fields: [plinkkId], references: [id])
+  plinkk   Plinkk @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
 }
 
 model Label {
@@ -126,9 +126,9 @@ model Label {
   fontColor String @default("#FFFFFF")
 
   userId   String
-  user     User    @relation(fields: [userId], references: [id])
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   plinkkId String?
-  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id])
+  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
 }
 
 model SocialIcon {
@@ -137,9 +137,9 @@ model SocialIcon {
   icon String @default("Github")
 
   userId   String
-  user     User    @relation(fields: [userId], references: [id])
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   plinkkId String?
-  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id])
+  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
 }
 
 model BackgroundColor {
@@ -147,9 +147,9 @@ model BackgroundColor {
   color String @default("#FF5733")
 
   userId   String
-  user     User    @relation(fields: [userId], references: [id])
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   plinkkId String?
-  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id])
+  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
 }
 
 model NeonColor {
@@ -157,9 +157,9 @@ model NeonColor {
   color String @default("#7289DA")
 
   userId   String
-  user     User    @relation(fields: [userId], references: [id])
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   plinkkId String?
-  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id])
+  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
 }
 
 model Statusbar {
@@ -171,7 +171,7 @@ model Statusbar {
   statusText    String? @default("busy")
 
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PlinkkStatusbar {
@@ -235,7 +235,7 @@ model Theme {
   pendingUpdateMessage String?
 
   authorId String
-  author   User   @relation(fields: [authorId], references: [id])
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
 
 model Plinkk {

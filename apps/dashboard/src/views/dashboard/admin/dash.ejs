@@ -854,7 +854,7 @@ users.filter(u=>
             um.name.textContent = displayName || id;
             um.id.textContent = id;
             um.role.value = role;
-            um.view.href = '/' + id;
+            um.view.href = "<%= frontendUrl %>" + '/' + id;
             um.disable2fa.disabled = !twofa;
             // Stats
             const v = document.getElementById('umStatViews'); if (v) v.textContent = String(views);
@@ -889,12 +889,12 @@ users.filter(u=>
                 if (plActiveChk) plActiveChk.checked = !!o.isActive;
                 if (plDefault) plDefault.checked = !!o.isDefault;
                 if (plEmailVisible) plEmailVisible.checked = !!o.emailVisible;
-                if (plPreview) plPreview.href = o.url;
+                if (plPreview) plPreview.href = "<%= frontendUrl %>" + o.url;
                 if (plViews) plViews.textContent = String(o.views||0);
                 if (plMeta) plMeta.textContent = o.slug ? `/${id}/${o.slug}` : `/${id}`;
                 // Mettre à jour les liens "Voir le profil" et "Copier le lien"
-                if (um.view) um.view.href = o.url;
-                um.copy?.setAttribute('data-url', o.url);
+                if (um.view) um.view.href = "<%= frontendUrl %>" + o.url;
+                um.copy?.setAttribute('data-url', "<%= frontendUrl %>" + o.url);
             }
             if (plSelect){ plSelect.value = '0'; applyPl(0); plSelect.onchange = ()=> applyPl(Number(plSelect.value||0)); }
 
