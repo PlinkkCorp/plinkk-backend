@@ -27,7 +27,7 @@ import { authenticator } from "otplib";
 import { replyView } from "./lib/replyView";
 import fastifyRateLimit from "@fastify/rate-limit";
 import "dotenv/config";
-import { PrismaClient, Role } from "@plinkk/prisma/generated/prisma/client";
+import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
 
 const prisma = new PrismaClient();
 const fastify = Fastify({
@@ -105,6 +105,19 @@ fastify.register(fastifyCron, {
       },
     },
   ],
+});
+
+fastify.addHook("onRequest", async (request, reply) => {
+  const reservedRoots = new Set([
+        "favicon.ico",
+        "robots.txt",
+        "manifest.json",
+        "public",
+        "users"
+      ]);
+  if (request.url in reservedRoots) {
+    reply.redirect(process.env.FRONTEND_URL + request.url)
+  }
 });
 
 fastify.register(apiRoutes, { prefix: "/api" });

@@ -597,6 +597,14 @@ fastify.addHook("onRequest", async (request, reply) => {
     </html>
   `);
   }
+  const reservedRoots = new Set([
+    "login",
+    "logout",
+    "register",
+  ]);
+  if (request.url in reservedRoots) {
+    reply.redirect(process.env.DASHBOARD_URL + request.url)
+  }
 });
 
 fastify.get("/", async function (request, reply) {
@@ -734,12 +742,10 @@ fastify.setNotFoundHandler((request, reply) => {
     return reply.code(404).send({ error: "Not Found" });
   }
   const userId = request.session.get("data");
-  return reply
-    .code(404)
-    .view("erreurs/404.ejs", {
-      currentUser: userId ? { id: userId } : null,
-      dashboardUrl: process.env.DASHBOARD_URL,
-    });
+  return reply.code(404).view("erreurs/404.ejs", {
+    currentUser: userId ? { id: userId } : null,
+    dashboardUrl: process.env.DASHBOARD_URL,
+  });
 });
 
 // Error handler
