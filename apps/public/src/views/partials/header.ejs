@@ -1,4 +1,5 @@
-    <!-- Header -->
+  <!-- Header -->
+  <% if (typeof dashboardUrl === 'undefined' || !dashboardUrl) { dashboardUrl = '/dashboard'; } %>
     <header class="sticky top-0 z-30 bg-[#0B1020]/60 backdrop-blur border-b border-slate-800/50" style="position: sticky">
       <!-- SPA top loader (fixed, NProgress-like) -->
       <style>
