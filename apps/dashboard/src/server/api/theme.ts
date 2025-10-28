@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
-import { coerceThemeData } from "../../lib/theme copy";
+import { coerceThemeData } from "../../lib/theme";
 import { verifyRoleIsStaff } from "../../lib/verifyRole";
 import { generateTheme } from "../../lib/generateTheme";
 
