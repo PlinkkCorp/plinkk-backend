@@ -1,7 +1,6 @@
 import { PrismaClient, Visibility } from "@plinkk/prisma/generated/prisma/client";
 import { FastifyRequest } from "fastify";
 
-// Détermine si l'identifiant est numérique (index) ou un slug
 export function parseIdentifier(id?: string | null): { kind: 'default' | 'index' | 'slug'; value?: number | string } {
   if (!id || id === '' || id === 'default') return { kind: 'default' };
   if (id === '0') return { kind: 'default' };
@@ -33,7 +32,6 @@ export async function resolvePlinkkPage(prisma: PrismaClient, username: string, 
   const isOwner = !!sessionUserId && sessionUserId === user.id;
   if (isPrivate && !isOwner) return { status: 403 as const, error: 'forbidden' };
 
-  // Analytics: incrémenter vues et PageStat + table journalière (hors mode preview)
   const isPreview = (request?.query as { preview: string })?.preview === '1';
   if (!isPreview) {
     try {
@@ -41,7 +39,6 @@ export async function resolvePlinkkPage(prisma: PrismaClient, username: string, 
         prisma.plinkk.update({ where: { id: page.id }, data: { views: { increment: 1 } } }),
         prisma.pageStat.create({ data: { plinkkId: page.id, eventType: 'view', ip: request?.ip || undefined } }),
       ]);
-      // table journalière (raw, compatible SQLite)
       const now = new Date();
       const y = now.getUTCFullYear();
       const m = String(now.getUTCMonth() + 1).padStart(2, '0');

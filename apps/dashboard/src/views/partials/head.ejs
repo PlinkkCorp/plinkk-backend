@@ -16,7 +16,6 @@
           <meta name="robots" content="<%= robotsVal %>" />
           <meta name="theme-color" content="#0B1020" />
           <link rel="icon" href="/public/images/logo.svg" />
-          <!-- Open Graph -->
           <meta property="og:site_name" content="Plinkk" />
           <meta property="og:type" content="website" />
           <meta property="og:title"
@@ -27,7 +26,6 @@
             <meta property="og:url" content="<%= canon %>" />
             <link rel="canonical" href="<%= canon %>" />
             <% } %>
-              <!-- Twitter -->
               <meta name="twitter:card" content="summary_large_image" />
               <meta name="twitter:title"
                 content="<%= ((typeof title !== 'undefined' && title) ? title + ' — ' : '') %>Plinkk" />
@@ -42,28 +40,17 @@
 
                 :root {
                   --ease-out-quad: cubic-bezier(.22, 1, .36, 1);
-                  /* Brand palette aligned with visuals (editor/profile/dashboard svgs) */
                   --brand-1: #4338CA;
-                  /* indigo */
                   --brand-2: #A21CAF;
-                  /* fuchsia */
                   --brand-3: #E11D48;
-                  /* rose */
                   --brand-sky-1: #0EA5E9;
-                  /* sky */
                   --brand-sky-2: #22D3EE;
-                  /* cyan */
                   --brand-emerald: #34D399;
-                  /* status dot */
                   --surface-950: #0B1020;
-                  /* bg in svgs */
                   --surface-900: #0b1324;
-                  /* card bg in svgs */
                   --stroke-800: #1f2937;
-                  /* strokes */
                 }
 
-                /* Subtle radial field behind body to match dark canvas */
                 body::before {
                   content: "";
                   position: fixed;
@@ -77,7 +64,6 @@
                   filter: blur(0.5px);
                 }
 
-                /* Brand utilities */
                 .brand-gradient {
                   background: linear-gradient(90deg, var(--brand-1), var(--brand-2), var(--brand-3));
                   -webkit-background-clip: text;

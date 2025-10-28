@@ -13,7 +13,6 @@ import { replyView } from "../lib/replyView";
 const prisma = new PrismaClient();
 
 export function plinkkPagesRoutes(fastify: FastifyInstance) {
-  // List pages
   fastify.get("/plinkks", async (request, reply) => {
     const userId = request.session.get("data") as string | undefined;
     if (!userId)
@@ -36,7 +35,6 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
       orderBy: [{ isDefault: "desc" }, { index: "asc" }, { createdAt: "asc" }],
     });
     const maxPages = getMaxPagesForRole(me.role);
-    // Passe aussi user et un alias plinkks pour la vue intégrée
     const pagesForView = pages.map((p) => ({
       ...p,
       affichageEmail: p.settings?.affichageEmail ?? null,
@@ -50,7 +48,6 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // Create
   fastify.post<{
     Body: {
       title: string;
@@ -89,7 +86,6 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     return reply.redirect("/plinkks");
   });
 
-  // Edit: redirect to classic editor with plinkkId param
   fastify.get<{ Params: { id: string } }>(
     "/plinkks/:id/edit",
     async (request, reply) => {
@@ -110,7 +106,6 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     }
   );
 
-  // Update
   fastify.post<{
     Params: { id: string };
     Body: {
@@ -153,7 +148,6 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     if (typeof body.isActive !== "undefined") data.isActive = !!body.isActive;
     const setDefault = !!body.isDefault;
     if (setDefault && !page.isDefault) {
-      // unset previous default and set this one as index 0
       const prev = await prisma.plinkk.findFirst({
         where: { userId, isDefault: true },
       });
@@ -179,7 +173,6 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     return reply.redirect("/plinkks");
   });
 
-  // Delete (soft or hard)
   fastify.post<{ Params: { id: string }; Body: { mode?: string } }>(
     "/plinkks/:id/delete",
     async (request, reply) => {
@@ -196,7 +189,6 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
           .code(404)
           .view("erreurs/404.ejs", { user: { id: userId } });
       if (page.isDefault) {
-        // prevent deletion of default if other pages exist
         const others = await prisma.plinkk.count({
           where: { userId, NOT: { id } },
         });
@@ -216,7 +208,6 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     }
   );
 
-  // Set default explicitly
   fastify.post<{ Params: { id: string } }>(
     "/plinkks/:id/set-default",
     async (request, reply) => {
@@ -254,7 +245,6 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     }
   );
 
-  // Stats: redirect to classic stats with plinkkId param
   fastify.get<{ Params: { id: string } }>(
     "/plinkks/:id/stats",
     async (request, reply) => {

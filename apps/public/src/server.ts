@@ -40,7 +40,6 @@ const PORT = 3002;
 declare module "@fastify/secure-session" {
   interface SessionData {
     data?: string;
-    // URL to return to after successful authentication
     returnTo?: string;
   }
 }
@@ -59,11 +58,10 @@ fastify.register(fastifyView, {
 
 fastify.register(fastifyStatic, {
   root: path.join(__dirname, "public"),
-  prefix: "/public/", // optional: default '/'
+  prefix: "/public/",
 });
 
 fastify.register(fastifyFormbody);
-// support file uploads via multipart/form-data
 fastify.register(fastifyMultipart, {
   limits: {
     fileSize: 2 * 1024 * 1024, // 2 Mo
@@ -88,10 +86,9 @@ fastify.register(fastifyCors, {
 fastify.register(fastifyHttpProxy, {
   upstream: "https://analytics.plinkk.fr/",
   prefix: "/umami_script.js",
-  rewritePrefix: "/script.js", // Supprime le préfixe dans la requête vers upstream
+  rewritePrefix: "/script.js",
   replyOptions: {
     rewriteRequestHeaders: (req, headers) => {
-      // On force un User-Agent et Host propres
       return {
         ...headers,
         host: "analytics.plinkk.fr",
@@ -161,7 +158,6 @@ fastify.addHook("onRequest", async (request, reply) => {
         const page = hostDb.plinkk;
         if (!page) return reply.code(404).send({ error: "Page introuvable" });
 
-        // Charger les données par Plinkk
         const [
           settings,
           background,
@@ -189,11 +185,8 @@ fastify.addHook("onRequest", async (request, reply) => {
           }),
           prisma.plinkkStatusbar.findUnique({ where: { plinkkId: page.id } }),
         ]);
-        // Si un thème privé est sélectionné, récupérer ses données, les normaliser en "full shape"
-        // et l'injecter comme thème 0 pour le front.
         let injectedThemeVar = "";
         try {
-          // Helpers de normalisation (cohérents avec apiRoutes)
           const normalizeHex = (v?: string) => {
             if (!v || typeof v !== "string") return "#000000";
             const s = v.trim();
@@ -291,7 +284,6 @@ fastify.addHook("onRequest", async (request, reply) => {
               }
             }
           }
-          // Fallback: si aucun thème sélectionné injecté, injecter le dernier SUBMITTED de l'utilisateur
           if (!injectedThemeVar) {
             const sub = await prisma.theme.findFirst({
               where: { authorId: page.user.id, status: "SUBMITTED" },
@@ -314,11 +306,9 @@ fastify.addHook("onRequest", async (request, reply) => {
             }
           }
         } catch {}
-        // If we computed an injected theme, parse it to pass as object
         let injectedObj = null;
         try {
           if (injectedThemeVar) {
-            // injectedThemeVar is like `window.__PLINKK_PRIVATE_THEME__ = {...};`
             const idx = injectedThemeVar.indexOf("=");
             const objStr = injectedThemeVar
               .slice(idx + 1)
@@ -326,11 +316,8 @@ fastify.addHook("onRequest", async (request, reply) => {
               .replace(/;$/, "");
             injectedObj = JSON.parse(objStr);
           }
-        } catch (e) {
-          /* ignore */
-        }
+        } catch (e) {}
 
-        // Fusionner les réglages de page (PlinkkSettings) avec les valeurs par défaut du compte
         const pageProfile: User & PlinkkSettings = {
           plinkkId: null,
           ...page.user,
@@ -358,10 +345,6 @@ fastify.addHook("onRequest", async (request, reply) => {
           animationDurationBackground:
             settings?.animationDurationBackground ?? 30,
           delayAnimationButton: settings?.delayAnimationButton ?? 0.1,
-          // Support for per-Plinkk public email: if a PlinkkSettings.affichageEmail
-          // exists we must prefer it for the generated profile config. We expose it
-          // both as `affichageEmail` and override `publicEmail` so generateProfileConfig
-          // (which reads profile.publicEmail) will pick up the page-specific value.
           affichageEmail: settings?.affichageEmail ?? null,
           publicEmail:
             settings &&
@@ -403,199 +386,7 @@ fastify.addHook("onRequest", async (request, reply) => {
         );
       }
     }
-    return reply.type("text/html").send(`
-    <!doctype html>
-    <html lang="fr">
-    <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Plinkk — Bienvenue</title>
-    <style>
-      :root{
-      --bg-1:#0f172a;
-      --bg-2:#0b1220;
-      --card:#0b1226;
-      --accent:#7c3aed;
-      --muted:rgba(255,255,255,0.72);
-      --glass:rgba(255,255,255,0.03);
-      }
-      @media (prefers-color-scheme: light){
-      :root{
-        --bg-1:#f7f8fb;
-        --bg-2:#eef2ff;
-        --card:#ffffff;
-        --accent:#6d28d9;
-        --muted:#334155;
-        --glass:rgba(13,17,25,0.04);
-      }
-      }
-      html,body{
-      height:100%;
-      margin:0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: linear-gradient(135deg,var(--bg-1),var(--bg-2));
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      color:var(--muted);
-      }
-      .wrap{
-      min-height:100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:32px;
-      box-sizing:border-box;
-      }
-      .card{
-      width:100%;
-      max-width:920px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      backdrop-filter: blur(8px);
-      border-radius:12px;
-      box-shadow: 0 10px 30px rgba(2,6,23,0.6);
-      overflow:hidden;
-      display:flex;
-      gap:0;
-      }
-      .panel-left{
-      flex:1 1 420px;
-      padding:40px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      gap:18px;
-      background:
-        linear-gradient(180deg, rgba(124,58,237,0.06), transparent 40%),
-        linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      }
-      .logo{
-      display:inline-grid;
-      place-items:center;
-      width:64px;
-      height:64px;
-      border-radius:12px;
-      background:linear-gradient(135deg,var(--accent),#4f46e5);
-      color:white;
-      font-weight:700;
-      font-size:24px;
-      box-shadow:0 6px 18px rgba(79,70,229,0.24);
-      }
-      h1{
-      margin:0;
-      color: white;
-      font-size:28px;
-      line-height:1.05;
-      }
-      p.lead{
-      margin:0;
-      color:var(--muted);
-      font-size:15px;
-      max-width:44ch;
-      }
-      .ctas{
-      margin-top:8px;
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      }
-      .btn{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 16px;
-      border-radius:10px;
-      text-decoration:none;
-      color:white;
-      background:var(--accent);
-      box-shadow:0 8px 20px rgba(99,102,241,0.14);
-      font-weight:600;
-      transition:transform .12s ease, box-shadow .12s ease;
-      }
-      .btn.secondary{
-      background:transparent;
-      color:var(--muted);
-      border:1px solid var(--glass);
-      box-shadow:none;
-      font-weight:600;
-      }
-      .btn:active{ transform:translateY(1px) }
-      .panel-right{
-      width:320px;
-      min-width:260px;
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      padding:22px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      gap:10px;
-      border-left:1px solid rgba(255,255,255,0.03);
-      }
-      .meta{
-      font-size:13px;
-      color:var(--muted);
-      display:flex;
-      align-items:center;
-      gap:10px;
-      }
-      .badge{
-      background:var(--glass);
-      color:var(--muted);
-      padding:6px 10px;
-      border-radius:999px;
-      font-weight:600;
-      font-size:12px;
-      }
-      footer{
-      padding:18px;
-      text-align:center;
-      font-size:13px;
-      color:rgba(255,255,255,0.5);
-      background:linear-gradient(180deg, transparent, rgba(0,0,0,0.02));
-      }
-      @media (max-width:820px){
-      .card{ flex-direction:column; }
-      .panel-right{ width:100%; border-left:0; border-top:1px solid rgba(255,255,255,0.03); }
-      }
-    </style>
-    </head>
-    <body>
-    <div class="wrap" role="main">
-      <div class="card" aria-labelledby="welcome-title">
-      <div class="panel-left">
-        <div style="display:flex;align-items:center;gap:12px">
-        <div class="logo" aria-hidden="true"><img src="https://plinkk.fr/public/images/logo.svg" style="max-width:100%;height:auto" alt="Plinkk Logo" /></div>
-        <div style="display:flex;flex-direction:column">
-          <div class="meta"><span class="badge">plinkk.fr</span><span style="opacity:.9">Accès restreint</span></div>
-        </div>
-        </div>
-        <h1 id="welcome-title">Bienvenue sur Plinkk</h1>
-        <p class="lead">Ce contenu est réservé au domaine officiel. Pour accéder à l'intégralité du site et à votre profil, rendez-vous sur le site principal ou connectez-vous avec votre compte.</p>
-        <div class="ctas">
-        <a class="btn" href="https://plinkk.fr" rel="noopener" target="_blank">Accéder au site officiel ↗</a>
-        <a class="btn secondary" href="https://plinkk.fr/login">Se connecter</a>
-        </div>
-      </div>
-      <div class="panel-right" aria-hidden="false">
-        <div style="display:flex;flex-direction:column;gap:8px">
-        <div style="font-weight:700;color:var(--muted);font-size:14px">Pourquoi cette page ?</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.45">
-          Pour protéger les profils et l'expérience utilisateur, l'accès direct à certains contenus est limité aux demandes depuis plinkk.fr. Si vous pensez que c'est une erreur, contactez le support à <a href="mailto:contact@plinkk.fr" style="color:inherit;text-decoration:underline">contact@plinkk.fr</a>.
-        </div>
-        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-          <span style="font-size:12px;color:var(--muted);background:var(--glass);padding:6px 8px;border-radius:8px">Sécurité</span>
-          <span style="font-size:12px;color:var(--muted);background:var(--glass);padding:6px 8px;border-radius:8px">Vie privée</span>
-          <span style="font-size:12px;color:var(--muted);background:var(--glass);padding:6px 8px;border-radius:8px">Support</span>
-        </div>
-        </div>
-      </div>
-      </div>
-    </div>
-    <footer>
-      © Plinkk — Renvoyer vers <a href="https://plinkk.fr" style="color:inherit;text-decoration:underline" rel="noopener" target="_blank">plinkk.fr</a>
-    </footer>
-    </body>
-    </html>
-  `);
+    return reply.code(409).view("erreurs/reserved.ejs")
   }
   const reservedRoots = new Set([
     "login",
@@ -615,7 +406,6 @@ fastify.get("/", async function (request, reply) {
         include: { role: true },
       })
     : null;
-  // Annonces depuis la DB (affichées si ciblées pour l'utilisateur courant ou globales)
   let msgs: Announcement[] = [];
   try {
     const now = new Date();
@@ -649,7 +439,6 @@ fastify.get("/", async function (request, reply) {
   return await replyView(reply, "index.ejs", currentUser, {});
 });
 
-// Liste publique de tous les profils
 fastify.get("/users", async (request, reply) => {
   const currentUserId = request.session.get("data") as string | undefined;
   const currentUser = currentUserId
@@ -663,7 +452,6 @@ fastify.get("/users", async (request, reply) => {
     include: { settings: true },
     orderBy: { createdAt: "asc" },
   });
-  // Annonces DB pour la page publique des utilisateurs: on affiche seulement les globales si non connecté
   let msgs: Announcement[] = [];
   try {
     const now = new Date();
@@ -699,11 +487,8 @@ fastify.get("/users", async (request, reply) => {
   });
 });
 
-// SPA fallback: serve the main index for non-API, non-static HTML navigations
-// This enables client-side routing across the site without breaking existing server routes.
 fastify.get("/*", async (request, reply) => {
   const url = request.raw.url || "";
-  // Exclusions: API endpoints, known static prefixes, dashboard server routes keep server-side handling
   if (
     url.startsWith("/api") ||
     url.startsWith("/public") ||
@@ -712,16 +497,13 @@ fastify.get("/*", async (request, reply) => {
   ) {
     return reply.callNotFound();
   }
-  // Respect existing host handling: do not force SPA on non-allowed hosts
   const host = request.headers.host || "";
   if (host !== "plinkk.fr" && host !== "127.0.0.1:3001") {
     return reply.callNotFound();
   }
-  // If it looks like a file request (has an extension), let 404/static handler deal with it
   if (/\.[a-zA-Z0-9]+$/.test(url)) {
     return reply.callNotFound();
   }
-  // Only for HTML navigations
   const accept = request.headers.accept || "";
   if (!accept.includes("text/html")) {
     return reply.callNotFound();
@@ -736,7 +518,6 @@ fastify.get("/*", async (request, reply) => {
   return await replyView(reply, "index.ejs", currentUser, {});
 });
 
-// 404 handler (après routes spécifiques)
 fastify.setNotFoundHandler((request, reply) => {
   if (request.raw.url?.startsWith("/api")) {
     return reply.code(404).send({ error: "Not Found" });
@@ -748,7 +529,6 @@ fastify.setNotFoundHandler((request, reply) => {
   });
 });
 
-// Error handler
 fastify.setErrorHandler((error, request, reply) => {
   fastify.log.error(error);
   if (request.raw.url?.startsWith("/api")) {

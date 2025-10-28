@@ -1,11 +1,8 @@
-<% 
-  // Rendu d'un avatar: image user.image (URL complète ou nom de fichier) sinon user.profileImage, sinon initiale
+<%
   const entity = typeof user !== 'undefined' && user;
   let imgUrl = null;
   if (entity && entity.image) {
     imgUrl = String(entity.image);
-    // normalisation: si ce n'est pas une URL absolue, ne commence pas par '/' et n'est pas une data:URL,
-    // on reconstruit le chemin public
     if (!/^https?:\/\//i.test(imgUrl) && imgUrl[0] !== '/' && !/^data:/i.test(imgUrl)) {
       imgUrl = '/public/uploads/avatars/' + imgUrl;
     }

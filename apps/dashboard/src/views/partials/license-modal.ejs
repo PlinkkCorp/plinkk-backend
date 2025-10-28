@@ -1,4 +1,3 @@
-<!-- Partial: license-modal.ejs -->
 <div id="licenseModal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
   <div class="absolute inset-0 bg-black/60" data-close="true"></div>
   <div class="relative max-w-3xl w-full bg-slate-900 text-slate-100 rounded-xl shadow-lg overflow-auto" style="max-height:80vh;">
@@ -44,9 +43,7 @@ SOFTWARE.
       triggers.forEach(function(t){ t.addEventListener('click', function(e){ e.preventDefault(); open(); }); });
     }
     if (closeBtn) closeBtn.addEventListener('click', function(e){ e.preventDefault(); close(); });
-    // clicking on backdrop
     var backdrop = modal.querySelector('[data-close]'); if (backdrop) backdrop.addEventListener('click', close);
-    // close on Esc
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
   })();
 </script>

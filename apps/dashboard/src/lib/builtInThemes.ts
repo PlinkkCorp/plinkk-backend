@@ -1,6 +1,3 @@
-// Centralized built-in themes list (migrated from public/config/themeConfig.js)
-// Keep in sync with previous front-end themes; this file is the authoritative
-// source for built-ins on the server side.
 export const builtInThemes = [
     {
         // Grey Theme (0)

@@ -10,7 +10,6 @@ import { apiMeThemesRoutes } from "./me/theme";
 import { apiMePlinkksRoutes } from "./me/plinkks";
 import path from "path";
 
-// In-memory store for pending 2FA secrets awaiting user confirmation (keyed by userId)
 const pending2fa = new Map<
   string,
   { secret: string; otpauth: string; createdAt: number }
@@ -21,7 +20,6 @@ const prisma = new PrismaClient();
 export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.register(apiMeThemesRoutes, { prefix: "/themes" });
   fastify.register(apiMePlinkksRoutes, { prefix: "/plinkks" });
-  // API: basculer la visibilité publique/privée de son profil
   fastify.post("/visibility", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -34,7 +32,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     return reply.send(updated);
   });
 
-  // API: changer l'email
   fastify.post("/email", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -44,7 +41,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     } catch (e) {
       return reply.code(400).send({ error: "Email invalide" });
     }
-    // vérifier unicité
     const exists = await prisma.user.findFirst({
       where: { email, NOT: { id: userId as string } },
       select: { id: true },
@@ -58,7 +54,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     return reply.send(updated);
   });
 
-  // API: changer le mot de passe
   fastify.post("/password", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -90,7 +85,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
-  // API: supprimer mon compte (mdp + TOTP si activé)
   fastify.post("/delete", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -125,14 +119,9 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
-  // API: basculer la visibilité publique de l'email (stockée dans cosmetics.settings.isEmailPublic)
   fastify.post("/email-visibility", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    // New behavior: use the dedicated `publicEmail` column on User to
-    // control whether the account email is publicly visible. This avoids
-    // coupling visibility to a cosmetics JSON object which doesn't exist
-    // in the Prisma schema.
     const { isEmailPublic } = (request.body as { isEmailPublic: string }) ?? {};
     const me = await prisma.user.findUnique({
       where: { id: userId as string },
@@ -153,15 +142,12 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // API: basculer la 2FA
   fastify.post("/2fa", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    // If no secret yet -> generate a temporary secret stored in session, return qr/otpauth
     if (!user.twoFactorEnabled) {
-      // Reuse a pending secret stored in session if present and not expired
       const pending: { secret: string, otpauth: string, createdAt: number } = pending2fa.get(userId as string) || null;
       const now = Date.now();
       let secret: string | null = null;
@@ -177,14 +163,12 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       } else {
         secret = authenticator.generateSecret();
         otpauth = authenticator.keyuri(user.userName, "Plinkk", secret);
-        // store pending secret in session for confirmation step (expires after 10min)
         pending2fa.set(userId as string, { secret, otpauth, createdAt: now });
       }
       const qrCode = await QRCode.toDataURL(otpauth as string);
       return { qrCode, otpauth };
     }
 
-    // If secret exists in DB -> expect an OTP to disable 2FA
     const { otp } = (request.body as { otp: string }) || {};
     if (!otp || typeof otp !== "string") {
       return reply
@@ -201,7 +185,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     return { successful: true };
   });
 
-  // API: confirmer l'activation 2FA en vérifiant un OTP (ne désactive pas)
   fastify.post("/2fa/confirm", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -209,11 +192,9 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     if (!otp || typeof otp !== "string")
       return reply.code(400).send({ error: "OTP requis" });
 
-    // Retrieve pending secret from session
     const pending: { secret: string, otpauth: string, createdAt: number } = pending2fa.get(userId as string) || null;
     if (!pending || !pending.secret)
       return reply.code(400).send({ error: "Aucune clé 2FA en attente" });
-    // optional expiry check
     const now = Date.now();
     if (!pending.createdAt || now - pending.createdAt > 10 * 60 * 1000) {
       pending2fa.delete(userId as string);
@@ -225,7 +206,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const valid = authenticator.check(otp, pending.secret);
     if (!valid) return reply.code(403).send({ error: "Code 2FA invalide" });
 
-    // Persist to DB and clear pending
     await prisma.user.update({
       where: { id: userId },
       data: { twoFactorSecret: pending.secret, twoFactorEnabled: true },
@@ -234,7 +214,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     return reply.send({ successful: true });
   });
 
-  // API: mettre à jour des infos de base du compte (username, name, description)
   fastify.post("/profile", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -254,8 +233,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       },
     });
 
-    // If the account's display name was updated, also update the user's default Plinkk
-    // so that account-level name and the main public page remain consistent.
     try {
       if (typeof body.name === "string" && body.name.trim()) {
         const defaultP = await prisma.plinkk.findFirst({
@@ -269,13 +246,11 @@ export function apiMeRoutes(fastify: FastifyInstance) {
         }
       }
     } catch (e) {
-      // Non-blocking: log and continue
       request.log?.warn({ e }, "sync default plinkk name failed");
     }
     return reply.send(updated);
   });
 
-  // API: ajouter un domaine ou le remplacer
   fastify.post("/host", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -303,7 +278,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // API: verifier si le domaine est valide
   fastify.post("/host/verify", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -313,7 +287,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     return reply.send({ verified: verified });
   });
 
-  // API: supprime le domaine
   fastify.delete("/host", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -325,7 +298,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     return reply.send({ successful: true });
   });
 
-  // API: sélectionner des cosmétiques (flair, bannerUrl, frame, theme)
   fastify.post("/cosmetics", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -334,7 +306,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       where: { id: userId as string },
       select: { cosmetics: true },
     });
-    // Fallback to empty object to avoid runtime errors when cosmetics is null/undefined
     const cosmetics = u?.cosmetics;
     const updated = await prisma.user.update({
       where: { id: userId as string },
@@ -363,12 +334,10 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
   });
 
-  // API: uploader/remplacer la photo de profil (avatar) via data URL (base64)
   fastify.post("/avatar", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
 
-    // Récupération du fichier envoyé
     const file = await request.file();
 
     if (!file) return reply.code(400).send({ error: "Aucun fichier reçu" });
@@ -377,7 +346,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
 
     const buf = await file.toBuffer();
 
-    // Limite stricte: 2 Mo
+    // Limite : 2 Mo
     if (buf.byteLength > 2 * 1024 * 1024)
       return reply.code(413).send({ error: "Image trop lourde (max 2 Mo)" });
 
@@ -398,7 +367,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     );
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
-    // Récupérer l’utilisateur
     const me = await prisma.user.findUnique({
       where: { id: userId as string },
     });
@@ -410,16 +378,13 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const publicUrl = `/public/uploads/avatars/${dedupName}`;
     const oldVal = me?.image || null;
 
-    // Écriture du fichier
     writeFileSync(filePath, buf);
 
-    // Mise à jour de l’utilisateur
     await prisma.user.update({
       where: { id: me.id },
       data: { image: publicUrl },
     });
 
-    // Suppression ancienne image si inutilisée
     if (oldVal && oldVal !== publicUrl) {
       const refs = await prisma.user.count({ where: { image: oldVal } });
       if (refs === 0) {

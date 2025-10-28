@@ -1,6 +1,4 @@
-<!-- Header -->
 <header class="sticky top-0 z-50 border-b border-fuchsia-600/30 bg-gradient-to-r from-slate-950/80 via-fuchsia-900/35 to-slate-950/80 backdrop-blur" style="position: sticky">
-    <!-- SPA top loader (fixed, NProgress-like) -->
     <style>
         #spaTopLoaderDash { position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 10000; pointer-events: none; opacity: 0; transition: opacity .15s ease; }
         #spaTopLoaderDash.active { opacity: 1; }
@@ -116,7 +114,6 @@
         const btn = document.getElementById('profileMenuBtn');
         const panel = document.getElementById('profileMenuPanel');
         if (!root || !btn || !panel) return;
-        // Empêche le double-binding si une page attache déjà des listeners
         if (btn.dataset.bound === '1') return;
         btn.dataset.bound = '1';
 
@@ -160,7 +157,6 @@
 </script>
 <script>
     (function(){
-        // Auto SPA loader triggers for dashboard
         const el = document.getElementById('spaTopLoaderDash');
         function start(){ if (el) el.classList.add('active'); }
         function end(){ if (el) el.classList.remove('active'); }

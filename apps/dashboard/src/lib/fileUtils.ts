@@ -1,6 +1,5 @@
 import https from "https";
 
-/** Rectangle arrondi générique **/
 export function roundedRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -11,7 +10,6 @@ export function roundedRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-// === Fonction pour couper le texte automatiquement ===
 export function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
   const words = text.split(" ");
   let line = "";
@@ -29,9 +27,6 @@ export function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
   ctx.fillText(line, x, y);
 }
 
-/**
- * Télécharge un fichier distant (stream -> string)
- */
 export function fetchRemoteFile(url: string): Promise<string> {
   return new Promise((resolve, reject) => {
     https.get(url, (res) => {

@@ -58,7 +58,6 @@
       animation: slide-up .4s var(--ease-out-quad) both
     }
 
-    /* Section switching */
     @keyframes in-right {
       from {
         opacity: 0;
@@ -123,7 +122,6 @@
       animation: out-left .24s var(--ease-out-quad) both
     }
 
-    /* Micro-animations */
     @keyframes shake {
 
       0%,
@@ -152,7 +150,6 @@
       animation: shake .36s cubic-bezier(.36, .07, .19, .97) both
     }
 
-    /* Carte: effet léger au chargement */
     #authCard {
       transition: transform .18s var(--ease-out-quad), filter .18s var(--ease-out-quad)
     }
@@ -184,7 +181,6 @@
       <h1 class="text-xl font-semibold tracking-tight">Plinkk</h1>
     </div>
 
-    <!-- Ajout de 'relative' et d'un id pour animer la carte -->
     <div id="authCard"
       class="relative rounded-2xl border border-slate-800/60 bg-slate-900/60 backdrop-blur-md shadow-2xl overflow-hidden animate-slide-up ring-1 ring-white/5"
       style="animation-delay:60ms">
@@ -198,7 +194,6 @@
           class="pointer-events-none absolute bottom-0 left-0 h-0.5 w-1/2 bg-indigo-500 transition-transform duration-300 ease-out"></span>
       </nav>
 
-      <!-- Connexion -->
       <section id="loginForm" class="p-5 space-y-4">
         <form action="/login" method="post" class="space-y-3">
           <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
@@ -239,7 +234,6 @@
         </p>
       </section>
 
-      <!-- Inscription -->
       <section id="signupForm" class="p-5 space-y-4 hidden">
         <form action="/register" method="post" class="space-y-3">
           <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
@@ -308,7 +302,6 @@
         </p>
       </section>
 
-      <!-- Overlay de chargement (inscription) -->
       <div id="loadingOverlay"
         class="hidden absolute inset-0 bg-slate-900/70 backdrop-blur-sm flex flex-col items-center justify-center gap-3 text-slate-200">
         <svg class="h-6 w-6 text-indigo-300 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -365,12 +358,10 @@
       const toEl = which === 'login' ? login : signup;
       const direction = which === 'login' ? 'left' : 'right';
 
-      // Prepare incoming section
       toEl.classList.remove('hidden');
       toEl.classList.remove('animate-out-left', 'animate-out-right', 'animate-in-left', 'animate-in-right');
       fromEl.classList.remove('animate-out-left', 'animate-out-right', 'animate-in-left', 'animate-in-right');
 
-      // Animate
       toEl.classList.add(direction === 'right' ? 'animate-in-right' : 'animate-in-left');
       fromEl.classList.add(direction === 'right' ? 'animate-out-left' : 'animate-out-right');
 
@@ -412,24 +403,9 @@
       updateTabsUI(state.current);
       attachPasswordToggles();
 
-      // Animation de passage "Inscription" -> "Enregistrement"
       const signupFormEl = document.querySelector('#signupForm form');
       const overlay = document.getElementById('loadingOverlay');
       const card = document.getElementById('authCard');
-      /* if (signupFormEl) {
-        signupFormEl.addEventListener('submit', (e) => {
-          // Met le bouton en état "loading" et désactive le formulaire
-          const btn = signupFormEl.querySelector('button[type="submit"]');
-          btn.disabled = true;
-          signupFormEl.querySelectorAll('input, button').forEach(el => { el.disabled = true; });
-          btn.innerHTML = '<span class="inline-flex items-center gap-2"><svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>Enregistrement...</span>';
-
-          // Affiche l'overlay et anime la carte
-          overlay.classList.remove('hidden');
-          overlay.classList.add('animate-fade-in');
-          card.classList.add('loading');
-        }, { once: true });
-      } */
     });
   </script>
 </body>

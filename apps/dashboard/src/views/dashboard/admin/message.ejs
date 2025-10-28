@@ -96,7 +96,7 @@
     const userInput = document.getElementById('userMentions');
     const sugg = document.getElementById('userSuggestions');
     const selectedUsers = document.getElementById('selectedUsers');
-    const picked = new Map(); // id -> {id, userName, email}
+    const picked = new Map();
 
     function setTargetsDisabled(disabled){
       targetsPanel.style.pointerEvents = disabled ? 'none' : '';
@@ -223,7 +223,6 @@
       }
     });
 
-    // Confirmation intégrée (petite modale)
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 z-50 hidden';
     modal.innerHTML = `
@@ -249,8 +248,6 @@
     modal.querySelector('#dlgClose').addEventListener('click', closeModal);
     modal.querySelector('#dlgCancel').addEventListener('click', closeModal);
     modal.querySelector('#dlgConfirm').addEventListener('click', async ()=>{
-      // Suppression DB: si un message courant est chargé, on peut le cibler; sinon on supprime le plus récent global
-      // On récupère le premier message via l'API et on envoie son id côté DELETE.
       let ok = false; let id = null;
       try { const res = await fetch('/admin/message/api'); if (res.ok){ const j = await res.json(); if (j && Array.isArray(j.messages) && j.messages.length) id = j.messages[0].id; } } catch(e){}
       try {

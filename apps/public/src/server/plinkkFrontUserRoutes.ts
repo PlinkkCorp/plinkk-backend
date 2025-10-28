@@ -268,6 +268,29 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     reply.type("application/javascript").send(js);
   });
 
+  fastify.get("/:username.png", async function (request, reply) {
+    const { username } = request.params as {
+      username: string;
+    };
+    if (username === "") {
+      reply.code(404).send("// please specify a username");
+      return;
+    }
+
+    const userIcon = (await prisma.user.findUnique({
+      where: {
+        id: username
+      },
+      select: {
+        image: true
+      }
+    })).image
+
+    console.log(userIcon)
+
+    return reply.sendFile(userIcon || "images/default_profile.png");
+  });
+
   fastify.get(
     "/canvaAnimation/*",
     { config: { rateLimit: false } },

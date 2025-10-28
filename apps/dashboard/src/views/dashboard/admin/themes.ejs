@@ -43,7 +43,6 @@
     <button class="tabBtn" data-tab="archived" role="tab" aria-selected="false">Archivés <span class="tab-count ml-2 text-xs text-slate-400">(<span>0</span>)</span></button>
   </div>
 
-  <!-- À valider -->
   <section>
     <h2 class="text-lg font-semibold mt-4">À valider</h2>
     <ul id="gridSubmitted" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
@@ -53,7 +52,6 @@
         <% submitted.forEach(t => { %>
           <li draggable="true" class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
             <div class="flex items-start gap-3">
-              <!-- drag handle removed: themes are categorized, not manually draggable -->
               <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
               <div class="min-w-0 flex-1">
                 <div class="font-medium truncate"><%= t.name %>
@@ -83,8 +81,6 @@
       </ul>
     <% } %>
   </section>
-
-  <!-- Validés -->
   <section>
     <h2 class="text-lg font-semibold mt-6">Validés</h2>
     <ul id="gridApproved" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
@@ -94,7 +90,6 @@
         <% approved.forEach(t => { %>
           <li draggable="true" class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
             <div class="flex items-start gap-3">
-              <!-- drag handle removed: themes are categorized, not manually draggable -->
               <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
               <div class="min-w-0 flex-1">
                 <div class="font-medium truncate"><%= t.name %></div>
@@ -123,8 +118,6 @@
       </ul>
     <% } %>
   </section>
-
-  <!-- Archivés -->
   <section>
     <h2 class="text-lg font-semibold mt-6">Archivés</h2>
     <ul id="gridArchived" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
@@ -134,7 +127,6 @@
         <% archived.forEach(t => { %>
           <li draggable="true" class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
             <div class="flex items-start gap-3">
-              <!-- drag handle removed: themes are categorized, not manually draggable -->
               <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
               <div class="min-w-0 flex-1">
                 <div class="font-medium truncate"><%= t.name %></div>
@@ -158,7 +150,6 @@
 
   <script>
   (function(){
-    // Toast helper
     function ensureToastContainer(){
       let c = document.getElementById('toastContainer');
       if (!c) {
@@ -205,11 +196,8 @@
     const search = document.getElementById('themeSearch');
     function extractColors(raw){
       try{ if(!raw) return null; const d = raw;
-        // si forme simplifiée { light: {bg,button,hover} }
         if (d.light && typeof d.light === 'object') return { bg: d.light.bg||'#f5f5f5', button: d.light.button||'#4f46e5', hover: d.light.hover||'#22c55e' };
-        // si forme complète
         if (d.background) return { bg: d.background||'#111827', button: d.buttonBackground||'#4f46e5', hover: d.hoverColor||'#22c55e' };
-        // autre
         return { bg: d.bg||'#111827', button: d.button||'#4f46e5', hover: d.hover||'#22c55e' };
       }catch(e){ return { bg:'#111827', button:'#4f46e5', hover:'#22c55e' }; }
     }
@@ -221,7 +209,6 @@
         let parsed = {};
         try{ parsed = JSON.parse(raw||'{}'); }catch(e){ parsed = {}; }
         const c = extractColors(parsed);
-        // simple aperçu : background et deux boutons
         box.innerHTML = `<div style="padding:8px;background:${c.bg};height:100%;display:flex;flex-direction:column;justify-content:center;gap:8px;">`+
           `<div style=\"height:28px;width:60%;background:${c.button};border-radius:6px;margin:0 auto;\"></div>`+
           `<div style=\"height:28px;width:40%;background:${c.hover};border-radius:6px;margin:0 auto;\"></div>`+
@@ -229,7 +216,6 @@
         });
       });
     }
-    // Remove or restore server-side "Aucun thème" placeholders depending on DOM state
     function tidyServerEmptyPlaceholders(){
       ['gridSubmitted','gridApproved','gridArchived'].forEach(id => {
         const grid = document.getElementById(id);
@@ -251,7 +237,6 @@
       });
     }
 
-    // Update the small counts shown on the tab buttons from actual DOM counts
     function updateTabCounts(){
       try{
         const map = {
@@ -284,26 +269,21 @@
           const actBtn = approve||reject||archive||unarchive||approveUpdate||del;
           if (!actBtn) return;
           const prev = actBtn.textContent; actBtn.disabled = true; actBtn.textContent = 'En cours...';
-          // Save DOM position for rollback
           const originalParent = li.parentElement;
           const originalNext = li.nextElementSibling;
           let tempMoved = false;
-          // helper to change action buttons depending on target grid
           function transformCardForGrid(card, target){
             try{
               const id = card.dataset.id;
               const actions = Array.from(card.querySelectorAll('div')).find(d=>d.className && d.className.indexOf('mt-3')!==-1) || card.querySelector('div.mt-3') || card.querySelector('.actions');
               if (!actions) return;
-              // Normalize: remove existing action nodes
               actions.innerHTML = '';
               if (target === 'approved'){
-                // approved grid actions: archive, preview, delete
                 const archive = document.createElement('button'); archive.className = 'archiveBtn px-3 py-1.5 rounded bg-slate-700 text-white text-xs'; archive.textContent = 'Archiver';
                 const preview = document.createElement('a'); preview.className = 'px-3 py-1.5 rounded bg-indigo-600 text-white text-xs'; preview.href = '/admin/themes/'+encodeURIComponent(id); preview.textContent = 'Prévisualiser';
                 const del = document.createElement('button'); del.className = 'deleteBtn px-3 py-1.5 rounded bg-rose-700 text-white text-xs'; del.textContent = 'Supprimer';
                 actions.appendChild(archive); actions.appendChild(preview); actions.appendChild(del);
               } else if (target === 'submitted'){
-                // submitted: approve/reject or approveUpdate if pending
                 const pending = card.querySelector('.badge-pending-update');
                 if (pending){
                   const approveUpd = document.createElement('button'); approveUpd.className = 'approveUpdateBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs'; approveUpd.textContent = 'Approuver la MAJ';
@@ -327,7 +307,6 @@
           try{
             if (approve || reject){
               const action = approve ? 'approve' : 'reject';
-              // optimistic: move/ remove UI immediately for snappiness
               if (approve) {
                 const target = document.getElementById('gridApproved');
                 if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); transformCardForGrid(li, 'approved'); target.appendChild(li); }
@@ -356,7 +335,6 @@
               showToast('Thème republié', 'success');
               try{ window.__refreshThemePaginators && window.__refreshThemePaginators(); }catch(e){}
             } else if (approveUpdate){
-              // optimistic visual update: remove badge and move to approved
               li.querySelector('.badge-pending-update')?.remove?.();
               const target = document.getElementById('gridApproved'); if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); transformCardForGrid(li, 'approved'); target.appendChild(li); }
               tempMoved = true;
@@ -367,7 +345,6 @@
             } else if (del){
               const ok = window.confirm('Supprimer définitivement ce thème ?');
               if (!ok) { actBtn.disabled = false; actBtn.textContent = prev; return; }
-              // optimistic remove
               li.remove(); tempMoved = true;
               const res = await fetch('/api/themes/'+encodeURIComponent(id), { method: 'DELETE' });
               if (!res.ok) throw new Error('HTTP '+res.status);
@@ -375,11 +352,9 @@
               try{ window.__refreshThemePaginators && window.__refreshThemePaginators(); }catch(e){}
             }
           }catch(err){
-            // rollback optimistic UI change
             try{
               if (tempMoved) {
                 if (!originalParent) {
-                  // nothing to rollback to
                 } else {
                   if (originalNext) originalParent.insertBefore(li, originalNext);
                   else originalParent.appendChild(li);
@@ -405,25 +380,20 @@
     }
     search?.addEventListener('input', applyFilter);
     renderPreviews(); wireActions();
-    // Drag & Drop removed: themes are categorized. Provide a noop for compatibility.
-    function setupDragAndDrop(){ /* intentionally empty */ }
+    function setupDragAndDrop(){}
     setupDragAndDrop();
 
-    // Refresh helpers: re-evaluate paginators and update tab counts after DOM changes
     window.__refreshThemePaginators = function(){
       try{
         const container = window.__themeAdminPaginators || {};
         Object.keys(container).forEach(k=>{
           const p = container[k]; if (!p) return;
-          // rebuild internals from DOM (re-reading items)
           const root = (k === 'submitted') ? document.getElementById('gridSubmitted') : (k === 'approved' ? document.getElementById('gridApproved') : document.getElementById('gridArchived'));
           if (!root) return;
-          // Force paginator to re-scan items by calling setFiltered with the current DOM items
           const items = Array.from(root.querySelectorAll('.themeCard'));
           try{ p.setFiltered(items); }catch(e){}
         });
       }catch(e){}
-      // Always try to refresh other UI pieces (categories, previews, filters, placeholders)
       try{ if (window.__onThemesUpdated) window.__onThemesUpdated(); }catch(e){}
       try{ tidyServerEmptyPlaceholders(); }catch(e){}
       try{ updateTabCounts(); }catch(e){}
@@ -433,7 +403,6 @@
   <script src="/public/js/pagination.js"></script>
   <script>
   (function(){
-    // Pagination + filtre par catégorie pour chaque grille
     const grids = {
       submitted: document.getElementById('gridSubmitted'),
       approved: document.getElementById('gridApproved'),
@@ -441,7 +410,6 @@
     };
     const search = document.getElementById('themeSearch');
     const catSelect = document.getElementById('themeCategoryFilter');
-    // collect categories from data-json of all themeCards
     function collectCategories(){
       const cats = new Set();
       Object.values(grids).forEach(g=>{
@@ -456,17 +424,14 @@
     function populateCategorySelect(){
       if (!catSelect) return;
       const prev = catSelect.value;
-      // remove existing dynamic options (keep first default option)
       while (catSelect.options.length > 1) catSelect.remove(1);
       const cats = collectCategories();
       cats.forEach(c=>{
         const o = document.createElement('option'); o.value = c; o.textContent = c; catSelect.appendChild(o);
       });
-      // restore previous selection if still available
       try{ if (prev) catSelect.value = prev; }catch(e){}
     }
 
-    // Called after DOM changes (optimistic moves / server ops) to refresh UI pieces
     window.__onThemesUpdated = function(){
       try{ populateCategorySelect(); }catch(e){}
       try{ renderPreviews(); }catch(e){}
@@ -474,15 +439,12 @@
       try{ updateTabCounts(); }catch(e){}
     };
 
-    // helper to ensure a message when no items
     function ensureEmptyMessage(grid){
       let m = grid.querySelector('.no-match-msg');
       if (!m){ m = document.createElement('div'); m.className = 'no-match-msg col-span-full text-sm text-slate-400'; m.style.display='none'; m.textContent = 'Aucun thème correspondant.'; grid.appendChild(m);} return m;
     }
 
-    // create paginators if available and wire tab updates
   const paginators = {};
-  // expose for external refreshes
   window.__themeAdminPaginators = window.__themeAdminPaginators || {};
     const tabButtons = Array.from(document.querySelectorAll('.tabBtn'));
     function showTab(name){
@@ -498,10 +460,8 @@
       const g = grids[k]; if (!g) return;
       if (!window.__PlinkkPaginator) return;
       const p = window.__PlinkkPaginator.createPaginator(g, { pageSize: 9, selectors: { items: '.themeCard' }, onRender: (pageItems, meta) => {
-        // show empty message when no matches
         const em = ensureEmptyMessage(g);
         if (!meta || meta.totalItems === 0) { em.style.display = ''; } else { em.style.display = 'none'; }
-        // update tab button count
         try{
           const btn = tabButtons.find(tb => tb.dataset.tab === k);
           if (btn) { const span = btn.querySelector('.tab-count span'); if (span) span.textContent = String(meta.totalItems); }
@@ -512,7 +472,6 @@
       p.render();
     });
 
-    // show only submitted by default
     showTab('submitted');
 
     function applyFilter(){
@@ -535,14 +494,12 @@
       });
     }
 
-  // wire events
   search?.addEventListener('input', applyFilter);
   catSelect?.addEventListener('change', applyFilter);
   const clearBtn = document.getElementById('clearSearch');
   clearBtn?.addEventListener('click', (e)=>{ e.preventDefault(); if (search) search.value=''; applyFilter(); if (search) search.focus(); });
 
     populateCategorySelect();
-    // initial filter to sync pagination
     applyFilter();
   })();
   </script>

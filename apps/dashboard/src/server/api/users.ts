@@ -9,7 +9,6 @@ import {
 const prisma = new PrismaClient();
 
 export function apiUsersRoutes(fastify: FastifyInstance) {
-  // API: lecture d'un utilisateur (infos minimales + plinkks + settings)
   fastify.get("/:id", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
@@ -51,8 +50,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     return reply.send(user);
   });
 
-  // ====== API de ban par email (par utilisateur) ======
-  // Lire l'état de ban de l'email de l'utilisateur
   fastify.get("/:id/ban-email", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
@@ -75,7 +72,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     return reply.send({
       active: !!ban,
       ban,
-      // date de fin théorique si time>0 (time en minutes)
       until:
         ban && typeof ban.time === "number" && ban.time! > 0
           ? new Date(
@@ -85,7 +81,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // Bannir par email l'utilisateur ciblé
   fastify.post("/:id/ban-email", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
@@ -107,7 +102,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       select: { email: true, id: true, role: { select: { name: true } } },
     });
     if (!u) return reply.code(404).send({ error: "Utilisateur introuvable" });
-    // Interdictions: pas d'auto-ban, pas de ban d'admins, pas de ban d'un rôle >= au sien
     const actor = await prisma.user.findUnique({
       where: { id: String(meId) },
       select: { id: true, role: { select: { name: true } } },
@@ -127,12 +121,10 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     const actorRole = actor.role?.name || "USER";
     if ((rank[actorRole] ?? 0) <= (rank[targetRole] ?? 0))
       return reply.code(403).send({ error: "forbidden_role" });
-    // Check s'il y a déjà un ban actif
     const existing = await prisma.bannedEmail.findFirst({
       where: { email: u.email, revoquedAt: null },
     });
     if (existing) return reply.code(409).send({ error: "already_banned" });
-    // Réactive un ancien ban si présent (évite P2002), sinon crée
     const ban = await prisma.bannedEmail.upsert({
       where: { email: u.email },
       create: {
@@ -158,7 +150,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true, ban });
   });
 
-  // Révoquer le ban (lever l'interdiction)
   fastify.delete("/:id/ban-email", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
@@ -186,7 +177,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
-  // API: mise à jour de rôle (admin/dev/moderator)
   fastify.post("/:id/role", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
@@ -199,14 +189,11 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     }
     const { id } = request.params as { id: string };
     const { role } = request.body as { role: string };
-    // Valider contre la table Role
     const dbRole = await prisma.role.findFirst({
       where: { OR: [{ id: role }, { name: role }] },
       select: { id: true, name: true },
     });
     if (!dbRole) return reply.code(400).send({ error: "Invalid role" });
-    // Enforce role hierarchy rules:
-    // hierarchy: USER(0) < MODERATOR(1) < DEVELOPER(2) < ADMIN(3)
     const rank: Record<string, number> = {
       USER: 0,
       MODERATOR: 1,
@@ -216,14 +203,11 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     const meRole = me.role.name as string;
     const targetRole = dbRole.name as string;
 
-    // Admin may do anything
     if (!verifyRoleAdmin(me.role)) {
-      // Developer cannot promote to ADMIN
       if (verifyRoleDeveloper(me.role)) {
         if (verifyRoleAdmin(me.role))
           return reply.code(403).send({ error: "Forbidden" });
       } else {
-        // Others (moderator) cannot set a role equal or higher than themselves
         if (rank[targetRole] >= rank[meRole])
           return reply.code(403).send({ error: "Forbidden" });
       }
@@ -237,7 +221,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     return reply.send({ id: updated.id, role: updated.role });
   });
 
-  // API: régler les cosmétiques (ex: flair, bannerUrl, frame) — admin/dev/moderator
   fastify.post("/:id/cosmetics", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
@@ -258,7 +241,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
   });
 
-  // API: suppression d'un utilisateur (admin/dev/moderator)
   fastify.delete("/:id", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
@@ -274,7 +256,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
-  // API: désactiver la 2FA d'un utilisateur (admin/dev/moderator)
   fastify.post("/:id/2fa/disable", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
@@ -303,7 +284,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true, changed: true });
   });
 
-  // API: basculer la visibilité publique/privée du profil d'un utilisateur (admin/dev/moderator)
   fastify.post("/:id/visibility", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
@@ -329,7 +309,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     return reply.send(updated);
   });
 
-  // API: basculer la visibilité publique de l'email d'un utilisateur (admin/dev/moderator)
   fastify.post("/:id/email-visibility", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
@@ -347,7 +326,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       return reply.code(400).send({ error: "Invalid payload" });
     }
 
-    // Lire l'email courant pour exposer publiquement si demandé
     const u = await prisma.user.findUnique({
       where: { id },
       select: { email: true, publicEmail: true },
@@ -363,7 +341,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     return reply.send({ id: updated.id, isEmailPublic: Boolean(updated.publicEmail) });
   });
 
-  // API: forcer la réinitialisation du mot de passe (admin/dev/moderator)
   fastify.post("/:id/force-password-reset", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
@@ -388,8 +365,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     return reply.send({ id: updated.id, mustChangePassword: updated.mustChangePassword });
   });
 
-  // ===== Banned Emails (global) =====
-  // Liste des bans par email (actifs)
   fastify.get("/bans/emails", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
@@ -407,7 +382,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     return reply.send({ bans });
   });
 
-  // Créer un ban email (global)
   fastify.post("/bans/emails", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
@@ -428,7 +402,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     if (!email || !email.includes("@") || email.length < 3) {
       return reply.code(400).send({ error: "invalid_email" });
     }
-    // Règles de protection
     const targetUser = await prisma.user.findFirst({
       where: { email },
       select: { id: true, role: { select: { name: true } } },
@@ -472,7 +445,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // Révoquer un ban email (global)
   fastify.delete("/bans/emails", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
@@ -495,7 +467,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true, count: res.count });
   });
 
-  // Ban massif par emails (global)
   fastify.post("/bans/emails/bulk", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
@@ -536,13 +507,11 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     }
     const alreadyBanned: string[] = [];
     const created: string[] = [];
-    // lire bans existants
     const existing = await prisma.bannedEmail.findMany({
       where: { email: { in: toCreate }, revoquedAt: null },
       select: { email: true },
     });
     const existingSet = new Set(existing.map((x) => x.email.toLowerCase()));
-    // Interdictions: auto-ban et rôles protégés
     const targets = await prisma.user.findMany({
       where: { email: { in: toCreate } },
       select: { email: true, id: true, role: { select: { name: true } } },
@@ -573,7 +542,6 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     const final = toCreate.filter(
       (e) => !existingSet.has(e) && !forbidden.has(e)
     );
-    // createMany en batch
     if (final.length) {
       await prisma.bannedEmail.createMany({
         data: final.map((email) => ({ email, reason, time })),

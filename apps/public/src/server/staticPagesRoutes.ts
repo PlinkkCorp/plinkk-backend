@@ -5,9 +5,8 @@ import { replyView } from "../lib/replyView";
 const prisma = new PrismaClient();
 
 export function staticPagesRoutes(fastify: FastifyInstance) {
-  // Pages statiques utiles
   fastify.get("/about", async (request, reply) => {
-    const currentUserId = request.session.get("data") as string | undefined;
+    const currentUserId = request.session.get("data");
     const currentUser = currentUserId
       ? await prisma.user.findUnique({
           where: { id: currentUserId },
@@ -17,7 +16,7 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
   });
 
   fastify.get("/privacy", async (request, reply) => {
-    const currentUserId = request.session.get("data") as string | undefined;
+    const currentUserId = request.session.get("data");
     const currentUser = currentUserId
       ? await prisma.user.findUnique({
           where: { id: currentUserId },
@@ -27,7 +26,7 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
   });
 
   fastify.get("/terms", async (request, reply) => {
-    const currentUserId = request.session.get("data") as string | undefined;
+    const currentUserId = request.session.get("data")
     const currentUser = currentUserId
       ? await prisma.user.findUnique({
           where: { id: currentUserId },
@@ -37,7 +36,7 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
   });
 
   fastify.get("/cookies", async (request, reply) => {
-    const currentUserId = request.session.get("data") as string | undefined;
+    const currentUserId = request.session.get("data")
     const currentUser = currentUserId
       ? await prisma.user.findUnique({
           where: { id: currentUserId },
@@ -47,7 +46,7 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
   });
 
   fastify.get("/legal", async (request, reply) => {
-    const currentUserId = request.session.get("data") as string | undefined;
+    const currentUserId = request.session.get("data")
     const currentUser = currentUserId
       ? await prisma.user.findUnique({
           where: { id: currentUserId },
@@ -57,7 +56,7 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
   });
 
   fastify.get("/docs", async (request, reply) => {
-    const currentUserId = request.session.get("data") as string | undefined;
+    const currentUserId = request.session.get("data")
     const currentUser = currentUserId
       ? await prisma.user.findUnique({
           where: { id: currentUserId },

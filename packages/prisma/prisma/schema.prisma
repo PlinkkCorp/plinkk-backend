@@ -313,7 +313,7 @@ model PlinkkEvent {
 
 model UserViewDaily {
   userId String
-  date   String
+  date   DateTime @default(now())
   count  Int
 
   @@id([userId, date])
@@ -322,7 +322,7 @@ model UserViewDaily {
 
 model LinkClickDaily {
   linkId String
-  date   String
+  date   DateTime @default(now())
   count  Int
 
   @@id([linkId, date])
@@ -331,7 +331,7 @@ model LinkClickDaily {
 
 model PlinkkViewDaily {
   plinkkId String
-  date     String
+  date     DateTime @default(now())
   count    Int
 
   @@id([plinkkId, date])

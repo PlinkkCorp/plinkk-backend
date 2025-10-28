@@ -6,7 +6,7 @@
 <%- include('../../partials/header-dash.ejs', { user: user }) %>
 <%- include('../../partials/admin-nav.ejs', { user: user }) %>
 
-<% // safe fallbacks: totals or pendingThemes might be undefined depending on controller const
+<%
 pendingCount=(typeof totals !=='undefined' && totals && totals.pendingThemes !=null) ?
 totals.pendingThemes : (typeof pendingThemes !=='undefined' && pendingThemes ? pendingThemes.length :
 0); const totalUsersCount=(typeof totals !=='undefined' && totals && totals.totalUsers !=null) ?
@@ -18,17 +18,14 @@ users.filter(u=>
 !u.isPublic).length : 0);
 %>
 <main class="max-w-7xl mx-auto p-4 space-y-5">
-    <!-- Quick actions -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold tracking-tight">Administration</h1>
             <p class="text-xs text-slate-400">Tableau de bord d'administration — actions rapides,
                 statistiques et modération.</p>
         </div>
-
     </div>
 
-    <!-- Stats cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
             <p class="text-xs text-slate-400">Utilisateurs</p>
@@ -56,9 +53,7 @@ users.filter(u=>
         </div>
     </div>
 
-    <!-- Main grid: Users + Pending Themes -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <!-- Users list (2/3) -->
         <section class="lg:col-span-2 rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
             <div class="flex items-center justify-between mb-3">
                 <h2 class="font-medium">Utilisateurs</h2>
@@ -129,7 +124,6 @@ users.filter(u=>
                                                 class="text-xs px-2 py-0.5 rounded bg-slate-800/80 border border-slate-700 text-slate-300 max-w-[8rem] truncate inline-block" title="@<%= u.id %>">@<%= u.id %>
                                             </span>
                                         </div>
-                                        <% /* Références Plinkk */ %>
                                         <% if (Array.isArray(u.plinkks) && u.plinkks.length > 0) { 
                                                     const def = u.plinkks.find(p=>p.isDefault) || null;
                                                     const others = u.plinkks.filter(p=>!p.isDefault);
@@ -209,7 +203,6 @@ users.filter(u=>
                     <% } %>
         </section>
 
-        <!-- Pending themes (1/3) -->
         <aside class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
             <div class="flex items-center justify-between mb-2">
                 <h2 class="font-medium">Thèmes en attente</h2>
@@ -248,9 +241,6 @@ users.filter(u=>
                     <% } %>
         </aside>
     </div>
-
-                        
-                                        <!-- Modal preview réutilisable (admin) -->
                                         <div id="plinkkPreviewModalAdmin" class="fixed inset-0 hidden z-50 items-center justify-center">
                                             <div class="absolute inset-0 bg-black/60" data-close></div>
                                             <div class="relative w-full max-w-4xl h-[80vh] bg-slate-900 border border-slate-700 rounded-lg overflow-hidden">
@@ -273,12 +263,11 @@ users.filter(u=>
                                                     title.textContent = label||'Prévisualisation';
                                                     modal.classList.remove('hidden');
                                                     modal.classList.add('flex');
-                                                    // animate backdrop and panel
                                                     const backdrop = modal.querySelector('[data-close]');
                                                     const panel = modal.querySelector('.relative.w-full.max-w-4xl');
                                                     backdrop?.classList.remove('animate-backdrop-out');
                                                     backdrop?.classList.add('animate-backdrop-in');
-                                                    panel?.classList.remove('animate-pop-in'); // reset
+                                                    panel?.classList.remove('animate-pop-in');
                                                     void panel?.offsetWidth;
                                                     panel?.classList.add('animate-pop-in');
                                                     document.body.style.overflow='hidden';
@@ -290,7 +279,7 @@ users.filter(u=>
                                                     backdrop?.classList.add('animate-backdrop-out');
                                                     // fade out quickly
                                                     panel?.classList.remove('animate-pop-in');
-                                                    panel?.classList.add('animate-fade-in'); // reuse subtle fade
+                                                    panel?.classList.add('animate-fade-in');
                                                     setTimeout(()=>{
                                                         frame.src='about:blank';
                                                         modal.classList.add('hidden'); modal.classList.remove('flex');
@@ -305,7 +294,6 @@ users.filter(u=>
 
 </main>
 
-<!-- Modale de gestion utilisateur -->
 <div id="userManageModal" class="fixed inset-0 hidden z-[2147483600] items-center justify-center transition-opacity duration-200 ease-out">
     <div class="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-200" data-close></div>
     <div class="relative w-full max-w-3xl bg-slate-900 border border-slate-700 rounded-lg shadow-2xl translate-y-2 opacity-0 transition-all duration-200 ease-out">
@@ -317,15 +305,11 @@ users.filter(u=>
             <button id="umClose" class="px-3 py-1 text-xs rounded bg-slate-800 text-white">Fermer</button>
         </div>
         <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Colonne gauche: Compte -->
             <div class="space-y-4">
-                <!-- Rôle -->
                 <div>
                     <label class="block text-xs text-slate-400 mb-1" data-tip="Définit les permissions et accès de l'utilisateur.">Rôle</label>
                     <select id="umRole" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm"></select>
                 </div>
-
-                <!-- Stats compte -->
                 <div class="rounded-md border border-slate-800/70 bg-slate-900/50 p-3">
                     <div class="text-xs text-slate-400 mb-2">Statistiques du compte</div>
                     <div class="grid grid-cols-3 gap-2 text-center">
@@ -339,8 +323,6 @@ users.filter(u=>
                         </div>
                     </div>
                 </div>
-
-                <!-- Sécurité compte -->
                 <div class="rounded-md border border-slate-800/70 bg-slate-900/50 p-3">
                     <div class="text-xs text-slate-400 mb-2">Sécurité</div>
                     <div class="flex flex-col gap-2">
@@ -354,8 +336,6 @@ users.filter(u=>
                         </button>
                     </div>
                 </div>
-
-                <!-- Modération: Ban par email -->
                 <div class="rounded-md border border-slate-800/70 bg-slate-900/50 p-3">
                     <div class="text-xs text-slate-400 mb-2">Modération</div>
                     <div id="umBanState" class="text-xs text-slate-300 hidden"></div>
@@ -383,8 +363,6 @@ users.filter(u=>
                         </div>
                     </div>
                 </div>
-
-                <!-- Zone dangereuse: suppression compte -->
                 <div class="rounded-md border border-slate-800/70 bg-slate-900/50 p-3">
                     <div class="text-xs text-rose-300 mb-2">Zone dangereuse</div>
                     <button id="umDelete" class="px-3 py-1.5 rounded bg-rose-700 text-white text-sm has-spinner" data-tip="Supprimer définitivement le compte (irréversible)">
@@ -393,10 +371,7 @@ users.filter(u=>
                     </button>
                 </div>
             </div>
-
-            <!-- Colonne droite: Plinkk sélectionné -->
             <div class="space-y-4">
-                <!-- Sélecteur + slug -->
                 <div class="rounded-md border border-slate-800/70 bg-slate-900/50 p-3">
                     <div class="flex items-center justify-between mb-2">
                         <div class="text-xs text-slate-400">Plinkks de l’utilisateur</div>
@@ -434,7 +409,6 @@ users.filter(u=>
                     </div>
                 </div>
 
-                <!-- Stats Plinkk + Toggles -->
                 <div class="rounded-md border border-slate-800/70 bg-slate-900/50 p-3">
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         <label class="inline-flex items-center gap-2 text-sm text-slate-200" data-tip="Rend la page visible publiquement">
@@ -516,11 +490,9 @@ users.filter(u=>
         sort?.addEventListener('change', () => { applySort(); applyFilter(); });
         resetBtn?.addEventListener('click', () => { if (search) search.value = ''; if (sort) sort.value = 'date-desc'; if (roleFilter) roleFilter.value = 'all'; if (visFilter) visFilter.value = 'all'; applySort(); applyFilter(); });
 
-        // render mini previews for pending themes
         (function renderPendingPreviews() {
             document.querySelectorAll('aside .previewMini').forEach(el => {
                 const li = el.closest('li');
-                // try to read data-json if available
                 const raw = li?.getAttribute('data-json') || '';
                 let parsed = {};
                 try { parsed = raw ? JSON.parse(raw) : {}; } catch (e) { }
@@ -555,12 +527,10 @@ users.filter(u=>
 
         const paginator = window.__PlinkkPaginator.createPaginator(grid, {
             pageSize: 21, selectors: { items: 'li' }, onRender: (pageItems, meta) => {
-                // mettre à jour visibleCount (nombre total match)
                 if (visibleCount) visibleCount.textContent = String(meta.totalItems);
             }
         });
 
-        // initial total count
         if (totalCount) totalCount.textContent = String(paginator.getAll().length);
 
         function applyFilter() {
@@ -610,7 +580,6 @@ users.filter(u=>
             applyFilter();
         });
 
-        // Animation des boutons copier
         const style = document.createElement('style');
         style.textContent = `
             .copy-anim { position: relative; }
@@ -626,7 +595,6 @@ users.filter(u=>
             `;
         document.head.appendChild(style);
 
-        // Toast notification styles
         const toastStyle = document.createElement('style');
         toastStyle.textContent = `
             .plinkk-toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 2147483200; display:flex; flex-direction:column; gap:8px; }
@@ -635,7 +603,6 @@ users.filter(u=>
             `;
         document.head.appendChild(toastStyle);
 
-        // Tooltips + spinner styles
         const uxStyle = document.createElement('style');
         uxStyle.textContent = `
             [data-tip]{ position: relative; cursor: help; }
@@ -648,7 +615,6 @@ users.filter(u=>
             `;
         document.head.appendChild(uxStyle);
 
-        // Ensure toast container exists
         function getToastContainer() {
             let c = document.querySelector('.plinkk-toast-container');
             if (!c) { c = document.createElement('div'); c.className = 'plinkk-toast-container'; document.body.appendChild(c); }
@@ -662,18 +628,15 @@ users.filter(u=>
                 t.className = 'plinkk-toast';
                 t.textContent = message;
                 c.appendChild(t);
-                // force reflow then show
                 void t.offsetWidth;
                 t.classList.add('show');
                 setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 180); }, ms);
-            } catch (e) { /* ignore */ }
+            } catch (e) {}
         }
 
-        // Confirm with typed input helper (used by delete flows)
         function confirmWithInput(displayName, userId) {
             return new Promise(resolve => {
                 const overlay = document.createElement('div');
-                // Utiliser un z-index supérieur à la modale utilisateur (z-[2147483600])
                 overlay.className = 'fixed inset-0 z-[2147483800] flex items-center justify-center bg-black/50';
                 overlay.innerHTML = `
                     <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
@@ -707,16 +670,13 @@ users.filter(u=>
                 overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(false); });
                 btnOk.addEventListener('click', () => cleanup((input.value || '').trim() === String(userId)));
                 input.addEventListener('keydown', (ev) => {
-                    // keep behavior local too; it will trigger onKey as well
                     if (ev.key === 'Enter') { ev.preventDefault(); btnOk.click(); }
                     if (ev.key === 'Escape') { ev.preventDefault(); btnCancel.click(); }
                 });
-                // attach document-level key handler for Enter/Escape
                 document.addEventListener('keydown', onKey);
             });
         }
 
-        // Boîte de dialogue simple (Oui/Non) — utilisation: suppression de Plinkk
         function confirmSimple(message = 'Confirmer ?', { confirmText = 'Confirmer', cancelText = 'Annuler' } = {}) {
             return new Promise(resolve => {
                 const overlay = document.createElement('div');
@@ -741,7 +701,6 @@ users.filter(u=>
             });
         }
 
-        // Reveal / hide private email pour admins (toggle inline dans la carte)
         grid.addEventListener('click', (e) => {
             const btn = e.target.closest('.revealEmailBtn');
             if (!btn) return;
@@ -752,10 +711,8 @@ users.filter(u=>
             const emailEl = wrap.querySelector('.emailValue');
             if (!emailEl) return;
             const email = emailEl.textContent || '';
-            // if email currently hidden, show it with Copy and Hide buttons
             if (!container.classList.contains('revealed')) {
                 container.classList.add('revealed');
-                // replace only the inner content of the container to avoid layout shift
                 container.innerHTML = `<span class="text-xs text-slate-400 truncate emailShown" title="${email}">${email}</span>
                     <div class="inline-flex items-center gap-2 ml-2">
                         <button class="copySmall px-2 py-0.5 text-xs rounded-md bg-emerald-600 text-white hover:bg-emerald-500">Copier</button>
@@ -770,7 +727,6 @@ users.filter(u=>
                 });
                 const hideBtn = container.querySelector('.hideEmailBtn');
                 hideBtn?.addEventListener('click', () => {
-                    // restore to initial state (Email privé + reveal button) with new markup
                     container.classList.remove('revealed');
                     container.innerHTML = `<span class="text-xs text-slate-500 italic privateEmailLabel" title="${email}">Email privé</span>` +
                         `<span class="privateEmailWrap ml-3 inline-flex items-center gap-2 text-xs">` +
@@ -783,21 +739,17 @@ users.filter(u=>
             }
         });
 
-        // Init
         if (sort) sort.value = 'date-desc';
         applySort();
         applyFilter();
 
-        // shortcut
         document.addEventListener('keydown', (ev) => {
             const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
             const meta = isMac ? ev.metaKey : ev.ctrlKey;
             if (meta && ev.key.toLowerCase() === 'k') { ev.preventDefault(); search?.focus(); }
         });
 
-        // ========= Modale de gestion utilisateur =========
         const myRole = "<%= (user && user.role && (user.role.id || user.role.name)) ? (user.role.id || user.role.name) : 'USER' %>";
-        // Charger dynamiquement les rôles depuis l'API
         const rolesCache = { list: [] };
         async function loadRoles() {
             try {
@@ -806,14 +758,12 @@ users.filter(u=>
                 const json = await res.json();
                 const roles = Array.isArray(json.roles) ? json.roles : [];
                 rolesCache.list = roles;
-                // Peupler roleFilter
                 const rf = document.getElementById('roleFilter');
                 if (rf) {
                     const current = rf.value;
                     rf.innerHTML = '<option value="all">Tous rôles</option>' + roles.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
                     rf.value = current || 'all';
                 }
-                // Peupler umRole
                 const umRoleSel = document.getElementById('umRole');
                 if (umRoleSel) {
                     umRoleSel.innerHTML = roles.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
@@ -860,10 +810,8 @@ users.filter(u=>
             const v = document.getElementById('umStatViews'); if (v) v.textContent = String(views);
             const pc = document.getElementById('umStatPlCount'); if (pc) pc.textContent = String(plCount);
             const pa = document.getElementById('umStatPlActive'); if (pa) pa.textContent = String(plActiveCount);
-            // Force reset password toggle
             const fp = document.getElementById('umForcePwd'); if (fp) fp.checked = !!mustChange;
 
-            // Charger les détails + plinkks depuis l'API
             currentUserDetails = await fetchUserDetails(id);
             const plSelect = document.getElementById('umPlSelect');
             const plSlug = document.getElementById('umPlSlug');
@@ -875,7 +823,6 @@ users.filter(u=>
             const plEmailVisible = document.getElementById('umPlEmailVisible');
             const plViews = document.getElementById('umPlViews');
             currentPlinkks = Array.isArray(currentUserDetails?.plinkks) ? currentUserDetails.plinkks : [];
-            // Options: label = name||slug (+ Par défaut)
             const opts = currentPlinkks.map(p => ({
                 id: p.id, slug: (p.slug||''), label: (p.isDefault ? (p.name||p.slug||'Par défaut')+ ' (Par défaut)' : (p.name||p.slug||'Sans nom')),
                 isDefault: !!p.isDefault, isPublic: !!p.isPublic, isActive: !!p.isActive,
@@ -892,17 +839,13 @@ users.filter(u=>
                 if (plPreview) plPreview.href = "<%= frontendUrl %>" + o.url;
                 if (plViews) plViews.textContent = String(o.views||0);
                 if (plMeta) plMeta.textContent = o.slug ? `/${id}/${o.slug}` : `/${id}`;
-                // Mettre à jour les liens "Voir le profil" et "Copier le lien"
                 if (um.view) um.view.href = "<%= frontendUrl %>" + o.url;
                 um.copy?.setAttribute('data-url', "<%= frontendUrl %>" + o.url);
             }
             if (plSelect){ plSelect.value = '0'; applyPl(0); plSelect.onchange = ()=> applyPl(Number(plSelect.value||0)); }
 
-            // Appliquer les restrictions de rôle selon mon rôle
-            // Appliquer restrictions même avec rôles dynamiques: on garde un mapping par défaut et on étend dynamiquement
             const baseRanks = { USER:0, MODERATOR:1, DEVELOPER:2, ADMIN:3 };
             const ranks = { ...baseRanks };
-            // Donner un rang par ordre alphabétique aux rôles inconnus pour éviter blocage, mais garder ADMIN au sommet
             const dyn = (rolesCache.list || []).map(r => r.name).filter(n => !(n in ranks) && n !== 'ADMIN').sort();
             dyn.forEach((name, i) => { ranks[name] = 1 + i; });
             ranks['ADMIN'] = Math.max(...Object.values(ranks)) + 1;
@@ -949,10 +892,8 @@ users.filter(u=>
         um.root?.querySelector('[data-close]')?.addEventListener('click', closeUserModal);
         document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && !um.root.classList.contains('hidden')) closeUserModal(); });
 
-        // Actions dans la modale
         um.copy?.addEventListener('click', async ()=>{
             if (!currentLI) return;
-            // URL déjà calculée selon la page sélectionnée
             const fallback = '/' + currentLI.dataset.id;
             const raw = um.copy.getAttribute('data-url') || fallback;
             const url = (window.location && window.location.origin ? window.location.origin : '') + raw;
@@ -978,8 +919,6 @@ users.filter(u=>
                 console.error(err); showToast('Erreur de mise à jour du rôle'); um.role.value = prev;
             }
         });
-
-        
 
         um.disable2fa?.addEventListener('click', async ()=>{
             if (!currentLI || um.disable2fa.disabled) return; const id = currentLI.dataset.id;
@@ -1010,7 +949,6 @@ users.filter(u=>
             finally { if (spinner) spinner.classList.add('hidden'); }
         });
 
-        // === Gestion Plinkk (sauvegarder / supprimer) ===
         (function(){
                 const plSelect = document.getElementById('umPlSelect');
                 const plSlug = document.getElementById('umPlSlug');
@@ -1042,10 +980,8 @@ users.filter(u=>
                 try{
                     const res = await fetch('/api/admin/plinkks/' + encodeURIComponent(pId), { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
                     if (!res.ok) throw new Error('HTTP '+res.status);
-                    // Active toggle is a separate call if changed
                     const active = !!(plActiveChk && plActiveChk.checked);
                     await fetch('/api/admin/plinkks/' + encodeURIComponent(pId) + '/active', { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ isActive: active }) });
-                    // Email visibilité (affichageEmail)
                     if (plEmailVisible){
                         const checked = !!plEmailVisible.checked;
                         const uEmail = currentUserDetails?.publicEmail || currentUserDetails?.email || '';
@@ -1073,7 +1009,6 @@ users.filter(u=>
             });
         })();
 
-        // Forcer le reset du mot de passe
         const umForcePwd = document.getElementById('umForcePwd');
         const umForcePwdSpin = document.getElementById('umForcePwdSpin');
         umForcePwd?.addEventListener('change', async ()=>{
@@ -1094,7 +1029,6 @@ users.filter(u=>
             } finally { umForcePwd.disabled = false; umForcePwdSpin?.classList.add('hidden'); }
         });
 
-        // Ban email (modération)
         (function(){
             const banState = document.getElementById('umBanState');
             const banForm = document.getElementById('umBanForm');
@@ -1127,7 +1061,6 @@ users.filter(u=>
                 }
             }
 
-            // Charger état ban à chaque ouverture de modale
             const observer = new MutationObserver(()=>{
                 if (!currentLI) return;
                 const id = currentLI.dataset.id; loadBanState(id);

@@ -1,17 +1,12 @@
 <%- include('../../partials/head.ejs', { title: 'Tableau de bord - Cosmétiques', description: 'Choisis ton flair, cadre, thème et bannière avec aperçu en direct.', robots: 'noindex,nofollow' }) %>
 <%- include('../../partials/header-dash.ejs', { user: user }) %>
-
 <main class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
-
   <%- include('../../partials/asside_dash.ejs', { active: 'cosmetics' }) %>
-
   <section class="col-span-12 lg:col-span-9 space-y-4 relative">
-    <!-- Improved overlay: centered card with actions -->
     <div id="comingSoonOverlay" class="absolute -inset-3 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm rounded-xl" aria-hidden="false">
       <div role="dialog" aria-modal="true" aria-labelledby="comingSoonTitle" aria-describedby="comingSoonDesc" class="mx-4 w-full max-w-lg rounded-xl bg-gradient-to-b from-slate-900/95 to-slate-900/90 border border-slate-700 p-6 text-center text-white shadow-2xl transform transition-all duration-200">
         <div class="flex items-center justify-center mb-4">
           <div class="h-12 w-12 rounded-full bg-indigo-600/90 flex items-center justify-center shadow-lg mr-3">
-            <!-- improved wrench icon -->
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" role="img">
               <rect x="3" y="5" width="18" height="12" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
               <path stroke-linecap="round" stroke-linejoin="round" d="M2 19h20" />
@@ -28,7 +23,6 @@
         <div class="mt-4 text-xs text-slate-400">Ce message restera visible tant que la fonctionnalité est en développement.</div>
       </div>
     </div>
-    <!-- Header (style Mon compte) -->
     <div class="mb-4">
       <div class="flex items-center justify-between gap-4">
         <h1 class="text-2xl font-semibold">Cosmétiques</h1>
@@ -38,7 +32,6 @@
       </div>
     </div>
 
-    <!-- Preview -->
     <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
       <h2 class="font-medium mb-3">Aperçu</h2>
       <div id="preview" class="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
@@ -64,13 +57,10 @@
            data-theme="<%= (cosmetics && cosmetics.selected && cosmetics.selected.theme) ? String(cosmetics.selected.theme) : 'system' %>"
            data-banner="<%= (cosmetics && cosmetics.selected && cosmetics.selected.banner) ? String(cosmetics.selected.banner) : 'none' %>"
            data-banner-url="<%= (cosmetics && cosmetics.selected && cosmetics.selected.bannerUrl) ? String(cosmetics.selected.bannerUrl) : '' %>"></div>
-  <!-- Catalog JSON for client-side -->
   <script id="catalogData" type="application/json"><%- JSON.stringify(catalog) %></script>
     </div>
 
-    <!-- Selectors -->
     <form id="formCosmetics" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <!-- Flair (affichage uniquement si défini) -->
       <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
         <div class="flex items-center justify-between mb-2">
           <h2 class="font-medium">Flair</h2>
@@ -78,7 +68,6 @@
         <p class="text-sm text-slate-400">Ce tag est attribué par l’équipe/automatisation. Il peut être ajouté via code. Si vous en avez un, il s’affichera dans l’aperçu.</p>
       </div>
 
-      <!-- Frame -->
       <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
         <h2 class="font-medium mb-2">Cadre</h2>
         <div class="flex flex-wrap gap-2" role="listbox" aria-label="Cadre">
@@ -91,7 +80,6 @@
         </div>
       </div>
 
-      <!-- Theme -->
       <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
         <h2 class="font-medium mb-2">Thème</h2>
         <div class="flex flex-wrap gap-2" role="listbox" aria-label="Thème">
@@ -104,7 +92,6 @@
         </div>
       </div>
 
-      <!-- Banner -->
       <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
         <h2 class="font-medium mb-2">Bannière</h2>
         <div class="flex flex-wrap gap-2" role="listbox" aria-label="Bannière prédéfinie">
@@ -117,7 +104,6 @@
         </div>
       </div>
 
-      <!-- Actions -->
       <div class="sm:col-span-2 flex justify-end gap-2">
         <button type="button" id="saveBtn" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white">Enregistrer</button>
       </div>
@@ -126,7 +112,6 @@
 </main>
 
 <script>
-  // Expose catalog for label lookups in preview (parsed from embedded JSON)
   const CATALOG = JSON.parse(document.getElementById('catalogData')?.textContent || '{}');
 
   const initEl = document.getElementById('initialCosmetics');
@@ -145,13 +130,11 @@
   }
 
   function applyPreview(){
-    // Flair
     const flairBadge = document.getElementById('flairBadge');
     const showFlair = state.flair && String(state.flair).trim() !== '';
     if (showFlair) { flairBadge.textContent = flairLabel(state.flair); flairBadge.classList.remove('hidden'); }
     else { flairBadge.classList.add('hidden'); flairBadge.textContent=''; }
 
-    // Frame
     const frame = document.getElementById('frame');
     frame.className = 'pointer-events-none absolute inset-0 rounded-full';
     frame.style.boxShadow = 'none';
@@ -161,7 +144,6 @@
       case 'gold': frame.style.boxShadow = '0 0 0 2px rgba(234,179,8,.7), 0 0 20px rgba(234,179,8,.5)'; break;
     }
 
-    // Theme (simple aperçu sur la carte preview)
     const preview = document.getElementById('preview');
     preview.style.outline = 'none';
     preview.style.boxShadow = 'none';
@@ -172,7 +154,6 @@
       default: preview.style.outline = '1px solid rgba(30,41,59,.6)';
     }
 
-    // Banner
     const banner = document.getElementById('banner');
     banner.style.background = 'transparent';
     banner.style.color = 'rgb(100 116 139)';
@@ -180,8 +161,6 @@
     else if (state.banner === 'gradient-fuchsia') { banner.style.background = 'linear-gradient(135deg,#d946ef33,#111827)'; }
     else if (state.bannerUrl) { banner.style.background = `center/cover no-repeat url(${state.bannerUrl})`; banner.style.color = 'transparent'; }
 
-    // Activer visuellement les boutons sélectionnés
-  // plus de sélection d'utilisateur pour le flair
     updateActiveButtons('frame', state.frame);
     updateActiveButtons('theme', state.theme);
     updateActiveButtons('banner', state.banner);
@@ -199,19 +178,17 @@
     });
   }
 
-  // Interactions
   document.querySelectorAll('[data-type]')?.forEach(b => b.addEventListener('click', () => {
     const t = b.getAttribute('data-type');
     const v = b.getAttribute('data-value');
     if (t==='frame') state.frame = v;
     if (t==='theme') state.theme = v;
-    if (t==='banner') { state.banner = v; if (v !== 'none') { /* bannière préréglée => on ignore l'URL */ } }
+    if (t==='banner') { state.banner = v; if (v !== 'none') {} }
     applyPreview();
   }));
 
   document.getElementById('bannerUrl')?.addEventListener('input', (e)=>{
     state.bannerUrl = e.currentTarget.value;
-    // Quand une URL est saisie, on annule le choix de bannière préréglée
     if (state.bannerUrl && state.banner !== 'none') {
       state.banner = 'none';
     }
@@ -224,14 +201,12 @@
     applyPreview();
   });
 
-  // Actions principales
   let saving = false;
   document.getElementById('saveBtn')?.addEventListener('click', async ()=>{
     if (saving) return; saving = true;
     const btn = document.getElementById('saveBtn');
     if (btn) { btn.textContent = 'Enregistrement...'; btn.disabled = true; btn.classList.add('opacity-70'); }
     try {
-  // Ne pas envoyer le flair: non modifiable par l'utilisateur
   const payload = { frame: state.frame, theme: state.theme, banner: state.banner, bannerUrl: state.bannerUrl };
       const res = await fetch('/api/me/cosmetics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (!res.ok) {
@@ -239,7 +214,6 @@
         alert(j.error || 'Erreur lors de la sauvegarde');
       } else {
         const j = await res.json();
-        // snapshot sauvegardé
         saved.flair = j.cosmetics?.selected?.flair ?? state.flair;
         saved.frame = j.cosmetics?.selected?.frame ?? state.frame;
         saved.theme = j.cosmetics?.selected?.theme ?? state.theme;
@@ -257,7 +231,6 @@
 
   document.getElementById('resetBtn')?.addEventListener('click', ()=>{
     Object.assign(state, saved);
-    // mettre à jour le champ URL
     const inp = document.getElementById('bannerUrl');
     if (inp) inp.value = saved.bannerUrl || '';
     applyPreview();
@@ -272,7 +245,6 @@
       state.theme = j.cosmetics?.selected?.theme || 'system';
       state.banner = j.cosmetics?.selected?.banner || 'none';
       state.bannerUrl = j.cosmetics?.selected?.bannerUrl || '';
-      // mettre à jour inputs
       const inp = document.getElementById('bannerUrl');
       if (inp) inp.value = state.bannerUrl || '';
       applyPreview();
@@ -285,7 +257,6 @@
   applyPreview();
 </script>
 <script>
-  // Overlay behavior: dismiss or 'notify me' action
   (function(){
     const overlay = document.getElementById('comingSoonOverlay');
   const btnNotify = document.getElementById('notifyMeBtn');
@@ -295,20 +266,15 @@
       overlay.style.display = 'none';
     }
 
-    // Always show the overlay by default; do not persist dismissal across sessions
     if (overlay) overlay.style.display = '';
 
-  // No dismiss handlers: overlay intentionally non-closable via UI
-
     btnNotify?.addEventListener('click', async () => {
-      // Keep the overlay visible. Mark the user as interested: disable the button and show a small confirmation.
       try {
         if (btnNotify.disabled) return;
         btnNotify.disabled = true;
         btnNotify.textContent = 'Noté — merci';
         btnNotify.classList.remove('bg-emerald-600');
         btnNotify.classList.add('bg-emerald-700', 'opacity-80');
-        // show an inline confirmation message inside the dialog
         try {
           const dialog = overlay.querySelector('[role="dialog"]');
           if (dialog && !dialog.querySelector('.notify-confirm')) {
@@ -318,7 +284,6 @@
             dialog.appendChild(note);
           }
         } catch (e) {}
-        // Optionally, you could call an API to register interest here.
       } catch (e) {
         alert('Erreur lors de la demande');
       }

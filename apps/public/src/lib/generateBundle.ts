@@ -15,7 +15,7 @@ export async function generateBundle() {
           minify: true,
           platform: "browser",
           format: "esm",
-          write: false, // on garde le résultat en mémoire
+          write: false,
           banner: {
             js: "// JavaScript made by PlinkkCorp Dev",
             css: "/* CSS made by PlinkkCorp Dev */",

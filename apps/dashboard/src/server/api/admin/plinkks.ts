@@ -6,7 +6,6 @@ import { isReservedSlug, slugify, reindexNonDefault } from "../../../lib/plinkkU
 const prisma = new PrismaClient();
 
 export function apiAdminPlinkksRoutes(fastify: FastifyInstance) {
-  // Update plinkk fields: slug, isPublic, isDefault
   fastify.patch("/:id", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "unauthorized" });
@@ -18,7 +17,6 @@ export function apiAdminPlinkksRoutes(fastify: FastifyInstance) {
     const page = await prisma.plinkk.findUnique({ where: { id }, include: { user: true } });
     if (!page) return reply.code(404).send({ error: "not_found" });
 
-    // Accumulate updates
     const set: any = {};
     if (typeof body.isPublic === "boolean") {
       set.isPublic = Boolean(body.isPublic);
@@ -27,35 +25,29 @@ export function apiAdminPlinkksRoutes(fastify: FastifyInstance) {
     if (typeof body.name === "string" && body.name.trim()) {
       set.name = body.name.trim();
     }
-    // Slug change
     if (typeof body.slug === "string") {
       const raw = body.slug.trim();
       const s = slugify(raw);
       if (!s) return reply.code(400).send({ error: "invalid_slug" });
       if (await isReservedSlug(prisma, s)) return reply.code(400).send({ error: "reserved_slug" });
-      // Ensure uniqueness within user
       const conflict = await prisma.plinkk.findFirst({ where: { userId: page.userId, slug: s, NOT: { id } }, select: { id: true } });
       if (conflict) return reply.code(409).send({ error: "slug_conflict" });
       set.slug = s;
     }
 
-    // Set default requires transaction to clear previous default
     if (body.isDefault === true && !page.isDefault) {
       const prev = await prisma.plinkk.findFirst({ where: { userId: page.userId, isDefault: true } });
-      // Trouver un index élevé libre pour éviter tout conflit unique (userId,index)
       const agg = await prisma.plinkk.aggregate({
         where: { userId: page.userId },
         _max: { index: true },
       });
-      const maxIndex = (agg._max.index ?? 0) + 10; // marge de sécurité
+      const maxIndex = (agg._max.index ?? 0) + 10;
 
       await prisma.$transaction([
-        // 1) Déplacer un éventuel index 0 existant (hors page courante) vers un index temporaire élevé
         prisma.plinkk.updateMany({
           where: { userId: page.userId, index: 0, NOT: { id } },
           data: { index: maxIndex + 1 },
         }),
-        // 2) Si une ancienne par défaut existe, la passer non défaut et la mettre très loin pour éviter collisions
         ...(prev
           ? [
               prisma.plinkk.update({
@@ -64,13 +56,11 @@ export function apiAdminPlinkksRoutes(fastify: FastifyInstance) {
               }),
             ]
           : []),
-        // 3) Passer la page courante en défaut avec index 0 et appliquer les autres modifications éventuelles
         prisma.plinkk.update({
           where: { id },
           data: { isDefault: true, index: 0, ...(Object.keys(set).length ? set : {}) },
         }),
       ]);
-      // 4) Repacker les index des non défaut proprement
       await reindexNonDefault(prisma, page.userId);
       return reply.send({ ok: true, id, isDefault: true });
     }
@@ -81,7 +71,6 @@ export function apiAdminPlinkksRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true, id });
   });
 
-  // Toggle active (freeze/unfreeze)
   fastify.patch("/:id/active", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "unauthorized" });
@@ -96,7 +85,6 @@ export function apiAdminPlinkksRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true, id, isActive: Boolean(isActive) });
   });
 
-  // Delete plinkk (prevent deleting default if others exist)
   fastify.delete("/:id", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "unauthorized" });
@@ -114,7 +102,6 @@ export function apiAdminPlinkksRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true, id });
   });
 
-  // Minimal settings update for affichageEmail (per-Plinkk public email)
   fastify.put("/:id/config", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "unauthorized" });

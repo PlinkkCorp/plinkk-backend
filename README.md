@@ -31,7 +31,7 @@ Backend Node.js/TypeScript pour le projet [Plinkk](https://github.com/PlinkkCorp
    ```
 ## Plinkk — Backend
 
-Bienvenue dans le backend de Plinkk (Node.js + TypeScript). Ce dépôt sert l'API, le rendu côté serveur (EJS) et les endpoints pour les pages « Plinkk » (équivalent à Linktree).
+Bienvenue dans le backend de Plinkk (Node.js + TypeScript). Ce dépôt sert l'API, le rendu côté serveur (EJS) et les endpoints pour les pages « Plinkk ».
 
 Badges: [build] [prisma] [node]
 
@@ -67,7 +67,7 @@ pnpm install
 
 # Plinkk — Backend
 
-Backend Node.js + TypeScript pour le projet Plinkk (service de pages de liens, style Linktree).
+Backend Node.js + TypeScript pour le projet Plinkk (service de pages de liens).
 
 ![build](https://img.shields.io/badge/build-passing-brightgreen) ![prisma](https://img.shields.io/badge/prisma-ready-blue) ![node](https://img.shields.io/badge/node-18%2B-green)
 

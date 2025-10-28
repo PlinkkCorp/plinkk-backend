@@ -1,11 +1,10 @@
 import { FastifyInstance } from "fastify";
 import { PrismaClient, Theme } from "@plinkk/prisma/generated/prisma/client";
-import { coerceThemeData, readBuiltInThemes } from "../../../lib/theme";
+import { coerceThemeData, readBuiltInThemes } from "../../../lib/theme copy";
 
 const prisma = new PrismaClient();
 
 export function apiMeThemesRoutes(fastify: FastifyInstance) {
-    // Archive (owner hides from public list) -> sets status ARCHIVED
   fastify.post("/:id/archive", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -23,7 +22,6 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
-  // Create/update my theme draft
   fastify.post("/", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -57,7 +55,6 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
     return reply.send(created);
   });
 
-  // Update my theme draft (only when status = DRAFT)
   fastify.patch("/:id", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -97,7 +94,6 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
     return reply.send(updated);
   });
 
-  // Delete my theme draft (allow for DRAFT or REJECTED)
   fastify.delete("/:id", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -108,12 +104,10 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
     });
     if (!t || t.authorId !== userId)
       return reply.code(404).send({ error: "Thème introuvable" });
-    // Allow the owner to delete their theme at any status (DRAFT/SUBMITTED/APPROVED/REJECTED)
     await prisma.theme.delete({ where: { id } });
     return reply.send({ ok: true });
   });
 
-  // Submit a draft for approval
   fastify.post("/:id/submit", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -132,7 +126,6 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
     return reply.send(updated);
   });
 
-  // Toggle private flag on my theme (owner only)
   fastify.post("/:id/privacy", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -152,21 +145,18 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
     return reply.send(updated);
   });
 
-  // Select a private theme to use on my profile (doesn't publish it)
   fastify.post("/select", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
     const body = request.body as { themeId: string, builtInIndex: number };
     const { themeId, builtInIndex } = body;
     if (typeof builtInIndex === "number") {
-      // Use built-in theme: read built-ins and pick index
       const built = readBuiltInThemes();
       if (!Array.isArray(built) || built.length === 0)
         return reply.code(400).send({ error: "No built-in themes available" });
       if (builtInIndex < 0 || builtInIndex >= built.length)
         return reply.code(400).send({ error: "builtInIndex out of range" });
       const themeData = built[builtInIndex];
-      // create a private theme in DB for this user and select it
       const created = await prisma.theme.create({
         data: {
           name: `builtin-${builtInIndex}`,
@@ -191,7 +181,6 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
     });
     if (!t || t.authorId !== userId)
       return reply.code(404).send({ error: "Thème introuvable" });
-    // Autoriser l’utilisation de n’importe quel thème qui t’appartient (privé, brouillon, soumis ou approuvé)
     await prisma.user.update({
       where: { id: userId as string },
       data: { selectedCustomThemeId: t.id },
@@ -199,7 +188,6 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
-  // Submit an update for an approved theme (store as pendingUpdate)
   fastify.post("/:id/update", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });

@@ -40,7 +40,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         }),
       ]);
 
-    // compute publicPath for user views (prefer default plinkk slug if present)
     let publicPath;
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
@@ -58,7 +57,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // Dashboard: Cosmétiques (aperçu et sélection)
   fastify.get("/cosmetics", async function (request, reply) {
     request.log?.info(
       {
@@ -83,7 +81,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       );
     }
     const cosmetics = userInfo.cosmetics;
-    // Petit catalogue par défaut (certaines entrées "verrouillées" selon le rôle)
     const catalog = {
       flairs: [
         { key: "OG", label: "OG", locked: false },
@@ -153,7 +150,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // Page d'édition (classique) avec sélection de Plinkk (par défaut si non fourni)
   fastify.get("/edit", async function (request, reply) {
     request.log?.info(
       {
@@ -173,7 +169,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (!userInfo) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent("/edit")}`);
     }
-    // Sélection de la page Plinkk à éditer
     const q = request.query as { plinkkId: string };
     const pages = await prisma.plinkk.findMany({
       where: { userId: String(userId) },
@@ -204,7 +199,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
-    // Ajout d'un champ top-level `affichageEmail` par page pour simplifier l'usage côté client
     const pagesForView = pages.map((p) => ({
       ...p,
       affichageEmail: p.settings?.affichageEmail ?? null,
@@ -217,7 +211,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // Dashboard: Statistiques (classique) avec sélection de Plinkk (par défaut si non fourni)
   fastify.get("/stats", async function (request, reply) {
     request.log?.info(
       {
@@ -240,7 +233,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     if (!userInfo) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent("/stats")}`);
     }
-    // Pages de l'utilisateur et sélection
     const q = request.query as { plinkkId: string };
     const pages = await prisma.plinkk.findMany({
       where: { userId: String(userId) },
@@ -264,7 +256,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       : null;
     const autoOpenPlinkkModal = !q?.plinkkId && pages.length > 1;
 
-    // Précharger la série par jour (plinkk)
     const now = new Date();
     const end = now;
     const start = new Date(end.getTime() - 29 * 86400000);
@@ -276,27 +267,32 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     };
     const s = fmt(start);
     const e = fmt(end);
-    let preSeries: { date: string; count: number }[] = [];
+    let preSeries: { date: Date; count: number }[] = [];
     let totalViews = 0;
     let totalClicks = 0;
     try {
       if (selected) {
-        await prisma.$executeRawUnsafe(
-          'CREATE TABLE IF NOT EXISTS "PlinkkViewDaily" ("plinkkId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("plinkkId","date"))'
-        );
-        const rows = (await prisma.$queryRawUnsafe(
-          `SELECT "date", "count" FROM "PlinkkViewDaily" WHERE "plinkkId" = ? AND "date" BETWEEN ? AND ? ORDER BY "date" ASC`,
-          selected.id,
-          s,
-          e
-        )) as Array<{ date: string; count: number }>;
+        const rows = await prisma.plinkkViewDaily.findMany({
+          where: {
+            plinkkId: selected.id,
+            date: {
+              gte: start,
+              lte: end,
+            },
+          },
+          select: {
+            date: true,
+            count: true,
+          },
+          orderBy: { date: "asc" },
+        });
         const byDate = new Map(rows.map((r) => [r.date, Number(r.count)]));
         for (
           let t = new Date(start.getTime());
           t <= end;
           t = new Date(t.getTime() + 86400000)
         ) {
-          const key = fmt(t);
+          const key = t;
           preSeries.push({ date: key, count: byDate.get(key) || 0 });
         }
         totalViews = await prisma.pageStat.count({
@@ -338,12 +334,10 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // API: Vues journalières (pour graphiques)
   fastify.get("/stats/views", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     const { from, to } = request.query as { from?: string; to?: string };
-    // bornes par défaut: 30 derniers jours (UTC)
     const now = new Date();
     const end = to ? new Date(to) : now;
     const start = from
@@ -358,7 +352,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const s = fmt(start);
     const e = fmt(end);
     try {
-      // Assurer l'existence de la table
       await prisma.$executeRawUnsafe(
         'CREATE TABLE IF NOT EXISTS "UserViewDaily" ("userId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("userId","date"))'
       );
@@ -371,7 +364,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         ORDER BY "date" ASC
       `;
 
-      // Remplir les jours manquants à 0
       const byDate = new Map(rows.map((r) => [r.date, r.count]));
       const series: { date: string; count: number }[] = [];
       for (
@@ -389,7 +381,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // API: Clics journaliers (somme de tous les liens de l'utilisateur)
   fastify.get("/stats/clicks", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
@@ -408,10 +399,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const s = fmt(start);
     const e = fmt(end);
     try {
-      await prisma.$executeRawUnsafe(
-        'CREATE TABLE IF NOT EXISTS "LinkClickDaily" ("linkId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("linkId","date"))'
-      );
-      // agréger par jour pour tous les liens de l'utilisateur (via sous-sélection des linkId)
       const linkIds = (
         await prisma.link.findMany({
           where: { userId: String(userId) },
@@ -420,23 +407,34 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       ).map((x) => x.id);
       if (linkIds.length === 0)
         return reply.send({ from: s, to: e, series: [] });
-      // Construire la liste pour clause IN
       const placeholders = linkIds.map(() => "?").join(",");
-      const rows = (await prisma.$queryRawUnsafe(
-        `SELECT "date", SUM("count") as count FROM "LinkClickDaily" WHERE "linkId" IN (${placeholders}) AND "date" BETWEEN ? AND ? GROUP BY "date" ORDER BY "date" ASC`,
-        ...linkIds,
-        s,
-        e
-      )) as Array<{ date: string; count: number }>;
+      const rows = (
+        await prisma.linkClickDaily.groupBy({
+          by: ["date"],
+          where: {
+            linkId: {
+              in: linkIds,
+            },
+            date: { gte: start, lte: end },
+          },
+          _sum: {
+            count: true,
+          },
+          orderBy: { date: "asc" },
+        })
+      ).map((r) => ({
+        date: r.date,
+        count: r._sum.count ?? 0,
+      }));
+
       const byDate = new Map(rows.map((r) => [r.date, Number(r.count)]));
-      const series: { date: string; count: number }[] = [];
+      const series: { date: Date; count: number }[] = [];
       for (
         let t = new Date(start.getTime());
         t <= end;
         t = new Date(t.getTime() + 86400000)
       ) {
-        const key = fmt(t);
-        series.push({ date: key, count: byDate.get(key) || 0 });
+        series.push({ date: t, count: byDate.get(t) || 0 });
       }
       return reply.send({ from: s, to: e, series });
     } catch (e) {
@@ -445,7 +443,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Dashboard: Versions (vue dédiée)
   fastify.get("/versions", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) {
@@ -481,7 +478,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // Dashboard: Compte (gestion infos, confidentialité, cosmétiques)
   fastify.get("/account", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) {
@@ -491,13 +487,11 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     }
     let userInfo: User = null;
     try {
-      // Try to include `host` if the table exists in the DB/schema
       userInfo = await prisma.user.findFirst({
         where: { id: userId },
         include: { cosmetics: true, role: true },
       });
     } catch (e) {
-      // If the Host table is missing (e.g. migrations not applied), fallback to query without it
       request.log?.warn(
         { err: e },
         "Failed to include host when fetching userInfo; retrying without host (fallback)"
@@ -512,8 +506,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
         `/login?returnTo=${encodeURIComponent("/account")}`
       );
     }
-    // Dérive la visibilité d'email depuis le champ `publicEmail` (présent
-    // dans le schéma Prisma). Si publicEmail est défini -> l'email est public.
     const isEmailPublic = Boolean(userInfo.publicEmail);
     const pages = await prisma.plinkk.findMany({
       where: { userId: userInfo.id },
@@ -539,11 +531,10 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       isEmailPublic,
       publicPath,
       pages,
-      plinkks: pages
+      plinkks: pages,
     });
   });
 
-  // Dashboard: Mes thèmes (création / soumission)
   fastify.get("/themes", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) {

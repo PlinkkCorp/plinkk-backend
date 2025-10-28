@@ -32,7 +32,6 @@
       <% } else if (theme.archived) { %>
         <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-100 border border-slate-700" title="Thème archivé">
           <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <!-- cleaner archive box icon -->
         <path d="M21 8v10a2 2 0 01-2 2H5a2 2 0 01-2-2V8" />
         <path d="M3 8l9-5 9 5" />
         <path d="M9 13h6" />
@@ -99,7 +98,6 @@
   const raw = JSON.parse(String.raw`<%- JSON.stringify(JSON.stringify(theme.data)) %>`);
   const id = '<%= theme.id %>';
 
-  // DOM refs for both previews
   const previewBoxLight = document.getElementById('previewBoxLight');
   const previewBoxDark = document.getElementById('previewBoxDark');
   const btnPrimaryLight = document.getElementById('btnPrimaryLight');
@@ -107,7 +105,6 @@
   const btnPrimaryDark = document.getElementById('btnPrimaryDark');
   const btnHoverDark = document.getElementById('btnHoverDark');
 
-  // Coerce to full theme shape {background, textColor, buttonBackground, buttonHoverBackground, linkHoverColor, articleHoverBoxShadow, darkTheme, opposite}
   function normalizeHex(v){ if(!v) return '#000000'; let s=String(v).trim(); if(!s.startsWith('#')) s='#'+s; if(/^#[0-9a-fA-F]{3}$/.test(s)) s='#'+s.slice(1).split('').map(c=>c+c).join(''); return s; }
   function lum(hex){ const h=normalizeHex(hex).slice(1); const r=parseInt(h.slice(0,2),16)/255,g=parseInt(h.slice(2,4),16)/255,b=parseInt(h.slice(4,6),16)/255; const a=[r,g,b].map(v=>v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)); return 0.2126*a[0]+0.7152*a[1]+0.0722*a[2]; }
   function contrast(bg){ return lum(bg)>0.5 ? '#111827' : '#ffffff'; }
@@ -152,7 +149,6 @@
   const dataObj = (typeof raw === 'string') ? (function(){ try { return JSON.parse(raw); } catch(_) { return {}; } })() : raw;
   const d = coerce(dataObj);
 
-  // Determine explicit light and dark theme objects
   const lightTheme = d.darkTheme ? (d.opposite || d) : d;
   const darkTheme = d.darkTheme ? d : (d.opposite || d);
 
@@ -165,12 +161,10 @@
     if (t.articleHoverBoxShadow) box.style.boxShadow = t.articleHoverBoxShadow;
   }
 
-  // Apply both themes immediately
   applyThemeTo(previewBoxLight, btnPrimaryLight, btnHoverLight, lightTheme);
   applyThemeTo(previewBoxDark, btnPrimaryDark, btnHoverDark, darkTheme);
 
   const goBack = (msg) => { if (msg) console.info(msg); window.location.href = '/admin/themes'; };
-  // Helper to attach safe handlers only if the element exists
   const on = (sel, fn) => { const el = document.getElementById(sel); if (!el) return; fn(el); };
 
   on('approveBtn', (el) => el.addEventListener('click', async ()=>{

@@ -23,7 +23,6 @@ export type builtInThemesTypes = {
   };
 };
 
-// Helper: read built-in themes from server module
 export function readBuiltInThemes(): builtInThemesTypes[] {
   try {
     return Array.isArray(builtInThemes) ? builtInThemes : [];
@@ -32,7 +31,6 @@ export function readBuiltInThemes(): builtInThemesTypes[] {
   }
 }
 
-// Helpers: thème simplifié (3 couleurs) -> format complet avec opposite (light/dark)
 export function normalizeHex(v?: string) {
   if (!v || typeof v !== "string") return "#000000";
   const s = v.trim();
@@ -80,7 +78,6 @@ export function mix(hexA: string, hexB: string, ratio = 0.2) {
 }
 
 export function hoverVariant(color: string) {
-  // Crée une variante hover en mélangeant avec blanc/noir selon la luminance
   return luminance(color) > 0.5
     ? mix(color, "#000000", 0.2)
     : mix(color, "#ffffff", 0.2);
@@ -115,7 +112,6 @@ export function toFullTheme(light: SimplifiedVariant, dark: SimplifiedVariant) {
 }
 
 export function coerceThemeData(data: any) {
-  // Si déjà au format complet (background/hoverColor/etc.), le retourner tel quel
   if (
     data &&
     typeof data === "object" &&
@@ -123,13 +119,11 @@ export function coerceThemeData(data: any) {
     ("opposite" in data || "darkTheme" in data)
   )
     return data;
-  // Sinon si format simplifié { light: {bg,button,hover}, dark: {bg,button,hover} }
   if (data && data.light && data.dark) {
     const l = data.light as SimplifiedVariant;
     const d = data.dark as SimplifiedVariant;
     return toFullTheme(l, d);
   }
-  // Dernier recours: si ne contient que 3 couleurs uniques, dupliquer pour dark en inversant légèrement
   if (data && data.bg && data.button && data.hover) {
     const l = {
       bg: data.bg,

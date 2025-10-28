@@ -19,7 +19,6 @@
         </div>
 
         <div id="tab-slugs" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <!-- Form -->
           <div class="md:col-span-1 bg-slate-900/60 border border-slate-800 rounded-lg p-4 h-fit">
             <form id="add-ban-form" class="space-y-3">
               <div>
@@ -41,8 +40,6 @@
               <div id="formMsg" class="text-sm" aria-live="polite"></div>
             </form>
           </div>
-
-          <!-- Table -->
           <div class="md:col-span-2 bg-slate-900/60 border border-slate-800 rounded-lg p-4">
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-2">
@@ -69,8 +66,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Onglet Emails -->
         <div id="tab-emails" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
           <div class="md:col-span-1 bg-slate-900/60 border border-slate-800 rounded-lg p-4 h-fit">
             <form id="add-emailban-form" class="space-y-3">
@@ -127,8 +122,6 @@
               </table>
             </div>
           </div>
-
-          <!-- Drawer Ban massif -->
           <div id="bulkDrawer" class="fixed inset-0 z-50 hidden" aria-hidden="true">
             <div id="bulkBackdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
             <aside
@@ -210,7 +203,6 @@
       <script src="/public/js/pagination.js"></script>
       <script>
         (function () {
-          // Tabs
           const tabBtns = Array.from(document.querySelectorAll('.tab-btn'));
           const tabSlugs = document.getElementById('tab-slugs');
           const tabEmails = document.getElementById('tab-emails');
@@ -218,7 +210,6 @@
             tabBtns.forEach(b => b.classList.remove('bg-slate-900/70', 'text-white'));
             btn.classList.add('bg-slate-900/70', 'text-white');
             const sel = btn.getAttribute('data-tab');
-            // switch with subtle fade
             const showEl = sel === 'slugs' ? tabSlugs : tabEmails;
             const hideEl = sel === 'slugs' ? tabEmails : tabSlugs;
             hideEl.classList.add('hidden');
@@ -255,7 +246,6 @@
               tbody.appendChild(tr);
             }
 
-            // --- INITIALISATION OU MISE À JOUR DU PAGINATEUR ---
             if (!paginator) {
               paginator = __PlinkkPaginator.createPaginator(tbody, {
                 pageSize: 10,
@@ -267,8 +257,6 @@
             } else {
               paginator.setFiltered(Array.from(tbody.querySelectorAll('tr')));
             }
-
-            // Liaisons des boutons de suppression (uniquement sur la page affichée)
             Array.from(document.getElementsByClassName('del-btn')).forEach(btn =>
               btn.addEventListener('click', onDelete)
             );
@@ -345,7 +333,6 @@
               tbody.appendChild(tr);
             }
 
-            // --- INITIALISATION OU MISE À JOUR DU PAGINATEUR ---
             if (!paginator) {
               paginator = __PlinkkPaginator.createPaginator(tbody, {
                 pageSize: 10,
@@ -358,7 +345,6 @@
               paginator.setFiltered(Array.from(tbody.querySelectorAll('tr')));
             }
 
-            // Liaisons des boutons de suppression (pour la page actuelle)
             Array.from(document.getElementsByClassName('del-btn')).forEach(btn =>
               btn.addEventListener('click', onDelete)
             );
@@ -408,12 +394,10 @@
           refreshBtn.addEventListener('click', () => fetchBans());
           searchInput.addEventListener('input', () => renderTable(bansCache));
 
-          // initial
           fetchBans();
         })();
       </script>
       <script>
-        // Email bans (lecture basique depuis Prisma via endpoint à créer ultérieurement)
         (() => {
           const tbody = document.getElementById('emailbans-tbody');
           const refreshBtn = document.getElementById('refreshEmailBtn');
@@ -502,10 +486,8 @@
           clearBtn.addEventListener('click', () => addForm.reset());
           refreshBtn.addEventListener('click', () => fetchList());
           search.addEventListener('input', () => render());
-          // init lazy: only load when tab clicked to Emails
           document.querySelector('[data-tab="emails"]').addEventListener('click', () => { if (!cache.length) fetchList(); });
 
-          // ==== Recherche type Discord ====
           const userInput = document.getElementById('userSearchInput');
           const userDropdown = document.getElementById('userSearchDropdown');
           const selectedTbody = document.getElementById('bulkSelectedTbody');
@@ -516,7 +498,7 @@
           const bulkPasteArea = document.getElementById('bulkPasteArea');
           const bulkFileInput = document.getElementById('bulkFileInput');
           const bulkParseBtn = document.getElementById('bulkParseBtn');
-          const selected = new Set(); // emails sélectionnés
+          const selected = new Set();
 
           function openDrawer() {
             bulkDrawer.classList.remove('hidden');
@@ -648,7 +630,6 @@
               const forbidden = out?.skippedForbidden?.length || 0;
               const extra = forbidden > 0 ? " (interdits = auto‑ban, admin ou rôle ≥ au vôtre)" : "";
               showMsg(bulkMsg, `Créés: ${created} | Existants: ${skipped} | Invalides: ${invalid} | Interdits: ${forbidden}${extra}`, true);
-              // retirer de la sélection ceux qui sont créés ou déjà bannis
               [...(out?.created || []), ...(out?.alreadyBanned || [])].forEach((em) => selected.delete(String(em).toLowerCase()));
               renderSelected();
               await fetchList();

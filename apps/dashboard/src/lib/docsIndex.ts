@@ -1,10 +1,10 @@
 import path from "path";
 
 export type DocNode = {
-  slug: string; // url segment (e.g. "premiers-pas")
+  slug: string;
   title: string;
   excerpt?: string;
-  file: string; // relative to views root, e.g. "docs/pages/getting-started.ejs"
+  file: string;
   children?: DocNode[];
 };
 

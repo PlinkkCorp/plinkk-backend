@@ -33,7 +33,6 @@
                 <div class="text-xs text-slate-400 mt-1">URL: <a class="text-indigo-300 hover:underline" href="/<%= p.slug %>" target="_blank">/<%= p.slug %></a></div>
               </div>
               <div class="flex items-center gap-2 text-xs">
-                <!-- <button class="btnDefault px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white <%= p.isDefault ? 'opacity-50 cursor-not-allowed' : '' %>" data-id="<%= p.id %>" <%= p.isDefault ? 'disabled' : '' %>>Définir par défaut</button> -->
                 <button type="button" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white btnExport" data-export-url="../api/me/plinkks/<%= p.id %>/export.zip" aria-label="Exporter le plinkk">Exporter le plinkk</button>
                 <button class="btnTogglePub px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white" data-id="<%= p.id %>" data-public="<%= (p.visibility === 'PUBLIC' || p.isPublic) ? '1' : '0' %>"><%= (p.visibility === 'PUBLIC' || p.isPublic) ? 'Rendre privé' : 'Rendre public' %></button>
                 <a class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white" href="/plinkks/<%= p.id %>/stats">Voir stats</a>
@@ -56,7 +55,6 @@
     const btnCreate = $('#btnCreate');
     const msgEl = document.getElementById('plinkkMsg');
 
-    // Inline confirmation modal used across the page (returns a Promise<boolean>)
     function showConfirm(message){
       return new Promise(resolve => {
         const overlay = document.createElement('div');
@@ -93,7 +91,6 @@
       });
     }
 
-    // Simple alert modal (OK only)
     function showAlert(message){
       return new Promise(resolve => {
         const overlay = document.createElement('div');
@@ -114,7 +111,6 @@
       });
     }
 
-    // Modal form to create a plinkk (returns {slug,name} or null)
     function showFormCreatePlinkk(){
       return new Promise(resolve => {
         const overlay = document.createElement('div');
@@ -144,10 +140,9 @@
         btnOk.addEventListener('click', () => {
           const slug = String(inSlug.value||'').trim();
           const name = String(inName.value||'').trim();
-          if (!slug || !name) return; // keep modal open
+          if (!slug || !name) return;
           cleanup({ slug, name });
         });
-        // Entrée: sur le champ slug -> passer au champ nom; sur le champ nom -> valider
         inSlug.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') { e.preventDefault(); inName?.focus(); }
         });
@@ -175,7 +170,6 @@
     });
 
     document.addEventListener('click', async (e) => {
-      // Détermination robuste de l'élément cliqué (bouton ou élément possédant des data-attrs)
       const el = e.target.closest('button, [data-id], [data-export-url]');
       if (!el) return;
       const id = el.dataset?.id;

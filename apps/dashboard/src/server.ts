@@ -20,8 +20,6 @@ import {
   slugify,
   isReservedSlug,
 } from "./lib/plinkkUtils";
-// Example profile data used to pre-fill a new user's main Plinkk
-// Note: this file is shared with client-side config and exports a default object
 import profileConfig from "./public/config/profileConfig";
 import { authenticator } from "otplib";
 import { replyView } from "./lib/replyView";
@@ -38,7 +36,6 @@ const PORT = 3001;
 declare module "@fastify/secure-session" {
   interface SessionData {
     data?: string;
-    // URL to return to after successful authentication
     returnTo?: string;
   }
 }
@@ -57,11 +54,11 @@ fastify.register(fastifyView, {
 
 fastify.register(fastifyStatic, {
   root: path.join(__dirname, "public"),
-  prefix: "/public/", // optional: default '/'
+  prefix: "/public/",
 });
 
 fastify.register(fastifyFormbody);
-// support file uploads via multipart/form-data
+
 fastify.register(fastifyMultipart, {
   limits: {
     fileSize: 2 * 1024 * 1024, // 2 Mo
@@ -125,9 +122,7 @@ fastify.register(dashboardRoutes);
 fastify.register(plinkkPagesRoutes);
 
 fastify.get("/login", async function (request, reply) {
-  const currentUserId = request.session.get("data") as string | undefined;
-  // If a session exists and it's not a temporary TOTP marker, ensure the user still exists.
-  // If user exists, redirect to dashboard; otherwise, clear the stale session to avoid redirect loops.
+  const currentUserId = request.session.get("data");
   if (currentUserId && !String(currentUserId).includes("__totp")) {
     try {
       const exists = await prisma.user.findUnique({
@@ -137,18 +132,15 @@ fastify.get("/login", async function (request, reply) {
       if (exists) {
         return reply.redirect("/");
       }
-      // stale session -> clear and continue to render login page
       try {
         request.session.delete();
       } catch (e) {}
     } catch (e) {
-      // On DB error, do not loop: clear session as a safe fallback
       try {
         request.session.delete();
       } catch (_) {}
     }
   }
-  // Log stored returnTo for debugging
   try {
     request.log?.info(
       { returnTo: request.session.get("returnTo") },
@@ -167,20 +159,16 @@ fastify.get("/login", async function (request, reply) {
   });
 });
 
-// Provide a GET /register route: unauthenticated users are redirected to the login page anchor,
-// authenticated users are forwarded to the dashboard.
 fastify.get("/register", async (request, reply) => {
-  const currentUserId = request.session.get("data") as string | undefined;
+  const currentUserId = request.session.get("data");
   if (currentUserId && !String(currentUserId).includes("__totp")) {
     return reply.redirect("/");
   }
-  // Not logged in: send to the login page signup anchor
   return reply.redirect("/login#signup");
 });
 
 fastify.post("/register", async (req, reply) => {
-  // If already authenticated (not in TOTP flow), redirect to dashboard instead of creating another account
-  const currentUserId = req.session.get("data") as string | undefined;
+  const currentUserId = req.session.get("data");
   if (currentUserId && !String(currentUserId).includes("__totp")) {
     return reply.redirect("/");
   }
@@ -192,13 +180,11 @@ fastify.post("/register", async (req, reply) => {
       passwordVerif: string;
       acceptTerms?: string | boolean;
     };
-  // Nettoyage / validations de base
   const rawUsername = (username || "").trim();
   const rawEmail = (email || "").trim();
   const rawPassword = password || "";
   const rawPasswordVerif = passwordVerif || "";
 
-  // Username length constraints (client and server must agree)
   const USERNAME_MIN = 3;
   const USERNAME_MAX = 30;
   if (rawUsername.length < USERNAME_MIN || rawUsername.length > USERNAME_MAX) {
@@ -212,7 +198,6 @@ fastify.post("/register", async (req, reply) => {
   }
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Vérif mots de passe
   if (password !== passwordVerif) {
     const emailParam = encodeURIComponent(rawEmail);
     const userParam = encodeURIComponent(rawUsername);
@@ -232,7 +217,6 @@ fastify.post("/register", async (req, reply) => {
     );
   }
 
-  // Vérifier que l'utilisateur a accepté les CGU
   if (
     !(acceptTerms === "on" || acceptTerms === "true" || acceptTerms === true)
   ) {
@@ -259,7 +243,6 @@ fastify.post("/register", async (req, reply) => {
     }
   }
   try {
-    // generate slug/id from username
     const generatedId = slugify(username);
 
     if (!generatedId || generatedId.length === 0) {
@@ -272,7 +255,6 @@ fastify.post("/register", async (req, reply) => {
       );
     }
 
-    // Vérifier unicité globale: pas d'utilisateur existant, pas de plinkk avec ce slug, pas de mot réservé
     if (await isReservedSlug(prisma, generatedId)) {
       const emailParam = encodeURIComponent(rawEmail);
       const userParam = encodeURIComponent(rawUsername);
@@ -323,16 +305,12 @@ fastify.post("/register", async (req, reply) => {
         },
       },
     });
-    // Ensure a default Cosmetic row exists to avoid null-access errors in code
     try {
       await prisma.cosmetic.create({ data: { userId: user.id } });
     } catch (e) {
-      // Non bloquant: ignore unique constraint or other create errors
       req.log?.warn({ e }, "create default cosmetic failed");
     }
-    // Auto-crée un Plinkk principal pour ce compte (slug global basé sur username)
     try {
-      // Create the user's main Plinkk and capture it so we can attach example data
       const createdPlinkk = await createPlinkkForUser(prisma, user.id, {
         name: username,
         slugBase: username,
@@ -340,7 +318,6 @@ fastify.post("/register", async (req, reply) => {
         isActive: true,
       });
       try {
-        // Create PlinkkSettings from example profileConfig (non-blocking)
         await prisma.plinkkSettings.create({
           data: {
             plinkkId: createdPlinkk.id,
@@ -380,7 +357,6 @@ fastify.post("/register", async (req, reply) => {
       }
 
       try {
-        // Create a single example Link for the new Plinkk if provided in the example config
         const exampleLinks = profileConfig.links;
         if (Array.isArray(exampleLinks) && exampleLinks.length > 0) {
           const l = exampleLinks[0];
@@ -408,10 +384,8 @@ fastify.post("/register", async (req, reply) => {
         req.log?.warn({ e }, "create example link failed");
       }
     } catch (e) {
-      // non bloquant
       req.log?.warn({ e }, "auto-create default plinkk failed");
     }
-    // Auto-login: set session and redirect to original destination if present
     const returnTo =
       (req.body as { returnTo: string })?.returnTo ||
       (req.query as { returnTo: string })?.returnTo;
@@ -428,12 +402,10 @@ fastify.post("/register", async (req, reply) => {
       "/login?error=" + encodeURIComponent("Utilisateur deja existant")
     );
   }
-  // note: on error above we redirected; otherwise we've already redirected to /
 });
 
 fastify.post("/login", async (request, reply) => {
-  // If already authenticated and not in TOTP flow, redirect to dashboard
-  const currentUserId = request.session.get("data") as string | undefined;
+  const currentUserId = request.session.get("data");
   if (currentUserId && !String(currentUserId).includes("__totp")) {
     return reply.redirect("/");
   }
@@ -465,7 +437,6 @@ fastify.post("/login", async (request, reply) => {
       include: { role: true },
     });
   } else {
-    // Supporter '@pseudo' et variantes: on slugify pour matcher l'id (généré à l'inscription)
     const withoutAt = identifier.startsWith("@")
       ? identifier.slice(1)
       : identifier;
@@ -473,8 +444,8 @@ fastify.post("/login", async (request, reply) => {
     user = await prisma.user.findFirst({
       where: {
         OR: [
-          { id: candidateId }, // id est basé sur slugify(username)
-          { userName: identifier }, // affichage (peut différer en casse)
+          { id: candidateId },
+          { userName: identifier },
         ],
       },
       include: { role: true },
@@ -495,7 +466,6 @@ fastify.post("/login", async (request, reply) => {
       )}&email=${encodeURIComponent(identifier)}`
     );
 
-  // Vérifier si l'email est banni
   try {
     const ban = await prisma.bannedEmail.findFirst({ where: { email: user.email, revoquedAt: null } });
     if (ban) {
@@ -509,7 +479,6 @@ fastify.post("/login", async (request, reply) => {
   } catch (e) {}
 
   if (user.twoFactorEnabled) {
-    // Pass returnTo via query to TOTP step so it's preserved through the flow
     const returnToQuery =
       (request.body as { returnTo: string })?.returnTo ||
       (request.query as { returnTo: string })?.returnTo;
@@ -521,7 +490,6 @@ fastify.post("/login", async (request, reply) => {
     );
   }
 
-  // Mise à jour lastLogin par id (compatible login par username ou email)
   await prisma.user.update({
     where: { id: user.id },
     data: {
@@ -596,7 +564,6 @@ fastify.post("/totp", async (request, reply) => {
     );
     return reply.redirect(returnToTotp || "/");
   }
-  // Unexpected state: clear and go to login to avoid loops
   try {
     request.session.delete();
   } catch (e) {}
@@ -620,8 +587,6 @@ fastify.get("/logout", (req, reply) => {
   reply.redirect("/login");
 });
 
-// SPA fallback: serve the main index for non-API, non-static HTML navigations
-// This enables client-side routing across the site without breaking existing server routes.
 fastify.get("/*", async (request, reply) => {
   const url = request.raw.url || "";
   // Exclusions: API endpoints, known static prefixes, dashboard server routes keep server-side handling
@@ -657,7 +622,6 @@ fastify.get("/*", async (request, reply) => {
   return await replyView(reply, "index.ejs", currentUser, {});
 });
 
-// 404 handler (après routes spécifiques)
 fastify.setNotFoundHandler((request, reply) => {
   if (request.raw.url?.startsWith("/api")) {
     return reply.code(404).send({ error: "Not Found" });
@@ -668,7 +632,6 @@ fastify.setNotFoundHandler((request, reply) => {
     .view("erreurs/404.ejs", { currentUser: userId ? { id: userId } : null });
 });
 
-// Error handler
 fastify.setErrorHandler((error, request, reply) => {
   fastify.log.error(error);
   if (request.raw.url?.startsWith("/api")) {

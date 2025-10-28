@@ -36,17 +36,13 @@ export async function replyView(
     });
   }
 
-  // Build a safe user object for templates and normalize role identifiers so older templates
-  // that compare `user.role.id === 'ADMIN'` keep working even if role.id is a nanoid.
   const safe = toSafeUser(user);
   let isAdmin = false
   let isStaff = false
   if (safe && safe.role) {
     try {
-      // Align role.id with role.name for template compatibility
       safe.role.id = safe.role.name;
     } catch (e) {}
-    // Convenience flags for templates
     isAdmin = safe.role && safe.role.name === 'ADMIN';
     isStaff = safe.role && ['ADMIN', 'DEVELOPER', 'MODERATOR'].includes(safe.role.name);
   }

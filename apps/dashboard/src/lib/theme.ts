@@ -23,7 +23,6 @@ export type builtInThemesTypes = {
   };
 };
 
-// Helper: read built-in themes from server module
 export function readBuiltInThemes(): builtInThemesTypes[] {
   try {
     return Array.isArray(builtInThemes) ? builtInThemes : [];
@@ -32,7 +31,6 @@ export function readBuiltInThemes(): builtInThemesTypes[] {
   }
 }
 
-// Helpers: thème simplifié (3 couleurs) -> format complet avec opposite (light/dark)
 export function normalizeHex(v?: string) {
   if (!v || typeof v !== "string") return "#000000";
   const s = v.trim();

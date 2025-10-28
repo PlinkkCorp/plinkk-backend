@@ -9,7 +9,6 @@
           <p class="text-xs text-slate-400">Filtre par dates, rôle et visibilité. Graphique des inscriptions/jour.</p>
         </div>
 
-        <!-- Onglets -->
         <nav class="flex items-center gap-2 text-sm mb-2" role="tablist" aria-label="Statistiques">
           <button id="tabSignups" class="px-3 py-1.5 rounded bg-indigo-600 text-white" role="tab"
             aria-selected="true">Inscriptions</button>
@@ -19,7 +18,6 @@
             role="tab" aria-selected="false">Bans</button>
         </nav>
 
-        <!-- Filtres -->
         <section class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3">
             <label class="text-sm">Du
@@ -49,8 +47,6 @@
           </div>
         </section>
 
-
-        <!-- PANNEAU INSCRIPTIONS -->
         <section id="panelSignups" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
           <nav class="flex flex-wrap items-center gap-2 text-xs mb-3" role="tablist"
             aria-label="Sous-stats Inscriptions">
@@ -108,7 +104,6 @@
           </section>
         </section>
 
-        <!-- Graphique: Public vs Privé par jour -->
         <section id="su2" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4 hidden">
           <div class="flex items-center justify-between mb-3">
             <h2 class="font-medium">Visibilité des nouvelles inscriptions</h2>
@@ -132,7 +127,6 @@
           </div>
         </section>
 
-        <!-- Graphique: Inscriptions par rôle -->
         <section id="su3" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4 hidden">
           <div class="flex items-center justify-between mb-3">
             <h2 class="font-medium">Inscriptions par rôle</h2>
@@ -160,7 +154,6 @@
           </div>
         </section>
 
-        <!-- Graphique: Cumul des inscriptions -->
         <section id="su4" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4 hidden">
           <div class="flex items-center justify-between mb-3">
             <h2 class="font-medium">Cumul des inscriptions</h2>
@@ -178,7 +171,6 @@
           </div>
         </section>
 
-        <!-- PANNEAU CONNEXIONS -->
         <section id="panelLogins" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4 hidden">
           <div class="flex items-center justify-between mb-2">
             <h2 class="font-medium">Connexions par jour</h2>
@@ -200,7 +192,6 @@
           </div>
         </section>
 
-        <!-- PANNEAU BANS -->
         <section id="panelBans" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4 hidden">
           <div class="flex items-center justify-between mb-2">
             <h2 class="font-medium">Bans par jour</h2>
@@ -222,10 +213,8 @@
 
       <script>
         (function () {
-          // Utilitaires DOM
           const $ = (s, r = document) => r.querySelector(s);
           const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-          // Onglets panneaux
           function activateTab(which) {
             const tabs = { signups: $('#tabSignups'), logins: $('#tabLogins'), bans: $('#tabBans') };
             const panels = { signups: $('#panelSignups'), logins: $('#panelLogins'), bans: $('#panelBans') };
@@ -235,7 +224,6 @@
               btn.classList.toggle('bg-slate-800', !active); btn.classList.toggle('text-slate-200', !active); btn.classList.toggle('border', !active); btn.classList.toggle('border-slate-700', !active);
             });
             Object.entries(panels).forEach(([k, el]) => { el.classList.toggle('hidden', k !== which); });
-            // Après changement de visibilité, forcer un re-render une fois le layout stabilisé
             scheduleRerender();
           }
           $('#tabSignups').addEventListener('click', () => { activateTab('signups'); });
@@ -243,7 +231,6 @@
           $('#tabBans').addEventListener('click', () => { activateTab('bans'); applyBans(); });
           activateTab('signups');
 
-          // Sous-onglets Inscriptions
           let currentSub = 'su1';
           function activateSub(which) {
             const tabs = { su1: $('#tabSU1'), su2: $('#tabSU2'), su3: $('#tabSU3'), su4: $('#tabSU4') };
@@ -255,7 +242,6 @@
             });
             Object.entries(sections).forEach(([k, el]) => { if (el) el.classList.toggle('hidden', k !== which); });
             currentSub = which;
-            // Re-render après affichage du sous-onglet
             scheduleRerender();
           }
           $('#tabSU1')?.addEventListener('click', () => activateSub('su1'));
@@ -264,22 +250,17 @@
           $('#tabSU4')?.addEventListener('click', () => activateSub('su4'));
           activateSub('su1');
 
-          // Re-render différé pour gérer les canvas initialement cachés
           function scheduleRerender() {
-            // Deux RAF pour garantir que le layout est appliqué et les tailles CSS calculées
             requestAnimationFrame(() => {
               requestAnimationFrame(() => {
-                // Si le panneau Inscriptions est visible, re-render du sous-onglet courant
                 const isSignupsVisible = !document.getElementById('panelSignups')?.classList.contains('hidden');
                 if (isSignupsVisible) {
                   rerenderCurrentSub();
                 }
-                // Si Connexions visible, re-render si données déjà chargées
                 const isLoginsVisible = !document.getElementById('panelLogins')?.classList.contains('hidden');
                 if (isLoginsVisible) {
                   if (seriesL && seriesL.length) { renderChartL({ series: seriesL }, hoverIndexL); }
                 }
-                // Si Bans visible
                 const isBansVisible = !document.getElementById('panelBans')?.classList.contains('hidden');
                 if (isBansVisible) {
                   if (seriesB && seriesB.length) { renderChartB({ series: seriesB }, hoverIndexB); }
@@ -307,10 +288,8 @@
 
           function fmtDate(d) { const y = d.getUTCFullYear(); const m = String(d.getUTCMonth() + 1).padStart(2, '0'); const dd = String(d.getUTCDate()).padStart(2, '0'); return `${y}-${m}-${dd}`; }
           function setRange(days) { const to = new Date(); const from = new Date(to.getTime() - (days - 1) * 86400000); $('#from').value = fmtDate(from); $('#to').value = fmtDate(to); }
-          // init défaut: 30 jours
           if (!$('#from').value || !$('#to').value) setRange(30);
 
-          // ---------- Chart 1: Inscriptions par jour (mono-série) ----------
           const ctx = $('#chart').getContext('2d');
           const wrap1 = document.getElementById('chart1Wrap');
           const tt1 = document.getElementById('tt1');
@@ -322,20 +301,18 @@
             const labels = lastSeries.map(p => p.date);
             const data = lastSeries.map(p => p.count);
 
-            // Gestion HiDPI et largeur 100%
             const dpr = window.devicePixelRatio || 1;
             const cssW = ctx.canvas.clientWidth;
-            // IMPORTANT: utiliser la hauteur CSS pour éviter l'agrandissement cumulatif
             const cssH = 260;
             ctx.canvas.width = Math.max(1, Math.floor(cssW * dpr));
             ctx.canvas.height = Math.floor(cssH * dpr);
             const w = ctx.canvas.width;
             const h = ctx.canvas.height;
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // coord en CSS px
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             ctx.clearRect(0, 0, cssW, cssH);
 
-            const padL = 40; // padding gauche pour labels Y
-            const padB = 28; // padding bas pour labels X
+            const padL = 40;
+            const padB = 28;
             const padT = 10; const padR = 10;
             const innerW = cssW - padL - padR;
             const innerH = cssH - padT - padB;
@@ -347,7 +324,6 @@
             const stepX = data.length > 1 ? (innerW / (data.length - 1)) : 0;
             const scaleY = innerH / maxRounded;
 
-            // axes
             ctx.strokeStyle = 'rgba(148,163,184,0.35)';
             ctx.lineWidth = 1;
             ctx.beginPath();
@@ -356,7 +332,6 @@
             ctx.lineTo(padL + innerW, padT + innerH);
             ctx.stroke();
 
-            // grille et ticks Y
             ctx.fillStyle = 'rgba(148,163,184,0.7)';
             ctx.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
             ctx.textAlign = 'right';
@@ -369,7 +344,6 @@
               ctx.fillText(String(y), padL - 6, py);
             }
 
-            // ticks X (dates espacées)
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
             const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
@@ -378,12 +352,11 @@
               const x = padL + i * stepX;
               ctx.strokeStyle = 'rgba(148,163,184,0.15)';
               ctx.beginPath(); ctx.moveTo(x, padT + innerH); ctx.lineTo(x, padT + innerH + 4); ctx.stroke();
-              const shortLab = lab?.slice(5) || '';// MM-DD si YYYY-MM-DD
+              const shortLab = lab?.slice(5) || '';
               ctx.fillStyle = 'rgba(148,163,184,0.7)';
               ctx.fillText(shortLab, x, padT + innerH + 6);
             });
 
-            // polyline
             ctx.strokeStyle = '#6366f1';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -394,7 +367,6 @@
             });
             ctx.stroke();
 
-            // points
             ctx.fillStyle = '#818cf8';
             data.forEach((v, i) => {
               const x = padL + i * stepX;
@@ -402,18 +374,14 @@
               ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill();
             });
 
-            // hover highlight + tooltip
             if (hoverIndex >= 0 && hoverIndex < data.length) {
               const x = padL + hoverIndex * stepX;
               const y = padT + innerH - data[hoverIndex] * scaleY;
-              // crosshair vertical
               ctx.strokeStyle = 'rgba(99,102,241,0.35)';
               ctx.lineWidth = 1;
               ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + innerH); ctx.stroke();
-              // highlight point
               ctx.fillStyle = '#a5b4fc';
               ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
-              // tooltip position/content
               const rect = wrap1.getBoundingClientRect();
               tt1.textContent = `${labels[hoverIndex]} — ${data[hoverIndex]} inscrits`;
               const ttX = Math.min(rect.width - 140, Math.max(8, x + 8));
@@ -425,13 +393,10 @@
               tt1.classList.add('hidden');
             }
 
-            // titres axes
             ctx.fillStyle = 'rgba(148,163,184,0.9)';
             ctx.font = '12px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-            // X
             ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
             ctx.fillText('Date', padL + innerW, padT + innerH + 24);
-            // Y
             ctx.save();
             ctx.translate(12, padT + innerH / 2);
             ctx.rotate(-Math.PI / 2);
@@ -489,7 +454,6 @@
             let run = 0; return (series || []).map(p => { run += (p.count || 0); return { date: p.date, count: run }; });
           }
 
-          // ---------- Chart 2: Public/Privé ----------
           const ctx2 = document.getElementById('chartVisibility').getContext('2d');
           const wrap2 = document.getElementById('chart2Wrap');
           const tt2 = document.getElementById('tt2');
@@ -512,23 +476,19 @@
             const yTicks = 5, stepY = Math.max(1, Math.ceil(maxVal / yTicks)); const maxRounded = Math.max(stepY, stepY * yTicks);
             const stepX = pub.length > 1 ? innerW / (pub.length - 1) : 0; const scaleY = innerH / maxRounded;
 
-            // axes + grille
             ctx2.strokeStyle = 'rgba(148,163,184,0.35)'; ctx2.lineWidth = 1; ctx2.beginPath(); ctx2.moveTo(padL, padT); ctx2.lineTo(padL, padT + innerH); ctx2.lineTo(padL + innerW, padT + innerH); ctx2.stroke();
             ctx2.fillStyle = 'rgba(148,163,184,0.7)'; ctx2.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'; ctx2.textAlign = 'right'; ctx2.textBaseline = 'middle';
             for (let y = 0; y <= maxRounded; y += stepY) { const py = padT + innerH - y * scaleY; ctx2.strokeStyle = 'rgba(148,163,184,0.15)'; ctx2.beginPath(); ctx2.moveTo(padL, py); ctx2.lineTo(padL + innerW, py); ctx2.stroke(); ctx2.fillText(String(y), padL - 6, py); }
             ctx2.textAlign = 'center'; ctx2.textBaseline = 'top'; const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
             labels.forEach((lab, i) => { if (i % xLabelEvery !== 0 && i !== labels.length - 1) return; const x = padL + i * stepX; ctx2.strokeStyle = 'rgba(148,163,184,0.15)'; ctx2.beginPath(); ctx2.moveTo(x, padT + innerH); ctx2.lineTo(x, padT + innerH + 4); ctx2.stroke(); ctx2.fillText(lab?.slice(5) || '', x, padT + innerH + 6); });
 
-            // lines
             function drawLine(data, color) { ctx2.strokeStyle = color; ctx2.lineWidth = 2; ctx2.beginPath(); data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctx2.moveTo(x, y); else ctx2.lineTo(x, y); }); ctx2.stroke(); }
-            drawLine(pub, '#10b981'); // emerald-500
-            drawLine(pri, '#f43f5e'); // rose-500
+            drawLine(pub, '#10b981');
+            drawLine(pri, '#f43f5e');
 
-            // points
             function drawDots(data, color) { ctx2.fillStyle = color; data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctx2.beginPath(); ctx2.arc(x, y, 2.5, 0, Math.PI * 2); ctx2.fill(); }); }
             drawDots(pub, '#34d399'); drawDots(pri, '#fb7185');
 
-            // hover
             if (hoverIndex >= 0 && hoverIndex < labels.length) {
               const x = padL + hoverIndex * stepX; ctx2.strokeStyle = 'rgba(148,163,184,0.35)'; ctx2.beginPath(); ctx2.moveTo(x, padT); ctx2.lineTo(x, padT + innerH); ctx2.stroke();
               const rect = wrap2.getBoundingClientRect();
@@ -538,7 +498,6 @@
             } else { tt2.classList.add('hidden'); }
           }
 
-          // ---------- Chart 3: Par rôle ----------
           const ctx3 = document.getElementById('chartRoles').getContext('2d');
           const wrap3 = document.getElementById('chart3Wrap');
           const tt3 = document.getElementById('tt3');
@@ -547,7 +506,6 @@
             series3 = Array.isArray(payload?.series) ? payload.series : [];
             hoverIndex3 = hoverIndex;
             const labels = series3.map(p => p.date);
-            // Détecter dynamiquement les clés de rôle depuis le premier point
             const roleKeys = (() => {
               const first = series3[0] || {};
               return Object.keys(first).filter(k => k !== 'date');
@@ -563,13 +521,11 @@
             const maxVal = Math.max(1, ...dsets.flat());
             const yTicks = 5, stepY = Math.max(1, Math.ceil(maxVal / yTicks)); const maxRounded = Math.max(stepY, stepY * yTicks);
             const stepX = labels.length > 1 ? innerW / (labels.length - 1) : 0; const scaleY = innerH / maxRounded;
-            // axes + grille
             ctx3.strokeStyle = 'rgba(148,163,184,0.35)'; ctx3.lineWidth = 1; ctx3.beginPath(); ctx3.moveTo(padL, padT); ctx3.lineTo(padL, padT + innerH); ctx3.lineTo(padL + innerW, padT + innerH); ctx3.stroke();
             ctx3.fillStyle = 'rgba(148,163,184,0.7)'; ctx3.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'; ctx3.textAlign = 'right'; ctx3.textBaseline = 'middle';
             for (let y = 0; y <= maxRounded; y += stepY) { const py = padT + innerH - y * scaleY; ctx3.strokeStyle = 'rgba(148,163,184,0.15)'; ctx3.beginPath(); ctx3.moveTo(padL, py); ctx3.lineTo(padL + innerW, py); ctx3.stroke(); ctx3.fillText(String(y), padL - 6, py); }
             ctx3.textAlign = 'center'; ctx3.textBaseline = 'top'; const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
             labels.forEach((lab, i) => { if (i % xLabelEvery !== 0 && i !== labels.length - 1) return; const x = padL + i * stepX; ctx3.strokeStyle = 'rgba(148,163,184,0.15)'; ctx3.beginPath(); ctx3.moveTo(x, padT + innerH); ctx3.lineTo(x, padT + innerH + 4); ctx3.stroke(); ctx3.fillText(lab?.slice(5) || '', x, padT + innerH + 6); });
-            // lines + points
             dsets.forEach((arr, idx) => { const color = colors[idx]; ctx3.strokeStyle = color; ctx3.lineWidth = 2; ctx3.beginPath(); arr.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctx3.moveTo(x, y); else ctx3.lineTo(x, y); }); ctx3.stroke(); ctx3.fillStyle = color; arr.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctx3.beginPath(); ctx3.arc(x, y, 2.3, 0, Math.PI * 2); ctx3.fill(); }); });
             if (hoverIndex >= 0 && hoverIndex < labels.length) {
               const x = padL + hoverIndex * stepX; ctx3.strokeStyle = 'rgba(148,163,184,0.35)'; ctx3.beginPath(); ctx3.moveTo(x, padT); ctx3.lineTo(x, padT + innerH); ctx3.stroke();
@@ -580,8 +536,6 @@
             } else { tt3.classList.add('hidden'); }
           }
 
-          // ---------- Chart 4: Cumul ----------
-          // ---------- Chart L: Connexions ----------
           const ctxL = document.getElementById('chartLogins')?.getContext('2d');
           const wrapL = document.getElementById('chartLWrap');
           const ttL = document.getElementById('ttL');
@@ -594,13 +548,11 @@
             const padL = 40, padB = 28, padT = 10, padR = 10; const innerW = cssW - padL - padR, innerH = cssH - padT - padB;
             const maxVal = Math.max(1, ...data); const yTicks = 5, stepY = Math.max(1, Math.ceil(maxVal / yTicks)); const maxRounded = Math.max(stepY, stepY * yTicks);
             const stepX = data.length > 1 ? innerW / (data.length - 1) : 0; const scaleY = innerH / maxRounded;
-            // axes + grille
             ctxL.strokeStyle = 'rgba(148,163,184,0.35)'; ctxL.lineWidth = 1; ctxL.beginPath(); ctxL.moveTo(padL, padT); ctxL.lineTo(padL, padT + innerH); ctxL.lineTo(padL + innerW, padT + innerH); ctxL.stroke();
             ctxL.fillStyle = 'rgba(148,163,184,0.7)'; ctxL.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'; ctxL.textAlign = 'right'; ctxL.textBaseline = 'middle';
             for (let y = 0; y <= maxRounded; y += stepY) { const py = padT + innerH - y * scaleY; ctxL.strokeStyle = 'rgba(148,163,184,0.15)'; ctxL.beginPath(); ctxL.moveTo(padL, py); ctxL.lineTo(padL + innerW, py); ctxL.stroke(); ctxL.fillText(String(y), padL - 6, py); }
             ctxL.textAlign = 'center'; ctxL.textBaseline = 'top'; const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
             labels.forEach((lab, i) => { if (i % xLabelEvery !== 0 && i !== labels.length - 1) return; const x = padL + i * stepX; ctxL.strokeStyle = 'rgba(148,163,184,0.15)'; ctxL.beginPath(); ctxL.moveTo(x, padT + innerH); ctxL.lineTo(x, padT + innerH + 4); ctxL.stroke(); ctxL.fillText(lab?.slice(5) || '', x, padT + innerH + 6); });
-            // line + points
             ctxL.strokeStyle = '#06b6d4'; ctxL.lineWidth = 2; ctxL.beginPath(); data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctxL.moveTo(x, y); else ctxL.lineTo(x, y); }); ctxL.stroke();
             ctxL.fillStyle = '#67e8f9'; data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctxL.beginPath(); ctxL.arc(x, y, 2.5, 0, Math.PI * 2); ctxL.fill(); });
             if (hoverIndex >= 0 && hoverIndex < labels.length) { const x = padL + hoverIndex * stepX; const y = padT + innerH - data[hoverIndex] * scaleY; ctxL.strokeStyle = 'rgba(6,182,212,0.35)'; ctxL.beginPath(); ctxL.moveTo(x, padT); ctxL.lineTo(x, padT + innerH); ctxL.stroke(); ctxL.fillStyle = '#a5f3fc'; ctxL.beginPath(); ctxL.arc(x, y, 4, 0, Math.PI * 2); ctxL.fill(); const rect = wrapL.getBoundingClientRect(); const ttX = Math.min(rect.width - 140, Math.max(8, x + 8)); const ttY = Math.max(8, y - 10); ttL.textContent = `${labels[hoverIndex]} — ${data[hoverIndex]} connexions`; ttL.style.left = ttX + 'px'; ttL.style.top = ttY + 'px'; ttL.classList.remove('hidden'); } else { ttL.classList.add('hidden'); }
@@ -619,7 +571,6 @@
             finally { document.getElementById('loadL')?.classList.add('hidden'); }
           }
 
-          // ---------- Chart B: Bans ----------
           const ctxB = document.getElementById('chartBans')?.getContext('2d');
           const wrapB = document.getElementById('chartBWrap');
           const ttB = document.getElementById('ttB');
@@ -631,13 +582,11 @@
             const padL = 40, padB = 28, padT = 10, padR = 10; const innerW = cssW - padL - padR, innerH = cssH - padT - padB;
             const maxVal = Math.max(1, ...created, ...revoked); const yTicks = 5, stepY = Math.max(1, Math.ceil(maxVal / yTicks)); const maxRounded = Math.max(stepY, stepY * yTicks);
             const stepX = labels.length > 1 ? innerW / (labels.length - 1) : 0; const scaleY = innerH / maxRounded;
-            // axes + grille
             ctxB.strokeStyle = 'rgba(148,163,184,0.35)'; ctxB.lineWidth = 1; ctxB.beginPath(); ctxB.moveTo(padL, padT); ctxB.lineTo(padL, padT + innerH); ctxB.lineTo(padL + innerW, padT + innerH); ctxB.stroke();
             ctxB.fillStyle = 'rgba(148,163,184,0.7)'; ctxB.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'; ctxB.textAlign = 'right'; ctxB.textBaseline = 'middle';
             for (let y = 0; y <= maxRounded; y += stepY) { const py = padT + innerH - y * scaleY; ctxB.strokeStyle = 'rgba(148,163,184,0.15)'; ctxB.beginPath(); ctxB.moveTo(padL, py); ctxB.lineTo(padL + innerW, py); ctxB.stroke(); ctxB.fillText(String(y), padL - 6, py); }
             ctxB.textAlign = 'center'; ctxB.textBaseline = 'top'; const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
             labels.forEach((lab, i) => { if (i % xLabelEvery !== 0 && i !== labels.length - 1) return; const x = padL + i * stepX; ctxB.strokeStyle = 'rgba(148,163,184,0.15)'; ctxB.beginPath(); ctxB.moveTo(x, padT + innerH); ctxB.lineTo(x, padT + innerH + 4); ctxB.stroke(); ctxB.fillText(lab?.slice(5) || '', x, padT + innerH + 6); });
-            // lignes
             function drawLine(data, color) { ctxB.strokeStyle = color; ctxB.lineWidth = 2; ctxB.beginPath(); data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctxB.moveTo(x, y); else ctxB.lineTo(x, y); }); ctxB.stroke(); }
             drawLine(created, '#ef4444'); drawLine(revoked, '#22c55e');
             function drawDots(data, color) { ctxB.fillStyle = color; data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctxB.beginPath(); ctxB.arc(x, y, 2.3, 0, Math.PI * 2); ctxB.fill(); }); }
@@ -670,13 +619,11 @@
             const padL = 40, padB = 28, padT = 10, padR = 10; const innerW = cssW - padL - padR, innerH = cssH - padT - padB;
             const maxVal = Math.max(1, ...data); const yTicks = 5, stepY = Math.max(1, Math.ceil(maxVal / yTicks)); const maxRounded = Math.max(stepY, stepY * yTicks);
             const stepX = data.length > 1 ? innerW / (data.length - 1) : 0; const scaleY = innerH / maxRounded;
-            // axes
             ctx4.strokeStyle = 'rgba(148,163,184,0.35)'; ctx4.lineWidth = 1; ctx4.beginPath(); ctx4.moveTo(padL, padT); ctx4.lineTo(padL, padT + innerH); ctx4.lineTo(padL + innerW, padT + innerH); ctx4.stroke();
             ctx4.fillStyle = 'rgba(148,163,184,0.7)'; ctx4.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'; ctx4.textAlign = 'right'; ctx4.textBaseline = 'middle';
             for (let y = 0; y <= maxRounded; y += stepY) { const py = padT + innerH - y * scaleY; ctx4.strokeStyle = 'rgba(148,163,184,0.15)'; ctx4.beginPath(); ctx4.moveTo(padL, py); ctx4.lineTo(padL + innerW, py); ctx4.stroke(); ctx4.fillText(String(y), padL - 6, py); }
             ctx4.textAlign = 'center'; ctx4.textBaseline = 'top'; const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
             labels.forEach((lab, i) => { if (i % xLabelEvery !== 0 && i !== labels.length - 1) return; const x = padL + i * stepX; ctx4.strokeStyle = 'rgba(148,163,184,0.15)'; ctx4.beginPath(); ctx4.moveTo(x, padT + innerH); ctx4.lineTo(x, padT + innerH + 4); ctx4.stroke(); ctx4.fillText(lab?.slice(5) || '', x, padT + innerH + 6); });
-            // line
             ctx4.strokeStyle = '#22d3ee'; ctx4.lineWidth = 2; ctx4.beginPath(); data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctx4.moveTo(x, y); else ctx4.lineTo(x, y); }); ctx4.stroke();
             ctx4.fillStyle = '#67e8f9'; data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctx4.beginPath(); ctx4.arc(x, y, 2.3, 0, Math.PI * 2); ctx4.fill(); });
             if (hoverIndex >= 0 && hoverIndex < labels.length) {
@@ -718,7 +665,6 @@
             }
           }
 
-          // setup preset buttons and custom-days input safely
           const presetIds = ['last24h', 'last7', 'last30', 'last90'];
           const presetButtons = presetIds.map(id => document.getElementById(id));
           function setActive(btn) {
@@ -741,7 +687,6 @@
               setRange(val);
               setActive(e.currentTarget);
               apply();
-              // si onglets actifs, maj connexions/bans aussi
               if (document.getElementById('tabLogins')?.getAttribute('aria-selected') === 'true') applyLogins();
               if (document.getElementById('tabBans')?.getAttribute('aria-selected') === 'true') applyBans();
             });
@@ -770,7 +715,6 @@
             });
           }
 
-          // auto-apply when date inputs change (like presets/customDays)
           const fromEl = document.getElementById('from');
           const toEl = document.getElementById('to');
           if (fromEl) {
@@ -780,16 +724,13 @@
             toEl.addEventListener('change', () => { setActive(null); apply(); if (document.getElementById('tabLogins')?.getAttribute('aria-selected') === 'true') applyLogins(); if (document.getElementById('tabBans')?.getAttribute('aria-selected') === 'true') applyBans(); });
           }
 
-          // auto-appliquer au chargement
           apply();
 
-          // Hover handlers
           function bindHover(canvas, render, getCount) {
             const rectWrap = canvas.parentElement;
             canvas.addEventListener('mousemove', (ev) => {
               const rect = canvas.getBoundingClientRect();
               const x = ev.clientX - rect.left; const y = ev.clientY - rect.top;
-              // We recompute index by reading innerW & stepX from current draw by approximating with last known series lengths
               const cssW = canvas.clientWidth; const padL = 40, padR = 10; const count = getCount();
               const innerW = Math.max(1, cssW - padL - padR);
               const stepX = count > 1 ? innerW / (count - 1) : 0;
@@ -807,7 +748,6 @@
           bindHover(document.getElementById('chartLogins'), (hi) => renderChartL({ series: seriesL }, hi), () => seriesL.length);
           bindHover(document.getElementById('chartBans'), (hi) => renderChartB({ series: seriesB }, hi), () => seriesB.length);
 
-          // Re-rendu sur resize pour garder la largeur à 100%
           window.addEventListener('resize', () => {
             if (lastSeries && lastSeries.length) renderChart(lastSeries, hoverIndex1);
             if (series2 && series2.length) renderChart2({ series: series2 }, hoverIndex2);

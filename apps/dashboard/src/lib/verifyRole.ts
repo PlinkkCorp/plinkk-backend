@@ -1,6 +1,5 @@
 import { Role } from "@plinkk/prisma/generated/prisma";
 
-// Retourne true si l'utilisateur a le rôle USER (ou pas de rôle)
 export function verifyRoleUser(role: Role | null | undefined): boolean {
     if (!role) return true;
     return role.name === "USER";
@@ -26,7 +25,6 @@ export function verifyRoleDeveloper(role: Role | null | undefined): boolean {
     return role.name === "DEVELOPER";
 }
 
-// Note: original had a typo 'Modrator' — keep compatibility by keeping the same export name
 export function verifyRoleModrator(role: Role | null | undefined): boolean {
     if (!role) return false;
     return role.name === "MODERATOR";

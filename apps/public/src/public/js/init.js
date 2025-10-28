@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         }
     } catch (_) { }
-    document.title = profileData.userName ? `${profileData.userName} - Linktree` : "Plinkk By Klaynight";
+    document.title = profileData.userName ? `${profileData.userName} - Plinkk` : "Plinkk By Klaynight";
     const link = document.createElement("link");
     link.rel = "icon";
     link.href = profileData.iconUrl;

@@ -1,8 +1,8 @@
-import { PrismaClient } from "@plinkk/prisma/generated/prisma";
+import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
 import builtInThemes from "./builtInThemes";
 import { builtInThemesTypes, coerceThemeData } from "./theme";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
 export async function generateTheme(userId?: string) {
   let builtIns: builtInThemesTypes[] = [];
@@ -12,7 +12,6 @@ export async function generateTheme(userId?: string) {
     builtIns = [];
   }
 
-  // Load approved community themes from DB
   const community = await prisma.theme.findMany({
     where: { status: "APPROVED", isPrivate: false },
     select: {
@@ -25,7 +24,6 @@ export async function generateTheme(userId?: string) {
     orderBy: { createdAt: "desc" },
   });
   const list = [];
-  // normalize community themes using coerceThemeData
   for (const t of community) {
     let full;
     try {

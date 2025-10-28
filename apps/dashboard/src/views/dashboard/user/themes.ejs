@@ -244,8 +244,8 @@
   const resetBtn = $('#resetThemeBtn');
   const isPrivateEl = document.getElementById('isPrivate');
   const usePrivateBtn = document.getElementById('usePrivateBtn');
-  let editId = null; // draft being edited
-  let editStatus = null; // status of the edited card
+  let editId = null;
+  let editStatus = null;
   let previewMode = 'light';
 
   function setMsg(t, ok){ msg.textContent = t||''; msg.className = 'text-xs ' + (ok ? 'text-emerald-400' : 'text-amber-300'); }
@@ -285,7 +285,6 @@
     const name = (fd.get('name')||'').toString().trim(); if (!name) { setMsg('Nom requis', false); return; }
   const payload = { name, description: (fd.get('description')||'').toString(), data: buildSimplified(fd), isPrivate: !!isPrivateEl.checked };
     try {
-    // If editing an APPROVED theme, we don't PATCH the theme (immutable), we only allow proposing an update via the global Submit button.
     const url = editId && editStatus !== 'APPROVED' ? ('/api/me/themes/'+encodeURIComponent(editId)) : '/api/me/themes';
     const method = editId && editStatus !== 'APPROVED' ? 'PATCH' : 'POST';
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -296,11 +295,9 @@
   btnSubmit.dataset.id = j.id;
   editId = j.id;
   editStatus = 'DRAFT';
-      // Insert the new draft in the list without reloading
       try {
-        const theme = j; // assume API returns the created/updated theme object
+        const theme = j;
         let list = document.getElementById('listDrafts');
-        // fallback: find the container with h3 "Brouillons"
         if (!list) {
           const h3 = Array.from(document.querySelectorAll('h3')).find(h=>/Brouillons/i.test(h.textContent||''));
           if (h3) list = h3.nextElementSibling;
@@ -311,11 +308,10 @@
           renderMiniForLi(li);
           attachCardListeners(li);
         }
-      } catch (e) { /* non critique */ }
+      } catch (e) {}
     } catch(err){ setMsg(err.message||'Erreur', false); }
   });
 
-  // Helper: create li DOM for a theme object
   function createThemeLi(t){
     const li = document.createElement('li');
     li.className = 'w-full sm:w-1/2 lg:w-1/3 rounded border border-slate-800 bg-slate-900 p-3 text-sm';
@@ -333,10 +329,8 @@
     } else if (status === 'REJECTED') {
       actions = `<button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="${escapeHtml(t.id)}">Supprimer</button>`;
     } else if (status === 'SUBMITTED' || status === 'APPROVED') {
-      // Allow the owner to delete their submitted or approved themes as requested
       actions = `<button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="${escapeHtml(t.id)}">Supprimer</button>`;
     } else {
-      // For other statuses, show no actions
       actions = '';
     }
     li.innerHTML = `
@@ -376,7 +370,6 @@
   }
 
   function attachCardListeners(li){
-    // Inline confirmation modal used across the page (returns a Promise<boolean>)
     function showConfirm(message){
       return new Promise(resolve => {
         const overlay = document.createElement('div');
@@ -408,14 +401,11 @@
         btnOk.addEventListener('click', () => cleanup(true));
         overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(false); });
         document.body.appendChild(overlay);
-        // attach key handler so Enter confirms and Escape cancels
         document.addEventListener('keydown', onKey);
-        // focus the cancel for accessibility
         btnCancel.focus();
       });
     }
 
-    // edit
     const editBtn = li.querySelector('.editOne');
     if (editBtn) editBtn.addEventListener('click', () => {
       const id = editBtn.dataset.id; const raw = editBtn.getAttribute('data-json');
@@ -435,7 +425,6 @@
         syncTextToColorInputs();
         editId = id; editStatus = li?.getAttribute('data-status') || 'DRAFT';
         btnSubmit.dataset.id = id; btnSubmit.disabled = false;
-        // When editing an approved theme, change the CTA label to "Proposer une MAJ" since submit will send an update
         btnSubmit.textContent = (editStatus === 'APPROVED') ? 'Proposer une MAJ' : 'Soumettre';
         setMsg(editStatus === 'APPROVED' ? 'Édition d’un thème validé. Cliquez sur "Proposer une MAJ" pour envoyer la mise à jour.' : 'Édition du brouillon chargée.', true);
         updatePreview();
@@ -451,13 +440,11 @@
         const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/submit', { method: 'POST' });
         const j = await res.json();
         if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
-        // update status badge
         const badge = li.querySelector('span'); if (badge) badge.textContent = 'PENDING';
         submitBtn.remove();
         setMsg('Soumis pour validation ✓', true);
       } catch(err){ alert('Erreur de soumission'); submitBtn.disabled = false; submitBtn.textContent = 'Soumettre'; }
     });
-    // delete
     const delBtn = li.querySelector('.deleteOne');
     if (delBtn) delBtn.addEventListener('click', async () => {
       const id = delBtn.dataset.id; if (!id) return;
@@ -470,7 +457,6 @@
       } catch(err){ alert('Suppression impossible'); delBtn.disabled = false; delBtn.textContent = 'Supprimer'; }
     });
 
-    // archive (owner)
     const archiveBtn = li.querySelector('.archiveOne');
     if (archiveBtn) archiveBtn.addEventListener('click', async () => {
       const id = archiveBtn.dataset.id; if (!id) return;
@@ -479,21 +465,16 @@
       try {
         const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/archive', { method: 'POST' });
         if (!res.ok) throw new Error('HTTP '+res.status);
-        // move card to Archived list
         const archivedList = document.getElementById('listArchived');
         if (archivedList) archivedList.appendChild(li);
-        // update status badge
         const badge = li.querySelector('span'); if (badge) badge.textContent = 'ARCHIVED';
-        // remove archive & submit/update buttons in archived view
         li.querySelectorAll('.archiveOne,.submitOne,.updateOne').forEach(b=>b.remove());
       } catch(err){ alert("Impossible d'archiver"); archiveBtn.disabled = false; archiveBtn.textContent = prev; }
     });
 
-    // propose update (for approved theme)
     const updateBtn = li.querySelector('.updateOne');
     if (updateBtn) updateBtn.addEventListener('click', async () => {
       const id = updateBtn.dataset.id; if (!id) return;
-      // build payload from current form (reuse colors)
       const fd = new FormData(form);
       const payload = { data: buildSimplified(fd), message: 'Mise à jour proposée' };
       updateBtn.disabled = true; const prev = updateBtn.textContent; updateBtn.textContent = 'Envoi...';
@@ -501,7 +482,6 @@
         const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/update', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
         const j = await res.json();
         if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
-        // add small badge "MAJ en attente"
         const header = li.querySelector('.flex.items-center.gap-2');
         if (header && !li.querySelector('.badge-pending-update')){
           const b = document.createElement('span');
@@ -519,7 +499,6 @@
     const id = btnSubmit.dataset.id || editId; if (!id) return;
     try {
       if (editStatus === 'APPROVED') {
-        // Proposer une MAJ pour un thème validé avec les couleurs du formulaire
         const fd = new FormData(form);
         const payload = { data: buildSimplified(fd), message: 'Mise à jour via bouton principal' };
         const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -527,7 +506,6 @@
         if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
         setMsg('Mise à jour envoyée ✓', true);
       } else {
-        // Soumission classique (brouillon -> soumis)
         const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/submit', { method: 'POST' });
         const j = await res.json();
         if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
@@ -538,7 +516,6 @@
     } catch(err){ setMsg(err.message||'Erreur', false); }
   });
 
-  // Utiliser ce thème privé sur mon profil (sélectionne selectedCustomThemeId)
   usePrivateBtn.addEventListener('click', async () => {
     const id = btnSubmit.dataset.id || editId; if (!id) { setMsg('Enregistrez le brouillon d\'abord', false); return; }
     if (!isPrivateEl.checked) { setMsg('Cochez "Thème privé" pour l\'utiliser en privé', false); return; }
@@ -561,9 +538,7 @@
 
   document.querySelectorAll('.deleteOne').forEach(btn => btn.addEventListener('click', async () => {
     const id = btn.dataset.id; if (!id) return;
-    // show inline modal confirmation
     const ok = await (async function(){
-      // create a modal similar to the one used per-card (fallback if attachCardListeners not applied)
       const overlay = document.createElement('div');
       overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
       overlay.innerHTML = `
@@ -590,7 +565,6 @@
     try {
       const res = await fetch('/api/me/themes/'+encodeURIComponent(id), { method: 'DELETE' });
       if (!res.ok) throw new Error('HTTP '+res.status);
-      // remove card
       const li = btn.closest('li'); if (li) li.remove();
     } catch(err){ alert('Suppression impossible'); btn.disabled = false; btn.textContent = 'Supprimer'; }
   }));
@@ -599,7 +573,6 @@
     const id = btn.dataset.id; const raw = btn.getAttribute('data-json');
     try {
       const full = raw ? JSON.parse(raw) : null;
-      // Tenter d’extraire une représentation simplifiée depuis le full format (avec opposite)
       const light = full && full.background ? { bg: full.background, button: full.buttonBackground, hover: full.hoverColor } : { bg: '', button: '', hover: '' };
       const dark = full && full.opposite ? { bg: full.opposite.background, button: full.opposite.buttonBackground, hover: full.opposite.hoverColor } : { bg: '', button: '', hover: '' };
       form.name.value = btn.closest('li').querySelector('strong')?.textContent || '';
@@ -618,7 +591,6 @@
     } catch {}
   }));
 
-  // Render mini previews for myThemesGrid
   (function renderMyPreviews(){
     const containers = ['listDrafts','listSubmitted','listApproved','listArchived','listRejected'];
     containers.forEach(id => {
@@ -627,7 +599,6 @@
       const raw = li.getAttribute('data-json'); let parsed = {};
       try { parsed = JSON.parse(raw||'{}'); } catch(e){ parsed = {}; }
       const mini = li.querySelector('.previewMini'); if (!mini) return;
-      // extract colors
       let c = { bg: '#111827', button: '#4f46e5', hover: '#22c55e' };
       if (parsed.light) c = { bg: parsed.light.bg||c.bg, button: parsed.light.button||c.button, hover: parsed.light.hover||c.hover };
       else if (parsed.background) c = { bg: parsed.background||c.bg, button: parsed.buttonBackground||c.button, hover: parsed.hoverColor||c.hover };
@@ -647,16 +618,13 @@
   }
   resetBtn?.addEventListener('click', () => { form.reset(); editId = null; btnSubmit.disabled = true; btnSubmit.dataset.id = ''; setMsg('', true); syncTextToColorInputs(); updatePreview(); });
 
-  // Preview mode switch
   document.querySelectorAll('#previewTabs [data-mode]')?.forEach((b)=>{
     b.addEventListener('click', ()=>{ previewMode = b.getAttribute('data-mode')||'light'; updatePreview(); });
   });
 
-  // init
   linkColorInputs();
   syncTextToColorInputs();
   updatePreview();
-  // attach listeners for all existing cards across lists
   ['listDrafts','listSubmitted','listApproved','listArchived','listRejected'].forEach(id =>{
     const ul = document.getElementById(id); if (!ul) return;
     ul.querySelectorAll('li').forEach(li => attachCardListeners(li));

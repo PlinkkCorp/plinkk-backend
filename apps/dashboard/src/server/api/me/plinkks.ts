@@ -28,7 +28,6 @@ import { generateTheme } from "../../../lib/generateTheme";
 const prisma = new PrismaClient();
 
 export function apiMePlinkksRoutes(fastify: FastifyInstance) {
-  // Update plinkk (toggle default/public)
   fastify.patch("/:id", async (request, reply) => {
     const userId = request.session.get("data") as string | undefined;
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
@@ -38,12 +37,10 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       return reply.code(404).send({ error: "not_found" });
     const body = request.body as { isPublic: boolean; isDefault: boolean };
     const patch: { isPublic?: boolean; visibility?: "PUBLIC" | "PRIVATE" } = {};
-    // Toggle public
     if (typeof body.isPublic === "boolean") {
       patch.isPublic = Boolean(body.isPublic);
       patch.visibility = body.isPublic ? "PUBLIC" : "PRIVATE";
     }
-    // Set default
     if (body.isDefault === true && !p.isDefault) {
       const prev = await prisma.plinkk.findFirst({
         where: { userId, isDefault: true },
@@ -90,7 +87,6 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
-  // Create plinkk
   fastify.post("/", async (request, reply) => {
     const userId = request.session.get("data") as string | undefined;
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
@@ -98,18 +94,15 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     const rawSlug = typeof body.slug === "string" ? body.slug : "";
     const rawName = typeof body.name === "string" ? body.name : "";
     try {
-      // Normaliser la base; éviter mots réservés
       const base = slugify(rawSlug || rawName || "page");
       if (!base || (await isReservedSlug(prisma, base)))
         return reply.code(400).send({ error: "invalid_or_reserved_slug" });
-      // Interdire conflit avec un @ d'utilisateur
       const userConflict = await prisma.user.findUnique({
         where: { id: base },
         select: { id: true },
       });
       if (userConflict)
         return reply.code(409).send({ error: "slug_conflicts_with_user" });
-      // Interdire conflit direct avec un autre plinkk (suggestion générera une variante de toute façon)
       const created = await createPlinkkForUser(prisma, userId, {
         name: rawName,
         slugBase: base,
@@ -126,8 +119,6 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // API: Récupérer la configuration complète du profil pour l'éditeur
-  // Version par Plinkk (édition indépendante par page)
   fastify.get("/:id/config", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -166,16 +157,11 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     ]);
 
     const cfg = {
-      // Champs d'identité/texte: si un enregistrement PlinkkSettings existe, on respecte ses valeurs
-      // même si elles valent null (ce qui signifie "effacé"), sinon on fallback vers user.
       profileLink: settings != null ? settings.profileLink : null,
       profileImage: settings != null ? settings.profileImage : null,
       profileIcon: settings != null ? settings.profileIcon : null,
       profileSiteText: settings != null ? settings.profileSiteText : null,
       userName: settings != null ? settings.userName : user?.userName ?? null,
-      // Email public spécifique à la Plinkk : si settings présent ET que la
-      // propriété `affichageEmail` est définie, l'utiliser (même si null =>
-      // effacement explicite). Sinon fallback vers user.publicEmail || user.email.
       email:
         settings != null &&
         Object.prototype.hasOwnProperty.call(settings, "affichageEmail")
@@ -244,14 +230,12 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
 
     const body = request.body as PlinkkSettings;
 
-    // Upsert des réglages de page
     const data = pickDefined({
       profileLink: body.profileLink,
       profileImage: body.profileImage,
       profileIcon: body.profileIcon,
       profileSiteText: body.profileSiteText,
       userName: body.userName,
-      // affichageEmail: valeur publique spécifique à cette Plinkk
       affichageEmail: body.affichageEmail,
       iconUrl: body.iconUrl,
       description: body.description,
@@ -291,7 +275,6 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
-  // Enregistrer l'ordre d'agencement des sections
   fastify.put("/:id/config/layout", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -323,7 +306,6 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
 
     const body = request.body as { background: any[] };
-    // Couleurs de fond: accepter string[] ou { color: string }[] et normaliser
     const list = Array.isArray(body?.background) ? body.background : [];
     const colors = list
       .map((item) =>
@@ -393,7 +375,6 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
 
     const body = request.body as { socialIcon: SocialIcon[] };
 
-    // Icônes sociales
     if (Array.isArray(body.socialIcon)) {
       await prisma.socialIcon.deleteMany({
         where: { userId: String(userId), plinkkId: id },
@@ -424,7 +405,6 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
 
     const body = request.body as { links: Link[] };
 
-    // Liens
     if (Array.isArray(body.links)) {
       const existing = await prisma.link.findMany({
         where: { userId: String(userId), plinkkId: id },
@@ -489,7 +469,6 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
 
     const body = request.body as { statusbar: PlinkkStatusbar };
 
-    // Statusbar dédié à la page
     if (body.statusbar !== undefined) {
       const s = body.statusbar;
       if (s === null) {
@@ -528,7 +507,6 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
 
     const body = request.body as { neonColors: NeonColor[] };
 
-    // Néon
     if (Array.isArray(body.neonColors)) {
       await prisma.neonColor.deleteMany({
         where: { userId: String(userId), plinkkId: id },
@@ -593,10 +571,6 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
         settings?.selectedAnimationBackgroundIndex ?? 0,
       animationDurationBackground: settings?.animationDurationBackground ?? 30,
       delayAnimationButton: settings?.delayAnimationButton ?? 0.1,
-      // Support for per-Plinkk public email: if a PlinkkSettings.affichageEmail
-      // exists we must prefer it for the generated profile config. We expose it
-      // both as `affichageEmail` and override `publicEmail` so generateProfileConfig
-      // (which reads profile.publicEmail) will pick up the page-specific value.
       affichageEmail: settings?.affichageEmail ?? null,
       publicEmail:
         settings &&
@@ -619,18 +593,14 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
 
     const themes = await generateTheme(page.userId)
 
-    // Création du flux d’archive
-    const archive = archiver("zip", { zlib: { level: 9 } }); // niveau max de compression
+    const archive = archiver("zip", { zlib: { level: 9 } });
 
-    // Définition des headers HTTP pour le téléchargement
     reply
       .header("Content-Type", "application/zip")
       .header("Content-Disposition", "attachment; filename=plinkk_" + page.name + ".zip");
 
-    // Piping direct de l’archive dans la réponse (stream)
     archive.pipe(reply.raw);
 
-    // --- FICHIERS DYNAMIQUES ---
     archive.append(await ejs.renderFile(path.join(__dirname, "..", "..", "..", "views", "plinkk", "show.ejs"), { page: page, userId: page.userId, username: page.userId }), { name: "index.html" });
     archive.append(js, { name: page.slug + ".js" });
     archive.append(config, { name: "config.js" });
@@ -642,11 +612,9 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       archive.file(path.join(__dirname, "..", "..", "..", "public", "canvaAnimation", canvaData[canvaId].fileNames), { name: "canvaAnimation/" + canvaData[canvaId].fileNames })
     }
 
-    // --- FICHIERS CSS (statiques) ---
     archive.file(path.join(__dirname, "..", "..", "..", "public", "css", "styles.css"), { name: "css/styles.css" });
     archive.file(path.join(__dirname, "..", "..", "..", "public", "css", "button.css"), { name: "css/button.css" });
 
-    // --- LOGOS (statiques) ---
     if (page.settings.profileImage.startsWith("/public/")) archive.file(path.join(__dirname, "..", "..", "..", ...page.settings.profileImage.split("/")), { name: page.settings.profileImage})
     if (page.settings.profileIcon.startsWith("/public/")) archive.file(path.join(__dirname, "..", "..", "..", ...page.settings.profileIcon.split("/")), { name: page.settings.profileIcon})
     if (page.settings.iconUrl.startsWith("/public/")) archive.file(path.join(__dirname, "..", "..", "..", ...page.settings.iconUrl.split("/")), { name: page.settings.iconUrl})
@@ -658,7 +626,6 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       archive.file(path.join(__dirname, "..", "..", "..", "public", "images", "icons", socialIcon.icon + ".svg"), { name: "public/images/icons/" + socialIcon.icon + ".svg" });
     }
 
-    // Finaliser le ZIP
     await archive.finalize();
   });
 }

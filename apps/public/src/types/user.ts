@@ -1,4 +1,4 @@
-import { Prisma, User } from "@plinkk/prisma/generated/prisma/client";
+import { Prisma } from "@plinkk/prisma/generated/prisma/client";
 
 export type UserWithIncludeStrict = Prisma.UserGetPayload<{
   include: {

@@ -20,10 +20,8 @@
 
         if (!notice) return;
 
-        // Masque le main tant que la notice est affichée (mobile)
         if (main) main.classList.add('hidden');
 
-        // Fermeture : réaffiche le main
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
                 notice.classList.add('hidden');
@@ -34,7 +32,6 @@
 </script>
 
         <main class="max-w-7xl mx-auto p-4 grid grid-cols-12 gap-4">
-            <!-- Colonne gauche: UI de configuration -->
             <section class="col-span-12 md:col-span-7 xl:col-span-8 space-y-4">
                 <div class="flex items-center justify-between gap-3">
                     <div class="min-w-0">
@@ -66,7 +63,6 @@
                                         </div>
                 </div>
 
-                <!-- Onglets (avec icônes, accessible) -->
                 <nav class="rounded-xl border border-slate-800/60 bg-slate-900/60 px-2 overflow-x-auto shadow animate-slide-up" role="tablist" aria-label="Sections d'édition">
                     <ul class="flex gap-1 text-sm min-w-max" id="tabs">
                         <li>
@@ -114,9 +110,7 @@
                     </ul>
                 </nav>
 
-                <!-- Sections -->
                 <div class="space-y-4">
-                    <!-- Profil -->
                     <div id="section-profile" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
                         <div class="mb-3"><h3 class="font-medium">Profil</h3><p class="text-xs text-slate-400">Informations de base affichées publiquement.</p></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -174,7 +168,6 @@
                         </div>
                     </div>
 
-                    <!-- Apparence -->
                     <div id="section-appearance" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
                         <div class="mb-3"><h3 class="font-medium">Apparence</h3><p class="text-xs text-slate-400">Couleurs et options d’affichage.</p></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -194,7 +187,6 @@
                             </label>
                             <label class="flex items-center gap-2 text-sm"><input id="buttonThemeEnable" type="checkbox" class="size-4"/> Activer thème des boutons <span class="info-i" title="Applique le style de boutons du thème sélectionné.">i</span></label>
                         </div>
-                        <!-- Néon (déplacé ici) -->
                         <div class="pt-4 mt-4 border-t border-slate-800">
                             <div class="relative rounded-xl border border-slate-800/70 bg-slate-900/50 overflow-hidden">
                                 <div class="px-3 pt-3 flex items-center justify-between opacity-60 select-none">
@@ -222,8 +214,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Arrière-plan -->
                     <div id="section-background" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
                             <div class="mb-3 flex items-center justify-between">
                             <div>
@@ -246,7 +236,6 @@
                             </label>
                         </div>
                         <div id="backgroundList" class="flex flex-col gap-2" role="list"></div>
-                        <!-- Canvas (déplacé ici) -->
                         <div class="pt-4 mt-4 border-t border-slate-800">
                             <div class="mb-2 flex items-center justify-between">
                                 <div>
@@ -275,7 +264,6 @@
                                   </label>
                                   <span class="text-[11px] text-slate-400">Désactive pour économiser les ressources</span>
                                 </div>
-                                <!-- Aperçu sélectionné 16:9 -->
                                 <div class="md:col-span-2">
                                     <div id="selectedCanvasPreview" class="relative rounded-lg border border-slate-800 overflow-hidden bg-slate-900/60 max-w-[440px] mx-auto">
                                         <div id="selectedCanvasPreviewOverlay" class="absolute inset-0 bg-black/50 text-slate-200 text-xs flex items-center justify-center hidden">Canvas désactivé</div>
@@ -285,10 +273,7 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Liens (inclut Icônes sociales) -->
                     <div id="section-links" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
-                        <!-- Icônes sociales -->
                         <div class="mb-3 flex items-center justify-between">
                             <div>
                                 <h3 class="font-medium">Icônes sociales</h3>
@@ -298,8 +283,6 @@
                         </div>
                         <div id="socialList" class="space-y-3"></div>
                         <div class="border-t border-slate-800 my-4"></div>
-
-                        <!-- Liens -->
                         <div class="mb-3 flex items-center justify-between">
                             <div>
                                 <h3 class="font-medium">Liens</h3>
@@ -309,8 +292,6 @@
                         </div>
                         <div id="linksList" class="space-y-3"></div>
                     </div>
-
-                    <!-- Animations -->
                     <div id="section-animations" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
                         <div class="mb-3"><h3 class="font-medium">Animations</h3><p class="text-xs text-slate-400">Ajustez les animations d’éléments et d’arrière‑plan.</p></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -346,8 +327,6 @@
                             </label>
                         </div>
                     </div>
-
-                    <!-- Statusbar (inclut Labels) -->
                     <div id="section-statusbar" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
 
                         <div class="mb-3"><h3 class="font-medium">Barre de statut</h3><p class="text-xs text-slate-400">Message et style du statut affiché sous le profil.</p></div>
@@ -384,7 +363,6 @@
                                 <input type="hidden" id="status_statusText" />
                             </div>
                         </div>
-                        <!-- Labels (déplacé ici) -->
                         <div class="pt-4 mt-4 border-t border-slate-800">
                             <div class="mb-3 flex items-center justify-between">
                                 <div>
@@ -396,8 +374,6 @@
                             <div id="labelsList" class="space-y-3"></div>
                         </div>
                     </div>
-
-                    <!-- Agencement -->
                     <div id="section-layout" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
                         <div class="mb-3"><h3 class="font-medium">Agencement</h3><p class="text-xs text-slate-400">Réordonne visuellement les sections de ta page par glisser‑déposer.</p></div>
                         <div class="space-y-2" id="layoutList" role="list"></div>
@@ -405,8 +381,6 @@
                     </div>
                 </div>
             </section>
-
-            <!-- Colonne droite: Aperçu -->
             <aside class="col-span-12 md:col-span-5 xl:col-span-4 space-y-3">
                 <div class="rounded-lg border border-indigo-800/40 bg-slate-900/60 p-3 sticky top-[68px] shadow animate-slide-up" style="animation-delay:120ms">
                     <div class="flex items-center justify-between gap-2 mb-2">
@@ -431,8 +405,6 @@
                 </div>
             </aside>
         </main>
-
-                    <!-- Modal Sélection d'icône sociale -->
                     <div id="iconModal" class="fixed inset-0 z-50 hidden">
                         <div class="absolute inset-0 bg-black/60 animate-fade-in"></div>
                         <div class="relative mx-auto mt-16 w-[92vw] max-w-3xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in">
@@ -446,8 +418,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Modal générique de sélection (thèmes, animations, canvas, bouton thème) -->
                     <div id="pickerModal" class="fixed inset-0 z-50 hidden">
                         <div class="absolute inset-0 bg-black/60 animate-fade-in"></div>
                         <div class="relative mx-auto mt-16 w-[92vw] max-w-5xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in">
@@ -469,14 +439,12 @@
 
                         <script>
                                 window.__PLINKK_USER_ID__ = "<%= user.id %>";
-                                // Gestion simple des onglets avec hash dans l’URL
                                 (function(){
                                     const btns = Array.from(document.querySelectorAll('.tab-btn'));
                                     const sections = Array.from(document.querySelectorAll('[id^="section-"]'));
                                     const selectTab = (target) => {
                                         sections.forEach(s => s.classList.toggle('hidden', `#${s.id}` !== target));
                                         btns.forEach(b => b.setAttribute('aria-selected', b.dataset.target === target ? 'true' : 'false'));
-                                        // Mémoriser dans l’URL
                                         if (history.replaceState) {
                                             history.replaceState(null, '', target);
                                         } else {
@@ -484,11 +452,9 @@
                                         }
                                     };
                                     btns.forEach(b => b.addEventListener('click', () => selectTab(b.dataset.target)));
-                                    // Init sur hash ou défaut profil
                                     const initial = location.hash && sections.some(s => `#${s.id}` === location.hash) ? location.hash : '#section-profile';
                                     selectTab(initial);
 
-                                    // Relier boutons mobiles aux actions principales
                                     const save = document.getElementById('saveBtn');
                                     const reset = document.getElementById('resetBtn');
                                     ['saveBtn--mobile','saveBtn--fab'].forEach(id=>{
@@ -499,19 +465,15 @@
                                     });
                                 })();
                         </script>
-                <!-- Expose les données de configuration (thèmes, animations, canvas, boutons) au dashboard -->
                 <style>
-                    /* Visuel pour champs masqués : grisé et non éditable mais valeur visible */
                     .masked-field { background-color: rgba(100,100,100,0.12) !important; opacity: 0.65; cursor: not-allowed; }
                     .masked-field:disabled { color: inherit; }
                     .masked-field[readonly] { color: inherit; }
                     .mask-toggle { line-height: 1; }
 
-                    /* Petit (i) d'aide discret */
                     .info-i { display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; font-size:10px; line-height:1; border-radius:9999px; border:1px solid rgba(148,163,184,0.35); color:#cbd5e1; margin-left:6px; cursor:help; background: rgba(15,23,42,0.5); }
                     .info-i:hover { background: rgba(30,41,59,0.6); color:#e5e7eb; border-color: rgba(148,163,184,0.6); }
 
-                    /* Cadran d'angle (knob) */
                     .deg-dial { position: relative; width: 72px; height: 72px; border-radius: 100%; border: 1px solid #334155; background: radial-gradient(closest-side, rgba(30,41,59,0.9), rgba(15,23,42,0.9)); box-shadow: inset 0 0 0 2px rgba(148,163,184,0.1); outline: none; user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab; }
                     .deg-dial:focus { box-shadow: 0 0 0 2px rgba(99,102,241,0.55), inset 0 0 0 2px rgba(148,163,184,0.1); }
                     .deg-dial.is-dragging { cursor: grabbing; }
@@ -520,18 +482,16 @@
                 </style>
                 <script>
                     (function(){
-                        // Gestion des boutons "œil" pour masquer les inputs de profil, avec persistance locale
                         const USER_ID = window.__PLINKK_USER_ID__ || 'self';
                         const PLINKK_ID = window.__PLINKK_SELECTED_ID__ || 'default';
-                        const LS_PREFIX = 'PLK_MASK:'; // clé localStorage prefix
+                        const LS_PREFIX = 'PLK_MASK:';
 
                         function lsGet(key){ try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } }
-                        function lsSet(key, val){ try { localStorage.setItem(key, JSON.stringify(val)); } catch { /* ignore */ } }
-                        function lsDel(key){ try { localStorage.removeItem(key); } catch { /* ignore */ } }
+                        function lsSet(key, val){ try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+                        function lsDel(key){ try { localStorage.removeItem(key); } catch {} }
                         function getKey(inputId){ return `${LS_PREFIX}${USER_ID}:${PLINKK_ID}:${inputId}`; }
 
                         function applyMaskedState(input, btn, saved){
-                            // saved: { masked: boolean, value: string }
                             if (!input || !btn) return;
                             const isMasked = !!(saved && saved.masked);
                             
@@ -539,7 +499,6 @@
                             btn.setAttribute('aria-pressed', isMasked ? 'true' : 'false');
 
                             if (isMasked) {
-                                // Conserver/forcer la valeur mémorisée
                                 if (saved && typeof saved.value !== 'undefined') {
                                     input.value = saved.value;
                                 }
@@ -547,12 +506,9 @@
                                 input.readOnly = true;
                                 input.disabled = true;
                                 input.classList.add('masked-field');
-                                // Icône œil barré (eye-off)
                                 btn.innerHTML = '<svg class="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a20.81 20.81 0 0 1 5.06-6.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.82 20.82 0 0 1-4.87 6.82M1 1l22 22"/></svg>';
                             } else {
-                                // État non masqué
                                 if (typeof input.dataset._originalValue !== 'undefined') {
-                                    // restaurer la valeur en clair si nous l’avions mémorisée
                                     input.value = input.dataset._originalValue;
                                     delete input.dataset._originalValue;
                                 }
@@ -563,7 +519,6 @@
                             }
                         }
 
-                        // Initialisation + listeners
                         const buttons = Array.from(document.querySelectorAll('.mask-toggle'));
                         buttons.forEach(btn => {
                             const targetId = btn.getAttribute('data-target');
@@ -571,32 +526,26 @@
                             const input = document.getElementById(targetId);
                             if (!input) return;
 
-                            // Restaure l'état depuis localStorage
                             const key = getKey(targetId);
                             const saved = lsGet(key);
                             applyMaskedState(input, btn, saved);
 
-                            // Listener clic
                             btn.addEventListener('click', () => {
                                 const currentlyMasked = btn.getAttribute('aria-pressed') === 'true';
                                 if (!currentlyMasked) {
-                                    // activer masquage: mémoriser valeur+état
                                     const value = input.value ?? '';
                                     lsSet(key, { masked: true, value });
                                     applyMaskedState(input, btn, { masked: true, value });
                                 } else {
-                                    // désactiver masquage: supprimer persistance + restaurer
                                     lsDel(key);
                                     applyMaskedState(input, btn, { masked: false });
                                 }
-                                // Déclencher une sauvegarde auto afin d’actualiser l’aperçu après le PUT
                                 if (window.__DASH_TRIGGER_SAVE__) {
                                     window.__DASH_TRIGGER_SAVE__();
                                 }
                             });
                         });
 
-                        // Avant l'envoi (click sur save ou submit de form), remplacer les champs masqués par "" pour qu'ils n'envoient rien
                         function clearMaskedValues() {
                             document.querySelectorAll('[data-maskable]')
                                 .forEach(inp => {
@@ -609,7 +558,6 @@
                                 });
                         }
 
-                        // Intercepter clics sur les boutons de sauvegarde (capture pour être sûr d'exécuter avant d'autres handlers)
                         document.addEventListener('click', (e) => {
                             const saveBtn = e.target.closest && e.target.closest('#saveBtn, #saveBtn--mobile, #saveBtn--fab');
                             if (saveBtn) {
@@ -617,16 +565,13 @@
                             }
                         }, true);
 
-                        // Si un formulaire enveloppe ces champs, intercepter son submit aussi (plus robuste)
                         (function attachFormInterceptor(){
-                            // Cherche le formulaire parent le plus proche d'un des inputs maskable
                             const sample = document.querySelector('[data-maskable]');
                             if (!sample) return;
                             const form = sample.closest('form');
                             if (!form) return;
                             form.addEventListener('submit', (ev) => {
                                 clearMaskedValues();
-                                // allow normal submit to proceed
                             });
                         })();
                     })();
@@ -636,8 +581,6 @@
                     import { animations, animationBackground } from '/public/config/animationConfig.js';
                     import btnIconThemeConfig from '/public/config/btnIconThemeConfig.js';
                     import labelPresets from '/public/config/labelPresets.js';
-                    // Fetch built-ins + community themes from the server and expose
-                    // them to the dashboard UI via window.__PLINKK_CFG__
                     try {
                         const res = await fetch(`/themes.json?userId=${encodeURIComponent("<%= user.id %>")}`);
                         let builtIns = [];
@@ -654,7 +597,6 @@
                     }
                 </script>
                 <script>
-                    // Synchronisation knob <-> input pour l'angle de dégradé
                     (function(){
                         const input = document.getElementById('degBackgroundColor');
                         const dial = document.getElementById('degDial');
@@ -667,7 +609,6 @@
                         function syncFromInput(){ const v = clampDeg(input.value); setDot(v); setAria(v); }
                         function syncFromDeg(val){ const v = clampDeg(val); input.value = String(v); setDot(v); setAria(v); if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); }
 
-                        // Init (attendre que le formulaire soit rempli)
                         setTimeout(syncFromInput, 0);
 
                         input.addEventListener('input', () => syncFromInput());
@@ -677,9 +618,8 @@
                             const rect = dial.getBoundingClientRect();
                             const cx = rect.left + rect.width/2; const cy = rect.top + rect.height/2;
                             const dx = clientX - cx; const dy = clientY - cy;
-                            let angle = Math.atan2(dy, dx) * 180/Math.PI; // -180..180, 0 à droite
-                            angle = (angle + 360) % 360; // 0..359
-                            // On veut 0° en haut: ajouter 90° puis modulo 360
+                            let angle = Math.atan2(dy, dx) * 180/Math.PI;
+                            angle = (angle + 360) % 360;
                             angle = (angle + 90) % 360;
                             return Math.round(angle);
                         }
@@ -709,26 +649,22 @@
                             window.addEventListener('mouseup', onPointerUp);
                             window.addEventListener('touchmove', onPointerMove, { passive: false });
                             window.addEventListener('touchend', onPointerUp);
-                            // Focus pour activer le support à la molette ensuite
                             dial.focus();
                         }
 
-                        // Drag depuis n'importe où sur le dial (dot compris)
                         dial.addEventListener('mousedown', startDrag);
                         dial.addEventListener('touchstart', startDrag, { passive: false });
 
-                        // Molette (uniquement quand le dial a le focus, i.e. cliqué juste avant)
                         dial.addEventListener('wheel', (e) => {
                             if (document.activeElement !== dial) return;
                             e.preventDefault();
                             const delta = e.deltaY || e.deltaX || 0;
                             const step = e.shiftKey ? 10 : 1;
-                            const dir = delta > 0 ? -step : step; // sens intuitif
+                            const dir = delta > 0 ? -step : step;
                             const val = clampDeg((Number(input.value)||0) + dir);
                             syncFromDeg(val);
                         }, { passive: false });
 
-                        // Accessibilité clavier
                         dial.addEventListener('keydown', (e) => {
                             const step = (e.shiftKey ? 10 : 1);
                             let val = clampDeg(input.value);
@@ -739,16 +675,13 @@
                         });
                     })();
                 </script>
-                <!-- Données utiles pour la sélection de page -->
                 <script type="application/json" id="pages-data"><%- JSON.stringify(typeof pages !== 'undefined' ? pages : []) %></script>
                 <script type="application/json" id="autoopen-data"><%= (typeof autoOpenPlinkkModal !== 'undefined' && autoOpenPlinkkModal) ? 'true' : 'false' %></script>
                 <% if (typeof plinkk !== 'undefined' && plinkk) { %>
                 <script>window.__PLINKK_SELECTED_ID__ = "<%= plinkk.id %>";</script>
                 <% } %>
-                <!-- Initialisation de l'UI du dashboard (formulaire, listes, pickers) -->
                 <script type="module" src="/public/js/dashboard-ui/index.js"></script>
                 <script>
-                        // Toggle preview viewport (desktop/mobile)
                         (function(){
                             const frame = document.getElementById('preview');
                             const wrap = frame && frame.parentElement;
@@ -761,7 +694,6 @@
                                 btn.addEventListener('click', ()=> setMobile(btn.getAttribute('data-view')==='mobile'));
                             });
                         })();
-                        // Live-update header plinkk name as user types in the "Nom affiché" field
                         (function(){
                             try {
                                 const nameInput = document.getElementById('userName');
@@ -771,12 +703,10 @@
                                         const v = nameInput.value || '';
                                         headerName.textContent = v || headerName.getAttribute('data-original') || '';
                                     });
-                                    // store original as fallback
                                     headerName.setAttribute('data-original', headerName.textContent || '');
                                 }
-                            } catch (e) { /* ignore */ }
+                            } catch (e) {}
                         })();
-                        // Sélection de page via un select intégré à la page (fallback vers prompt si nécessaire)
                         (function(){
                             const btn = document.getElementById('changePlinkk');
                             const btnMobile = document.getElementById('changePlinkk--mobile');
@@ -788,8 +718,6 @@
 
                             const currentId = window.__PLINKK_SELECTED_ID__ || '';
 
-
-                            // Build dropdown items into a UL
                             function buildList(listEl, isMobile) {
                                 if (!listEl) return;
                                 listEl.innerHTML = '';
@@ -798,7 +726,6 @@
                                     li.className = 'px-3 py-2 hover:bg-slate-800 cursor-pointer flex items-center justify-between';
                                     li.tabIndex = 0;
                                     const left = document.createElement('div');
-                                    // Afficher uniquement le slug dans la liste déroulante (visuel)
                                     left.textContent = p.slug;
                                     const openLink = document.createElement('a');
                                     openLink.textContent = 'Ouvrir';
@@ -809,7 +736,6 @@
                                     li.appendChild(left);
                                     li.appendChild(openLink);
                                     li.addEventListener('click', (e) => {
-                                        // If clicking the 'Ouvrir' link, let it open in new tab
                                         if (e.target === openLink) return;
                                         location.href = `/edit?plinkkId=${encodeURIComponent(p.id)}`;
                                     });
@@ -826,7 +752,6 @@
                                 });
                             }
 
-                            // Dropdown open/close helpers
                             function toggleDropdown(drop, open) {
                                 if (!drop) return;
                                 drop.classList.toggle('hidden', !open);
@@ -850,7 +775,6 @@
                                 searchM.addEventListener('input', () => filterList(searchM, listM));
                             }
 
-                            // Show current label + open link
                             if (currentId) {
                                 const current = pages.find(p => p.id === currentId);
                                 if (current) {
@@ -870,7 +794,6 @@
                                 }
                             }
 
-                            // Toggle dropdown on button click
                             const btnEl = document.getElementById('changePlinkkBtn');
                             const btnElM = document.getElementById('changePlinkkBtnMobile');
                             if (btnEl && dropdown) {
@@ -880,21 +803,17 @@
                                 btnElM.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(dropdownM, dropdownM.classList.contains('hidden')); if (searchM) { searchM.value = ''; filterList(searchM, listM); setTimeout(()=>searchM.focus(), 50); } });
                             }
 
-                            // Close dropdown when clicking outside
                             document.addEventListener('click', () => { toggleDropdown(dropdown, false); toggleDropdown(dropdownM, false); });
-                            // Prevent clicks inside dropdown from closing (we handle)
                             if (dropdown) dropdown.addEventListener('click', (e)=> e.stopPropagation());
                             if (dropdownM) dropdownM.addEventListener('click', (e)=> e.stopPropagation());
 
                             function openChooserFallback() {
-                                // Redirect to the first available page by default instead of using prompt
                                 if (pages && pages.length) {
                                     const id = pages[0].id;
                                     if (id) location.href = `/edit?plinkkId=${encodeURIComponent(id)}&autoRedirect=1`;
                                 }
                             }
 
-                            // Helper to populate a <select> with available pages and wire navigation
                             function populate(selectEl, isMobile) {
                                 if (!selectEl) return;
                                 selectEl.innerHTML = '';
@@ -904,25 +823,21 @@
                                     opt.textContent = `${i+1}. ${p.name} (${p.slug})`;
                                     selectEl.appendChild(opt);
                                 });
-                                // Pre-select current if known
                                 if (currentId) {
                                     const idx = pages.findIndex(p => p.id === currentId);
                                     if (idx !== -1) selectEl.value = pages[idx].id;
                                 }
-                                // Navigate when selection changes
                                 selectEl.addEventListener('change', () => {
                                     const val = selectEl.value;
                                     if (!val) return;
                                     location.href = `/edit?plinkkId=${encodeURIComponent(val)}`;
                                 });
-                                // Keyboard support: Enter to confirm
                                 selectEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const val = selectEl.value; if (val) location.href = `/edit?plinkkId=${encodeURIComponent(val)}`; } });
                             }
 
                             populate(select, false);
                             populate(selectMobile, true);
 
-                            // Afficher le label courant (au lieu de pré-sélectionner l'option)
                             if (currentId) {
                                 const current = pages.find(p => p.id === currentId);
                                 if (current) {
@@ -939,7 +854,6 @@
                             const autoOpenRaw = document.getElementById('autoopen-data')?.textContent || 'false';
                             const autoOpen = String(autoOpenRaw).trim() === 'true';
                             if (autoOpen && pages.length > 1) {
-                                // si un select existe, l'ouvrir (focus) sinon fallback
                                 if (select) { select.focus(); } else { openChooserFallback(); }
                             }
                         })();

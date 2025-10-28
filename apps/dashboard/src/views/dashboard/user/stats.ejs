@@ -4,7 +4,6 @@
     <div class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
       <%- include('../../partials/asside_dash.ejs', { active: 'stats' }) %>
       <main class="col-span-12 lg:col-span-9 space-y-4">
-        <!-- En-tête (style Mon compte) -->
         <div class="mb-4">
           <div class="flex items-center justify-between">
             <h1 class="text-2xl font-semibold">Statistiques <% if (typeof plinkk !== 'undefined' && plinkk) { %><span class="text-base text-slate-400">— <%= plinkk.name %></span><% } %></h1>
@@ -15,7 +14,6 @@
           </div>
         </div>
 
-        <!-- Barre d'onglets (comme Compte) -->
         <div class="rounded-lg border border-slate-800/60 bg-slate-900/40">
           <div class="px-4 py-2 border-b border-slate-800/40">
             <nav class="flex gap-2" role="tablist" aria-label="Sections stats">
@@ -27,9 +25,7 @@
           </div>
         </div>
 
-        <!-- Panels -->
         <section id="panel-overview" class="tab-panel">
-          <!-- KPIs -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
               <div class="text-xs text-slate-400">Vues profil</div>
@@ -50,7 +46,6 @@
           </div>
         </section>
 
-        <!-- Tendances -->
         <section id="panel-trends" class="tab-panel hidden">
           <section class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
             <div class="mb-4 flex items-center justify-between">
@@ -84,9 +79,7 @@
           </section>
         </section>
 
-        <!-- Liens: filtres + Top + tableau -->
         <section id="panel-links" class="tab-panel hidden">
-          <!-- Filtres / barre d'outils -->
           <section class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
               <div class="col-span-2">
@@ -104,7 +97,6 @@
             </div>
           </section>
 
-          <!-- Top liens -->
           <section class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
             <div class="mb-2 flex items-center justify-between">
               <h3 class="font-medium">Top liens par clics</h3>
@@ -113,7 +105,6 @@
             <div id="chartTop" class="w-full"></div>
           </section>
 
-          <!-- Tableau détaillé -->
           <section class="rounded-lg border border-slate-800 bg-slate-900/60 p-4 overflow-auto">
             <table class="w-full text-sm">
               <thead>
@@ -129,7 +120,6 @@
           </section>
         </section>
 
-        <!-- Catégories -->
         <section id="panel-categories" class="tab-panel hidden">
           <section class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
             <div class="mb-2 flex items-center justify-between">
@@ -140,7 +130,6 @@
           </section>
         </section>
 
-        <!-- Tableau détaillé -->
         <section class="rounded-lg border border-slate-800 bg-slate-900/60 p-4 overflow-auto">
           <table class="w-full text-sm">
             <thead>
@@ -162,7 +151,6 @@
         <script type="application/json" id="autoopen-data"><%= (typeof autoOpenPlinkkModal !== 'undefined' && autoOpenPlinkkModal) ? 'true' : 'false' %></script>
         <script type="module" src="/public/js/dashboard-stats.js"></script>
         <script>
-          // Sélection intégrée de page (dropdown avec recherche) — fallback vers prompt si nécessaire
           (function(){
             const btn = document.getElementById('changePlinkkBtn');
             const dropdown = document.getElementById('changePlinkkDropdown');
@@ -172,12 +160,10 @@
             let pages = [];
             try { pages = JSON.parse(pagesRaw) || []; } catch {}
 
-            // If the integrated elements aren't present, fallback to the prompt behavior
             if (!btn || !dropdown || !listEl || !search) {
               const fallbackBtn = document.getElementById('changePlinkk');
               if (!fallbackBtn) return;
               fallbackBtn.addEventListener('click', () => {
-                // Redirect to the first available page by default (with autoRedirect flag)
                 if (pages && pages.length) {
                   const id = pages[0].id;
                   if (id) location.href = `/stats?plinkkId=${encodeURIComponent(id)}&autoRedirect=1`;
@@ -186,7 +172,6 @@
               return;
             }
 
-            // Build list items
             function buildList() {
               listEl.innerHTML = '';
               pages.forEach((p, i) => {
@@ -210,7 +195,6 @@
               });
             }
 
-            // Toggle helper
             function toggle(open){
               dropdown.classList.toggle('hidden', !open);
               btn.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -219,11 +203,9 @@
 
             buildList();
 
-            // Don't bind toggle if button indicates a selection is needed
             if (!btn.hasAttribute('data-needs-selection')) {
               btn.addEventListener('click', (e) => { e.stopPropagation(); toggle(!dropdown.classList.contains('hidden')); search.value = ''; filterList(''); });
             } else {
-              // Visual cue when user clicks a disabled button: briefly pulse the label
               btn.addEventListener('click', (e) => {
                 e.preventDefault(); e.stopPropagation();
                 btn.classList.add('ring-2','ring-amber-400');
@@ -232,20 +214,16 @@
             }
             search.addEventListener('input', () => filterList(search.value));
 
-            // Close when clicking outside
             document.addEventListener('click', () => toggle(false));
             dropdown.addEventListener('click', (e)=> e.stopPropagation());
 
-            // Auto-open support (keeps previous behavior when requested)
             const autoOpenRaw = document.getElementById('autoopen-data')?.textContent || 'false';
             const autoOpen = String(autoOpenRaw).trim() === 'true';
             if (autoOpen && pages.length > 0) {
-              // auto-redirect to first page when autoOpen requested
               const id = pages[0] && pages[0].id;
               if (id) location.href = `/stats?plinkkId=${encodeURIComponent(id)}&autoRedirect=1`;
             }
           })();
-          // Tabs UX (comme la page Compte)
           (function(){
             const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
             const panels = {
@@ -268,7 +246,6 @@
                 if (k === key) el.classList.remove('hidden'); else el.classList.add('hidden');
               });
             }
-            // initial
             setActive('overview');
             tabButtons.forEach(btn => btn.addEventListener('click', () => {
               const key = btn.getAttribute('data-tab'); if (!key) return; setActive(key);
@@ -277,6 +254,5 @@
         </script>
       </main>
     </div>
-    <!-- profileMenuPanel logic is now handled in partials/header-dash.ejs -->
   </body>
   </html>

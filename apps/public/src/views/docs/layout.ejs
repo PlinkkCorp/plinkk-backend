@@ -247,7 +247,6 @@
 
     <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div class="grid grid-cols-12 gap-6">
-            <!-- Sidebar navigation (gauche) -->
             <aside class="col-span-12 lg:col-span-3">
                 <div class="sticky top-20">
                     <div class="mb-4">
@@ -357,7 +356,6 @@
             results.innerHTML = items.map(i => `<li><a class="block px-2 py-1 rounded hover:bg-slate-800" href="${i.path}"><strong>${i.title}</strong><br><span class="text-xs text-slate-400">${i.excerpt || ''}</span></a></li>`).join('');
         });
 
-        // Génère des IDs de titres et la TOC (H2/H3)
         function slugify(text) {
             return text.toLowerCase()
                 .replace(/\s+/g, '-')
@@ -409,7 +407,7 @@
 
             function convertHeadingEmojis(h) {
                 const text = h.textContent || '';
-                const last = text.trim().slice(-2); // some emojis are two chars
+                const last = text.trim().slice(-2);
                 const keys = Array.from(emojiMap.keys());
                 let matched = keys.find(k => text.endsWith(k));
                 if (!matched) {
@@ -427,7 +425,6 @@
             const allHeadings = Array.from(article.querySelectorAll('h1, h2, h3'));
             allHeadings.forEach(convertHeadingEmojis);
 
-            // H1 anchor copy with '#'
             const firstH1 = article.querySelector('h1');
             if (firstH1) {
                 if (!firstH1.id) firstH1.id = slugify(firstH1.textContent || '');
@@ -446,13 +443,11 @@
                 firstH1.appendChild(a);
             }
 
-            // Build TOC (H2/H3) and add anchors on H2/H3 with '#'
             const headings = Array.from(article.querySelectorAll('h2, h3'));
             const items = [];
             headings.forEach(h => {
                 if (!h.id) { h.id = slugify(h.textContent || ''); }
                 items.push({ id: h.id, text: h.textContent || '', level: h.tagName.toLowerCase() });
-                // Ajoute un lien d’ancrage (SVG '#') sur H2/H3
                 if (h.tagName === 'H2' || h.tagName === 'H3') {
                     const a = document.createElement('a');
                     a.href = '#' + h.id;
@@ -469,7 +464,6 @@
                     h.appendChild(a);
                 }
             });
-            // Group TOC by H2 and H3, collapsible
             const groups = [];
             let currentGroup = null;
             items.forEach(it => {
@@ -505,7 +499,6 @@
                 let activeId = null;
                 headings.forEach(h => { if (h.offsetTop <= scrollY) activeId = h.id; });
                 tocLinks.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + activeId); });
-                // auto-expand group containing active link
                 tocGroups.forEach(g => {
                     const links = Array.from(g.querySelectorAll('a'));
                     const contains = links.some(a => a.getAttribute('href') === '#' + activeId);
@@ -526,7 +519,6 @@
                 }
             });
 
-            // Mini TOC (premiers H2) sous H1
             const miniToc = document.getElementById('doc-mini-toc');
             const miniWrap = document.getElementById('doc-mini-toc-items');
             if (miniToc && miniWrap) {
@@ -546,7 +538,6 @@
             }
         }
 
-        // Back to top floating button
         const back = document.createElement('button');
         back.id = 'backToTop';
         back.className = 'rounded-full p-2 bg-slate-800/70 border border-slate-700 text-slate-200 hover:bg-slate-800 shadow';

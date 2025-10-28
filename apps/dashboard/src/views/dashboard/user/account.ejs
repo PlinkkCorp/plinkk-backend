@@ -1,14 +1,11 @@
 <%- include('../../partials/head.ejs', { title: 'Tableau de bord - Mon compte' ,
   description: 'Gère ton email, mot de passe et confidentialité du profil.' , robots: 'noindex,nofollow' }) %>
   <%- include('../../partials/header-dash.ejs') %>
-
-
     <main class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
 
       <%- include('../../partials/asside_dash.ejs', { active: 'account' }) %>
 
         <section class="col-span-12 lg:col-span-9 space-y-4">
-          <!-- Title simple (sans fond ni description) -->
           <div class="mb-4">
             <div class="flex items-center justify-between">
               <h1 class="text-2xl font-semibold">Mon compte</h1>
@@ -17,13 +14,10 @@
                 ➜</a>
             </div>
           </div>
-
-          <!-- Nouvelle interface: barre de catégories en haut + contenu en dessous (style édition) -->
           <div id="accountRoot"
             data-twofactor="<%= !!(user && ((user.totpSecret && user.totpSecret !== '') || user.twoFactorEnabled)) %>"
             data-user-email="<%= user.email %>">
             <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-0">
-              <!-- Top bar catégories -->
               <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-800/40 bg-transparent">
                 <nav class="flex gap-2 w-full" role="tablist" aria-label="Sections du compte">
                   <button class="tab-btn px-3 py-2 rounded-md text-sm font-medium bg-transparent text-slate-300"
@@ -35,7 +29,6 @@
                 </nav>
               </div>
 
-              <!-- Contenu des panneaux -->
               <div class="p-4">
                 <div id="panel-profile" class="tab-panel">
                   <div class="flex items-start gap-4">
@@ -208,25 +201,16 @@
                           type="submit">Changer le mot de passe</button>
                       </div>
                     </form>
-
-                    <!-- Confidentialité déplacée dans Sécurité & confidentialité -->
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
-          <!-- fin colonne -->
           </div>
         </section>
     </main>
-
-    <!-- Modal popup (initialement caché) -->
     <div id="deleteModal" class="fixed inset-0 hidden z-50 grid place-items-center">
-      <!-- Overlay -->
       <div class="absolute inset-0 bg-black/60 modal-overlay"></div>
-
-      <!-- Contenu du modal -->
       <div class="relative w-full max-w-lg mx-4">
         <div class="rounded-lg bg-slate-900/95 border border-slate-800/60 p-6 shadow-lg">
           <h3 class="text-lg font-semibold mb-2 text-red-200">Confirmer la suppression du compte</h3>
@@ -261,7 +245,6 @@
       </div>
     </div>
 
-    <!-- A2F Modal (utilisé par le JS d'activation) -->
     <div id="twoFactorModal" class="fixed inset-0 hidden z-50 grid place-items-center">
       <div id="twoFactorOverlay" class="absolute inset-0 bg-black/60"></div>
       <div class="relative w-full max-w-md mx-4">
@@ -298,7 +281,6 @@
       </div>
     </div>
 
-    <!-- Disable A2F Modal (collect OTP instead of prompt) -->
     <div id="disable2faModal" class="fixed inset-0 hidden z-50 grid place-items-center">
       <div class="absolute inset-0 bg-black/60" data-disable-overlay></div>
       <div class="relative w-full max-w-md mx-4">
@@ -321,13 +303,9 @@
       </div>
     </div>
 
-    <!-- Host modals supprimés: gestion inline dans l'onglet Sécurité -->
-
-    <!-- Toasts container pour les alertes in-page -->
     <div id="toasts" class="fixed top-4 right-4 z-50 flex flex-col items-end gap-2 pointer-events-none"></div>
 
     <script>
-      // helper: afficher un toast/in-page alert
       function showAlert(message, type = 'info', opts = {}) {
         const container = document.getElementById('toasts');
         if (!container) return console.log(message);
@@ -339,7 +317,6 @@
         el.style.opacity = '0';
         el.style.transition = 'opacity .2s, transform .2s';
         container.appendChild(el);
-        // force reflow
         void el.offsetWidth;
         el.style.opacity = '1';
         el.style.transform = 'translateY(0)';
@@ -372,10 +349,8 @@
 
           const file = input.files[0];
           if (!/^image\//i.test(file.type)) { setMsg('Fichier non valide (image requise).', false); return; }
-          // Note: le serveur limite à ~128 Ko; on garde 2 Mo côté client pour l’instant
           if (file.size > 2 * 1024 * 1024) { setMsg('Image trop lourde (max 2 Mo).', false); return; }
           try {
-            // Convertir le fichier en Data URL (base64) attendu par l'API /api/me/avatar
             const fileToDataUrl = (f) => new Promise((resolve, reject) => {
               const fr = new FileReader();
               fr.onload = () => resolve(fr.result);
@@ -430,7 +405,6 @@
     </script>
 
     <script>
-      // Simple tab switching pour la barre de catégories
       (function () {
         const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
         const panels = {
@@ -455,7 +429,6 @@
           });
         }
 
-        // initial
         setActive('profile');
 
         tabButtons.forEach(btn => btn.addEventListener('click', () => {
@@ -465,11 +438,8 @@
     </script>
 
     <script>
-      // Expose si la A2F est activée (valeur server-side) au JS client
-      // Expose si la A2F est activée (valeur server-side) au JS via data-attribute pour éviter l'injection directe
       const accountRoot = document.getElementById('accountRoot');
       const twoFactorEnabled = accountRoot ? accountRoot.getAttribute('data-twofactor') === 'true' : false;
-      // Email
       document.getElementById('formEmail')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
@@ -478,7 +448,6 @@
         const j = await res.json().catch(() => ({}));
         if (res.ok) {
           showAlert('Email mis à jour', 'success');
-          // mettre à jour dynamiquement l'affichage de l'email dans le header et mobile
           try {
             const newEmail = (j && j.email) ? j.email : payload.email;
             if (newEmail) {
@@ -486,15 +455,12 @@
                 el.textContent = newEmail;
               });
             }
-          } catch (err) {
-            // ignore
-          }
+          } catch (err) {}
         } else {
           showAlert(j.error || 'Erreur', 'error');
         }
       });
 
-      // Confidentialité par Plinkk
       window.addEventListener('load', () => {
         const accountRoot = document.getElementById('accountRoot');
         const userEmail = accountRoot?.getAttribute('data-user-email') || '';
@@ -502,7 +468,6 @@
         const chkPublic = document.getElementById('togglePublic');
         const chkEmail = document.getElementById('toggleEmailPublic');
 
-        // Charger la liste des plinkks depuis le template JSON
         let plinkkList = [];
         try {
           const tpl = document.getElementById('account-plinkks-data');
@@ -537,9 +502,7 @@
           const id = select?.value || '';
           const p = plinkkList.find(x => x.id === id) || null;
           if (!p) { if (chkPublic) chkPublic.checked = false; if (chkEmail) chkEmail.checked = false; return; }
-          // Public selon la propriété du plinkk
           if (typeof p.isPublic === 'boolean' && chkPublic) chkPublic.checked = !!p.isPublic;
-          // Email: requête la config pour savoir si affichageEmail est null (=> caché) ou non
           try {
             const res = await fetch(`/api/me/plinkks/${encodeURIComponent(id)}/config`);
             const j = await res.json().catch(() => ({}));
@@ -551,7 +514,6 @@
         refreshToggles();
         select?.addEventListener('change', refreshToggles);
 
-        // Toggle profil public (par plinkk)
         chkPublic?.addEventListener('change', async (e) => {
           const id = select?.value || '';
           if (!id) return;
@@ -567,7 +529,6 @@
           }
         });
 
-        // Toggle email public (par plinkk)
         chkEmail?.addEventListener('change', async (e) => {
           const id = select?.value || '';
           if (!id) return;
@@ -582,7 +543,6 @@
         });
       });
 
-      // Mot de passe
       document.getElementById('formPassword')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
@@ -592,7 +552,6 @@
         if (res.ok) showAlert('Mot de passe mis à jour', 'success'); else showAlert(j.error || 'Erreur', 'error');
       });
 
-      // Supprimer mon compte: nouveau flux avec bouton unique -> affiche formulaire
       (function () {
         const btnShow = document.getElementById('btnShowDelete');
         const modal = document.getElementById('deleteModal');
@@ -603,7 +562,6 @@
 
         if (!btnShow || !modal || !form) return;
 
-        // Ouvre le modal
         btnShow.addEventListener('click', () => {
           modal.classList.remove('hidden');
           setTimeout(() => {
@@ -612,21 +570,18 @@
           }, 100);
         });
 
-        // Ferme le modal (annuler)
         btnCancel?.addEventListener('click', () => {
           form.reset();
           modal.classList.add('hidden');
           if (errorMsg) { errorMsg.classList.add('hidden'); errorMsg.textContent = ''; }
         });
 
-        // Ferme le modal si on clique sur l'overlay
         modal.querySelector('.modal-overlay')?.addEventListener('click', () => {
           form.reset();
           modal.classList.add('hidden');
           if (errorMsg) { errorMsg.classList.add('hidden'); errorMsg.textContent = ''; }
         });
 
-        // Submit
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
           if (btnConfirm) btnConfirm.disabled = true;
@@ -635,7 +590,6 @@
           const fd = new FormData(form);
           const payload = Object.fromEntries(fd.entries());
 
-          // Validation minimale côté client
           if (!payload.password || String(payload.password).trim() === '') {
             if (errorMsg) { errorMsg.textContent = 'Entrez votre mot de passe.'; errorMsg.classList.remove('hidden'); }
             btnConfirm && (btnConfirm.disabled = false);
@@ -657,7 +611,6 @@
               btnConfirm && (btnConfirm.disabled = false);
               return;
             }
-            // Succès : fermer le modal et rediriger
             modal.classList.add('hidden');
             showAlert('Compte supprimé. Redirection...', 'success');
             setTimeout(() => { window.location.href = '/'; }, 1400);
@@ -670,7 +623,6 @@
         });
       })();
 
-      // Handlers for disable A2F modal (confirm/cancel/overlay)
       (function () {
         const disableModal = document.getElementById('disable2faModal');
         const btnCancel = document.getElementById('btnCancelDisable2fa');
@@ -708,7 +660,6 @@
         });
       })();
 
-      // A2F: gestion activation / désactivation
       (function () {
         const btnEnable = document.getElementById('btnEnable2fa');
         const btnDisable = document.getElementById('btnDisable2fa');
@@ -736,7 +687,6 @@
             if (otpauthEl) otpauthEl.value = data.otpauth;
           }
           modal.classList.remove('hidden');
-          // focus on close button for accessibility
           setTimeout(() => { btnClose?.focus(); }, 50);
         }
 
@@ -776,7 +726,6 @@
             closeBtn?.addEventListener('click', closeTips);
             open2faBtn?.addEventListener('click', () => { closeTips(); btnEnable?.click(); });
 
-            // bind Esc once
             if (!tips.dataset.bound) {
               const escHandler = (e) => { if (e.key === 'Escape') closeTips(); };
               document.addEventListener('keydown', escHandler);
@@ -784,7 +733,6 @@
             }
           }
 
-          // show modal and focus first actionable element
           tips.classList.remove('hidden');
           setTimeout(() => {
             const cb = tips.querySelector('[data-tips-open-2fa]');
@@ -798,7 +746,6 @@
             const res = await fetch('/api/me/2fa', { method: 'POST' });
             const j = await res.json().catch(() => ({}));
             if (!res.ok) {
-              // afficher l'erreur sous l'input de confirmation (texte rouge)
               (function () {
                 const inputConfirmOtp = document.getElementById('twoFactorConfirmOtp');
                 let errEl = document.getElementById('twoFactorError');
@@ -817,11 +764,9 @@
               })();
               return;
             }
-            // API retourne { qrCode, otpauth } si activation (totpSecret was empty), else { successful: true }
             if (j.qrCode || j.otpauth) {
               await open2faModalWith(j);
             } else if (j.successful) {
-              // Désactivation côté serveur (rare ici)
               location.reload();
             } else {
               showAlert('Réponse inattendue', 'error');
@@ -834,8 +779,6 @@
           }
         });
 
-        // Désactivation : demander OTP et l'envoyer
-        // Désactivation : ouvre un modal pour saisir l'OTP au lieu d'utiliser prompt()
         btnDisable?.addEventListener('click', async () => {
           const disableModal = document.getElementById('disable2faModal');
           const disableOtp = document.getElementById('disable2faOtp');
@@ -847,7 +790,6 @@
           setTimeout(() => { disableOtp && disableOtp.focus(); }, 50);
         });
 
-        // Confirmer l'activation via le OTP saisi dans la modal
         const btnConfirm2fa = document.getElementById('btnConfirm2fa');
         const inputConfirmOtp = document.getElementById('twoFactorConfirmOtp');
         btnConfirm2fa?.addEventListener('click', async () => {
@@ -860,7 +802,6 @@
             if (!res.ok) { showAlert(j.error || 'Code invalide', 'error'); return; }
             if (j.successful) {
               showAlert('A2F activée avec succès', 'success');
-              // masquer le bouton confirmer et montrer le bouton reload
               document.getElementById('btnReloadAfter2fa')?.classList.remove('hidden');
               btnConfirm2fa.classList.add('hidden');
             } else {
@@ -869,19 +810,16 @@
           } catch (err) { console.error(err); showAlert('Erreur réseau', 'error'); } finally { btnConfirm2fa.disabled = false; }
         });
 
-        // Fermeture modal
         btnClose?.addEventListener('click', () => { modal.classList.add('hidden'); });
         overlay?.addEventListener('click', () => { modal.classList.add('hidden'); });
         btnReload?.addEventListener('click', () => { location.reload(); });
       })();
     </script>
 
-    <!-- Données Plinkk sérialisées (inertes) pour la section Domaines -->
     <template id="account-plinkks-data"><%- JSON.stringify((typeof plinkks !=='undefined' ) ? plinkks : ((typeof pages
         !=='undefined' ) ? pages : [])) %></template>
 
     <script>
-      // Gestion Domaines (inline, par Plinkk)
       (function () {
         const selectPlinkk = document.getElementById('domainPlinkkSelect');
         const inputHost = document.getElementById('domainHostname');
@@ -894,7 +832,6 @@
 
         if (!selectPlinkk || !inputHost) return;
 
-        // Injecter la liste des plinkks depuis la variable globale définie juste avant
         let list = [];
         try {
           const tpl = document.getElementById('account-plinkks-data');

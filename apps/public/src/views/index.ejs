@@ -28,7 +28,6 @@
 }) %>
 <%- include('partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
 
-    <!-- Hero -->
     <section class="relative overflow-hidden">
       <div class="absolute inset-0 bg-gradient-to-b from-[#4338CA]/10 via-[#A21CAF]/8 to-transparent pointer-events-none"></div>
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 pb-14">
@@ -72,7 +71,6 @@
       </div>
     </section>
 
-    <!-- Fonctionnalités phares -->
 <section id="highlights" class="py-14">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <h2 class="text-2xl sm:text-3xl font-semibold brand-gradient">Fonctionnalités phares</h2>
@@ -125,7 +123,6 @@
   </div>
 </section>
 
-<!-- À propos : Pourquoi, Pour qui et Comment ça marche (modernisé) -->
 <section id="about" class="py-16">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="sm:flex sm:items-center sm:justify-between gap-6">
@@ -140,13 +137,11 @@
     </div>
 
     <div class="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-      <!-- Left: Feature showcase -->
       <div class="lg:col-span-2 grid gap-6 grid-cols-1 md:grid-cols-2">
         <article class="group relative overflow-hidden rounded-2xl p-6 bg-gradient-to-b from-slate-900/60 to-slate-900/30 border border-slate-800/60 backdrop-blur-sm hover:shadow-xl transition">
           <div class="flex items-start gap-4">
             <div class="flex-none">
               <div class="h-12 w-12 rounded-xl bg-gradient-to-tr from-indigo-500 to-fuchsia-500 flex items-center justify-center text-white shadow-md">
-                <!-- control icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v18M3 12h18" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </div>
             </div>
@@ -165,7 +160,6 @@
           <div class="flex items-start gap-4">
             <div class="flex-none">
               <div class="h-12 w-12 rounded-xl bg-gradient-to-tr from-emerald-400 to-blue-500 flex items-center justify-center text-white shadow-md">
-                <!-- design icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7h18M3 12h18M3 17h18" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </div>
             </div>
@@ -184,7 +178,6 @@
           <div class="flex items-start gap-4">
             <div class="flex-none">
               <div class="h-12 w-12 rounded-xl bg-gradient-to-tr from-amber-400 to-rose-500 flex items-center justify-center text-white shadow-md">
-                <!-- scale icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </div>
             </div>
@@ -203,7 +196,6 @@
           <div class="flex items-start gap-4">
             <div class="flex-none">
               <div class="h-12 w-12 rounded-xl bg-gradient-to-tr from-indigo-400 to-cyan-500 flex items-center justify-center text-white shadow-md">
-                <!-- collaboration icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
@@ -223,8 +215,6 @@
           </div>
         </article>
       </div>
-
-      <!-- Right: How it works (stepper) -->
       <aside class="rounded-2xl p-6 border border-slate-800/60 bg-slate-900/40 backdrop-blur-sm shadow-sm">
         <h3 class="text-lg font-semibold text-white">Comment ça marche</h3>
         <p class="mt-2 text-slate-400 text-sm">3 étapes rapides pour être en ligne.</p>
@@ -266,8 +256,6 @@
     </div>
   </div>
 </section>
-
-    <!-- Team / Devs -->
     <section id="team" class="py-14">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
   <h2 class="text-2xl sm:text-3xl font-semibold brand-gradient">Les développeurs</h2>
@@ -290,8 +278,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Call to action -->
     <section class="py-12">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="glass rounded-2xl px-6 py-8 border border-slate-800/60 flex flex-col md:flex-row items-center justify-between gap-4 ring-brand">
@@ -311,11 +297,9 @@
       const btn = document.getElementById('menuBtn');
       const menu = document.getElementById('mobileMenu');
       if (btn && menu) { btn.addEventListener('click', ()=> { menu.classList.toggle('hidden'); }); }
-      // Tabs aperçu héro
       const snapImg = document.getElementById('snapImage');
       const snapTabs = document.querySelectorAll('.snap-tab');
       const snapMap = { editor: '/public/images/landing/editor.svg', profile: '/public/images/landing/profile.svg', dashboard: '/public/images/landing/dashboard.svg' };
-      // Précharge les images pour un switch instantané
       Object.values(snapMap).forEach((url)=>{ const img = new Image(); img.src = url; });
       if (snapTabs && snapTabs.length && snapImg) {
         snapTabs.forEach(t => t.addEventListener('click', () => {
@@ -325,7 +309,6 @@
           t.setAttribute('aria-selected','true');
           const key = t.getAttribute('data-snap');
           const src = snapMap[key] || snapMap.editor;
-          // Ajoute un cache-busting pour forcer la mise à jour du SVG
           snapImg.src = src + '?v=' + Date.now();
         }));
       }

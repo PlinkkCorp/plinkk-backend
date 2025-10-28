@@ -1,7 +1,5 @@
-  <!-- Header -->
   <% if (typeof dashboardUrl === 'undefined' || !dashboardUrl) { dashboardUrl = '/dashboard'; } %>
     <header class="sticky top-0 z-30 bg-[#0B1020]/60 backdrop-blur border-b border-slate-800/50" style="position: sticky">
-      <!-- SPA top loader (fixed, NProgress-like) -->
       <style>
         #spaTopLoader { position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 10000; pointer-events: none; opacity: 0; transition: opacity .15s ease; }
         #spaTopLoader.active { opacity: 1; }
@@ -17,7 +15,6 @@
         </a>
         <nav class="hidden md:flex items-center gap-6 text-sm text-slate-300">
           <a href="/about" class="hover:text-white">À propos</a>
-          
           <a href="/users" class="hover:text-white">Utilisateurs</a>
           <a href="<%= dashboardUrl %>" class="hover:text-white">Dashboard</a>
         </nav>
@@ -36,7 +33,6 @@
                 <svg class="w-4 h-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
               </button>
               <div id="accountPanel" class="absolute right-0 top-full mt-2 w-auto min-w-[18rem] max-w-sm rounded-xl border border-slate-800/70 bg-slate-900/95 backdrop-blur shadow-xl p-2 hidden">
-                <!-- Account card -->
                 <div class="flex items-center gap-3 px-3 py-2">
                   <div class="h-10 w-10 rounded-full grid place-items-center bg-indigo-700/70 font-semibold text-white overflow-hidden" data-avatar>
                     <%- include('avatar.ejs', { user: user }) %>
@@ -55,7 +51,6 @@
                   <a href="<%= dashboardUrl %>/account" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-md bg-slate-800/70 hover:bg-slate-800 border border-slate-700 text-slate-200">Gérer mon compte</a>
                 </div>
                 <div class="my-1 border-t border-slate-800"></div>
-                <!-- Quick links -->
                 <div class="grid grid-cols-2 gap-2 px-2 py-2">
                   <a href="/<%= user.id %>" class="px-3 py-2 text-xs rounded-md border border-slate-700 bg-slate-800/60 hover:bg-slate-800">Voir mon profil</a>
                   <a href="<%= dashboardUrl %>/cosmetics" class="px-3 py-2 text-xs rounded-md border border-slate-700 bg-slate-800/60 hover:bg-slate-800">Cosmétiques</a>
@@ -107,7 +102,6 @@
           </div>
           <% }) %>
         <% } %>
-        <!-- Mobile -->
         <button id="menuBtn" class="md:hidden inline-flex items-center justify-center h-9 w-9 rounded-md border border-slate-800/60 text-slate-300 hover:text-white">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5"><path d="M3.75 6.75h16.5v1.5H3.75v-1.5Zm0 4.5h16.5v1.5H3.75v-1.5Zm0 4.5h16.5v1.5H3.75v-1.5Z"/></svg>
         </button>
@@ -115,7 +109,6 @@
       <div id="mobileMenu" class="md:hidden hidden border-t border-slate-800/60">
         <div class="px-4 py-3 space-y-2 text-sm">
           <a href="/about" class="block py-1 text-slate-300 hover:text-white">À propos</a>
-          
           <a href="/users" class="block py-1 text-slate-300 hover:text-white">Utilisateurs</a>
           <a href="<%= dashboardUrl %>" class="block py-1 text-slate-300 hover:text-white">Dashboard</a>
           <% if (typeof user !== 'undefined' && user) { %>
@@ -161,13 +154,12 @@
     </header>
     <script>
       (function(){
-        // Minimal SPA loader controller usable from anywhere
         const el = document.getElementById('spaTopLoader');
         const bar = document.getElementById('spaTopLoaderProg');
         let _active = false, _timer = null, _val = 0, _t0 = 0;
         const MIN_VISIBLE = 300; // ms
         function setProgress(p){ if (!bar) return; _val = Math.max(0, Math.min(100, p)); bar.style.width = _val + '%'; }
-        function tick(){ if (!_active) return; // ease towards 80%
+        function tick(){ if (!_active) return;
           const target = 80; const delta = Math.max(0.5, (target - _val) * 0.1); setProgress(_val + delta); _timer = setTimeout(tick, 200); }
         function start(){
           if (!el || !bar) return;
@@ -181,13 +173,10 @@
           const elapsed = Date.now() - _t0; const extra = Math.max(0, MIN_VISIBLE - elapsed);
           setTimeout(()=>{ el.classList.remove('active'); setProgress(0); _active = false; }, 250 + extra);
         }
-        // Expose programmatic API
         if (!window.__spaLoadingStart) window.__spaLoadingStart = start;
         if (!window.__spaLoadingEnd) window.__spaLoadingEnd = end;
-        // Listen to generic custom events
         window.addEventListener('spa:loading-start', start);
         window.addEventListener('spa:loading-end', end);
-        // Full navigation: start before unload, then finish after new page load
         window.addEventListener('beforeunload', ()=>{ try { sessionStorage.setItem('spa_nav','1'); start(); } catch{} });
         try {
           if (sessionStorage.getItem('spa_nav') === '1') {
@@ -197,7 +186,6 @@
             if (document.readyState === 'complete') fin(); else window.addEventListener('load', fin, { once: true });
           }
         } catch {}
-        // Automatic triggers for internal navigations (progressive enhancement)
         function isModifiedClick(e){ return e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0; }
         function isSameOrigin(url){ try { const u=new URL(url, location.href); return u.origin===location.origin; } catch { return false; } }
         function looksLikeHtmlRequest(url){ return isSameOrigin(url) && !/\.(?:png|jpe?g|webp|gif|svg|ico|css|js|map|json|txt|woff2?|ttf|otf)(?:[?#].*)?$/i.test(url); }
@@ -209,13 +197,10 @@
           if (a.target === '_blank' || a.download != null) return;
           if (isModifiedClick(e)) return;
           if (!looksLikeHtmlRequest(href)) return;
-          // Start loader; if it's a full navigation, page unload hides it; if SPA intercepts, fetch wrapper/end event should hide it.
           try { window.dispatchEvent(new Event('spa:loading-start')); } catch {}
-          // Safety net: auto-hide after 8s if nothing closes it (avoids stuck state on custom handlers)
           setTimeout(()=>{ try { window.dispatchEvent(new Event('spa:loading-end')); } catch {} }, 8000);
         }, true);
 
-        // Patch fetch to show loader for GET HTML navigations (not for /api/*)
         try {
           const origFetch = window.fetch.bind(window);
           let inflight = 0; const onBegin=()=>{ if (inflight++===0) window.dispatchEvent(new Event('spa:loading-start')); };
@@ -251,8 +236,6 @@
         const menuBtn = document.getElementById('menuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
         if (menuBtn && mobileMenu) menuBtn.addEventListener('click', ()=> mobileMenu.classList.toggle('hidden'));
-
-        // Account dropdown open/close
         const accountBtn = document.getElementById('accountBtn');
         const accountPanel = document.getElementById('accountPanel');
         const root = document.getElementById('accountMenuRoot');
@@ -280,6 +263,6 @@
             const btn = wrap.querySelector('button[id^="dismissSiteMessage"]');
             if (btn) btn.addEventListener('click', ()=>{ localStorage.setItem(key,'1'); wrap.style.display='none'; });
           });
-        } catch(e){ /* ignore */ }
+        } catch(e){}
       })();
     </script>

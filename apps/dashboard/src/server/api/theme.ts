@@ -1,14 +1,12 @@
 import { FastifyInstance } from "fastify";
 import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
-import { coerceThemeData } from "../../lib/theme";
+import { coerceThemeData } from "../../lib/theme copy";
 import { verifyRoleIsStaff } from "../../lib/verifyRole";
 import { generateTheme } from "../../lib/generateTheme";
 
 const prisma = new PrismaClient();
 
 export function apiThemeRoutes(fastify: FastifyInstance) {
-  // THEME APIs
-  // List approved themes (public)
   fastify.get("/approved", async (request, reply) => {
     const themes = await prisma.theme.findMany({
       where: { status: "APPROVED", isPrivate: false },
@@ -21,7 +19,6 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
       },
       orderBy: { createdAt: "desc" },
     });
-    // Ensure data has the shape expected by front
     const list = themes.map((t) => {
       let full;
       try {
@@ -41,15 +38,12 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     return reply.send(list);
   });
 
-  // List all themes: built-in + approved community themes (and optionally owner's themes if requested)
   fastify.get("/list", async (request, reply) => {
     const { userId } = request.query as { userId: string };
 
-    // Return built-ins first, then community and mine
     return reply.send(await generateTheme(userId));
   });
 
-  // Admin: approve a pending update -> replace data and clear pending
   fastify.post("/:id/approve-update", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
@@ -79,7 +73,6 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
-  // Admin: unarchive (republish) -> sets status APPROVED
   fastify.post("/:id/unarchive", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
@@ -98,7 +91,6 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
-  // Admin: archive a theme (any status) -> sets status ARCHIVED
   fastify.post("/:id/archive", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
@@ -117,7 +109,6 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
-  // Admin: approve / reject
   fastify.post("/:id/approve", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
@@ -156,7 +147,6 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     return reply.send(updated);
   });
 
-  // Admin: delete a theme (any status)
   fastify.delete("/:id", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });

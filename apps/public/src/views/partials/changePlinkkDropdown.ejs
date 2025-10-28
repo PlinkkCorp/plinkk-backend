@@ -1,4 +1,3 @@
-<%# Partial: reusable changePlinkk chooser (desktop + mobile) --%>
 <% if (typeof pages !== 'undefined' && Array.isArray(pages) && pages.length > 1) { %>
   <% const hasSelection = (typeof plinkk !== 'undefined' && plinkk); %>
   <div class="ml-2 relative inline-block text-left">
@@ -14,7 +13,6 @@
     </div>
   </div>
 
-  <!-- Mobile variant -->
   <div class="ml-2 relative inline-block text-left sm:hidden">
     <button id="changePlinkkBtnMobile" type="button" class="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-md border text-white focus:outline-none <%= hasSelection ? 'bg-slate-800 border-slate-700' : 'bg-slate-800/40 border-slate-700/40 cursor-not-allowed' %>" <%= hasSelection ? '' : 'disabled aria-disabled="true" data-needs-selection="1"' %>>
       <span id="changePlinkkBtnLabelMobile"><%= hasSelection && plinkk && plinkk.name ? plinkk.name : 'Veuillez sélectionner un plinkk' %></span>
@@ -29,12 +27,10 @@
   </div>
 <% } %>
 <script>
-// Show a small notice when the user was auto-redirected to the default plinkk
 (function(){
   try {
     const params = new URLSearchParams(location.search);
     if (params.get('autoRedirect') === '1') {
-        // create a small floating toast (non intrusive) instead of a full-width banner
         const toast = document.createElement('div');
         toast.className = 'fixed top-4 right-4 z-50 max-w-xs w-auto px-4 py-2 rounded-md text-sm bg-indigo-700 text-white shadow-lg flex items-center gap-3 transition-opacity duration-200';
         toast.setAttribute('role','status');
@@ -47,16 +43,14 @@
         closeBtn.addEventListener('click', () => { toast.remove(); });
         toast.appendChild(closeBtn);
         document.body.appendChild(toast);
-        // auto-hide after 5s
         setTimeout(() => {
           try { toast.style.opacity = '0'; } catch (e) {}
           setTimeout(() => { try { toast.remove(); } catch (e) {} }, 300);
         }, 5000);
-      // remove autoRedirect from URL
       params.delete('autoRedirect');
       const base = location.pathname + (params.toString() ? '?' + params.toString() : '') + location.hash;
       history.replaceState(null, '', base);
     }
-  } catch (e) { /* ignore */ }
+  } catch (e) {}
 })();
 </script>
