@@ -31,7 +31,7 @@ export async function replyView(
 ): Promise<string> {
   if (user === null) {
     return reply.code(statusCode).view(template, {
-      dashboardUrl: process.env.DASHBOARD_URL,
+      frontendUrl: process.env.FRONTEND_URL,
       ...data,
     });
   }
