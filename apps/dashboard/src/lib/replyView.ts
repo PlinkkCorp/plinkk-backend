@@ -52,7 +52,7 @@ export async function replyView(
     user: toSafeUser(user),
     isAdmin: isAdmin,
     isStaff: isStaff,
-    dashboardUrl: process.env.DASHBOARD_URL,
+    frontendUrl: process.env.FRONTEND_URL,
     ...data,
   });
 }
