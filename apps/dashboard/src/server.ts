@@ -26,6 +26,7 @@ import { replyView } from "./lib/replyView";
 import fastifyRateLimit from "@fastify/rate-limit";
 import "dotenv/config";
 import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
+import { generateTheme } from "./lib/generateTheme";
 
 const prisma = new PrismaClient();
 const fastify = Fastify({
@@ -106,14 +107,14 @@ fastify.register(fastifyCron, {
 
 fastify.addHook("onRequest", async (request, reply) => {
   const reservedRoots = new Set([
-        "favicon.ico",
-        "robots.txt",
-        "manifest.json",
-        "public",
-        "users"
-      ]);
+    "favicon.ico",
+    "robots.txt",
+    "manifest.json",
+    "public",
+    "users",
+  ]);
   if (request.url in reservedRoots) {
-    reply.redirect(process.env.FRONTEND_URL + request.url)
+    reply.redirect(process.env.FRONTEND_URL + request.url);
   }
 });
 
@@ -443,10 +444,7 @@ fastify.post("/login", async (request, reply) => {
     const candidateId = slugify(withoutAt);
     user = await prisma.user.findFirst({
       where: {
-        OR: [
-          { id: candidateId },
-          { userName: identifier },
-        ],
+        OR: [{ id: candidateId }, { userName: identifier }],
       },
       include: { role: true },
     });
@@ -467,13 +465,23 @@ fastify.post("/login", async (request, reply) => {
     );
 
   try {
-    const ban = await prisma.bannedEmail.findFirst({ where: { email: user.email, revoquedAt: null } });
+    const ban = await prisma.bannedEmail.findFirst({
+      where: { email: user.email, revoquedAt: null },
+    });
     if (ban) {
       const isActive =
-        ban.time == null || ban.time < 0 || new Date(ban.createdAt).getTime() + ban.time * 60000 > Date.now();
+        ban.time == null ||
+        ban.time < 0 ||
+        new Date(ban.createdAt).getTime() + ban.time * 60000 > Date.now();
       if (isActive) {
-        const msg = `Votre compte a été banni pour la raison suivante: ${ban.reason || "Violation des règles"}. Veuillez contacter l'administration pour plus de détails à contact@plinkk.fr`;
-        return reply.redirect(`/login?error=${encodeURIComponent(msg)}&email=${encodeURIComponent(identifier)}`);
+        const msg = `Votre compte a été banni pour la raison suivante: ${
+          ban.reason || "Violation des règles"
+        }. Veuillez contacter l'administration pour plus de détails à contact@plinkk.fr`;
+        return reply.redirect(
+          `/login?error=${encodeURIComponent(msg)}&email=${encodeURIComponent(
+            identifier
+          )}`
+        );
       }
     }
   } catch (e) {}
@@ -586,6 +594,17 @@ fastify.get("/logout", (req, reply) => {
   } catch (e) {}
   reply.redirect("/login");
 });
+
+fastify.get(
+  "/themes.json",
+  { config: { rateLimit: false } },
+  async function (request, reply) {
+    const { userId } = request.query as { userId: string };
+
+    // Return built-ins first, then community and mine
+    return reply.send(await generateTheme(userId));
+  }
+);
 
 fastify.get("/*", async (request, reply) => {
   const url = request.raw.url || "";
