@@ -946,4 +946,23 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       .map(([date, v]) => ({ date, ...v }));
     return reply.send({ from: fmt(start), to: fmt(end), roles, series });
   });
+
+  fastify.get("/roles", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin/roles")}`);
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, include: { role: true } });
+    if (!userInfo) return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin/roles")}`);
+    if (!verifyRoleIsStaff(userInfo.role)) return reply.redirect("/");
+    // Pré-chargement minimal des rôles pour affichage initial
+    // Utilisation de cast any pour éviter les erreurs de typage avant régénération Prisma
+    const roles = await (prisma as any).role.findMany({
+      include: { permissions: { include: { permission: true } } },
+      orderBy: [{ priority: 'desc' }, { name: 'asc' }]
+    });
+    const perms = await (prisma as any).permission.findMany({ orderBy: [{ category: 'asc' }, { key: 'asc' }] });
+    const grouped: Record<string, any[]> = {};
+    for (const p of perms) { grouped[p.category] = grouped[p.category] || []; grouped[p.category].push(p); }
+    let publicPath; try { const def = await prisma.plinkk.findFirst({ where: { userId: userInfo.id, isDefault: true } }); publicPath = def && def.slug ? def.slug : userInfo.id; } catch {}
+    return replyView(reply, 'dashboard/admin/roles.ejs', userInfo, { roles, permissionsGrouped: grouped, publicPath });
+  });
 }

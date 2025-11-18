@@ -1,0 +1,213 @@
+<%- include('../../partials/head.ejs', { title: 'Admin - Rôles & Permissions', description: 'Gestion des rôles et permissions', robots: 'noindex,nofollow' }) %>
+<%- include('../../partials/header-dash.ejs', { user: user }) %>
+<%- include('../../partials/admin-nav.ejs', { user: user }) %>
+<main class="max-w-7xl mx-auto p-4">
+  <div class="mb-4">
+    <h1 class="text-2xl font-bold tracking-tight">Rôles & Permissions</h1>
+    <p class="text-xs text-slate-400">UI façon Discord — rôles à gauche, permissions à droite.</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+    <!-- Colonne gauche: liste des rôles + création -->
+    <aside class="md:col-span-3 rounded-lg border border-slate-800/70 bg-slate-900/60 overflow-hidden">
+      <div class="p-3 border-b border-slate-800/70">
+        <form id="createRoleForm" class="flex items-center gap-2">
+          <input name="name" placeholder="Nouveau rôle (ex: PARTNER)" class="flex-1 px-2 py-1 rounded bg-slate-900/60 border border-slate-700 text-sm" />
+          <button type="submit" class="px-2 py-1 rounded bg-indigo-600 text-white text-xs">Créer</button>
+        </form>
+        <div id="createRoleStatus" class="text-[11px] text-slate-400 mt-1"></div>
+      </div>
+      <div id="rolesList" class="max-h-[70vh] overflow-auto">
+        <!-- items -->
+      </div>
+      <div id="rolesEmpty" class="hidden p-3 text-xs text-slate-400">Aucun rôle.</div>
+    </aside>
+
+    <!-- Colonne droite: permissions du rôle sélectionné -->
+    <section class="md:col-span-9 rounded-lg border border-slate-800/70 bg-slate-900/60 p-4" id="rightPane">
+      <div id="roleHeader" class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/70 pb-3 mb-4">
+        <div>
+          <div class="text-xs text-slate-400">Rôle sélectionné</div>
+          <h2 id="selRoleName" class="text-lg font-semibold">—</h2>
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+          <label class="inline-flex items-center gap-2"><input id="selRoleIsStaff" type="checkbox" class="h-4 w-4 rounded border-slate-600" /> Staff</label>
+          <label class="inline-flex items-center gap-2">Priorité <input id="selRolePriority" type="number" class="w-16 px-2 py-1 rounded bg-slate-900/60 border border-slate-700" /></label>
+          <label class="inline-flex items-center gap-2">Max Plinkks <input id="selRoleMaxPlinkks" type="number" class="w-16 px-2 py-1 rounded bg-slate-900/60 border border-slate-700" /></label>
+          <label class="inline-flex items-center gap-2">Max Thèmes <input id="selRoleMaxThemes" type="number" class="w-16 px-2 py-1 rounded bg-slate-900/60 border border-slate-700" /></label>
+          <button id="btnSaveRole" class="px-2 py-1 rounded bg-indigo-600 text-white">Enregistrer</button>
+          <button id="btnDeleteRole" class="px-2 py-1 rounded bg-rose-600 text-white">Supprimer</button>
+        </div>
+      </div>
+
+      <div id="permissionsPanel" class="grid md:grid-cols-2 gap-4">
+        <% Object.keys(permissionsGrouped).forEach(cat => { %>
+          <div class="rounded border border-slate-800/60 bg-slate-900/50">
+            <div class="px-3 py-2 text-xs font-semibold text-slate-300 border-b border-slate-800/60"><%= cat %></div>
+            <div class="p-2 space-y-1">
+              <% permissionsGrouped[cat].forEach(p => { %>
+                <div class="flex items-center justify-between gap-2 text-xs px-2 py-2 rounded hover:bg-slate-800/40">
+                  <div class="flex items-center gap-2">
+                    <code class="px-1 py-0.5 bg-slate-800/80 rounded text-[10px] text-indigo-300"><%= p.key %></code>
+                    <span class="text-slate-400"><%= p.description || '' %></span>
+                  </div>
+                  <label class="inline-flex items-center cursor-pointer select-none">
+                    <input type="checkbox" class="perm-toggle sr-only" data-key="<%= p.key %>">
+                    <span class="w-9 h-5 bg-slate-700 rounded-full relative transition">
+                      <span class="dot absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition"></span>
+                    </span>
+                  </label>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+      <div id="noRoleHint" class="text-xs text-slate-400">Sélectionnez un rôle pour voir et modifier ses permissions.</div>
+    </section>
+  </div>
+</main>
+
+<script>
+(function(){
+  const $ = (s,r=document)=>r.querySelector(s);
+  const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
+  const rolesData = <%- JSON.stringify(roles.map(r=>({id:r.id,name:r.name,isStaff:r.isStaff,priority:r.priority,color:r.color,maxPlinkks:r.maxPlinkks,maxThemes:r.maxThemes,permissions:r.permissions.map(p=>p.permission.key)}))) %>;
+  let selectedRoleId = rolesData[0]?.id || null;
+
+  // Rendu colonne gauche
+  function renderRolesList(){
+    const list = $('#rolesList'); list.innerHTML='';
+    if(!rolesData.length){ $('#rolesEmpty').classList.remove('hidden'); return; } else { $('#rolesEmpty').classList.add('hidden'); }
+    rolesData.forEach(r=>{
+      const a = document.createElement('button');
+      a.type='button';
+      a.className = 'w-full text-left px-3 py-2 text-sm border-b border-slate-800/60 hover:bg-slate-800/50 ' + (r.id===selectedRoleId?'bg-slate-800/60':'');
+      a.setAttribute('data-id', r.id);
+      a.innerHTML = `<div class='flex items-center justify-between'>
+        <span class='font-medium text-slate-200'>${r.name}</span>
+        ${r.isStaff?"<span class='text-[10px] px-1 py-0.5 rounded bg-amber-600/30 border border-amber-600 text-amber-300'>STAFF</span>":''}
+      </div>`;
+      list.appendChild(a);
+    });
+  }
+
+  // Rendu panneau droit selon rôle
+  function renderRight(){
+    const role = rolesData.find(r=>r.id===selectedRoleId);
+    const hint = $('#noRoleHint');
+    if(!role){ hint.classList.remove('hidden'); $('#roleHeader').classList.add('opacity-50'); return; }
+    hint.classList.add('hidden'); $('#roleHeader').classList.remove('opacity-50');
+    $('#selRoleName').textContent = role.name;
+    $('#selRoleIsStaff').checked = !!role.isStaff;
+    $('#selRolePriority').value = Number(role.priority||0);
+    $('#selRoleMaxPlinkks').value = Number(role.maxPlinkks||1);
+    $('#selRoleMaxThemes').value = Number(role.maxThemes||0);
+    const current = new Set(role.permissions || []);
+    $$('.perm-toggle').forEach(chk=>{
+      const key = chk.getAttribute('data-key');
+      const on = current.has(key);
+      chk.checked = on;
+      // style du switch
+      const wrap = chk.parentElement.querySelector('span');
+      const dot = wrap.querySelector('.dot');
+      applySwitchStyle(wrap, dot, on);
+    });
+  }
+
+  function applySwitchStyle(track, dot, on){
+    if(on){
+      track.classList.remove('bg-slate-700');
+      track.classList.add('bg-indigo-600');
+      dot.style.transform = 'translateX(1rem)';
+    } else {
+      track.classList.add('bg-slate-700');
+      track.classList.remove('bg-indigo-600');
+      dot.style.transform = 'translateX(0)';
+    }
+  }
+
+  // Events
+  $('#rolesList').addEventListener('click', (ev)=>{
+    const btn = ev.target.closest('button[data-id]');
+    if(!btn) return;
+    selectedRoleId = btn.getAttribute('data-id');
+    renderRolesList();
+    renderRight();
+  });
+
+  $('#createRoleForm').addEventListener('submit', async (ev)=>{
+    ev.preventDefault();
+    const fd = new FormData(ev.currentTarget);
+    const payload = { name: fd.get('name') };
+    const res = await fetch('/api/admin/roles', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    const status = $('#createRoleStatus');
+    if(res.ok){
+      const j = await res.json();
+      rolesData.push({ id: j.roleId, name: String(payload.name).toUpperCase(), isStaff:false, priority:0, color:null, maxPlinkks:1, maxThemes:0, permissions:[] });
+      selectedRoleId = j.roleId;
+      renderRolesList(); renderRight();
+      status.textContent = 'Créé ✔'; status.className='text-emerald-400 text-[11px] mt-1';
+      ev.currentTarget.reset();
+    } else {
+      status.textContent = 'Erreur '+res.status; status.className='text-rose-400 text-[11px] mt-1';
+    }
+  });
+
+  // Sauvegarde infos du rôle sélectionné
+  $('#btnSaveRole').addEventListener('click', async ()=>{
+    const roleId = selectedRoleId; if(!roleId) return;
+    const payload = {
+      isStaff: $('#selRoleIsStaff').checked,
+      priority: Number($('#selRolePriority').value||0),
+      maxPlinkks: Number($('#selRoleMaxPlinkks').value||1),
+      maxThemes: Number($('#selRoleMaxThemes').value||0),
+    };
+    const res = await fetch('/api/admin/roles/'+roleId, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    if(res.ok){
+      const r = rolesData.find(x=>x.id===roleId); if(r) Object.assign(r, payload);
+      renderRolesList();
+    } else alert('Échec de la sauvegarde');
+  });
+
+  // Suppression du rôle
+  $('#btnDeleteRole').addEventListener('click', async ()=>{
+    const roleId = selectedRoleId; if(!roleId) return;
+    if(!confirm('Supprimer ce rôle ?')) return;
+    const res = await fetch('/api/admin/roles/'+roleId, { method:'DELETE' });
+    if(res.ok){
+      const idx = rolesData.findIndex(r=>r.id===roleId);
+      if(idx>=0) rolesData.splice(idx,1);
+      selectedRoleId = rolesData[0]?.id || null;
+      renderRolesList(); renderRight();
+    } else alert('Impossible de supprimer (rôle utilisé ?)');
+  });
+
+  // Bascules permissions
+  $('#permissionsPanel').addEventListener('change', async (ev)=>{
+    const chk = ev.target.closest('.perm-toggle'); if(!chk) return;
+    const key = chk.getAttribute('data-key'); const roleId = selectedRoleId; if(!roleId) return;
+    const on = chk.checked;
+    const track = chk.parentElement.querySelector('span');
+    const dot = track.querySelector('.dot');
+    applySwitchStyle(track, dot, on);
+    const body = on ? { addPermissions:[key] } : { removePermissions:[key] };
+    const res = await fetch('/api/admin/roles/'+roleId, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    if(res.ok){
+      const r = rolesData.find(x=>x.id===roleId); if(!r) return;
+      if(on){ if(!r.permissions.includes(key)) r.permissions.push(key); }
+      else { r.permissions = r.permissions.filter(p=>p!==key); }
+    } else {
+      // revert
+      chk.checked = !on; applySwitchStyle(track, dot, !on);
+      alert('Échec de mise à jour de la permission');
+    }
+  });
+
+  // Init
+  renderRolesList();
+  renderRight();
+})();
+</script>
+</body>
+</html>
