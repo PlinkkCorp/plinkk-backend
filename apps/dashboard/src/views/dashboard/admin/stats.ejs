@@ -75,6 +75,11 @@
                   </div>
                   <span class="text-xs text-slate-300">Chargement…</span>
                 </div>
+                <div id="err1" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900/60">
+                  <div class="text-xs text-rose-400 font-medium">Erreur de chargement des inscriptions.</div>
+                  <button type="button" class="px-2 py-1 text-xs rounded bg-rose-600 text-white" onclick="window.__retrySU1?.()">Réessayer</button>
+                </div>
+                <div id="empty1" class="hidden absolute inset-0 flex items-center justify-center text-xs text-slate-400">Aucune donnée</div>
               </div>
               <aside class="lg:col-span-1">
                 <div class="p-3">
@@ -118,6 +123,11 @@
               <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2"></div>
               <span class="text-xs text-slate-300">Chargement…</span>
             </div>
+            <div id="err2" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900/60">
+              <div class="text-xs text-rose-400 font-medium">Erreur de chargement (visibilité).</div>
+              <button type="button" class="px-2 py-1 text-xs rounded bg-rose-600 text-white" onclick="window.__retrySU2?.()">Réessayer</button>
+            </div>
+            <div id="empty2" class="hidden absolute inset-0 flex items-center justify-center text-xs text-slate-400">Aucune donnée</div>
           </div>
           <div class="mt-2 flex items-center gap-3 text-xs text-slate-400">
             <span class="inline-flex items-center gap-1"><span
@@ -141,6 +151,11 @@
               <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2"></div>
               <span class="text-xs text-slate-300">Chargement…</span>
             </div>
+            <div id="err3" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900/60">
+              <div class="text-xs text-rose-400 font-medium">Erreur de chargement (rôles).</div>
+              <button type="button" class="px-2 py-1 text-xs rounded bg-rose-600 text-white" onclick="window.__retrySU3?.()">Réessayer</button>
+            </div>
+            <div id="empty3" class="hidden absolute inset-0 flex items-center justify-center text-xs text-slate-400">Aucune donnée</div>
           </div>
           <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-400">
             <span class="inline-flex items-center gap-1"><span
@@ -168,6 +183,11 @@
               <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2"></div>
               <span class="text-xs text-slate-300">Chargement…</span>
             </div>
+            <div id="err4" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900/60">
+              <div class="text-xs text-rose-400 font-medium">Erreur de chargement (cumul).</div>
+              <button type="button" class="px-2 py-1 text-xs rounded bg-rose-600 text-white" onclick="window.__retrySU4?.()">Réessayer</button>
+            </div>
+            <div id="empty4" class="hidden absolute inset-0 flex items-center justify-center text-xs text-slate-400">Aucune donnée</div>
           </div>
         </section>
 
@@ -185,6 +205,11 @@
               <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2"></div>
               <span class="text-xs text-slate-300">Chargement…</span>
             </div>
+            <div id="errL" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900/60">
+              <div class="text-xs text-rose-400 font-medium">Erreur de chargement des connexions.</div>
+              <button type="button" class="px-2 py-1 text-xs rounded bg-rose-600 text-white" onclick="window.__retryL?.()">Réessayer</button>
+            </div>
+            <div id="emptyL" class="hidden absolute inset-0 flex items-center justify-center text-xs text-slate-400">Aucune donnée</div>
           </div>
           <div class="mt-4">
             <h3 class="text-sm text-slate-300 mb-2">Connexions récentes</h3>
@@ -206,6 +231,11 @@
               <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2"></div>
               <span class="text-xs text-slate-300">Chargement…</span>
             </div>
+            <div id="errB" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900/60">
+              <div class="text-xs text-rose-400 font-medium">Erreur de chargement des bans.</div>
+              <button type="button" class="px-2 py-1 text-xs rounded bg-rose-600 text-white" onclick="window.__retryB?.()">Réessayer</button>
+            </div>
+            <div id="emptyB" class="hidden absolute inset-0 flex items-center justify-center text-xs text-slate-400">Aucune donnée</div>
           </div>
           <div class="mt-3 text-xs text-slate-400" id="banSummary"></div>
         </section>
@@ -410,42 +440,42 @@
               from: $('#from').value,
               to: $('#to').value,
             });
-            const res = await fetch(`/dashboard/admin/stats/users/series?${q.toString()}`);
+            const res = await fetch(`/admin/stats/users/series?${q.toString()}`);
             if (!res.ok) throw new Error('HTTP ' + res.status);
             return res.json();
           }
           async function fetchSummary() {
             const q = new URLSearchParams({ from: $('#from').value, to: $('#to').value });
-            const res = await fetch(`/dashboard/admin/stats/users/summary?${q.toString()}`);
+            const res = await fetch(`/admin/stats/users/summary?${q.toString()}`);
             if (!res.ok) throw new Error('HTTP ' + res.status);
             return res.json();
           }
           async function fetchLoginsSeries() {
             const q = new URLSearchParams({ from: $('#from').value, to: $('#to').value });
-            const res = await fetch(`/dashboard/admin/stats/logins/series?${q.toString()}`);
+            const res = await fetch(`/admin/stats/logins/series?${q.toString()}`);
             if (!res.ok) throw new Error('HTTP ' + res.status); return res.json();
           }
           async function fetchRecentLogins() {
-            const res = await fetch(`/dashboard/admin/stats/logins/recent?limit=20`);
+            const res = await fetch(`/admin/stats/logins/recent?limit=20`);
             if (!res.ok) throw new Error('HTTP ' + res.status); return res.json();
           }
           async function fetchBansSeries() {
             const q = new URLSearchParams({ from: $('#from').value, to: $('#to').value });
-            const res = await fetch(`/dashboard/admin/stats/bans/series?${q.toString()}`);
+            const res = await fetch(`/admin/stats/bans/series?${q.toString()}`);
             if (!res.ok) throw new Error('HTTP ' + res.status); return res.json();
           }
 
 
           async function fetchSeriesByVisibility() {
             const q = new URLSearchParams({ from: $('#from').value, to: $('#to').value });
-            const res = await fetch(`/dashboard/admin/stats/users/series/by-visibility?${q.toString()}`);
+            const res = await fetch(`/admin/stats/users/series/by-visibility?${q.toString()}`);
             if (!res.ok) throw new Error('HTTP ' + res.status);
             return res.json();
           }
 
           async function fetchSeriesByRole() {
             const q = new URLSearchParams({ from: $('#from').value, to: $('#to').value });
-            const res = await fetch(`/dashboard/admin/stats/users/series/by-role?${q.toString()}`);
+            const res = await fetch(`/admin/stats/users/series/by-role?${q.toString()}`);
             if (!res.ok) throw new Error('HTTP ' + res.status);
             return res.json();
           }
@@ -558,18 +588,6 @@
             if (hoverIndex >= 0 && hoverIndex < labels.length) { const x = padL + hoverIndex * stepX; const y = padT + innerH - data[hoverIndex] * scaleY; ctxL.strokeStyle = 'rgba(6,182,212,0.35)'; ctxL.beginPath(); ctxL.moveTo(x, padT); ctxL.lineTo(x, padT + innerH); ctxL.stroke(); ctxL.fillStyle = '#a5f3fc'; ctxL.beginPath(); ctxL.arc(x, y, 4, 0, Math.PI * 2); ctxL.fill(); const rect = wrapL.getBoundingClientRect(); const ttX = Math.min(rect.width - 140, Math.max(8, x + 8)); const ttY = Math.max(8, y - 10); ttL.textContent = `${labels[hoverIndex]} — ${data[hoverIndex]} connexions`; ttL.style.left = ttX + 'px'; ttL.style.top = ttY + 'px'; ttL.classList.remove('hidden'); } else { ttL.classList.add('hidden'); }
           }
 
-          async function applyLogins() {
-            try {
-              document.getElementById('loadL')?.classList.remove('hidden');
-              const [payload, recent] = await Promise.all([fetchLoginsSeries(), fetchRecentLogins()]);
-              document.getElementById('rangeLabelL').textContent = `${payload.from} → ${payload.to}`;
-              renderChartL(payload);
-              const list = recent.users || [];
-              const fmt = (s) => new Date(s).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
-              document.getElementById('recentLogins').innerHTML = list.map(u => `<div class='flex items-center justify-between gap-2 border border-slate-800 rounded px-2 py-1.5'><span class='truncate'>@${u.userName} <span class='text-slate-400'>(${u.email})</span></span><span class='text-slate-400'>${fmt(u.lastLogin)}</span></div>`).join('');
-            } catch (e) { console.error(e); }
-            finally { document.getElementById('loadL')?.classList.add('hidden'); }
-          }
 
           const ctxB = document.getElementById('chartBans')?.getContext('2d');
           const wrapB = document.getElementById('chartBWrap');
@@ -594,16 +612,6 @@
             if (hoverIndex >= 0 && hoverIndex < labels.length) { const x = padL + hoverIndex * stepX; ctxB.strokeStyle = 'rgba(148,163,184,0.35)'; ctxB.beginPath(); ctxB.moveTo(x, padT); ctxB.lineTo(x, padT + innerH); ctxB.stroke(); const rect = wrapB.getBoundingClientRect(); const ttX = Math.min(rect.width - 170, Math.max(8, x + 8)); const ttY = 14; ttB.innerHTML = `<div class='font-medium text-slate-100'>${labels[hoverIndex]}</div><div><span class='inline-block w-2 h-2 rounded-full mr-1' style='background:#ef4444'></span>Créés: <b>${created[hoverIndex]}</b></div><div><span class='inline-block w-2 h-2 rounded-full mr-1' style='background:#22c55e'></span>Révoqués: <b>${revoked[hoverIndex]}</b></div>`; ttB.style.left = ttX + 'px'; ttB.style.top = ttY + 'px'; ttB.classList.remove('hidden'); } else { ttB.classList.add('hidden'); }
           }
 
-          async function applyBans() {
-            try {
-              document.getElementById('loadB')?.classList.remove('hidden');
-              const payload = await fetchBansSeries();
-              document.getElementById('rangeLabelB').textContent = `${payload.from} → ${payload.to}`;
-              renderChartB(payload);
-              const s = payload.summary || {}; document.getElementById('banSummary').textContent = `Actifs: ${s.activeNow || 0} • Total créés: ${s.totalBanned || 0} • Total révoqués: ${s.totalRevoked || 0}`;
-            } catch (e) { console.error(e); }
-            finally { document.getElementById('loadB')?.classList.add('hidden'); }
-          }
           const ctx4 = document.getElementById('chartCumul').getContext('2d');
           const wrap4 = document.getElementById('chart4Wrap');
           const tt4 = document.getElementById('tt4');
@@ -632,12 +640,15 @@
             } else { tt4.classList.add('hidden'); }
           }
 
+
+          // --- Version enrichie avec gestion erreurs + états vides ---
           async function apply() {
             try {
               document.getElementById('load1')?.classList.remove('hidden');
               document.getElementById('load2')?.classList.remove('hidden');
               document.getElementById('load3')?.classList.remove('hidden');
               document.getElementById('load4')?.classList.remove('hidden');
+              ['err1','err2','err3','err4','empty1','empty2','empty3','empty4'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
               const [seriesPayload, summary, visPayload, rolePayload] = await Promise.all([
                 fetchSeries(), fetchSummary(), fetchSeriesByVisibility(), fetchSeriesByRole()
               ]);
@@ -649,7 +660,10 @@
               renderChart3(rolePayload);
               $('#rangeLabel4').textContent = `${seriesPayload.from} → ${seriesPayload.to}`;
               renderChart4(makeCumul(seriesPayload.series || []));
-              // résumé
+              if (!(seriesPayload.series||[]).length) document.getElementById('empty1')?.classList.remove('hidden');
+              if (!(visPayload.series||[]).length) document.getElementById('empty2')?.classList.remove('hidden');
+              if (!(rolePayload.series||[]).length) document.getElementById('empty3')?.classList.remove('hidden');
+              if (!(seriesPayload.series||[]).length) document.getElementById('empty4')?.classList.remove('hidden');
               $('#statTotal').textContent = (summary.total ?? 0);
               $('#statPub').textContent = (summary.publics ?? 0);
               $('#statPriv').textContent = (summary.privates ?? 0);
@@ -657,6 +671,10 @@
               $('#statStaff').textContent = staff;
             } catch (e) {
               console.error(e);
+              document.getElementById('err1')?.classList.remove('hidden');
+              document.getElementById('err2')?.classList.remove('hidden');
+              document.getElementById('err3')?.classList.remove('hidden');
+              document.getElementById('err4')?.classList.remove('hidden');
             } finally {
               document.getElementById('load1')?.classList.add('hidden');
               document.getElementById('load2')?.classList.add('hidden');

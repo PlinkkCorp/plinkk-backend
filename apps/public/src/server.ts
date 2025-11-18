@@ -10,10 +10,10 @@ import {
   AnnouncementRoleTarget,
   AnnouncementTarget,
   PlinkkSettings,
-  PrismaClient,
   Role,
   User,
 } from "@plinkk/prisma/generated/prisma/client";
+import { prisma } from "@plinkk/prisma";
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
@@ -31,7 +31,6 @@ import { minify } from "uglify-js";
 import { coerceThemeData } from "./lib/theme";
 import { generateTheme } from "./lib/generateTheme";
 
-const prisma = new PrismaClient();
 const fastify = Fastify({
   logger: true,
 });

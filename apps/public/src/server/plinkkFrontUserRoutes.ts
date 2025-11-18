@@ -3,13 +3,9 @@ import { existsSync } from "fs";
 import path from "path";
 import { generateProfileConfig } from "../lib/generateConfig";
 import { minify } from "uglify-js";
-import {
-  PlinkkSettings,
-  PrismaClient,
-  User,
-} from "@plinkk/prisma/generated/prisma/client";
-
-const prisma = new PrismaClient();
+import { PlinkkSettings, User } from "@plinkk/prisma/generated/prisma/client";
+// Utilise l'instance Prisma partagée pour éviter des ouvertures multiples du fichier SQLite
+import { prisma } from "@plinkk/prisma";
 
 import { resolvePlinkkPage, parseIdentifier } from "../lib/resolvePlinkkPage";
 import { coerceThemeData } from "../lib/theme";
@@ -32,6 +28,34 @@ async function ensureCanvas(): Promise<CanvasMod> {
 }
 
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
+  async function recordPlinkkView(plinkkId: string, userId: string, request: any) {
+    try {
+      await prisma.pageStat.create({
+        data: {
+          plinkkId,
+          eventType: "view",
+          ip: String(request.ip || request.headers?.["x-forwarded-for"] || ""),
+          meta: { userId },
+        },
+      });
+    } catch (e) {
+      request.log?.warn({ err: e }, "recordPlinkkView.pageStat failed");
+    }
+    try {
+      const now = new Date();
+      const y = now.getUTCFullYear();
+      const m = now.getUTCMonth();
+      const d = now.getUTCDate();
+      const dateObj = new Date(Date.UTC(y, m, d));
+      await prisma.plinkkViewDaily.upsert({
+        where: { plinkkId_date: { plinkkId, date: dateObj } },
+        create: { plinkkId, date: dateObj, count: 1 },
+        update: { count: { increment: 1 } },
+      });
+    } catch (e) {
+      request.log?.warn({ err: e }, "recordPlinkkView.daily failed");
+    }
+  }
   fastify.get(
     "/:username",
     { config: { rateLimit: false } },
@@ -124,6 +148,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
               resolved.page && resolved.page.slug
                 ? resolved.page.slug
                 : resolved.user.id;
+            if (!isPreview) {
+              await recordPlinkkView(resolved.page.id, resolved.user.id, request);
+            }
             return reply.view("plinkk/show.ejs", {
               page: resolved.page,
               userId: resolved.user.id,
@@ -144,15 +171,17 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
       // En mode aperçu on n'incrémente pas les vues ni les agrégations journalières
       if (!isPreview) {
-        // Use updateMany instead of update to avoid throwing when the user does not exist
-        // (update would fail with 'No record was found for an update'). updateMany will
-        // silently affect 0 rows if there's no matching user, which is desirable here.
-        await prisma.user.updateMany({
-          where: { id: username },
-          data: { views: { increment: 1 } },
-        });
+        // Incrément des vues utilisateur, robuste aux erreurs SQLite (code 14)
+        try {
+          await prisma.user.updateMany({
+            where: { id: username },
+            data: { views: { increment: 1 } },
+          });
+        } catch (e) {
+          request.log?.warn({ err: e }, "user.updateMany failed (views increment) - skipping");
+        }
 
-        // Enregistrer la vue datée (agrégation quotidienne) dans SQLite sans modifier le client généré
+        // Agrégation quotidienne des vues (UserViewDaily)
         try {
           const now = new Date();
           const y = now.getUTCFullYear();
@@ -166,19 +195,11 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
                 date: dateStr,
               },
             },
-            create: {
-              userId: username,
-              date: dateStr,
-              count: 1,
-            },
-            update: {
-              count: {
-                increment: 1,
-              },
-            },
+            create: { userId: username, date: dateStr, count: 1 },
+            update: { count: { increment: 1 } },
           });
         } catch (e) {
-          request.log?.warn({ err: e }, "Failed to record daily view");
+          request.log?.warn({ err: e }, "Failed to record daily view (userViewDaily upsert)");
         }
       }
 
@@ -236,6 +257,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         resolved.page && resolved.page.slug
           ? resolved.page.slug
           : resolved.user.id;
+      if (!isPreview) {
+        await recordPlinkkView(resolved.page.id, resolved.user.id, request);
+      }
       return reply.view("plinkk/show.ejs", {
         page: resolved.page,
         userId: resolved.user.id,
@@ -615,6 +639,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       username: string;
       identifier: string;
     };
+    // Prévisualisation (preview=1) ne doit pas compter les vues
+    const isPreview = (request.query as { preview?: string })?.preview === "1";
     // Ignore si l'identifiant correspond à un préfixe d'actifs
     if (
       ["css", "js", "images", "canvaAnimation"].includes(String(identifier))
@@ -657,6 +683,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       resolved.page && resolved.page.slug
         ? resolved.page.slug
         : resolved.user.id;
+    if (!isPreview) {
+      await recordPlinkkView(resolved.page.id, resolved.user.id, request);
+    }
     return reply.view("plinkk/show.ejs", {
       page: resolved.page,
       userId: resolved.user.id,
@@ -672,6 +701,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     Params: { username: string };
   }>("/:username/0", async (request, reply) => {
     const { username } = request.params as { username: string };
+    const isPreview = (request.query as { preview?: string })?.preview === "1";
     const resolved = await resolvePlinkkPage(
       prisma,
       username,
@@ -687,6 +717,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     });
     const isOwner =
       (request.session.get("data") as string | undefined) === resolved.user.id;
+    if (!isPreview) {
+      await recordPlinkkView(resolved.page.id, resolved.user.id, request);
+    }
     return reply.view("plinkk/show.ejs", {
       page: resolved.page,
       userId: resolved.user.id,
@@ -724,6 +757,20 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       );
     } catch (e) {}
 
+    try {
+      if (link.plinkkId) {
+        await prisma.pageStat.create({
+          data: {
+            plinkkId: link.plinkkId,
+            eventType: "click",
+            ip: String(req.ip || req.headers?.["x-forwarded-for"] || ""),
+            meta: { linkId, userId: link.userId },
+          },
+        });
+      }
+    } catch (e) {
+      req.log?.warn({ err: e }, "record click pageStat failed");
+    }
     return reply.redirect(link.url);
   });
 

@@ -563,7 +563,9 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     const where: Prisma.UserWhereInput = {
       createdAt: { gte: start, lte: end },
     };
-    if (role && role !== "all") where.role.name = role;
+    if (role && role !== "all") {
+      where.role = { name: role };
+    }
     if (visibility && visibility !== "all")
       where.isPublic = visibility === "public";
     const users = await prisma.user.findMany({
@@ -629,7 +631,10 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     const where: Prisma.UserWhereInput = {
       createdAt: { gte: start, lte: end },
     };
-    if (role && role !== "all") where.role.name = role;
+    if (role && role !== "all") {
+      // Filtre correct de la relation rôle en Prisma
+      where.role = { name: role };
+    }
     if (visibility && visibility !== "all")
       where.isPublic = visibility === "public";
     const rows = await prisma.user.findMany({
