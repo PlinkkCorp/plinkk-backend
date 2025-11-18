@@ -1,16 +1,14 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@plinkk/prisma/generated/prisma/client';
-import { verifyRoleIsStaff } from '../../../lib/verifyRole';
+import { ensurePermission } from '../../../lib/permissions';
 
 const prisma = new PrismaClient();
 
 export function apiAdminRolesRoutes(fastify: FastifyInstance) {
   // Liste des rôles + permissions agrégées
   fastify.get('/', async (request, reply) => {
-    const meId = request.session.get('data');
-    if (!meId) return reply.code(401).send({ error: 'unauthorized' });
-    const me = await prisma.user.findUnique({ where: { id: String(meId) }, select: { role: true } });
-    if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: 'forbidden' });
+    const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
+    if (!ok) return;
     const roles = await prisma.role.findMany({
       include: { permissions: { include: { permission: true } }, users: { select: { id: true } } },
       orderBy: [{ priority: 'desc' }, { name: 'asc' }]
@@ -33,10 +31,8 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
 
   // Liste des permissions disponibles (groupées par catégorie)
   fastify.get('/permissions', async (request, reply) => {
-    const meId = request.session.get('data');
-    if (!meId) return reply.code(401).send({ error: 'unauthorized' });
-    const me = await prisma.user.findUnique({ where: { id: String(meId) }, select: { role: true } });
-    if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: 'forbidden' });
+    const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
+    if (!ok) return;
     const perms = await prisma.permission.findMany({ orderBy: [{ category: 'asc' }, { key: 'asc' }] });
     const grouped: Record<string, any[]> = {};
     for (const p of perms) {
@@ -48,10 +44,8 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
 
   // Création d'un rôle
   fastify.post('/', async (request, reply) => {
-    const meId = request.session.get('data');
-    if (!meId) return reply.code(401).send({ error: 'unauthorized' });
-    const me = await prisma.user.findUnique({ where: { id: String(meId) }, select: { role: true } });
-    if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: 'forbidden' });
+    const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
+    if (!ok) return;
     const body = request.body as { name: string; isStaff?: boolean; priority?: number; color?: string; maxPlinkks?: number; maxThemes?: number; permissions?: string[] };
     const name = (body.name || '').trim().toUpperCase();
     if (!name) return reply.code(400).send({ error: 'missing_name' });
@@ -78,10 +72,8 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
 
   // Réordonner les rôles (top = priorité la plus haute)
   fastify.post('/reorder', async (request, reply) => {
-    const meId = request.session.get('data');
-    if (!meId) return reply.code(401).send({ error: 'unauthorized' });
-    const me = await prisma.user.findUnique({ where: { id: String(meId) }, select: { role: true } });
-    if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: 'forbidden' });
+    const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
+    if (!ok) return;
     const body = request.body as { ids: string[] };
     const ids = Array.isArray(body?.ids) ? body.ids.filter(Boolean) : [];
     if (!ids.length) return reply.code(400).send({ error: 'missing_ids' });
@@ -93,10 +85,8 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
 
   // Mise à jour d'un rôle (champs + ajout/retrait permissions)
   fastify.patch('/:id', async (request, reply) => {
-    const meId = request.session.get('data');
-    if (!meId) return reply.code(401).send({ error: 'unauthorized' });
-    const me = await prisma.user.findUnique({ where: { id: String(meId) }, select: { role: true } });
-    if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: 'forbidden' });
+    const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
+    if (!ok) return;
     const { id } = request.params as { id: string };
     const body = request.body as { name?: string; isStaff?: boolean; priority?: number; color?: string | null; maxPlinkks?: number; maxThemes?: number; addPermissions?: string[]; removePermissions?: string[] };
     const role = await prisma.role.findUnique({ where: { id } });
@@ -126,10 +116,8 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
 
   // Suppression d'un rôle
   fastify.delete('/:id', async (request, reply) => {
-    const meId = request.session.get('data');
-    if (!meId) return reply.code(401).send({ error: 'unauthorized' });
-    const me = await prisma.user.findUnique({ where: { id: String(meId) }, select: { role: true } });
-    if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: 'forbidden' });
+    const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
+    if (!ok) return;
     const { id } = request.params as { id: string };
     const role = await prisma.role.findUnique({ where: { id }, include: { users: true } });
     if (!role) return reply.code(404).send({ error: 'not_found' });

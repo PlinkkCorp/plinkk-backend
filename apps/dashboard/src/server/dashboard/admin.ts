@@ -7,6 +7,7 @@ import {
 } from "@plinkk/prisma/generated/prisma/client";
 import { replyView, getActiveAnnouncementsForUser } from "../../lib/replyView";
 import { verifyRoleIsStaff } from "../../lib/verifyRole";
+import { ensurePermission } from "../../lib/permissions";
 
 const prisma = new PrismaClient();
 
@@ -27,13 +28,11 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
         `/login?returnTo=${encodeURIComponent("/admin/themes")}`
       );
     }
-    if (!verifyRoleIsStaff(userInfo.role)) {
-      request.log?.info(
-        { userId: userInfo.id, role: userInfo.role },
-        "non-staff attempted admin themes page - redirecting to user dashboard"
-      );
-      return reply.redirect("/");
+    {
+      const ok = await ensurePermission(request, reply, 'VIEW_ADMIN', { mode: 'redirect' });
+      if (!ok) return;
     }
+    
     const [submitted, approved, archived] = await Promise.all([
       prisma.theme.findMany({
         where: { status: "SUBMITTED", isPrivate: false },
@@ -113,12 +112,9 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
         `/login?returnTo=${encodeURIComponent("/admin/themes")}`
       );
     }
-    if (!verifyRoleIsStaff(userInfo.role)) {
-      request.log?.info(
-        { userId: userInfo.id, role: userInfo.role },
-        "non-staff attempted admin theme preview - redirecting to user dashboard"
-      );
-      return reply.redirect("/");
+    {
+      const ok = await ensurePermission(request, reply, 'VIEW_ADMIN', { mode: 'redirect' });
+      if (!ok) return;
     }
     const { id } = request.params as { id: string };
     const t = await prisma.theme.findUnique({
@@ -170,7 +166,10 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       return reply.redirect(
         `/login?returnTo=${encodeURIComponent("/admin/message")}`
       );
-    if (!verifyRoleIsStaff(userInfo.role)) return reply.redirect("/");
+    {
+      const ok = await ensurePermission(request, reply, 'MANAGE_ANNOUNCEMENTS', { mode: 'redirect' });
+      if (!ok) return;
+    }
     let publicPath;
     try {
       const defaultPlinkk = await prisma.plinkk.findFirst({
@@ -187,12 +186,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.get("/message/api", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
-    const me = await prisma.user.findFirst({
-      where: { id: userId },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "forbidden" });
+    const ok = await ensurePermission(request, reply, 'MANAGE_ANNOUNCEMENTS');
+    if (!ok) return;
     const list = await getActiveAnnouncementsForUser(userId as string);
     return reply.send({ messages: list });
   });
@@ -200,12 +195,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.get("/users/search", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
-    const me = await prisma.user.findFirst({
-      where: { id: userId },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "forbidden" });
+    const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
+    if (!ok) return;
     const q = String((request.query as { q: string })?.q as string).trim();
     if (!q) return reply.send({ users: [] });
     const take = Math.min(
@@ -236,12 +227,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.post("/message/api", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
-    const me = await prisma.user.findFirst({
-      where: { id: userId },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "forbidden" });
+    const ok = await ensurePermission(request, reply, 'MANAGE_ANNOUNCEMENTS');
+    if (!ok) return;
     const body = request.body as {
       id: string;
       targetUserIds: string[];
@@ -308,12 +295,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.delete("/message/api", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
-    const me = await prisma.user.findFirst({
-      where: { id: userId },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "forbidden" });
+    const ok = await ensurePermission(request, reply, 'MANAGE_ANNOUNCEMENTS');
+    if (!ok) return;
     const { id } = request.query as { id: string };
     if (!id) return reply.code(400).send({ error: "missing_id" });
     try {
@@ -342,7 +325,10 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
         `/login?returnTo=${encodeURIComponent("/admin/bans")}`
       );
 
-    if (!verifyRoleIsStaff(userInfo.role)) return reply.redirect("/");
+    {
+      const ok = await ensurePermission(request, reply, 'MANAGE_BANNED_EMAILS', { mode: 'redirect' });
+      if (!ok) return;
+    }
 
     let publicPath;
     try {
@@ -372,12 +358,9 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     if (!userInfo) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin")}`);
     }
-    if (!verifyRoleIsStaff(userInfo.role)) {
-      request.log?.info(
-        { userId: userInfo.id, role: userInfo.role },
-        "non-staff attempted admin page - redirecting to user dashboard"
-      );
-      return reply.redirect("/");
+    {
+      const ok = await ensurePermission(request, reply, 'VIEW_ADMIN', { mode: 'redirect' });
+      if (!ok) return;
     }
     const [usersRaw, totals] = await Promise.all([
       prisma.user.findMany({
@@ -496,12 +479,9 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
         `/login?returnTo=${encodeURIComponent("/admin/stats")}`
       );
     }
-    if (!verifyRoleIsStaff(userInfo.role)) {
-      request.log?.info(
-        { userId: userInfo.id, role: userInfo.role },
-        "non-staff attempted admin stats page - redirecting to user dashboard"
-      );
-      return reply.redirect("/");
+    {
+      const ok = await ensurePermission(request, reply, 'VIEW_STATS', { mode: 'redirect' });
+      if (!ok) return;
     }
     let publicPath;
     try {
@@ -519,13 +499,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.get("/stats/users/series", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
-    const me = await prisma.user.findFirst({
-      where: { id: userId },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role))) {
-      return reply.code(403).send({ error: "forbidden" });
-    }
+    const ok = await ensurePermission(request, reply, 'VIEW_STATS');
+    if (!ok) return;
     const {
       from,
       to,
@@ -593,13 +568,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.get("/stats/users/summary", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
-    const me = await prisma.user.findFirst({
-      where: { id: userId },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role))) {
-      return reply.code(403).send({ error: "forbidden" });
-    }
+    const ok = await ensurePermission(request, reply, 'VIEW_STATS');
+    if (!ok) return;
     const {
       from,
       to,
@@ -655,12 +625,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.get("/stats/logins/series", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
-    const me = await prisma.user.findFirst({
-      where: { id: userId },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "forbidden" });
+    const ok = await ensurePermission(request, reply, 'VIEW_STATS');
+    if (!ok) return;
     const { from, to } = request.query as { from?: string; to?: string };
     const now = new Date();
     const end = to
@@ -709,12 +675,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.get("/stats/logins/recent", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
-    const me = await prisma.user.findFirst({
-      where: { id: userId },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "forbidden" });
+    const ok = await ensurePermission(request, reply, 'VIEW_STATS');
+    if (!ok) return;
     const limit = Math.min(
       50,
       Math.max(1, Number((request.query as any)?.limit || 20))
@@ -736,12 +698,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.get("/stats/bans/series", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
-    const me = await prisma.user.findFirst({
-      where: { id: userId },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "forbidden" });
+    const ok = await ensurePermission(request, reply, 'VIEW_STATS');
+    if (!ok) return;
     const { from, to } = request.query as { from?: string; to?: string };
     const now = new Date();
     const end = to
@@ -952,7 +910,10 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     if (!userId) return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin/roles")}`);
     const userInfo = await prisma.user.findFirst({ where: { id: userId }, include: { role: true } });
     if (!userInfo) return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin/roles")}`);
-    if (!verifyRoleIsStaff(userInfo.role)) return reply.redirect("/");
+    {
+      const ok = await ensurePermission(request, reply, 'MANAGE_ROLES', { mode: 'redirect' });
+      if (!ok) return;
+    }
     // Pré-chargement minimal des rôles pour affichage initial
     // Utilisation de cast any pour éviter les erreurs de typage avant régénération Prisma
     let roles: any[] = [];
