@@ -58,7 +58,14 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
     const existing = await prisma.role.findUnique({ where: { name } });
     if (existing) return reply.code(409).send({ error: 'role_exists' });
     const role = await prisma.role.create({ data: { name, id: name, isStaff: !!body.isStaff, priority: body.priority || 0, color: body.color || null, maxPlinkks: body.maxPlinkks ?? 1, maxThemes: body.maxThemes ?? 0 } });
-    const permKeys = Array.isArray(body.permissions) ? body.permissions : [];
+    // Inhérite par défaut des permissions du rôle USER si aucune liste fournie
+    let permKeys = Array.isArray(body.permissions) ? body.permissions : [];
+    if (!permKeys.length) {
+      try {
+        const userRole = await prisma.role.findUnique({ where: { name: 'USER' }, include: { permissions: true } });
+        permKeys = (userRole?.permissions || []).map(p => p.permissionKey);
+      } catch {}
+    }
     if (permKeys.length) {
       for (const pk of permKeys) {
         try {
@@ -67,6 +74,21 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
       }
     }
     return reply.send({ ok: true, roleId: role.id });
+  });
+
+  // Réordonner les rôles (top = priorité la plus haute)
+  fastify.post('/reorder', async (request, reply) => {
+    const meId = request.session.get('data');
+    if (!meId) return reply.code(401).send({ error: 'unauthorized' });
+    const me = await prisma.user.findUnique({ where: { id: String(meId) }, select: { role: true } });
+    if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: 'forbidden' });
+    const body = request.body as { ids: string[] };
+    const ids = Array.isArray(body?.ids) ? body.ids.filter(Boolean) : [];
+    if (!ids.length) return reply.code(400).send({ error: 'missing_ids' });
+    const n = ids.length;
+    const updates = ids.map((id, idx) => prisma.role.update({ where: { id }, data: { priority: (n - idx) } }));
+    await prisma.$transaction(updates);
+    return reply.send({ ok: true });
   });
 
   // Mise à jour d'un rôle (champs + ajout/retrait permissions)

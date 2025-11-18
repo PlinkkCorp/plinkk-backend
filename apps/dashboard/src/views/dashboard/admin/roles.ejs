@@ -2,9 +2,16 @@
 <%- include('../../partials/header-dash.ejs', { user: user }) %>
 <%- include('../../partials/admin-nav.ejs', { user: user }) %>
 <main class="max-w-7xl mx-auto p-4">
+  <style>
+    /* UI & Drag indicators */
+    #rolesList .draggable{position:relative; cursor:move}
+    #rolesList .dragging{opacity:.6}
+    #rolesList .drag-over-top::before,#rolesList .drag-over-bottom::after{content:"";position:absolute;left:0;right:0;height:2px;background:#6366F1}
+    #rolesList .drag-over-top::before{top:0}
+    #rolesList .drag-over-bottom::after{bottom:0}
+  </style>
   <div class="mb-4">
     <h1 class="text-2xl font-bold tracking-tight">Rôles & Permissions</h1>
-    <p class="text-xs text-slate-400">UI façon Discord — rôles à gauche, permissions à droite.</p>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
@@ -13,14 +20,22 @@
       <div class="p-3 border-b border-slate-800/70">
         <form id="createRoleForm" class="flex items-center gap-2">
           <input name="name" placeholder="Nouveau rôle (ex: PARTNER)" class="flex-1 px-2 py-1 rounded bg-slate-900/60 border border-slate-700 text-sm" />
-          <button type="submit" class="px-2 py-1 rounded bg-indigo-600 text-white text-xs">Créer</button>
+          <button type="submit" class="px-2 py-1 rounded bg-indigo-600 text-white text-xs whitespace-nowrap">Créer</button>
+          <!-- Bouton rafraîchir retiré: rechargement automatique inutile -->
         </form>
-        <div id="createRoleStatus" class="text-[11px] text-slate-400 mt-1"></div>
+        <div class="mt-2 flex items-center gap-2">
+          <input id="roleSearch" placeholder="Rechercher un rôle..." class="w-full px-2 py-1 rounded bg-slate-900/60 border border-slate-700 text-xs" />
+        </div>
+        <div class="flex items-center justify-between mt-1">
+          <div id="createRoleStatus" class="text-[11px] text-slate-400"></div>
+          <div id="rolesCount" class="text-[11px] text-slate-500">Glissez-déposez pour réordonner</div>
+        </div>
       </div>
       <div id="rolesList" class="max-h-[70vh] overflow-auto">
         <!-- items -->
       </div>
       <div id="rolesEmpty" class="hidden p-3 text-xs text-slate-400">Aucun rôle.</div>
+      <div id="rolesError" class="hidden p-3 text-xs text-rose-400"></div>
     </aside>
 
     <!-- Colonne droite: permissions du rôle sélectionné -->
@@ -66,26 +81,48 @@
       <div id="noRoleHint" class="text-xs text-slate-400">Sélectionnez un rôle pour voir et modifier ses permissions.</div>
     </section>
   </div>
+  <script id="rolesPayloadB64" type="text/plain"><%= rolesB64 || '' %></script>
 </main>
 
 <script>
 (function(){
   const $ = (s,r=document)=>r.querySelector(s);
   const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
-  const rolesData = <%- JSON.stringify(roles.map(r=>({id:r.id,name:r.name,isStaff:r.isStaff,priority:r.priority,color:r.color,maxPlinkks:r.maxPlinkks,maxThemes:r.maxThemes,permissions:r.permissions.map(p=>p.permission.key)}))) %>;
+  let rolesDataRawB64 = document.getElementById('rolesPayloadB64')?.textContent || '';
+  let rolesDataRaw = '';
+  if(rolesDataRawB64){
+    try { rolesDataRaw = atob(rolesDataRawB64.trim()); } catch(e){ console.error('[roles] atob failed', e); rolesDataRaw = '[]'; }
+  } else { rolesDataRaw = '[]'; }
+  let rolesData = [];
+  try {
+    rolesData = JSON.parse(rolesDataRaw);
+  } catch(parseErr){
+    console.error('[roles] JSON parse error', parseErr, rolesDataRaw);
+    // Affiche un message explicite dans l'UI pour que l'utilisateur sache quoi faire
+    const errBox = document.getElementById('rolesError');
+    if(errBox){
+      errBox.textContent = 'Erreur de parsing des rôles côté client. Relancez le seed (node scripts/seed-permissions.js) ou vérifiez le template. Contenu brut: '+rolesDataRaw.slice(0,120)+'...';
+      errBox.classList.remove('hidden');
+    }
+    rolesData = [];
+  }
   let selectedRoleId = rolesData[0]?.id || null;
+  let searchTerm = '';
 
   // Rendu colonne gauche
   function renderRolesList(){
     const list = $('#rolesList'); list.innerHTML='';
-    if(!rolesData.length){ $('#rolesEmpty').classList.remove('hidden'); return; } else { $('#rolesEmpty').classList.add('hidden'); }
-    rolesData.forEach(r=>{
+    const visible = searchTerm ? rolesData.filter(r=>String(r.name||'').toLowerCase().includes(searchTerm)) : rolesData.slice();
+    if(!visible.length){ $('#rolesEmpty').classList.remove('hidden'); return; } else { $('#rolesEmpty').classList.add('hidden'); }
+    $('#rolesCount').textContent = visible.length+" rôle"+(visible.length>1?'s':'')+" affichés"+(searchTerm?" (filtré)":"");
+    visible.forEach(r=>{
       const a = document.createElement('button');
       a.type='button';
-      a.className = 'w-full text-left px-3 py-2 text-sm border-b border-slate-800/60 hover:bg-slate-800/50 ' + (r.id===selectedRoleId?'bg-slate-800/60':'');
+      a.className = 'w-full text-left px-3 py-2 text-sm border-b border-slate-800/60 hover:bg-slate-800/50 draggable ' + (r.id===selectedRoleId?'bg-slate-800/60':'');
       a.setAttribute('data-id', r.id);
+      a.setAttribute('draggable','true');
       a.innerHTML = `<div class='flex items-center justify-between'>
-        <span class='font-medium text-slate-200'>${r.name}</span>
+        <span class='font-medium text-slate-200 flex items-center gap-2'><span class='opacity-60'>☰</span>${r.name}</span>
         ${r.isStaff?"<span class='text-[10px] px-1 py-0.5 rounded bg-amber-600/30 border border-amber-600 text-amber-300'>STAFF</span>":''}
       </div>`;
       list.appendChild(a);
@@ -134,6 +171,65 @@
     selectedRoleId = btn.getAttribute('data-id');
     renderRolesList();
     renderRight();
+  });
+  $('#roleSearch').addEventListener('input', (ev)=>{
+    searchTerm = String(ev.currentTarget.value||'').toLowerCase();
+    renderRolesList();
+  });
+
+  // Drag & drop pour réordonner
+  let dragId = null;
+  $('#rolesList').addEventListener('dragstart', (ev)=>{
+    const btn = ev.target.closest('button[data-id]');
+    if(!btn) return;
+    dragId = btn.getAttribute('data-id');
+    ev.dataTransfer?.setData('text/plain', dragId);
+    btn.classList.add('dragging');
+  });
+  $('#rolesList').addEventListener('dragover', (ev)=>{
+    ev.preventDefault();
+    const btn = ev.target.closest('button[data-id]');
+    $$('#rolesList .drag-over-top, #rolesList .drag-over-bottom').forEach(b=>b.classList.remove('drag-over-top','drag-over-bottom'));
+    if(!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const before = ev.clientY < rect.top + rect.height/2;
+    btn.classList.add(before?'drag-over-top':'drag-over-bottom');
+  });
+  $('#rolesList').addEventListener('drop', async (ev)=>{
+    ev.preventDefault();
+    const target = ev.target.closest('button[data-id]');
+    $$('#rolesList .drag-over-top, #rolesList .drag-over-bottom').forEach(b=>b.classList.remove('drag-over-top','drag-over-bottom'));
+    if(!target || !dragId) return;
+    const targetId = target.getAttribute('data-id');
+    if(!targetId || dragId===targetId) return;
+    const fromIdx = rolesData.findIndex(r=>r.id===dragId);
+    let toIdx = rolesData.findIndex(r=>r.id===targetId);
+    if(fromIdx<0 || toIdx<0) return;
+    const rect = target.getBoundingClientRect();
+    const before = ev.clientY < rect.top + rect.height/2;
+    // calcul insert index en tenant compte du déplacement
+    let insertIndex = before ? toIdx : toIdx + 1;
+    if(fromIdx < insertIndex) insertIndex--; // correction si on retire avant d'insérer
+    const [moved] = rolesData.splice(fromIdx,1);
+    rolesData.splice(insertIndex,0,moved);
+    renderRolesList();
+    // Persistance ordre => haut = priorité max
+    try{
+      const ids = rolesData.map(r=>r.id);
+      const res = await fetch('/api/admin/roles/reorder',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids})});
+      if(!res.ok){ throw new Error('persist failed'); }
+      // mettre à jour priorités locales (n -> 1)
+      const n = ids.length;
+      rolesData.forEach((r,i)=>{ r.priority = (n - i); });
+      $('#rolesCount').textContent = rolesData.length+" rôle"+(rolesData.length>1?'s':'')+" chargés (ordre enregistré)";
+    }catch(e){
+      $('#rolesError').textContent = 'Échec de l\'enregistrement de l\'ordre';
+      $('#rolesError').classList.remove('hidden');
+    }
+  });
+  $('#rolesList').addEventListener('dragend', ()=>{
+    $$('#rolesList .dragging').forEach(b=>b.classList.remove('dragging'));
+    $$('#rolesList .drag-over-top, #rolesList .drag-over-bottom').forEach(b=>b.classList.remove('drag-over-top','drag-over-bottom'));
   });
 
   $('#createRoleForm').addEventListener('submit', async (ev)=>{
@@ -204,7 +300,12 @@
     }
   });
 
-  // Init
+  // Init (affichage uniquement des données pré-rendues serveur)
+  if(!rolesData.length){
+    $('#rolesEmpty').classList.remove('hidden');
+    $('#rolesError').textContent = 'Aucun rôle préchargé. Vérifiez le script de seed (node scripts/seed-permissions.js) ou vos droits staff.';
+    $('#rolesError').classList.remove('hidden');
+  }
   renderRolesList();
   renderRight();
 })();
