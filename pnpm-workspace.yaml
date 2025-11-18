@@ -3,5 +3,4 @@ packages:
   - 'packages/*'
 
 overrides:
-  globe:
-    version: 11.0.3
+  globe: 11.0.3

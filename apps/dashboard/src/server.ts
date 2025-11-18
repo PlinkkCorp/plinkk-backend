@@ -300,8 +300,9 @@ fastify.post("/register", async (req, reply) => {
         email: email,
         password: hashedPassword,
         role: {
-          connect: {
-            id: "USER",
+          connectOrCreate: {
+            where: { name: "USER" },
+            create: { id: "USER", name: "USER" },
           },
         },
       },

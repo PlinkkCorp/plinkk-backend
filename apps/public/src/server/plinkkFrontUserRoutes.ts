@@ -16,7 +16,20 @@ import { coerceThemeData } from "../lib/theme";
 import { generateBundle } from "../lib/generateBundle";
 import { generateTheme } from "../lib/generateTheme";
 import { roundedRect, wrapText } from "../lib/fileUtils";
-import { createCanvas, loadImage, registerFont } from "canvas";
+// Chargement paresseux de 'canvas' pour tolérer l'absence de binaire natif (Node 22/Windows)
+type CanvasMod = typeof import("canvas") | null;
+let _canvasMod: CanvasMod = null;
+async function ensureCanvas(): Promise<CanvasMod> {
+  if (_canvasMod !== null) return _canvasMod;
+  try {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+    const mod: typeof import("canvas") = await import("canvas");
+    _canvasMod = mod;
+  } catch (e) {
+    _canvasMod = null;
+  }
+  return _canvasMod;
+}
 
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
   fastify.get(
@@ -714,14 +727,33 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     return reply.redirect(link.url);
   });
 
-  registerFont(path.resolve("assets/fonts/Inter-Bold.ttf"), {
-    family: "Inter",
-  });
-  registerFont(path.resolve("assets/fonts/Inter-Regular.ttf"), {
-    family: "Inter",
-  });
-
   fastify.get("/og/:id", async (request, reply) => {
+    const canvasMod = await ensureCanvas();
+    if (!canvasMod) {
+      // Si canvas indisponible (ex: Node 22 sous Windows sans précompilé),
+      // on renvoie une image statique par défaut pour débloquer le dev.
+      try {
+        return reply.sendFile("images/default_profile.png");
+      } catch {
+        return reply.code(501).send({
+          error: "canvas_unavailable",
+          hint:
+            "Le module 'canvas' n'est pas chargé. Utilisez Node 20 LTS ou installez une version compatible de canvas.",
+        });
+      }
+    }
+    const { createCanvas, loadImage, registerFont } = canvasMod;
+
+    // Charger les polices (chemins relatifs au cwd du service)
+    try {
+      registerFont(path.resolve("assets/fonts/Inter-Bold.ttf"), {
+        family: "Inter",
+      });
+      registerFont(path.resolve("assets/fonts/Inter-Regular.ttf"), {
+        family: "Inter",
+      });
+    } catch {}
+
     const { id } = request.params as { id: string };
     const page = await prisma.plinkk.findFirst({
       where: { slug: id },
