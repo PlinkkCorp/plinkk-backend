@@ -1,115 +1,225 @@
 <%- include('../../partials/head.ejs', { title: 'Tableau de bord - Cosmétiques', description: 'Choisis ton flair, cadre, thème et bannière avec aperçu en direct.', robots: 'noindex,nofollow' }) %>
 <%- include('../../partials/header-dash.ejs', { user: user }) %>
-<main class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
+
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
   <%- include('../../partials/asside_dash.ejs', { active: 'cosmetics' }) %>
-  <section class="col-span-12 lg:col-span-9 space-y-4 relative">
-    <div id="comingSoonOverlay" class="absolute -inset-3 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm rounded-xl" aria-hidden="false">
-      <div role="dialog" aria-modal="true" aria-labelledby="comingSoonTitle" aria-describedby="comingSoonDesc" class="mx-4 w-full max-w-lg rounded-xl bg-gradient-to-b from-slate-900/95 to-slate-900/90 border border-slate-700 p-6 text-center text-white shadow-2xl transform transition-all duration-200">
-        <div class="flex items-center justify-center mb-4">
-          <div class="h-12 w-12 rounded-full bg-indigo-600/90 flex items-center justify-center shadow-lg mr-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" role="img">
-              <rect x="3" y="5" width="18" height="12" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2 19h20" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8 9h8" />
+
+  <main class="col-span-12 lg:col-span-10 space-y-6 relative">
+    
+    <!-- Coming Soon Overlay -->
+    <div id="comingSoonOverlay" class="absolute inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm rounded-3xl border border-slate-800" aria-hidden="false">
+      <div role="dialog" aria-modal="true" class="mx-4 w-full max-w-lg rounded-3xl bg-slate-900 border border-slate-800 p-8 text-center shadow-2xl shadow-black/50">
+        <div class="flex items-center justify-center mb-6">
+          <div class="h-16 w-16 rounded-2xl bg-violet-500/10 flex items-center justify-center shadow-inner border border-violet-500/20">
+            <svg class="h-8 w-8 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.077-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
             </svg>
           </div>
         </div>
-        <h2 id="comingSoonTitle" class="text-2xl font-semibold mb-2">Fonctionnalité en cours</h2>
-        <p id="comingSoonDesc" class="text-sm text-slate-300 mb-3">Nous améliorons activement cet outil. Il sera disponible prochainement avec une interface dédiée.</p>
-        <p class="text-xs text-slate-400 mb-4">L'interface est désactivée pour l'instant.</p>
-        <div class="flex items-center justify-center gap-3">
-          <button id="notifyMeBtn" class="px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400">Me prévenir</button>
-        </div>
-        <div class="mt-4 text-xs text-slate-400">Ce message restera visible tant que la fonctionnalité est en développement.</div>
-      </div>
-    </div>
-    <div class="mb-4">
-      <div class="flex items-center justify-between gap-4">
-        <h1 class="text-2xl font-semibold">Cosmétiques</h1>
-        <div class="flex items-center gap-2">
-          <button id="resetBtn" class="px-3 py-2 text-sm rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200">Réinitialiser</button>
+        <h2 class="text-2xl font-bold text-white mb-3">Atelier Cosmétique</h2>
+        <p class="text-slate-400 mb-8 leading-relaxed">Nous peaufinons les derniers détails de l'atelier de personnalisation. Bientôt, vous pourrez exprimer votre style unique avec des cadres, thèmes et bannières exclusifs.</p>
+        
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button id="notifyMeBtn" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium shadow-lg shadow-violet-900/20 transition-all active:scale-95">
+            Me prévenir du lancement
+          </button>
+          <a href="/" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium border border-slate-700 transition-colors">
+            Retour au tableau de bord
+          </a>
         </div>
       </div>
     </div>
 
-    <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-      <h2 class="font-medium mb-3">Aperçu</h2>
-      <div id="preview" class="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
-        <div class="flex items-center gap-3">
-          <div id="avatar" class="relative shrink-0 h-12 w-12 rounded-full grid place-items-center bg-indigo-700/70 border border-indigo-600/50 text-white font-bold" data-avatar>
-            <div id="frame" class="pointer-events-none absolute inset-0 rounded-full">
-              <%- include('../../partials/avatar.ejs', { user: user, }) %>
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Cosmétiques</h1>
+        <p class="text-sm text-slate-400 mt-1">Personnalisez votre apparence sur Plinkk.</p>
+      </div>
+      <button id="resetBtn" class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">
+        Réinitialiser
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      <!-- Preview Column -->
+      <div class="xl:col-span-4 xl:order-2 space-y-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg sticky top-6">
+          <h2 class="text-lg font-semibold text-white mb-4">Aperçu en direct</h2>
+          
+          <!-- Card Preview -->
+          <div id="preview" class="relative overflow-hidden rounded-2xl bg-slate-950 border border-slate-800 transition-all duration-300 group">
+            <!-- Banner -->
+            <div id="banner" class="h-24 w-full bg-slate-900 relative overflow-hidden">
+              <div class="absolute inset-0 flex items-center justify-center text-xs text-slate-600 font-medium uppercase tracking-wider">Bannière</div>
+            </div>
+            
+            <div class="px-5 pb-5">
+              <div class="relative flex justify-between items-end -mt-10 mb-3">
+                <!-- Avatar -->
+                <div class="relative">
+                  <div id="avatar" class="h-20 w-20 rounded-2xl bg-slate-900 p-1 ring-4 ring-slate-950 relative z-10" data-avatar>
+                    <div class="h-full w-full rounded-xl overflow-hidden bg-slate-800 relative">
+                      <%- include('../../partials/avatar.ejs', { user: user }) %>
+                      <!-- Frame Overlay -->
+                      <div id="frame" class="absolute inset-0 pointer-events-none z-20"></div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Flair Badge -->
+                <span id="flairBadge" class="hidden mb-1 px-2.5 py-1 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400 text-[10px] font-bold uppercase tracking-wider">
+                  BETA
+                </span>
+              </div>
+              
+              <div>
+                <h3 class="text-lg font-bold text-white leading-tight"><%= user.userName %></h3>
+                <p class="text-sm text-slate-500 font-medium">@<%= user.id %></p>
+              </div>
             </div>
           </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="font-semibold"><%= user.userName %></span>
-              <span id="flairBadge" class="hidden text-[10px] px-2 py-0.5 rounded-full bg-slate-700/30 border border-slate-600/50 text-slate-300"></span>
+
+          <div class="mt-6 p-4 rounded-xl bg-slate-950/50 border border-slate-800/50">
+            <div class="flex items-center gap-3 text-sm text-slate-400">
+              <svg class="size-5 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              <p>Les modifications sont appliquées instantanément à l'aperçu.</p>
             </div>
-            <p class="text-xs text-slate-400">@<%= user.id %></p>
           </div>
         </div>
-        <div id="banner" class="mt-3 rounded-md border border-slate-800 h-16 flex items-center justify-center text-xs text-slate-500">Bannière</div>
       </div>
-      <div id="initialCosmetics" class="hidden"
-           data-flair="<%= (cosmetics && cosmetics.selected && cosmetics.selected.flair) ? String(cosmetics.selected.flair) : '' %>"
-           data-frame="<%= (cosmetics && cosmetics.selected && cosmetics.selected.frame) ? String(cosmetics.selected.frame) : 'none' %>"
-           data-theme="<%= (cosmetics && cosmetics.selected && cosmetics.selected.theme) ? String(cosmetics.selected.theme) : 'system' %>"
-           data-banner="<%= (cosmetics && cosmetics.selected && cosmetics.selected.banner) ? String(cosmetics.selected.banner) : 'none' %>"
-           data-banner-url="<%= (cosmetics && cosmetics.selected && cosmetics.selected.bannerUrl) ? String(cosmetics.selected.bannerUrl) : '' %>"></div>
-  <script id="catalogData" type="application/json"><%- JSON.stringify(catalog) %></script>
+
+      <!-- Controls Column -->
+      <div class="xl:col-span-8 xl:order-1 space-y-6">
+        <form id="formCosmetics" class="space-y-6">
+          
+          <!-- Flair Section -->
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="p-2 rounded-lg bg-violet-500/10 text-violet-400">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              </div>
+              <h2 class="text-lg font-semibold text-white">Flair</h2>
+            </div>
+            <p class="text-sm text-slate-400 bg-slate-950/50 p-4 rounded-xl border border-slate-800">
+              Les flairs sont des badges spéciaux attribués par l'équipe Plinkk ou obtenus lors d'événements. Si vous en possédez un, il s'affichera automatiquement à côté de votre nom.
+            </p>
+          </div>
+
+          <!-- Frames Section -->
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="12" cy="12" r="5"/></svg>
+              </div>
+              <h2 class="text-lg font-semibold text-white">Cadre d'avatar</h2>
+            </div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" role="listbox">
+              <% catalog.frames.forEach(fr => { %>
+                <button type="button" data-type="frame" data-value="<%= fr.key %>"
+                  class="group relative flex flex-col items-center gap-3 p-4 rounded-2xl border border-slate-800 bg-slate-950/50 hover:bg-slate-800 hover:border-slate-700 transition-all text-center">
+                  <div class="h-16 w-16 rounded-xl bg-slate-900 border border-slate-800 group-hover:border-slate-600 transition-colors relative overflow-hidden">
+                    <!-- Preview of frame style here if possible, or just placeholder -->
+                    <div class="absolute inset-0 flex items-center justify-center text-xs text-slate-600">Aperçu</div>
+                  </div>
+                  <span class="text-sm font-medium text-slate-300 group-hover:text-white"><%= fr.label %></span>
+                  <div class="absolute inset-0 rounded-2xl ring-2 ring-violet-500 opacity-0 scale-95 transition-all ui-selected:opacity-100 ui-selected:scale-100"></div>
+                </button>
+              <% }) %>
+            </div>
+          </div>
+
+          <!-- Themes Section -->
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="p-2 rounded-lg bg-fuchsia-500/10 text-fuchsia-400">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+              </div>
+              <h2 class="text-lg font-semibold text-white">Thème de carte</h2>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4" role="listbox">
+              <% catalog.themes.forEach(th => { %>
+                <button type="button" data-type="theme" data-value="<%= th.key %>"
+                  class="group relative p-4 rounded-2xl border border-slate-800 bg-slate-950/50 hover:bg-slate-800 hover:border-slate-700 transition-all text-left">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-slate-300 group-hover:text-white"><%= th.label %></span>
+                    <div class="h-4 w-4 rounded-full border border-slate-700 bg-slate-900 ui-selected:bg-violet-500 ui-selected:border-violet-500"></div>
+                  </div>
+                  <div class="h-2 w-2/3 rounded-full bg-slate-800 mb-2"></div>
+                  <div class="h-2 w-1/2 rounded-full bg-slate-800/60"></div>
+                </button>
+              <% }) %>
+            </div>
+          </div>
+
+          <!-- Banners Section -->
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              </div>
+              <h2 class="text-lg font-semibold text-white">Bannière</h2>
+            </div>
+
+            <div class="space-y-6">
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-3">Bannières prédéfinies</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4" role="listbox">
+                  <% catalog.banners.forEach(b => { %>
+                    <button type="button" data-type="banner" data-value="<%= b.key %>"
+                      class="group relative h-20 rounded-xl border border-slate-800 bg-slate-950 overflow-hidden hover:border-slate-600 transition-all">
+                      <div class="absolute inset-0 flex items-center justify-center bg-slate-900/50 group-hover:bg-slate-900/30 transition-colors">
+                        <span class="text-xs font-medium text-white drop-shadow-md"><%= b.label %></span>
+                      </div>
+                      <!-- We could add inline styles here based on key to show preview -->
+                    </button>
+                  <% }) %>
+                </div>
+              </div>
+
+              <div class="pt-6 border-t border-slate-800">
+                <label class="block text-sm font-medium text-slate-300 mb-3">Ou URL personnalisée</label>
+                <div class="flex gap-3">
+                  <div class="relative flex-1">
+                    <input id="bannerUrl" type="url" placeholder="https://..." 
+                      class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none placeholder-slate-600" />
+                  </div>
+                  <button type="button" id="clearBannerUrl" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors" title="Effacer">
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                  </button>
+                </div>
+                <p class="text-xs text-slate-500 mt-2">L'URL personnalisée est prioritaire sur la sélection prédéfinie.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center justify-end gap-4 pt-4">
+            <button type="button" id="starterPack" class="px-6 py-3 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
+              Appliquer Starter Pack
+            </button>
+            <button type="button" id="saveBtn" class="px-8 py-3 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-all hover:scale-105 active:scale-95">
+              Enregistrer les modifications
+            </button>
+          </div>
+
+        </form>
+      </div>
     </div>
 
-    <form id="formCosmetics" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="font-medium">Flair</h2>
-        </div>
-        <p class="text-sm text-slate-400">Ce tag est attribué par l’équipe/automatisation. Il peut être ajouté via code. Si vous en avez un, il s’affichera dans l’aperçu.</p>
-      </div>
+    <!-- Hidden Data -->
+    <div id="initialCosmetics" class="hidden"
+         data-flair="<%= (cosmetics && cosmetics.selected && cosmetics.selected.flair) ? String(cosmetics.selected.flair) : '' %>"
+         data-frame="<%= (cosmetics && cosmetics.selected && cosmetics.selected.frame) ? String(cosmetics.selected.frame) : 'none' %>"
+         data-theme="<%= (cosmetics && cosmetics.selected && cosmetics.selected.theme) ? String(cosmetics.selected.theme) : 'system' %>"
+         data-banner="<%= (cosmetics && cosmetics.selected && cosmetics.selected.banner) ? String(cosmetics.selected.banner) : 'none' %>"
+         data-banner-url="<%= (cosmetics && cosmetics.selected && cosmetics.selected.bannerUrl) ? String(cosmetics.selected.bannerUrl) : '' %>"></div>
+    <script id="catalogData" type="application/json"><%- JSON.stringify(catalog) %></script>
 
-      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-        <h2 class="font-medium mb-2">Cadre</h2>
-        <div class="flex flex-wrap gap-2" role="listbox" aria-label="Cadre">
-          <% catalog.frames.forEach(fr => { %>
-            <button type="button" data-type="frame" data-value="<%= fr.key %>"
-              class="cos-btn px-3 py-1.5 text-xs rounded-md border border-slate-700 bg-slate-800/80 hover:bg-slate-800 text-slate-200">
-              <%= fr.label %>
-            </button>
-          <% }) %>
-        </div>
-      </div>
-
-      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-        <h2 class="font-medium mb-2">Thème</h2>
-        <div class="flex flex-wrap gap-2" role="listbox" aria-label="Thème">
-          <% catalog.themes.forEach(th => { %>
-            <button type="button" data-type="theme" data-value="<%= th.key %>"
-              class="cos-btn px-3 py-1.5 text-xs rounded-md border border-slate-700 bg-slate-800/80 hover:bg-slate-800 text-slate-200">
-              <%= th.label %>
-            </button>
-          <% }) %>
-        </div>
-      </div>
-
-      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-        <h2 class="font-medium mb-2">Bannière</h2>
-        <div class="flex flex-wrap gap-2" role="listbox" aria-label="Bannière prédéfinie">
-          <% catalog.banners.forEach(b => { %>
-            <button type="button" data-type="banner" data-value="<%= b.key %>"
-              class="cos-btn px-3 py-1.5 text-xs rounded-md border border-slate-700 bg-slate-800/80 hover:bg-slate-800 text-slate-200 text-left">
-              <%= b.label %>
-            </button>
-          <% }) %>
-        </div>
-      </div>
-
-      <div class="sm:col-span-2 flex justify-end gap-2">
-        <button type="button" id="saveBtn" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white">Enregistrer</button>
-      </div>
-    </form>
-  </section>
-</main>
+  </main>
+</div>
 
 <script>
   const CATALOG = JSON.parse(document.getElementById('catalogData')?.textContent || '{}');
@@ -130,36 +240,71 @@
   }
 
   function applyPreview(){
+    // Flair
     const flairBadge = document.getElementById('flairBadge');
     const showFlair = state.flair && String(state.flair).trim() !== '';
-    if (showFlair) { flairBadge.textContent = flairLabel(state.flair); flairBadge.classList.remove('hidden'); }
-    else { flairBadge.classList.add('hidden'); flairBadge.textContent=''; }
+    if (showFlair) { 
+      flairBadge.textContent = flairLabel(state.flair); 
+      flairBadge.classList.remove('hidden'); 
+    } else { 
+      flairBadge.classList.add('hidden'); 
+      flairBadge.textContent=''; 
+    }
 
+    // Frame
     const frame = document.getElementById('frame');
-    frame.className = 'pointer-events-none absolute inset-0 rounded-full';
+    frame.className = 'absolute inset-0 pointer-events-none z-20 rounded-xl'; // Reset classes
     frame.style.boxShadow = 'none';
+    
+    // Simple CSS shadows for demo frames - in real app use classes or images
     switch(state.frame){
-      case 'neon': frame.style.boxShadow = '0 0 0 2px rgba(99,102,241,.6), 0 0 24px rgba(99,102,241,.6)'; break;
-      case 'glow': frame.style.boxShadow = '0 0 0 2px rgba(16,185,129,.6), 0 0 24px rgba(16,185,129,.6)'; break;
-      case 'gold': frame.style.boxShadow = '0 0 0 2px rgba(234,179,8,.7), 0 0 20px rgba(234,179,8,.5)'; break;
+      case 'neon': frame.style.boxShadow = '0 0 0 2px rgba(139,92,246,0.8), 0 0 15px rgba(139,92,246,0.6), inset 0 0 10px rgba(139,92,246,0.4)'; break;
+      case 'glow': frame.style.boxShadow = '0 0 0 2px rgba(16,185,129,0.8), 0 0 15px rgba(16,185,129,0.6)'; break;
+      case 'gold': frame.style.boxShadow = '0 0 0 2px rgba(234,179,8,0.8), 0 0 15px rgba(234,179,8,0.4)'; break;
+      default: frame.style.boxShadow = 'none';
     }
 
+    // Theme (Card Border/Glow)
     const preview = document.getElementById('preview');
-    preview.style.outline = 'none';
-    preview.style.boxShadow = 'none';
+    preview.style.borderColor = '';
+    preview.style.boxShadow = '';
+    
     switch(state.theme){
-      case 'dark-emerald': preview.style.outline = '1px solid rgba(16,185,129,.35)'; break;
-      case 'midnight': preview.style.outline = '1px solid rgba(99,102,241,.35)'; break;
-      case 'plasma': preview.style.outline = '1px solid rgba(244,63,94,.35)'; break;
-      default: preview.style.outline = '1px solid rgba(30,41,59,.6)';
+      case 'dark-emerald': 
+        preview.style.borderColor = 'rgba(16,185,129,0.5)'; 
+        preview.style.boxShadow = '0 0 20px rgba(16,185,129,0.1)';
+        break;
+      case 'midnight': 
+        preview.style.borderColor = 'rgba(139,92,246,0.5)'; 
+        preview.style.boxShadow = '0 0 20px rgba(139,92,246,0.1)';
+        break;
+      case 'plasma': 
+        preview.style.borderColor = 'rgba(244,63,94,0.5)'; 
+        preview.style.boxShadow = '0 0 20px rgba(244,63,94,0.1)';
+        break;
+      default: 
+        preview.style.borderColor = '';
+        preview.style.boxShadow = '';
     }
 
+    // Banner
     const banner = document.getElementById('banner');
-    banner.style.background = 'transparent';
-    banner.style.color = 'rgb(100 116 139)';
-    if (state.banner === 'gradient-emerald') { banner.style.background = 'linear-gradient(135deg,#10b98133,#111827)'; }
-    else if (state.banner === 'gradient-fuchsia') { banner.style.background = 'linear-gradient(135deg,#d946ef33,#111827)'; }
-    else if (state.bannerUrl) { banner.style.background = `center/cover no-repeat url(${state.bannerUrl})`; banner.style.color = 'transparent'; }
+    banner.style.background = '';
+    banner.style.backgroundImage = '';
+    banner.innerHTML = ''; // Clear text if image
+    
+    if (state.bannerUrl) {
+      banner.style.background = `center/cover no-repeat url(${state.bannerUrl})`;
+    } else if (state.banner !== 'none') {
+      // Simulate banner styles
+      if (state.banner === 'gradient-emerald') banner.style.background = 'linear-gradient(135deg, #064e3b, #10b981)';
+      else if (state.banner === 'gradient-fuchsia') banner.style.background = 'linear-gradient(135deg, #701a75, #d946ef)';
+      else if (state.banner === 'cosmos') banner.style.background = 'linear-gradient(to right, #0f172a, #312e81)';
+      else banner.style.background = '#1e293b'; // Default fallback
+    } else {
+      banner.innerHTML = '<div class="absolute inset-0 flex items-center justify-center text-xs text-slate-600 font-medium uppercase tracking-wider">Bannière</div>';
+      banner.style.background = '#0f172a';
+    }
 
     updateActiveButtons('frame', state.frame);
     updateActiveButtons('theme', state.theme);
@@ -170,11 +315,19 @@
     document.querySelectorAll(`[data-type="${type}"]`).forEach(btn => {
       const v = btn.getAttribute('data-value');
       const isActive = String(v) === String(value);
-      btn.classList.toggle('ring-2', isActive);
-      btn.classList.toggle('ring-indigo-500/70', isActive);
-      btn.classList.toggle('bg-slate-800/80', !isActive);
-      btn.classList.toggle('bg-indigo-600', isActive);
-      btn.classList.toggle('text-white', isActive);
+      
+      // Reset classes
+      if (type === 'banner') {
+        btn.classList.toggle('ring-2', isActive);
+        btn.classList.toggle('ring-violet-500', isActive);
+        btn.classList.toggle('border-violet-500', isActive);
+        btn.classList.toggle('border-slate-800', !isActive);
+      } else {
+        btn.classList.toggle('ring-2', isActive);
+        btn.classList.toggle('ring-violet-500', isActive);
+        btn.classList.toggle('bg-slate-800', isActive);
+        btn.classList.toggle('bg-slate-950/50', !isActive);
+      }
     });
   }
 
@@ -183,17 +336,15 @@
     const v = b.getAttribute('data-value');
     if (t==='frame') state.frame = v;
     if (t==='theme') state.theme = v;
-    if (t==='banner') { state.banner = v; if (v !== 'none') {} }
+    if (t==='banner') { state.banner = v; }
     applyPreview();
   }));
 
   document.getElementById('bannerUrl')?.addEventListener('input', (e)=>{
     state.bannerUrl = e.currentTarget.value;
-    if (state.bannerUrl && state.banner !== 'none') {
-      state.banner = 'none';
-    }
     applyPreview();
   });
+  
   document.getElementById('clearBannerUrl')?.addEventListener('click', ()=>{
     const inp = document.getElementById('bannerUrl');
     if (inp) inp.value = '';
@@ -205,9 +356,10 @@
   document.getElementById('saveBtn')?.addEventListener('click', async ()=>{
     if (saving) return; saving = true;
     const btn = document.getElementById('saveBtn');
+    const originalText = btn.textContent;
     if (btn) { btn.textContent = 'Enregistrement...'; btn.disabled = true; btn.classList.add('opacity-70'); }
     try {
-  const payload = { frame: state.frame, theme: state.theme, banner: state.banner, bannerUrl: state.bannerUrl };
+      const payload = { frame: state.frame, theme: state.theme, banner: state.banner, bannerUrl: state.bannerUrl };
       const res = await fetch('/api/me/cosmetics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (!res.ok) {
         const j = await res.json().catch(()=>({error:'Erreur'}));
@@ -219,13 +371,15 @@
         saved.theme = j.cosmetics?.selected?.theme ?? state.theme;
         saved.banner = j.cosmetics?.selected?.banner ?? state.banner;
         saved.bannerUrl = j.cosmetics?.selected?.bannerUrl ?? state.bannerUrl;
-        alert('Cosmétiques enregistrés');
+        // alert('Cosmétiques enregistrés'); // Replace with toast if available
+        if (window.showAlert) window.showAlert('Cosmétiques enregistrés', 'success');
+        else alert('Cosmétiques enregistrés');
       }
     } catch (e) {
       alert('Erreur réseau');
     } finally {
       saving = false;
-      if (btn) { btn.textContent = 'Enregistrer'; btn.disabled = false; btn.classList.remove('opacity-70'); }
+      if (btn) { btn.textContent = originalText; btn.disabled = false; btn.classList.remove('opacity-70'); }
     }
   });
 
@@ -237,6 +391,7 @@
   });
 
   document.getElementById('starterPack')?.addEventListener('click', async ()=>{
+    if(!confirm('Appliquer le Starter Pack ? Cela remplacera votre sélection actuelle.')) return;
     const res = await fetch('/api/me/cosmetics/starter-pack', { method: 'POST' });
     if (res.ok) {
       const j = await res.json();
@@ -248,7 +403,8 @@
       const inp = document.getElementById('bannerUrl');
       if (inp) inp.value = state.bannerUrl || '';
       applyPreview();
-      alert('Starter pack appliqué');
+      if (window.showAlert) window.showAlert('Starter pack appliqué', 'success');
+      else alert('Starter pack appliqué');
     } else {
       alert('Impossible d\'appliquer le starter pack');
     }
@@ -256,36 +412,26 @@
 
   applyPreview();
 </script>
+
 <script>
   (function(){
     const overlay = document.getElementById('comingSoonOverlay');
-  const btnNotify = document.getElementById('notifyMeBtn');
+    const btnNotify = document.getElementById('notifyMeBtn');
 
-    function hideOverlay() {
-      if (!overlay) return;
-      overlay.style.display = 'none';
-    }
-
-    if (overlay) overlay.style.display = '';
+    // If you want to hide the overlay for development/testing, uncomment:
+    // if (overlay) overlay.style.display = 'none';
 
     btnNotify?.addEventListener('click', async () => {
       try {
         if (btnNotify.disabled) return;
         btnNotify.disabled = true;
-        btnNotify.textContent = 'Noté — merci';
-        btnNotify.classList.remove('bg-emerald-600');
-        btnNotify.classList.add('bg-emerald-700', 'opacity-80');
-        try {
-          const dialog = overlay.querySelector('[role="dialog"]');
-          if (dialog && !dialog.querySelector('.notify-confirm')) {
-            const note = document.createElement('div');
-            note.className = 'notify-confirm mt-3 text-sm text-slate-300';
-            note.textContent = 'Merci — nous vous préviendrons lorsque la fonctionnalité sera disponible.';
-            dialog.appendChild(note);
-          }
-        } catch (e) {}
+        btnNotify.textContent = 'Noté — merci !';
+        btnNotify.classList.remove('bg-violet-600', 'hover:bg-violet-500');
+        btnNotify.classList.add('bg-emerald-600', 'text-white', 'cursor-default');
+        
+        // Optional: Send analytics event here
       } catch (e) {
-        alert('Erreur lors de la demande');
+        console.error(e);
       }
     });
   })();

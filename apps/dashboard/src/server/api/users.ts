@@ -166,6 +166,11 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
+    const me = await prisma.user.findUnique({
+      where: { id: meId as string },
+      select: { role: true },
+    });
+    if (!me) return reply.code(401).send({ error: "Unauthorized" });
     const { id } = request.params as { id: string };
     const { role } = request.body as { role: string };
     const dbRole = await prisma.role.findFirst({
@@ -337,6 +342,11 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_BANNED_EMAILS');
     if (!ok) return;
+    const me = await prisma.user.findFirst({
+      where: { id: userId },
+      select: { id: true, role: { select: { name: true } } },
+    });
+    if (!me) return reply.code(401).send({ error: "unauthorized" });
     const body = request.body as {
       email?: string;
       reason?: string;
@@ -414,6 +424,11 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_BANNED_EMAILS');
     if (!ok) return;
+    const me = await prisma.user.findFirst({
+      where: { id: userId },
+      select: { id: true, role: { select: { name: true } } },
+    });
+    if (!me) return reply.code(401).send({ error: "unauthorized" });
     const body = request.body as {
       emails?: string[];
       reason?: string;

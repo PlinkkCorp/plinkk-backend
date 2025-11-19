@@ -1,229 +1,180 @@
-<%- include('partials/head.ejs', { title: 'Dashboard' ,
-    description: 'Aperçu de ton profil, liens, indicateurs et actions rapides.' , robots: 'noindex,nofollow' }) %>
-    <%- include('partials/header-dash.ejs') %>
+<%- include('partials/head.ejs', { title: 'Dashboard', description: 'Centre de contrôle pour ton univers Plinkk.', robots: 'noindex,nofollow' }) %>
+<%- include('partials/header-dash.ejs') %>
 
-        <div class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
-            <%- include('partials/asside_dash.ejs', { active: 'dashboard' }) %>
-                <main class="col-span-12 lg:col-span-9 space-y-4">
-                    <section class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-5 shadow animate-slide-up">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div>
-                                <h1 class="text-lg font-semibold">Bienvenue, <span class="text-indigo-300">
-                                        <%= user.userName %>
-                                    </span></h1>
-                                <p class="text-xs text-slate-400">Dernière mise à jour: <%= new
-                                        Date(user.updatedAt).toLocaleString('fr-FR') %>
-                                </p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <a href="/edit"
-                                    class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow">Éditer
-                                    le profil</a>
-                                <a target="_blank"
-                                    href="<%= frontendUrl %>/<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : user.id %>"
-                                    class="px-3 py-2 text-sm rounded-md bg-emerald-700/80 hover:bg-emerald-600 text-white border border-emerald-500/40 shadow">Voir
-                                    le profil</a>
-                            </div>
-                        </div>
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+    <%- include('partials/asside_dash.ejs', { active: 'dashboard' }) %>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-                            <div
-                                class="rounded-lg border border-indigo-800/50 bg-indigo-950/30 p-4 shadow hover:shadow-lg transition hover:-translate-y-0.5">
-                                <p class="text-xs text-slate-300">Liens</p>
-                                <p class="text-3xl font-bold text-indigo-300">
-                                    <%= stats.links %>
-                                </p>
-                            </div>
-                            <div
-                                class="rounded-lg border border-fuchsia-800/50 bg-fuchsia-950/30 p-4 shadow hover:shadow-lg transition hover:-translate-y-0.5">
-                                <p class="text-xs text-slate-300">Icônes sociales</p>
-                                <p class="text-3xl font-bold text-fuchsia-300">
-                                    <%= stats.socials %>
-                                </p>
-                            </div>
-                            <div
-                                class="rounded-lg border border-emerald-800/50 bg-emerald-950/30 p-4 shadow hover:shadow-lg transition hover:-translate-y-0.5">
-                                <p class="text-xs text-slate-300">Labels</p>
-                                <p class="text-3xl font-bold text-emerald-300">
-                                    <%= stats.labels %>
-                                </p>
-                            </div>
-                        </div>
-
-                        <% const kDone=(stats.links>0?1:0) + (stats.socials>0?1:0) + (stats.labels>0?1:0);
-                            const kPct = Math.max(0, Math.min(100, Math.round((kDone/3)*100)));
-                            %>
-                            <div class="mt-4">
-                                <div class="flex items-center justify-between mb-1">
-                                    <p class="text-sm font-medium">Complétion du profil</p>
-                                    <p class="text-xs text-slate-400">
-                                        <%= kPct %>%
-                                    </p>
-                                </div>
-                                <div class="h-2 rounded-full bg-slate-800 overflow-hidden">
-                                    <div id="progressBar"
-                                        class="h-full rounded-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-emerald-500"
-                                        data-pct="<%= kPct %>"></div>
-                                </div>
-                                <div class="mt-2 flex flex-wrap gap-2 text-xs">
-                                    <span
-                                        class="px-2 py-1 rounded bg-slate-800/70 border border-slate-700/60 <%= stats.links>0?'text-emerald-300':'text-slate-400' %>">Liens</span>
-                                    <span
-                                        class="px-2 py-1 rounded bg-slate-800/70 border border-slate-700/60 <%= stats.socials>0?'text-emerald-300':'text-slate-400' %>">Sociaux</span>
-                                    <span
-                                        class="px-2 py-1 rounded bg-slate-800/70 border border-slate-700/60 <%= stats.labels>0?'text-emerald-300':'text-slate-400' %>">Labels</span>
-                                </div>
-                            </div>
-                    </section>
-                    <section class="grid grid-cols-1 xl:grid-cols-3 gap-4">
-                        <div class="xl:col-span-2 space-y-4">
-                            <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up"
-                                style="animation-delay:60ms">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h3 class="font-medium">Mes derniers liens</h3>
-                                    <a href="/edit#section-links"
-                                        class="text-sm text-indigo-300 hover:text-indigo-200 underline underline-offset-4">Gérer</a>
-                                </div>
-                                <% if (links && links.length) { %>
-                                    <ul class="divide-y divide-slate-800">
-                                        <% links.slice(0,6).forEach(l=> { %>
-                                            <li class="py-2 flex items-center gap-3">
-                                                <div
-                                                    class="h-5 w-5 rounded bg-indigo-700/70 flex items-center justify-center text-[10px] shrink-0">
-                                                    🔗</div>
-                                                <div class="min-w-0">
-                                                    <p class="truncate font-medium text-slate-100">
-                                                        <%= l.name || l.text || l.url %>
-                                                    </p>
-                                                    <p class="truncate text-xs text-slate-400">
-                                                        <%= l.url %>
-                                                    </p>
-                                                </div>
-                                            </li>
-                                            <% }) %>
-                                    </ul>
-                                    <% } else { %>
-                                        <p class="text-sm text-slate-400">Aucun lien pour le moment.</p>
-                                        <% } %>
-                            </div>
-
-                            <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up"
-                                style="animation-delay:80ms">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h3 class="font-medium">Mes Plinkks</h3>
-                                    <a href="/plinkks"
-                                        class="text-sm text-indigo-300 hover:text-indigo-200 underline underline-offset-4">Gérer</a>
-                                </div>
-                                <% if (typeof plinkks !=='undefined' && Array.isArray(plinkks) && plinkks.length) { %>
-                                    <ul class="divide-y divide-slate-800">
-                                        <% plinkks.forEach(p=> { %>
-                                            <li class="py-2 flex items-center justify-between">
-                                                <div>
-                                                    <div class="font-medium text-slate-100">
-                                                        <%= p.name || p.slug || p.id %>
-                                                    </div>
-                                                    <div class="text-xs text-slate-400">/<%= p.slug ? p.slug : user.id
-                                                            %>
-                                                    </div>
-                                                </div>
-                                                <div class="flex items-center gap-2">
-                                                    <a target="_blank"
-                                                        href="<%= frontendUrl %>/<%= p.slug ? p.slug : user.id %>"
-                                                        class="px-3 py-1.5 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white">Ouvrir</a>
-                                                    <a href="/edit?plinkkId=<%= p.id %>"
-                                                        class="px-3 py-1.5 text-xs rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200">Éditer</a>
-                                                </div>
-                                            </li>
-                                            <% }) %>
-                                    </ul>
-                                    <% } else { %>
-                                        <p class="text-sm text-slate-400">Aucun Plinkk pour le moment.</p>
-                                        <% } %>
-                            </div>
-
-                            <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up"
-                                style="animation-delay:100ms">
-                                <h3 class="font-medium mb-2">Raccourcis</h3>
-                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                    <a href="/edit#section-links"
-                                        class="group rounded-lg border border-slate-800/60 bg-slate-800/40 p-3 hover:bg-slate-800/70 transition">
-                                        <div
-                                            class="h-8 w-8 rounded bg-indigo-700/70 grid place-items-center text-slate-100 mb-2">
-                                            +</div>
-                                        <p class="text-sm">Ajouter un lien</p>
-                                    </a>
-                                    <a href="/edit#section-social"
-                                        class="group rounded-lg border border-slate-800/60 bg-slate-800/40 p-3 hover:bg-slate-800/70 transition">
-                                        <div
-                                            class="h-8 w-8 rounded bg-fuchsia-700/70 grid place-items-center text-slate-100 mb-2">
-                                            #</div>
-                                        <p class="text-sm">Icône sociale</p>
-                                    </a>
-                                    <a href="/edit#section-appearance"
-                                        class="group rounded-lg border border-slate-800/60 bg-slate-800/40 p-3 hover:bg-slate-800/70 transition">
-                                        <div
-                                            class="h-8 w-8 rounded bg-emerald-700/70 grid place-items-center text-slate-100 mb-2">
-                                            🎨</div>
-                                        <p class="text-sm">Apparence</p>
-                                    </a>
-                                    <a href="/edit#section-labels"
-                                        class="group rounded-lg border border-slate-800/60 bg-slate-800/40 p-3 hover:bg-slate-800/70 transition">
-                                        <div
-                                            class="h-8 w-8 rounded bg-amber-700/70 grid place-items-center text-slate-100 mb-2">
-                                            🏷️</div>
-                                        <p class="text-sm">Gérer les labels</p>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="xl:col-span-1">
-                            <div
-                                class="rounded-xl border border-indigo-800/40 bg-slate-900/60 p-3 shadow animate-slide-up xl:sticky xl:top-[68px]">
-                                <div class="flex items-center justify-between gap-2 mb-2">
-                                    <h2 class="text-base font-semibold">Aperçu</h2>
-                                    <div class="flex items-center gap-2">
-                                        <button id="previewReload"
-                                            class="px-3 py-1.5 text-xs rounded-md border border-slate-700/60 bg-slate-800/50 hover:bg-slate-700/60">Recharger</button>
-                                        <a class="px-3 py-1.5 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors"
-                                            target="_blank"
-                                            href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>">Ouvrir</a>
-                                    </div>
-                                </div>
-                                <div class="rounded-lg border border-slate-800 bg-slate-950/60 overflow-hidden">
-                                    <div
-                                        class="flex items-center gap-1 px-3 py-2 border-b border-slate-800 bg-slate-900/60">
-                                        <span class="size-2 rounded-full bg-rose-500/80"></span>
-                                        <span class="size-2 rounded-full bg-amber-500/80"></span>
-                                        <span class="size-2 rounded-full bg-emerald-500/80"></span>
-                                        <span class="ml-2 text-[10px] text-slate-400 truncate">
-                                            <%= frontendUrl %>
-                                                <% if (typeof plinkk !=='undefined' && plinkk && plinkk.slug) { %>/<%=
-                                                        plinkk.slug %>
-                                                        <% } else { %>/<%= user.id %>
-                                                                <% } %>
-                                        </span>
-                                    </div>
-                                    <iframe id="previewFrame" class="w-full h-[68dvh] bg-white"
-                                        src="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %>?preview=1<% } else { %>/<%= user.id %>?preview=1<% } %>"></iframe>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </main>
+    <main class="col-span-12 lg:col-span-10 space-y-8">
+        <!-- Welcome & Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            <div class="relative z-10">
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Bonjour, <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400"><%= (user && user.userName) || 'Créateur' %></span> 👋</h1>
+                <p class="text-slate-400 text-lg">Prêt à développer votre audience aujourd'hui ?</p>
+            </div>
+            <div class="flex gap-3 relative z-10">
+                <a href="<%= frontendUrl %>/<%= (user && user.userName) || (user && user.id) %>" target="_blank" class="px-5 py-3 bg-slate-700/50 hover:bg-slate-700 text-white rounded-xl border border-slate-600 transition-all flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    Voir ma page
+                </a>
+                <button onclick="navigator.clipboard.writeText('<%= frontendUrl %>/<%= (user && user.userName) || (user && user.id) %>')" class="px-5 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl shadow-lg shadow-violet-900/20 transition-all flex items-center gap-2 font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+                    Copier le lien
+                </button>
+            </div>
         </div>
 
-        <script>
-            (function () {
-                const btn = document.getElementById('previewReload');
-                const frame = document.getElementById('previewFrame');
-                if (btn && frame) { btn.addEventListener('click', () => { frame.src = frame.src; }); }
-            })();
-            (function () {
-                const el = document.getElementById('progressBar');
-                if (!el) return;
-                const pct = Number(el.getAttribute('data-pct') || '0');
-                const clamped = Math.max(0, Math.min(100, Math.round(pct)));
-                el.style.width = clamped + '%';
-            })();
-        </script>
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-blue-500/10 rounded-xl text-blue-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </div>
+                    <span class="text-xs font-medium text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-lg">+12%</span>
+                </div>
+                <p class="text-slate-400 text-sm font-medium">Vues totales</p>
+                <h3 class="text-3xl font-bold text-white mt-1"><%= (typeof stats !== 'undefined' && stats.views) ? stats.views : 0 %></h3>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-violet-500/10 rounded-xl text-violet-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                    </div>
+                    <span class="text-xs font-medium text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-lg">+5%</span>
+                </div>
+                <p class="text-slate-400 text-sm font-medium">Clics totaux</p>
+                <h3 class="text-3xl font-bold text-white mt-1"><%= (typeof stats !== 'undefined' && stats.clicks) ? stats.clicks : 0 %></h3>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-pink-500/10 rounded-xl text-pink-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg>
+                    </div>
+                    <span class="text-xs font-medium text-slate-500 bg-slate-800 px-2 py-1 rounded-lg">Avg</span>
+                </div>
+                <p class="text-slate-400 text-sm font-medium">Taux de clic (CTR)</p>
+                <h3 class="text-3xl font-bold text-white mt-1"><%= (typeof stats !== 'undefined' && stats.ctr) ? stats.ctr : '0%' %></h3>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            <!-- Main Content Column -->
+            <div class="xl:col-span-2 space-y-8">
+                
+                <!-- Quick Actions Grid -->
+                <div>
+                    <h2 class="text-lg font-semibold text-white mb-4">Actions rapides</h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <a href="/edit#add-link" class="group flex flex-col items-center justify-center p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-violet-500/50 transition-all cursor-pointer">
+                            <div class="w-12 h-12 rounded-full bg-violet-500/10 text-violet-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                            </div>
+                            <span class="text-sm font-medium text-slate-300 group-hover:text-white">Ajouter un lien</span>
+                        </a>
+                        <a href="/appearance" class="group flex flex-col items-center justify-center p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-pink-500/50 transition-all cursor-pointer">
+                            <div class="w-12 h-12 rounded-full bg-pink-500/10 text-pink-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+                            </div>
+                            <span class="text-sm font-medium text-slate-300 group-hover:text-white">Apparence</span>
+                        </a>
+                        <a href="/analytics" class="group flex flex-col items-center justify-center p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-blue-500/50 transition-all cursor-pointer">
+                            <div class="w-12 h-12 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                            </div>
+                            <span class="text-sm font-medium text-slate-300 group-hover:text-white">Analytiques</span>
+                        </a>
+                        <a href="/settings" class="group flex flex-col items-center justify-center p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-orange-500/50 transition-all cursor-pointer">
+                            <div class="w-12 h-12 rounded-full bg-orange-500/10 text-orange-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </div>
+                            <span class="text-sm font-medium text-slate-300 group-hover:text-white">Réglages</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Recent Activity / Links -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
+                    <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                        <h3 class="font-semibold text-white text-lg">Vos liens performants</h3>
+                        <a href="/edit" class="text-sm text-violet-400 hover:text-violet-300 font-medium">Voir tout →</a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-950/50 text-xs uppercase font-semibold text-slate-500">
+                                <tr>
+                                    <th class="px-6 py-4">Titre</th>
+                                    <th class="px-6 py-4">Destination</th>
+                                    <th class="px-6 py-4 text-right">Clics</th>
+                                    <th class="px-6 py-4 text-right">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800 text-sm">
+                                <% if (typeof links !== 'undefined' && links.length > 0) { %>
+                                    <% links.slice(0, 5).forEach(link => { %>
+                                    <tr class="hover:bg-slate-800/30 transition-colors">
+                                        <td class="px-6 py-4 font-medium text-slate-200"><%= link.name || 'Sans titre' %></td>
+                                        <td class="px-6 py-4 text-slate-400 truncate max-w-[200px]"><%= link.url %></td>
+                                        <td class="px-6 py-4 text-right text-slate-300"><%= link.clicks || 0 %></td>
+                                        <td class="px-6 py-4 text-right">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400">Actif</span>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                                            <div class="flex flex-col items-center justify-center">
+                                                <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-3 text-slate-600">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                                                </div>
+                                                <p>Aucun lien pour le moment.</p>
+                                                <a href="/edit#add-link" class="mt-2 text-violet-400 hover:underline">Ajouter votre premier lien</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Column -->
+            <div class="xl:col-span-1">
+                <div class="sticky top-8">
+                    <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-6 shadow-2xl shadow-black/50 relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-violet-900/20 to-transparent pointer-events-none"></div>
+                        
+                        <div class="flex items-center justify-between mb-6 relative z-10">
+                            <h3 class="text-base font-semibold text-white">Aperçu mobile</h3>
+                            <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %>?preview=1<% } else { %>/<%= user.id %>?preview=1<% } %>" target="_blank" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                            </a>
+                        </div>
+                        
+                        <!-- Phone Mockup -->
+                        <div class="relative mx-auto border-slate-950 bg-slate-950 border-[10px] rounded-[3rem] h-[600px] w-[300px] shadow-xl ring-1 ring-slate-800">
+                            <!-- Notch -->
+                            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-slate-950 rounded-b-2xl z-20"></div>
+                            
+                            <!-- Screen -->
+                            <div class="w-full h-full rounded-[2.3rem] overflow-hidden bg-white relative z-10">
+                                <iframe 
+                                    id="preview"
+                                    src="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %>?preview=1<% } else { %>/<%= user.id %>?preview=1<% } %>" 
+                                    class="w-full h-full border-0"
+                                    title="Preview"
+                                ></iframe>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 text-center">
+                            <p class="text-xs text-slate-500">L'aperçu se met à jour automatiquement</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

@@ -31,380 +31,473 @@
     })();
 </script>
 
-        <main class="max-w-7xl mx-auto p-4 grid grid-cols-12 gap-4">
-            <section class="col-span-12 md:col-span-7 xl:col-span-8 space-y-4">
-                <div class="flex items-center justify-between gap-3">
-                    <div class="min-w-0">
-                        <h2 class="text/base font-semibold">Configuration <% if (typeof plinkk !== 'undefined' && plinkk) { %>
-                            <span id="headerPlinkkLabel" class="text-slate-400">— <span id="headerPlinkkName"><%= plinkk.name %></span> (<span id="headerPlinkkSlug"><%= plinkk.slug %></span>)</span>
-                        <% } %></h2>
-                        <div id="status" class="text-xs text-slate-400"></div>
+        <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+    <%- include('../../partials/asside_dash.ejs', { active: 'edit' }) %>
+
+    <main class="col-span-12 lg:col-span-10 grid grid-cols-1 xl:grid-cols-12 gap-8">
+        <section class="xl:col-span-8 space-y-6">
+            <!-- Header Section -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+                <div class="min-w-0">
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-3">
+                        Configuration
+                        <% if (typeof plinkk !== 'undefined' && plinkk) { %>
+                            <span class="text-sm font-normal text-slate-400 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+                                <%= plinkk.name %> <span class="text-slate-500">/</span> <span class="text-violet-400"><%= plinkk.slug %></span>
+                            </span>
+                        <% } %>
+                    </h1>
+                    <div id="status" class="text-xs text-emerald-400 mt-2 font-medium h-4"></div>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <div class="hidden sm:block">
+                        <%- include('../../partials/changePlinkkDropdown.ejs') %>
                     </div>
-                                        <div class="hidden sm:flex items-center gap-2">
-                                                <%- include('../../partials/changePlinkkDropdown.ejs') %>
-                                        </div>
-                                        <div class="flex sm:hidden items-center gap-2">
-                                                <% if (typeof pages !== 'undefined' && Array.isArray(pages) && pages.length > 1) { %>
-                                                    <div class="ml-2 relative inline-block text-left">
-                                                        <button id="changePlinkkBtnMobile" type="button" class="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-md bg-slate-800 border border-slate-700 text-white focus:outline-none">
-                                                            <span id="changePlinkkBtnLabelMobile">Choisir...</span>
-                                                            <svg class="text-slate-300" width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
-                                                        </button>
-                                                        <div id="changePlinkkDropdownMobile" class="hidden absolute right-0 mt-2 w-64 rounded-md bg-slate-900 border border-slate-800 shadow-lg z-40">
-                                                            <div class="p-2">
-                                                                <input id="changePlinkkSearchMobile" type="search" placeholder="Rechercher..." class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none" />
-                                                            </div>
-                                                            <ul id="changePlinkkListMobile" class="max-h-48 overflow-auto divide-y divide-slate-800 text-sm"></ul>
-                                                        </div>
-                                                    </div>
-                                                <% } %>
-                                                <button id="resetBtn--mobile" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Reset</button>
-                                                <button id="saveBtn--mobile" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500">Save</button>
-                                        </div>
+                    
+                    <!-- Mobile Plinkk Switcher -->
+                    <div class="sm:hidden relative">
+                        <% if (typeof pages !== 'undefined' && Array.isArray(pages) && pages.length > 1) { %>
+                            <button id="changePlinkkBtnMobile" type="button" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 border border-slate-700 text-white hover:bg-slate-700 transition-colors">
+                                <span id="changePlinkkBtnLabelMobile">Choisir...</span>
+                                <svg class="text-slate-400" width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
+                            </button>
+                            <!-- Dropdown content (same as desktop but positioned for mobile) -->
+                            <div id="changePlinkkDropdownMobile" class="hidden absolute right-0 mt-2 w-64 rounded-xl bg-slate-900 border border-slate-800 shadow-xl z-50 overflow-hidden">
+                                <div class="p-2 border-b border-slate-800">
+                                    <input id="changePlinkkSearchMobile" type="search" placeholder="Rechercher..." class="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:border-violet-500" />
+                                </div>
+                                <ul id="changePlinkkListMobile" class="max-h-48 overflow-auto divide-y divide-slate-800/50 text-sm"></ul>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button id="resetBtn--mobile" class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">Reset</button>
+                        <button id="saveBtn--mobile" class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors">Sauvegarder</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="bg-slate-900 border border-slate-800 p-2 rounded-2xl overflow-x-auto scrollbar-hide">
+                <ul class="flex gap-2 min-w-max" id="tabs">
+                    <li>
+                        <button data-target="#section-profile" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2" aria-selected="true">
+                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-3.33 0-8 1.67-8 5v1h16v-1c0-3.33-4.67-5-8-5z"/></svg>
+                            Profil
+                        </button>
+                    </li>
+                    <li>
+                        <button data-target="#section-appearance" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l4 8h8l-6 5 2 9-8-5-8 5 2-9-6-5h8z"/></svg>
+                            Apparence
+                        </button>
+                    </li>
+                    <li>
+                        <button data-target="#section-background" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v12H4zM7 9h10v6H7z"/></svg>
+                            Arrière-plan
+                        </button>
+                    </li>
+                    <li>
+                        <button data-target="#section-links" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 13.41L9.17 12l4.24-4.24 1.41 1.41L10.59 13.41zm2.82-2.82L14.83 12 10.59 16.24 9.17 14.83 13.41 10.59z"/></svg>
+                            Liens
+                        </button>
+                    </li>
+                    <li>
+                        <button data-target="#section-animations" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M2 17h20v2H2zM7 9h10v2H7zM4 13h16v2H4z"/></svg>
+                            Animations
+                        </button>
+                    </li>
+                    <li>
+                        <button data-target="#section-statusbar" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5h18v2H3zM3 9h18v6H3zM3 17h18v2H3z"/></svg>
+                            Status
+                        </button>
+                    </li>
+                    <li>
+                        <button data-target="#section-layout" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16v2H4zM4 11h10v2H4zM4 17h13v2H4z"/></svg>
+                            Agencement
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Content Sections -->
+            <div class="space-y-6">
+                <!-- Profile Section -->
+                <div id="section-profile" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg animate-slide-up">
+                    <div class="mb-6 pb-4 border-b border-slate-800">
+                        <h3 class="text-lg font-semibold text-white">Profil</h3>
+                        <p class="text-sm text-slate-400">Informations de base affichées publiquement.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Lien du profil <span class="info-i" title="Lien externe vers ton profil principal">i</span></span>
+                            <input id="profileLink" type="url" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 placeholder-slate-600" placeholder="https://..." />
+                        </label>
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Texte du site <span class="info-i" title="Texte court affiché à côté du lien">i</span></span>
+                            <div class="relative">
+                                <input id="profileSiteText" data-maskable="true" type="text" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                                <button type="button" data-target="profileSiteText" class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
+                        </label>
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Nom affiché <span class="info-i" title="Nom public visible sur ta page">i</span></span>
+                            <input id="userName" type="text" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                        </label>
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Email <span class="info-i" title="Adresse e‑mail de contact">i</span></span>
+                            <div class="relative">
+                                <input id="email" data-maskable="true" type="email" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                                <button type="button" data-target="email" class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
+                        </label>
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Image de profil (URL) <span class="info-i" title="URL d’une image carrée">i</span></span>
+                            <input id="profileImage" type="url" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                        </label>
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Icône de profil (URL) <span class="info-i" title="Petite icône affichée près de ton nom">i</span></span>
+                            <div class="relative">
+                                <input id="profileIcon" data-maskable="true" type="url" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                                <button type="button" data-target="profileIcon" class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
+                        </label>
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Icône d’onglet (URL) <span class="info-i" title="Favicon affichée dans l’onglet">i</span></span>
+                            <div class="relative">
+                                <input id="iconUrl" data-maskable="true" type="url" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                                <button type="button" data-target="iconUrl" class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
+                        </label>
+                        <label class="block space-y-2 md:col-span-2">
+                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Description <span class="info-i" title="Courte bio affichée sur ta page">i</span></span>
+                            <div class="relative">
+                                <textarea id="description" data-maskable="true" rows="3" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 resize-none"></textarea>
+                                <button type="button" data-target="description" class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
+                        </label>
+                    </div>
                 </div>
 
-                <nav class="rounded-xl border border-slate-800/60 bg-slate-900/60 px-2 overflow-x-auto shadow animate-slide-up" role="tablist" aria-label="Sections d'édition">
-                    <ul class="flex gap-1 text-sm min-w-max" id="tabs">
-                        <li>
-                            <button data-target="#section-profile" role="tab" aria-controls="section-profile" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800 aria-selected:bg-slate-800 flex items-center gap-2" aria-selected="true">
-                                <svg class="size-4 text-slate-300" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-3.33 0-8 1.67-8 5v1h16v-1c0-3.33-4.67-5-8-5z"/></svg>
-                                Profil
-                            </button>
-                        </li>
-                        <li>
-                            <button data-target="#section-appearance" role="tab" aria-controls="section-appearance" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800 flex items-center gap-2">
-                                <svg class="size-4 text-slate-300" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l4 8h8l-6 5 2 9-8-5-8 5 2-9-6-5h8z"/></svg>
-                                Apparence
-                            </button>
-                        </li>
-                        <li>
-                            <button data-target="#section-background" role="tab" aria-controls="section-background" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800 flex items-center gap-2">
-                                <svg class="size-4 text-slate-300" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v12H4zM7 9h10v6H7z"/></svg>
-                                Arrière-plan
-                            </button>
-                        </li>
-                        <li>
-                            <button data-target="#section-links" role="tab" aria-controls="section-links" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800 flex items-center gap-2">
-                                <svg class="size-4 text-slate-300" viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 13.41L9.17 12l4.24-4.24 1.41 1.41L10.59 13.41zm2.82-2.82L14.83 12 10.59 16.24 9.17 14.83 13.41 10.59z"/></svg>
-                                Liens
-                            </button>
-                        </li>
-                        <li>
-                            <button data-target="#section-animations" role="tab" aria-controls="section-animations" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800 flex items-center gap-2">
-                                <svg class="size-4 text-slate-300" viewBox="0 0 24 24" fill="currentColor"><path d="M2 17h20v2H2zM7 9h10v2H7zM4 13h16v2H4z"/></svg>
-                                Animations
-                            </button>
-                        </li>
-                        <li>
-                            <button data-target="#section-statusbar" role="tab" aria-controls="section-statusbar" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800 flex items-center gap-2">
-                                <svg class="size-4 text-slate-300" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5h18v2H3zM3 9h18v6H3zM3 17h18v2H3z"/></svg>
-                                Status & Labels
-                            </button>
-                        </li>
-                        <li>
-                            <button data-target="#section-layout" role="tab" aria-controls="section-layout" class="tab-btn px-3 py-2 rounded-md hover:bg-slate-800 flex items-center gap-2">
-                                <svg class="size-4 text-slate-300" viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16v2H4zM4 11h10v2H4zM4 17h13v2H4z"/></svg>
-                                Agencement
-                            </button>
-                        </li>
-                    </ul>
-                </nav>
-
-                <div class="space-y-4">
-                    <div id="section-profile" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-                        <div class="mb-3"><h3 class="font-medium">Profil</h3><p class="text-xs text-slate-400">Informations de base affichées publiquement.</p></div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="block text-sm">Lien du profil <span class="info-i" title="Lien externe vers ton profil principal (ex. site perso, X/Twitter). Affiché sous ton nom. Utilise https://">i</span>
-                                <input id="profileLink" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="https://..." inputmode="url"/>
-                            </label>
-                            <label class="block text-sm">Texte du site <span class="info-i" title="Texte court affiché à côté du lien (ex. ‘Mon site’, ‘Portfolio’).">i</span>
-                                <div class="relative">
-                                    <input id="profileSiteText" data-maskable="true" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
-                                    <button type="button" data-target="profileSiteText" aria-pressed="false" class="mask-toggle absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-white" aria-label="Masquer / afficher">
-                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                    </button>
-                                </div>
-                            </label>
-                            <label class="block text-sm">Nom affiché <span class="info-i" title="Nom public visible sur ta page.">i</span>
-                                <input id="userName" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
-                            </label>
-                            <label class="block text-sm">Email <span class="info-i" title="Adresse e‑mail de contact. Tu peux la masquer via l’icône œil avant d’enregistrer si tu ne souhaites pas l’afficher.">i</span>
-                                <div class="relative">
-                                    <input id="email" data-maskable="true" type="email" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" inputmode="email" autocomplete="email" />
-                                    <button type="button" data-target="email" aria-pressed="false" class="mask-toggle absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-white" aria-label="Masquer / afficher">
-                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                    </button>
-                                </div>
-                            </label>
-                            <label class="block text-sm">Image de profil (URL) <span class="info-i" title="URL d’une image carrée (idéalement 512×512) en .jpg/.png/.webp.">i</span>
-                                <div class="relative">
-                                    <input id="profileImage" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
-                                </div>
-                            </label>
-                            <label class="block text-sm">Icône de profil (URL) <span class="info-i" title="Petite icône affichée près de ton nom. Taille conseillée ≥64px.">i</span>
-                                <div class="relative">
-                                    <input id="profileIcon" data-maskable="true" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
-                                    <button type="button" data-target="profileIcon" aria-pressed="false" class="mask-toggle absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-white" aria-label="Masquer / afficher">
-                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                    </button>
-                                </div>
-                            </label>
-                            <label class="block text-sm">Icône d’onglet (URL) <span class="info-i" title="Favicon affichée dans l’onglet du navigateur. .png ou .ico (≈32×32).">i</span>
-                                <div class="relative">
-                                    <input id="iconUrl" data-maskable="true" type="url" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50" />
-                                    <button type="button" data-target="iconUrl" aria-pressed="false" class="mask-toggle absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-white" aria-label="Masquer / afficher">
-                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                    </button>
-                                </div>
-                            </label>
-                            <label class="block text-sm md:col-span-2">Description <span class="info-i" title="Courte bio affichée sur ta page. Idéalement 200–300 caractères.">i</span>
-                                <div class="relative">
-                                    <textarea id="description" data-maskable="true" rows="3" class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-600/50"></textarea>
-                                    <button type="button" data-target="description" aria-pressed="false" class="mask-toggle absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 hover:bg-slate-700 text-white" aria-label="Masquer / afficher">
-                                        <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                    </button>
-                                </div>
-                            </label>
-                        </div>
+                <!-- Appearance Section -->
+                <div id="section-appearance" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                    <div class="mb-6 pb-4 border-b border-slate-800">
+                        <h3 class="text-lg font-semibold text-white">Apparence</h3>
+                        <p class="text-sm text-slate-400">Couleurs et options d’affichage.</p>
                     </div>
-
-                    <div id="section-appearance" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
-                        <div class="mb-3"><h3 class="font-medium">Apparence</h3><p class="text-xs text-slate-400">Couleurs et options d’affichage.</p></div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="block text-sm">Couleur hover <span class="info-i" title="Couleur utilisée au survol des liens et boutons.">i</span>
-                                <input id="profileHoverColor" type="color" class="mt-1 h-10 w-full rounded bg-slate-900 border border-slate-800 p-1" />
-                            </label>
-                            <label class="block text-sm">Thème <span class="info-i" title="Palette de couleurs prédéfinie pour ta page.">i</span>
-                                <div class="mt-1 flex items-center gap-2">
-                                    <select id="selectedThemeIndex" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-800"></select>
-                                    <button id="openThemePicker" type="button" class="h-10 px-3 text-sm rounded-md bg-fuchsia-700/80 hover:bg-fuchsia-600 border border-fuchsia-500/40 text-white shadow transition-colors">Choisir</button>
-                                </div>
-                            </label>
-                            <label style="display: none;" class="flex items-center gap-2 text-sm opacity-60 cursor-not-allowed " title="Fonctionnalité à venir">
-                                <input id="neonEnable" type="checkbox" class="size-4" disabled/>
-                                <span>Activer Néon</span>
-                                <span class="text-[10px] px-2 py-0.5 rounded-full border border-fuchsia-500/30 text-fuchsia-300/90 bg-fuchsia-950/30">À venir</span>
-                            </label>
-                            <label class="flex items-center gap-2 text-sm"><input id="buttonThemeEnable" type="checkbox" class="size-4"/> Activer thème des boutons <span class="info-i" title="Applique le style de boutons du thème sélectionné.">i</span></label>
-                        </div>
-                        <div class="pt-4 mt-4 border-t border-slate-800">
-                            <div class="relative rounded-xl border border-slate-800/70 bg-slate-900/50 overflow-hidden">
-                                <div class="px-3 pt-3 flex items-center justify-between opacity-60 select-none">
-                                    <div class="flex items-center gap-2">
-                                        <h4 class="font-medium">Couleurs Néon</h4>
-                                        <span class="text-[10px] px-2 py-0.5 rounded-full border border-fuchsia-500/30 text-fuchsia-300/90 bg-fuchsia-950/30">À venir</span>
-                                    </div>
-                                    <button id="addNeonColor" type="button" class="px-3 py-2 text-sm rounded-md bg-fuchsia-700/60 border border-fuchsia-500/30 text-white/70 shadow" disabled>+ Ajouter une couleur</button>
-                                </div>
-                                <div class="p-3">
-                                  <div id="neonList" class="grid grid-cols-2 md:grid-cols-4 gap-3 opacity-50 pointer-events-none">
-                                    <div class="col-span-2 md:col-span-4 text-xs text-slate-400">Planifie tes couleurs préférées — le néon revient bientôt avec plus d’options ✨</div>
-                                  </div>
-                                </div>
-                                <div class="absolute inset-0 flex items-center justify-center" aria-hidden="true">
-                                    <div class="relative">
-                                        <div class="absolute -inset-0.5 bg-gradient-to-r from-fuchsia-500/40 via-indigo-500/40 to-cyan-500/40 blur-md rounded-2xl"></div>
-                                        <div class="relative px-5 py-3 rounded-2xl border border-slate-700/80 bg-slate-900/85 text-center shadow-xl">
-                                            <div class="mx-auto mb-2 size-8 rounded-full flex items-center justify-center bg-slate-800/80 border border-slate-700 text-slate-200">🛠️</div>
-                                            <div class="text-sm font-semibold text-slate-100">En cours de développement</div>
-                                            <div class="text-[11px] text-slate-400 mt-0.5">Bientôt disponible</div>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Couleur hover <span class="info-i" title="Couleur au survol">i</span></span>
+                            <div class="flex items-center gap-3">
+                                <input id="profileHoverColor" type="color" class="h-12 w-20 rounded-lg bg-slate-950 border border-slate-800 p-1 cursor-pointer" />
+                                <span class="text-xs text-slate-500">Cliquez pour changer</span>
                             </div>
-                        </div>
-                    </div>
-                    <div id="section-background" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
-                            <div class="mb-3 flex items-center justify-between">
-                            <div>
-                                <h3 class="font-medium">Arrière‑plan (dégradé)</h3>
-                                <p class="text-xs text-slate-400">Définissez les couleurs du dégradé d’arrière‑plan.</p>
-                            </div>
+                        </label>
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Thème <span class="info-i" title="Palette de couleurs prédéfinie">i</span></span>
                             <div class="flex items-center gap-2">
-                                <button id="invertBackgroundColors" type="button" class="px-3 py-2 text-sm rounded-md bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-white shadow transition-colors">Inverser</button>
-                                <button id="addBackgroundColor" type="button" class="px-3 py-2 text-sm rounded-md bg-cyan-700/80 hover:bg-cyan-600 border border-cyan-500/40 text-white shadow transition-colors">+ Ajouter une couleur</button>
+                                <select id="selectedThemeIndex" class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none"></select>
+                                <button id="openThemePicker" type="button" class="px-4 py-3 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-medium shadow-lg shadow-fuchsia-900/20 transition-colors">Choisir</button>
                             </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                            <label class="block text-sm">Angle du dégradé <span class="info-i" title="Orientation du dégradé en degrés (0–359). 0° = haut, 90° = droite.">i</span>
-                                <div class="mt-1 flex items-center gap-3">
-                                    <input id="degBackgroundColor" type="number" class="w-24 px-3 py-2 rounded bg-slate-900 border border-slate-800" />
-                                    <div id="degDial" class="deg-dial" tabindex="0" role="slider" aria-label="Angle du dégradé" aria-valuemin="0" aria-valuemax="359" aria-valuenow="0">
-                                        <div class="deg-dial-dot"></div>
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
-                        <div id="backgroundList" class="flex flex-col gap-2" role="list"></div>
-                        <div class="pt-4 mt-4 border-t border-slate-800">
-                            <div class="mb-2 flex items-center justify-between">
+                        </label>
+                        <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                            <input id="buttonThemeEnable" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
+                            <span class="text-sm font-medium text-slate-300">Activer thème des boutons</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Neon Section (Coming Soon) -->
+                    <div class="mt-8 pt-6 border-t border-slate-800">
+                        <div class="relative rounded-2xl border border-slate-800 bg-slate-950/50 overflow-hidden group">
+                            <div class="absolute inset-0 bg-gradient-to-br from-fuchsia-500/5 to-violet-500/5"></div>
+                            <div class="p-6 flex items-center justify-between opacity-40">
                                 <div>
-                                    <h4 class="font-medium">Canvas</h4>
-                                    <p class="text-xs text-slate-400">Choisissez l’animation de fond canvas.</p>
+                                    <h4 class="font-medium text-white">Couleurs Néon</h4>
+                                    <p class="text-xs text-slate-400 mt-1">Personnalisation avancée des effets lumineux</p>
                                 </div>
-                                <label class="flex items-center gap-2 text-sm">
-                                    <input id="canvaEnable" type="checkbox" class="size-4"/>
-                                    Activer Canvas <span class="info-i" title="Active ou désactive l’animation de fond (consomme davantage de ressources).">i</span>
-                                </label>
+                                <button disabled class="px-4 py-2 rounded-lg bg-slate-800 text-slate-400 text-sm">Bientôt</button>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <label class="block text-sm md:col-span-2">Animation <span class="info-i" title="Choisis l’animation de fond à utiliser.">i</span>
-                                    <div class="mt-1">
-                                        <select id="selectedCanvasIndex" class="hidden"></select>
-                                        <div class="relative">
-                                            <input id="selectedCanvasLabel" type="text" class="pl-3 pr-20 py-2 w-full rounded bg-slate-900/60 border border-slate-800/60 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="Cliquer pour choisir" readonly />
-                                            <button id="openCanvasPicker" type="button" class="absolute right-1 top-1 h-8 px-2 text-xs rounded bg-cyan-700/80 hover:bg-cyan-600 border border-cyan-500/40 text-white shadow transition-colors">Choisir</button>
-                                        </div>
-                                    </div>
-                                </label>
-                                <div class="flex items-center gap-2 md:col-span-2 -mt-2">
-                                  <label class="inline-flex items-center text-xs">
-                                    <input id="canvasPreviewEnable" type="checkbox" class="form-checkbox mr-2" />
-                                    Aperçu (réduit) <span class="info-i" title="Affiche un petit aperçu de l’animation sélectionnée. Désactive pour économiser les ressources.">i</span>
-                                  </label>
-                                  <span class="text-[11px] text-slate-400">Désactive pour économiser les ressources</span>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <div id="selectedCanvasPreview" class="relative rounded-lg border border-slate-800 overflow-hidden bg-slate-900/60 max-w-[440px] mx-auto">
-                                        <div id="selectedCanvasPreviewOverlay" class="absolute inset-0 bg-black/50 text-slate-200 text-xs flex items-center justify-center hidden">Canvas désactivé</div>
-                                        <div id="selectedCanvasPreviewFrame" class="block w-full" style="aspect-ratio: 16/9;"></div>
-                                    </div>
+                            <div class="absolute inset-0 flex items-center justify-center backdrop-blur-[1px]">
+                                <div class="px-6 py-3 rounded-full bg-slate-900/90 border border-slate-700 shadow-xl flex items-center gap-3">
+                                    <span class="flex h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse"></span>
+                                    <span class="text-sm font-medium text-slate-200">En cours de développement</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div id="section-links" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
-                        <div class="mb-3 flex items-center justify-between">
-                            <div>
-                                <h3 class="font-medium">Icônes sociales</h3>
-                                <p class="text-xs text-slate-400">Ajoutez des liens vers vos réseaux et services.</p>
-                            </div>
-                            <button id="addSocial" type="button" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">+ Ajouter</button>
-                        </div>
-                        <div id="socialList" class="space-y-3"></div>
-                        <div class="border-t border-slate-800 my-4"></div>
-                        <div class="mb-3 flex items-center justify-between">
-                            <div>
-                                <h3 class="font-medium">Liens</h3>
-                                <p class="text-xs text-slate-400">Gérez les boutons et liens de votre page.</p>
-                            </div>
-                            <button id="addLink" type="button" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">+ Ajouter un lien</button>
-                        </div>
-                        <div id="linksList" class="space-y-3"></div>
-                    </div>
-                    <div id="section-animations" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
-                        <div class="mb-3"><h3 class="font-medium">Animations</h3><p class="text-xs text-slate-400">Ajustez les animations d’éléments et d’arrière‑plan.</p></div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="block text-sm">Animation d'article <span class="info-i" title="Effet d’apparition des blocs (sections, liens).">i</span>
-                                <select id="selectedAnimationIndex" class="hidden"></select>
-                                <div class="relative mt-1">
-                                    <input id="selectedAnimationLabel" type="text" class="pl-3 pr-20 py-2 w-full rounded bg-slate-900/60 border border-slate-800/60 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="Cliquer pour choisir" readonly />
-                                    <button id="openAnimArticlePicker" type="button" class="absolute right-1 top-1 h-8 px-2 text-xs rounded bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Choisir</button>
-                                </div>
-                            </label>
-                            <label class="block text-sm">Animation de bouton <span class="info-i" title="Effet appliqué aux boutons (au survol, au clic).">i</span>
-                                <select id="selectedAnimationButtonIndex" class="hidden"></select>
-                                <div class="relative mt-1">
-                                    <input id="selectedAnimationButtonLabel" type="text" class="pl-3 pr-20 py-2 w-full rounded bg-slate-900/60 border border-slate-800/60 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="Cliquer pour choisir" readonly />
-                                    <button id="openAnimButtonPicker" type="button" class="absolute right-1 top-1 h-8 px-2 text-xs rounded bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Choisir</button>
-                                </div>
-                            </label>
-                            <label class="block text-sm">Animation d'arrière-plan <span class="info-i" title="Effet d’animation appliqué à l’arrière‑plan (si utilisé).">i</span>
-                                <select id="selectedAnimationBackgroundIndex" class="hidden"></select>
-                                <div class="relative mt-1">
-                                    <input id="selectedAnimationBackgroundLabel" type="text" class="pl-3 pr-20 py-2 w-full rounded bg-slate-900/60 border border-slate-800/60 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-600/50" placeholder="Cliquer pour choisir" readonly />
-                                    <button id="openAnimBackgroundPicker" type="button" class="absolute right-1 top-1 h-8 px-2 text-xs rounded bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Choisir</button>
-                                </div>
-                            </label>
-                            <label class="block text-sm">Durée anim background (s) <span class="info-i" title="Durée d’un cycle complet d’animation (en secondes).">i</span>
-                                <input id="animationDurationBackground" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
-                            </label>
-                            <label class="block text-sm">Délai anim bouton (s) <span class="info-i" title="Retard avant le déclenchement de l’animation des boutons (en secondes).">i</span>
-                                <input id="delayAnimationButton" step="0.01" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
-                            </label>
-                            <label class="block text-sm">Taille background (%) <span class="info-i" title="Échelle du motif d’arrière‑plan (en pourcentage).">i</span>
-                                <input id="backgroundSize" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
-                            </label>
-                        </div>
-                    </div>
-                    <div id="section-statusbar" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
+                </div>
 
-                        <div class="mb-3"><h3 class="font-medium">Barre de statut</h3><p class="text-xs text-slate-400">Message et style du statut affiché sous le profil.</p></div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="block text-sm md:col-span-2">Texte <span class="info-i" title="Message affiché sous ton profil dans la barre de statut.">i</span>
-                                <input id="status_text" type="text" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
-                            </label>
-                            <label class="block text-sm">FontTextColor (0 ou 1) <span class="info-i" title="Forcer la couleur du texte: 0 = texte clair, 1 = texte foncé (selon ton fond).">i</span>
-                                <input id="status_fontTextColor" type="number" class="mt-1 w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
-                            </label>
-                            <div class="md:col-span-1">
-                                <div class="text-sm mb-1">Statut <span class="info-i" title="État visible sous ton profil (en ligne, occupé, absent, hors‑ligne).">i</span></div>
-                                <div class="relative inline-block" id="statusDropdown">
-                                    <button id="statusDropdownBtn" type="button" aria-haspopup="menu" aria-expanded="false" class="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-slate-800/80 border border-slate-700/60 hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-600/40 text-sm">
-                                        <span class="inline-block size-2 rounded-full bg-slate-400"></span>
-                                        <span class="status-current-label">Hors‑ligne</span>
-                                        <svg class="size-4 text-slate-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
-                                    </button>
-                                    <div id="statusDropdownPanel" class="absolute z-10 mt-2 w-48 rounded-lg border border-slate-700 bg-slate-900/95 backdrop-blur shadow-xl p-1 hidden" role="menu" aria-label="Choisir un statut">
-                                        <button type="button" class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-slate-800" data-value="online" role="menuitem">
-                                            <span class="inline-block size-2 rounded-full bg-emerald-400"></span> En ligne
-                                        </button>
-                                        <button type="button" class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-slate-800" data-value="busy" role="menuitem">
-                                            <span class="inline-block size-2 rounded-full bg-rose-400"></span> Occupé
-                                        </button>
-                                        <button type="button" class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-slate-800" data-value="away" role="menuitem">
-                                            <span class="inline-block size-2 rounded-full bg-amber-400"></span> Absent
-                                        </button>
-                                        <button type="button" class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-slate-800" data-value="offline" role="menuitem">
-                                            <span class="inline-block size-2 rounded-full bg-slate-400"></span> Hors‑ligne
-                                        </button>
-                                    </div>
-                                </div>
-                                <input type="hidden" id="status_statusText" />
-                            </div>
+                <!-- Background Section -->
+                <div id="section-background" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                    <div class="mb-6 pb-4 border-b border-slate-800 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-white">Arrière‑plan</h3>
+                            <p class="text-sm text-slate-400">Dégradés et animations.</p>
                         </div>
-                        <div class="pt-4 mt-4 border-t border-slate-800">
-                            <div class="mb-3 flex items-center justify-between">
-                                <div>
-                                    <h4 class="font-medium">Labels</h4>
-                                    <p class="text-xs text-slate-400">Badges affichés sous votre profil.</p>
-                                </div>
-                                <button id="addLabel" type="button" class="px-3 py-2 text-sm rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors">+ Ajouter un label</button>
-                            </div>
-                            <div id="labelsList" class="space-y-3"></div>
-                        </div>
-                    </div>
-                    <div id="section-layout" class="card rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 hidden shadow animate-slide-up">
-                        <div class="mb-3"><h3 class="font-medium">Agencement</h3><p class="text-xs text-slate-400">Réordonne visuellement les sections de ta page par glisser‑déposer.</p></div>
-                        <div class="space-y-2" id="layoutList" role="list"></div>
-                        <p class="text-[11px] text-slate-400 mt-3">Astuce: fais glisser les éléments avec la poignée à gauche pour changer l’ordre.</p>
-                    </div>
-                </div>
-            </section>
-            <aside class="col-span-12 md:col-span-5 xl:col-span-4 space-y-3">
-                <div class="rounded-lg border border-indigo-800/40 bg-slate-900/60 p-3 sticky top-[68px] shadow animate-slide-up" style="animation-delay:120ms">
-                    <div class="flex items-center justify-between gap-2 mb-2">
-                        <h2 class="text-base font-semibold">Aperçu</h2>
                         <div class="flex items-center gap-2">
-                            <button id="refreshPreview" class="px-3 py-2 text-xs rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow transition-colors">Rafraîchir</button>
-                            <a class="px-3 py-2 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors" target="_blank" href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>">Ouvrir</a>
+                            <button id="invertBackgroundColors" type="button" class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">Inverser</button>
+                            <button id="addBackgroundColor" type="button" class="px-3 py-2 text-xs font-medium rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-900/20 transition-colors">+ Couleur</button>
                         </div>
                     </div>
-                    <div class="rounded border border-slate-800 overflow-hidden bg-slate-950/40">
-                        <div class="flex items-center gap-2 px-3 py-2 border-b border-slate-800 text-[10px] text-slate-400">
-                            <span class="size-2 rounded-full bg-rose-500/80"></span>
-                            <span class="size-2 rounded-full bg-amber-500/80"></span>
-                            <span class="size-2 rounded-full bg-emerald-500/80"></span>
-                            <div class="ml-auto flex items-center gap-1">
-                                <button type="button" data-view="desktop" class="px-2 py-1 rounded hover:bg-slate-800">Desktop</button>
-                                <button type="button" data-view="mobile" class="px-2 py-1 rounded hover:bg-slate-800">Mobile</button>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Angle du dégradé <span class="info-i" title="Orientation en degrés">i</span></span>
+                            <div class="flex items-center gap-4 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                                <input id="degBackgroundColor" type="number" class="w-20 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-center text-white font-mono" />
+                                <div id="degDial" class="deg-dial shrink-0" tabindex="0" role="slider" aria-label="Angle">
+                                    <div class="deg-dial-dot"></div>
+                                </div>
+                                <span class="text-xs text-slate-500">Faites tourner pour ajuster</span>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div id="backgroundList" class="space-y-2 mb-8" role="list"></div>
+                    
+                    <div class="pt-6 border-t border-slate-800">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h4 class="font-medium text-white">Canvas Animé</h4>
+                                <p class="text-xs text-slate-400">Effets d'arrière-plan dynamiques.</p>
+                            </div>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <span class="text-sm font-medium text-slate-300">Activer</span>
+                                <div class="relative inline-flex items-center cursor-pointer">
+                                    <input id="canvaEnable" type="checkbox" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="md:col-span-2 space-y-2">
+                                <label class="text-sm font-medium text-slate-300">Animation</label>
+                                <div class="relative">
+                                    <select id="selectedCanvasIndex" class="hidden"></select>
+                                    <input id="selectedCanvasLabel" type="text" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer" placeholder="Choisir une animation..." readonly />
+                                    <button id="openCanvasPicker" type="button" class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-medium transition-colors">Parcourir</button>
+                                </div>
+                            </div>
+                            
+                            <div class="md:col-span-2 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <label class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
+                                        <input id="canvasPreviewEnable" type="checkbox" class="rounded border-slate-700 bg-slate-900 text-cyan-600 focus:ring-cyan-600/50" />
+                                        Afficher l'aperçu
+                                    </label>
+                                </div>
+                                <div id="selectedCanvasPreview" class="relative rounded-2xl border border-slate-800 overflow-hidden bg-slate-950 aspect-video flex items-center justify-center">
+                                    <div id="selectedCanvasPreviewOverlay" class="absolute inset-0 bg-slate-950/80 flex items-center justify-center text-slate-500 text-sm hidden">Aperçu désactivé</div>
+                                    <div id="selectedCanvasPreviewFrame" class="w-full h-full"></div>
+                                </div>
                             </div>
                         </div>
-                        <iframe id="preview" class="w-full h-[72dvh] bg-white" src="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %>?preview=1<% } else { %>/<%= user.id %>?preview=1<% } %>"></iframe>
                     </div>
                 </div>
-            </aside>
-        </main>
+
+                <!-- Links Section -->
+                <div id="section-links" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                    <div class="mb-6 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-white">Réseaux Sociaux</h3>
+                            <p class="text-sm text-slate-400">Vos profils sociaux (Instagram, X, etc.)</p>
+                        </div>
+                        <button id="addSocial" type="button" class="px-4 py-2 text-sm font-medium rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white shadow-lg shadow-fuchsia-900/20 transition-colors flex items-center gap-2">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Ajouter
+                        </button>
+                    </div>
+                    <div id="socialList" class="space-y-3 mb-8 min-h-[50px]"></div>
+                    
+                    <div class="border-t border-slate-800 my-6"></div>
+                    
+                    <div class="mb-6 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-white">Liens</h3>
+                            <p class="text-sm text-slate-400">Vos liens principaux.</p>
+                        </div>
+                        <button id="addLink" type="button" class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors flex items-center gap-2">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Ajouter un lien
+                        </button>
+                    </div>
+                    <div id="linksList" class="space-y-3 min-h-[50px]"></div>
+                </div>
+
+                <!-- Animations Section -->
+                <div id="section-animations" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                    <div class="mb-6 pb-4 border-b border-slate-800">
+                        <h3 class="text-lg font-semibold text-white">Animations</h3>
+                        <p class="text-sm text-slate-400">Dynamisez votre page.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300">Apparition des éléments</span>
+                            <div class="relative">
+                                <select id="selectedAnimationIndex" class="hidden"></select>
+                                <input id="selectedAnimationLabel" type="text" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer" readonly />
+                                <button id="openAnimArticlePicker" type="button" class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium transition-colors">Choisir</button>
+                            </div>
+                        </label>
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300">Animation des boutons</span>
+                            <div class="relative">
+                                <select id="selectedAnimationButtonIndex" class="hidden"></select>
+                                <input id="selectedAnimationButtonLabel" type="text" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer" readonly />
+                                <button id="openAnimButtonPicker" type="button" class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium transition-colors">Choisir</button>
+                            </div>
+                        </label>
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300">Animation de fond</span>
+                            <div class="relative">
+                                <select id="selectedAnimationBackgroundIndex" class="hidden"></select>
+                                <input id="selectedAnimationBackgroundLabel" type="text" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer" readonly />
+                                <button id="openAnimBackgroundPicker" type="button" class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium transition-colors">Choisir</button>
+                            </div>
+                        </label>
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300">Durée anim background (s)</span>
+                            <input id="animationDurationBackground" type="number" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
+                        </label>
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300">Délai anim bouton (s)</span>
+                            <input id="delayAnimationButton" step="0.01" type="number" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
+                        </label>
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300">Taille background (%)</span>
+                            <input id="backgroundSize" type="number" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Status Section -->
+                <div id="section-statusbar" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                    <div class="mb-6 pb-4 border-b border-slate-800">
+                        <h3 class="text-lg font-semibold text-white">Barre de statut</h3>
+                        <p class="text-sm text-slate-400">Message et état affichés sous le profil.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <label class="block space-y-2 md:col-span-2">
+                            <span class="text-sm font-medium text-slate-300">Message de statut</span>
+                            <input id="status_text" type="text" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 placeholder-slate-600" placeholder="Ex: En train de coder..." />
+                        </label>
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300">Couleur du texte (0=clair, 1=foncé)</span>
+                            <input id="status_fontTextColor" type="number" min="0" max="1" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
+                        </label>
+                        <div class="space-y-2">
+                            <span class="text-sm font-medium text-slate-300 block">État</span>
+                            <div class="relative inline-block w-full" id="statusDropdown">
+                                <button id="statusDropdownBtn" type="button" class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 hover:bg-slate-900 transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        <span class="size-3 rounded-full bg-slate-500 shadow-sm"></span>
+                                        <span class="status-current-label">Hors‑ligne</span>
+                                    </div>
+                                    <svg class="size-4 text-slate-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
+                                </button>
+                                <div id="statusDropdownPanel" class="absolute z-20 mt-2 w-full rounded-xl border border-slate-800 bg-slate-900 shadow-xl p-1 hidden">
+                                    <button type="button" class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200" data-value="online">
+                                        <span class="size-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span> En ligne
+                                    </button>
+                                    <button type="button" class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200" data-value="busy">
+                                        <span class="size-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span> Occupé
+                                    </button>
+                                    <button type="button" class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200" data-value="away">
+                                        <span class="size-2.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></span> Absent
+                                    </button>
+                                    <button type="button" class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200" data-value="offline">
+                                        <span class="size-2.5 rounded-full bg-slate-500"></span> Hors‑ligne
+                                    </button>
+                                </div>
+                            </div>
+                            <input type="hidden" id="status_statusText" />
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-6 border-t border-slate-800">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h4 class="font-medium text-white">Labels</h4>
+                                <p class="text-xs text-slate-400">Badges affichés sous votre profil.</p>
+                            </div>
+                            <button id="addLabel" type="button" class="px-3 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">+ Ajouter</button>
+                        </div>
+                        <div id="labelsList" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <!-- Layout Section -->
+                <div id="section-layout" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                    <div class="mb-6 pb-4 border-b border-slate-800">
+                        <h3 class="text-lg font-semibold text-white">Agencement</h3>
+                        <p class="text-sm text-slate-400">Réordonnez les sections par glisser-déposer.</p>
+                    </div>
+                    <div class="space-y-3" id="layoutList" role="list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Preview Sidebar -->
+        <aside class="xl:col-span-4 space-y-6">
+            <div class="sticky top-24">
+                <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-6 shadow-2xl shadow-black/50 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-violet-900/10 to-transparent pointer-events-none"></div>
+                    
+                    <div class="flex items-center justify-between mb-6 relative z-10">
+                        <h3 class="text-base font-semibold text-white">Aperçu en direct</h3>
+                        <div class="flex items-center gap-2">
+                            <button id="refreshPreview" class="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="Rafraîchir">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
+                            </button>
+                            <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>" target="_blank" class="p-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors" title="Ouvrir">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Phone Mockup -->
+                    <div class="relative mx-auto border-slate-950 bg-slate-950 border-[10px] rounded-[3rem] h-[650px] w-[320px] shadow-xl ring-1 ring-slate-800">
+                        <!-- Notch -->
+                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-slate-950 rounded-b-2xl z-20"></div>
+                        
+                        <!-- Screen -->
+                        <div class="w-full h-full rounded-[2.3rem] overflow-hidden bg-white relative z-10">
+                            <iframe 
+                                id="preview"
+                                src="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %>?preview=1<% } else { %>/<%= user.id %>?preview=1<% } %>" 
+                                class="w-full h-full border-0"
+                                title="Preview"
+                            ></iframe>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-center gap-2">
+                        <button type="button" data-view="mobile" class="px-3 py-1.5 text-xs font-medium rounded-full bg-slate-800 text-white border border-slate-700">Mobile</button>
+                        <button type="button" data-view="desktop" class="px-3 py-1.5 text-xs font-medium rounded-full bg-slate-900 text-slate-400 border border-slate-800 hover:bg-slate-800">Desktop</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </main>
+</div>
                     <div id="iconModal" class="fixed inset-0 z-50 hidden">
                         <div class="absolute inset-0 bg-black/60 animate-fade-in"></div>
                         <div class="relative mx-auto mt-16 w-[92vw] max-w-3xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in">

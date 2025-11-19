@@ -1,96 +1,175 @@
-<%- include('../../partials/head.ejs', { title: 'Admin - Message global', description: '', robots: 'noindex,nofollow' }) %>
+<%- include('../../partials/head.ejs', { title: 'Message Global - Administration', description: 'Gérez les annonces globales du site.', robots: 'noindex,nofollow' }) %>
+
 <%- include('../../partials/header-dash.ejs', { user: user }) %>
-<%- include('../../partials/admin-nav.ejs', { user: user }) %>
 
-<main class="max-w-7xl mx-auto p-6">
-  <div class="space-y-4">
-    <h1 class="text-2xl font-bold">Message global</h1>
-    <p class="text-sm text-slate-400">Envoyer un message qui s'affichera dans le header des utilisateurs. Utile pour annonces, maintenances, shutdowns, etc.</p>
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+    <%- include('../../partials/admin-nav.ejs', { user: user, active: 'message' }) %>
 
-    <form id="siteMessageForm" class="max-w-3xl space-y-3">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <label class="block">
-          <div class="text-xs text-slate-400 mb-1">Niveau</div>
-          <select name="level" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm">
-            <option value="info">Info</option>
-            <option value="success">Succès</option>
-            <option value="warning">Alerte</option>
-            <option value="error">Erreur</option>
-            <option value="maintenance">Maintenance</option>
-          </select>
-        </label>
-
-        <label class="block">
-          <div class="text-xs text-slate-400 mb-1">Début (optionnel)</div>
-          <input type="datetime-local" name="startAt" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" />
-        </label>
-
-        <label class="block">
-          <div class="text-xs text-slate-400 mb-1">Fin (optionnel)</div>
-          <input type="datetime-local" name="endAt" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" />
-        </label>
-      </div>
-
-      <label class="block mt-1">
-        <div class="text-xs text-slate-400 mb-1">Texte (supports liens)</div>
-        <textarea name="text" rows="4" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" placeholder="Le message public..."></textarea>
-      </label>
-
-      <label class="inline-flex items-center gap-2">
-        <input type="checkbox" name="dismissible" />
-        <span class="text-xs text-slate-400">Dismissible (les utilisateurs peuvent masquer localement)</span>
-      </label>
-
-      <div class="grid grid-cols-1 gap-3 pt-1">
-        <div class="flex items-center gap-4">
-          <label class="inline-flex items-center gap-2">
-            <input type="checkbox" name="global" id="globalToggle" />
-            <span class="text-xs text-slate-300">Tous les utilisateurs</span>
-          </label>
-          <span id="globalBadge" class="text-[11px] px-2 py-0.5 rounded border border-emerald-600/50 bg-emerald-700/20 text-emerald-100 hidden">Mode global activé</span>
+    <main class="col-span-12 lg:col-span-10 space-y-8">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            <div class="relative z-10">
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Message Global</h1>
+                <p class="text-slate-400 text-lg">Diffusez des annonces, alertes ou maintenances à vos utilisateurs.</p>
+            </div>
         </div>
 
-        <div id="targetsPanel" class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-opacity">
-          <div>
-            <div class="text-xs text-slate-400 mb-2">Rôles à cibler</div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="rolesGroup">
-              <label class="inline-flex items-center gap-2"><input type="checkbox" value="USER" class="roleBox" /><span class="text-xs">USER</span></label>
-              <label class="inline-flex items-center gap-2"><input type="checkbox" value="PARTNER" class="roleBox" /><span class="text-xs">PARTNER</span></label>
-              <label class="inline-flex items-center gap-2"><input type="checkbox" value="ADMIN" class="roleBox" /><span class="text-xs">ADMIN</span></label>
-              <label class="inline-flex items-center gap-2"><input type="checkbox" value="DEVELOPER" class="roleBox" /><span class="text-xs">DEVELOPER</span></label>
-              <label class="inline-flex items-center gap-2"><input type="checkbox" value="MODERATOR" class="roleBox" /><span class="text-xs">MODERATOR</span></label>
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            <!-- Form -->
+            <div class="xl:col-span-2 space-y-8">
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 relative overflow-hidden">
+                    <form id="siteMessageForm" class="space-y-6 relative z-10">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Niveau</label>
+                                <div class="relative">
+                                    <select name="level" class="w-full appearance-none rounded-xl bg-slate-950 border border-slate-800 px-4 py-3 text-sm text-white focus:border-violet-500 outline-none transition-colors cursor-pointer">
+                                        <option value="info">Info (Bleu)</option>
+                                        <option value="success">Succès (Vert)</option>
+                                        <option value="warning">Alerte (Jaune)</option>
+                                        <option value="error">Erreur (Rouge)</option>
+                                        <option value="maintenance">Maintenance (Violet)</option>
+                                    </select>
+                                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Début (Optionnel)</label>
+                                <input type="datetime-local" name="startAt" class="w-full rounded-xl bg-slate-950 border border-slate-800 px-4 py-3 text-sm text-white focus:border-violet-500 outline-none transition-colors [color-scheme:dark]" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Fin (Optionnel)</label>
+                                <input type="datetime-local" name="endAt" class="w-full rounded-xl bg-slate-950 border border-slate-800 px-4 py-3 text-sm text-white focus:border-violet-500 outline-none transition-colors [color-scheme:dark]" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Contenu du message</label>
+                            <textarea name="text" rows="4" class="w-full rounded-xl bg-slate-950 border border-slate-800 px-4 py-3 text-sm text-white focus:border-violet-500 outline-none transition-colors resize-none" placeholder="Saisissez votre annonce ici... (Markdown supporté)"></textarea>
+                        </div>
+
+                        <div class="flex items-center gap-3 p-4 rounded-xl bg-slate-950/50 border border-slate-800">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="dismissible" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+                            </label>
+                            <span class="text-sm text-slate-300">Autoriser les utilisateurs à masquer ce message</span>
+                        </div>
+
+                        <div class="border-t border-slate-800 pt-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-bold text-white">Ciblage</h3>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-sm text-slate-400">Mode Global</span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="global" id="globalToggle" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="targetsPanel" class="grid grid-cols-1 md:grid-cols-2 gap-8 transition-all duration-300">
+                                <div class="space-y-4">
+                                    <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Par Rôle</label>
+                                    <div class="grid grid-cols-2 gap-3" id="rolesGroup">
+                                        <% ['USER', 'PARTNER', 'ADMIN', 'DEVELOPER', 'MODERATOR'].forEach(role => { %>
+                                            <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                                                <input type="checkbox" value="<%= role %>" class="roleBox w-4 h-4 rounded border-slate-700 text-violet-600 focus:ring-violet-600 bg-slate-900" />
+                                                <span class="text-sm font-medium text-slate-300"><%= role %></span>
+                                            </label>
+                                        <% }) %>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider">Par Utilisateur</label>
+                                    <div class="relative">
+                                        <input type="text" id="userMentions" class="w-full rounded-xl bg-slate-950 border border-slate-800 px-4 py-3 text-sm text-white focus:border-violet-500 outline-none transition-colors" placeholder="Rechercher @pseudo, email..." />
+                                        <div id="userSuggestions" class="absolute z-20 mt-2 w-full rounded-xl border border-slate-800 bg-slate-900 shadow-2xl hidden max-h-60 overflow-y-auto"></div>
+                                    </div>
+                                    <div id="selectedUsers" class="flex flex-wrap gap-2 min-h-[40px]"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4 pt-4 border-t border-slate-800">
+                            <button type="submit" class="flex-1 px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium shadow-lg shadow-violet-900/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                                Publier le message
+                            </button>
+                            <button type="button" id="clearBtn" class="px-6 py-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 font-medium border border-rose-500/20 transition-colors">
+                                Supprimer
+                            </button>
+                        </div>
+                        <div id="status" class="text-center text-sm font-medium min-h-[20px]"></div>
+                    </form>
+                </div>
             </div>
-          </div>
-          <div>
-            <div class="text-xs text-slate-400 mb-2">Utilisateurs (@mention pour rechercher)</div>
-            <div class="relative">
-              <input type="text" id="userMentions" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" placeholder="@id, @username, @email" />
-              <div id="userSuggestions" class="absolute z-10 mt-1 w-full rounded-md border border-slate-700 bg-slate-900 shadow-lg hidden max-h-56 overflow-auto"></div>
+
+            <!-- Preview -->
+            <div class="xl:col-span-1 space-y-6">
+                <div class="sticky top-6">
+                    <h3 class="text-lg font-bold text-white mb-4 px-2">Aperçu en direct</h3>
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-grid-slate-800/[0.2] [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] pointer-events-none"></div>
+                        
+                        <!-- Mock Header -->
+                        <div class="relative z-10 space-y-4">
+                            <div class="h-4 w-1/3 bg-slate-800 rounded-full mb-6"></div>
+                            
+                            <div id="preview" class="rounded-xl p-4 border transition-all duration-300">
+                                <div class="flex items-start gap-3">
+                                    <div class="preview-icon mt-0.5"></div>
+                                    <div class="preview-content text-sm leading-relaxed"></div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3 pt-4 opacity-50">
+                                <div class="h-32 bg-slate-800 rounded-2xl w-full"></div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="h-24 bg-slate-800 rounded-2xl"></div>
+                                    <div class="h-24 bg-slate-800 rounded-2xl"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-4 px-2 text-center">
+                        L'apparence réelle peut varier légèrement selon le thème de l'utilisateur.
+                    </p>
+                </div>
             </div>
-            <div id="selectedUsers" class="flex flex-wrap gap-2 mt-2"></div>
-          </div>
         </div>
-      </div>
+    </main>
+</div>
 
-      <div class="flex items-center gap-3 mt-3">
-        <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white">Enregistrer</button>
-        <button type="button" id="clearBtn" class="px-4 py-2 rounded bg-rose-600 text-white">Supprimer</button>
-        <div class="flex-1"></div>
-        <div id="preview" class="rounded px-3 py-2 text-sm border"></div>
-      </div>
-    </form>
-
-    <div id="status" class="text-sm text-slate-400"></div>
-  </div>
-</main>
+<!-- Delete Modal -->
+<div id="deleteModal" class="fixed inset-0 z-[100] hidden" aria-hidden="true">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" id="modalBackdrop"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl transform transition-all scale-95 opacity-0" id="modalContent">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-500">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Supprimer le message ?</h3>
+                <p class="text-slate-400 text-sm mb-6">Cette action retirera immédiatement le message pour tous les utilisateurs. Cette action est irréversible.</p>
+                <div class="flex gap-3">
+                    <button id="dlgCancel" class="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition-colors">Annuler</button>
+                    <button id="dlgConfirm" class="flex-1 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-medium transition-colors">Confirmer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-  (function(){
+(function(){
     const form = document.getElementById('siteMessageForm');
     const status = document.getElementById('status');
-  const clearBtn = document.getElementById('clearBtn');
+    const clearBtn = document.getElementById('clearBtn');
     const globalToggle = document.getElementById('globalToggle');
-    const globalBadge = document.getElementById('globalBadge');
     const targetsPanel = document.getElementById('targetsPanel');
     const rolesBoxes = Array.from(document.querySelectorAll('#rolesGroup .roleBox'));
     const userInput = document.getElementById('userMentions');
@@ -98,173 +177,284 @@
     const selectedUsers = document.getElementById('selectedUsers');
     const picked = new Map();
 
+    // UI Logic
     function setTargetsDisabled(disabled){
-      targetsPanel.style.pointerEvents = disabled ? 'none' : '';
-      targetsPanel.style.opacity = disabled ? '0.5' : '1';
-      if (disabled) {
-        globalBadge.classList.remove('hidden');
-      } else {
-        globalBadge.classList.add('hidden');
-      }
+        if(disabled) {
+            targetsPanel.classList.add('opacity-30', 'pointer-events-none', 'grayscale');
+        } else {
+            targetsPanel.classList.remove('opacity-30', 'pointer-events-none', 'grayscale');
+        }
     }
-    globalToggle.addEventListener('change', ()=> setTargetsDisabled(globalToggle.checked));
-    setTargetsDisabled(false);
+    globalToggle.addEventListener('change', () => setTargetsDisabled(globalToggle.checked));
+    setTargetsDisabled(false); // Default state
 
+    // User Selection Logic
     function renderPicked(){
-      selectedUsers.innerHTML = '';
-      for (const u of picked.values()){
-        const chip = document.createElement('span');
-        chip.className = 'inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border border-slate-700 bg-slate-800/70';
-        chip.innerHTML = `<span class="font-medium">@${u.id}</span><button type="button" aria-label="Retirer" class="ml-1 text-slate-300 hover:text-white">×</button>`;
-        chip.querySelector('button').addEventListener('click', ()=>{ picked.delete(u.id); renderPicked(); });
-        selectedUsers.appendChild(chip);
-      }
+        selectedUsers.innerHTML = '';
+        for (const u of picked.values()){
+            const chip = document.createElement('div');
+            chip.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-200 text-xs font-medium animate-fade-in';
+            chip.innerHTML = `
+                <span>@${escapeHtml(u.userName || u.id)}</span>
+                <button type="button" class="text-violet-400 hover:text-white transition-colors">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            `;
+            chip.querySelector('button').addEventListener('click', () => { picked.delete(u.id); renderPicked(); });
+            selectedUsers.appendChild(chip);
+        }
     }
 
     let lastQ = ''; let lastCtl = 0;
     async function searchUsers(q){
-      if (!q || q.length < 1) { sugg.classList.add('hidden'); sugg.innerHTML=''; return; }
-      const ctl = ++lastCtl;
-      const res = await fetch(`/admin/users/search?q=${encodeURIComponent(q)}&limit=8`);
-      if (!res.ok) return; const json = await res.json(); if (ctl !== lastCtl) return;
-      const users = Array.isArray(json.users) ? json.users : [];
-      if (!users.length) { sugg.classList.add('hidden'); sugg.innerHTML=''; return; }
-      sugg.innerHTML = users.map(u => (
-        `<button type="button" data-id="${u.id}" class="w-full text-left px-3 py-2 text-sm hover:bg-slate-800 flex items-center gap-2">
-           <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-indigo-700/70 text-[10px] text-white overflow-hidden">${(u.userName||u.id).slice(0,2).toUpperCase()}</span>
-           <span class="flex-1">
-             <span class="font-medium">@${u.id}</span>
-             <span class="block text-xs text-slate-400">${(u.userName||'')} ${(u.email?(' · '+u.email):'')}</span>
-           </span>
-         </button>`
-      )).join('');
-      sugg.classList.remove('hidden');
-      Array.from(sugg.querySelectorAll('button[data-id]')).forEach(b => b.addEventListener('click', ()=>{
-        const id = b.getAttribute('data-id');
-        const u = users.find(x=>x.id===id); if (!u) return; picked.set(u.id, u); renderPicked(); sugg.classList.add('hidden'); userInput.value=''; userInput.focus();
-      }));
+        if (!q || q.length < 1) { sugg.classList.add('hidden'); sugg.innerHTML=''; return; }
+        const ctl = ++lastCtl;
+        try {
+            const res = await fetch(`/dashboard/admin/users/search?q=${encodeURIComponent(q)}&limit=5`);
+            if (!res.ok) return; 
+            const json = await res.json(); 
+            if (ctl !== lastCtl) return;
+            
+            const users = Array.isArray(json.users) ? json.users : [];
+            if (!users.length) { sugg.classList.add('hidden'); return; }
+            
+            sugg.innerHTML = users.map(u => `
+                <button type="button" data-id="${u.id}" class="w-full text-left px-4 py-3 hover:bg-slate-800 flex items-center gap-3 transition-colors border-b border-slate-800 last:border-0">
+                    <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-bold text-white border border-slate-700">
+                        ${(u.userName||u.id).slice(0,1).toUpperCase()}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-medium text-slate-200 text-sm truncate">@${escapeHtml(u.userName || u.id)}</div>
+                        <div class="text-xs text-slate-500 truncate">${escapeHtml(u.email || '')}</div>
+                    </div>
+                </button>
+            `).join('');
+            sugg.classList.remove('hidden');
+            
+            Array.from(sugg.querySelectorAll('button[data-id]')).forEach(b => b.addEventListener('click', () => {
+                const id = b.getAttribute('data-id');
+                const u = users.find(x => x.id === id); 
+                if (u) { picked.set(u.id, u); renderPicked(); }
+                sugg.classList.add('hidden'); 
+                userInput.value = ''; 
+                userInput.focus();
+            }));
+        } catch(e) { sugg.classList.add('hidden'); }
     }
-    userInput.addEventListener('input', ()=>{
-      const v = userInput.value.trim();
-      const q = v.startsWith('@') ? v.slice(1) : v;
-      if (q !== lastQ) { lastQ = q; searchUsers(q); }
+
+    userInput.addEventListener('input', () => {
+        const v = userInput.value.trim();
+        const q = v.startsWith('@') ? v.slice(1) : v;
+        if (q !== lastQ) { lastQ = q; searchUsers(q); }
     });
-    userInput.addEventListener('blur', ()=> setTimeout(()=>sugg.classList.add('hidden'), 150));
+    
+    // Close suggestions on click outside
+    document.addEventListener('click', (e) => {
+        if (!sugg.contains(e.target) && e.target !== userInput) sugg.classList.add('hidden');
+    });
 
+    // Preview Logic
     function renderPreview(data){
-      const p = document.getElementById('preview');
-      if (!p) return;
-      if (!data || !data.text) {
-        p.innerHTML = '<span class="text-xs text-slate-400">Aperçu vide</span>';
-        p.style.background='';
-        p.style.color='';
-        p.style.borderColor='';
-        return;
-      }
-      const lvl = String(data.level||'info').toLowerCase();
-      const styles = {
-        info: { bg:'#0ea5e9', border:'#0284c7', text:'#e0f2fe', icon:'i' },
-        success: { bg:'#10b981', border:'#059669', text:'#ecfdf5', icon:'c' },
-        warning: { bg:'#f59e0b', border:'#d97706', text:'#fffbeb', icon:'w' },
-        error: { bg:'#ef4444', border:'#dc2626', text:'#fee2e2', icon:'e' },
-        maintenance: { bg:'#6366f1', border:'#4f46e5', text:'#eef2ff', icon:'m' }
-      };
-      const s = styles[lvl] || styles.info;
-      p.style.background = `${s.bg}22`;
-      p.style.color = s.text;
-      p.style.borderColor = `${s.border}66`;
-      const iconHtml = {
-        i: '<svg class="inline w-4 h-4 align-[-1px]" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16Zm-.75-9.25a.75.75 0 011.5 0v5.5a.75.75 0 01-1.5 0v-5.5ZM10 6a1 1 0 100 2 1 1 0 000-2Z" clip-rule="evenodd"/></svg>',
-        c: '<svg class="inline w-4 h-4 align-[-1px]" viewBox="0 0 24 24" fill="currentColor"><path d="M9 12.75l-2.25-2.25-1.5 1.5L9 15.75l9-9-1.5-1.5z"/></svg>',
-        w: '<svg class="inline w-4 h-4 align-[-1px]" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v2h2v-2zm0-8h-2v6h2V10z"/></svg>',
-        e: '<svg class="inline w-4 h-4 align-[-1px]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 110 20 10 10 0 010-20zm-1 5h2v7h-2V7zm0 9h2v2h-2v-2z"/></svg>',
-        m: '<svg class="inline w-4 h-4 align-[-1px]" viewBox="0 0 24 24" fill="currentColor"><path d="M22.7 19.3l-6.5-6.5a6 6 0 11-3.2-3.2l6.5 6.5a2.25 2.25 0 103.2 3.2zM10 14a4 4 0 100-8 4 4 0 000 8z"/></svg>'
-      }[s.icon];
-      p.innerHTML = `${iconHtml}<span class="ml-2 align-middle">${escapeHtml(data.text)}</span>`;
+        const p = document.getElementById('preview');
+        const iconEl = p.querySelector('.preview-icon');
+        const contentEl = p.querySelector('.preview-content');
+        
+        if (!data || !data.text) {
+            p.className = 'rounded-xl p-4 border border-slate-800 bg-slate-900/50 text-slate-500 text-center italic';
+            p.innerHTML = 'Aucun message actif';
+            return;
+        }
+
+        const lvl = String(data.level||'info').toLowerCase();
+        const styles = {
+            info: { bg:'bg-sky-500/10', border:'border-sky-500/20', text:'text-sky-200', icon:'text-sky-400' },
+            success: { bg:'bg-emerald-500/10', border:'border-emerald-500/20', text:'text-emerald-200', icon:'text-emerald-400' },
+            warning: { bg:'bg-amber-500/10', border:'border-amber-500/20', text:'text-amber-200', icon:'text-amber-400' },
+            error: { bg:'bg-rose-500/10', border:'border-rose-500/20', text:'text-rose-200', icon:'text-rose-400' },
+            maintenance: { bg:'bg-violet-500/10', border:'border-violet-500/20', text:'text-violet-200', icon:'text-violet-400' }
+        };
+        const s = styles[lvl] || styles.info;
+
+        p.className = `rounded-xl p-4 border ${s.bg} ${s.border} ${s.text} transition-all duration-300`;
+        
+        const icons = {
+            info: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+            success: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+            warning: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+            error: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
+            maintenance: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>'
+        };
+
+        p.innerHTML = `
+            <div class="flex items-start gap-3">
+                <div class="${s.icon} mt-0.5 shrink-0">${icons[lvl] || icons.info}</div>
+                <div class="text-sm leading-relaxed font-medium">${escapeHtml(data.text)}</div>
+            </div>
+        `;
     }
 
+    // Live preview update
+    ['level', 'text'].forEach(f => {
+        form.elements[f].addEventListener('input', () => {
+            renderPreview({
+                level: form.elements['level'].value,
+                text: form.elements['text'].value
+            });
+        });
+    });
+
+    // Data Loading
     async function load(){
-      const res = await fetch('/admin/message/api');
-      if (!res.ok) return;
-      const json = await res.json();
-      const m = (json && Array.isArray(json.messages) && json.messages.length) ? json.messages[0] : null;
-      if (m) {
-        form.elements['level'].value = m.level || 'info';
-        form.elements['text'].value = m.text || '';
-        if (m.startAt) form.elements['startAt'].value = new Date(m.startAt).toISOString().slice(0,16);
-        if (m.endAt) form.elements['endAt'].value = new Date(m.endAt).toISOString().slice(0,16);
-        form.elements['dismissible'].checked = !!m.dismissible;
-        renderPreview(m);
-      } else {
-        renderPreview(null);
-      }
+        try {
+            const res = await fetch('/api/admin/message');
+            if (!res.ok) return;
+            const json = await res.json();
+            const m = (json && Array.isArray(json.messages) && json.messages.length) ? json.messages[0] : null;
+            
+            if (m) {
+                form.elements['level'].value = m.level || 'info';
+                form.elements['text'].value = m.text || '';
+                if (m.startAt) form.elements['startAt'].value = new Date(m.startAt).toISOString().slice(0,16);
+                if (m.endAt) form.elements['endAt'].value = new Date(m.endAt).toISOString().slice(0,16);
+                form.elements['dismissible'].checked = !!m.dismissible;
+                
+                // Restore targeting
+                if (m.global) {
+                    globalToggle.checked = true;
+                    setTargetsDisabled(true);
+                } else {
+                    globalToggle.checked = false;
+                    setTargetsDisabled(false);
+                    if (m.targetRoles) {
+                        m.targetRoles.forEach(r => {
+                            const cb = rolesBoxes.find(b => b.value === r);
+                            if(cb) cb.checked = true;
+                        });
+                    }
+                    // Note: restoring specific users would require fetching their details if not provided in message object
+                    // For now we skip restoring user chips to avoid complexity, or assume backend sends minimal user info
+                }
+                
+                renderPreview(m);
+            } else {
+                renderPreview(null);
+            }
+        } catch(e) { console.error(e); }
     }
 
     function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+    // Submit
     form.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-  const data = { level: form.elements['level'].value, text: form.elements['text'].value, dismissible: !!form.elements['dismissible'].checked };
-      if (form.elements['startAt'].value) data.startAt = new Date(form.elements['startAt'].value).toISOString();
-      if (form.elements['endAt'].value) data.endAt = new Date(form.elements['endAt'].value).toISOString();
-      data.global = !!globalToggle.checked;
-      if (!data.global) {
-        const rolesSel = rolesBoxes.filter(b => b.checked).map(b => b.value);
-        const userIds = Array.from(picked.keys());
-        if (rolesSel.length) data.targetRoles = rolesSel;
-        if (userIds.length) data.targetUserIds = userIds;
-      }
-      const res = await fetch('/admin/message/api', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(data) });
-      if (res.ok) {
-        status.textContent = 'Message enregistré.';
-        renderPreview(data);
-      } else {
-        status.textContent = 'Erreur lors de l\'enregistrement.';
-      }
+        e.preventDefault();
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Enregistrement...';
+        status.textContent = '';
+
+        try {
+            const data = { 
+                level: form.elements['level'].value, 
+                text: form.elements['text'].value, 
+                dismissible: !!form.elements['dismissible'].checked 
+            };
+            if (form.elements['startAt'].value) data.startAt = new Date(form.elements['startAt'].value).toISOString();
+            if (form.elements['endAt'].value) data.endAt = new Date(form.elements['endAt'].value).toISOString();
+            
+            data.global = !!globalToggle.checked;
+            if (!data.global) {
+                const rolesSel = rolesBoxes.filter(b => b.checked).map(b => b.value);
+                const userIds = Array.from(picked.keys());
+                if (rolesSel.length) data.targetRoles = rolesSel;
+                if (userIds.length) data.targetUserIds = userIds;
+            }
+
+            const res = await fetch('/api/admin/message', { 
+                method: 'POST', 
+                headers: { 'Content-Type':'application/json' }, 
+                body: JSON.stringify(data) 
+            });
+            
+            if (res.ok) {
+                status.className = 'text-center text-sm font-medium text-emerald-400';
+                status.textContent = 'Message publié avec succès !';
+                renderPreview(data);
+            } else {
+                throw new Error('Erreur serveur');
+            }
+        } catch(err) {
+            status.className = 'text-center text-sm font-medium text-rose-400';
+            status.textContent = 'Erreur lors de l\'enregistrement.';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = originalText;
+            setTimeout(() => status.textContent = '', 3000);
+        }
     });
 
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 z-50 hidden';
-    modal.innerHTML = `
-      <div class="absolute inset-0 bg-black/50"></div>
-      <div class="absolute inset-0 flex items-center justify-center p-4">
-        <div class="w-full max-w-sm rounded-lg bg-slate-900 border border-slate-700 shadow-xl">
-          <div class="px-4 py-3 border-b border-slate-700 flex items-center justify-between">
-            <h3 class="text-sm font-medium">Supprimer le message</h3>
-            <button type="button" id="dlgClose" class="text-slate-300 hover:text-white">×</button>
-          </div>
-          <div class="px-4 py-4 text-sm text-slate-300">Êtes-vous sûr de vouloir supprimer le message affiché dans les headers ?</div>
-          <div class="px-4 py-3 border-t border-slate-700 flex items-center justify-end gap-2">
-            <button type="button" id="dlgCancel" class="px-3 py-1.5 text-xs rounded border border-slate-700 bg-slate-800 hover:bg-slate-700">Annuler</button>
-            <button type="button" id="dlgConfirm" class="px-3 py-1.5 text-xs rounded border border-rose-600/50 bg-rose-700/30 hover:bg-rose-700/40 text-rose-100">Supprimer</button>
-          </div>
-        </div>
-      </div>`;
-    document.body.appendChild(modal);
-    const openModal = ()=> modal.classList.remove('hidden');
-    const closeModal = ()=> modal.classList.add('hidden');
+    // Delete Modal
+    const modal = document.getElementById('deleteModal');
+    const modalContent = document.getElementById('modalContent');
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    
+    function openModal() {
+        modal.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        });
+    }
+    
+    function closeModal() {
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => modal.classList.add('hidden'), 200);
+    }
+
     clearBtn.addEventListener('click', openModal);
-    modal.addEventListener('click', (e)=>{ if (e.target === modal) closeModal(); });
-    modal.querySelector('#dlgClose').addEventListener('click', closeModal);
-    modal.querySelector('#dlgCancel').addEventListener('click', closeModal);
-    modal.querySelector('#dlgConfirm').addEventListener('click', async ()=>{
-      let ok = false; let id = null;
-      try { const res = await fetch('/admin/message/api'); if (res.ok){ const j = await res.json(); if (j && Array.isArray(j.messages) && j.messages.length) id = j.messages[0].id; } } catch(e){}
-      try {
-        const url = id ? (`/admin/message/api?id=${encodeURIComponent(id)}`) : '/admin/message/api?id=';
-        const resDb = await fetch(url, { method: 'DELETE' });
-        ok = resDb.ok;
-      } catch(e) {}
-      if (ok) {
-        form.reset();
-        renderPreview(null);
-        status.textContent = 'Message supprimé.';
-      } else {
-        status.textContent = 'Erreur lors de la suppression.';
-      }
-      closeModal();
+    document.getElementById('dlgCancel').addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', closeModal);
+
+    document.getElementById('dlgConfirm').addEventListener('click', async () => {
+        let ok = false; let id = null;
+        try { 
+            const res = await fetch('/api/admin/message'); 
+            if (res.ok){ 
+                const j = await res.json(); 
+                if (j && Array.isArray(j.messages) && j.messages.length) id = j.messages[0].id; 
+            } 
+        } catch(e){}
+        
+        try {
+            const url = id ? (`/api/admin/message?id=${encodeURIComponent(id)}`) : '/api/admin/message';
+            const resDb = await fetch(url, { method: 'DELETE' });
+            ok = resDb.ok;
+        } catch(e) {}
+
+        if (ok) {
+            form.reset();
+            renderPreview(null);
+            status.className = 'text-center text-sm font-medium text-emerald-400';
+            status.textContent = 'Message supprimé.';
+            picked.clear();
+            renderPicked();
+            setTargetsDisabled(false);
+        } else {
+            status.className = 'text-center text-sm font-medium text-rose-400';
+            status.textContent = 'Erreur lors de la suppression.';
+        }
+        closeModal();
+        setTimeout(() => status.textContent = '', 3000);
     });
 
     load();
-  })();
+})();
 </script>
+
+<style>
+    .animate-fade-in { animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+</style>
+
+<%- include('../../partials/footer.ejs') %>

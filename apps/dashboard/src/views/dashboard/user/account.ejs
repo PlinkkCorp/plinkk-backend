@@ -1,303 +1,345 @@
 <%- include('../../partials/head.ejs', { title: 'Tableau de bord - Mon compte' ,
   description: 'Gère ton email, mot de passe et confidentialité du profil.' , robots: 'noindex,nofollow' }) %>
   <%- include('../../partials/header-dash.ejs') %>
-    <main class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
-
+    
+    <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
       <%- include('../../partials/asside_dash.ejs', { active: 'account' }) %>
 
-        <section class="col-span-12 lg:col-span-9 space-y-4">
-          <div class="mb-4">
-            <div class="flex items-center justify-between">
-              <h1 class="text-2xl font-semibold">Mon compte</h1>
-              <a href="/dashboard/cosmetics"
-                class="px-3 py-2 text-sm rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200">Cosmétiques
-                ➜</a>
+        <main class="col-span-12 lg:col-span-10 space-y-6">
+          <!-- Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+            <div>
+              <h1 class="text-2xl font-bold text-white">Mon compte</h1>
+              <p class="text-sm text-slate-400 mt-1">Gérez vos informations personnelles et votre sécurité.</p>
             </div>
+            <a href="/cosmetics" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
+              <span>Cosmétiques</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
           </div>
+
           <div id="accountRoot"
             data-twofactor="<%= !!(user && ((user.totpSecret && user.totpSecret !== '') || user.twoFactorEnabled)) %>"
             data-user-email="<%= user.email %>">
-            <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-0">
-              <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-800/40 bg-transparent">
-                <nav class="flex gap-2 w-full" role="tablist" aria-label="Sections du compte">
-                  <button class="tab-btn px-3 py-2 rounded-md text-sm font-medium bg-transparent text-slate-300"
-                    data-tab="profile" aria-selected="true">Profil</button>
-                  <button class="tab-btn px-3 py-2 rounded-md text-sm font-medium bg-transparent text-slate-300"
-                    data-tab="security" aria-selected="false">Confidentialité &amp; Sécurité</button>
-                  <button class="tab-btn px-3 py-2 rounded-md text-sm font-medium bg-transparent text-slate-300"
-                    data-tab="settings" aria-selected="false">Paramètres</button>
-                </nav>
+            
+            <!-- Tabs -->
+            <nav class="bg-slate-900 border border-slate-800 p-2 rounded-2xl mb-6 overflow-x-auto scrollbar-hide">
+              <ul class="flex gap-2 min-w-max" role="tablist" aria-label="Sections du compte">
+                <li>
+                  <button class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
+                    data-tab="profile" aria-selected="true">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-3.33 0-8 1.67-8 5v1h16v-1c0-3.33-4.67-5-8-5z"/></svg>
+                    Profil
+                  </button>
+                </li>
+                <li>
+                  <button class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
+                    data-tab="security" aria-selected="false">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                    Confidentialité &amp; Sécurité
+                  </button>
+                </li>
+                <li>
+                  <button class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
+                    data-tab="settings" aria-selected="false">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.58 1.62-.94l2.39.96c.21.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                    Paramètres
+                  </button>
+                </li>
+              </ul>
+            </nav>
+
+            <!-- Content Panels -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg">
+              
+              <!-- Profile Panel -->
+              <div id="panel-profile" class="tab-panel animate-slide-up">
+                <div class="flex flex-col md:flex-row items-start gap-8">
+                  <div class="flex-shrink-0">
+                    <div class="h-32 w-32 rounded-full overflow-hidden border-4 border-slate-800 bg-slate-800 grid place-items-center text-3xl font-semibold text-slate-200 shadow-xl relative group" id="avatarPreview" data-avatar>
+                      <%- include('../../partials/avatar.ejs', { user: user }) %>
+                      <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onclick="document.getElementById('avatarInput').click()">
+                        <svg class="text-white size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex-1 space-y-4">
+                    <div>
+                      <h4 class="text-lg font-semibold text-white mb-1">Photo de profil</h4>
+                      <p class="text-sm text-slate-400">Cette image sera affichée sur votre profil et dans les commentaires. Formats acceptés : PNG, JPG ou WebP (max 2 Mo).</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                      <label class="cursor-pointer px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium shadow-lg shadow-violet-900/20 transition-colors">
+                        Choisir une image
+                        <input id="avatarInput" type="file" accept="image/*" class="hidden" />
+                      </label>
+                      <p id="avatarMsg" class="text-sm font-medium"></p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div class="p-4">
-                <div id="panel-profile" class="tab-panel">
-                  <div class="flex items-start gap-4">
-                    <div
-                      class="h-20 w-20 rounded-full overflow-hidden border border-slate-700 bg-slate-800 grid place-items-center text-xl font-semibold text-slate-200"
-                      id="avatarPreview" data-avatar>
-                      <%- include('../../partials/avatar.ejs', { user: user }) %>
+              <!-- Security Panel -->
+              <div id="panel-security" class="tab-panel hidden animate-slide-up">
+                <% const tfEnabled=(user && (user.twoFactorEnabled)) %>
+                <% const hostEnabled=(user && (user.host !==null)) %>
+                
+                <div class="space-y-8">
+                  <!-- Privacy Section -->
+                  <div>
+                    <div class="mb-4 pb-4 border-b border-slate-800">
+                      <h4 class="text-lg font-semibold text-white">Confidentialité</h4>
+                      <p class="text-sm text-slate-400">Gérez la visibilité de vos informations.</p>
                     </div>
-                    <div class="flex-1">
-                      <h4 class="font-medium mb-1">Photo de profil</h4>
-                      <p class="text-xs text-slate-400 mb-2">PNG, JPG ou WebP (max 2 Mo).</p>
-                      <input id="avatarInput" type="file" accept="image/*"
-                        class="block text-xs text-slate-200 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700" />
-                      <p id="avatarMsg" class="mt-2 text-xs"></p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                      <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Sélectionne le Plinkk</label>
+                        <select id="privacyPlinkkSelect" class="w-full md:w-1/2 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none"></select>
+                      </div>
+                    </div>
+
+                    <div class="space-y-4">
+                      <div class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
+                        <div>
+                          <p class="text-sm font-medium text-white">Profil public</p>
+                          <p class="text-xs text-slate-400">Autoriser l'apparition dans la page Utilisateurs.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input id="togglePublic" type="checkbox" class="sr-only peer" <%=user.isPublic ? 'checked' : '' %> />
+                          <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
+                      </div>
+                      
+                      <div class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
+                        <div>
+                          <p class="text-sm font-medium text-white">Afficher mon email</p>
+                          <p class="text-xs text-slate-400">Rendre l'email visible sur la page Utilisateurs.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input id="toggleEmailPublic" type="checkbox" class="sr-only peer" <%=isEmailPublic ? 'checked' : '' %> />
+                          <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div id="panel-security" class="tab-panel hidden">
-                  <% const tfEnabled=(user && (user.twoFactorEnabled)) %>
-                    <% const hostEnabled=(user && (user.host !==null)) %>
-                      <div class="space-y-4">
+                  <!-- Security Section -->
+                  <div>
+                    <div class="mb-4 pb-4 border-b border-slate-800">
+                      <h4 class="text-lg font-semibold text-white">Sécurité</h4>
+                      <p class="text-sm text-slate-400">Protégez votre compte.</p>
+                    </div>
+
+                    <div class="p-6 rounded-xl bg-slate-950 border border-slate-800 mb-6">
+                      <div class="flex items-center justify-between mb-4">
                         <div>
-                          <h4 class="text-lg font-semibold mb-2">Confidentialité</h4>
-                          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
-                            <div>
-                              <label class="block text-xs mb-1">Sélectionne le Plinkk</label>
-                              <select id="privacyPlinkkSelect"
-                                class="w-full h-9 px-2 rounded-md bg-slate-900/60 border border-slate-700 text-sm"></select>
-                            </div>
-                          </div>
-                          <div class="flex items-center justify-between py-2">
-                            <div>
-                              <p class="text-sm font-medium">Profil public</p>
-                              <p class="text-xs text-slate-400">Autoriser l'apparition dans la page Utilisateurs.</p>
-                            </div>
-                            <label class="inline-flex items-center cursor-pointer relative">
-                              <input id="togglePublic" type="checkbox" class="sr-only peer" <%=user.isPublic ? 'checked'
-                                : '' %> />
-                              <span
-                                class="w-10 h-6 bg-slate-700/80 rounded-full p-1 peer-checked:bg-emerald-600 transition"></span>
-                              <span
-                                class="absolute top-1 left-1 size-4 rounded-full bg-white transition peer-checked:translate-x-4"></span>
-                            </label>
-                          </div>
-                          <div class="flex items-center justify-between py-2">
-                            <div>
-                              <p class="text-sm font-medium">Afficher mon email</p>
-                              <p class="text-xs text-slate-400">Rendre l'email visible sur la page Utilisateurs.</p>
-                            </div>
-                            <label class="inline-flex items-center cursor-pointer relative">
-                              <input id="toggleEmailPublic" type="checkbox" class="sr-only peer" <%=isEmailPublic
-                                ? 'checked' : '' %> />
-                              <span
-                                class="w-10 h-6 bg-slate-700/80 rounded-full p-1 peer-checked:bg-emerald-600 transition"></span>
-                              <span
-                                class="absolute top-1 left-1 size-4 rounded-full bg-white transition peer-checked:translate-x-4"></span>
-                            </label>
-                          </div>
+                          <h4 class="font-medium text-white flex items-center gap-2">
+                            Authentification à 2 facteurs (A2F)
+                            <% if (tfEnabled) { %>
+                              <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs border border-emerald-500/20">Activée</span>
+                            <% } else { %>
+                              <span class="px-2 py-0.5 rounded-full bg-slate-700 text-slate-400 text-xs">Désactivée</span>
+                            <% } %>
+                          </h4>
+                          <p class="text-xs text-slate-400 mt-1">Ajoute une couche de sécurité supplémentaire à votre compte.</p>
                         </div>
+                        <div class="flex items-center gap-2">
+                          <button id="btnLearn2fa" class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">Info</button>
+                          <% if (!tfEnabled) { %>
+                            <button id="btnEnable2fa" class="px-3 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">Activer</button>
+                          <% } else { %>
+                            <button id="btnDisable2fa" class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">Désactiver</button>
+                          <% } %>
+                        </div>
+                      </div>
+                    </div>
 
-                        <div class="border-t border-slate-800/40 my-2"></div>
-
-                        <div>
-                          <h4 class="text-lg font-semibold mb-2">Sécurité</h4>
-                          <div class="space-y-2">
-                            <h4 class="font-medium mb-1">Authentification à 2 facteurs (A2F)</h4>
-                            <p class="text-xs text-slate-400 mb-2">État: <span class="font-medium">
-                                <%= tfEnabled ? 'Activée' : 'Désactivée' %>
-                              </span></p>
+                    <div class="space-y-4">
+                      <h4 class="font-medium text-white">Domaines personnalisés</h4>
+                      <p class="text-sm text-slate-400">Associe un nom de domaine à l'un de tes Plinkks.</p>
+                      
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-slate-950 border border-slate-800">
+                        <div class="space-y-2">
+                          <label class="text-xs font-medium text-slate-300">Sélectionne le Plinkk</label>
+                          <select id="domainPlinkkSelect" class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:border-violet-500 outline-none"></select>
+                        </div>
+                        <div class="space-y-2">
+                          <label class="text-xs font-medium text-slate-300">Nom de domaine</label>
+                          <input id="domainHostname" class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:border-violet-500 outline-none" placeholder="plinkk.example.fr" />
+                        </div>
+                        <div class="md:col-span-2 flex flex-wrap items-center gap-2 pt-2">
+                          <button id="btnDomainSave" class="px-3 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">Activer / Mettre à jour</button>
+                          <button id="btnDomainVerify" class="px-3 py-2 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/20 transition-colors">Vérifier DNS</button>
+                          <button id="btnDomainDelete" class="px-3 py-2 text-xs font-medium rounded-lg bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/20 transition-colors">Désactiver</button>
+                        </div>
+                        
+                        <div id="domainDnsHints" class="hidden md:col-span-2 space-y-3 mt-2 p-3 rounded-lg bg-slate-900/50 border border-slate-800">
+                          <div>
+                            <label class="block text-xs text-slate-400 mb-1">Enregistrement TXT (vérification)</label>
                             <div class="flex items-center gap-2">
-                              <% if (!tfEnabled) { %>
-                                <button id="btnEnable2fa"
-                                  class="px-3 py-2 text-sm rounded-md bg-emerald-600 hover:bg-emerald-500 text-white">Activer
-                                  la A2F</button>
-                                <% } else { %>
-                                  <button id="btnDisable2fa"
-                                    class="px-3 py-2 text-sm rounded-md bg-amber-600 hover:bg-amber-500 text-white">Désactiver
-                                    la A2F</button>
-                                  <% } %>
-                                    <button id="btnLearn2fa"
-                                      class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 text-white">Comment
-                                      ça marche</button>
+                              <input id="domainTXT" readonly class="flex-1 px-3 py-2 rounded bg-slate-950 border border-slate-800 text-xs text-slate-300 font-mono" />
+                              <button class="p-2 rounded bg-slate-800 text-slate-400 hover:text-white" onclick="navigator.clipboard.writeText(document.getElementById('domainTXT').value)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
                             </div>
                           </div>
-                          <div class="space-y-3 mt-4">
-                            <h4 class="font-medium mb-1">Domaines (par Plinkk)</h4>
-                            <p class="text-xs text-slate-400">Associe un CNAME à l'un de tes Plinkks. 1 domaine par
-                              Plinkk.</p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              <div>
-                                <label class="block text-xs mb-1">Sélectionne le Plinkk</label>
-                                <select id="domainPlinkkSelect"
-                                  class="w-full h-9 px-2 rounded-md bg-slate-900/60 border border-slate-700 text-sm"></select>
-                              </div>
-                              <div>
-                                <label class="block text-xs mb-1">Nom de domaine (ex: plinkk.example.fr)</label>
-                                <input id="domainHostname"
-                                  class="w-full h-9 px-3 rounded-md bg-slate-900/60 border border-slate-700 text-sm"
-                                  placeholder="plinkk.example.fr" />
-                              </div>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-2">
-                              <button id="btnDomainSave"
-                                class="px-3 py-2 text-sm rounded-md bg-emerald-600 hover:bg-emerald-500 text-white">Activer
-                                / Mettre à jour</button>
-                              <button id="btnDomainVerify"
-                                class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white">Vérifier</button>
-                              <button id="btnDomainDelete"
-                                class="px-3 py-2 text-sm rounded-md bg-amber-600 hover:bg-amber-500 text-white">Désactiver</button>
-                            </div>
-                            <div id="domainDnsHints" class="hidden space-y-3 mt-2">
-                              <div>
-                                <label class="block text-xs mb-1">Enregistrement TXT (vérification)</label>
-                                <input id="domainTXT" readonly
-                                  class="w-full h-9 px-3 rounded-md bg-slate-900/60 border border-slate-700 text-xs text-slate-300" />
-                              </div>
-                              <div>
-                                <label class="block text-xs mb-1">Enregistrement CNAME</label>
-                                <input id="domainCNAME" readonly
-                                  class="w-full h-9 px-3 rounded-md bg-slate-900/60 border border-slate-700 text-xs text-slate-300" />
-                              </div>
-                              <p class="text-[11px] text-slate-400">Après avoir ajouté ces enregistrements, patiente ~15
-                                minutes puis clique sur "Vérifier".</p>
+                          <div>
+                            <label class="block text-xs text-slate-400 mb-1">Enregistrement CNAME</label>
+                            <div class="flex items-center gap-2">
+                              <input id="domainCNAME" readonly class="flex-1 px-3 py-2 rounded bg-slate-950 border border-slate-800 text-xs text-slate-300 font-mono" />
+                              <button class="p-2 rounded bg-slate-800 text-slate-400 hover:text-white" onclick="navigator.clipboard.writeText(document.getElementById('domainCNAME').value)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
                             </div>
                           </div>
+                          <p class="text-[11px] text-slate-500">La propagation DNS peut prendre jusqu'à 15 minutes.</p>
                         </div>
+                      </div>
+                    </div>
 
+                    <div class="mt-8 pt-6 border-t border-slate-800">
+                      <h4 class="font-medium text-rose-400 mb-2">Zone de danger</h4>
+                      <div class="p-4 rounded-xl border border-rose-900/30 bg-rose-950/10 flex items-center justify-between">
                         <div>
-                          <h4 class="font-medium mb-1 text-red-200">Supprimer le compte</h4>
-                          <p class="text-xs text-red-300 mb-2">Cette action est définitive.</p>
-                          <div id="deleteAction">
-                            <button id="btnShowDelete"
-                              class="w-full px-3 py-2 text-sm rounded-md bg-red-700 hover:bg-red-600 text-white border border-red-500/60"
-                              type="button">Supprimer le compte</button>
-                          </div>
+                          <p class="text-sm font-medium text-rose-200">Supprimer le compte</p>
+                          <p class="text-xs text-rose-300/60">Cette action est irréversible et supprimera toutes vos données.</p>
                         </div>
+                        <button id="btnShowDelete" class="px-4 py-2 text-sm font-medium rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">Supprimer</button>
                       </div>
-                </div>
-
-                <div id="panel-settings" class="tab-panel hidden">
-                  <div class="space-y-4">
-                    <form id="formEmail">
-                      <h4 class="font-medium mb-2">Email</h4>
-                      <label class="block text-xs text-slate-300 mb-1">Adresse email</label>
-                      <div class="flex items-center gap-2 ">
-                        <input name="email" type="email" value="<%= user.email %>"
-                          class="flex-1 min-w-0 rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm" />
-                        <button
-                          class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white whitespace-nowrap"
-                          type="submit">Mettre à jour l'email</button>
-                      </div>
-                    </form>
-
-                    <div class="border-t border-slate-800/40 my-2"></div>
-
-                    <form id="formPassword">
-                      <h4 class="font-medium mb-2">Mot de passe</h4>
-                      <label class="block text-xs text-slate-300 mb-1">Mot de passe actuel</label>
-                      <input name="currentPassword" type="password"
-                        class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm mb-2" />
-                      <label class="block text-xs text-slate-300 mb-1">Nouveau mot de passe</label>
-                      <input name="newPassword" type="password"
-                        class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm mb-2" />
-                      <label class="block text-xs text-slate-300 mb-1">Confirmer le mot de passe</label>
-                      <input name="confirmPassword" type="password"
-                        class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm mb-3" />
-                      <div class="flex items-center justify-end">
-                        <button class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white"
-                          type="submit">Changer le mot de passe</button>
-                      </div>
-                    </form>
+                    </div>
                   </div>
+                </div>
+              </div>
+
+              <!-- Settings Panel -->
+              <div id="panel-settings" class="tab-panel hidden animate-slide-up">
+                <div class="space-y-8">
+                  <form id="formEmail">
+                    <div class="mb-4 pb-4 border-b border-slate-800">
+                      <h4 class="text-lg font-semibold text-white">Email</h4>
+                      <p class="text-sm text-slate-400">Adresse de contact et de connexion.</p>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-4 items-end">
+                      <div class="w-full">
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Adresse email</label>
+                        <input name="email" type="email" value="<%= user.email %>" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
+                      </div>
+                      <button class="px-6 py-3 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors whitespace-nowrap" type="submit">Mettre à jour</button>
+                    </div>
+                  </form>
+
+                  <form id="formPassword">
+                    <div class="mb-4 pb-4 border-b border-slate-800">
+                      <h4 class="text-lg font-semibold text-white">Mot de passe</h4>
+                      <p class="text-sm text-slate-400">Changez votre mot de passe régulièrement.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Mot de passe actuel</label>
+                        <input name="currentPassword" type="password" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Nouveau mot de passe</label>
+                        <input name="newPassword" type="password" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Confirmer le mot de passe</label>
+                        <input name="confirmPassword" type="password" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
+                      </div>
+                      <div class="md:col-span-2 flex justify-end">
+                        <button class="px-6 py-3 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors" type="submit">Changer le mot de passe</button>
+                      </div>
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>
           </div>
-          </div>
-        </section>
-    </main>
-    <div id="deleteModal" class="fixed inset-0 hidden z-50 grid place-items-center">
+        </main>
+    </div>
+    
+    <!-- Modals (kept mostly same structure but updated classes) -->
+    <div id="deleteModal" class="fixed inset-0 hidden z-50 grid place-items-center backdrop-blur-sm">
       <div class="absolute inset-0 bg-black/60 modal-overlay"></div>
-      <div class="relative w-full max-w-lg mx-4">
-        <div class="rounded-lg bg-slate-900/95 border border-slate-800/60 p-6 shadow-lg">
-          <h3 class="text-lg font-semibold mb-2 text-red-200">Confirmer la suppression du compte</h3>
-          <p class="text-xs text-red-300 mb-4">Cette action est définitive et irréversible. Entrez votre mot de passe
-            pour confirmer.</p>
+      <div class="relative w-full max-w-lg mx-4 animate-scale-in">
+        <div class="rounded-3xl bg-slate-900 border border-slate-800 p-8 shadow-2xl shadow-black/50">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="p-3 rounded-full bg-rose-500/10 text-rose-500">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-white">Supprimer le compte ?</h3>
+              <p class="text-sm text-slate-400">Cette action est définitive et irréversible.</p>
+            </div>
+          </div>
 
-          <div id="deleteError" class="hidden mb-3 text-sm text-amber-300"></div>
+          <div id="deleteError" class="hidden mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-sm text-rose-400"></div>
 
-          <form id="formDeleteAccount" autocomplete="off">
-            <label class="block text-xs text-red-100 mb-1">Mot de passe</label>
-            <input id="deletePassword" name="password" type="password" required
-              class="w-full rounded-md bg-slate-950/40 border border-red-800 px-3 py-2 text-sm mb-3 text-red-50 placeholder:text-red-300/60"
-              placeholder="Votre mot de passe" />
+          <form id="formDeleteAccount" autocomplete="off" class="space-y-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-300 mb-1">Mot de passe</label>
+              <input id="deletePassword" name="password" type="password" required class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-rose-500 outline-none" placeholder="Votre mot de passe" />
+            </div>
 
             <% if (user && user.twoFactorEnabled) { %>
-              <label class="block text-xs text-red-100 mb-1">Code A2F</label>
-              <input id="deleteOtp" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" required
-                class="w-full rounded-md bg-slate-950/40 border border-red-800 px-3 py-2 text-sm mb-3 text-red-50 placeholder:text-red-300/60"
-                placeholder="123456" />
-              <% } %>
+              <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1">Code A2F</label>
+                <input id="deleteOtp" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" required class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-rose-500 outline-none" placeholder="123456" />
+              </div>
+            <% } %>
 
-                <div class="flex items-center justify-end gap-2 mt-4">
-                  <button id="btnCancelDelete"
-                    class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
-                    type="button">Annuler</button>
-                  <button id="btnConfirmDelete"
-                    class="px-3 py-2 text-sm rounded-md bg-red-700 hover:bg-red-600 text-white border border-red-500/60"
-                    type="submit">Supprimer définitivement</button>
-                </div>
+            <div class="flex items-center justify-end gap-3 mt-6">
+              <button id="btnCancelDelete" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors" type="button">Annuler</button>
+              <button id="btnConfirmDelete" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors" type="submit">Supprimer définitivement</button>
+            </div>
           </form>
         </div>
       </div>
     </div>
 
-    <div id="twoFactorModal" class="fixed inset-0 hidden z-50 grid place-items-center">
+    <div id="twoFactorModal" class="fixed inset-0 hidden z-50 grid place-items-center backdrop-blur-sm">
       <div id="twoFactorOverlay" class="absolute inset-0 bg-black/60"></div>
-      <div class="relative w-full max-w-md mx-4">
-        <div class="rounded-lg bg-slate-900/95 border border-slate-800/60 p-6 shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Activer la A2F</h3>
-          <p class="text-sm text-slate-300 mb-3">Scannez le QR avec votre application d'authentification ou copiez la
-            clé.</p>
+      <div class="relative w-full max-w-md mx-4 animate-scale-in">
+        <div class="rounded-3xl bg-slate-900 border border-slate-800 p-8 shadow-2xl shadow-black/50">
+          <h3 class="text-xl font-bold text-white mb-2">Activer la A2F</h3>
+          <p class="text-sm text-slate-400 mb-6">Scannez le QR avec votre application d'authentification.</p>
 
-          <div id="twoFactorQrWrap" class="mb-4 text-center"></div>
-          <div class="mb-3">
-            <label class="block text-xs text-slate-400 mb-1">Clé / otpauth</label>
-            <input id="twoFactorOtpauth" readonly
-              class="w-full rounded-md bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-200" />
-          </div>
-
+          <div id="twoFactorQrWrap" class="mb-6 flex justify-center p-4 bg-white rounded-xl"></div>
+          
           <div class="mb-4">
-            <label class="block text-xs text-slate-400 mb-1">Code de confirmation (6 chiffres)</label>
-            <input id="twoFactorConfirmOtp" inputmode="numeric" pattern="[0-9]*" maxlength="6"
-              class="w-full rounded-md bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-200"
-              placeholder="123456" />
+            <label class="block text-xs font-medium text-slate-300 mb-1">Clé manuelle</label>
+            <div class="flex gap-2">
+              <input id="twoFactorOtpauth" readonly class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono" />
+              <button class="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white" onclick="navigator.clipboard.writeText(document.getElementById('twoFactorOtpauth').value)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+            </div>
           </div>
 
-          <div class="flex items-center justify-end gap-2">
-            <button id="btnClose2faModal"
-              class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 text-white border border-slate-700">Fermer</button>
-            <button id="btnConfirm2fa"
-              class="px-3 py-2 text-sm rounded-md bg-emerald-600 hover:bg-emerald-500 text-white">Confirmer
-              l'activation</button>
-            <button id="btnReloadAfter2fa"
-              class="px-3 py-2 text-sm rounded-md bg-emerald-500/30 hover:bg-emerald-500/40 text-white hidden">J'ai
-              scanné — Recharger</button>
+          <div class="mb-6">
+            <label class="block text-xs font-medium text-slate-300 mb-1">Code de confirmation</label>
+            <input id="twoFactorConfirmOtp" inputmode="numeric" pattern="[0-9]*" maxlength="6" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-center text-lg tracking-widest focus:border-emerald-500 outline-none" placeholder="000000" />
+          </div>
+
+          <div class="flex items-center justify-end gap-3">
+            <button id="btnClose2faModal" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">Fermer</button>
+            <button id="btnConfirm2fa" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">Confirmer</button>
+            <button id="btnReloadAfter2fa" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white hidden">Terminer</button>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="disable2faModal" class="fixed inset-0 hidden z-50 grid place-items-center">
+    <div id="disable2faModal" class="fixed inset-0 hidden z-50 grid place-items-center backdrop-blur-sm">
       <div class="absolute inset-0 bg-black/60" data-disable-overlay></div>
-      <div class="relative w-full max-w-md mx-4">
-        <div class="rounded-lg bg-slate-900/95 border border-slate-800/60 p-6 shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Désactiver la A2F</h3>
-          <p class="text-sm text-slate-300 mb-3">Saisis le code A2F pour confirmer la désactivation.</p>
-          <div id="disable2faError" class="hidden mb-3 text-sm text-amber-300"></div>
-          <label class="block text-xs text-slate-400 mb-1">Code A2F (6 chiffres)</label>
-          <input id="disable2faOtp" inputmode="numeric" pattern="[0-9]*" maxlength="6"
-            class="w-full rounded-md bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm text-slate-200 mb-4"
-            placeholder="123456" />
-          <div class="flex items-center justify-end gap-2">
-            <button id="btnCancelDisable2fa"
-              class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 text-white border border-slate-700">Annuler</button>
-            <button id="btnConfirmDisable2fa"
-              class="px-3 py-2 text-sm rounded-md bg-amber-600 hover:bg-amber-500 text-white">Confirmer la
-              désactivation</button>
+      <div class="relative w-full max-w-md mx-4 animate-scale-in">
+        <div class="rounded-3xl bg-slate-900 border border-slate-800 p-8 shadow-2xl shadow-black/50">
+          <h3 class="text-xl font-bold text-white mb-2">Désactiver la A2F</h3>
+          <p class="text-sm text-slate-400 mb-6">Entrez un code pour confirmer la désactivation.</p>
+          
+          <div id="disable2faError" class="hidden mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-sm text-amber-400"></div>
+          
+          <input id="disable2faOtp" inputmode="numeric" pattern="[0-9]*" maxlength="6" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-center text-lg tracking-widest focus:border-amber-500 outline-none mb-6" placeholder="000000" />
+          
+          <div class="flex items-center justify-end gap-3">
+            <button id="btnCancelDisable2fa" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">Annuler</button>
+            <button id="btnConfirmDisable2fa" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/20 transition-colors">Désactiver</button>
           </div>
         </div>
       </div>
@@ -310,22 +352,621 @@
         const container = document.getElementById('toasts');
         if (!container) return console.log(message);
         const el = document.createElement('div');
-        el.className = 'pointer-events-auto max-w-sm w-full rounded-md px-4 py-2 text-sm shadow';
-        const bg = type === 'success' ? 'bg-emerald-600 text-white' : type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-200';
-        el.classList.add(...bg.split(' '));
-        el.textContent = message;
-        el.style.opacity = '0';
-        el.style.transition = 'opacity .2s, transform .2s';
+        el.className = 'pointer-events-auto max-w-sm w-full rounded-xl px-4 py-3 text-sm shadow-lg border flex items-center gap-3 animate-slide-in-right';
+        
+        let bg = 'bg-slate-900 text-white border-slate-800';
+        let icon = '';
+        
+        if (type === 'success') {
+          bg = 'bg-slate-900 text-emerald-400 border-emerald-500/30';
+          icon = '<svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+        } else if (type === 'error') {
+          bg = 'bg-slate-900 text-rose-400 border-rose-500/30';
+          icon = '<svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+        }
+        
+        el.className += ' ' + bg;
+        el.innerHTML = `${icon}<span>${message}</span>`;
+        
         container.appendChild(el);
-        void el.offsetWidth;
-        el.style.opacity = '1';
-        el.style.transform = 'translateY(0)';
+        
         const timeout = opts.timeout || 3500;
-        const remove = () => { el.style.opacity = '0'; setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 220); };
+        const remove = () => { 
+          el.style.opacity = '0'; 
+          el.style.transform = 'translateX(100%)';
+          setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 300); 
+        };
         el.addEventListener('click', remove);
         setTimeout(remove, timeout);
         return el;
       }
+    </script>
+
+    <script>
+      (function () {
+        const $ = (s, r = document) => r.querySelector(s);
+        const input = $('#avatarInput');
+        const preview = $('#avatarPreview');
+        const msg = $('#avatarMsg');
+
+        function setMsg(text, ok) {
+          if (!msg) return;
+          msg.textContent = text || '';
+          msg.className = 'text-sm font-medium ' + (ok ? 'text-emerald-400' : 'text-amber-400');
+        }
+
+        async function uploadAvatar() {
+          if (!input || !input.files || !input.files[0]) {
+            setMsg('Choisis une image.', false);
+            return;
+          }
+
+          const file = input.files[0];
+          if (!/^image\//i.test(file.type)) { setMsg('Fichier non valide (image requise).', false); return; }
+          if (file.size > 2 * 1024 * 1024) { setMsg('Image trop lourde (max 2 Mo).', false); return; }
+          try {
+            const fileToDataUrl = (f) => new Promise((resolve, reject) => {
+              const fr = new FileReader();
+              fr.onload = () => resolve(fr.result);
+              fr.onerror = () => reject(fr.error || new Error('Lecture du fichier échouée'));
+              fr.readAsDataURL(f);
+            });
+            const dataUrl = await fileToDataUrl(file);
+
+            const formData = new FormData();
+            formData.append("file", input.files[0]);
+
+            const res = await fetch("/api/me/avatar", {
+              method: "POST",
+              body: formData,
+            });
+            if (!res.ok) {
+              if (res.status === 413) {
+                setMsg('Image trop lourde (max 128 Ko)', false);
+                return;
+              }
+              throw new Error('HTTP ' + res.status);
+            }
+            const json = await res.json();
+            if (json && (json.url || json.file) && preview) {
+              const raw = json.url || ('/public/uploads/avatars/' + json.file);
+              const url = raw + '?v=' + Date.now();
+              preview.innerHTML = `<img src="${url}" alt="Avatar" class="h-full w-full object-cover" />`;
+
+              const currentId = '<%= user.id %>';
+              document.querySelectorAll('[data-avatar]').forEach(el => {
+                const elUser = el.getAttribute && el.getAttribute('data-avatar-user');
+                if (elUser && elUser === currentId) {
+                  if (el.tagName === 'IMG') {
+                    el.setAttribute('src', url);
+                  } else {
+                    el.innerHTML = `<img data-avatar data-avatar-user="${currentId}" src="${url}" alt="Avatar" class="h-full w-full object-cover" />`;
+                  }
+                }
+              });
+            }
+
+            setMsg('Avatar mis à jour.', true);
+          } catch (err) {
+            console.error(err);
+            setMsg('Échec de l’upload.', false);
+          }
+        }
+
+
+        input?.addEventListener('change', uploadAvatar);
+      })();
+    </script>
+
+    <script>
+      (function () {
+        const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
+        const panels = {
+          profile: document.getElementById('panel-profile'),
+          security: document.getElementById('panel-security'),
+          settings: document.getElementById('panel-settings')
+        };
+
+        function setActive(key) {
+          tabButtons.forEach(btn => {
+            const t = btn.getAttribute('data-tab');
+            const selected = t === key;
+            btn.setAttribute('aria-selected', selected ? 'true' : 'false');
+            // Styling handled by aria-selected in CSS/Tailwind
+          });
+          Object.keys(panels).forEach(k => {
+            const el = panels[k];
+            if (!el) return;
+            if (k === key) {
+              el.classList.remove('hidden');
+              el.classList.add('animate-slide-up');
+            } else {
+              el.classList.add('hidden');
+              el.classList.remove('animate-slide-up');
+            }
+          });
+        }
+
+        setActive('profile');
+
+        tabButtons.forEach(btn => btn.addEventListener('click', () => {
+          const key = btn.getAttribute('data-tab'); if (!key) return; setActive(key);
+        }));
+      })();
+    </script>
+
+    <script>
+      const accountRoot = document.getElementById('accountRoot');
+      const twoFactorEnabled = accountRoot ? accountRoot.getAttribute('data-twofactor') === 'true' : false;
+      document.getElementById('formEmail')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.currentTarget);
+        const payload = Object.fromEntries(fd.entries());
+        const res = await fetch('/api/me/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const j = await res.json().catch(() => ({}));
+        if (res.ok) {
+          showAlert('Email mis à jour', 'success');
+          try {
+            const newEmail = (j && j.email) ? j.email : payload.email;
+            if (newEmail) {
+              document.querySelectorAll('[data-current-email]').forEach(el => {
+                el.textContent = newEmail;
+              });
+            }
+          } catch (err) {}
+        } else {
+          showAlert(j.error || 'Erreur', 'error');
+        }
+      });
+
+      window.addEventListener('load', () => {
+        const accountRoot = document.getElementById('accountRoot');
+        const userEmail = accountRoot?.getAttribute('data-user-email') || '';
+        const select = document.getElementById('privacyPlinkkSelect');
+        const chkPublic = document.getElementById('togglePublic');
+        const chkEmail = document.getElementById('toggleEmailPublic');
+
+        let plinkkList = [];
+        try {
+          const tpl = document.getElementById('account-plinkks-data');
+          const raw = tpl ? tpl.innerHTML : '[]';
+          plinkkList = JSON.parse(raw || '[]');
+        } catch (_) { plinkkList = []; }
+
+        function populateOptions() {
+          if (!select) return;
+          select.innerHTML = '';
+          if (!plinkkList.length) {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = 'Aucun plinkk';
+            select.appendChild(opt);
+            chkPublic && (chkPublic.disabled = true);
+            chkEmail && (chkEmail.disabled = true);
+            return;
+          }
+          let defaultId = null;
+          plinkkList.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = `${p.name || p.slug || p.id} (${p.slug || p.id})`;
+            if (p.isDefault) defaultId = p.id;
+            select.appendChild(opt);
+          });
+          if (defaultId) select.value = defaultId;
+        }
+
+        async function refreshToggles() {
+          const id = select?.value || '';
+          const p = plinkkList.find(x => x.id === id) || null;
+          if (!p) { if (chkPublic) chkPublic.checked = false; if (chkEmail) chkEmail.checked = false; return; }
+          if (typeof p.isPublic === 'boolean' && chkPublic) chkPublic.checked = !!p.isPublic;
+          try {
+            const res = await fetch(`/api/me/plinkks/${encodeURIComponent(id)}/config`);
+            const j = await res.json().catch(() => ({}));
+            if (chkEmail) chkEmail.checked = j && j.email !== null;
+          } catch (_) { if (chkEmail) chkEmail.checked = false; }
+        }
+
+        populateOptions();
+        refreshToggles();
+        select?.addEventListener('change', refreshToggles);
+
+        chkPublic?.addEventListener('change', async (e) => {
+          const id = select?.value || '';
+          if (!id) return;
+          const checked = e.currentTarget.checked;
+          const res = await fetch(`/api/me/plinkks/${encodeURIComponent(id)}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isPublic: !!checked })
+          });
+          if (!res.ok) showAlert('Erreur lors du changement de visibilité', 'error');
+          else {
+            const p = plinkkList.find(x => x.id === id); if (p) p.isPublic = !!checked;
+          }
+        });
+
+        chkEmail?.addEventListener('change', async (e) => {
+          const id = select?.value || '';
+          if (!id) return;
+          const checked = e.currentTarget.checked;
+          const payload = { affichageEmail: checked ? (userEmail || null) : null };
+          const res = await fetch(`/api/me/plinkks/${encodeURIComponent(id)}/config/plinkk`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) showAlert('Erreur lors du changement visibilité email', 'error');
+        });
+      });
+
+      document.getElementById('formPassword')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.currentTarget);
+        const payload = Object.fromEntries(fd.entries());
+        const res = await fetch('/api/me/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const j = await res.json().catch(() => ({}));
+        if (res.ok) showAlert('Mot de passe mis à jour', 'success'); else showAlert(j.error || 'Erreur', 'error');
+      });
+
+      (function () {
+        const btnShow = document.getElementById('btnShowDelete');
+        const modal = document.getElementById('deleteModal');
+        const form = document.getElementById('formDeleteAccount');
+        const btnCancel = document.getElementById('btnCancelDelete');
+        const btnConfirm = document.getElementById('btnConfirmDelete');
+        const errorMsg = document.getElementById('deleteError');
+
+        if (!btnShow || !modal || !form) return;
+
+        btnShow.addEventListener('click', () => {
+          modal.classList.remove('hidden');
+          setTimeout(() => {
+            const pwd = document.getElementById('deletePassword');
+            pwd && pwd.focus();
+          }, 100);
+        });
+
+        btnCancel?.addEventListener('click', () => {
+          form.reset();
+          modal.classList.add('hidden');
+          if (errorMsg) { errorMsg.classList.add('hidden'); errorMsg.textContent = ''; }
+        });
+
+        modal.querySelector('.modal-overlay')?.addEventListener('click', () => {
+          form.reset();
+          modal.classList.add('hidden');
+          if (errorMsg) { errorMsg.classList.add('hidden'); errorMsg.textContent = ''; }
+        });
+
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          if (btnConfirm) btnConfirm.disabled = true;
+          if (errorMsg) { errorMsg.classList.add('hidden'); errorMsg.textContent = ''; }
+
+          const fd = new FormData(form);
+          const payload = Object.fromEntries(fd.entries());
+
+          if (!payload.password || String(payload.password).trim() === '') {
+            if (errorMsg) { errorMsg.textContent = 'Entrez votre mot de passe.'; errorMsg.classList.remove('hidden'); }
+            btnConfirm && (btnConfirm.disabled = false);
+            return;
+          }
+          if (twoFactorEnabled) {
+            if (!payload.otp || String(payload.otp).trim().length < 6) {
+              if (errorMsg) { errorMsg.textContent = 'Entrez votre code A2F (6 chiffres).'; errorMsg.classList.remove('hidden'); }
+              btnConfirm && (btnConfirm.disabled = false);
+              return;
+            }
+          }
+
+          try {
+            const res = await fetch('/api/me/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              if (errorMsg) { errorMsg.textContent = j.error || 'Suppression impossible'; errorMsg.classList.remove('hidden'); }
+              btnConfirm && (btnConfirm.disabled = false);
+              return;
+            }
+            modal.classList.add('hidden');
+            showAlert('Compte supprimé. Redirection...', 'success');
+            setTimeout(() => { window.location.href = '/'; }, 1400);
+          } catch (err) {
+            console.error(err);
+            if (errorMsg) { errorMsg.textContent = 'Erreur réseau'; errorMsg.classList.remove('hidden'); }
+          } finally {
+            btnConfirm && (btnConfirm.disabled = false);
+          }
+        });
+      })();
+
+      (function () {
+        const disableModal = document.getElementById('disable2faModal');
+        const btnCancel = document.getElementById('btnCancelDisable2fa');
+        const btnConfirm = document.getElementById('btnConfirmDisable2fa');
+        const inputOtp = document.getElementById('disable2faOtp');
+        const errEl = document.getElementById('disable2faError');
+
+        if (!disableModal) return;
+
+        const close = () => { disableModal.classList.add('hidden'); if (errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; } };
+
+        btnCancel?.addEventListener('click', () => { close(); });
+        disableModal.querySelector('[data-disable-overlay]')?.addEventListener('click', () => { close(); });
+
+        btnConfirm?.addEventListener('click', async () => {
+          const val = inputOtp?.value?.trim();
+          if (!val || val.length < 6) { if (errEl) { errEl.textContent = 'Entrez un code A2F valide (6 chiffres)'; errEl.classList.remove('hidden'); } return; }
+          try {
+            btnConfirm.disabled = true;
+            const res = await fetch('/api/me/2fa', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ otp: val }) });
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              if (errEl) { errEl.textContent = j.error || 'Erreur lors de la désactivation'; errEl.classList.remove('hidden'); }
+              else showAlert(j.error || 'Erreur lors de la désactivation', 'error');
+              return;
+            }
+            if (j.successful) {
+              showAlert('A2F désactivée', 'success');
+              close();
+              setTimeout(() => location.reload(), 600);
+            } else {
+              if (errEl) { errEl.textContent = 'Erreur lors de la désactivation'; errEl.classList.remove('hidden'); } else showAlert('Erreur lors de la désactivation', 'error');
+            }
+          } catch (err) { console.error(err); showAlert('Erreur réseau', 'error'); } finally { btnConfirm.disabled = false; }
+        });
+      })();
+
+      (function () {
+        const btnEnable = document.getElementById('btnEnable2fa');
+        const btnDisable = document.getElementById('btnDisable2fa');
+        console.debug('A2F buttons found', { btnEnable: !!btnEnable, btnDisable: !!btnDisable });
+        const btnLearn = document.getElementById('btnLearn2fa');
+        const modal = document.getElementById('twoFactorModal');
+        const overlay = document.getElementById('twoFactorOverlay');
+        const qrWrap = document.getElementById('twoFactorQrWrap');
+        const otpauthEl = document.getElementById('twoFactorOtpauth');
+        const btnClose = document.getElementById('btnClose2faModal');
+        const btnReload = document.getElementById('btnReloadAfter2fa');
+
+        async function open2faModalWith(data) {
+          if (!modal) return;
+          qrWrap.innerHTML = '';
+          if (otpauthEl) otpauthEl.value = '';
+          if (data.qrCode) {
+            const img = document.createElement('img');
+            img.src = data.qrCode;
+            img.alt = 'QR A2F';
+            img.className = 'mx-auto';
+            qrWrap.appendChild(img);
+          }
+          if (data.otpauth) {
+            if (otpauthEl) otpauthEl.value = data.otpauth;
+          }
+          modal.classList.remove('hidden');
+          setTimeout(() => { btnClose?.focus(); }, 50);
+        }
+
+        btnLearn?.addEventListener('click', () => {
+          let tips = document.getElementById('twoFactorTipsModal');
+          if (!tips) {
+            tips = document.createElement('div');
+            tips.id = 'twoFactorTipsModal';
+            tips.className = 'fixed inset-0 hidden z-50 grid place-items-center backdrop-blur-sm';
+            tips.innerHTML = `
+            <div class="absolute inset-0 bg-black/60" data-tips-overlay></div>
+            <div class="relative w-full max-w-lg mx-4 animate-scale-in">
+              <div class="rounded-3xl bg-slate-900 border border-slate-800 p-8 shadow-2xl shadow-black/50">
+                <h3 class="text-xl font-bold text-white mb-4">Comment fonctionne la A2F</h3>
+                <p class="text-sm text-slate-300 mb-4">Installe une application d'authentification (Google Authenticator, Authy, etc.). Pour activer : clique sur "Activer la A2F", scanne le QR et entre le code généré pour confirmer.</p>
+                <ul class="text-sm text-slate-400 mb-6 list-disc list-inside space-y-2">
+                  <li>Télécharge une app d'authentification sur ton téléphone.</li>
+                  <li>Scanne le QR fourni lors de l'activation.</li>
+                  <li>Saisis le code à 6 chiffres pour terminer l'activation.</li>
+                </ul>
+                <div class="flex items-center justify-end gap-3">
+                  <button data-tips-close class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">Fermer</button>
+                  <button data-tips-open-A2F class="px-4 py-2.5 text-sm font-medium rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">Activer la A2F</button>
+                </div>
+              </div>
+            </div>
+          `;
+            document.body.appendChild(tips);
+
+            const overlayEl = tips.querySelector('[data-tips-overlay]');
+            const closeBtn = tips.querySelector('[data-tips-close]');
+            const open2faBtn = tips.querySelector('[data-tips-open-2fa]');
+
+            const closeTips = () => { tips.classList.add('hidden'); };
+
+            overlayEl?.addEventListener('click', closeTips);
+            closeBtn?.addEventListener('click', closeTips);
+            open2faBtn?.addEventListener('click', () => { closeTips(); btnEnable?.click(); });
+
+            if (!tips.dataset.bound) {
+              const escHandler = (e) => { if (e.key === 'Escape') closeTips(); };
+              document.addEventListener('keydown', escHandler);
+              tips.dataset.bound = 'true';
+            }
+          }
+
+          tips.classList.remove('hidden');
+          setTimeout(() => {
+            const cb = tips.querySelector('[data-tips-open-2fa]');
+            cb?.focus();
+          }, 50);
+        });
+
+        btnEnable?.addEventListener('click', async () => {
+          try {
+            btnEnable.disabled = true;
+            const res = await fetch('/api/me/2fa', { method: 'POST' });
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              (function () {
+                const inputConfirmOtp = document.getElementById('twoFactorConfirmOtp');
+                let errEl = document.getElementById('twoFactorError');
+                if (!errEl) {
+                  errEl = document.createElement('div');
+                  errEl.id = 'twoFactorError';
+                  errEl.className = 'mt-2 text-xs text-rose-400';
+                  if (inputConfirmOtp && inputConfirmOtp.parentNode) {
+                    inputConfirmOtp.parentNode.insertBefore(errEl, inputConfirmOtp.nextSibling);
+                  } else {
+                    const modal = document.getElementById('twoFactorModal');
+                    modal && modal.querySelector('.p-6')?.appendChild(errEl);
+                  }
+                }
+                errEl.textContent = j.error || 'Erreur lors de la génération de la A2F';
+              })();
+              return;
+            }
+            if (j.qrCode || j.otpauth) {
+              await open2faModalWith(j);
+            } else if (j.successful) {
+              location.reload();
+            } else {
+              showAlert('Réponse inattendue', 'error');
+            }
+          } catch (err) {
+            console.error(err);
+            showAlert('Erreur réseau lors de la génération du QR', 'error');
+          } finally {
+            btnEnable.disabled = false;
+          }
+        });
+
+        btnDisable?.addEventListener('click', async () => {
+          const disableModal = document.getElementById('disable2faModal');
+          const disableOtp = document.getElementById('disable2faOtp');
+          const disableErr = document.getElementById('disable2faError');
+          if (!disableModal) return;
+          if (disableErr) { disableErr.classList.add('hidden'); disableErr.textContent = ''; }
+          disableOtp && (disableOtp.value = '');
+          disableModal.classList.remove('hidden');
+          setTimeout(() => { disableOtp && disableOtp.focus(); }, 50);
+        });
+
+        const btnConfirm2fa = document.getElementById('btnConfirm2fa');
+        const inputConfirmOtp = document.getElementById('twoFactorConfirmOtp');
+        btnConfirm2fa?.addEventListener('click', async () => {
+          const value = inputConfirmOtp?.value?.trim();
+          if (!value || value.length < 6) { showAlert('Entrez un code A2F valide (6 chiffres)', 'error'); return; }
+          try {
+            btnConfirm2fa.disabled = true;
+            const res = await fetch('/api/me/2fa/confirm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ otp: value }) });
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok) { showAlert(j.error || 'Code invalide', 'error'); return; }
+            if (j.successful) {
+              showAlert('A2F activée avec succès', 'success');
+              document.getElementById('btnReloadAfter2fa')?.classList.remove('hidden');
+              btnConfirm2fa.classList.add('hidden');
+            } else {
+              showAlert('Erreur lors de la confirmation', 'error');
+            }
+          } catch (err) { console.error(err); showAlert('Erreur réseau', 'error'); } finally { btnConfirm2fa.disabled = false; }
+        });
+
+        btnClose?.addEventListener('click', () => { modal.classList.add('hidden'); });
+        overlay?.addEventListener('click', () => { modal.classList.add('hidden'); });
+        btnReload?.addEventListener('click', () => { location.reload(); });
+      })();
+    </script>
+
+    <template id="account-plinkks-data"><%- JSON.stringify((typeof plinkks !=='undefined' ) ? plinkks : ((typeof pages
+        !=='undefined' ) ? pages : [])) %></template>
+
+    <script>
+      (function () {
+        const selectPlinkk = document.getElementById('domainPlinkkSelect');
+        const inputHost = document.getElementById('domainHostname');
+        const btnSave = document.getElementById('btnDomainSave');
+        const btnVerify = document.getElementById('btnDomainVerify');
+        const btnDelete = document.getElementById('btnDomainDelete');
+        const hints = document.getElementById('domainDnsHints');
+        const txt = document.getElementById('domainTXT');
+        const cname = document.getElementById('domainCNAME');
+
+        if (!selectPlinkk || !inputHost) return;
+
+        let list = [];
+        try {
+          const tpl = document.getElementById('account-plinkks-data');
+          const raw = tpl ? tpl.innerHTML : '[]';
+          list = JSON.parse(raw || '[]');
+        } catch (_) { list = []; }
+        selectPlinkk.innerHTML = '';
+        if (!list.length) {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = 'Aucun plinkk';
+          selectPlinkk.appendChild(opt);
+        } else {
+          list.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = `${p.name || p.slug || p.id} (${p.slug || p.id})`;
+            selectPlinkk.appendChild(opt);
+          });
+        }
+
+        function buildTxtRecord(hostname, token) {
+          return `_plinkk-verification.${hostname} IN TXT "plinkk-verify=${token}"`;
+        }
+        function buildCnameRecord(hostname) {
+          return `${hostname} CNAME page.plinkk.fr`;
+        }
+
+        btnSave?.addEventListener('click', async () => {
+          const hostname = (inputHost.value || '').trim();
+          if (!hostname) { showAlert('Entre un nom de domaine', 'error'); return; }
+          try {
+            btnSave.disabled = true;
+            const res = await fetch('/api/me/host', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hostname }) });
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok) { showAlert(j.error || 'Erreur lors de la configuration du domaine', 'error'); return; }
+            if (j.token || (j.verified === false)) {
+              hints?.classList.remove('hidden');
+              if (txt) txt.value = buildTxtRecord(hostname, j.token || 'TOKEN');
+              if (cname) cname.value = buildCnameRecord(hostname);
+              showAlert('Ajoute les enregistrements DNS puis clique sur Vérifier', 'success');
+            } else {
+              showAlert('Domaine enregistré', 'success');
+            }
+          } catch (e) {
+            console.error(e);
+            showAlert('Erreur réseau', 'error');
+          } finally {
+            btnSave.disabled = false;
+          }
+        });
+
+        btnVerify?.addEventListener('click', async () => {
+          try {
+            btnVerify.disabled = true;
+            const res = await fetch('/api/me/host/verify', { method: 'POST' });
+            const j = await res.json().catch(() => ({}));
+            if (j.verified) {
+              showAlert('Domaine vérifié ✓', 'success');
+            } else {
+              showAlert('TXT non détecté, réessaye dans quelques minutes', 'error');
+            }
+          } catch (e) { console.error(e); showAlert('Erreur réseau', 'error'); }
+          finally { btnVerify.disabled = false; }
+        });
+
+        btnDelete?.addEventListener('click', async () => {
+          try {
+            btnDelete.disabled = true;
+            const res = await fetch('/api/me/host', { method: 'DELETE' });
+            const j = await res.json().catch(() => ({}));
+            if (!res.ok) { showAlert(j.error || 'Suppression impossible', 'error'); return; }
+            showAlert('Domaine désactivé', 'success');
+          } catch (e) { console.error(e); showAlert('Erreur réseau', 'error'); }
+          finally { btnDelete.disabled = false; }
+        });
+      })();
     </script>
 
     <script>

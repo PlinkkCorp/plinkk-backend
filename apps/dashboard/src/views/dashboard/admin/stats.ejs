@@ -1,245 +1,225 @@
 <%- include('../../partials/head.ejs', { title: 'Admin - Statistiques' , description: 'Statistiques des utilisateurs' ,
   robots: 'noindex,nofollow' }) %>
   <%- include('../../partials/header-dash.ejs', { user: user }) %>
-    <%- include('../../partials/admin-nav.ejs', { user: user }) %>
 
-      <main class="max-w-7xl mx-auto p-4 space-y-5">
-        <div>
-          <h1 class="text-2xl font-bold tracking-tight">Statistiques — Utilisateurs</h1>
-          <p class="text-xs text-slate-400">Filtre par dates, rôle et visibilité. Graphique des inscriptions/jour.</p>
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+    <%- include('../../partials/admin-nav.ejs', { active: '/admin/stats' }) %>
+
+    <main class="col-span-12 lg:col-span-10 space-y-8">
+    <div class="flex flex-col gap-2">
+        <h1 class="text-3xl font-bold tracking-tight text-white">Statistiques — Utilisateurs</h1>
+        <p class="text-sm text-slate-400">Analysez l'activité de la plateforme, les inscriptions et les bannissements.</p>
+    </div>
+
+    <nav class="flex items-center gap-2 text-sm mb-4" role="tablist" aria-label="Statistiques">
+        <button id="tabSignups" class="px-4 py-2 rounded-full bg-violet-600 text-white font-medium transition-colors" role="tab" aria-selected="true">Inscriptions</button>
+        <button id="tabLogins" class="px-4 py-2 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-colors" role="tab" aria-selected="false">Connexions</button>
+        <button id="tabBans" class="px-4 py-2 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-colors" role="tab" aria-selected="false">Bans</button>
+    </nav>
+
+    <section class="rounded-3xl border border-slate-800 bg-slate-900 p-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+            <label class="text-sm font-medium text-slate-300">Du
+                <input type="date" id="from" class="mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none transition-all" />
+            </label>
+            <label class="text-sm font-medium text-slate-300">Au
+                <input type="date" id="to" class="mt-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none transition-all" />
+            </label>
         </div>
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-3 text-sm bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+                <label for="customDays" class="text-slate-400">Durée</label>
+                <input id="customDays" type="number" min="1" value="15" class="w-16 px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-center text-slate-200 focus:border-violet-500 outline-none" />
+                <span class="text-slate-400">jours</span>
+            </div>
+            <div class="h-6 w-px bg-slate-800 mx-1"></div>
+            <button id="last24h" class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-sm hover:bg-slate-700 transition-colors">24 h</button>
+            <button id="last7" class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-sm hover:bg-slate-700 transition-colors">7 jours</button>
+            <button id="last30" class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-sm hover:bg-slate-700 transition-colors">30 jours</button>
+            <button id="last90" class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-sm hover:bg-slate-700 transition-colors">90 jours</button>
+        </div>
+    </section>
 
-        <nav class="flex items-center gap-2 text-sm mb-2" role="tablist" aria-label="Statistiques">
-          <button id="tabSignups" class="px-3 py-1.5 rounded bg-indigo-600 text-white" role="tab"
-            aria-selected="true">Inscriptions</button>
-          <button id="tabLogins" class="px-3 py-1.5 rounded bg-slate-800 text-slate-200 border border-slate-700"
-            role="tab" aria-selected="false">Connexions</button>
-          <button id="tabBans" class="px-3 py-1.5 rounded bg-slate-800 text-slate-200 border border-slate-700"
-            role="tab" aria-selected="false">Bans</button>
+    <section id="panelSignups" class="rounded-3xl border border-slate-800 bg-slate-900 p-6">
+        <nav class="flex flex-wrap items-center gap-2 text-sm mb-6" role="tablist" aria-label="Sous-stats Inscriptions">
+            <button id="tabSU1" class="px-3 py-1.5 rounded-lg bg-violet-600 text-white font-medium transition-colors" role="tab" aria-selected="true">Par jour</button>
+            <button id="tabSU2" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-colors" role="tab" aria-selected="false">Visibilité</button>
+            <button id="tabSU3" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-colors" role="tab" aria-selected="false">Rôles</button>
+            <button id="tabSU4" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-colors" role="tab" aria-selected="false">Cumul</button>
         </nav>
-
-        <section class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3">
-            <label class="text-sm">Du
-              <input type="date" id="from"
-                class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-700" />
-            </label>
-            <label class="text-sm">Au
-              <input type="date" id="to"
-                class="mt-1 w-full px-3 py-2 rounded bg-slate-900/60 border border-slate-700" />
-            </label>
-          </div>
-          <div class="mt-3 flex flex-wrap items-center gap-2">
-            <div class="flex items-center gap-2 text-sm">
-              <label for="customDays" class="text-slate-300">Durée</label>
-              <input id="customDays" type="number" min="1" value="15"
-                class="w-20 px-2 py-1 rounded bg-slate-900/60 border border-slate-700" />
-              <span class="text-slate-400">jours</span>
+        
+        <section id="su1" class="rounded-xl">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-white">Inscriptions par jour</h2>
+                <div class="text-sm text-slate-400 font-mono" id="rangeLabel"></div>
             </div>
-            <button id="last24h"
-              class="px-3 py-2 rounded bg-slate-800 border border-slate-700 text-slate-200 text-sm">24 h</button>
-            <button id="last7" class="px-3 py-2 rounded bg-slate-800 border border-slate-700 text-slate-200 text-sm">7
-              jours</button>
-            <button id="last30" class="px-3 py-2 rounded bg-slate-800 border border-slate-700 text-slate-200 text-sm">30
-              jours</button>
-            <button id="last90" class="px-3 py-2 rounded bg-slate-800 border border-slate-700 text-slate-200 text-sm">90
-              jours</button>
-          </div>
-        </section>
-
-        <section id="panelSignups" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
-          <nav class="flex flex-wrap items-center gap-2 text-xs mb-3" role="tablist"
-            aria-label="Sous-stats Inscriptions">
-            <button id="tabSU1" class="px-2.5 py-1 rounded bg-indigo-600 text-white" role="tab" aria-selected="true">Par
-              jour</button>
-            <button id="tabSU2" class="px-2.5 py-1 rounded bg-slate-800 text-slate-200 border border-slate-700"
-              role="tab" aria-selected="false">Visibilité</button>
-            <button id="tabSU3" class="px-2.5 py-1 rounded bg-slate-800 text-slate-200 border border-slate-700"
-              role="tab" aria-selected="false">Rôles</button>
-            <button id="tabSU4" class="px-2.5 py-1 rounded bg-slate-800 text-slate-200 border border-slate-700"
-              role="tab" aria-selected="false">Cumul</button>
-          </nav>
-          <section id="su1" class="rounded-lg">
-            <div class="flex items-center justify-between mb-2">
-              <h2 class="font-medium">Inscriptions par jour</h2>
-              <div class="text-xs text-slate-400" id="rangeLabel"></div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch">
-              <div class="lg:col-span-4 relative" id="chart1Wrap">
-                <canvas id="chart" class="w-full block" style="width:100%" height="260"></canvas>
-                <div id="tt1"
-                  class="hidden absolute px-2.5 py-1.5 text-xs rounded bg-slate-800/95 border border-slate-700 text-slate-100 shadow z-10">
-                </div>
-                <div id="load1" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/40">
-                  <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2">
-                  </div>
-                  <span class="text-xs text-slate-300">Chargement…</span>
-                </div>
-                <div id="err1" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900/60">
-                  <div class="text-xs text-rose-400 font-medium">Erreur de chargement des inscriptions.</div>
-                  <button type="button" class="px-2 py-1 text-xs rounded bg-rose-600 text-white" onclick="window.__retrySU1?.()">Réessayer</button>
-                </div>
-                <div id="empty1" class="hidden absolute inset-0 flex items-center justify-center text-xs text-slate-400">Aucune donnée</div>
-              </div>
-              <aside class="lg:col-span-1">
-                <div class="p-3">
-                  <div class="text-xs text-slate-400 mb-2">Résumé</div>
-                  <div class="bg-slate-900/50 border border-slate-800 rounded overflow-hidden">
-                    <div
-                      class="flex items-center justify-between px-3 py-2 border-b border-slate-800 bg-gradient-to-r from-indigo-600/6 to-transparent">
-                      <div class="text-sm text-slate-300">Total</div>
-                      <div id="statTotal" class="text-lg font-bold text-white">–</div>
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 items-stretch">
+                <div class="lg:col-span-4 relative min-h-[300px] bg-slate-950/50 rounded-2xl border border-slate-800/50 p-4" id="chart1Wrap">
+                    <canvas id="chart" class="w-full h-full block"></canvas>
+                    <div id="tt1" class="hidden absolute px-3 py-2 text-xs rounded-lg bg-slate-800/95 border border-slate-700 text-slate-100 shadow-xl z-10 backdrop-blur-sm pointer-events-none"></div>
+                    <div id="load1" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/20 backdrop-blur-[1px] rounded-2xl">
+                        <div class="animate-spin rounded-full h-6 w-6 border-2 border-violet-500 border-t-transparent mr-3"></div>
+                        <span class="text-sm text-slate-300 font-medium">Chargement…</span>
                     </div>
-                    <div class="flex items-center justify-between px-3 py-2 border-b border-slate-800">
-                      <div class="text-sm text-slate-400">Publics</div>
-                      <div id="statPub" class="text-sm font-semibold text-slate-100">–</div>
+                    <div id="err1" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900/60 rounded-2xl">
+                        <div class="text-sm text-rose-400 font-medium">Erreur de chargement des inscriptions.</div>
+                        <button type="button" class="px-3 py-1.5 text-xs rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-colors" onclick="window.__retrySU1?.()">Réessayer</button>
                     </div>
-                    <div class="flex items-center justify-between px-3 py-2 border-b border-slate-800">
-                      <div class="text-sm text-slate-400">Privés</div>
-                      <div id="statPriv" class="text-sm font-semibold text-slate-100">–</div>
-                    </div>
-                    <div class="flex items-center justify-between px-3 py-2">
-                      <div class="text-sm text-slate-400">Staff</div>
-                      <div id="statStaff" class="text-sm font-semibold text-slate-100">–</div>
-                    </div>
-                  </div>
+                    <div id="empty1" class="hidden absolute inset-0 flex items-center justify-center text-sm text-slate-500">Aucune donnée sur cette période</div>
                 </div>
-              </aside>
+                
+                <aside class="lg:col-span-1">
+                    <div class="h-full flex flex-col">
+                        <div class="text-sm font-medium text-slate-400 mb-3 uppercase tracking-wider text-[10px]">Résumé</div>
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden flex-1">
+                            <div class="flex flex-col justify-center px-4 py-4 border-b border-slate-800 bg-gradient-to-br from-violet-500/10 to-transparent">
+                                <div class="text-sm text-slate-400 mb-1">Total</div>
+                                <div id="statTotal" class="text-3xl font-bold text-white tracking-tight">–</div>
+                            </div>
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800/50">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                    <div class="text-sm text-slate-400">Publics</div>
+                                </div>
+                                <div id="statPub" class="text-sm font-semibold text-slate-200 font-mono">–</div>
+                            </div>
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800/50">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-rose-500"></div>
+                                    <div class="text-sm text-slate-400">Privés</div>
+                                </div>
+                                <div id="statPriv" class="text-sm font-semibold text-slate-200 font-mono">–</div>
+                            </div>
+                            <div class="flex items-center justify-between px-4 py-3">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+                                    <div class="text-sm text-slate-400">Staff</div>
+                                </div>
+                                <div id="statStaff" class="text-sm font-semibold text-slate-200 font-mono">–</div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
             </div>
-          </section>
         </section>
 
-        <section id="su2" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4 hidden">
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="font-medium">Visibilité des nouvelles inscriptions</h2>
-            <div class="text-xs text-slate-400" id="rangeLabel2"></div>
-          </div>
-          <div class="relative" id="chart2Wrap">
-            <canvas id="chartVisibility" class="w-full block" style="width:100%" height="260"></canvas>
-            <div id="tt2"
-              class="hidden absolute px-2.5 py-1.5 text-xs rounded bg-slate-800/95 border border-slate-700 text-slate-100 shadow z-10">
+        <section id="su2" class="hidden">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-white">Visibilité des nouvelles inscriptions</h2>
+                <div class="text-sm text-slate-400 font-mono" id="rangeLabel2"></div>
             </div>
-            <div id="load2" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/40">
-              <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2"></div>
-              <span class="text-xs text-slate-300">Chargement…</span>
+            <div class="relative min-h-[300px] bg-slate-950/50 rounded-2xl border border-slate-800/50 p-4" id="chart2Wrap">
+                <canvas id="chartVisibility" class="w-full h-full block"></canvas>
+                <div id="tt2" class="hidden absolute px-3 py-2 text-xs rounded-lg bg-slate-800/95 border border-slate-700 text-slate-100 shadow-xl z-10 backdrop-blur-sm pointer-events-none"></div>
+                <div id="load2" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/20 backdrop-blur-[1px] rounded-2xl">
+                    <div class="animate-spin rounded-full h-6 w-6 border-2 border-violet-500 border-t-transparent mr-3"></div>
+                    <span class="text-sm text-slate-300 font-medium">Chargement…</span>
+                </div>
+                <div id="err2" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900/60 rounded-2xl">
+                    <div class="text-sm text-rose-400 font-medium">Erreur de chargement (visibilité).</div>
+                    <button type="button" class="px-3 py-1.5 text-xs rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-colors" onclick="window.__retrySU2?.()">Réessayer</button>
+                </div>
+                <div id="empty2" class="hidden absolute inset-0 flex items-center justify-center text-sm text-slate-500">Aucune donnée</div>
             </div>
-            <div id="err2" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900/60">
-              <div class="text-xs text-rose-400 font-medium">Erreur de chargement (visibilité).</div>
-              <button type="button" class="px-2 py-1 text-xs rounded bg-rose-600 text-white" onclick="window.__retrySU2?.()">Réessayer</button>
+            <div class="mt-4 flex items-center gap-4 text-sm text-slate-400 justify-center">
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-950 border border-slate-800"><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>Public</span>
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-950 border border-slate-800"><span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-500"></span>Privé</span>
             </div>
-            <div id="empty2" class="hidden absolute inset-0 flex items-center justify-center text-xs text-slate-400">Aucune donnée</div>
-          </div>
-          <div class="mt-2 flex items-center gap-3 text-xs text-slate-400">
-            <span class="inline-flex items-center gap-1"><span
-                class="inline-block w-3 h-1 rounded bg-emerald-500"></span>Public</span>
-            <span class="inline-flex items-center gap-1"><span
-                class="inline-block w-3 h-1 rounded bg-rose-500"></span>Privé</span>
-          </div>
         </section>
 
-        <section id="su3" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4 hidden">
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="font-medium">Inscriptions par rôle</h2>
-            <div class="text-xs text-slate-400" id="rangeLabel3"></div>
-          </div>
-          <div class="relative" id="chart3Wrap">
-            <canvas id="chartRoles" class="w-full block" style="width:100%" height="280"></canvas>
-            <div id="tt3"
-              class="hidden absolute px-2.5 py-1.5 text-xs rounded bg-slate-800/95 border border-slate-700 text-slate-100 shadow z-10">
+        <section id="su3" class="hidden">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-white">Inscriptions par rôle</h2>
+                <div class="text-sm text-slate-400 font-mono" id="rangeLabel3"></div>
             </div>
-            <div id="load3" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/40">
-              <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2"></div>
-              <span class="text-xs text-slate-300">Chargement…</span>
+            <div class="relative min-h-[300px] bg-slate-950/50 rounded-2xl border border-slate-800/50 p-4" id="chart3Wrap">
+                <canvas id="chartRoles" class="w-full h-full block"></canvas>
+                <div id="tt3" class="hidden absolute px-3 py-2 text-xs rounded-lg bg-slate-800/95 border border-slate-700 text-slate-100 shadow-xl z-10 backdrop-blur-sm pointer-events-none"></div>
+                <div id="load3" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/20 backdrop-blur-[1px] rounded-2xl">
+                    <div class="animate-spin rounded-full h-6 w-6 border-2 border-violet-500 border-t-transparent mr-3"></div>
+                    <span class="text-sm text-slate-300 font-medium">Chargement…</span>
+                </div>
+                <div id="err3" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900/60 rounded-2xl">
+                    <div class="text-sm text-rose-400 font-medium">Erreur de chargement (rôles).</div>
+                    <button type="button" class="px-3 py-1.5 text-xs rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-colors" onclick="window.__retrySU3?.()">Réessayer</button>
+                </div>
+                <div id="empty3" class="hidden absolute inset-0 flex items-center justify-center text-sm text-slate-500">Aucune donnée</div>
             </div>
-            <div id="err3" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900/60">
-              <div class="text-xs text-rose-400 font-medium">Erreur de chargement (rôles).</div>
-              <button type="button" class="px-2 py-1 text-xs rounded bg-rose-600 text-white" onclick="window.__retrySU3?.()">Réessayer</button>
+            <div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-400 justify-center">
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-950 border border-slate-800"><span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-400"></span>USER</span>
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-950 border border-slate-800"><span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"></span>MODERATOR</span>
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-950 border border-slate-800"><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>DEVELOPER</span>
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-950 border border-slate-800"><span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-500"></span>ADMIN</span>
             </div>
-            <div id="empty3" class="hidden absolute inset-0 flex items-center justify-center text-xs text-slate-400">Aucune donnée</div>
-          </div>
-          <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-400">
-            <span class="inline-flex items-center gap-1"><span
-                class="inline-block w-3 h-1 rounded bg-slate-400"></span>USER</span>
-            <span class="inline-flex items-center gap-1"><span
-                class="inline-block w-3 h-1 rounded bg-amber-500"></span>MODERATOR</span>
-            <span class="inline-flex items-center gap-1"><span
-                class="inline-block w-3 h-1 rounded bg-emerald-500"></span>DEVELOPER</span>
-            <span class="inline-flex items-center gap-1"><span
-                class="inline-block w-3 h-1 rounded bg-rose-500"></span>ADMIN</span>
-          </div>
         </section>
 
-        <section id="su4" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4 hidden">
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="font-medium">Cumul des inscriptions</h2>
-            <div class="text-xs text-slate-400" id="rangeLabel4"></div>
-          </div>
-          <div class="relative" id="chart4Wrap">
-            <canvas id="chartCumul" class="w-full block" style="width:100%" height="240"></canvas>
-            <div id="tt4"
-              class="hidden absolute px-2.5 py-1.5 text-xs rounded bg-slate-800/95 border border-slate-700 text-slate-100 shadow z-10">
+        <section id="su4" class="hidden">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-white">Cumul des inscriptions</h2>
+                <div class="text-sm text-slate-400 font-mono" id="rangeLabel4"></div>
             </div>
-            <div id="load4" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/40">
-              <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2"></div>
-              <span class="text-xs text-slate-300">Chargement…</span>
+            <div class="relative min-h-[300px] bg-slate-950/50 rounded-2xl border border-slate-800/50 p-4" id="chart4Wrap">
+                <canvas id="chartCumul" class="w-full h-full block"></canvas>
+                <div id="tt4" class="hidden absolute px-3 py-2 text-xs rounded-lg bg-slate-800/95 border border-slate-700 text-slate-100 shadow-xl z-10 backdrop-blur-sm pointer-events-none"></div>
+                <div id="load4" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/20 backdrop-blur-[1px] rounded-2xl">
+                    <div class="animate-spin rounded-full h-6 w-6 border-2 border-violet-500 border-t-transparent mr-3"></div>
+                    <span class="text-sm text-slate-300 font-medium">Chargement…</span>
+                </div>
+                <div id="err4" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900/60 rounded-2xl">
+                    <div class="text-sm text-rose-400 font-medium">Erreur de chargement (cumul).</div>
+                    <button type="button" class="px-3 py-1.5 text-xs rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-colors" onclick="window.__retrySU4?.()">Réessayer</button>
+                </div>
+                <div id="empty4" class="hidden absolute inset-0 flex items-center justify-center text-sm text-slate-500">Aucune donnée</div>
             </div>
-            <div id="err4" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900/60">
-              <div class="text-xs text-rose-400 font-medium">Erreur de chargement (cumul).</div>
-              <button type="button" class="px-2 py-1 text-xs rounded bg-rose-600 text-white" onclick="window.__retrySU4?.()">Réessayer</button>
-            </div>
-            <div id="empty4" class="hidden absolute inset-0 flex items-center justify-center text-xs text-slate-400">Aucune donnée</div>
-          </div>
         </section>
+    </section>
 
-        <section id="panelLogins" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4 hidden">
-          <div class="flex items-center justify-between mb-2">
-            <h2 class="font-medium">Connexions par jour</h2>
-            <div class="text-xs text-slate-400" id="rangeLabelL"></div>
-          </div>
-          <div class="relative" id="chartLWrap">
-            <canvas id="chartLogins" class="w-full block" style="width:100%" height="260"></canvas>
-            <div id="ttL"
-              class="hidden absolute px-2.5 py-1.5 text-xs rounded bg-slate-800/95 border border-slate-700 text-slate-100 shadow z-10">
+    <section id="panelLogins" class="rounded-3xl border border-slate-800 bg-slate-900 p-6 hidden">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white">Connexions par jour</h2>
+            <div class="text-sm text-slate-400 font-mono" id="rangeLabelL"></div>
+        </div>
+        <div class="relative min-h-[300px] bg-slate-950/50 rounded-2xl border border-slate-800/50 p-4" id="chartLWrap">
+            <canvas id="chartLogins" class="w-full h-full block"></canvas>
+            <div id="ttL" class="hidden absolute px-3 py-2 text-xs rounded-lg bg-slate-800/95 border border-slate-700 text-slate-100 shadow-xl z-10 backdrop-blur-sm pointer-events-none"></div>
+            <div id="loadL" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/20 backdrop-blur-[1px] rounded-2xl">
+                <div class="animate-spin rounded-full h-6 w-6 border-2 border-cyan-500 border-t-transparent mr-3"></div>
+                <span class="text-sm text-slate-300 font-medium">Chargement…</span>
             </div>
-            <div id="loadL" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/40">
-              <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2"></div>
-              <span class="text-xs text-slate-300">Chargement…</span>
+            <div id="errL" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900/60 rounded-2xl">
+                <div class="text-sm text-rose-400 font-medium">Erreur de chargement des connexions.</div>
+                <button type="button" class="px-3 py-1.5 text-xs rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-colors" onclick="window.__retryL?.()">Réessayer</button>
             </div>
-            <div id="errL" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900/60">
-              <div class="text-xs text-rose-400 font-medium">Erreur de chargement des connexions.</div>
-              <button type="button" class="px-2 py-1 text-xs rounded bg-rose-600 text-white" onclick="window.__retryL?.()">Réessayer</button>
-            </div>
-            <div id="emptyL" class="hidden absolute inset-0 flex items-center justify-center text-xs text-slate-400">Aucune donnée</div>
-          </div>
-          <div class="mt-4">
-            <h3 class="text-sm text-slate-300 mb-2">Connexions récentes</h3>
-            <div id="recentLogins" class="text-xs text-slate-300 grid md:grid-cols-2 gap-2"></div>
-          </div>
-        </section>
+            <div id="emptyL" class="hidden absolute inset-0 flex items-center justify-center text-sm text-slate-500">Aucune donnée</div>
+        </div>
+        <div class="mt-6">
+            <h3 class="text-sm font-medium text-slate-300 mb-3 uppercase tracking-wider text-[10px]">Connexions récentes</h3>
+            <div id="recentLogins" class="text-xs text-slate-400 grid md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </div>
+    </section>
 
-        <section id="panelBans" class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4 hidden">
-          <div class="flex items-center justify-between mb-2">
-            <h2 class="font-medium">Bans par jour</h2>
-            <div class="text-xs text-slate-400" id="rangeLabelB"></div>
-          </div>
-          <div class="relative" id="chartBWrap">
-            <canvas id="chartBans" class="w-full block" style="width:100%" height="260"></canvas>
-            <div id="ttB"
-              class="hidden absolute px-2.5 py-1.5 text-xs rounded bg-slate-800/95 border border-slate-700 text-slate-100 shadow z-10">
+    <section id="panelBans" class="rounded-3xl border border-slate-800 bg-slate-900 p-6 hidden">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white">Bans par jour</h2>
+            <div class="text-sm text-slate-400 font-mono" id="rangeLabelB"></div>
+        </div>
+        <div class="relative min-h-[300px] bg-slate-950/50 rounded-2xl border border-slate-800/50 p-4" id="chartBWrap">
+            <canvas id="chartBans" class="w-full h-full block"></canvas>
+            <div id="ttB" class="hidden absolute px-3 py-2 text-xs rounded-lg bg-slate-800/95 border border-slate-700 text-slate-100 shadow-xl z-10 backdrop-blur-sm pointer-events-none"></div>
+            <div id="loadB" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/20 backdrop-blur-[1px] rounded-2xl">
+                <div class="animate-spin rounded-full h-6 w-6 border-2 border-rose-500 border-t-transparent mr-3"></div>
+                <span class="text-sm text-slate-300 font-medium">Chargement…</span>
             </div>
-            <div id="loadB" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/40">
-              <div class="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-transparent mr-2"></div>
-              <span class="text-xs text-slate-300">Chargement…</span>
+            <div id="errB" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900/60 rounded-2xl">
+                <div class="text-sm text-rose-400 font-medium">Erreur de chargement des bans.</div>
+                <button type="button" class="px-3 py-1.5 text-xs rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-colors" onclick="window.__retryB?.()">Réessayer</button>
             </div>
-            <div id="errB" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-900/60">
-              <div class="text-xs text-rose-400 font-medium">Erreur de chargement des bans.</div>
-              <button type="button" class="px-2 py-1 text-xs rounded bg-rose-600 text-white" onclick="window.__retryB?.()">Réessayer</button>
-            </div>
-            <div id="emptyB" class="hidden absolute inset-0 flex items-center justify-center text-xs text-slate-400">Aucune donnée</div>
-          </div>
-          <div class="mt-3 text-xs text-slate-400" id="banSummary"></div>
-        </section>
-      </main>
+            <div id="emptyB" class="hidden absolute inset-0 flex items-center justify-center text-sm text-slate-500">Aucune donnée</div>
+        </div>
+        <div class="mt-4 text-xs text-slate-400 flex justify-center gap-4" id="banSummary"></div>
+    </section>
+</main>
+</div>
 
       <script>
         (function () {
@@ -250,8 +230,8 @@
             const panels = { signups: $('#panelSignups'), logins: $('#panelLogins'), bans: $('#panelBans') };
             Object.entries(tabs).forEach(([k, btn]) => {
               const active = k === which; btn.setAttribute('aria-selected', active ? 'true' : 'false');
-              btn.classList.toggle('bg-indigo-600', active); btn.classList.toggle('text-white', active);
-              btn.classList.toggle('bg-slate-800', !active); btn.classList.toggle('text-slate-200', !active); btn.classList.toggle('border', !active); btn.classList.toggle('border-slate-700', !active);
+              btn.classList.toggle('bg-violet-600', active); btn.classList.toggle('text-white', active);
+              btn.classList.toggle('bg-slate-800', !active); btn.classList.toggle('text-slate-300', !active); btn.classList.toggle('border', !active); btn.classList.toggle('border-slate-700', !active);
             });
             Object.entries(panels).forEach(([k, el]) => { el.classList.toggle('hidden', k !== which); });
             scheduleRerender();
@@ -267,8 +247,8 @@
             const sections = { su1: $('#su1'), su2: $('#su2'), su3: $('#su3'), su4: $('#su4') };
             Object.entries(tabs).forEach(([k, btn]) => {
               if (!btn) return; const active = k === which; btn.setAttribute('aria-selected', active ? 'true' : 'false');
-              btn.classList.toggle('bg-indigo-600', active); btn.classList.toggle('text-white', active);
-              btn.classList.toggle('bg-slate-800', !active); btn.classList.toggle('text-slate-200', !active); btn.classList.toggle('border', !active); btn.classList.toggle('border-slate-700', !active);
+              btn.classList.toggle('bg-violet-600', active); btn.classList.toggle('text-white', active);
+              btn.classList.toggle('bg-slate-800', !active); btn.classList.toggle('text-slate-300', !active); btn.classList.toggle('border', !active); btn.classList.toggle('border-slate-700', !active);
             });
             Object.entries(sections).forEach(([k, el]) => { if (el) el.classList.toggle('hidden', k !== which); });
             currentSub = which;
@@ -387,7 +367,7 @@
               ctx.fillText(shortLab, x, padT + innerH + 6);
             });
 
-            ctx.strokeStyle = '#6366f1';
+            ctx.strokeStyle = '#7c3aed';
             ctx.lineWidth = 2;
             ctx.beginPath();
             data.forEach((v, i) => {
@@ -397,7 +377,7 @@
             });
             ctx.stroke();
 
-            ctx.fillStyle = '#818cf8';
+            ctx.fillStyle = '#a78bfa';
             data.forEach((v, i) => {
               const x = padL + i * stepX;
               const y = padT + innerH - v * scaleY;
@@ -407,10 +387,10 @@
             if (hoverIndex >= 0 && hoverIndex < data.length) {
               const x = padL + hoverIndex * stepX;
               const y = padT + innerH - data[hoverIndex] * scaleY;
-              ctx.strokeStyle = 'rgba(99,102,241,0.35)';
+              ctx.strokeStyle = 'rgba(124, 58, 237, 0.35)';
               ctx.lineWidth = 1;
               ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + innerH); ctx.stroke();
-              ctx.fillStyle = '#a5b4fc';
+              ctx.fillStyle = '#c4b5fd';
               ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
               const rect = wrap1.getBoundingClientRect();
               tt1.textContent = `${labels[hoverIndex]} — ${data[hoverIndex]} inscrits`;
@@ -583,9 +563,9 @@
             for (let y = 0; y <= maxRounded; y += stepY) { const py = padT + innerH - y * scaleY; ctxL.strokeStyle = 'rgba(148,163,184,0.15)'; ctxL.beginPath(); ctxL.moveTo(padL, py); ctxL.lineTo(padL + innerW, py); ctxL.stroke(); ctxL.fillText(String(y), padL - 6, py); }
             ctxL.textAlign = 'center'; ctxL.textBaseline = 'top'; const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
             labels.forEach((lab, i) => { if (i % xLabelEvery !== 0 && i !== labels.length - 1) return; const x = padL + i * stepX; ctxL.strokeStyle = 'rgba(148,163,184,0.15)'; ctxL.beginPath(); ctxL.moveTo(x, padT + innerH); ctxL.lineTo(x, padT + innerH + 4); ctxL.stroke(); ctxL.fillText(lab?.slice(5) || '', x, padT + innerH + 6); });
-            ctxL.strokeStyle = '#06b6d4'; ctxL.lineWidth = 2; ctxL.beginPath(); data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctxL.moveTo(x, y); else ctxL.lineTo(x, y); }); ctxL.stroke();
-            ctxL.fillStyle = '#67e8f9'; data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctxL.beginPath(); ctxL.arc(x, y, 2.5, 0, Math.PI * 2); ctxL.fill(); });
-            if (hoverIndex >= 0 && hoverIndex < labels.length) { const x = padL + hoverIndex * stepX; const y = padT + innerH - data[hoverIndex] * scaleY; ctxL.strokeStyle = 'rgba(6,182,212,0.35)'; ctxL.beginPath(); ctxL.moveTo(x, padT); ctxL.lineTo(x, padT + innerH); ctxL.stroke(); ctxL.fillStyle = '#a5f3fc'; ctxL.beginPath(); ctxL.arc(x, y, 4, 0, Math.PI * 2); ctxL.fill(); const rect = wrapL.getBoundingClientRect(); const ttX = Math.min(rect.width - 140, Math.max(8, x + 8)); const ttY = Math.max(8, y - 10); ttL.textContent = `${labels[hoverIndex]} — ${data[hoverIndex]} connexions`; ttL.style.left = ttX + 'px'; ttL.style.top = ttY + 'px'; ttL.classList.remove('hidden'); } else { ttL.classList.add('hidden'); }
+            ctxL.strokeStyle = '#3b82f6'; ctxL.lineWidth = 2; ctxL.beginPath(); data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctxL.moveTo(x, y); else ctxL.lineTo(x, y); }); ctxL.stroke();
+            ctxL.fillStyle = '#93c5fd'; data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctxL.beginPath(); ctxL.arc(x, y, 2.5, 0, Math.PI * 2); ctxL.fill(); });
+            if (hoverIndex >= 0 && hoverIndex < labels.length) { const x = padL + hoverIndex * stepX; const y = padT + innerH - data[hoverIndex] * scaleY; ctxL.strokeStyle = 'rgba(59, 130, 246, 0.35)'; ctxL.beginPath(); ctxL.moveTo(x, padT); ctxL.lineTo(x, padT + innerH); ctxL.stroke(); ctxL.fillStyle = '#dbeafe'; ctxL.beginPath(); ctxL.arc(x, y, 4, 0, Math.PI * 2); ctxL.fill(); const rect = wrapL.getBoundingClientRect(); const ttX = Math.min(rect.width - 140, Math.max(8, x + 8)); const ttY = Math.max(8, y - 10); ttL.textContent = `${labels[hoverIndex]} — ${data[hoverIndex]} connexions`; ttL.style.left = ttX + 'px'; ttL.style.top = ttY + 'px'; ttL.classList.remove('hidden'); } else { ttL.classList.add('hidden'); }
           }
 
 
@@ -632,10 +612,10 @@
             for (let y = 0; y <= maxRounded; y += stepY) { const py = padT + innerH - y * scaleY; ctx4.strokeStyle = 'rgba(148,163,184,0.15)'; ctx4.beginPath(); ctx4.moveTo(padL, py); ctx4.lineTo(padL + innerW, py); ctx4.stroke(); ctx4.fillText(String(y), padL - 6, py); }
             ctx4.textAlign = 'center'; ctx4.textBaseline = 'top'; const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
             labels.forEach((lab, i) => { if (i % xLabelEvery !== 0 && i !== labels.length - 1) return; const x = padL + i * stepX; ctx4.strokeStyle = 'rgba(148,163,184,0.15)'; ctx4.beginPath(); ctx4.moveTo(x, padT + innerH); ctx4.lineTo(x, padT + innerH + 4); ctx4.stroke(); ctx4.fillText(lab?.slice(5) || '', x, padT + innerH + 6); });
-            ctx4.strokeStyle = '#22d3ee'; ctx4.lineWidth = 2; ctx4.beginPath(); data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctx4.moveTo(x, y); else ctx4.lineTo(x, y); }); ctx4.stroke();
-            ctx4.fillStyle = '#67e8f9'; data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctx4.beginPath(); ctx4.arc(x, y, 2.3, 0, Math.PI * 2); ctx4.fill(); });
+            ctx4.strokeStyle = '#d946ef'; ctx4.lineWidth = 2; ctx4.beginPath(); data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctx4.moveTo(x, y); else ctx4.lineTo(x, y); }); ctx4.stroke();
+            ctx4.fillStyle = '#f0abfc'; data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctx4.beginPath(); ctx4.arc(x, y, 2.3, 0, Math.PI * 2); ctx4.fill(); });
             if (hoverIndex >= 0 && hoverIndex < labels.length) {
-              const x = padL + hoverIndex * stepX; const y = padT + innerH - data[hoverIndex] * scaleY; ctx4.strokeStyle = 'rgba(34,211,238,0.4)'; ctx4.beginPath(); ctx4.moveTo(x, padT); ctx4.lineTo(x, padT + innerH); ctx4.stroke(); ctx4.fillStyle = '#a5f3fc'; ctx4.beginPath(); ctx4.arc(x, y, 4, 0, Math.PI * 2); ctx4.fill();
+              const x = padL + hoverIndex * stepX; const y = padT + innerH - data[hoverIndex] * scaleY; ctx4.strokeStyle = 'rgba(217, 70, 239, 0.4)'; ctx4.beginPath(); ctx4.moveTo(x, padT); ctx4.lineTo(x, padT + innerH); ctx4.stroke(); ctx4.fillStyle = '#fae8ff'; ctx4.beginPath(); ctx4.arc(x, y, 4, 0, Math.PI * 2); ctx4.fill();
               const rect = wrap4.getBoundingClientRect(); const ttX = Math.min(rect.width - 140, Math.max(8, x + 8)); const ttY = Math.max(8, y - 10); tt4.textContent = `${labels[hoverIndex]} — cumul: ${data[hoverIndex]}`; tt4.style.left = ttX + 'px'; tt4.style.top = ttY + 'px'; tt4.classList.remove('hidden');
             } else { tt4.classList.add('hidden'); }
           }
@@ -683,17 +663,92 @@
             }
           }
 
+          async function applyLogins() {
+            try {
+              document.getElementById('loadL')?.classList.remove('hidden');
+              document.getElementById('errL')?.classList.add('hidden');
+              document.getElementById('emptyL')?.classList.add('hidden');
+              
+              const [seriesPayload, recent] = await Promise.all([
+                fetchLoginsSeries(),
+                fetchRecentLogins()
+              ]);
+              
+              $('#rangeLabelL').textContent = `${seriesPayload.from} → ${seriesPayload.to}`;
+              renderChartL(seriesPayload);
+              
+              if (!(seriesPayload.series || []).length) {
+                document.getElementById('emptyL')?.classList.remove('hidden');
+              }
+
+              const recentContainer = document.getElementById('recentLogins');
+              if (recentContainer) {
+                recentContainer.innerHTML = (recent.logins || []).map(l => `
+                  <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-950 border border-slate-800">
+                    <div class="h-8 w-8 rounded-full bg-slate-800 overflow-hidden">
+                      ${l.user?.avatar ? `<img src="/uploads/${l.user.avatar}" class="h-full w-full object-cover">` : `<div class="h-full w-full flex items-center justify-center text-slate-500 text-[10px]">${l.user?.userName?.substring(0,2).toUpperCase()}</div>`}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <div class="truncate font-medium text-slate-200">${l.user?.userName || 'Inconnu'}</div>
+                      <div class="text-[10px] text-slate-500">${new Date(l.createdAt).toLocaleString()}</div>
+                    </div>
+                  </div>
+                `).join('');
+              }
+
+            } catch (e) {
+              console.error(e);
+              document.getElementById('errL')?.classList.remove('hidden');
+            } finally {
+              document.getElementById('loadL')?.classList.add('hidden');
+            }
+          }
+
+          async function applyBans() {
+            try {
+              document.getElementById('loadB')?.classList.remove('hidden');
+              document.getElementById('errB')?.classList.add('hidden');
+              document.getElementById('emptyB')?.classList.add('hidden');
+              
+              const seriesPayload = await fetchBansSeries();
+              
+              $('#rangeLabelB').textContent = `${seriesPayload.from} → ${seriesPayload.to}`;
+              renderChartB(seriesPayload);
+              
+              if (!(seriesPayload.series || []).length) {
+                document.getElementById('emptyB')?.classList.remove('hidden');
+              }
+              
+              const totalCreated = (seriesPayload.series || []).reduce((acc, curr) => acc + (curr.created || 0), 0);
+              const totalRevoked = (seriesPayload.series || []).reduce((acc, curr) => acc + (curr.revoked || 0), 0);
+              
+              const summaryEl = document.getElementById('banSummary');
+              if (summaryEl) {
+                summaryEl.innerHTML = `
+                  <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-rose-500"></div>Total créés: <span class="text-slate-200 font-mono">${totalCreated}</span></div>
+                  <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-500"></div>Total révoqués: <span class="text-slate-200 font-mono">${totalRevoked}</span></div>
+                `;
+              }
+
+            } catch (e) {
+              console.error(e);
+              document.getElementById('errB')?.classList.remove('hidden');
+            } finally {
+              document.getElementById('loadB')?.classList.add('hidden');
+            }
+          }
+
           const presetIds = ['last24h', 'last7', 'last30', 'last90'];
           const presetButtons = presetIds.map(id => document.getElementById(id));
           function setActive(btn) {
             presetButtons.forEach(b => {
               if (!b) return;
-              b.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500');
-              b.classList.add('bg-slate-800', 'text-slate-200', 'border-slate-700');
+              b.classList.remove('bg-violet-600', 'text-white', 'border-violet-500');
+              b.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-700');
             });
             if (btn) {
-              btn.classList.remove('bg-slate-800', 'text-slate-200', 'border-slate-700');
-              btn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-500');
+              btn.classList.remove('bg-slate-800', 'text-slate-300', 'border-slate-700');
+              btn.classList.add('bg-violet-600', 'text-white', 'border-violet-500');
             }
           }
 
@@ -774,6 +829,13 @@
             if (seriesL && seriesL.length) renderChartL({ series: seriesL }, hoverIndexL);
             if (seriesB && seriesB.length) renderChartB({ series: seriesB }, hoverIndexB);
           });
+
+          window.__retrySU1 = apply;
+          window.__retrySU2 = apply;
+          window.__retrySU3 = apply;
+          window.__retrySU4 = apply;
+          window.__retryL = applyLogins;
+          window.__retryB = applyBans;
         })();
       </script>
       </body>

@@ -1,106 +1,172 @@
 <%- include('../../partials/head.ejs', { title: 'Admin - Rôles & Permissions', description: 'Gestion des rôles et permissions', robots: 'noindex,nofollow' }) %>
 <%- include('../../partials/header-dash.ejs', { user: user }) %>
-<%- include('../../partials/admin-nav.ejs', { user: user }) %>
-<main class="max-w-7xl mx-auto p-4">
-  <style>
+
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+  <%- include('../../partials/admin-nav.ejs', { user: user, active: 'roles' }) %>
+
+  <main class="col-span-12 lg:col-span-10 space-y-6">
+    <style>
     /* UI & Drag indicators */
     #rolesList .draggable{position:relative; cursor:move}
     #rolesList .dragging{opacity:.6}
-    #rolesList .drag-over-top::before,#rolesList .drag-over-bottom::after{content:"";position:absolute;left:0;right:0;height:2px;background:#6366F1}
+    #rolesList .drag-over-top::before,#rolesList .drag-over-bottom::after{content:"";position:absolute;left:0;right:0;height:2px;background:#8b5cf6}
     #rolesList .drag-over-top::before{top:0}
     #rolesList .drag-over-bottom::after{bottom:0}
   </style>
-  <div class="mb-4">
-    <h1 class="text-2xl font-bold tracking-tight">Rôles & Permissions</h1>
+
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-white tracking-tight">Rôles & Permissions</h1>
+    <p class="text-slate-400 mt-2">Gérez les rôles utilisateurs et leurs permissions d'accès.</p>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
     <!-- Colonne gauche: liste des rôles + création -->
-    <aside class="md:col-span-3 rounded-lg border border-slate-800/70 bg-slate-900/60 overflow-hidden">
-      <div class="p-3 border-b border-slate-800/70">
-        <form id="createRoleForm" class="flex items-center gap-2">
-          <input name="name" placeholder="Nouveau rôle (ex: PARTNER)" class="flex-1 px-2 py-1 rounded bg-slate-900/60 border border-slate-700 text-sm" />
-          <button type="submit" class="px-2 py-1 rounded bg-indigo-600 text-white text-xs whitespace-nowrap">Créer</button>
-          <!-- Bouton rafraîchir retiré: rechargement automatique inutile -->
-        </form>
-        <div class="mt-2 flex items-center gap-2">
-          <input id="roleSearch" placeholder="Rechercher un rôle..." class="w-full px-2 py-1 rounded bg-slate-900/60 border border-slate-700 text-xs" />
+    <aside class="lg:col-span-3 flex flex-col gap-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden flex flex-col h-[calc(100vh-200px)] sticky top-6">
+        <div class="p-4 border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+          <form id="createRoleForm" class="flex flex-col gap-3">
+            <div class="flex gap-2">
+              <input name="name" placeholder="Nouveau rôle (ex: PARTNER)" class="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all" />
+              <button type="submit" class="px-3 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
+            </div>
+          </form>
+          <div class="mt-3 relative">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input id="roleSearch" placeholder="Rechercher un rôle..." class="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/50 transition-all" />
+          </div>
+          <div class="flex items-center justify-between mt-2 px-1">
+            <div id="createRoleStatus" class="text-[10px] font-medium text-slate-400"></div>
+            <div id="rolesCount" class="text-[10px] text-slate-500">Glissez pour réordonner</div>
+          </div>
         </div>
-        <div class="flex items-center justify-between mt-1">
-          <div id="createRoleStatus" class="text-[11px] text-slate-400"></div>
-          <div id="rolesCount" class="text-[11px] text-slate-500">Glissez-déposez pour réordonner</div>
+        
+        <div id="rolesList" class="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+          <!-- items -->
         </div>
+        
+        <div id="rolesEmpty" class="hidden p-8 text-center">
+          <p class="text-sm text-slate-400">Aucun rôle trouvé.</p>
+        </div>
+        <div id="rolesError" class="hidden p-3 m-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-xs text-rose-400"></div>
       </div>
-      <div id="rolesList" class="max-h-[70vh] overflow-auto">
-        <!-- items -->
-      </div>
-      <div id="rolesEmpty" class="hidden p-3 text-xs text-slate-400">Aucun rôle.</div>
-      <div id="rolesError" class="hidden p-3 text-xs text-rose-400"></div>
     </aside>
 
     <!-- Colonne droite: permissions du rôle sélectionné -->
-    <section class="md:col-span-9 rounded-lg border border-slate-800/70 bg-slate-900/60 p-4" id="rightPane">
-      <div id="roleHeader" class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/70 pb-3 mb-4">
-        <div>
-          <div class="text-xs text-slate-400">Rôle sélectionné</div>
-          <h2 id="selRoleName" class="text-lg font-semibold">—</h2>
-        </div>
-        <div class="flex items-center gap-2 text-xs">
-          <label class="inline-flex items-center gap-2"><input id="selRoleIsStaff" type="checkbox" class="h-4 w-4 rounded border-slate-600" /> Staff</label>
-          <label class="inline-flex items-center gap-2">Priorité <input id="selRolePriority" type="number" class="w-16 px-2 py-1 rounded bg-slate-900/60 border border-slate-700" /></label>
-          <label class="inline-flex items-center gap-2">Max Plinkks <input id="selRoleMaxPlinkks" type="number" class="w-16 px-2 py-1 rounded bg-slate-900/60 border border-slate-700" /></label>
-          <label class="inline-flex items-center gap-2">Max Thèmes <input id="selRoleMaxThemes" type="number" class="w-16 px-2 py-1 rounded bg-slate-900/60 border border-slate-700" /></label>
-          <button id="btnSaveRole" class="px-2 py-1 rounded bg-indigo-600 text-white">Enregistrer</button>
-          <button id="btnDeleteRole" class="px-2 py-1 rounded bg-rose-600 text-white">Supprimer</button>
-        </div>
-      </div>
-
-      <!-- Contrôles globaux permissions -->
-      <div class="flex flex-wrap items-center gap-2 mb-3 text-xs">
-        <button id="btnEnableAll" class="px-2 py-1 rounded bg-emerald-600/90 text-white hover:bg-emerald-600">Tout activer</button>
-        <button id="btnDisableAll" class="px-2 py-1 rounded bg-slate-700 text-slate-100 hover:bg-slate-600">Tout désactiver</button>
-        <div class="flex items-center gap-2 ml-auto">
-          <select id="importRoleSelect" class="px-2 py-1 rounded bg-slate-900/60 border border-slate-700">
-            <option value="">Importer depuis…</option>
-          </select>
-          <button id="btnImportPerms" class="px-2 py-1 rounded bg-indigo-600 text-white">Importer</button>
-        </div>
-      </div>
-
-      <div id="permissionsPanel" class="grid md:grid-cols-2 gap-4">
-        <% Object.keys(permissionsGrouped).forEach(cat => { %>
-          <div class="rounded border border-slate-800/60 bg-slate-900/50" data-category="<%= cat %>">
-            <div class="px-3 py-2 text-xs font-semibold text-slate-300 border-b border-slate-800/60 flex items-center justify-between">
-              <span><%= cat %></span>
-              <span class="flex items-center gap-2">
-                <button type="button" class="btn-cat-enable px-2 py-0.5 rounded bg-emerald-700/80 text-white">Activer tout</button>
-                <button type="button" class="btn-cat-disable px-2 py-0.5 rounded bg-slate-700 text-slate-100">Désactiver tout</button>
-              </span>
+    <section class="lg:col-span-9 space-y-6" id="rightPane">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+        <div id="roleHeader" class="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-800 pb-6 mb-6">
+          <div>
+            <div class="text-xs font-medium text-violet-400 mb-1">RÔLE SÉLECTIONNÉ</div>
+            <h2 id="selRoleName" class="text-3xl font-bold text-white tracking-tight">—</h2>
+          </div>
+          
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-3 bg-slate-950 rounded-xl p-1 border border-slate-800">
+              <label class="flex items-center gap-2 px-3 py-1.5 cursor-pointer hover:bg-slate-900 rounded-lg transition-colors">
+                <input id="selRoleIsStaff" type="checkbox" class="w-4 h-4 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-500/50 focus:ring-offset-0" />
+                <span class="text-sm text-slate-300 font-medium">Staff Access</span>
+              </label>
             </div>
-            <div class="p-2 space-y-1">
-              <% permissionsGrouped[cat].forEach(p => { %>
-                <div class="flex items-center justify-between gap-2 text-xs px-2 py-2 rounded hover:bg-slate-800/40">
-                  <div class="flex items-center gap-2">
-                    <code class="px-1 py-0.5 bg-slate-800/80 rounded text-[10px] text-indigo-300"><%= p.key %></code>
-                    <span class="text-slate-400"><%= p.description || '' %></span>
-                  </div>
-                  <label class="inline-flex items-center cursor-pointer select-none">
-                    <input type="checkbox" class="perm-toggle sr-only" data-key="<%= p.key %>">
-                    <span class="w-9 h-5 bg-slate-700 rounded-full relative transition">
-                      <span class="dot absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition"></span>
-                    </span>
-                  </label>
-                </div>
-              <% }) %>
+
+            <div class="flex items-center gap-2 bg-slate-950 rounded-xl p-1 border border-slate-800">
+              <div class="px-3 py-1.5 border-r border-slate-800">
+                <span class="text-xs text-slate-500 uppercase font-bold">Priorité</span>
+              </div>
+              <input id="selRolePriority" type="number" class="w-16 px-2 py-1 bg-transparent text-sm text-white focus:outline-none text-center" />
+            </div>
+
+            <div class="flex items-center gap-2 bg-slate-950 rounded-xl p-1 border border-slate-800">
+              <div class="px-3 py-1.5 border-r border-slate-800">
+                <span class="text-xs text-slate-500 uppercase font-bold">Max Plinkks</span>
+              </div>
+              <input id="selRoleMaxPlinkks" type="number" class="w-16 px-2 py-1 bg-transparent text-sm text-white focus:outline-none text-center" />
+            </div>
+
+            <div class="flex items-center gap-2 bg-slate-950 rounded-xl p-1 border border-slate-800">
+              <div class="px-3 py-1.5 border-r border-slate-800">
+                <span class="text-xs text-slate-500 uppercase font-bold">Max Thèmes</span>
+              </div>
+              <input id="selRoleMaxThemes" type="number" class="w-16 px-2 py-1 bg-transparent text-sm text-white focus:outline-none text-center" />
+            </div>
+
+            <div class="flex items-center gap-2 ml-2">
+              <button id="btnSaveRole" class="p-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-colors" title="Enregistrer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              </button>
+              <button id="btnDeleteRole" class="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 transition-colors" title="Supprimer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
             </div>
           </div>
-        <% }) %>
+        </div>
+
+        <!-- Contrôles globaux permissions -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div class="flex items-center gap-2">
+            <button id="btnEnableAll" class="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 text-xs font-medium transition-colors">Tout activer</button>
+            <button id="btnDisableAll" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition-colors">Tout désactiver</button>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <div class="relative">
+              <select id="importRoleSelect" class="appearance-none pl-3 pr-8 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-300 focus:outline-none focus:border-violet-500/50">
+                <option value="">Importer depuis…</option>
+              </select>
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            <button id="btnImportPerms" class="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium transition-colors">Importer</button>
+          </div>
+        </div>
+
+        <div id="permissionsPanel" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <% Object.keys(permissionsGrouped).forEach(cat => { %>
+            <div class="bg-slate-950/50 border border-slate-800 rounded-2xl overflow-hidden" data-category="<%= cat %>">
+              <div class="px-4 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
+                <span class="text-xs font-bold text-slate-300 uppercase tracking-wider"><%= cat %></span>
+                <div class="flex items-center gap-1">
+                  <button type="button" class="btn-cat-enable p-1 rounded hover:bg-emerald-500/10 text-slate-500 hover:text-emerald-500 transition-colors" title="Activer tout">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </button>
+                  <button type="button" class="btn-cat-disable p-1 rounded hover:bg-rose-500/10 text-slate-500 hover:text-rose-500 transition-colors" title="Désactiver tout">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="p-2 space-y-1">
+                <% permissionsGrouped[cat].forEach(p => { %>
+                  <div class="group flex items-center justify-between gap-3 p-2 rounded-xl hover:bg-slate-900 transition-colors">
+                    <div class="flex flex-col min-w-0">
+                      <div class="flex items-center gap-2">
+                        <code class="text-[10px] font-mono text-violet-400 bg-violet-500/10 px-1.5 py-0.5 rounded border border-violet-500/20"><%= p.key %></code>
+                      </div>
+                      <span class="text-[11px] text-slate-500 truncate mt-0.5 group-hover:text-slate-400 transition-colors"><%= p.description || '' %></span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                      <input type="checkbox" class="perm-toggle sr-only peer" data-key="<%= p.key %>">
+                      <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-violet-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-violet-600"></div>
+                    </label>
+                  </div>
+                <% }) %>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+        
+        <div id="noRoleHint" class="hidden flex flex-col items-center justify-center py-20 text-center">
+          <div class="w-16 h-16 rounded-full bg-slate-800/50 flex items-center justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-600"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+          </div>
+          <h3 class="text-lg font-medium text-white">Aucun rôle sélectionné</h3>
+          <p class="text-slate-400 text-sm mt-1 max-w-xs">Sélectionnez un rôle dans la liste de gauche pour voir et modifier ses permissions.</p>
+        </div>
       </div>
-      <div id="noRoleHint" class="text-xs text-slate-400">Sélectionnez un rôle pour voir et modifier ses permissions.</div>
     </section>
   </div>
   <script id="rolesPayloadB64" type="text/plain"><%= rolesB64 || '' %></script>
 </main>
+</div>
 
 <script>
 (function(){
@@ -116,7 +182,6 @@
     rolesData = JSON.parse(rolesDataRaw);
   } catch(parseErr){
     console.error('[roles] JSON parse error', parseErr, rolesDataRaw);
-    // Affiche un message explicite dans l'UI pour que l'utilisateur sache quoi faire
     const errBox = document.getElementById('rolesError');
     if(errBox){
       errBox.textContent = 'Erreur de parsing des rôles côté client. Relancez le seed (node scripts/seed-permissions.js) ou vérifiez le template. Contenu brut: '+rolesDataRaw.slice(0,120)+'...';
@@ -134,15 +199,29 @@
     if(!visible.length){ $('#rolesEmpty').classList.remove('hidden'); return; } else { $('#rolesEmpty').classList.add('hidden'); }
     $('#rolesCount').textContent = visible.length+" rôle"+(visible.length>1?'s':'')+" affichés"+(searchTerm?" (filtré)":"");
     visible.forEach(r=>{
+      const isSelected = r.id===selectedRoleId;
       const a = document.createElement('button');
       a.type='button';
-      a.className = 'w-full text-left px-3 py-2 text-sm border-b border-slate-800/60 hover:bg-slate-800/50 draggable ' + (r.id===selectedRoleId?'bg-slate-800/60':'');
+      a.className = `w-full text-left px-3 py-3 rounded-xl text-sm transition-all draggable group relative overflow-hidden ${isSelected ? 'bg-violet-600 text-white shadow-lg shadow-violet-900/20' : 'bg-slate-950/50 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-transparent hover:border-slate-700'}`;
       a.setAttribute('data-id', r.id);
       a.setAttribute('draggable','true');
-      a.innerHTML = `<div class='flex items-center justify-between'>
-        <span class='font-medium text-slate-200 flex items-center gap-2'><span class='opacity-60'>☰</span>${r.name}</span>
-        ${r.isStaff?"<span class='text-[10px] px-1 py-0.5 rounded bg-amber-600/30 border border-amber-600 text-amber-300'>STAFF</span>":''}
-      </div>`;
+      
+      let staffBadge = '';
+      if(r.isStaff) {
+        staffBadge = isSelected 
+          ? `<span class='text-[10px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold border border-white/20'>STAFF</span>`
+          : `<span class='text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 font-bold border border-amber-500/20'>STAFF</span>`;
+      }
+
+      a.innerHTML = `
+        <div class='flex items-center justify-between relative z-10'>
+          <span class='font-medium flex items-center gap-3'>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-50 cursor-grab active:cursor-grabbing"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            ${r.name}
+          </span>
+          ${staffBadge}
+        </div>
+      `;
       list.appendChild(a);
     });
   }
@@ -151,8 +230,17 @@
   function renderRight(){
     const role = rolesData.find(r=>r.id===selectedRoleId);
     const hint = $('#noRoleHint');
-    if(!role){ hint.classList.remove('hidden'); $('#roleHeader').classList.add('opacity-50'); return; }
-    hint.classList.add('hidden'); $('#roleHeader').classList.remove('opacity-50');
+    const content = $('#rightPane > div'); // The main content div
+    
+    if(!role){ 
+      hint.classList.remove('hidden'); 
+      content.classList.add('hidden');
+      return; 
+    }
+    
+    hint.classList.add('hidden'); 
+    content.classList.remove('hidden');
+    
     $('#selRoleName').textContent = role.name;
     $('#selRoleIsStaff').checked = !!role.isStaff;
     $('#selRolePriority').value = Number(role.priority||0);
@@ -163,23 +251,7 @@
       const key = chk.getAttribute('data-key');
       const on = current.has(key);
       chk.checked = on;
-      // style du switch
-      const wrap = chk.parentElement.querySelector('span');
-      const dot = wrap.querySelector('.dot');
-      applySwitchStyle(wrap, dot, on);
     });
-  }
-
-  function applySwitchStyle(track, dot, on){
-    if(on){
-      track.classList.remove('bg-slate-700');
-      track.classList.add('bg-indigo-600');
-      dot.style.transform = 'translateX(1rem)';
-    } else {
-      track.classList.add('bg-slate-700');
-      track.classList.remove('bg-indigo-600');
-      dot.style.transform = 'translateX(0)';
-    }
   }
 
   // Helpers permissions
@@ -274,16 +346,21 @@
       rolesData.push({ id: j.roleId, name: String(payload.name).toUpperCase(), isStaff:false, priority:0, color:null, maxPlinkks:1, maxThemes:0, permissions:[] });
       selectedRoleId = j.roleId;
       renderRolesList(); renderRight();
-      status.textContent = 'Créé ✔'; status.className='text-emerald-400 text-[11px] mt-1';
+      status.textContent = 'Créé ✔'; status.className='text-emerald-400 text-[10px] font-medium';
       ev.currentTarget.reset();
+      setTimeout(() => { status.textContent = ''; }, 3000);
     } else {
-      status.textContent = 'Erreur '+res.status; status.className='text-rose-400 text-[11px] mt-1';
+      status.textContent = 'Erreur '+res.status; status.className='text-rose-400 text-[10px] font-medium';
     }
   });
 
   // Sauvegarde infos du rôle sélectionné
   $('#btnSaveRole').addEventListener('click', async ()=>{
     const roleId = selectedRoleId; if(!roleId) return;
+    const btn = $('#btnSaveRole');
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>';
+    
     const payload = {
       isStaff: $('#selRoleIsStaff').checked,
       priority: Number($('#selRolePriority').value||0),
@@ -291,6 +368,11 @@
       maxThemes: Number($('#selRoleMaxThemes').value||0),
     };
     const res = await fetch('/api/admin/roles/'+roleId, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    
+    setTimeout(() => {
+      btn.innerHTML = originalContent;
+    }, 500);
+
     if(res.ok){
       const r = rolesData.find(x=>x.id===roleId); if(r) Object.assign(r, payload);
       renderRolesList();
@@ -315,9 +397,7 @@
     const chk = ev.target.closest('.perm-toggle'); if(!chk) return;
     const key = chk.getAttribute('data-key'); const roleId = selectedRoleId; if(!roleId) return;
     const on = chk.checked;
-    const track = chk.parentElement.querySelector('span');
-    const dot = track.querySelector('.dot');
-    applySwitchStyle(track, dot, on);
+    
     const body = on ? { addPermissions:[key] } : { removePermissions:[key] };
     const res = await fetch('/api/admin/roles/'+roleId, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
     if(res.ok){
@@ -326,7 +406,7 @@
       else { r.permissions = r.permissions.filter(p=>p!==key); }
     } else {
       // revert
-      chk.checked = !on; applySwitchStyle(track, dot, !on);
+      chk.checked = !on;
       alert('Échec de mise à jour de la permission');
     }
   });
@@ -405,3 +485,4 @@
 </script>
 </body>
 </html>
+

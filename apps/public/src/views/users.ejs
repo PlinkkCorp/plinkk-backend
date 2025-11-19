@@ -1,45 +1,55 @@
 <%- include('partials/head', { title: 'Utilisateurs', description: 'Tous les profils hébergés sur Plinkk.' }) %>
 <%- include('partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
 
-  <main class="max-w-7xl mx-auto p-4 space-y-5">
-    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 animate-slide-up">
+  <main class="max-w-[1600px] mx-auto p-6 space-y-8">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-slide-up">
       <div class="space-y-1">
-        <h1 class="text-2xl font-bold tracking-tight">Tous les profils hébergés</h1>
-        <p class="text-xs text-slate-400">Découvrez les comptes publics Plinkk.</p>
+        <h1 class="text-2xl font-bold tracking-tight text-white">Tous les profils hébergés</h1>
+        <p class="text-sm text-slate-400">Découvrez les comptes publics Plinkk.</p>
       </div>
 
       <% if (plinkks.length > 0) { %>
-      <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2">
-        <label class="relative block flex-1">
-          <input id="searchInput" type="text" placeholder="Rechercher (nom, @id, email)" class="w-full rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 pr-10 text-sm outline-none focus:ring-2 focus:ring-indigo-600 placeholder:text-slate-500" />
-          <span class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 text-xs">⌘K</span>
-        </label>
-        <div class="flex gap-2">
-          <select id="sortSelect" class="rounded-md bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-600">
+      <div class="w-full md:w-auto flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1 min-w-[300px]">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input id="searchInput" type="text" placeholder="Rechercher (nom, @id, email)" 
+            class="block w-full pl-10 pr-12 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all sm:text-sm" />
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <span class="text-slate-600 text-xs font-medium border border-slate-700 rounded px-1.5 py-0.5">⌘K</span>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <select id="sortSelect" class="bg-slate-900 border border-slate-800 text-slate-200 text-sm rounded-xl focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5">
             <option value="name-asc">Nom (A→Z)</option>
             <option value="name-desc">Nom (Z→A)</option>
             <option value="id-asc">@Id (A→Z)</option>
             <option value="id-desc">@Id (Z→A)</option>
           </select>
-          <button id="resetBtn" class="rounded-md bg-slate-800/60 border border-slate-700 px-3 py-2 text-sm hover:bg-slate-800">Réinitialiser</button>
+          <button id="resetBtn" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl transition-colors border border-slate-700">
+            Réinitialiser
+          </button>
         </div>
       </div>
       <% } %>
     </div>
 
-    <div class="flex items-center justify-between animate-slide-up">
-      <p class="text-xs text-slate-400">Total: <span id="totalCount"><%= plinkks.length %></span></p>
-      <p class="text-xs text-slate-400 hidden sm:block"><span id="visibleCount"><%= plinkks.length %></span> affiché(s)</p>
+    <div class="flex items-center justify-between animate-slide-up px-1">
+      <p class="text-xs font-medium text-slate-500">Total: <span id="totalCount" class="text-slate-300"><%= plinkks.length %></span></p>
+      <p class="text-xs font-medium text-slate-500 hidden sm:block"><span id="visibleCount" class="text-slate-300"><%= plinkks.length %></span> affiché(s)</p>
     </div>
 
     <% if (plinkks.length === 0) { %>
-      <div class="rounded-lg border border-dashed border-slate-700 bg-slate-900/50 p-10 text-center space-y-2 animate-slide-up">
-        <div class="text-2xl">🫥</div>
-        <p class="text-sm text-slate-300 font-medium">Aucun Plinkks pour le moment</p>
-        <p class="text-xs text-slate-500">Les Plinkks publics s’afficheront ici.</p>
+      <div class="rounded-3xl border border-dashed border-slate-800 bg-slate-900/50 p-12 text-center space-y-3 animate-slide-up">
+        <div class="text-4xl mb-2">🫥</div>
+        <h3 class="text-lg font-medium text-slate-200">Aucun Plinkks pour le moment</h3>
+        <p class="text-sm text-slate-500">Les Plinkks publics s’afficheront ici.</p>
       </div>
     <% } else { %>
-      <ul id="usersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <ul id="usersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
      <% plinkks.forEach(u => { 
        const initials = (u.name || u.id || '?').trim().charAt(0).toUpperCase(); 
        const role = u.role || 'USER';
@@ -59,39 +69,52 @@
      %>
   <% const isEmailPublic = Boolean(u.settings && (u.settings.affichageEmail !== null && u.settings.affichageEmail !== undefined)); %>
   <% const publicEmail = (u.settings && (u.settings.affichageEmail !== null && u.settings.affichageEmail !== undefined)) ? String(u.settings.affichageEmail) : ''; %>
-      <li class="group rounded-xl border border-slate-800/80 bg-slate-900/70 hover:bg-slate-900 transition-colors shadow-sm hover:shadow-md animate-slide-up overflow-hidden"
+      <li class="group relative flex flex-col bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden transition-all hover:border-slate-700 hover:shadow-xl hover:shadow-violet-900/5 animate-slide-up"
         data-name="<%- (u.name||'').toLowerCase() %>"
         data-id="<%- (u.id||'').toLowerCase() %>"
   data-search="<%- (u.name+' '+u.id + (isEmailPublic && publicEmail ? (' '+publicEmail) : '')).toLowerCase() %>">
             <% if (bannerUrl) { %>
-              <div class="h-12 w-full border-b border-slate-800" style="background: center/cover no-repeat url('<%= bannerUrl %>')"></div>
+              <div class="h-24 w-full bg-slate-800 bg-cover bg-center" style="background-image: url('<%= bannerUrl %>')"></div>
+            <% } else { %>
+              <div class="h-24 w-full bg-gradient-to-r from-slate-800 to-slate-900"></div>
             <% } %>
-            <div class="p-4 flex items-start gap-3">
-              <div class="relative ">
-                <div class="relative shrink-0 h-11 w-11 rounded-full border border-indigo-600/50 overflow-hidden grid place-items-center bg-indigo-700/70 text-sm font-semibold text-white">
-                  <%- include('partials/avatar.ejs', { user: avatarUser }) %>
+            
+            <div class="px-5 pb-5 flex-1 flex flex-col">
+              <div class="relative -mt-10 mb-3 flex justify-between items-end">
+                <div class="relative h-20 w-20 rounded-2xl border-4 border-slate-900 bg-slate-800 overflow-hidden shadow-lg">
+                  <%- include('partials/avatar.ejs', { user: avatarUser, className: "w-full h-full object-cover" }) %>
                 </div>
-              </div>
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2 min-w-0">
-                  <div class="font-semibold truncate"><%= u.name %></div>
-                  <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 max-w-[7.5rem] truncate inline-block">@<%= u.slug %></span>
-                  <% if (role && role !== 'USER') { %>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full border truncate <%= role === 'ADMIN' ? 'bg-red-600/20 border-red-500/40 text-red-300' : role === 'PARTNER' ? 'bg-indigo-600/20 border-indigo-500/40 text-indigo-300' : role === 'DEVELOPER' ? 'bg-emerald-600/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-700/30 border-slate-600/50 text-slate-300' %>"><%= role %></span>
-                  <% } %>
-                  <% if (flair) { %>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 truncate" title="Flair"><%= flair %></span>
-                  <% } %>
-                </div>
-                <% if (isEmailPublic) { %>
-                  <span class="text-xs text-slate-400 truncate"><%= publicEmail %></span>
-                <% } else { %>
-                  <span class="text-xs text-slate-500 italic">Email privé</span>
+                <% if (role && role !== 'USER') { %>
+                  <span class="mb-1 text-[10px] px-2 py-1 rounded-lg font-medium border <%= role === 'ADMIN' ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' : role === 'PARTNER' ? 'bg-violet-500/10 border-violet-500/20 text-violet-400' : role === 'DEVELOPER' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-slate-700/30 border-slate-600/50 text-slate-300' %>"><%= role %></span>
                 <% } %>
-                <div class="mt-3 flex flex-wrap items-center gap-2">
-                  <a class="px-3 py-1.5 text-xs rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors" href="/<%= u.slug %>">Voir le profil</a>
-                  <button type="button" class="px-3 py-1.5 text-xs rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200 transition-colors copyBtn" data-id="<%= u.slug %>">Copier le lien</button>
+              </div>
+
+              <div class="flex-1 min-w-0 space-y-1">
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-lg text-white truncate"><%= u.name %></h3>
+                  <% if (flair) { %>
+                    <span class="text-base" title="Flair"><%= flair %></span>
+                  <% } %>
                 </div>
+                <div class="flex items-center gap-2 text-sm text-slate-400">
+                  <span class="truncate">@<%= u.slug %></span>
+                </div>
+                
+                <% if (isEmailPublic) { %>
+                  <div class="pt-2 flex items-center gap-1.5 text-xs text-slate-500">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <span class="truncate"><%= publicEmail %></span>
+                  </div>
+                <% } %>
+              </div>
+
+              <div class="mt-5 pt-4 border-t border-slate-800 flex items-center gap-3">
+                <a class="flex-1 inline-flex justify-center items-center px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium transition-colors shadow-lg shadow-violet-900/20" href="/<%= u.slug %>">
+                  Voir le profil
+                </a>
+                <button type="button" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors border border-slate-700 copyBtn" data-id="<%= u.slug %>" title="Copier le lien">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </button>
               </div>
             </div>
           </li>
@@ -168,12 +191,12 @@
         .copy-anim::after {
           content: 'Copié !';
           position: absolute; left: 50%; top: -10px; transform: translate(-50%, -100%);
-          background: rgba(16,185,129,.95); color: #fff; font-size: 10px; border-radius: 6px; padding: 4px 6px;
+          background: rgba(124, 58, 237, 0.95); color: #fff; font-size: 10px; border-radius: 6px; padding: 4px 6px;
           opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease;
-          box-shadow: 0 8px 24px rgba(16,185,129,.35);
+          box-shadow: 0 8px 24px rgba(124, 58, 237, 0.35);
         }
         .copy-anim.copied::after { opacity: 1; transform: translate(-50%, -120%); }
-        .copy-anim.copied { box-shadow: 0 0 0 1px rgba(16,185,129,.35) inset; }
+        .copy-anim.copied { box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.35) inset; }
       `;
       document.head.appendChild(style);
 
