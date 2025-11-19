@@ -98,6 +98,7 @@ export function generateProfileConfig(
           profile.selectedCanvasIndex ?? 16
         },
         layoutOrder: ${JSON.stringify((profile).layoutOrder ?? null)},
+        cosmetics: ${JSON.stringify((profile as any).cosmetics || {})},
     };
     export default profileData;
     `;

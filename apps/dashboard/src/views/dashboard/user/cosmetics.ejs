@@ -1,438 +1,382 @@
-<%- include('../../partials/head.ejs', { title: 'Tableau de bord - Cosmétiques', description: 'Choisis ton flair, cadre, thème et bannière avec aperçu en direct.', robots: 'noindex,nofollow' }) %>
+<%- include('../../partials/head.ejs', { title: 'Tableau de bord - Cosmétiques', description: 'Personnalisez votre profil Plinkk.', robots: 'noindex,nofollow' }) %>
 <%- include('../../partials/header-dash.ejs', { user: user }) %>
 
 <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
   <%- include('../../partials/asside_dash.ejs', { active: 'cosmetics' }) %>
 
-  <main class="col-span-12 lg:col-span-10 space-y-6 relative">
+  <main class="col-span-12 lg:col-span-10 space-y-6">
     
-    <!-- Coming Soon Overlay -->
-    <div id="comingSoonOverlay" class="absolute inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm rounded-3xl border border-slate-800" aria-hidden="false">
-      <div role="dialog" aria-modal="true" class="mx-4 w-full max-w-lg rounded-3xl bg-slate-900 border border-slate-800 p-8 text-center shadow-2xl shadow-black/50">
-        <div class="flex items-center justify-center mb-6">
-          <div class="h-16 w-16 rounded-2xl bg-violet-500/10 flex items-center justify-center shadow-inner border border-violet-500/20">
-            <svg class="h-8 w-8 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.077-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
-            </svg>
-          </div>
-        </div>
-        <h2 class="text-2xl font-bold text-white mb-3">Atelier Cosmétique</h2>
-        <p class="text-slate-400 mb-8 leading-relaxed">Nous peaufinons les derniers détails de l'atelier de personnalisation. Bientôt, vous pourrez exprimer votre style unique avec des cadres, thèmes et bannières exclusifs.</p>
-        
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <button id="notifyMeBtn" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium shadow-lg shadow-violet-900/20 transition-all active:scale-95">
-            Me prévenir du lancement
-          </button>
-          <a href="/" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium border border-slate-700 transition-colors">
-            Retour au tableau de bord
-          </a>
-        </div>
-      </div>
-    </div>
-
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl">
       <div>
-        <h1 class="text-2xl font-bold text-white">Cosmétiques</h1>
-        <p class="text-sm text-slate-400 mt-1">Personnalisez votre apparence sur Plinkk.</p>
+        <h1 class="text-2xl font-bold text-white">Apparence du Profil</h1>
+        <p class="text-sm text-slate-400 mt-1">Personnalisez les couleurs et effets de votre carte utilisateur.</p>
       </div>
-      <button id="resetBtn" class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">
-        Réinitialiser
-      </button>
+      <div class="flex gap-3">
+        <button id="resetBtn" class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">
+          Réinitialiser
+        </button>
+        <button id="saveBtn" class="px-6 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-all hover:scale-105 active:scale-95">
+          Enregistrer
+        </button>
+      </div>
     </div>
 
-    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-      <!-- Preview Column -->
-      <div class="xl:col-span-4 xl:order-2 space-y-6">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg sticky top-6">
-          <h2 class="text-lg font-semibold text-white mb-4">Aperçu en direct</h2>
-          
-          <!-- Card Preview -->
-          <div id="preview" class="relative overflow-hidden rounded-2xl bg-slate-950 border border-slate-800 transition-all duration-300 group">
-            <!-- Banner -->
-            <div id="banner" class="h-24 w-full bg-slate-900 relative overflow-hidden">
-              <div class="absolute inset-0 flex items-center justify-center text-xs text-slate-600 font-medium uppercase tracking-wider">Bannière</div>
-            </div>
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+      
+      <!-- Preview Column (Sticky) -->
+      <div class="xl:col-span-5 xl:order-2">
+        <div class="sticky top-6 space-y-6">
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl">
+            <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Aperçu en direct</h2>
             
-            <div class="px-5 pb-5">
-              <div class="relative flex justify-between items-end -mt-10 mb-3">
-                <!-- Avatar -->
-                <div class="relative">
-                  <div id="avatar" class="h-20 w-20 rounded-2xl bg-slate-900 p-1 ring-4 ring-slate-950 relative z-10" data-avatar>
-                    <div class="h-full w-full rounded-xl overflow-hidden bg-slate-800 relative">
-                      <%- include('../../partials/avatar.ejs', { user: user }) %>
-                      <!-- Frame Overlay -->
-                      <div id="frame" class="absolute inset-0 pointer-events-none z-20"></div>
+            <!-- Profile Card Preview -->
+            <div id="previewCard" class="relative w-full aspect-[4/5] sm:aspect-[16/9] xl:aspect-[4/5] rounded-3xl overflow-hidden bg-slate-950 transition-all duration-500 group">
+              
+              <!-- Animated Background Layer -->
+              <div id="previewBg" class="absolute inset-0 transition-all duration-500"></div>
+              
+              <!-- Overlay Effects (Snow, Sparkles, etc.) -->
+              <div id="previewEffect" class="absolute inset-0 pointer-events-none z-10"></div>
+
+              <!-- Content Container -->
+              <div class="absolute inset-0 flex flex-col z-20">
+                <!-- Banner -->
+                <div id="previewBanner" class="h-32 w-full bg-slate-900/50 relative overflow-hidden transition-all duration-300">
+                  <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950/80"></div>
+                </div>
+
+                <!-- User Info -->
+                <div class="flex-1 px-6 pb-6 flex flex-col justify-end relative">
+                  <!-- Avatar -->
+                  <div class="absolute top-0 -translate-y-1/2 left-6">
+                    <div class="relative h-24 w-24">
+                      <div class="absolute inset-0 rounded-2xl bg-slate-950 rotate-3 opacity-50"></div>
+                      <div class="relative h-full w-full rounded-2xl bg-slate-900 p-1 ring-4 ring-slate-950 overflow-hidden">
+                        <%- include('../../partials/avatar.ejs', { user: user, className: "w-full h-full object-cover rounded-xl" }) %>
+                        <!-- Frame -->
+                        <div id="previewFrame" class="absolute inset-0 pointer-events-none z-30"></div>
+                      </div>
+                      <!-- Status Indicator (Fake) -->
+                      <div class="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-emerald-500 ring-4 ring-slate-950 z-40"></div>
                     </div>
                   </div>
+
+                  <div class="mt-14 space-y-1">
+                    <div class="flex items-center gap-2">
+                      <h3 class="text-2xl font-bold text-white drop-shadow-md"><%= user.userName %></h3>
+                      <span id="previewFlair" class="hidden px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 text-white border border-white/20 backdrop-blur-sm"></span>
+                    </div>
+                    <p class="text-slate-300 font-medium drop-shadow-sm">@<%= user.id %></p>
+                    
+                    <!-- Badges Row -->
+                    <div class="flex gap-2 pt-2">
+                      <div class="h-6 w-6 rounded bg-slate-800/50 border border-white/10" title="Badge"></div>
+                      <div class="h-6 w-6 rounded bg-slate-800/50 border border-white/10" title="Badge"></div>
+                    </div>
+                  </div>
+
+                  <!-- Bio Box -->
+                  <div class="mt-6 p-4 rounded-2xl bg-slate-950/40 backdrop-blur-md border border-white/5 text-sm text-slate-300 leading-relaxed">
+                    Ceci est un exemple de votre biographie. Personnalisez votre profil pour le rendre unique !
+                  </div>
                 </div>
-                
-                <!-- Flair Badge -->
-                <span id="flairBadge" class="hidden mb-1 px-2.5 py-1 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400 text-[10px] font-bold uppercase tracking-wider">
-                  BETA
-                </span>
-              </div>
-              
-              <div>
-                <h3 class="text-lg font-bold text-white leading-tight"><%= user.userName %></h3>
-                <p class="text-sm text-slate-500 font-medium">@<%= user.id %></p>
               </div>
             </div>
-          </div>
 
-          <div class="mt-6 p-4 rounded-xl bg-slate-950/50 border border-slate-800/50">
-            <div class="flex items-center gap-3 text-sm text-slate-400">
-              <svg class="size-5 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-              <p>Les modifications sont appliquées instantanément à l'aperçu.</p>
+            <div class="mt-4 flex justify-center gap-2">
+              <div class="h-1.5 w-1.5 rounded-full bg-slate-700"></div>
+              <div class="h-1.5 w-1.5 rounded-full bg-slate-700"></div>
+              <div class="h-1.5 w-1.5 rounded-full bg-slate-700"></div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Controls Column -->
-      <div class="xl:col-span-8 xl:order-1 space-y-6">
-        <form id="formCosmetics" class="space-y-6">
+      <div class="xl:col-span-7 xl:order-1 space-y-8">
+        
+        <!-- Tabs Navigation -->
+        <div class="flex gap-2 overflow-x-auto pb-2 border-b border-slate-800">
+          <button type="button" class="tab-btn active px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap" data-tab="theme">Thème & Couleurs</button>
+          <button type="button" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap" data-tab="decoration">Décorations</button>
+          <button type="button" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap" data-tab="banner">Bannière</button>
+        </div>
+
+        <!-- Tab: Theme -->
+        <div id="tab-theme" class="tab-content space-y-8 animate-fade-in">
           
-          <!-- Flair Section -->
-          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="p-2 rounded-lg bg-violet-500/10 text-violet-400">
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <!-- Colors -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-white">Couleurs du Profil</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                <label class="block text-xs font-medium text-slate-400 mb-2">Couleur Primaire</label>
+                <div class="flex items-center gap-3">
+                  <input type="color" id="primaryColor" class="h-10 w-10 rounded-lg cursor-pointer bg-transparent border-0 p-0" value="#4c1d95">
+                  <input type="text" id="primaryColorText" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white font-mono" value="#4c1d95">
+                </div>
               </div>
-              <h2 class="text-lg font-semibold text-white">Flair</h2>
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                <label class="block text-xs font-medium text-slate-400 mb-2">Couleur Secondaire</label>
+                <div class="flex items-center gap-3">
+                  <input type="color" id="accentColor" class="h-10 w-10 rounded-lg cursor-pointer bg-transparent border-0 p-0" value="#0f172a">
+                  <input type="text" id="accentColorText" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white font-mono" value="#0f172a">
+                </div>
+              </div>
             </div>
-            <p class="text-sm text-slate-400 bg-slate-950/50 p-4 rounded-xl border border-slate-800">
-              Les flairs sont des badges spéciaux attribués par l'équipe Plinkk ou obtenus lors d'événements. Si vous en possédez un, il s'affichera automatiquement à côté de votre nom.
-            </p>
           </div>
 
-          <!-- Frames Section -->
-          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg">
-            <div class="flex items-center gap-3 mb-6">
-              <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="12" cy="12" r="5"/></svg>
-              </div>
-              <h2 class="text-lg font-semibold text-white">Cadre d'avatar</h2>
+          <!-- Gradient Style -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-white">Style du Dégradé</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <button type="button" class="gradient-opt p-3 rounded-xl border border-slate-800 bg-slate-900 hover:border-violet-500 transition-all text-center" data-val="linear">
+                <div class="h-10 w-full rounded-lg bg-gradient-to-r from-violet-600 to-slate-900 mb-2"></div>
+                <span class="text-xs text-slate-300">Linéaire</span>
+              </button>
+              <button type="button" class="gradient-opt p-3 rounded-xl border border-slate-800 bg-slate-900 hover:border-violet-500 transition-all text-center" data-val="radial">
+                <div class="h-10 w-full rounded-lg bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-violet-600 to-slate-900 mb-2"></div>
+                <span class="text-xs text-slate-300">Radial</span>
+              </button>
+              <button type="button" class="gradient-opt p-3 rounded-xl border border-slate-800 bg-slate-900 hover:border-violet-500 transition-all text-center" data-val="animated">
+                <div class="h-10 w-full rounded-lg bg-gradient-to-r from-violet-600 via-fuchsia-500 to-violet-600 bg-[length:200%_100%] animate-gradient-x mb-2"></div>
+                <span class="text-xs text-slate-300">Animé</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Effects -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-white">Effets Visuels</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <button type="button" class="effect-opt p-4 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 transition-all text-left" data-val="none">
+                <span class="block text-sm font-medium text-white">Aucun</span>
+              </button>
+              <button type="button" class="effect-opt p-4 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 transition-all text-left" data-val="sparkles">
+                <span class="block text-sm font-medium text-white">✨ Paillettes</span>
+              </button>
+              <button type="button" class="effect-opt p-4 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 transition-all text-left" data-val="noise">
+                <span class="block text-sm font-medium text-white">📺 Grain</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Decoration -->
+        <div id="tab-decoration" class="tab-content hidden space-y-8 animate-fade-in">
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-white">Cadre d'Avatar</h3>
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-4">
+              <% catalog.frames.forEach(fr => { %>
+                <button type="button" class="frame-opt group relative aspect-square rounded-2xl border border-slate-800 bg-slate-900 hover:border-violet-500 transition-all flex flex-col items-center justify-center gap-2" data-val="<%= fr.key %>">
+                  <div class="h-12 w-12 rounded-full bg-slate-800 relative">
+                    <!-- Frame Preview Logic -->
+                    <div class="absolute inset-0 rounded-full border-2 border-transparent group-hover:border-violet-500/50 transition-colors"></div>
+                  </div>
+                  <span class="text-xs text-slate-400 group-hover:text-white"><%= fr.label %></span>
+                </button>
+              <% }) %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Banner -->
+        <div id="tab-banner" class="tab-content hidden space-y-8 animate-fade-in">
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-white">Type de Bannière</h3>
+            <div class="space-y-4">
+              <input type="url" id="bannerUrlInput" placeholder="https://exemple.com/image.gif" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all">
+              <p class="text-xs text-slate-500">Supporte les images, GIFs et vidéos MP4.</p>
             </div>
             
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" role="listbox">
-              <% catalog.frames.forEach(fr => { %>
-                <button type="button" data-type="frame" data-value="<%= fr.key %>"
-                  class="group relative flex flex-col items-center gap-3 p-4 rounded-2xl border border-slate-800 bg-slate-950/50 hover:bg-slate-800 hover:border-slate-700 transition-all text-center">
-                  <div class="h-16 w-16 rounded-xl bg-slate-900 border border-slate-800 group-hover:border-slate-600 transition-colors relative overflow-hidden">
-                    <!-- Preview of frame style here if possible, or just placeholder -->
-                    <div class="absolute inset-0 flex items-center justify-center text-xs text-slate-600">Aperçu</div>
+            <h4 class="text-sm font-medium text-slate-400 mt-6 mb-3">Prédéfinis</h4>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <% catalog.banners.forEach(b => { %>
+                <button type="button" class="banner-opt h-20 rounded-xl bg-slate-900 border border-slate-800 hover:border-violet-500 overflow-hidden relative" data-val="<%= b.key %>">
+                  <div class="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/20 transition-colors">
+                    <span class="text-xs font-medium text-white"><%= b.label %></span>
                   </div>
-                  <span class="text-sm font-medium text-slate-300 group-hover:text-white"><%= fr.label %></span>
-                  <div class="absolute inset-0 rounded-2xl ring-2 ring-violet-500 opacity-0 scale-95 transition-all ui-selected:opacity-100 ui-selected:scale-100"></div>
                 </button>
               <% }) %>
             </div>
           </div>
+        </div>
 
-          <!-- Themes Section -->
-          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg">
-            <div class="flex items-center gap-3 mb-6">
-              <div class="p-2 rounded-lg bg-fuchsia-500/10 text-fuchsia-400">
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-              </div>
-              <h2 class="text-lg font-semibold text-white">Thème de carte</h2>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4" role="listbox">
-              <% catalog.themes.forEach(th => { %>
-                <button type="button" data-type="theme" data-value="<%= th.key %>"
-                  class="group relative p-4 rounded-2xl border border-slate-800 bg-slate-950/50 hover:bg-slate-800 hover:border-slate-700 transition-all text-left">
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-slate-300 group-hover:text-white"><%= th.label %></span>
-                    <div class="h-4 w-4 rounded-full border border-slate-700 bg-slate-900 ui-selected:bg-violet-500 ui-selected:border-violet-500"></div>
-                  </div>
-                  <div class="h-2 w-2/3 rounded-full bg-slate-800 mb-2"></div>
-                  <div class="h-2 w-1/2 rounded-full bg-slate-800/60"></div>
-                </button>
-              <% }) %>
-            </div>
-          </div>
-
-          <!-- Banners Section -->
-          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg">
-            <div class="flex items-center gap-3 mb-6">
-              <div class="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
-                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-              </div>
-              <h2 class="text-lg font-semibold text-white">Bannière</h2>
-            </div>
-
-            <div class="space-y-6">
-              <div>
-                <label class="block text-sm font-medium text-slate-300 mb-3">Bannières prédéfinies</label>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4" role="listbox">
-                  <% catalog.banners.forEach(b => { %>
-                    <button type="button" data-type="banner" data-value="<%= b.key %>"
-                      class="group relative h-20 rounded-xl border border-slate-800 bg-slate-950 overflow-hidden hover:border-slate-600 transition-all">
-                      <div class="absolute inset-0 flex items-center justify-center bg-slate-900/50 group-hover:bg-slate-900/30 transition-colors">
-                        <span class="text-xs font-medium text-white drop-shadow-md"><%= b.label %></span>
-                      </div>
-                      <!-- We could add inline styles here based on key to show preview -->
-                    </button>
-                  <% }) %>
-                </div>
-              </div>
-
-              <div class="pt-6 border-t border-slate-800">
-                <label class="block text-sm font-medium text-slate-300 mb-3">Ou URL personnalisée</label>
-                <div class="flex gap-3">
-                  <div class="relative flex-1">
-                    <input id="bannerUrl" type="url" placeholder="https://..." 
-                      class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none placeholder-slate-600" />
-                  </div>
-                  <button type="button" id="clearBannerUrl" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors" title="Effacer">
-                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                  </button>
-                </div>
-                <p class="text-xs text-slate-500 mt-2">L'URL personnalisée est prioritaire sur la sélection prédéfinie.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex items-center justify-end gap-4 pt-4">
-            <button type="button" id="starterPack" class="px-6 py-3 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
-              Appliquer Starter Pack
-            </button>
-            <button type="button" id="saveBtn" class="px-8 py-3 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-all hover:scale-105 active:scale-95">
-              Enregistrer les modifications
-            </button>
-          </div>
-
-        </form>
       </div>
     </div>
 
-    <!-- Hidden Data -->
-    <div id="initialCosmetics" class="hidden"
-         data-flair="<%= (cosmetics && cosmetics.selected && cosmetics.selected.flair) ? String(cosmetics.selected.flair) : '' %>"
-         data-frame="<%= (cosmetics && cosmetics.selected && cosmetics.selected.frame) ? String(cosmetics.selected.frame) : 'none' %>"
-         data-theme="<%= (cosmetics && cosmetics.selected && cosmetics.selected.theme) ? String(cosmetics.selected.theme) : 'system' %>"
-         data-banner="<%= (cosmetics && cosmetics.selected && cosmetics.selected.banner) ? String(cosmetics.selected.banner) : 'none' %>"
-         data-banner-url="<%= (cosmetics && cosmetics.selected && cosmetics.selected.bannerUrl) ? String(cosmetics.selected.bannerUrl) : '' %>"></div>
-    <script id="catalogData" type="application/json"><%- JSON.stringify(catalog) %></script>
+    <!-- Initial Data Store -->
+    <% 
+      const data = (cosmetics && cosmetics.data) ? cosmetics.data : {};
+      const initial = {
+        primaryColor: data.primaryColor || '#4c1d95',
+        accentColor: data.accentColor || '#0f172a',
+        gradientType: data.gradientType || 'linear',
+        effect: data.effect || 'none',
+        frame: cosmetics.frame || 'none',
+        bannerUrl: cosmetics.bannerUrl || '',
+        banner: cosmetics.banner || 'none',
+        flair: cosmetics.flair || null
+      };
+    %>
+    <script id="initialData" type="application/json"><%- JSON.stringify(initial) %></script>
 
   </main>
 </div>
 
-<script>
-  const CATALOG = JSON.parse(document.getElementById('catalogData')?.textContent || '{}');
-
-  const initEl = document.getElementById('initialCosmetics');
-  const saved = {
-    flair: (initEl?.dataset.flair || '') || null,
-    frame: initEl?.dataset.frame || 'none',
-    theme: initEl?.dataset.theme || 'system',
-    banner: initEl?.dataset.banner || 'none',
-    bannerUrl: initEl?.dataset.bannerUrl || '',
-  };
-  const state = { ...saved };
-
-  function flairLabel(key) {
-    const f = (CATALOG?.flairs || []).find(x => String(x.key).toUpperCase() === String(key || '').toUpperCase());
-    return f?.label || key || '';
+<style>
+  .tab-btn.active { background-color: #7c3aed; color: white; }
+  .tab-btn:not(.active) { background-color: transparent; color: #94a3b8; }
+  .tab-btn:not(.active):hover { background-color: #1e293b; color: #e2e8f0; }
+  
+  @keyframes gradient-x {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
+  .animate-gradient-x { animation: gradient-x 3s ease infinite; }
+  
+  .effect-sparkles { background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 0L12 8L20 10L12 12L10 20L8 12L0 10L8 8L10 0Z' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E"); }
+  .effect-noise { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E"); }
+</style>
 
-  function applyPreview(){
-    // Flair
-    const flairBadge = document.getElementById('flairBadge');
-    const showFlair = state.flair && String(state.flair).trim() !== '';
-    if (showFlair) { 
-      flairBadge.textContent = flairLabel(state.flair); 
-      flairBadge.classList.remove('hidden'); 
-    } else { 
-      flairBadge.classList.add('hidden'); 
-      flairBadge.textContent=''; 
+<script>
+  const initial = JSON.parse(document.getElementById('initialData').textContent);
+  const state = { ...initial };
+
+  // Elements
+  const els = {
+    previewBg: document.getElementById('previewBg'),
+    previewEffect: document.getElementById('previewEffect'),
+    previewFrame: document.getElementById('previewFrame'),
+    previewBanner: document.getElementById('previewBanner'),
+    primaryColor: document.getElementById('primaryColor'),
+    primaryColorText: document.getElementById('primaryColorText'),
+    accentColor: document.getElementById('accentColor'),
+    accentColorText: document.getElementById('accentColorText'),
+    bannerUrlInput: document.getElementById('bannerUrlInput'),
+  };
+
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${btn.dataset.tab}`).classList.remove('hidden');
+    });
+  });
+
+  // Render Preview
+  function render() {
+    // Background Gradient
+    let bgStyle = '';
+    if (state.gradientType === 'linear') {
+      bgStyle = `background: linear-gradient(135deg, ${state.primaryColor}, ${state.accentColor})`;
+    } else if (state.gradientType === 'radial') {
+      bgStyle = `background: radial-gradient(circle at center, ${state.primaryColor}, ${state.accentColor})`;
+    } else if (state.gradientType === 'animated') {
+      bgStyle = `background: linear-gradient(270deg, ${state.primaryColor}, ${state.accentColor}, ${state.primaryColor}); background-size: 200% 200%; animation: gradient-x 3s ease infinite;`;
     }
+    els.previewBg.style = bgStyle;
+
+    // Effects
+    els.previewEffect.className = 'absolute inset-0 pointer-events-none z-10';
+    if (state.effect === 'sparkles') els.previewEffect.classList.add('effect-sparkles');
+    if (state.effect === 'noise') els.previewEffect.classList.add('effect-noise');
 
     // Frame
-    const frame = document.getElementById('frame');
-    frame.className = 'absolute inset-0 pointer-events-none z-20 rounded-xl'; // Reset classes
-    frame.style.boxShadow = 'none';
-    
-    // Simple CSS shadows for demo frames - in real app use classes or images
-    switch(state.frame){
-      case 'neon': frame.style.boxShadow = '0 0 0 2px rgba(139,92,246,0.8), 0 0 15px rgba(139,92,246,0.6), inset 0 0 10px rgba(139,92,246,0.4)'; break;
-      case 'glow': frame.style.boxShadow = '0 0 0 2px rgba(16,185,129,0.8), 0 0 15px rgba(16,185,129,0.6)'; break;
-      case 'gold': frame.style.boxShadow = '0 0 0 2px rgba(234,179,8,0.8), 0 0 15px rgba(234,179,8,0.4)'; break;
-      default: frame.style.boxShadow = 'none';
-    }
-
-    // Theme (Card Border/Glow)
-    const preview = document.getElementById('preview');
-    preview.style.borderColor = '';
-    preview.style.boxShadow = '';
-    
-    switch(state.theme){
-      case 'dark-emerald': 
-        preview.style.borderColor = 'rgba(16,185,129,0.5)'; 
-        preview.style.boxShadow = '0 0 20px rgba(16,185,129,0.1)';
-        break;
-      case 'midnight': 
-        preview.style.borderColor = 'rgba(139,92,246,0.5)'; 
-        preview.style.boxShadow = '0 0 20px rgba(139,92,246,0.1)';
-        break;
-      case 'plasma': 
-        preview.style.borderColor = 'rgba(244,63,94,0.5)'; 
-        preview.style.boxShadow = '0 0 20px rgba(244,63,94,0.1)';
-        break;
-      default: 
-        preview.style.borderColor = '';
-        preview.style.boxShadow = '';
-    }
+    els.previewFrame.style = '';
+    if (state.frame === 'neon') els.previewFrame.style = 'box-shadow: 0 0 0 2px rgba(139,92,246,0.8), 0 0 15px rgba(139,92,246,0.6), inset 0 0 10px rgba(139,92,246,0.4); border-radius: 12px;';
+    else if (state.frame === 'glow') els.previewFrame.style = 'box-shadow: 0 0 0 2px rgba(16,185,129,0.8), 0 0 15px rgba(16,185,129,0.6); border-radius: 12px;';
+    else if (state.frame === 'gold') els.previewFrame.style = 'box-shadow: 0 0 0 2px rgba(234,179,8,0.8), 0 0 15px rgba(234,179,8,0.4); border-radius: 12px;';
 
     // Banner
-    const banner = document.getElementById('banner');
-    banner.style.background = '';
-    banner.style.backgroundImage = '';
-    banner.innerHTML = ''; // Clear text if image
-    
     if (state.bannerUrl) {
-      banner.style.background = `center/cover no-repeat url(${state.bannerUrl})`;
+      els.previewBanner.style.backgroundImage = `url('${state.bannerUrl}')`;
+      els.previewBanner.style.backgroundSize = 'cover';
+      els.previewBanner.style.backgroundPosition = 'center';
     } else if (state.banner !== 'none') {
-      // Simulate banner styles
-      if (state.banner === 'gradient-emerald') banner.style.background = 'linear-gradient(135deg, #064e3b, #10b981)';
-      else if (state.banner === 'gradient-fuchsia') banner.style.background = 'linear-gradient(135deg, #701a75, #d946ef)';
-      else if (state.banner === 'cosmos') banner.style.background = 'linear-gradient(to right, #0f172a, #312e81)';
-      else banner.style.background = '#1e293b'; // Default fallback
+      // Presets
+      if (state.banner === 'gradient-emerald') els.previewBanner.style.background = 'linear-gradient(135deg, #064e3b, #10b981)';
+      else if (state.banner === 'gradient-fuchsia') els.previewBanner.style.background = 'linear-gradient(135deg, #701a75, #d946ef)';
+      else els.previewBanner.style.background = '#1e293b';
     } else {
-      banner.innerHTML = '<div class="absolute inset-0 flex items-center justify-center text-xs text-slate-600 font-medium uppercase tracking-wider">Bannière</div>';
-      banner.style.background = '#0f172a';
+      els.previewBanner.style.background = '';
+      els.previewBanner.classList.add('bg-slate-900/50');
     }
 
-    updateActiveButtons('frame', state.frame);
-    updateActiveButtons('theme', state.theme);
-    updateActiveButtons('banner', state.banner);
-  }
+    // Update Inputs
+    els.primaryColor.value = state.primaryColor;
+    els.primaryColorText.value = state.primaryColor;
+    els.accentColor.value = state.accentColor;
+    els.accentColorText.value = state.accentColor;
+    els.bannerUrlInput.value = state.bannerUrl;
 
-  function updateActiveButtons(type, value){
-    document.querySelectorAll(`[data-type="${type}"]`).forEach(btn => {
-      const v = btn.getAttribute('data-value');
-      const isActive = String(v) === String(value);
-      
-      // Reset classes
-      if (type === 'banner') {
-        btn.classList.toggle('ring-2', isActive);
-        btn.classList.toggle('ring-violet-500', isActive);
-        btn.classList.toggle('border-violet-500', isActive);
-        btn.classList.toggle('border-slate-800', !isActive);
+    // Update Active States
+    document.querySelectorAll('[data-val]').forEach(btn => {
+      const type = btn.classList.contains('gradient-opt') ? 'gradientType' : 
+                   btn.classList.contains('effect-opt') ? 'effect' :
+                   btn.classList.contains('frame-opt') ? 'frame' :
+                   btn.classList.contains('banner-opt') ? 'banner' : '';
+      if (type && state[type] === btn.dataset.val) {
+        btn.classList.add('ring-2', 'ring-violet-500', 'border-transparent');
       } else {
-        btn.classList.toggle('ring-2', isActive);
-        btn.classList.toggle('ring-violet-500', isActive);
-        btn.classList.toggle('bg-slate-800', isActive);
-        btn.classList.toggle('bg-slate-950/50', !isActive);
+        btn.classList.remove('ring-2', 'ring-violet-500', 'border-transparent');
       }
     });
   }
 
-  document.querySelectorAll('[data-type]')?.forEach(b => b.addEventListener('click', () => {
-    const t = b.getAttribute('data-type');
-    const v = b.getAttribute('data-value');
-    if (t==='frame') state.frame = v;
-    if (t==='theme') state.theme = v;
-    if (t==='banner') { state.banner = v; }
-    applyPreview();
-  }));
+  // Listeners
+  const updateColor = (key, val) => { state[key] = val; render(); };
+  els.primaryColor.addEventListener('input', e => updateColor('primaryColor', e.target.value));
+  els.primaryColorText.addEventListener('input', e => updateColor('primaryColor', e.target.value));
+  els.accentColor.addEventListener('input', e => updateColor('accentColor', e.target.value));
+  els.accentColorText.addEventListener('input', e => updateColor('accentColor', e.target.value));
+  els.bannerUrlInput.addEventListener('input', e => { state.bannerUrl = e.target.value; render(); });
 
-  document.getElementById('bannerUrl')?.addEventListener('input', (e)=>{
-    state.bannerUrl = e.currentTarget.value;
-    applyPreview();
-  });
-  
-  document.getElementById('clearBannerUrl')?.addEventListener('click', ()=>{
-    const inp = document.getElementById('bannerUrl');
-    if (inp) inp.value = '';
-    state.bannerUrl = '';
-    applyPreview();
-  });
+  document.querySelectorAll('.gradient-opt').forEach(b => b.addEventListener('click', () => { state.gradientType = b.dataset.val; render(); }));
+  document.querySelectorAll('.effect-opt').forEach(b => b.addEventListener('click', () => { state.effect = b.dataset.val; render(); }));
+  document.querySelectorAll('.frame-opt').forEach(b => b.addEventListener('click', () => { state.frame = b.dataset.val; render(); }));
+  document.querySelectorAll('.banner-opt').forEach(b => b.addEventListener('click', () => { state.banner = b.dataset.val; render(); }));
 
-  let saving = false;
-  document.getElementById('saveBtn')?.addEventListener('click', async ()=>{
-    if (saving) return; saving = true;
+  // Save
+  document.getElementById('saveBtn').addEventListener('click', async () => {
     const btn = document.getElementById('saveBtn');
-    const originalText = btn.textContent;
-    if (btn) { btn.textContent = 'Enregistrement...'; btn.disabled = true; btn.classList.add('opacity-70'); }
+    btn.textContent = '...';
     try {
-      const payload = { frame: state.frame, theme: state.theme, banner: state.banner, bannerUrl: state.bannerUrl };
-      const res = await fetch('/api/me/cosmetics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      if (!res.ok) {
-        const j = await res.json().catch(()=>({error:'Erreur'}));
-        alert(j.error || 'Erreur lors de la sauvegarde');
+      const payload = {
+        frame: state.frame,
+        banner: state.banner,
+        bannerUrl: state.bannerUrl,
+        data: {
+          primaryColor: state.primaryColor,
+          accentColor: state.accentColor,
+          gradientType: state.gradientType,
+          effect: state.effect
+        }
+      };
+      const res = await fetch('/api/me/cosmetics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        if (window.showAlert) window.showAlert('Sauvegardé !', 'success');
+        else alert('Sauvegardé !');
       } else {
-        const j = await res.json();
-        saved.flair = j.cosmetics?.selected?.flair ?? state.flair;
-        saved.frame = j.cosmetics?.selected?.frame ?? state.frame;
-        saved.theme = j.cosmetics?.selected?.theme ?? state.theme;
-        saved.banner = j.cosmetics?.selected?.banner ?? state.banner;
-        saved.bannerUrl = j.cosmetics?.selected?.bannerUrl ?? state.bannerUrl;
-        // alert('Cosmétiques enregistrés'); // Replace with toast if available
-        if (window.showAlert) window.showAlert('Cosmétiques enregistrés', 'success');
-        else alert('Cosmétiques enregistrés');
+        alert('Erreur');
       }
     } catch (e) {
       alert('Erreur réseau');
-    } finally {
-      saving = false;
-      if (btn) { btn.textContent = originalText; btn.disabled = false; btn.classList.remove('opacity-70'); }
     }
+    btn.textContent = 'Enregistrer';
   });
 
-  document.getElementById('resetBtn')?.addEventListener('click', ()=>{
-    Object.assign(state, saved);
-    const inp = document.getElementById('bannerUrl');
-    if (inp) inp.value = saved.bannerUrl || '';
-    applyPreview();
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    Object.assign(state, initial);
+    render();
   });
 
-  document.getElementById('starterPack')?.addEventListener('click', async ()=>{
-    if(!confirm('Appliquer le Starter Pack ? Cela remplacera votre sélection actuelle.')) return;
-    const res = await fetch('/api/me/cosmetics/starter-pack', { method: 'POST' });
-    if (res.ok) {
-      const j = await res.json();
-      state.flair = j.cosmetics?.selected?.flair || null;
-      state.frame = j.cosmetics?.selected?.frame || 'none';
-      state.theme = j.cosmetics?.selected?.theme || 'system';
-      state.banner = j.cosmetics?.selected?.banner || 'none';
-      state.bannerUrl = j.cosmetics?.selected?.bannerUrl || '';
-      const inp = document.getElementById('bannerUrl');
-      if (inp) inp.value = state.bannerUrl || '';
-      applyPreview();
-      if (window.showAlert) window.showAlert('Starter pack appliqué', 'success');
-      else alert('Starter pack appliqué');
-    } else {
-      alert('Impossible d\'appliquer le starter pack');
-    }
-  });
-
-  applyPreview();
-</script>
-
-<script>
-  (function(){
-    const overlay = document.getElementById('comingSoonOverlay');
-    const btnNotify = document.getElementById('notifyMeBtn');
-
-    // If you want to hide the overlay for development/testing, uncomment:
-    // if (overlay) overlay.style.display = 'none';
-
-    btnNotify?.addEventListener('click', async () => {
-      try {
-        if (btnNotify.disabled) return;
-        btnNotify.disabled = true;
-        btnNotify.textContent = 'Noté — merci !';
-        btnNotify.classList.remove('bg-violet-600', 'hover:bg-violet-500');
-        btnNotify.classList.add('bg-emerald-600', 'text-white', 'cursor-default');
-        
-        // Optional: Send analytics event here
-      } catch (e) {
-        console.error(e);
-      }
-    });
-  })();
+  render();
 </script>

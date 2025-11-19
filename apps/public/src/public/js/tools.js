@@ -19,6 +19,31 @@ export function createProfileContainer(profileData) {
     profileLink.tabIndex = 0;
     const profilePicWrapper = document.createElement("div");
     profilePicWrapper.className = "profile-pic-wrapper";
+
+    // --- Frame Logic (Cosmetics) ---
+    const cosmetics = profileData.cosmetics || {};
+    const frame = cosmetics.frame;
+    if (frame && frame !== 'none') {
+        const frameDiv = document.createElement("div");
+        frameDiv.className = "avatar-frame";
+        frameDiv.style.position = "absolute";
+        frameDiv.style.inset = "-4px"; // Slightly larger than avatar
+        frameDiv.style.borderRadius = "50%";
+        frameDiv.style.pointerEvents = "none";
+        frameDiv.style.zIndex = "10";
+        
+        if (frame === 'neon') {
+            frameDiv.style.boxShadow = "0 0 0 2px rgba(139,92,246,0.8), 0 0 15px rgba(139,92,246,0.6), inset 0 0 10px rgba(139,92,246,0.4)";
+        } else if (frame === 'glow') {
+            frameDiv.style.boxShadow = "0 0 0 2px rgba(16,185,129,0.8), 0 0 15px rgba(16,185,129,0.6)";
+        } else if (frame === 'gold') {
+            frameDiv.style.boxShadow = "0 0 0 2px rgba(234,179,8,0.8), 0 0 15px rgba(234,179,8,0.4)";
+        }
+        profilePicWrapper.style.position = "relative";
+        profilePicWrapper.appendChild(frameDiv);
+    }
+    // -------------------------------
+
     const profilePic = document.createElement("img");
     if (isSafeUrl(profileData.profileImage)) {
         profilePic.src = profileData.profileImage;
@@ -123,6 +148,25 @@ export function createProfileContainer(profileData) {
 export function createUserName(profileData) {
     const userName = document.createElement("h1");
     setSafeText(userName, profileData.userName);
+
+    // --- Flair Logic (Cosmetics) ---
+    const cosmetics = profileData.cosmetics || {};
+    if (cosmetics.flair) {
+        const flairSpan = document.createElement("span");
+        flairSpan.className = "user-flair";
+        flairSpan.textContent = cosmetics.flair;
+        flairSpan.style.fontSize = "0.5em";
+        flairSpan.style.marginLeft = "8px";
+        flairSpan.style.verticalAlign = "middle";
+        flairSpan.style.opacity = "0.8";
+        flairSpan.style.background = "rgba(255,255,255,0.1)";
+        flairSpan.style.padding = "2px 6px";
+        flairSpan.style.borderRadius = "6px";
+        flairSpan.style.border = "1px solid rgba(255,255,255,0.2)";
+        userName.appendChild(flairSpan);
+    }
+    // -------------------------------
+
     if (!profileData.userName.trim()) {
         userName.style.display = "none";
     }

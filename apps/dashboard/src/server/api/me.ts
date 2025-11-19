@@ -301,30 +301,32 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/cosmetics", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const body = (request.body as { bannerUrl: string, banner: string, frame: string, theme: string });
-    const u = await prisma.user.findUnique({
-      where: { id: userId as string },
-      select: { cosmetics: true },
+    const body = (request.body as { 
+      bannerUrl?: string, 
+      banner?: string, 
+      frame?: string, 
+      theme?: string,
+      data?: any 
     });
-    const cosmetics = u?.cosmetics;
+    
     const updated = await prisma.user.update({
       where: { id: userId as string },
       data: {
         cosmetics: {
           upsert: {
             create: {
-              flair: null,
-              bannerUrl: body.bannerUrl ?? cosmetics.bannerUrl ?? null,
-              banner: body.banner ?? cosmetics.banner ?? null,
-              frame: body.frame ?? cosmetics.frame ?? null,
-              theme: body.theme ?? cosmetics.theme ?? null,
+              bannerUrl: body.bannerUrl ?? "",
+              banner: body.banner ?? "",
+              frame: body.frame ?? "none",
+              theme: body.theme ?? "system",
+              data: body.data ?? {},
             },
             update: {
-              flair: null,
-              bannerUrl: body.bannerUrl ?? cosmetics.bannerUrl ?? null,
-              banner: body.banner ?? cosmetics.banner ?? null,
-              frame: body.frame ?? cosmetics.frame ?? null,
-              theme: body.theme ?? cosmetics.theme ?? null,
+              bannerUrl: body.bannerUrl,
+              banner: body.banner,
+              frame: body.frame,
+              theme: body.theme,
+              data: body.data,
             },
           },
         },

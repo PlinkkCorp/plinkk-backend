@@ -478,6 +478,14 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     });
   });
 
+  fastify.get("/settings", async function (request, reply) {
+    return reply.redirect("/account");
+  });
+
+  fastify.get("/appearance", async function (request, reply) {
+    return reply.redirect("/cosmetics");
+  });
+
   fastify.get("/account", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) {

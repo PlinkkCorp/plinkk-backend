@@ -448,7 +448,15 @@ fastify.get("/users", async (request, reply) => {
     : null;
   const plinkks = await prisma.plinkk.findMany({
     where: { isPublic: true },
-    include: { settings: true },
+    include: {
+      settings: true,
+      user: {
+        include: {
+          cosmetics: true,
+          role: true,
+        },
+      },
+    },
     orderBy: { createdAt: "asc" },
   });
   let msgs: Announcement[] = [];
