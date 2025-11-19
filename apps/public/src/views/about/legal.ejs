@@ -1,42 +1,84 @@
 <%- include('../partials/head', { title: 'Mentions légales', description: 'Mentions légales de Plinkk.' }) %>
 <%- include('../partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
-<main class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-10">
-  <article class="glass ring-gradient rounded-2xl p-6 prose prose-invert max-w-none">
-    <h1 class="mb-2">Mentions légales</h1>
-    <p class="text-slate-300 !mt-0">Dernière mise à jour : <time datetime="2025-09-29">29 septembre 2025</time></p>
 
-    <nav aria-label="Liens utiles" class="not-prose mt-4">
-      <ul class="flex flex-wrap gap-3 text-sm text-slate-300">
-        <li><a class="underline hover:text-white" href="/privacy">Confidentialité</a></li>
-        <li><a class="underline hover:text-white" href="/cookies">Cookies</a></li>
-        <li><a class="underline hover:text-white" href="/terms">Conditions</a></li>
-      </ul>
-    </nav>
+<main class="relative isolate overflow-hidden min-h-screen">
+  <!-- Background Effects -->
+  <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div class="absolute left-[50%] top-0 -translate-x-1/2 blur-3xl opacity-20" aria-hidden="true">
+      <div class="aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc]" style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"></div>
+    </div>
+  </div>
 
-    <hr class="my-4 border-slate-800/60" />
+  <div class="mx-auto max-w-4xl px-6 py-24 sm:py-32">
+    
+    <div class="text-center mb-16 animate-slide-up">
+      <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl">Mentions légales</h1>
+      <div class="mt-4 flex items-center justify-center gap-2 text-slate-400">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <span>Dernière mise à jour : <time datetime="2025-09-29" class="text-slate-200 font-medium">29 septembre 2025</time></span>
+      </div>
+    </div>
 
-    <h2 id="editeur">Éditeur du site</h2>
-    <p><strong>Plinkk</strong> — Klaynight (Elouan Passereau)<br>
-    Site : <a href="https://klaynight.fr" rel="external">klaynight.fr</a><br>
-  Contact : <%- include('../partials/contact-email') %></p>
+    <div class="bg-slate-900/40 backdrop-blur-md rounded-3xl border border-white/5 p-8 sm:p-12 shadow-2xl animate-slide-up" style="animation-delay: 100ms;">
+      
+      <!-- Navigation -->
+      <nav class="flex flex-wrap gap-2 mb-12 border-b border-white/5 pb-8">
+        <a href="/terms" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">Conditions d'utilisation</a>
+        <a href="/privacy" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">Confidentialité</a>
+        <a href="/cookies" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">Cookies</a>
+        <a href="/legal" class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-white/10">Mentions légales</a>
+      </nav>
 
-    <h2 id="hebergeur">Hébergeur</h2>
-    <p>Contabo GmbH — Détails disponibles sur <a href="https://contabo.com" rel="external">contabo.com</a>.</p>
+      <div class="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-a:text-violet-400 prose-a:no-underline hover:prose-a:text-violet-300 prose-strong:text-white prose-li:text-slate-300">
+        
+        <h2 id="editeur" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">1</span>
+          Éditeur du site
+        </h2>
+        <p>
+          <strong>Plinkk</strong> — Klaynight (Elouan Passereau)<br>
+          Site : <a href="https://klaynight.fr" rel="external" target="_blank">klaynight.fr</a><br>
+          Contact : <%- include('../partials/contact-email', { linkClass: 'text-violet-400 hover:text-violet-300 transition-colors' }) %>
+        </p>
 
-    <h2 id="propriete">Propriété intellectuelle</h2>
-    <p>Les éléments du site (textes, images, logos, icônes) sont protégés. Toute reproduction non autorisée est interdite.</p>
+        <h2 id="hebergeur" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">2</span>
+          Hébergeur
+        </h2>
+        <p>Contabo GmbH — Détails disponibles sur <a href="https://contabo.com" rel="external" target="_blank">contabo.com</a>.</p>
 
-    <h2 id="donnees">Données personnelles</h2>
-    <p>Voir la <a href="/privacy">Politique de confidentialité</a> et la <a href="/cookies">Politique des cookies</a>.</p>
+        <h2 id="propriete" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">3</span>
+          Propriété intellectuelle
+        </h2>
+        <p>Les éléments du site (textes, images, logos, icônes) sont protégés. Toute reproduction non autorisée est interdite.</p>
 
-    <h2 id="responsabilite">Responsabilité</h2>
-    <p>Nous mettons tout en œuvre pour assurer l’exactitude des informations sans garantie. L’usage du site se fait sous votre responsabilité.</p>
+        <h2 id="donnees" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">4</span>
+          Données personnelles
+        </h2>
+        <p>Voir la <a href="/privacy">Politique de confidentialité</a> et la <a href="/cookies">Politique des cookies</a>.</p>
 
-    <h2 id="licence">Licence du code</h2>
-  <p>Le code source est distribué sous licence MIT (voir la <a href="#" class="openLicenseModal">licence</a>).</p>
+        <h2 id="responsabilite" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">5</span>
+          Responsabilité
+        </h2>
+        <p>Nous mettons tout en œuvre pour assurer l’exactitude des informations sans garantie. L’usage du site se fait sous votre responsabilité.</p>
 
-    <h2 id="droit">Droit applicable</h2>
-    <p>Droit français. En cas de litige, compétence des tribunaux du ressort du siège de l’éditeur.</p>
-  </article>
+        <h2 id="licence" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">6</span>
+          Licence du code
+        </h2>
+        <p>Le code source est distribué sous licence MIT (voir la <a href="#" class="openLicenseModal">licence</a>).</p>
+
+        <h2 id="droit" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">7</span>
+          Droit applicable
+        </h2>
+        <p>Droit français. En cas de litige, compétence des tribunaux du ressort du siège de l’éditeur.</p>
+
+      </div>
+    </div>
+  </div>
 </main>
 <%- include('../partials/footer') %>
