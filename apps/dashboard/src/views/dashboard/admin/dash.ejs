@@ -192,10 +192,10 @@
                                                         const others = u.plinkks.filter(p=>!p.isDefault).slice(0, 3);
                                                     %>
                                                         <% if (def) { %>
-                                                            <a href="/<%= u.id %>" target="_blank" class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-violet-900 ring-2 ring-slate-900 text-[10px] text-violet-200 font-bold" title="Par défaut: <%= def.name || def.slug %>">D</a>
+                                                            <a href="<%= frontendUrl %>/<%= u.id %>" target="_blank" class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-violet-900 ring-2 ring-slate-900 text-[10px] text-violet-200 font-bold" title="Par défaut: <%= def.name || def.slug %>">D</a>
                                                         <% } %>
                                                         <% others.forEach(p => { %>
-                                                            <a href="/<%= u.id %>/<%= p.slug %>" target="_blank" class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-800 ring-2 ring-slate-900 text-[10px] text-slate-400" title="<%= p.name || p.slug %>"><%= (p.name||p.slug).charAt(0).toUpperCase() %></a>
+                                                            <a href="<%= frontendUrl %>/<%= u.id %>/<%= p.slug %>" target="_blank" class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-800 ring-2 ring-slate-900 text-[10px] text-slate-400" title="<%= p.name || p.slug %>"><%= (p.name||p.slug).charAt(0).toUpperCase() %></a>
                                                         <% }) %>
                                                         <% if (u.plinkks.length > 4) { %>
                                                             <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-800 ring-2 ring-slate-900 text-[10px] text-slate-400">+<%= u.plinkks.length - 4 %></span>
@@ -911,9 +911,12 @@
 
         um.copy?.addEventListener('click', async ()=>{
             if (!currentLI) return;
-            const fallback = '/' + currentLI.dataset.id;
+            const fallback = "<%= frontendUrl %>" + '/' + currentLI.dataset.id;
             const raw = um.copy.getAttribute('data-url') || fallback;
-            const url = (window.location && window.location.origin ? window.location.origin : '') + raw;
+            let url = raw;
+            if (!raw.startsWith('http')) {
+                 url = (window.location && window.location.origin ? window.location.origin : '') + raw;
+            }
             try { await navigator.clipboard?.writeText(url); showToast('Lien copié'); } catch(e){ showToast('Copie échouée'); }
         });
 

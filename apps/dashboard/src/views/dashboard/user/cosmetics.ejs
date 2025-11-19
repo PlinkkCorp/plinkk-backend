@@ -218,6 +218,44 @@
       </div>
     </div>
 
+    <!-- Toasts Container -->
+    <div id="toasts" class="fixed top-4 right-4 z-50 flex flex-col items-end gap-2 pointer-events-none"></div>
+
+    <script>
+      window.showAlert = function(message, type = 'info', opts = {}) {
+        const container = document.getElementById('toasts');
+        if (!container) return console.log(message);
+        const el = document.createElement('div');
+        el.className = 'pointer-events-auto max-w-sm w-full rounded-xl px-4 py-3 text-sm shadow-lg border flex items-center gap-3 animate-slide-in-right';
+        
+        let bg = 'bg-slate-900 text-white border-slate-800';
+        let icon = '';
+        
+        if (type === 'success') {
+          bg = 'bg-slate-900 text-emerald-400 border-emerald-500/30';
+          icon = '<svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+        } else if (type === 'error') {
+          bg = 'bg-slate-900 text-rose-400 border-rose-500/30';
+          icon = '<svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+        }
+        
+        el.className += ' ' + bg;
+        el.innerHTML = `${icon}<span>${message}</span>`;
+        
+        container.appendChild(el);
+        
+        const timeout = opts.timeout || 3500;
+        const remove = () => { 
+          el.style.opacity = '0'; 
+          el.style.transform = 'translateX(100%)';
+          setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 300); 
+        };
+        el.addEventListener('click', remove);
+        setTimeout(remove, timeout);
+        return el;
+      }
+    </script>
+
     <!-- Initial Data Store -->
     <% 
       const data = (cosmetics && cosmetics.data) ? cosmetics.data : {};
@@ -377,10 +415,12 @@
         if (window.showAlert) window.showAlert('Sauvegardé !', 'success');
         else alert('Sauvegardé !');
       } else {
-        alert('Erreur');
+        if (window.showAlert) window.showAlert('Erreur lors de la sauvegarde', 'error');
+        else alert('Erreur');
       }
     } catch (e) {
-      alert('Erreur réseau');
+      if (window.showAlert) window.showAlert('Erreur réseau', 'error');
+      else alert('Erreur réseau');
     }
     btn.textContent = 'Enregistrer';
   });

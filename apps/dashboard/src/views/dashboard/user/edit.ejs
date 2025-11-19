@@ -7,7 +7,7 @@
         <h2 class="text-lg font-semibold mb-2">Édition indisponible sur mobile</h2>
         <p class="text-sm text-slate-300 mb-4">L'interface d'édition n'est pas accessible depuis un petit écran. Utilisez un ordinateur ou activez le mode « affichage bureau » de votre navigateur pour modifier votre page.</p>
         <div class="flex items-center justify-center gap-2">
-            <a href="<% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>" target="_blank" class="px-3 py-2 rounded bg-emerald-700/80 hover:bg-emerald-600 text-white">Ouvrir la page</a>
+            <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>" target="_blank" class="px-3 py-2 rounded bg-emerald-700/80 hover:bg-emerald-600 text-white">Ouvrir la page</a>
         </div>
     </div>
 </div>
@@ -810,6 +810,7 @@
                             try { pages = JSON.parse(pagesRaw) || []; } catch {}
 
                             const currentId = window.__PLINKK_SELECTED_ID__ || '';
+                            const FRONTEND_URL = "<%= frontendUrl %>";
 
                             function buildList(listEl, isMobile) {
                                 if (!listEl) return;
@@ -822,7 +823,7 @@
                                     left.textContent = p.slug;
                                     const openLink = document.createElement('a');
                                     openLink.textContent = 'Ouvrir';
-                                    openLink.href = `/${p.slug}`;
+                                    openLink.href = `${FRONTEND_URL}/${p.slug}`;
                                     openLink.target = '_blank';
                                     openLink.rel = 'noopener';
                                     openLink.className = 'text-emerald-300 hover:underline ml-2';
@@ -875,14 +876,14 @@
                                     const link = document.getElementById('openCurrentPlinkk');
                                     const btnLabel = document.getElementById('changePlinkkBtnLabel');
                                     if (lbl) { lbl.textContent = current.slug; lbl.classList.remove('hidden'); }
-                                    if (link) { link.href = `/${current.slug}`; link.classList.remove('hidden'); }
+                                    if (link) { link.href = `${FRONTEND_URL}/${current.slug}`; link.classList.remove('hidden'); }
                                     if (btnLabel) { btnLabel.textContent = `${current.slug}`; }
 
                                     const lblM = document.getElementById('currentPlinkkLabelMobile');
                                     const linkM = document.getElementById('openCurrentPlinkkMobile');
                                     const btnLabelM = document.getElementById('changePlinkkBtnLabelMobile');
                                     if (lblM) { lblM.textContent = current.slug; lblM.classList.remove('hidden'); }
-                                    if (linkM) { linkM.href = `/${current.slug}`; linkM.classList.remove('hidden'); }
+                                    if (linkM) { linkM.href = `${FRONTEND_URL}/${current.slug}`; linkM.classList.remove('hidden'); }
                                     if (btnLabelM) { btnLabelM.textContent = `${current.slug}`; }
                                 }
                             }
