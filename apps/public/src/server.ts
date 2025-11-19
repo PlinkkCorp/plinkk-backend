@@ -405,6 +405,18 @@ fastify.get("/", async function (request, reply) {
         include: { role: true },
       })
     : null;
+
+  const [userCount, linkCount, totalViewsResult] = await Promise.all([
+    prisma.user.count(),
+    prisma.link.count(),
+    prisma.plinkk.aggregate({
+      _sum: {
+        views: true,
+      },
+    }),
+  ]);
+  const totalViews = totalViewsResult._sum.views || 0;
+
   let msgs: Announcement[] = [];
   try {
     const now = new Date();
@@ -435,7 +447,11 @@ fastify.get("/", async function (request, reply) {
       msgs = anns.filter((a) => a.global);
     }
   } catch (e) {}
-  return await replyView(reply, "index.ejs", currentUser, {});
+  return await replyView(reply, "index.ejs", currentUser, {
+    userCount,
+    linkCount,
+    totalViews,
+  });
 });
 
 fastify.get("/users", async (request, reply) => {
@@ -522,7 +538,23 @@ fastify.get("/*", async (request, reply) => {
         include: { role: true },
       })
     : null;
-  return await replyView(reply, "index.ejs", currentUser, {});
+
+  const [userCount, linkCount, totalViewsResult] = await Promise.all([
+    prisma.user.count(),
+    prisma.link.count(),
+    prisma.plinkk.aggregate({
+      _sum: {
+        views: true,
+      },
+    }),
+  ]);
+  const totalViews = totalViewsResult._sum.views || 0;
+
+  return await replyView(reply, "index.ejs", currentUser, {
+    userCount,
+    linkCount,
+    totalViews,
+  });
 });
 
 fastify.setNotFoundHandler((request, reply) => {
