@@ -31,55 +31,67 @@
             <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Aperçu en direct</h2>
             
             <!-- Profile Card Preview -->
-            <div id="previewCard" class="relative w-full aspect-[4/5] sm:aspect-[16/9] xl:aspect-[4/5] rounded-3xl overflow-hidden bg-slate-950 transition-all duration-500 group">
-              
-              <!-- Animated Background Layer -->
-              <div id="previewBg" class="absolute inset-0 transition-all duration-500"></div>
-              
-              <!-- Overlay Effects (Snow, Sparkles, etc.) -->
-              <div id="previewEffect" class="absolute inset-0 pointer-events-none z-10"></div>
+            <div class="flex justify-center">
+              <div id="previewCard" class="relative w-full max-w-[320px] rounded-3xl overflow-hidden bg-slate-950 border border-slate-800/50 shadow-2xl group transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-violet-500/20 hover:border-violet-500/50">
+                
+                <!-- Dynamic Background Tint -->
+                <div id="previewBg" class="absolute inset-0 opacity-20 transition-opacity duration-300 group-hover:opacity-40"></div>
+                
+                <!-- Effect Overlay -->
+                <div id="previewEffect" class="absolute inset-0 pointer-events-none z-0 opacity-50"></div>
 
-              <!-- Content Container -->
-              <div class="absolute inset-0 flex flex-col z-20">
-                <!-- Banner -->
-                <div id="previewBanner" class="h-32 w-full bg-slate-900/50 relative overflow-hidden transition-all duration-300">
-                  <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950/80"></div>
-                </div>
+                <!-- Dark Glass Overlay -->
+                <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"></div>
 
-                <!-- User Info -->
-                <div class="flex-1 px-6 pb-6 flex flex-col justify-end relative">
-                  <!-- Avatar -->
-                  <div class="absolute top-0 -translate-y-1/2 left-6">
-                    <div class="relative h-24 w-24">
-                      <div class="absolute inset-0 rounded-2xl bg-slate-950 rotate-3 opacity-50"></div>
-                      <div class="relative h-full w-full rounded-2xl bg-slate-900 p-1 ring-4 ring-slate-950 overflow-hidden">
-                        <%- include('../../partials/avatar.ejs', { user: user, className: "w-full h-full object-cover rounded-xl" }) %>
-                        <!-- Frame -->
-                        <div id="previewFrame" class="absolute inset-0 pointer-events-none z-30"></div>
-                      </div>
-                      <!-- Status Indicator (Fake) -->
-                      <div class="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-emerald-500 ring-4 ring-slate-950 z-40"></div>
+                <!-- Banner (Faded Top) -->
+                <div id="previewBanner" class="absolute inset-x-0 top-0 h-32 bg-cover bg-center opacity-50 transition-transform duration-500 ease-out group-hover:scale-110" style="mask-image: linear-gradient(to bottom, black, transparent); -webkit-mask-image: linear-gradient(to bottom, black, transparent);"></div>
+
+                <!-- Content -->
+                <div class="relative z-10 p-5 flex flex-col">
+                    <!-- Header: Avatar + Role -->
+                    <div class="flex justify-between items-start mb-12">
+                        <!-- Avatar Container -->
+                        <div class="relative h-14 w-14 rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-slate-900 rounded-2xl flex items-center justify-center text-lg font-bold text-slate-400 overflow-hidden ring-2 ring-white/10">
+                                <%- include('../../partials/avatar.ejs', { user: user, className: "w-full h-full object-cover" }) %>
+                            </div>
+                            <!-- Frame Overlay -->
+                            <div id="previewFrame" class="absolute inset-0 pointer-events-none z-20 rounded-2xl"></div>
+                        </div>
+                        
+                        <!-- Role Badge -->
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border bg-white/5 border-white/10 text-slate-300 backdrop-blur-md shadow-sm">
+                            ADMIN
+                        </span>
                     </div>
-                  </div>
 
-                  <div class="mt-14 space-y-1">
-                    <div class="flex items-center gap-2">
-                      <h3 class="text-2xl font-bold text-white drop-shadow-md"><%= user.userName %></h3>
-                      <span id="previewFlair" class="hidden px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 text-white border border-white/20 backdrop-blur-sm"></span>
+                    <!-- User Info -->
+                    <div class="mt-auto pt-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <h3 class="text-lg font-bold text-white tracking-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-slate-400 transition-all truncate">
+                                <%= user.userName %>
+                                <span id="previewFlair" class="hidden ml-2 inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] bg-white/10 text-white/80 align-middle transform -translate-y-0.5 border border-white/10"></span>
+                            </h3>
+                            
+                            <!-- Fake Email -->
+                            <div class="flex-shrink-0 flex items-center gap-1.5 text-[10px] text-slate-400 bg-white/5 rounded-lg px-2 py-1 border border-white/5 max-w-[110px]">
+                                <svg class="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                <span class="truncate">email@exemple.com</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium">@<%= user.id %></p>
                     </div>
-                    <p class="text-slate-300 font-medium drop-shadow-sm">@<%= user.id %></p>
-                    
-                    <!-- Badges Row -->
-                    <div class="flex gap-2 pt-2">
-                      <div class="h-6 w-6 rounded bg-slate-800/50 border border-white/10" title="Badge"></div>
-                      <div class="h-6 w-6 rounded bg-slate-800/50 border border-white/10" title="Badge"></div>
-                    </div>
-                  </div>
 
-                  <!-- Bio Box -->
-                  <div class="mt-6 p-4 rounded-2xl bg-slate-950/40 backdrop-blur-md border border-white/5 text-sm text-slate-300 leading-relaxed">
-                    Ceci est un exemple de votre biographie. Personnalisez votre profil pour le rendre unique !
-                  </div>
+                    <!-- Actions -->
+                    <div class="mt-4 flex items-center gap-2">
+                        <button class="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white text-slate-950 text-xs font-bold hover:bg-slate-200 transition-colors shadow-lg shadow-white/5">
+                            <span>Voir</span>
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </button>
+                        <button class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/10 transition-colors backdrop-blur-md">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        </button>
+                    </div>
                 </div>
               </div>
             </div>
@@ -300,10 +312,10 @@
       // Presets
       if (state.banner === 'gradient-emerald') els.previewBanner.style.background = 'linear-gradient(135deg, #064e3b, #10b981)';
       else if (state.banner === 'gradient-fuchsia') els.previewBanner.style.background = 'linear-gradient(135deg, #701a75, #d946ef)';
+      else if (state.banner === 'cosmos') els.previewBanner.style.background = 'linear-gradient(to right, #0f172a, #312e81)';
       else els.previewBanner.style.background = '#1e293b';
     } else {
-      els.previewBanner.style.background = '';
-      els.previewBanner.classList.add('bg-slate-900/50');
+      els.previewBanner.style.background = `linear-gradient(to right, ${state.primaryColor}, ${state.accentColor})`;
     }
 
     // Update Inputs

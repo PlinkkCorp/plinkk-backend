@@ -65,20 +65,68 @@
                     <span class="hidden sm:inline text-sm font-medium max-w-28 truncate"><%= user.userName %></span>
                     <svg class="size-4 text-slate-300" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
             </button>
-                <div id="profileMenuPanel" class="absolute right-0 mt-2 w-56 rounded-lg border border-slate-700 bg-slate-900/95 backdrop-blur shadow-xl p-1 hidden" role="menu">
-                <a href="/" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Accueil</a>
-                <a href="/edit" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Éditer</a>
-                <a href="/stats" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Statistiques</a>
-                <!-- <a href="/versions" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Versions</a> -->
-                <a href="/cosmetics" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Cosmétiques</a>
-                <a href="/plinkks" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Mes Plinkks</a>
-                <a href="/themes" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Mes Thèmes</a>
-                <a href="/account" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Compte</a>
-                <div class="my-1 border-t border-slate-700"></div>
-                <a target="_blank" href="<%= frontendUrl %>/<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : user.id %>" class="block px-3 py-2 text-sm rounded-md hover:bg-slate-800">Voir mon profil</a>
-                <div class="my-1 border-t border-slate-700"></div>
-                <a href="/logout" class="block px-3 py-2 text-sm rounded-md text-rose-300 hover:bg-rose-900/20">Déconnexion</a>
+                <div id="profileMenuPanel" class="absolute right-0 mt-2 w-72 origin-top-right divide-y divide-slate-700/50 rounded-xl border border-slate-700 bg-slate-900/95 backdrop-blur-xl shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none hidden transform transition-all duration-200 ease-out" role="menu">
+    <div class="px-4 py-3">
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Compte</p>
+        <div class="mt-2 flex items-center gap-3">
+            <div class="h-9 w-9 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden ring-2 ring-slate-700">
+                 <%- include('avatar.ejs', { user }) %>
             </div>
+            <div class="overflow-hidden">
+                <p class="truncate text-sm font-medium text-white"><%= user.userName %></p>
+                <p class="truncate text-xs text-slate-400"><%= user.email %></p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="p-1">
+        <a href="/" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+            <svg class="h-5 w-5 text-slate-400 group-hover:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+            Tableau de bord
+        </a>
+        <a href="/edit" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+            <svg class="h-5 w-5 text-slate-400 group-hover:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+            Éditer ma page
+        </a>
+        <a href="/stats" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+            <svg class="h-5 w-5 text-slate-400 group-hover:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+            Statistiques
+        </a>
+        <a href="/cosmetics" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+            <svg class="h-5 w-5 text-slate-400 group-hover:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
+            Cosmétiques
+        </a>
+    </div>
+
+    <div class="p-1">
+        <a href="/plinkks" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+            <svg class="h-5 w-5 text-slate-400 group-hover:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+            Mes Plinkks
+        </a>
+        <a href="/themes" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+            <svg class="h-5 w-5 text-slate-400 group-hover:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            Mes Thèmes
+        </a>
+    </div>
+
+    <div class="p-1">
+        <a href="/account" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+            <svg class="h-5 w-5 text-slate-400 group-hover:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            Paramètres
+        </a>
+        <a target="_blank" href="<%= frontendUrl %>/<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : user.id %>" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+            <svg class="h-5 w-5 text-slate-400 group-hover:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+            Voir mon profil
+        </a>
+    </div>
+
+    <div class="p-1">
+        <a href="/logout" class="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-rose-400 hover:bg-rose-950/30 hover:text-rose-300 transition-colors">
+            <svg class="h-5 w-5 text-rose-400/70 group-hover:text-rose-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            Déconnexion
+        </a>
+    </div>
+</div>
         </div>
     </div>
     <div id="spaTopLoaderDash" aria-hidden="true"><div class="prog" id="spaTopLoaderProgDash"></div></div>
