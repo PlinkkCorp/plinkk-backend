@@ -15,6 +15,7 @@
         <button id="tabSignups" class="px-4 py-2 rounded-full bg-violet-600 text-white font-medium transition-colors" role="tab" aria-selected="true">Inscriptions</button>
         <button id="tabLogins" class="px-4 py-2 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-colors" role="tab" aria-selected="false">Connexions</button>
         <button id="tabBans" class="px-4 py-2 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-colors" role="tab" aria-selected="false">Bans</button>
+        <button id="tabPlinkks" class="px-4 py-2 rounded-full bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-colors" role="tab" aria-selected="false">Plinkks</button>
     </nav>
 
     <section class="rounded-3xl border border-slate-800 bg-slate-900 p-6">
@@ -218,6 +219,69 @@
         </div>
         <div class="mt-4 text-xs text-slate-400 flex justify-center gap-4" id="banSummary"></div>
     </section>
+
+    <section id="panelPlinkks" class="rounded-3xl border border-slate-800 bg-slate-900 p-6 hidden">
+        <!-- Total Views Card -->
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+                <div class="text-sm text-slate-400 mb-1">Vues Totales (Cumul)</div>
+                <div id="plinkkTotalViews" class="text-3xl font-bold text-white tracking-tight">–</div>
+            </div>
+        </div>
+    
+        <!-- Graph -->
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white">Vues par jour</h2>
+            <div class="text-sm text-slate-400 font-mono" id="rangeLabelP"></div>
+        </div>
+        <div class="relative min-h-[300px] bg-slate-950/50 rounded-2xl border border-slate-800/50 p-4" id="chartPWrap">
+            <canvas id="chartPlinkks" class="w-full h-full block"></canvas>
+            <div id="ttP" class="hidden absolute px-3 py-2 text-xs rounded-lg bg-slate-800/95 border border-slate-700 text-slate-100 shadow-xl z-10 backdrop-blur-sm pointer-events-none"></div>
+            <div id="loadP" class="hidden absolute inset-0 flex items-center justify-center bg-slate-900/20 backdrop-blur-[1px] rounded-2xl">
+                <div class="animate-spin rounded-full h-6 w-6 border-2 border-violet-500 border-t-transparent mr-3"></div>
+                <span class="text-sm text-slate-300 font-medium">Chargement…</span>
+            </div>
+            <div id="errP" role="alert" aria-live="assertive" class="hidden absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900/60 rounded-2xl">
+                <div class="text-sm text-rose-400 font-medium">Erreur de chargement.</div>
+                <button type="button" class="px-3 py-1.5 text-xs rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition-colors" onclick="window.__retryP?.()">Réessayer</button>
+            </div>
+            <div id="emptyP" class="hidden absolute inset-0 flex items-center justify-center text-sm text-slate-500">Aucune donnée</div>
+        </div>
+    
+        <!-- Top Plinkks List -->
+        <div class="mt-8">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                <h2 class="text-lg font-semibold text-white">Top Plinkks</h2>
+                <div class="flex gap-2">
+                    <input type="text" id="plinkkSearch" placeholder="Rechercher..." class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-200 focus:border-violet-500 outline-none" />
+                    <select id="plinkkSort" class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-200 focus:border-violet-500 outline-none">
+                        <option value="views-desc">Vues (Desc)</option>
+                        <option value="views-asc">Vues (Asc)</option>
+                        <option value="name-asc">Nom (A-Z)</option>
+                        <option value="name-desc">Nom (Z-A)</option>
+                        <option value="createdAt-desc">Récent</option>
+                        <option value="createdAt-asc">Ancien</option>
+                    </select>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-400">
+                    <thead class="bg-slate-950 text-slate-200 uppercase font-medium text-xs">
+                        <tr>
+                            <th class="px-4 py-3 rounded-l-xl">Plinkk</th>
+                            <th class="px-4 py-3">Propriétaire</th>
+                            <th class="px-4 py-3 text-right">Vues</th>
+                            <th class="px-4 py-3 rounded-r-xl text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topPlinkksList" class="divide-y divide-slate-800">
+                        <!-- Rows injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 flex justify-center gap-2" id="plinkkPagination"></div>
+        </div>
+    </section>
 </main>
 </div>
 
@@ -226,8 +290,8 @@
           const $ = (s, r = document) => r.querySelector(s);
           const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
           function activateTab(which) {
-            const tabs = { signups: $('#tabSignups'), logins: $('#tabLogins'), bans: $('#tabBans') };
-            const panels = { signups: $('#panelSignups'), logins: $('#panelLogins'), bans: $('#panelBans') };
+            const tabs = { signups: $('#tabSignups'), logins: $('#tabLogins'), bans: $('#tabBans'), plinkks: $('#tabPlinkks') };
+            const panels = { signups: $('#panelSignups'), logins: $('#panelLogins'), bans: $('#panelBans'), plinkks: $('#panelPlinkks') };
             Object.entries(tabs).forEach(([k, btn]) => {
               const active = k === which; btn.setAttribute('aria-selected', active ? 'true' : 'false');
               btn.classList.toggle('bg-violet-600', active); btn.classList.toggle('text-white', active);
@@ -239,6 +303,7 @@
           $('#tabSignups').addEventListener('click', () => { activateTab('signups'); });
           $('#tabLogins').addEventListener('click', () => { activateTab('logins'); applyLogins(); });
           $('#tabBans').addEventListener('click', () => { activateTab('bans'); applyBans(); });
+          $('#tabPlinkks').addEventListener('click', () => { activateTab('plinkks'); applyPlinkks(); });
           activateTab('signups');
 
           let currentSub = 'su1';
@@ -274,6 +339,10 @@
                 const isBansVisible = !document.getElementById('panelBans')?.classList.contains('hidden');
                 if (isBansVisible) {
                   if (seriesB && seriesB.length) { renderChartB({ series: seriesB }, hoverIndexB); }
+                }
+                const isPlinkksVisible = !document.getElementById('panelPlinkks')?.classList.contains('hidden');
+                if (isPlinkksVisible) {
+                  if (seriesP && seriesP.length) { renderChartP({ series: seriesP }, hoverIndexP); }
                 }
               });
             });
@@ -445,6 +514,21 @@
             if (!res.ok) throw new Error('HTTP ' + res.status); return res.json();
           }
 
+          async function fetchPlinkksSeries() {
+            const q = new URLSearchParams({ from: $('#from').value, to: $('#to').value });
+            const res = await fetch(`/admin/stats/plinkks/series?${q.toString()}`);
+            if (!res.ok) throw new Error('HTTP ' + res.status); return res.json();
+          }
+          async function fetchPlinkksTotal() {
+            const res = await fetch(`/admin/stats/plinkks/total`);
+            if (!res.ok) throw new Error('HTTP ' + res.status); return res.json();
+          }
+          async function fetchTopPlinkks(page = 1, limit = 20, sort = 'views', order = 'desc', search = '') {
+            const q = new URLSearchParams({ page, limit, sort, order, search });
+            const res = await fetch(`/admin/stats/plinkks/top?${q.toString()}`);
+            if (!res.ok) throw new Error('HTTP ' + res.status); return res.json();
+          }
+
 
           async function fetchSeriesByVisibility() {
             const q = new URLSearchParams({ from: $('#from').value, to: $('#to').value });
@@ -592,151 +676,121 @@
             if (hoverIndex >= 0 && hoverIndex < labels.length) { const x = padL + hoverIndex * stepX; ctxB.strokeStyle = 'rgba(148,163,184,0.35)'; ctxB.beginPath(); ctxB.moveTo(x, padT); ctxB.lineTo(x, padT + innerH); ctxB.stroke(); const rect = wrapB.getBoundingClientRect(); const ttX = Math.min(rect.width - 170, Math.max(8, x + 8)); const ttY = 14; ttB.innerHTML = `<div class='font-medium text-slate-100'>${labels[hoverIndex]}</div><div><span class='inline-block w-2 h-2 rounded-full mr-1' style='background:#ef4444'></span>Créés: <b>${created[hoverIndex]}</b></div><div><span class='inline-block w-2 h-2 rounded-full mr-1' style='background:#22c55e'></span>Révoqués: <b>${revoked[hoverIndex]}</b></div>`; ttB.style.left = ttX + 'px'; ttB.style.top = ttY + 'px'; ttB.classList.remove('hidden'); } else { ttB.classList.add('hidden'); }
           }
 
-          const ctx4 = document.getElementById('chartCumul').getContext('2d');
-          const wrap4 = document.getElementById('chart4Wrap');
-          const tt4 = document.getElementById('tt4');
-          let series4 = []; let hoverIndex4 = -1;
-          function renderChart4(series, hoverIndex = -1) {
-            series4 = Array.isArray(series) ? series : [];
-            hoverIndex4 = hoverIndex;
-            const labels = series4.map(p => p.date);
-            const data = series4.map(p => p.count);
-            const dpr = window.devicePixelRatio || 1; const cssW = ctx4.canvas.clientWidth; const cssH = 240;
-            ctx4.canvas.width = Math.max(1, Math.floor(cssW * dpr)); ctx4.canvas.height = Math.floor(cssH * dpr);
-            ctx4.setTransform(dpr, 0, 0, dpr, 0, 0); ctx4.clearRect(0, 0, cssW, cssH);
+          const ctxP = document.getElementById('chartPlinkks')?.getContext('2d');
+          const wrapP = document.getElementById('chartPWrap');
+          const ttP = document.getElementById('ttP');
+          let seriesP = []; let hoverIndexP = -1;
+          function renderChartP(payload, hoverIndex = -1) {
+            if (!ctxP) return; seriesP = payload?.series || []; hoverIndexP = hoverIndex;
+            const labels = seriesP.map(p => p.date); const data = seriesP.map(p => p.count || 0);
+            const dpr = window.devicePixelRatio || 1; const cssW = ctxP.canvas.clientWidth; const cssH = 260;
+            ctxP.canvas.width = Math.max(1, Math.floor(cssW * dpr)); ctxP.canvas.height = Math.floor(cssH * dpr); ctxP.setTransform(dpr, 0, 0, dpr, 0, 0); ctxP.clearRect(0, 0, cssW, cssH);
             const padL = 40, padB = 28, padT = 10, padR = 10; const innerW = cssW - padL - padR, innerH = cssH - padT - padB;
             const maxVal = Math.max(1, ...data); const yTicks = 5, stepY = Math.max(1, Math.ceil(maxVal / yTicks)); const maxRounded = Math.max(stepY, stepY * yTicks);
             const stepX = data.length > 1 ? innerW / (data.length - 1) : 0; const scaleY = innerH / maxRounded;
-            ctx4.strokeStyle = 'rgba(148,163,184,0.35)'; ctx4.lineWidth = 1; ctx4.beginPath(); ctx4.moveTo(padL, padT); ctx4.lineTo(padL, padT + innerH); ctx4.lineTo(padL + innerW, padT + innerH); ctx4.stroke();
-            ctx4.fillStyle = 'rgba(148,163,184,0.7)'; ctx4.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'; ctx4.textAlign = 'right'; ctx4.textBaseline = 'middle';
-            for (let y = 0; y <= maxRounded; y += stepY) { const py = padT + innerH - y * scaleY; ctx4.strokeStyle = 'rgba(148,163,184,0.15)'; ctx4.beginPath(); ctx4.moveTo(padL, py); ctx4.lineTo(padL + innerW, py); ctx4.stroke(); ctx4.fillText(String(y), padL - 6, py); }
-            ctx4.textAlign = 'center'; ctx4.textBaseline = 'top'; const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
-            labels.forEach((lab, i) => { if (i % xLabelEvery !== 0 && i !== labels.length - 1) return; const x = padL + i * stepX; ctx4.strokeStyle = 'rgba(148,163,184,0.15)'; ctx4.beginPath(); ctx4.moveTo(x, padT + innerH); ctx4.lineTo(x, padT + innerH + 4); ctx4.stroke(); ctx4.fillText(lab?.slice(5) || '', x, padT + innerH + 6); });
-            ctx4.strokeStyle = '#d946ef'; ctx4.lineWidth = 2; ctx4.beginPath(); data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctx4.moveTo(x, y); else ctx4.lineTo(x, y); }); ctx4.stroke();
-            ctx4.fillStyle = '#f0abfc'; data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctx4.beginPath(); ctx4.arc(x, y, 2.3, 0, Math.PI * 2); ctx4.fill(); });
-            if (hoverIndex >= 0 && hoverIndex < labels.length) {
-              const x = padL + hoverIndex * stepX; const y = padT + innerH - data[hoverIndex] * scaleY; ctx4.strokeStyle = 'rgba(217, 70, 239, 0.4)'; ctx4.beginPath(); ctx4.moveTo(x, padT); ctx4.lineTo(x, padT + innerH); ctx4.stroke(); ctx4.fillStyle = '#fae8ff'; ctx4.beginPath(); ctx4.arc(x, y, 4, 0, Math.PI * 2); ctx4.fill();
-              const rect = wrap4.getBoundingClientRect(); const ttX = Math.min(rect.width - 140, Math.max(8, x + 8)); const ttY = Math.max(8, y - 10); tt4.textContent = `${labels[hoverIndex]} — cumul: ${data[hoverIndex]}`; tt4.style.left = ttX + 'px'; tt4.style.top = ttY + 'px'; tt4.classList.remove('hidden');
-            } else { tt4.classList.add('hidden'); }
+            ctxP.strokeStyle = 'rgba(148,163,184,0.35)'; ctxP.lineWidth = 1; ctxP.beginPath(); ctxP.moveTo(padL, padT); ctxP.lineTo(padL, padT + innerH); ctxP.lineTo(padL + innerW, padT + innerH); ctxP.stroke();
+            ctxP.fillStyle = 'rgba(148,163,184,0.7)'; ctxP.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'; ctxP.textAlign = 'right'; ctxP.textBaseline = 'middle';
+            for (let y = 0; y <= maxRounded; y += stepY) { const py = padT + innerH - y * scaleY; ctxP.strokeStyle = 'rgba(148,163,184,0.15)'; ctxP.beginPath(); ctxP.moveTo(padL, py); ctxP.lineTo(padL + innerW, py); ctxP.stroke(); ctxP.fillText(String(y), padL - 6, py); }
+            ctxP.textAlign = 'center'; ctxP.textBaseline = 'top'; const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
+            labels.forEach((lab, i) => { if (i % xLabelEvery !== 0 && i !== labels.length - 1) return; const x = padL + i * stepX; ctxP.strokeStyle = 'rgba(148,163,184,0.15)'; ctxP.beginPath(); ctxP.moveTo(x, padT + innerH); ctxP.lineTo(x, padT + innerH + 4); ctxP.stroke(); ctxP.fillText(lab?.slice(5) || '', x, padT + innerH + 6); });
+            ctxP.strokeStyle = '#8b5cf6'; ctxP.lineWidth = 2; ctxP.beginPath(); data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; if (i === 0) ctxP.moveTo(x, y); else ctxP.lineTo(x, y); }); ctxP.stroke();
+            ctxP.fillStyle = '#a78bfa'; data.forEach((v, i) => { const x = padL + i * stepX; const y = padT + innerH - v * scaleY; ctxP.beginPath(); ctxP.arc(x, y, 2.5, 0, Math.PI * 2); ctxP.fill(); });
+            if (hoverIndex >= 0 && hoverIndex < labels.length) { const x = padL + hoverIndex * stepX; const y = padT + innerH - data[hoverIndex] * scaleY; ctxP.strokeStyle = 'rgba(139, 92, 246, 0.35)'; ctxP.beginPath(); ctxP.moveTo(x, padT); ctxP.lineTo(x, padT + innerH); ctxP.stroke(); ctxP.fillStyle = '#ddd6fe'; ctxP.beginPath(); ctxP.arc(x, y, 4, 0, Math.PI * 2); ctxP.fill(); const rect = wrapP.getBoundingClientRect(); const ttX = Math.min(rect.width - 140, Math.max(8, x + 8)); const ttY = Math.max(8, y - 10); ttP.textContent = `${labels[hoverIndex]} — ${data[hoverIndex]} vues`; ttP.style.left = ttX + 'px'; ttP.style.top = ttY + 'px'; ttP.classList.remove('hidden'); } else { ttP.classList.add('hidden'); }
           }
 
+          let plinkkPage = 1;
+          let plinkkSort = 'views-desc';
+          let plinkkSearch = '';
 
-          // --- Version enrichie avec gestion erreurs + états vides ---
-          async function apply() {
+          async function applyPlinkks() {
             try {
-              document.getElementById('load1')?.classList.remove('hidden');
-              document.getElementById('load2')?.classList.remove('hidden');
-              document.getElementById('load3')?.classList.remove('hidden');
-              document.getElementById('load4')?.classList.remove('hidden');
-              ['err1','err2','err3','err4','empty1','empty2','empty3','empty4'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));
-              const [seriesPayload, summary, visPayload, rolePayload] = await Promise.all([
-                fetchSeries(), fetchSummary(), fetchSeriesByVisibility(), fetchSeriesByRole()
-              ]);
-              $('#rangeLabel').textContent = `${seriesPayload.from} → ${seriesPayload.to}`;
-              renderChart(seriesPayload.series || []);
-              $('#rangeLabel2').textContent = `${visPayload.from} → ${visPayload.to}`;
-              renderChart2(visPayload);
-              $('#rangeLabel3').textContent = `${rolePayload.from} → ${rolePayload.to}`;
-              renderChart3(rolePayload);
-              $('#rangeLabel4').textContent = `${seriesPayload.from} → ${seriesPayload.to}`;
-              renderChart4(makeCumul(seriesPayload.series || []));
-              if (!(seriesPayload.series||[]).length) document.getElementById('empty1')?.classList.remove('hidden');
-              if (!(visPayload.series||[]).length) document.getElementById('empty2')?.classList.remove('hidden');
-              if (!(rolePayload.series||[]).length) document.getElementById('empty3')?.classList.remove('hidden');
-              if (!(seriesPayload.series||[]).length) document.getElementById('empty4')?.classList.remove('hidden');
-              $('#statTotal').textContent = (summary.total ?? 0);
-              $('#statPub').textContent = (summary.publics ?? 0);
-              $('#statPriv').textContent = (summary.privates ?? 0);
-              const staff = (summary.byRole?.ADMIN || 0) + (summary.byRole?.DEVELOPER || 0) + (summary.byRole?.MODERATOR || 0);
-              $('#statStaff').textContent = staff;
-            } catch (e) {
-              console.error(e);
-              document.getElementById('err1')?.classList.remove('hidden');
-              document.getElementById('err2')?.classList.remove('hidden');
-              document.getElementById('err3')?.classList.remove('hidden');
-              document.getElementById('err4')?.classList.remove('hidden');
-            } finally {
-              document.getElementById('load1')?.classList.add('hidden');
-              document.getElementById('load2')?.classList.add('hidden');
-              document.getElementById('load3')?.classList.add('hidden');
-              document.getElementById('load4')?.classList.add('hidden');
-            }
-          }
-
-          async function applyLogins() {
-            try {
-              document.getElementById('loadL')?.classList.remove('hidden');
-              document.getElementById('errL')?.classList.add('hidden');
-              document.getElementById('emptyL')?.classList.add('hidden');
+              document.getElementById('loadP')?.classList.remove('hidden');
+              document.getElementById('errP')?.classList.add('hidden');
+              document.getElementById('emptyP')?.classList.add('hidden');
               
-              const [seriesPayload, recent] = await Promise.all([
-                fetchLoginsSeries(),
-                fetchRecentLogins()
+              const [seriesPayload, totalPayload, topPayload] = await Promise.all([
+                fetchPlinkksSeries(),
+                fetchPlinkksTotal(),
+                fetchTopPlinkks(plinkkPage, 20, plinkkSort.split('-')[0], plinkkSort.split('-')[1], plinkkSearch)
               ]);
               
-              $('#rangeLabelL').textContent = `${seriesPayload.from} → ${seriesPayload.to}`;
-              renderChartL(seriesPayload);
+              $('#rangeLabelP').textContent = `${seriesPayload.from} → ${seriesPayload.to}`;
+              renderChartP(seriesPayload);
               
               if (!(seriesPayload.series || []).length) {
-                document.getElementById('emptyL')?.classList.remove('hidden');
+                document.getElementById('emptyP')?.classList.remove('hidden');
               }
 
-              const recentContainer = document.getElementById('recentLogins');
-              if (recentContainer) {
-                recentContainer.innerHTML = (recent.logins || []).map(l => `
-                  <div class="flex items-center gap-2 p-2 rounded-lg bg-slate-950 border border-slate-800">
-                    <div class="h-8 w-8 rounded-full bg-slate-800 overflow-hidden">
-                      ${l.user?.avatar ? `<img src="/uploads/${l.user.avatar}" class="h-full w-full object-cover">` : `<div class="h-full w-full flex items-center justify-center text-slate-500 text-[10px]">${l.user?.userName?.substring(0,2).toUpperCase()}</div>`}
-                    </div>
-                    <div class="min-w-0 flex-1">
-                      <div class="truncate font-medium text-slate-200">${l.user?.userName || 'Inconnu'}</div>
-                      <div class="text-[10px] text-slate-500">${new Date(l.createdAt).toLocaleString()}</div>
-                    </div>
-                  </div>
+              $('#plinkkTotalViews').textContent = totalPayload.total;
+
+              const list = document.getElementById('topPlinkksList');
+                           if (list) {
+                list.innerHTML = (topPayload.plinkks || []).map((p, i) => `
+                  <tr class="hover:bg-slate-800/50 transition-colors">
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-3">
+                        <span class="text-slate-500 font-mono text-xs w-6">${(plinkkPage - 1) * 20 + i + 1}</span>
+                        <div>
+                          <div class="font-medium text-slate-200">${p.name || p.slug}</div>
+                          <div class="text-xs text-slate-500">/${p.slug}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-2">
+                        <div class="h-6 w-6 rounded-full bg-slate-800 overflow-hidden">
+                          ${p.user?.image ? `<img src="/uploads/${p.user.image}" class="h-full w-full object-cover">` : `<div class="h-full w-full flex items-center justify-center text-slate-500 text-[10px]">${p.user?.userName?.substring(0,2).toUpperCase()}</div>`}
+                        </div>
+                        <span class="text-slate-300">${p.user?.userName}</span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 text-right font-mono text-slate-300">${p.views}</td>
+                    <td class="px-4 py-3 text-right">
+                      <a href="https://plinkk.fr/${p.slug}" target="_blank" class="text-violet-400 hover:text-violet-300 text-xs font-medium">Voir</a>
+                    </td>
+                  </tr>
                 `).join('');
               }
 
-            } catch (e) {
-              console.error(e);
-              document.getElementById('errL')?.classList.remove('hidden');
-            } finally {
-              document.getElementById('loadL')?.classList.add('hidden');
-            }
-          }
-
-          async function applyBans() {
-            try {
-              document.getElementById('loadB')?.classList.remove('hidden');
-              document.getElementById('errB')?.classList.add('hidden');
-              document.getElementById('emptyB')?.classList.add('hidden');
-              
-              const seriesPayload = await fetchBansSeries();
-              
-              $('#rangeLabelB').textContent = `${seriesPayload.from} → ${seriesPayload.to}`;
-              renderChartB(seriesPayload);
-              
-              if (!(seriesPayload.series || []).length) {
-                document.getElementById('emptyB')?.classList.remove('hidden');
-              }
-              
-              const totalCreated = (seriesPayload.series || []).reduce((acc, curr) => acc + (curr.created || 0), 0);
-              const totalRevoked = (seriesPayload.series || []).reduce((acc, curr) => acc + (curr.revoked || 0), 0);
-              
-              const summaryEl = document.getElementById('banSummary');
-              if (summaryEl) {
-                summaryEl.innerHTML = `
-                  <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-rose-500"></div>Total créés: <span class="text-slate-200 font-mono">${totalCreated}</span></div>
-                  <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-500"></div>Total révoqués: <span class="text-slate-200 font-mono">${totalRevoked}</span></div>
+              // Pagination simple
+              const totalPages = Math.ceil(topPayload.total / 20);
+              const pag = document.getElementById('plinkkPagination');
+              if (pag) {
+                pag.innerHTML = `
+                  <button ${plinkkPage <= 1 ? 'disabled' : ''} onclick="window.__changePlinkkPage(${plinkkPage - 1})" class="px-3 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 disabled:opacity-50 hover:bg-slate-700">Précédent</button>
+                  <span class="px-3 py-1 text-slate-400 text-sm">Page ${plinkkPage} / ${totalPages}</span>
+                  <button ${plinkkPage >= totalPages ? 'disabled' : ''} onclick="window.__changePlinkkPage(${plinkkPage + 1})" class="px-3 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 disabled:opacity-50 hover:bg-slate-700">Suivant</button>
                 `;
               }
 
             } catch (e) {
               console.error(e);
-              document.getElementById('errB')?.classList.remove('hidden');
+              document.getElementById('errP')?.classList.remove('hidden');
             } finally {
-              document.getElementById('loadB')?.classList.add('hidden');
+              document.getElementById('loadP')?.classList.add('hidden');
             }
           }
+
+          window.__changePlinkkPage = (p) => {
+            plinkkPage = p;
+            applyPlinkks();
+          };
+
+          $('#plinkkSort')?.addEventListener('change', (e) => {
+            plinkkSort = e.target.value;
+            plinkkPage = 1;
+            applyPlinkks();
+          });
+
+          let searchTimeout;
+          $('#plinkkSearch')?.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+              plinkkSearch = e.target.value;
+              plinkkPage = 1;
+              applyPlinkks();
+            }, 300);
+          });
 
           const presetIds = ['last24h', 'last7', 'last30', 'last90'];
           const presetButtons = presetIds.map(id => document.getElementById(id));
@@ -762,6 +816,7 @@
               apply();
               if (document.getElementById('tabLogins')?.getAttribute('aria-selected') === 'true') applyLogins();
               if (document.getElementById('tabBans')?.getAttribute('aria-selected') === 'true') applyBans();
+              if (document.getElementById('tabPlinkks')?.getAttribute('aria-selected') === 'true') applyPlinkks();
             });
           });
 
@@ -774,6 +829,7 @@
               apply();
               if (document.getElementById('tabLogins')?.getAttribute('aria-selected') === 'true') applyLogins();
               if (document.getElementById('tabBans')?.getAttribute('aria-selected') === 'true') applyBans();
+              if (document.getElementById('tabPlinkks')?.getAttribute('aria-selected') === 'true') applyPlinkks();
             });
             customEl.addEventListener('keydown', (ev) => {
               if (ev.key === 'Enter') {
@@ -784,6 +840,7 @@
                 apply();
                 if (document.getElementById('tabLogins')?.getAttribute('aria-selected') === 'true') applyLogins();
                 if (document.getElementById('tabBans')?.getAttribute('aria-selected') === 'true') applyBans();
+                if (document.getElementById('tabPlinkks')?.getAttribute('aria-selected') === 'true') applyPlinkks();
               }
             });
           }
@@ -791,10 +848,10 @@
           const fromEl = document.getElementById('from');
           const toEl = document.getElementById('to');
           if (fromEl) {
-            fromEl.addEventListener('change', () => { setActive(null); apply(); if (document.getElementById('tabLogins')?.getAttribute('aria-selected') === 'true') applyLogins(); if (document.getElementById('tabBans')?.getAttribute('aria-selected') === 'true') applyBans(); });
+            fromEl.addEventListener('change', () => { setActive(null); apply(); if (document.getElementById('tabLogins')?.getAttribute('aria-selected') === 'true') applyLogins(); if (document.getElementById('tabBans')?.getAttribute('aria-selected') === 'true') applyBans(); if (document.getElementById('tabPlinkks')?.getAttribute('aria-selected') === 'true') applyPlinkks(); });
           }
           if (toEl) {
-            toEl.addEventListener('change', () => { setActive(null); apply(); if (document.getElementById('tabLogins')?.getAttribute('aria-selected') === 'true') applyLogins(); if (document.getElementById('tabBans')?.getAttribute('aria-selected') === 'true') applyBans(); });
+            toEl.addEventListener('change', () => { setActive(null); apply(); if (document.getElementById('tabLogins')?.getAttribute('aria-selected') === 'true') applyLogins(); if (document.getElementById('tabBans')?.getAttribute('aria-selected') === 'true') applyBans(); if (document.getElementById('tabPlinkks')?.getAttribute('aria-selected') === 'true') applyPlinkks(); });
           }
 
           apply();
@@ -820,6 +877,7 @@
           bindHover(document.getElementById('chartCumul'), (hi) => renderChart4(series4, hi), () => series4.length);
           bindHover(document.getElementById('chartLogins'), (hi) => renderChartL({ series: seriesL }, hi), () => seriesL.length);
           bindHover(document.getElementById('chartBans'), (hi) => renderChartB({ series: seriesB }, hi), () => seriesB.length);
+          bindHover(document.getElementById('chartPlinkks'), (hi) => renderChartP({ series: seriesP }, hi), () => seriesP.length);
 
           window.addEventListener('resize', () => {
             if (lastSeries && lastSeries.length) renderChart(lastSeries, hoverIndex1);
@@ -828,6 +886,7 @@
             if (series4 && series4.length) renderChart4(series4, hoverIndex4);
             if (seriesL && seriesL.length) renderChartL({ series: seriesL }, hoverIndexL);
             if (seriesB && seriesB.length) renderChartB({ series: seriesB }, hoverIndexB);
+            if (seriesP && seriesP.length) renderChartP({ series: seriesP }, hoverIndexP);
           });
 
           window.__retrySU1 = apply;
@@ -836,6 +895,7 @@
           window.__retrySU4 = apply;
           window.__retryL = applyLogins;
           window.__retryB = applyBans;
+          window.__retryP = applyPlinkks;
         })();
       </script>
       </body>

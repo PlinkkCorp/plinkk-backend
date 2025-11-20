@@ -176,7 +176,10 @@
                         </div>
                     <% } %>
                 </div>
-                <p class="text-xs text-slate-500 font-medium">@<%= u.slug %></p>
+                <div class="flex items-center justify-between text-xs text-slate-500 font-medium mt-1">
+                  <span>@<%= user.userName || u.slug %></span>
+                  <span>/<%= u.slug %></span>
+                </div>
             </div>
 
             <!-- Actions (Always visible) -->

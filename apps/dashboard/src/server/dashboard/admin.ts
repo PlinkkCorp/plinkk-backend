@@ -905,6 +905,121 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     return reply.send({ from: fmt(start), to: fmt(end), roles, series });
   });
 
+  fastify.get("/stats/plinkks/series", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const ok = await ensurePermission(request, reply, 'VIEW_STATS');
+    if (!ok) return;
+    const { from, to } = request.query as { from?: string; to?: string };
+    const now = new Date();
+    const end = to
+      ? new Date(to + "T23:59:59.999Z")
+      : new Date(
+          Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate(),
+            23,
+            59,
+            59,
+            999
+          )
+        );
+    const start = from
+      ? new Date(from + "T00:00:00.000Z")
+      : new Date(end.getTime() - 29 * 86400000);
+
+    const fmt = (dt: Date) => {
+      const y = dt.getUTCFullYear();
+      const m = String(dt.getUTCMonth() + 1).padStart(2, "0");
+      const d = String(dt.getUTCDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    };
+
+    const rows = await prisma.plinkkViewDaily.findMany({
+      where: { date: { gte: start, lte: end } },
+      select: { date: true, count: true },
+    });
+
+    const byDate = new Map<string, number>();
+    for (
+      let t = new Date(start.getTime());
+      t <= end;
+      t = new Date(t.getTime() + 86400000)
+    ) {
+      byDate.set(fmt(t), 0);
+    }
+
+    for (const r of rows) {
+      const key = fmt(new Date(r.date));
+      if (byDate.has(key)) byDate.set(key, (byDate.get(key) || 0) + r.count);
+    }
+
+    const series = Array.from(byDate.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, count]) => ({ date, count }));
+
+    return reply.send({ from: fmt(start), to: fmt(end), series });
+  });
+
+  fastify.get("/stats/plinkks/top", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const ok = await ensurePermission(request, reply, 'VIEW_STATS');
+    if (!ok) return;
+
+    const {
+      page = 1,
+      limit = 20,
+      sort = "views",
+      order = "desc",
+      search = "",
+    } = request.query as any;
+    const skip = (Number(page) - 1) * Number(limit);
+    const take = Number(limit);
+
+    const where: Prisma.PlinkkWhereInput = {};
+    if (search) {
+      where.OR = [
+        { name: { contains: search } },
+        { slug: { contains: search } },
+        { user: { userName: { contains: search } } },
+      ];
+    }
+
+    const [plinkks, total] = await Promise.all([
+      prisma.plinkk.findMany({
+        where,
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          views: true,
+          createdAt: true,
+          user: { select: { userName: true, image: true } },
+        },
+        orderBy: { [sort]: order },
+        skip,
+        take,
+      }),
+      prisma.plinkk.count({ where }),
+    ]);
+
+    return reply.send({ plinkks, total });
+  });
+
+  fastify.get("/stats/plinkks/total", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const ok = await ensurePermission(request, reply, 'VIEW_STATS');
+    if (!ok) return;
+
+    const agg = await prisma.plinkk.aggregate({
+      _sum: { views: true },
+    });
+    return reply.send({ total: agg._sum.views || 0 });
+  });
+
   fastify.get("/roles", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin/roles")}`);
