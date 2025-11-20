@@ -51,25 +51,8 @@
                 </div>
                 
                 <div class="flex items-center gap-3">
-                    <div class="hidden sm:block">
+                    <div class="flex items-center gap-3">
                         <%- include('../../partials/changePlinkkDropdown.ejs') %>
-                    </div>
-                    
-                    <!-- Mobile Plinkk Switcher -->
-                    <div class="sm:hidden relative">
-                        <% if (typeof pages !== 'undefined' && Array.isArray(pages) && pages.length > 1) { %>
-                            <button id="changePlinkkBtnMobile" type="button" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 border border-slate-700 text-white hover:bg-slate-700 transition-colors">
-                                <span id="changePlinkkBtnLabelMobile">Choisir...</span>
-                                <svg class="text-slate-400" width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
-                            </button>
-                            <!-- Dropdown content (same as desktop but positioned for mobile) -->
-                            <div id="changePlinkkDropdownMobile" class="hidden absolute right-0 mt-2 w-64 rounded-xl bg-slate-900 border border-slate-800 shadow-xl z-50 overflow-hidden">
-                                <div class="p-2 border-b border-slate-800">
-                                    <input id="changePlinkkSearchMobile" type="search" placeholder="Rechercher..." class="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:border-violet-500" />
-                                </div>
-                                <ul id="changePlinkkListMobile" class="max-h-48 overflow-auto divide-y divide-slate-800/50 text-sm"></ul>
-                            </div>
-                        <% } %>
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -801,154 +784,11 @@
                             } catch (e) {}
                         })();
                         (function(){
-                            const btn = document.getElementById('changePlinkk');
-                            const btnMobile = document.getElementById('changePlinkk--mobile');
-                            const select = document.getElementById('changePlinkkSelect');
-                            const selectMobile = document.getElementById('changePlinkkSelectMobile');
-                            const pagesRaw = document.getElementById('pages-data')?.textContent || '[]';
-                            let pages = [];
-                            try { pages = JSON.parse(pagesRaw) || []; } catch {}
-
-                            const currentId = window.__PLINKK_SELECTED_ID__ || '';
-                            const FRONTEND_URL = "<%= frontendUrl %>";
-
-                            function buildList(listEl, isMobile) {
-                                if (!listEl) return;
-                                listEl.innerHTML = '';
-                                pages.forEach(p => {
-                                    const li = document.createElement('li');
-                                    li.className = 'px-3 py-2 hover:bg-slate-800 cursor-pointer flex items-center justify-between';
-                                    li.tabIndex = 0;
-                                    const left = document.createElement('div');
-                                    left.textContent = p.slug;
-                                    const openLink = document.createElement('a');
-                                    openLink.textContent = 'Ouvrir';
-                                    openLink.href = `${FRONTEND_URL}/${p.slug}`;
-                                    openLink.target = '_blank';
-                                    openLink.rel = 'noopener';
-                                    openLink.className = 'text-emerald-300 hover:underline ml-2';
-                                    li.appendChild(left);
-                                    li.appendChild(openLink);
-                                    li.addEventListener('click', (e) => {
-                                        if (e.target === openLink) return;
-                                        location.href = `/edit?plinkkId=${encodeURIComponent(p.id)}`;
-                                    });
-                                    li.addEventListener('keypress', (e) => { if (e.key === 'Enter') location.href = `/edit?plinkkId=${encodeURIComponent(p.id)}`; });
-                                    listEl.appendChild(li);
-                                });
-                            }
-
-                            function filterList(inputEl, listEl) {
-                                const q = (inputEl.value || '').toLowerCase().trim();
-                                Array.from(listEl.children).forEach(li => {
-                                    const txt = li.textContent || '';
-                                    li.style.display = txt.toLowerCase().includes(q) ? '' : 'none';
-                                });
-                            }
-
-                            function toggleDropdown(drop, open) {
-                                if (!drop) return;
-                                drop.classList.toggle('hidden', !open);
-                            }
-
-                            const dropdown = document.getElementById('changePlinkkDropdown');
-                            const list = document.getElementById('changePlinkkList');
-                            const search = document.getElementById('changePlinkkSearch');
-
-                            const dropdownM = document.getElementById('changePlinkkDropdownMobile');
-                            const listM = document.getElementById('changePlinkkListMobile');
-                            const searchM = document.getElementById('changePlinkkSearchMobile');
-
-                            buildList(list, false);
-                            buildList(listM, true);
-
-                            if (search && list) {
-                                search.addEventListener('input', () => filterList(search, list));
-                            }
-                            if (searchM && listM) {
-                                searchM.addEventListener('input', () => filterList(searchM, listM));
-                            }
-
-                            if (currentId) {
-                                const current = pages.find(p => p.id === currentId);
-                                if (current) {
-                                    const lbl = document.getElementById('currentPlinkkLabel');
-                                    const link = document.getElementById('openCurrentPlinkk');
-                                    const btnLabel = document.getElementById('changePlinkkBtnLabel');
-                                    if (lbl) { lbl.textContent = current.slug; lbl.classList.remove('hidden'); }
-                                    if (link) { link.href = `${FRONTEND_URL}/${current.slug}`; link.classList.remove('hidden'); }
-                                    if (btnLabel) { btnLabel.textContent = `${current.slug}`; }
-
-                                    const lblM = document.getElementById('currentPlinkkLabelMobile');
-                                    const linkM = document.getElementById('openCurrentPlinkkMobile');
-                                    const btnLabelM = document.getElementById('changePlinkkBtnLabelMobile');
-                                    if (lblM) { lblM.textContent = current.slug; lblM.classList.remove('hidden'); }
-                                    if (linkM) { linkM.href = `${FRONTEND_URL}/${current.slug}`; linkM.classList.remove('hidden'); }
-                                    if (btnLabelM) { btnLabelM.textContent = `${current.slug}`; }
-                                }
-                            }
-
-                            const btnEl = document.getElementById('changePlinkkBtn');
-                            const btnElM = document.getElementById('changePlinkkBtnMobile');
-                            if (btnEl && dropdown) {
-                                btnEl.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(dropdown, dropdown.classList.contains('hidden')); if (search) { search.value = ''; filterList(search, list); setTimeout(()=>search.focus(), 50); } });
-                            }
-                            if (btnElM && dropdownM) {
-                                btnElM.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(dropdownM, dropdownM.classList.contains('hidden')); if (searchM) { searchM.value = ''; filterList(searchM, listM); setTimeout(()=>searchM.focus(), 50); } });
-                            }
-
-                            document.addEventListener('click', () => { toggleDropdown(dropdown, false); toggleDropdown(dropdownM, false); });
-                            if (dropdown) dropdown.addEventListener('click', (e)=> e.stopPropagation());
-                            if (dropdownM) dropdownM.addEventListener('click', (e)=> e.stopPropagation());
-
-                            function openChooserFallback() {
-                                if (pages && pages.length) {
-                                    const id = pages[0].id;
-                                    if (id) location.href = `/edit?plinkkId=${encodeURIComponent(id)}&autoRedirect=1`;
-                                }
-                            }
-
-                            function populate(selectEl, isMobile) {
-                                if (!selectEl) return;
-                                selectEl.innerHTML = '';
-                                pages.forEach((p, i) => {
-                                    const opt = document.createElement('option');
-                                    opt.value = p.id;
-                                    opt.textContent = `${i+1}. ${p.name} (${p.slug})`;
-                                    selectEl.appendChild(opt);
-                                });
-                                if (currentId) {
-                                    const idx = pages.findIndex(p => p.id === currentId);
-                                    if (idx !== -1) selectEl.value = pages[idx].id;
-                                }
-                                selectEl.addEventListener('change', () => {
-                                    const val = selectEl.value;
-                                    if (!val) return;
-                                    location.href = `/edit?plinkkId=${encodeURIComponent(val)}`;
-                                });
-                                selectEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const val = selectEl.value; if (val) location.href = `/edit?plinkkId=${encodeURIComponent(val)}`; } });
-                            }
-
-                            populate(select, false);
-                            populate(selectMobile, true);
-
-                            if (currentId) {
-                                const current = pages.find(p => p.id === currentId);
-                                if (current) {
-                                    const lbl = document.getElementById('currentPlinkkLabel');
-                                    if (lbl) { lbl.textContent = `${current.name} (${current.slug})`; lbl.classList.remove('hidden'); }
-                                    const lblM = document.getElementById('currentPlinkkLabelMobile');
-                                    if (lblM) { lblM.textContent = `${current.name} (${current.slug})`; lblM.classList.remove('hidden'); }
-                                }
-                            }
-
-                            if (btn) { btn.addEventListener('click', () => { if (select) select.focus(); else openChooserFallback(); }); }
-                            if (btnMobile) { btnMobile.addEventListener('click', () => { if (selectMobile) selectMobile.focus(); else openChooserFallback(); }); }
-
                             const autoOpenRaw = document.getElementById('autoopen-data')?.textContent || 'false';
                             const autoOpen = String(autoOpenRaw).trim() === 'true';
-                            if (autoOpen && pages.length > 1) {
-                                if (select) { select.focus(); } else { openChooserFallback(); }
+                            if (autoOpen) {
+                                const modal = document.getElementById('plinkkSelectorModal');
+                                if (modal) modal.classList.remove('hidden');
                             }
                         })();
                 </script>
