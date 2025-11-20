@@ -49,7 +49,7 @@
                       </button>
                       <!-- Dropdown Menu -->
                       <div id="menu-<%= plinkk.id %>" class="hidden absolute right-0 top-full mt-2 w-48 bg-slate-900 border border-slate-800 rounded-xl shadow-xl z-20 overflow-hidden animate-scale-in origin-top-right">
-                        <a href="/dashboard/edit/<%= plinkk.id %>" class="flex items-center gap-2 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+                        <a href="/edit?plinkkId=<%= plinkk.id %>" class="flex items-center gap-2 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                           Modifier
                         </a>
@@ -70,7 +70,7 @@
                       <span class="w-1 h-1 rounded-full bg-slate-700"></span>
                       <span><%= new Date(plinkk.createdAt).toLocaleDateString() %></span>
                     </div>
-                    <a href="/dashboard/edit/<%= plinkk.id %>" class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
+                    <a href="/edit?plinkkId=<%= plinkk.id %>" class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
                       Gérer
                     </a>
                   </div>
@@ -226,7 +226,7 @@
         const slug = fd.get('slug');
         
         try {
-          const res = await fetch('/api/plinkk/create', {
+          const res = await fetch('/api/me/plinkks', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ slug })
@@ -235,7 +235,7 @@
           if (res.ok) {
             const data = await res.json();
             showAlert('Plinkk créé avec succès !', 'success');
-            setTimeout(() => window.location.href = `/dashboard/edit/${data.id}`, 1000);
+            setTimeout(() => window.location.href = `/edit?plinkkId=${data.id}`, 1000);
           } else {
             const err = await res.json();
             showAlert(err.error || 'Erreur lors de la création', 'error');
@@ -257,7 +257,7 @@
         const id = document.getElementById('deletePlinkkId').value;
         
         try {
-          const res = await fetch(`/api/plinkk/${id}`, {
+          const res = await fetch(`/api/me/plinkks/${id}`, {
             method: 'DELETE'
           });
           
