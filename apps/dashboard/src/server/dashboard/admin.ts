@@ -8,6 +8,9 @@ import {
 import { replyView, getActiveAnnouncementsForUser } from "../../lib/replyView";
 import { verifyRoleIsStaff } from "../../lib/verifyRole";
 import { ensurePermission } from "../../lib/permissions";
+import { logAdminAction } from "../../lib/adminLogger";
+import { exec } from "child_process";
+import * as os from "os";
 
 const prisma = new PrismaClient();
 
@@ -1064,5 +1067,166 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     request.log?.info({ rolesCount: roles.length }, 'Admin roles page preload');
     let publicPath; try { const def = await prisma.plinkk.findFirst({ where: { userId: userInfo.id, isDefault: true } }); publicPath = def && def.slug ? def.slug : userInfo.id; } catch {}
     return replyView(reply, 'dashboard/admin/roles.ejs', userInfo, { rolesB64, permissionsGrouped: grouped, publicPath });
+  });
+
+  fastify.get("/logs", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin/logs")}`);
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, include: { role: true } });
+    if (!userInfo) return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin/logs")}`);
+    {
+      const ok = await ensurePermission(request, reply, 'VIEW_ADMIN_LOGS', { mode: 'redirect' });
+      if (!ok) return;
+    }
+    let publicPath; try { const def = await prisma.plinkk.findFirst({ where: { userId: userInfo.id, isDefault: true } }); publicPath = def && def.slug ? def.slug : userInfo.id; } catch {}
+    return replyView(reply, 'dashboard/admin/logs.ejs', userInfo, { publicPath });
+  });
+
+  fastify.get("/logs/api", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const ok = await ensurePermission(request, reply, 'VIEW_ADMIN_LOGS');
+    if (!ok) return;
+    
+    const { page = 1, limit = 50 } = request.query as any;
+    const skip = (Number(page) - 1) * Number(limit);
+    const take = Number(limit);
+
+    const [logs, total] = await Promise.all([
+      prisma.adminLog.findMany({
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take
+      }),
+      prisma.adminLog.count()
+    ]);
+    
+    // Enrich logs with admin names
+    const adminIds = [...new Set(logs.map(l => l.adminId))];
+    const admins = await prisma.user.findMany({ where: { id: { in: adminIds } }, select: { id: true, userName: true } });
+    const adminMap = new Map(admins.map(a => [a.id, a.userName]));
+
+    const enriched = logs.map(l => ({
+      ...l,
+      adminName: adminMap.get(l.adminId) || l.adminId
+    }));
+
+    return reply.send({ logs: enriched, total });
+  });
+
+  fastify.post("/users/:id/impersonate", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const ok = await ensurePermission(request, reply, 'IMPERSONATE_USER');
+    if (!ok) return;
+    
+    const { id } = request.params as { id: string };
+    const target = await prisma.user.findUnique({ where: { id } });
+    if (!target) return reply.code(404).send({ error: "not_found" });
+
+    // Log action
+    await logAdminAction(userId, 'IMPERSONATE', id, { targetName: target.userName }, request.ip);
+
+    // Set session
+    request.session.set("data", target.id);
+    return reply.send({ ok: true, redirectUrl: '/dashboard' });
+  });
+
+  fastify.post("/users/:id/badges", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
+    if (!ok) return;
+
+    const { id } = request.params as { id: string };
+    const { type, value } = request.body as { type: 'VERIFIED' | 'PARTNER', value: boolean };
+
+    const data: any = {};
+    if (type === 'VERIFIED') data.isVerified = value;
+    if (type === 'PARTNER') data.isPartner = value;
+
+    if (Object.keys(data).length === 0) return reply.send({ ok: true }); // Nothing to update
+
+    await prisma.user.update({ where: { id }, data });
+    await logAdminAction(userId, 'UPDATE_BADGES', id, { ...data, type }, request.ip);
+
+    return reply.send({ ok: true });
+  });
+
+  fastify.get("/system", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin/system")}`);
+    const userInfo = await prisma.user.findFirst({ where: { id: userId }, include: { role: true } });
+    if (!userInfo) return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin/system")}`);
+    {
+      const ok = await ensurePermission(request, reply, 'VIEW_SYSTEM_HEALTH', { mode: 'redirect' });
+      if (!ok) return;
+    }
+    let publicPath; try { const def = await prisma.plinkk.findFirst({ where: { userId: userInfo.id, isDefault: true } }); publicPath = def && def.slug ? def.slug : userInfo.id; } catch {}
+    return replyView(reply, 'dashboard/admin/system.ejs', userInfo, { publicPath });
+  });
+
+  fastify.get("/system/api", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const ok = await ensurePermission(request, reply, 'VIEW_SYSTEM_HEALTH');
+    if (!ok) return;
+
+    const mem = process.memoryUsage();
+    const stats = {
+      uptime: process.uptime(),
+      memory: {
+        rss: mem.rss,
+        heapTotal: mem.heapTotal,
+        heapUsed: mem.heapUsed
+      },
+      os: {
+        freemem: os.freemem(),
+        totalmem: os.totalmem(),
+        loadavg: os.loadavg()
+      },
+      nodeVersion: process.version
+    };
+    return reply.send(stats);
+  });
+
+  fastify.post("/tasks/run", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const ok = await ensurePermission(request, reply, 'RUN_SYSTEM_TASKS');
+    if (!ok) return;
+
+    const { script } = request.body as { script: string };
+    const allowedScripts = [
+      'check-avatars.mjs',
+      'delete_inactive_user.js',
+      'check_public_endpoints.mjs',
+      'check-bans.js'
+    ];
+
+    if (!allowedScripts.includes(script)) {
+      return reply.code(400).send({ error: "invalid_script" });
+    }
+
+    await logAdminAction(userId, 'RUN_TASK', undefined, { script }, request.ip);
+
+    // Execute script
+    const scriptPath = `./scripts/${script}`; // Assuming scripts are in root/scripts or apps/dashboard/scripts? 
+    // Based on workspace info: apps/dashboard/scripts/ and root/scripts/ exist. 
+    // I'll assume root scripts for now or try to find them.
+    // The workspace info shows `apps/dashboard/scripts/` has these files.
+    
+    const cmd = `node apps/dashboard/scripts/${script}`;
+    
+    return new Promise((resolve) => {
+      exec(cmd, (error, stdout, stderr) => {
+        resolve({
+          ok: !error,
+          stdout,
+          stderr,
+          error: error ? error.message : null
+        });
+      });
+    });
   });
 }

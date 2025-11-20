@@ -319,19 +319,29 @@ export function apiMeRoutes(fastify: FastifyInstance) {
               banner: body.banner ?? "",
               frame: body.frame ?? "none",
               theme: body.theme ?? "system",
-              data: body.data ?? {},
             },
             update: {
               bannerUrl: body.bannerUrl,
               banner: body.banner,
               frame: body.frame,
               theme: body.theme,
-              data: body.data,
             },
           },
         },
       },
-      select: { id: true, cosmetics: true },
+      select: { 
+        id: true, 
+        cosmetics: {
+          select: {
+            id: true,
+            flair: true,
+            frame: true,
+            theme: true,
+            bannerUrl: true,
+            banner: true
+          }
+        } 
+      },
     });
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
   });

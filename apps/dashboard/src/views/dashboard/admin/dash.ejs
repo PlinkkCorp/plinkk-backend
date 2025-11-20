@@ -305,6 +305,29 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Badges -->
+                    <div class="bg-slate-950/50 border border-slate-800 rounded-2xl p-4">
+                        <div class="text-xs font-medium text-slate-400 mb-3 uppercase tracking-wider">Badges</div>
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                                <input id="umBadgeVerified" type="checkbox" class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-blue-500 focus:ring-blue-500 focus:ring-offset-0">
+                                <span class="text-sm text-slate-300 flex items-center gap-2">
+                                    Vérifié
+                                    <svg class="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                                </span>
+                                <svg id="umBadgeVerifiedSpin" class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                                <input id="umBadgePartner" type="checkbox" class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-violet-500 focus:ring-violet-500 focus:ring-offset-0">
+                                <span class="text-sm text-slate-300 flex items-center gap-2">
+                                    Partenaire
+                                    <svg class="w-4 h-4 text-violet-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                </span>
+                                <svg id="umBadgePartnerSpin" class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Security -->
@@ -362,6 +385,11 @@
                 <!-- Danger Zone -->
                 <div class="bg-rose-950/10 border border-rose-900/20 rounded-2xl p-4">
                     <div class="text-xs font-medium text-rose-400 mb-3 uppercase tracking-wider">Zone dangereuse</div>
+                    <button id="umImpersonate" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 transition-colors text-sm font-medium mb-3 has-spinner">
+                        <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span>Se connecter en tant que</span>
+                    </button>
                     <button id="umDelete" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-medium shadow-lg shadow-rose-900/20 transition-colors has-spinner">
                         <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
                         <span>Supprimer le compte</span>
@@ -797,7 +825,10 @@
             view: document.getElementById('umViewProfile'),
             copy: document.getElementById('umCopyLink'),
             disable2fa: document.getElementById('umDisable2fa'),
-            del: document.getElementById('umDelete')
+            del: document.getElementById('umDelete'),
+            impersonate: document.getElementById('umImpersonate'),
+            badgeVerified: document.getElementById('umBadgeVerified'),
+            badgePartner: document.getElementById('umBadgePartner')
         };
         let currentLI = null;
         let currentUserDetails = null;
@@ -830,6 +861,11 @@
             const fp = document.getElementById('umForcePwd'); if (fp) fp.checked = !!mustChange;
 
             currentUserDetails = await fetchUserDetails(id);
+            
+            // Badges
+            if (um.badgeVerified) um.badgeVerified.checked = !!currentUserDetails?.isVerified;
+            if (um.badgePartner) um.badgePartner.checked = !!currentUserDetails?.isPartner;
+
             const plSelect = document.getElementById('umPlSelect');
             const plSlug = document.getElementById('umPlSlug');
             const plPublic = document.getElementById('umPlPublic');
@@ -968,6 +1004,80 @@
             }catch(err){ console.error(err); showToast('Suppression impossible'); if (label) label.textContent = prev; btn.disabled = false; }
             finally { if (spinner) spinner.classList.add('hidden'); }
         });
+
+        um.impersonate?.addEventListener('click', async () => {
+            if (!currentLI) return;
+            const id = currentLI.dataset.id;
+            const ok = await confirmSimple(`Se connecter en tant que @${id} ?`, { confirmText: 'Se connecter', cancelText: 'Annuler' });
+            if (!ok) return;
+            
+            const btn = um.impersonate;
+            const spinner = btn.querySelector('.plinkk-spinner');
+            const icon = btn.querySelector('svg:not(.plinkk-spinner)');
+            const label = btn.querySelector('span');
+            const prevLabel = label ? label.textContent : '';
+            
+            btn.disabled = true;
+            if (spinner) spinner.classList.remove('hidden');
+            if (icon) icon.classList.add('hidden');
+            if (label) label.textContent = 'Connexion...';
+
+            try {
+                const res = await fetch(`/api/admin/users/${encodeURIComponent(id)}/impersonate`, { method: 'POST' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                if (data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                } else {
+                    showToast('Erreur: pas de redirection');
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Erreur lors de l\'impersonation');
+                btn.disabled = false;
+                if (spinner) spinner.classList.add('hidden');
+                if (icon) icon.classList.remove('hidden');
+                if (label) label.textContent = prevLabel;
+            }
+        });
+
+        const handleBadgeChange = async (type, checkbox, spinId) => {
+            if (!currentLI) return;
+            const id = currentLI.dataset.id;
+            const checked = checkbox.checked;
+            const spinner = document.getElementById(spinId);
+            
+            checkbox.disabled = true;
+            if (spinner) spinner.classList.remove('hidden');
+
+            try {
+                const res = await fetch(`/api/admin/users/${encodeURIComponent(id)}/badges`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, value: checked })
+                });
+                
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                
+                // Update local state
+                if (currentUserDetails) {
+                    if (type === 'VERIFIED') currentUserDetails.isVerified = checked;
+                    if (type === 'PARTNER') currentUserDetails.isPartner = checked;
+                }
+                showToast(`Badge ${type === 'VERIFIED' ? 'Vérifié' : 'Partenaire'} ${checked ? 'activé' : 'désactivé'}`);
+            } catch (err) {
+                console.error(err);
+                showToast('Erreur lors de la mise à jour du badge');
+                checkbox.checked = !checked; // Revert
+            } finally {
+                checkbox.disabled = false;
+                if (spinner) spinner.classList.add('hidden');
+            }
+        };
+
+        um.badgeVerified?.addEventListener('change', () => handleBadgeChange('VERIFIED', um.badgeVerified, 'umBadgeVerifiedSpin'));
+        um.badgePartner?.addEventListener('change', () => handleBadgeChange('PARTNER', um.badgePartner, 'umBadgePartnerSpin'));
 
         (function(){
                 const plSelect = document.getElementById('umPlSelect');

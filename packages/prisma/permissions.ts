@@ -10,6 +10,7 @@ export const PERMISSIONS: PermissionDefinition[] = [
   // Administration générale
   { key: 'VIEW_ADMIN', category: 'Administration', description: 'Accéder à l’interface administrative', defaultRoles: ['ADMIN','DEVELOPER','MODERATOR'] },
   { key: 'MANAGE_ROLES', category: 'Administration', description: 'Créer / modifier / supprimer des rôles', defaultRoles: ['ADMIN','DEVELOPER'] },
+  { key: 'ASSIGN_ROLE', category: 'Administration', description: 'Attribuer un rôle à un utilisateur', defaultRoles: ['ADMIN', 'DEVELOPER'] },
   { key: 'MANAGE_ANNOUNCEMENTS', category: 'Administration', description: 'Gérer les annonces / messages globaux', defaultRoles: ['ADMIN','DEVELOPER','MODERATOR'] },
   { key: 'VIEW_SYSTEM_LOGS', category: 'Administration', description: 'Consulter les journaux système', defaultRoles: ['ADMIN','DEVELOPER'] },
 
@@ -65,6 +66,7 @@ export const PERMISSIONS: PermissionDefinition[] = [
   // Sécurité avancée
   { key: 'VIEW_AUDIT_LOGS', category: 'Sécurité', description: 'Voir le journal d’audit', defaultRoles: ['ADMIN','DEVELOPER'] },
   { key: 'MANAGE_SECURITY_SETTINGS', category: 'Sécurité', description: 'Gérer les paramètres de sécurité', defaultRoles: ['ADMIN','DEVELOPER'] },
+  { key: 'VIEW_ADMIN_LOGS', category: 'Sécurité', description: 'Voir les logs d’administration', defaultRoles: ['ADMIN', 'DEVELOPER'] },
 
   // Statistiques détaillées
   { key: 'VIEW_LOGIN_STATS', category: 'Statistiques', description: 'Voir les statistiques de connexion', defaultRoles: ['ADMIN','DEVELOPER','MODERATOR'] },
@@ -79,6 +81,10 @@ export const PERMISSIONS: PermissionDefinition[] = [
   { key: 'MANAGE_INTEGRATIONS', category: 'Intégrations', description: 'Configurer des intégrations', defaultRoles: ['ADMIN','DEVELOPER'] },
   { key: 'MANAGE_UMAMI', category: 'Intégrations', description: 'Configurer Umami / Analytics', defaultRoles: ['ADMIN','DEVELOPER'] },
   { key: 'MANAGE_ANALYTICS', category: 'Intégrations', description: 'Configurer les analytiques', defaultRoles: ['ADMIN','DEVELOPER'] },
+
+  { key: 'IMPERSONATE_USER', category: 'Administration', description: 'Se connecter en tant qu’un autre utilisateur', defaultRoles: ['ADMIN', 'DEVELOPER'] },
+  { key: 'VIEW_SYSTEM_HEALTH', category: 'Administration', description: 'Voir l’état du système', defaultRoles: ['ADMIN', 'DEVELOPER'] },
+  { key: 'RUN_SYSTEM_TASKS', category: 'Administration', description: 'Lancer des tâches système', defaultRoles: ['ADMIN', 'DEVELOPER'] },
 
   // Billing
   { key: 'VIEW_BILLING', category: 'Facturation', description: 'Voir la facturation', defaultRoles: ['ADMIN'] },

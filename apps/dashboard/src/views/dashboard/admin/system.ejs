@@ -1,0 +1,124 @@
+<%- include('../../partials/head.ejs', { title: 'Système - Administration', description: 'État du système et maintenance.', robots: 'noindex,nofollow' }) %>
+<%- include('../../partials/header-dash.ejs', { user: user }) %>
+
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+    <%- include('../../partials/admin-nav.ejs', { user: user, active: 'system' }) %>
+
+    <main class="col-span-12 lg:col-span-10 space-y-8 relative">
+        <!-- Dev Overlay -->
+        <div class="absolute inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-3xl border border-slate-800">
+            <div class="p-4 rounded-full bg-amber-500/10 text-amber-500 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2">En Développement</h2>
+            <p class="text-slate-400 text-center max-w-md">Cette section est en cours de développement. Certaines fonctionnalités peuvent être instables ou indisponibles.</p>
+        </div>
+
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            <div class="relative z-10">
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Système & Maintenance</h1>
+                <p class="text-slate-400 text-lg">Surveillance des ressources et exécution de tâches.</p>
+            </div>
+        </div>
+
+        <!-- Health Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+                <div class="text-slate-400 text-sm font-medium mb-2">Uptime</div>
+                <div class="text-2xl font-bold text-white" id="sysUptime">-</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+                <div class="text-slate-400 text-sm font-medium mb-2">Mémoire (RSS)</div>
+                <div class="text-2xl font-bold text-white" id="sysMem">-</div>
+                <div class="text-xs text-slate-500 mt-1" id="sysMemDetail"></div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+                <div class="text-slate-400 text-sm font-medium mb-2">Node Version</div>
+                <div class="text-2xl font-bold text-white" id="sysNode">-</div>
+            </div>
+        </div>
+
+        <!-- Task Runner -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+            <h2 class="text-xl font-bold text-white mb-6">Exécution de Tâches</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <p class="text-sm text-slate-400">Sélectionnez un script de maintenance à exécuter. Attention, ces scripts peuvent modifier la base de données.</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="runTask('check-avatars.mjs')" class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-violet-500 text-left transition-all group">
+                            <div class="font-medium text-white group-hover:text-violet-400">Vérifier Avatars</div>
+                            <div class="text-xs text-slate-500 mt-1">check-avatars.mjs</div>
+                        </button>
+                        <button onclick="runTask('delete_inactive_user.js')" class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-rose-500 text-left transition-all group">
+                            <div class="font-medium text-white group-hover:text-rose-400">Supprimer Inactifs</div>
+                            <div class="text-xs text-slate-500 mt-1">delete_inactive_user.js</div>
+                        </button>
+                        <button onclick="runTask('check_public_endpoints.mjs')" class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-blue-500 text-left transition-all group">
+                            <div class="font-medium text-white group-hover:text-blue-400">Check Endpoints</div>
+                            <div class="text-xs text-slate-500 mt-1">check_public_endpoints.mjs</div>
+                        </button>
+                        <button onclick="runTask('check-bans.js')" class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-amber-500 text-left transition-all group">
+                            <div class="font-medium text-white group-hover:text-amber-400">Vérifier Bans</div>
+                            <div class="text-xs text-slate-500 mt-1">check-bans.js</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-black rounded-xl border border-slate-800 p-4 font-mono text-xs h-[300px] overflow-y-auto flex flex-col">
+                    <div class="text-slate-500 border-b border-slate-800 pb-2 mb-2">Console Output</div>
+                    <pre id="consoleOutput" class="flex-1 text-slate-300 whitespace-pre-wrap break-all"></pre>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    async function loadStats() {
+        try {
+            const res = await fetch('/admin/system/api');
+            const data = await res.json();
+            
+            document.getElementById('sysUptime').textContent = Math.floor(data.uptime / 60) + ' min';
+            document.getElementById('sysMem').textContent = Math.round(data.memory.rss / 1024 / 1024) + ' MB';
+            document.getElementById('sysMemDetail').textContent = `Heap: ${Math.round(data.memory.heapUsed / 1024 / 1024)} / ${Math.round(data.memory.heapTotal / 1024 / 1024)} MB`;
+            document.getElementById('sysNode').textContent = data.nodeVersion;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function runTask(script) {
+        const out = document.getElementById('consoleOutput');
+        out.textContent += `\n> Running ${script}...\n`;
+        out.scrollTop = out.scrollHeight;
+
+        try {
+            const res = await fetch('/admin/tasks/run', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ script })
+            });
+            const data = await res.json();
+            
+            if (data.error) {
+                out.textContent += `ERROR: ${data.error}\n`;
+            } else {
+                out.textContent += data.stdout || '';
+                if (data.stderr) out.textContent += `STDERR:\n${data.stderr}`;
+                out.textContent += `\n> Done.\n`;
+            }
+        } catch (e) {
+            out.textContent += `\nRequest Failed: ${e.message}\n`;
+        }
+        out.scrollTop = out.scrollHeight;
+    }
+
+    loadStats();
+    setInterval(loadStats, 10000);
+</script>
+</body>
+</html>
