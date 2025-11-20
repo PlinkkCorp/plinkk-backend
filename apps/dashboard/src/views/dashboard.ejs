@@ -13,7 +13,7 @@
                 <p class="text-slate-400 text-lg">Prêt à développer votre audience aujourd'hui ?</p>
             </div>
             <div class="flex gap-3 relative z-10">
-                <a href="<%= frontendUrl %>/<%= (user && user.userName) || (user && user.id) %>" target="_blank" class="px-5 py-3 bg-slate-700/50 hover:bg-slate-700 text-white rounded-xl border border-slate-600 transition-all flex items-center gap-2">
+                <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>" target="_blank" class="px-5 py-3 bg-slate-700/50 hover:bg-slate-700 text-white rounded-xl border border-slate-600 transition-all flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                     Voir ma page
                 </a>
@@ -148,7 +148,7 @@
                         
                         <div class="flex items-center justify-between mb-6 relative z-10">
                             <h3 class="text-base font-semibold text-white">Aperçu mobile</h3>
-                            <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %>?preview=1<% } else { %>/<%= user.id %>?preview=1<% } %>" target="_blank" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition-colors">
+                            <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>" target="_blank" class="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                             </a>
                         </div>
