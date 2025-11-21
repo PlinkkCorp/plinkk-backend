@@ -1,8 +1,8 @@
 <%- include('../../partials/head.ejs', { title: 'Sessions Actives - Admin' }) %>
-<%- include('../../../partials/header-dash.ejs', { user: user }) %>
+<%- include('../../partials/header-dash.ejs', { user: user }) %>
 
 <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-  <%- include('../../../partials/asside_dash.ejs', { active: 'admin-sessions' }) %>
+  <%- include('../../partials/admin-nav.ejs', { active: 'admin-sessions' }) %>
 
   <main class="col-span-12 lg:col-span-10 space-y-6">
     
@@ -27,16 +27,15 @@
           <thead class="text-xs text-slate-500 uppercase bg-slate-950/50 border-b border-slate-800">
             <tr>
               <th scope="col" class="px-6 py-4">Utilisateur</th>
-              <th scope="col" class="px-6 py-4">IP</th>
-              <th scope="col" class="px-6 py-4">User Agent</th>
-              <th scope="col" class="px-6 py-4">Créé le</th>
-              <th scope="col" class="px-6 py-4">Expire le</th>
+              <th scope="col" class="px-6 py-4">Contexte</th>
+              <th scope="col" class="px-6 py-4">Activité</th>
+              <th scope="col" class="px-6 py-4">Durée</th>
               <th scope="col" class="px-6 py-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody id="sessionsTableBody">
             <tr>
-              <td colspan="6" class="px-6 py-8 text-center text-slate-500">Chargement...</td>
+              <td colspan="5" class="px-6 py-8 text-center text-slate-500">Chargement...</td>
             </tr>
           </tbody>
         </table>
@@ -56,18 +55,109 @@
   </main>
 </div>
 
+<!-- Modal Details -->
+<div id="sessionModal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+  <div class="fixed inset-0 z-10 overflow-y-auto">
+    <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+      <div class="relative transform overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
+        <div class="bg-slate-900 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+          <div class="sm:flex sm:items-start">
+            <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
+              <h3 class="text-xl font-semibold leading-6 text-white mb-6" id="modal-title">Détails de la session</h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- User Info -->
+                <div class="bg-slate-950/50 rounded-xl p-4 border border-slate-800">
+                  <h4 class="text-sm font-medium text-slate-400 mb-3 uppercase tracking-wider">Utilisateur</h4>
+                  <div class="flex items-center gap-3 mb-4">
+                    <div id="modalUserImage" class="h-12 w-12 rounded-full bg-slate-800 overflow-hidden"></div>
+                    <div>
+                      <div id="modalUserName" class="font-bold text-white text-lg"></div>
+                      <div id="modalUserEmail" class="text-sm text-slate-500"></div>
+                    </div>
+                  </div>
+                  <div class="text-xs text-slate-600 font-mono bg-slate-900 p-2 rounded border border-slate-800/50 break-all" id="modalUserId"></div>
+                </div>
+
+                <!-- Session Context -->
+                <div class="bg-slate-950/50 rounded-xl p-4 border border-slate-800">
+                  <h4 class="text-sm font-medium text-slate-400 mb-3 uppercase tracking-wider">Contexte Technique</h4>
+                  <div class="space-y-3">
+                    <div>
+                      <div class="text-xs text-slate-500 mb-1">Adresse IP</div>
+                      <div id="modalIp" class="font-mono text-sm text-slate-300 bg-slate-900 px-2 py-1 rounded inline-block border border-slate-800"></div>
+                    </div>
+                    <div>
+                      <div class="text-xs text-slate-500 mb-1">User Agent</div>
+                      <div id="modalUa" class="text-xs text-slate-400 bg-slate-900 p-2 rounded border border-slate-800 break-all leading-relaxed"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Activity -->
+                <div class="bg-slate-950/50 rounded-xl p-4 border border-slate-800 md:col-span-2">
+                  <h4 class="text-sm font-medium text-slate-400 mb-3 uppercase tracking-wider">Activité Récente</h4>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <div class="text-xs text-slate-500 mb-1">Page Actuelle</div>
+                      <div id="modalCurrentPath" class="text-sm font-medium text-white break-all"></div>
+                    </div>
+                    <div>
+                      <div class="text-xs text-slate-500 mb-1">Dernière activité</div>
+                      <div id="modalLastActive" class="text-sm text-slate-300"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Timings -->
+                <div class="bg-slate-950/50 rounded-xl p-4 border border-slate-800 md:col-span-2">
+                  <h4 class="text-sm font-medium text-slate-400 mb-3 uppercase tracking-wider">Chronologie</h4>
+                  <div class="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <div class="text-xs text-slate-500 mb-1">Création</div>
+                      <div id="modalCreated" class="text-sm text-white font-mono"></div>
+                    </div>
+                    <div>
+                      <div class="text-xs text-slate-500 mb-1">Expiration</div>
+                      <div id="modalExpires" class="text-sm text-white font-mono"></div>
+                    </div>
+                    <div>
+                      <div class="text-xs text-slate-500 mb-1">ID Session</div>
+                      <div id="modalSessionId" class="text-xs text-slate-600 font-mono truncate" title=""></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <div class="bg-slate-900 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 border-t border-slate-800">
+          <button type="button" class="mt-3 inline-flex w-full justify-center rounded-xl bg-slate-800 px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-slate-700 hover:bg-slate-700 sm:mt-0 sm:w-auto transition-colors" onclick="closeModal()">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 let currentPage = 1;
+let isFirstLoad = true;
+let currentSessionsData = []; // Store data for modal
 
-async function loadSessions() {
+async function loadSessions(isAutoRefresh = false) {
   const search = document.getElementById('searchFilter').value;
   const tbody = document.getElementById('sessionsTableBody');
   
-  tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-500">Chargement...</td></tr>';
+  if (!isAutoRefresh && isFirstLoad) {
+    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-slate-500">Chargement...</td></tr>';
+  }
 
   try {
     const res = await fetch(`/admin/sessions/api?page=${currentPage}&search=${encodeURIComponent(search)}`);
     const data = await res.json();
+    currentSessionsData = data.sessions; // Save for modal usage
     
     document.getElementById('totalCount').textContent = data.total;
     document.getElementById('pageIndicator').textContent = `Page ${currentPage}`;
@@ -75,56 +165,181 @@ async function loadSessions() {
     document.getElementById('nextBtn').disabled = (currentPage * 20) >= data.total;
 
     if (data.sessions.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-500">Aucune session active trouvée</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-slate-500">Aucune session active trouvée</td></tr>';
       return;
     }
 
-    tbody.innerHTML = data.sessions.map(s => `
-      <tr class="border-b border-slate-800 hover:bg-slate-800/50 transition-colors">
+    tbody.innerHTML = data.sessions.map(s => {
+      const isCurrent = s.id === data.currentSessionId;
+      const ua = parseUA(s.userAgent);
+      const lastActive = s.lastActiveAt ? new Date(s.lastActiveAt) : new Date(s.createdAt);
+      const timeSinceActive = getTimeSince(lastActive);
+      
+      return `
+      <tr class="border-b border-slate-800 hover:bg-slate-800/50 transition-colors ${isCurrent ? 'bg-violet-500/5' : ''}">
         <td class="px-6 py-4 whitespace-nowrap text-white">
-          <div class="flex items-center gap-2">
-            <div class="h-6 w-6 rounded-full bg-slate-800 overflow-hidden">
+          <div class="flex items-center gap-3">
+            <div class="h-8 w-8 rounded-full bg-slate-800 overflow-hidden ring-2 ring-slate-800">
                ${s.user.image ? `<img src="${s.user.image}" class="h-full w-full object-cover">` : ''}
             </div>
             <div>
-              <div class="font-medium">${s.user.userName}</div>
-              <div class="text-xs text-slate-500">${s.user.email}</div>
+              <div class="font-medium flex items-center gap-2">
+                ${s.user.userName}
+                ${isCurrent ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-violet-500/20 text-violet-400 border border-violet-500/20">VOUS</span>' : ''}
+              </div>
+              <div class="text-xs text-slate-500 font-mono">${s.user.id}</div>
             </div>
           </div>
         </td>
-        <td class="px-6 py-4 whitespace-nowrap font-mono text-xs text-slate-400">
-          ${s.ip || 'N/A'}
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-2 text-xs text-slate-300">
+              <span class="font-mono bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">${s.ip || 'N/A'}</span>
+            </div>
+            <div class="text-xs text-slate-500 flex items-center gap-1" title="${s.userAgent}">
+              <span>${ua.os}</span> • <span>${ua.browser}</span>
+            </div>
+          </div>
         </td>
-        <td class="px-6 py-4 text-xs text-slate-500 max-w-xs truncate" title="${s.userAgent}">
-          ${parseUA(s.userAgent)}
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="flex flex-col gap-1">
+            <div class="text-sm">
+              ${formatActivity(s.currentPath)}
+            </div>
+            <div class="text-xs text-slate-500">
+              Actif il y a ${timeSinceActive}
+            </div>
+          </div>
         </td>
-        <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-400">
-          ${new Date(s.createdAt).toLocaleString()}
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-400">
-          ${new Date(s.expiresAt).toLocaleString()}
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="flex flex-col gap-1">
+            <div class="text-xs text-slate-400">
+              Début : ${new Date(s.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+            </div>
+            <div class="text-xs text-slate-500">
+              Expire : ${new Date(s.expiresAt).toLocaleDateString()}
+            </div>
+          </div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-right">
-          <button onclick="revokeSession('${s.id}')" class="text-rose-400 hover:text-rose-300 font-medium text-xs bg-rose-500/10 px-3 py-1.5 rounded-lg border border-rose-500/20 transition-colors">
-            Révoquer
-          </button>
+          <div class="flex items-center justify-end gap-2">
+            <button onclick="openModal('${s.id}')" class="text-slate-400 hover:text-white font-medium text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 transition-colors">
+              Détails
+            </button>
+            ${!isCurrent ? `
+            <button onclick="revokeSession('${s.id}')" class="text-rose-400 hover:text-rose-300 font-medium text-xs bg-rose-500/10 px-3 py-1.5 rounded-lg border border-rose-500/20 transition-colors hover:bg-rose-500/20">
+              Révoquer
+            </button>` : ''}
+          </div>
         </td>
       </tr>
-    `).join('');
+    `}).join('');
+    isFirstLoad = false;
   } catch (e) {
     console.error(e);
-    tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-rose-500">Erreur de chargement</td></tr>';
+    if (!isAutoRefresh) {
+      tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-rose-500">Erreur de chargement</td></tr>';
+    }
   }
 }
 
+function openModal(sessionId) {
+  const session = currentSessionsData.find(s => s.id === sessionId);
+  if (!session) return;
+
+  document.getElementById('modalUserImage').innerHTML = session.user.image ? `<img src="${session.user.image}" class="h-full w-full object-cover">` : '';
+  document.getElementById('modalUserName').textContent = session.user.userName;
+  document.getElementById('modalUserEmail').textContent = session.user.email;
+  document.getElementById('modalUserId').textContent = session.user.id;
+  
+  document.getElementById('modalIp').textContent = session.ip || 'N/A';
+  document.getElementById('modalUa').textContent = session.userAgent || 'Inconnu';
+  
+  document.getElementById('modalCurrentPath').innerHTML = session.currentPath ? `<span class="text-violet-400 font-mono">${session.currentPath}</span>` : '<span class="text-slate-500 italic">Aucune activité récente</span>';
+  
+  const lastActive = session.lastActiveAt ? new Date(session.lastActiveAt) : new Date(session.createdAt);
+  document.getElementById('modalLastActive').textContent = lastActive.toLocaleString() + ` (${getTimeSince(lastActive)})`;
+
+  document.getElementById('modalCreated').textContent = new Date(session.createdAt).toLocaleString();
+  document.getElementById('modalExpires').textContent = new Date(session.expiresAt).toLocaleString();
+  document.getElementById('modalSessionId').textContent = session.id;
+  document.getElementById('modalSessionId').title = session.id;
+
+  document.getElementById('sessionModal').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('sessionModal').classList.add('hidden');
+}
+
+function formatActivity(path) {
+  if (!path) return '<span class="text-slate-600 italic flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-slate-600"></span> Inactif</span>';
+  
+  let label = path;
+  let style = "text-slate-400";
+  let icon = "";
+
+  if (path.startsWith('/admin')) {
+    label = 'Admin Panel';
+    style = "text-amber-400";
+    icon = '<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>';
+  } else if (path.startsWith('/dashboard')) {
+    label = 'Dashboard';
+    style = "text-blue-400";
+    icon = '<span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>';
+  } else if (path === '/') {
+    label = 'Accueil';
+    style = "text-emerald-400";
+    icon = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>';
+  } else {
+    icon = '<span class="w-2 h-2 rounded-full bg-slate-500"></span>';
+  }
+
+  return `<div class="flex items-center gap-2 ${style}">
+    ${icon}
+    <span class="truncate max-w-[200px]" title="${path}">${label}</span>
+  </div>`;
+}
+
 function parseUA(ua) {
-  if (!ua) return 'Inconnu';
-  if (ua.includes('Windows')) return 'Windows';
-  if (ua.includes('Macintosh')) return 'Mac';
-  if (ua.includes('Linux')) return 'Linux';
-  if (ua.includes('Android')) return 'Android';
-  if (ua.includes('iPhone')) return 'iPhone';
-  return 'Autre';
+  if (!ua) return { os: 'Inconnu', browser: 'Inconnu' };
+  
+  let os = 'Autre OS';
+  if (ua.includes('Windows')) os = 'Windows';
+  else if (ua.includes('Macintosh')) os = 'macOS';
+  else if (ua.includes('Linux')) os = 'Linux';
+  else if (ua.includes('Android')) os = 'Android';
+  else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+
+  let browser = 'Autre Nav.';
+  if (ua.includes('Firefox')) browser = 'Firefox';
+  else if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
+  else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
+  else if (ua.includes('Edg')) browser = 'Edge';
+  else if (ua.includes('Opera') || ua.includes('OPR')) browser = 'Opera';
+
+  return { os, browser };
+}
+
+function getTimeSince(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  
+  let interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + " an(s)";
+  
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + " mois";
+  
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + " j";
+  
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + " h";
+  
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + " min";
+  
+  return Math.floor(seconds) + " s";
 }
 
 function changePage(delta) {
@@ -156,4 +371,5 @@ document.getElementById('searchFilter').addEventListener('input', (e) => {
 
 // Initial load
 loadSessions();
+setInterval(() => loadSessions(true), 5000);
 </script>

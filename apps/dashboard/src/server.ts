@@ -120,15 +120,46 @@ fastify.addHook("onRequest", async (request, reply) => {
 });
 
 fastify.addHook("preHandler", async (request, reply) => {
+  const userId = request.session.get("data");
   const sessionId = request.session.get("sessionId");
-  if (sessionId) {
-    try {
-      const session = await prisma.session.findUnique({ where: { id: sessionId } });
-      if (!session || session.expiresAt < new Date()) {
-        request.session.delete();
+
+  if (userId && !String(userId).includes("__totp")) {
+    if (sessionId) {
+      try {
+        const session = await prisma.session.findUnique({ where: { id: sessionId } });
+        if (!session || session.expiresAt < new Date()) {
+          request.session.delete();
+        } else {
+          // Update current path
+          const currentPath = request.raw.url;
+          if (currentPath && !currentPath.startsWith('/public') && !currentPath.startsWith('/api')) {
+             await prisma.session.update({
+               where: { id: sessionId },
+               data: { 
+                 currentPath: currentPath.split('?')[0],
+                 lastActiveAt: new Date()
+               }
+             });
+          }
+        }
+      } catch (e) {
+        // DB error, ignore
       }
-    } catch (e) {
-      // DB error, ignore
+    } else {
+      // Create session for legacy logins
+      try {
+        const session = await prisma.session.create({
+          data: {
+            userId: String(userId),
+            ip: request.ip,
+            userAgent: request.headers["user-agent"] || "Unknown",
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+          }
+        });
+        request.session.set("sessionId", session.id);
+      } catch (e) {
+        // Ignore creation errors
+      }
     }
   }
 });

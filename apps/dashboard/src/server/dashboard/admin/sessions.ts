@@ -66,7 +66,8 @@ export function dashboardAdminSessionsRoutes(fastify: FastifyInstance) {
       prisma.session.count({ where })
     ]);
 
-    return reply.send({ sessions, total });
+    const currentSessionId = request.session.get("sessionId");
+    return reply.send({ sessions, total, currentSessionId });
   });
 
   // API: Revoke Session
