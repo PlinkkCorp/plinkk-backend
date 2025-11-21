@@ -1,0 +1,100 @@
+<%- include('../../partials/head.ejs', { title: 'Mes Sessions' , description: 'Gérez vos sessions actives.' , robots: 'noindex,nofollow' }) %>
+
+<%- include('../../partials/header-dash.ejs', { user: user }) %>
+
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+    <%- include('../../partials/asside_dash.ejs', { user: user, active: 'sessions' }) %>
+
+    <main class="col-span-12 lg:col-span-10 space-y-8">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            <div class="relative z-10">
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Mes Sessions</h1>
+                <p class="text-slate-400 text-lg">Gérez les appareils connectés à votre compte.</p>
+            </div>
+        </div>
+
+        <!-- Sessions List -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
+            <div class="p-6 border-b border-slate-800">
+                <h2 class="font-bold text-white text-xl">Sessions Actives</h2>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-xs uppercase text-slate-500 bg-slate-950/50">
+                            <th class="p-4 font-medium">Appareil / IP</th>
+                            <th class="p-4 font-medium">Dernière activité</th>
+                            <th class="p-4 font-medium">Expiration</th>
+                            <th class="p-4 font-medium text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800">
+                        <% if (sessions.length === 0) { %>
+                            <tr>
+                                <td colspan="4" class="p-8 text-center text-slate-500">Aucune session active trouvée.</td>
+                            </tr>
+                        <% } else { %>
+                            <% sessions.forEach(session => { 
+                                const isCurrent = session.id === currentSessionId;
+                            %>
+                                <tr class="hover:bg-slate-800/30 transition-colors group">
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-medium text-white flex items-center gap-2">
+                                                    <%= session.userAgent || 'Inconnu' %>
+                                                    <% if (isCurrent) { %>
+                                                        <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] border border-emerald-500/20">Actuelle</span>
+                                                    <% } %>
+                                                </div>
+                                                <div class="text-xs text-slate-500 font-mono mt-0.5"><%= session.ip %></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-sm text-slate-300">
+                                        <%= new Date(session.createdAt).toLocaleString() %>
+                                    </td>
+                                    <td class="p-4 text-sm text-slate-300">
+                                        <%= new Date(session.expiresAt).toLocaleString() %>
+                                    </td>
+                                    <td class="p-4 text-right">
+                                        <% if (!isCurrent) { %>
+                                            <button onclick="revokeSession('<%= session.id %>')" class="p-2 rounded-xl hover:bg-rose-500/10 text-slate-400 hover:text-rose-500 transition-colors" title="Révoquer">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                            </button>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    async function revokeSession(id) {
+        if (!confirm('Voulez-vous vraiment déconnecter cette session ?')) return;
+        try {
+            const res = await fetch('/sessions/' + id, { method: 'DELETE' });
+            if (res.ok) {
+                window.location.reload();
+            } else {
+                alert('Erreur lors de la révocation');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Erreur réseau');
+        }
+    }
+</script>
+</body>
+</html>

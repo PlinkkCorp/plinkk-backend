@@ -889,6 +889,240 @@
             if (seriesP && seriesP.length) renderChartP({ series: seriesP }, hoverIndexP);
           });
 
+          const ctx4 = document.getElementById('chartCumul').getContext('2d');
+          const wrap4 = document.getElementById('chart4Wrap');
+          const tt4 = document.getElementById('tt4');
+          let series4 = [];
+          let hoverIndex4 = -1;
+          function renderChart4(series, hoverIndex = -1) {
+            series4 = Array.isArray(series) ? series : [];
+            hoverIndex4 = hoverIndex;
+            const labels = series4.map(p => p.date);
+            const data = series4.map(p => p.count);
+
+            const dpr = window.devicePixelRatio || 1;
+            const cssW = ctx4.canvas.clientWidth;
+            const cssH = 260;
+            ctx4.canvas.width = Math.max(1, Math.floor(cssW * dpr));
+            ctx4.canvas.height = Math.floor(cssH * dpr);
+            const w = ctx4.canvas.width;
+            const h = ctx4.canvas.height;
+            ctx4.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx4.clearRect(0, 0, cssW, cssH);
+
+            const padL = 40;
+            const padB = 28;
+            const padT = 10; const padR = 10;
+            const innerW = cssW - padL - padR;
+            const innerH = cssH - padT - padB;
+
+            const maxVal = Math.max(1, ...data);
+            const yTicks = 5;
+            const stepY = Math.max(1, Math.ceil(maxVal / yTicks));
+            const maxRounded = Math.max(stepY, stepY * yTicks);
+            const stepX = data.length > 1 ? (innerW / (data.length - 1)) : 0;
+            const scaleY = innerH / maxRounded;
+
+            ctx4.strokeStyle = 'rgba(148,163,184,0.35)';
+            ctx4.lineWidth = 1;
+            ctx4.beginPath();
+            ctx4.moveTo(padL, padT);
+            ctx4.lineTo(padL, padT + innerH);
+            ctx4.lineTo(padL + innerW, padT + innerH);
+            ctx4.stroke();
+
+            ctx4.fillStyle = 'rgba(148,163,184,0.7)';
+            ctx4.font = '11px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+            ctx4.textAlign = 'right';
+            ctx4.textBaseline = 'middle';
+            for (let y = 0; y <= maxRounded; y += stepY) {
+              const py = padT + innerH - y * scaleY;
+              ctx4.strokeStyle = 'rgba(148,163,184,0.15)';
+              ctx4.beginPath(); ctx4.moveTo(padL, py); ctx4.lineTo(padL + innerW, py); ctx4.stroke();
+              ctx4.fillStyle = 'rgba(148,163,184,0.7)';
+              ctx4.fillText(String(y), padL - 6, py);
+            }
+
+            ctx4.textAlign = 'center';
+            ctx4.textBaseline = 'top';
+            const xLabelEvery = Math.max(1, Math.ceil(labels.length / 6));
+            labels.forEach((lab, i) => {
+              if (i % xLabelEvery !== 0 && i !== labels.length - 1) return;
+              const x = padL + i * stepX;
+              ctx4.strokeStyle = 'rgba(148,163,184,0.15)';
+              ctx4.beginPath(); ctx4.moveTo(x, padT + innerH); ctx4.lineTo(x, padT + innerH + 4); ctx4.stroke();
+              const shortLab = lab?.slice(5) || '';
+              ctx4.fillStyle = 'rgba(148,163,184,0.7)';
+              ctx4.fillText(shortLab, x, padT + innerH + 6);
+            });
+
+            ctx4.strokeStyle = '#10b981';
+            ctx4.lineWidth = 2;
+            ctx4.beginPath();
+            data.forEach((v, i) => {
+              const x = padL + i * stepX;
+              const y = padT + innerH - v * scaleY;
+              if (i === 0) ctx4.moveTo(x, y); else ctx4.lineTo(x, y);
+            });
+            ctx4.stroke();
+
+            ctx4.fillStyle = '#34d399';
+            data.forEach((v, i) => {
+              const x = padL + i * stepX;
+              const y = padT + innerH - v * scaleY;
+              ctx4.beginPath(); ctx4.arc(x, y, 2.5, 0, Math.PI * 2); ctx4.fill();
+            });
+
+            if (hoverIndex >= 0 && hoverIndex < data.length) {
+              const x = padL + hoverIndex * stepX;
+              const y = padT + innerH - data[hoverIndex] * scaleY;
+              ctx4.strokeStyle = 'rgba(16, 185, 129, 0.35)';
+              ctx4.lineWidth = 1;
+              ctx4.beginPath(); ctx4.moveTo(x, padT); ctx4.lineTo(x, padT + innerH); ctx4.stroke();
+              ctx4.fillStyle = '#6ee7b7';
+              ctx4.beginPath(); ctx4.arc(x, y, 4, 0, Math.PI * 2); ctx4.fill();
+              const rect = wrap4.getBoundingClientRect();
+              tt4.textContent = `${labels[hoverIndex]} — ${data[hoverIndex]} total`;
+              const ttX = Math.min(rect.width - 140, Math.max(8, x + 8));
+              const ttY = Math.max(8, y - 10);
+              tt4.style.left = ttX + 'px';
+              tt4.style.top = ttY + 'px';
+              tt4.classList.remove('hidden');
+            } else {
+              tt4.classList.add('hidden');
+            }
+          }
+
+          async function apply() {
+            const load1 = document.getElementById('load1');
+            const err1 = document.getElementById('err1');
+            const empty1 = document.getElementById('empty1');
+            const load2 = document.getElementById('load2');
+            const err2 = document.getElementById('err2');
+            const empty2 = document.getElementById('empty2');
+            const load3 = document.getElementById('load3');
+            const err3 = document.getElementById('err3');
+            const empty3 = document.getElementById('empty3');
+            const load4 = document.getElementById('load4');
+            const err4 = document.getElementById('err4');
+            const empty4 = document.getElementById('empty4');
+
+            try {
+                load1?.classList.remove('hidden'); err1?.classList.add('hidden'); empty1?.classList.add('hidden');
+                load2?.classList.remove('hidden'); err2?.classList.add('hidden'); empty2?.classList.add('hidden');
+                load3?.classList.remove('hidden'); err3?.classList.add('hidden'); empty3?.classList.add('hidden');
+                load4?.classList.remove('hidden'); err4?.classList.add('hidden'); empty4?.classList.add('hidden');
+
+                const [series, summary, vis, roles] = await Promise.all([
+                    fetchSeries(),
+                    fetchSummary(),
+                    fetchSeriesByVisibility(),
+                    fetchSeriesByRole()
+                ]);
+
+                // SU1
+                lastSeries = series.series || [];
+                $('#rangeLabel').textContent = `${series.from} → ${series.to}`;
+                renderChart(lastSeries);
+                if (!lastSeries.length) empty1?.classList.remove('hidden');
+
+                // Summary
+                $('#statTotal').textContent = summary.total;
+                $('#statPub').textContent = summary.public;
+                $('#statPriv').textContent = summary.private;
+                $('#statStaff').textContent = summary.staff;
+
+                // SU2
+                series2 = vis.series || [];
+                $('#rangeLabel2').textContent = `${vis.from} → ${vis.to}`;
+                renderChart2({ series: series2 });
+                if (!series2.length) empty2?.classList.remove('hidden');
+
+                // SU3
+                series3 = roles.series || [];
+                $('#rangeLabel3').textContent = `${roles.from} → ${roles.to}`;
+                renderChart3({ series: series3 });
+                if (!series3.length) empty3?.classList.remove('hidden');
+
+                // SU4
+                series4 = makeCumul(lastSeries);
+                $('#rangeLabel4').textContent = `${series.from} → ${series.to}`;
+                renderChart4(series4);
+                if (!series4.length) empty4?.classList.remove('hidden');
+
+            } catch (e) {
+                console.error(e);
+                err1?.classList.remove('hidden');
+                err2?.classList.remove('hidden');
+                err3?.classList.remove('hidden');
+                err4?.classList.remove('hidden');
+            } finally {
+                load1?.classList.add('hidden');
+                load2?.classList.add('hidden');
+                load3?.classList.add('hidden');
+                load4?.classList.add('hidden');
+            }
+          }
+
+          async function applyLogins() {
+             try {
+                document.getElementById('loadL')?.classList.remove('hidden');
+                document.getElementById('errL')?.classList.add('hidden');
+                document.getElementById('emptyL')?.classList.add('hidden');
+
+                const [series, recent] = await Promise.all([
+                    fetchLoginsSeries(),
+                    fetchRecentLogins()
+                ]);
+
+                seriesL = series.series || [];
+                $('#rangeLabelL').textContent = `${series.from} → ${series.to}`;
+                renderChartL({ series: seriesL });
+                if (!seriesL.length) document.getElementById('emptyL')?.classList.remove('hidden');
+
+                const recDiv = document.getElementById('recentLogins');
+                if (recDiv) {
+                    recDiv.innerHTML = (recent.logins || []).map(l => `
+                        <div class="flex items-center gap-3 p-2 rounded-lg bg-slate-950 border border-slate-800">
+                            <div class="h-8 w-8 rounded-full bg-slate-800 flex items-center justify-center text-xs text-slate-400 font-medium">
+                                ${l.user?.userName?.substring(0,2).toUpperCase() || '??'}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="truncate text-slate-200 font-medium">${l.user?.userName || 'Inconnu'}</div>
+                                <div class="text-[10px] text-slate-500">${new Date(l.createdAt).toLocaleString()}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+             } catch (e) {
+                 console.error(e);
+                 document.getElementById('errL')?.classList.remove('hidden');
+             } finally {
+                 document.getElementById('loadL')?.classList.add('hidden');
+             }
+          }
+
+          async function applyBans() {
+             try {
+                document.getElementById('loadB')?.classList.remove('hidden');
+                document.getElementById('errB')?.classList.add('hidden');
+                document.getElementById('emptyB')?.classList.add('hidden');
+
+                const series = await fetchBansSeries();
+                seriesB = series.series || [];
+                $('#rangeLabelB').textContent = `${series.from} → ${series.to}`;
+                renderChartB({ series: seriesB });
+                if (!seriesB.length) document.getElementById('emptyB')?.classList.remove('hidden');
+
+             } catch (e) {
+                 console.error(e);
+                 document.getElementById('errB')?.classList.remove('hidden');
+             } finally {
+                 document.getElementById('loadB')?.classList.add('hidden');
+             }
+          }
+
           window.__retrySU1 = apply;
           window.__retrySU2 = apply;
           window.__retrySU3 = apply;

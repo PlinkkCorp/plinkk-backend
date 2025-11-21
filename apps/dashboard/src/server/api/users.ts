@@ -6,6 +6,7 @@ import {
   verifyRoleDeveloper,
 } from "../../lib/verifyRole";
 import { ensurePermission } from "../../lib/permissions";
+import { logAdminAction } from "../../lib/adminLogger";
 
 const prisma = new PrismaClient();
 
@@ -25,6 +26,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
         publicEmail: true,
         isPublic: true,
         views: true,
+        isVerified: true,
+        isPartner: true,
         role: { select: { id: true, name: true } },
         plinkks: {
           select: {
@@ -135,6 +138,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
         createdAt: new Date(),
       },
     });
+    await logAdminAction(meId, 'BAN_USER', id, { email: u.email, reason: body.reason, time: body.time }, request.ip);
     return reply.send({ ok: true, ban });
   });
 
@@ -158,6 +162,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       where: { email: ban.email },
       data: { revoquedAt: new Date() },
     });
+    await logAdminAction(meId, 'UNBAN_USER', id, { email: u.email }, request.ip);
     return reply.send({ ok: true });
   });
 
@@ -202,6 +207,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { roleId: dbRole.id },
       include: { role: true },
     });
+    await logAdminAction(meId, 'UPDATE_USER_ROLE', id, { oldRole: meRole, newRole: targetRole }, request.ip);
     return reply.send({ id: updated.id, role: updated.role });
   });
 
@@ -217,6 +223,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { cosmetics },
       include: { cosmetics: true },
     });
+    await logAdminAction(meId, 'UPDATE_USER_COSMETICS', id, { cosmetics }, request.ip);
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
   });
 
@@ -227,6 +234,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     if (!ok) return;
     const { id } = request.params as { id: string };
     await prisma.user.delete({ where: { id } });
+    await logAdminAction(meId, 'DELETE_USER', id, {}, request.ip);
     return reply.send({ ok: true });
   });
 
@@ -250,6 +258,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       where: { id },
       data: { twoFactorSecret: "", twoFactorEnabled: false },
     });
+    await logAdminAction(meId, 'RESET_2FA_USER', id, {}, request.ip);
     return reply.send({ ok: true, changed: true });
   });
 
@@ -270,6 +279,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { isPublic: Boolean(isPublic) },
       select: { id: true, isPublic: true },
     });
+    await logAdminAction(meId, 'UPDATE_USER_VISIBILITY', id, { isPublic }, request.ip);
     return reply.send(updated);
   });
 
@@ -297,6 +307,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { publicEmail: newPublicEmail },
       select: { id: true, publicEmail: true },
     });
+    await logAdminAction(meId, 'UPDATE_USER_EMAIL_VISIBILITY', id, { isEmailPublic }, request.ip);
     return reply.send({ id: updated.id, isEmailPublic: Boolean(updated.publicEmail) });
   });
 
@@ -321,6 +332,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { mustChangePassword: mustChange },
       select: { id: true, mustChangePassword: true },
     });
+    await logAdminAction(meId, 'FORCE_PASSWORD_RESET', id, { mustChange }, request.ip);
     return reply.send({ id: updated.id, mustChangePassword: updated.mustChangePassword });
   });
 
@@ -390,6 +402,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     const created = await prisma.bannedEmail.create({
       data: { email, reason, time },
     });
+    await logAdminAction(userId, 'BAN_EMAIL', undefined, { email, reason, time }, request.ip);
     return reply.send({
       ok: true,
       ban: {
@@ -416,6 +429,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { revoquedAt: new Date() },
     });
     if (!res.count) return reply.code(404).send({ error: "not_found" });
+    await logAdminAction(userId, 'UNBAN_EMAIL', undefined, { email: target }, request.ip);
     return reply.send({ ok: true, count: res.count });
   });
 
@@ -503,6 +517,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     }
     alreadyBanned.push(...toCreate.filter((e) => existingSet.has(e)));
     const skippedForbidden = toCreate.filter((e) => forbidden.has(e));
+    await logAdminAction(userId, 'BULK_BAN_EMAILS', undefined, { created, alreadyBanned, skippedForbidden, reason }, request.ip);
     return reply.send({
       ok: true,
       created,
@@ -510,5 +525,26 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       invalid,
       skippedForbidden,
     });
+  });
+
+  fastify.post("/:id/badges", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
+    if (!ok) return;
+
+    const { id } = request.params as { id: string };
+    const { type, value } = request.body as { type: 'VERIFIED' | 'PARTNER', value: boolean };
+
+    const data: any = {};
+    if (type === 'VERIFIED') data.isVerified = value;
+    if (type === 'PARTNER') data.isPartner = value;
+
+    if (Object.keys(data).length === 0) return reply.send({ ok: true }); // Nothing to update
+
+    await prisma.user.update({ where: { id }, data });
+    await logAdminAction(userId, 'UPDATE_BADGES', id, { ...data, type }, request.ip);
+
+    return reply.send({ ok: true });
   });
 }

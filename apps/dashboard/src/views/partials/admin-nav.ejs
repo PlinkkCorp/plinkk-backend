@@ -35,9 +35,13 @@
             <!-- Moderation -->
             <div class="space-y-1">
                 <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Modération</p>
-                <a href="/admin/reports" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('reports') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %> opacity-60 pointer-events-none">
+                <a href="/admin/reports" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('reports') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
                     <span class="font-medium">Signalements</span>
+                </a>
+                <a href="/admin/sessions" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('sessions') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                    <span class="font-medium">Sessions</span>
                 </a>
                 <a href="/admin/bans" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('bans') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>

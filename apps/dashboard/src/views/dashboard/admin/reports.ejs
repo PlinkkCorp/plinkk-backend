@@ -1,0 +1,238 @@
+<%- include('../../partials/head.ejs', { title: 'Administration - Signalements', description: 'Gestion des signalements.', robots: 'noindex,nofollow' }) %>
+<%- include('../../partials/header-dash.ejs', { user: user }) %>
+
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+  <%- include('../../partials/admin-nav.ejs', { active: 'admin-reports' }) %>
+
+  <main class="col-span-12 lg:col-span-10 space-y-6">
+    
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Signalements</h1>
+        <p class="text-sm text-slate-400 mt-1">Gérez les signalements des utilisateurs.</p>
+      </div>
+      <div class="flex gap-3">
+        <select id="statusFilter" class="bg-slate-950 border border-slate-800 text-slate-300 text-sm rounded-xl focus:ring-violet-500 focus:border-violet-500 block p-2.5">
+          <option value="PENDING" selected>En attente</option>
+          <option value="RESOLVED">Résolu</option>
+          <option value="DISMISSED">Rejeté</option>
+          <option value="ALL">Tout</option>
+        </select>
+        <button onclick="loadReports()" class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-colors">
+          Actualiser
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-slate-400">
+          <thead class="text-xs text-slate-500 uppercase bg-slate-950/50 border-b border-slate-800">
+            <tr>
+              <th scope="col" class="px-6 py-4">Date</th>
+              <th scope="col" class="px-6 py-4">Signalé par</th>
+              <th scope="col" class="px-6 py-4">Cible</th>
+              <th scope="col" class="px-6 py-4">Raison</th>
+              <th scope="col" class="px-6 py-4">Statut</th>
+              <th scope="col" class="px-6 py-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reportsTableBody">
+            <tr>
+              <td colspan="6" class="px-6 py-8 text-center text-slate-500">Chargement...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <div class="flex items-center justify-between p-4 border-t border-slate-800 bg-slate-950/30">
+        <span class="text-sm text-slate-500">Total: <span id="totalCount">0</span></span>
+        <div class="flex gap-2">
+          <button id="prevBtn" onclick="changePage(-1)" class="px-3 py-1 text-xs font-medium rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 disabled:opacity-50">Précédent</button>
+          <span id="pageIndicator" class="px-3 py-1 text-xs font-medium text-slate-400 flex items-center">Page 1</span>
+          <button id="nextBtn" onclick="changePage(1)" class="px-3 py-1 text-xs font-medium rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 disabled:opacity-50">Suivant</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Details Modal -->
+<div id="detailsModal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+  <div class="fixed inset-0 z-10 overflow-y-auto">
+    <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+      <div class="relative transform overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+        <div class="px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+          <h3 class="text-lg font-semibold leading-6 text-white mb-4" id="modal-title">Détails du signalement</h3>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-500 uppercase">Message</label>
+              <p id="modalMessage" class="mt-1 text-sm text-slate-300 bg-slate-950 p-3 rounded-lg border border-slate-800"></p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+               <div>
+                  <label class="block text-xs font-medium text-slate-500 uppercase">Reporter</label>
+                  <p id="modalReporter" class="text-sm text-white"></p>
+               </div>
+               <div>
+                  <label class="block text-xs font-medium text-slate-500 uppercase">Cible</label>
+                  <p id="modalTarget" class="text-sm text-white"></p>
+               </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-slate-950/50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 gap-2">
+          <button type="button" onclick="updateStatus('RESOLVED')" class="inline-flex w-full justify-center rounded-xl bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 sm:w-auto">Résoudre</button>
+          <button type="button" onclick="updateStatus('DISMISSED')" class="inline-flex w-full justify-center rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 sm:w-auto">Rejeter</button>
+          <button type="button" onclick="closeModal()" class="mt-3 inline-flex w-full justify-center rounded-xl bg-slate-800 px-3 py-2 text-sm font-semibold text-slate-300 shadow-sm ring-1 ring-inset ring-slate-700 hover:bg-slate-700 sm:mt-0 sm:w-auto">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentPage = 1;
+let currentReports = [];
+let selectedReportId = null;
+
+async function loadReports() {
+  const status = document.getElementById('statusFilter').value;
+  const tbody = document.getElementById('reportsTableBody');
+  
+  tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-500">Chargement...</td></tr>';
+
+  try {
+    const res = await fetch(`/admin/reports/api?page=${currentPage}&status=${status}`);
+    const data = await res.json();
+    
+    currentReports = data.reports;
+    document.getElementById('totalCount').textContent = data.total;
+    document.getElementById('pageIndicator').textContent = `Page ${currentPage}`;
+    document.getElementById('prevBtn').disabled = currentPage <= 1;
+    document.getElementById('nextBtn').disabled = (currentPage * 20) >= data.total;
+
+    if (data.reports.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-500">Aucun signalement trouvé</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.reports.map((r, idx) => `
+      <tr class="border-b border-slate-800 hover:bg-slate-800/50 transition-colors">
+        <td class="px-6 py-4 whitespace-nowrap text-slate-400">
+          ${new Date(r.createdAt).toLocaleDateString()} <span class="text-xs opacity-50">${new Date(r.createdAt).toLocaleTimeString()}</span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-white">
+          <div class="flex items-center gap-2">
+            <div class="h-6 w-6 rounded-full bg-slate-800 overflow-hidden">
+               ${r.reporter.image ? `<img src="${r.reporter.image}" class="h-full w-full object-cover">` : ''}
+            </div>
+            ${r.reporter.userName}
+          </div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-white">
+          ${r.reportedUser ? 
+            `<span class="px-2 py-1 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 text-xs">User: ${r.reportedUser.userName}</span>` : 
+            (r.reportedPlinkk ? `<span class="px-2 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs">Page: ${r.reportedPlinkk.slug}</span>` : '-')
+          }
+        </td>
+        <td class="px-6 py-4 text-slate-300 max-w-xs truncate" title="${r.reason}">
+          ${r.reason}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="px-2 py-1 rounded-full text-xs font-medium border ${getStatusClass(r.status)}">
+            ${getStatusLabel(r.status)}
+          </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-right">
+          <button onclick="openDetails(${idx})" class="text-violet-400 hover:text-violet-300 font-medium text-xs bg-violet-500/10 px-3 py-1.5 rounded-lg border border-violet-500/20 transition-colors">
+            Gérer
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    console.error(e);
+    tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-rose-500">Erreur de chargement</td></tr>';
+  }
+}
+
+function getStatusClass(status) {
+  switch(status) {
+    case 'PENDING': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+    case 'RESOLVED': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+    case 'DISMISSED': return 'bg-slate-700/50 text-slate-400 border-slate-600/50';
+    default: return 'bg-slate-800 text-slate-400';
+  }
+}
+
+function getStatusLabel(status) {
+  switch(status) {
+    case 'PENDING': return 'En attente';
+    case 'RESOLVED': return 'Résolu';
+    case 'DISMISSED': return 'Rejeté';
+    default: return status;
+  }
+}
+
+function changePage(delta) {
+  currentPage += delta;
+  if (currentPage < 1) currentPage = 1;
+  loadReports();
+}
+
+function openDetails(index) {
+  const r = currentReports[index];
+  selectedReportId = r.id;
+  
+  document.getElementById('modalMessage').textContent = r.message || "Aucun message détaillé.";
+  document.getElementById('modalReporter').textContent = `${r.reporter.userName} (${r.reporter.id})`;
+  
+  let targetText = "Inconnu";
+  if (r.reportedUser) targetText = `Utilisateur: ${r.reportedUser.userName} (${r.reportedUser.id})`;
+  else if (r.reportedPlinkk) targetText = `Page: ${r.reportedPlinkk.slug} (${r.reportedPlinkk.id})`;
+  
+  document.getElementById('modalTarget').textContent = targetText;
+  
+  document.getElementById('detailsModal').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('detailsModal').classList.add('hidden');
+  selectedReportId = null;
+}
+
+async function updateStatus(status) {
+  if (!selectedReportId) return;
+  
+  try {
+    const res = await fetch(`/admin/reports/${selectedReportId}/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    
+    if (res.ok) {
+      closeModal();
+      loadReports();
+    } else {
+      alert('Erreur lors de la mise à jour');
+    }
+  } catch (e) {
+    alert('Erreur réseau');
+  }
+}
+
+document.getElementById('statusFilter').addEventListener('change', () => {
+  currentPage = 1;
+  loadReports();
+});
+
+// Initial load
+loadReports();
+</script>

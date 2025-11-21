@@ -11,10 +11,15 @@ import { ensurePermission } from "../../lib/permissions";
 import { logAdminAction } from "../../lib/adminLogger";
 import { exec } from "child_process";
 import * as os from "os";
+import { dashboardAdminReportsRoutes } from "./admin/reports";
+import { dashboardAdminSessionsRoutes } from "./admin/sessions";
 
 const prisma = new PrismaClient();
 
 export function dashboardAdminRoutes(fastify: FastifyInstance) {
+  fastify.register(dashboardAdminReportsRoutes, { prefix: "/reports" });
+  fastify.register(dashboardAdminSessionsRoutes, { prefix: "/sessions" });
+
   fastify.get("/themes", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) {
@@ -303,7 +308,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     const { id } = request.query as { id: string };
     if (!id) return reply.code(400).send({ error: "missing_id" });
     try {
-      await prisma.bannedSlug.delete({ where: { slug: String(id) } });
+      await prisma.announcement.delete({ where: { id } });
+      await logAdminAction(userId, 'DELETE_ANNOUNCEMENT', id, {}, request.ip);
       return reply.send({ ok: true });
     } catch (e) {
       return reply.code(404).send({ error: "not_found" });
@@ -1088,17 +1094,27 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     const ok = await ensurePermission(request, reply, 'VIEW_ADMIN_LOGS');
     if (!ok) return;
     
-    const { page = 1, limit = 50 } = request.query as any;
+    const { page = 1, limit = 50, adminId, action, from, to, sort = 'desc' } = request.query as any;
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
+    const where: Prisma.AdminLogWhereInput = {};
+    if (adminId) where.adminId = adminId;
+    if (action) where.action = action;
+    if (from || to) {
+      where.createdAt = {};
+      if (from) where.createdAt.gte = new Date(from);
+      if (to) where.createdAt.lte = new Date(to);
+    }
+
     const [logs, total] = await Promise.all([
       prisma.adminLog.findMany({
-        orderBy: { createdAt: 'desc' },
+        where,
+        orderBy: { createdAt: sort === 'asc' ? 'asc' : 'desc' },
         skip,
         take
       }),
-      prisma.adminLog.count()
+      prisma.adminLog.count({ where })
     ]);
     
     // Enrich logs with admin names
@@ -1132,26 +1148,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true, redirectUrl: '/dashboard' });
   });
 
-  fastify.post("/users/:id/badges", async function (request, reply) {
-    const userId = request.session.get("data");
-    if (!userId) return reply.code(401).send({ error: "unauthorized" });
-    const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
-    if (!ok) return;
 
-    const { id } = request.params as { id: string };
-    const { type, value } = request.body as { type: 'VERIFIED' | 'PARTNER', value: boolean };
-
-    const data: any = {};
-    if (type === 'VERIFIED') data.isVerified = value;
-    if (type === 'PARTNER') data.isPartner = value;
-
-    if (Object.keys(data).length === 0) return reply.send({ ok: true }); // Nothing to update
-
-    await prisma.user.update({ where: { id }, data });
-    await logAdminAction(userId, 'UPDATE_BADGES', id, { ...data, type }, request.ip);
-
-    return reply.send({ ok: true });
-  });
 
   fastify.get("/system", async function (request, reply) {
     const userId = request.session.get("data");

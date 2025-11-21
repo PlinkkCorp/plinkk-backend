@@ -99,6 +99,8 @@ export function generateProfileConfig(
         },
         layoutOrder: ${JSON.stringify((profile).layoutOrder ?? null)},
         cosmetics: ${JSON.stringify((profile as any).cosmetics || {})},
+        isVerified: ${profile.isVerified ?? false},
+        isPartner: ${profile.isPartner ?? false},
     };
     export default profileData;
     `;

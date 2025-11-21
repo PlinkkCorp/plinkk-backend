@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@plinkk/prisma/generated/prisma/client';
 import { ensurePermission } from '../../../lib/permissions';
+import { logAdminAction } from '../../../lib/adminLogger';
 
 const prisma = new PrismaClient();
 
@@ -46,6 +47,7 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
   fastify.post('/', async (request, reply) => {
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
+    const userId = request.session.get("data");
     const body = request.body as { name: string; isStaff?: boolean; priority?: number; color?: string; maxPlinkks?: number; maxThemes?: number; permissions?: string[] };
     const name = (body.name || '').trim().toUpperCase();
     if (!name) return reply.code(400).send({ error: 'missing_name' });
@@ -67,6 +69,7 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
         } catch {}
       }
     }
+    await logAdminAction(userId, 'CREATE_ROLE', role.id, { name: role.name, ...body }, request.ip);
     return reply.send({ ok: true, roleId: role.id });
   });
 
@@ -74,12 +77,14 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
   fastify.post('/reorder', async (request, reply) => {
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
+    const userId = request.session.get("data");
     const body = request.body as { ids: string[] };
     const ids = Array.isArray(body?.ids) ? body.ids.filter(Boolean) : [];
     if (!ids.length) return reply.code(400).send({ error: 'missing_ids' });
     const n = ids.length;
     const updates = ids.map((id, idx) => prisma.role.update({ where: { id }, data: { priority: (n - idx) } }));
     await prisma.$transaction(updates);
+    await logAdminAction(userId, 'REORDER_ROLES', undefined, { ids }, request.ip);
     return reply.send({ ok: true });
   });
 
@@ -87,6 +92,7 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
   fastify.patch('/:id', async (request, reply) => {
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
+    const userId = request.session.get("data");
     const { id } = request.params as { id: string };
     const body = request.body as { name?: string; isStaff?: boolean; priority?: number; color?: string | null; maxPlinkks?: number; maxThemes?: number; addPermissions?: string[]; removePermissions?: string[] };
     const role = await prisma.role.findUnique({ where: { id } });
@@ -111,6 +117,7 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
         await prisma.rolePermission.deleteMany({ where: { roleId: id, permissionKey: pk } });
       }
     }
+    await logAdminAction(userId, 'UPDATE_ROLE', id, { update, addPermissions: add, removePermissions: remove }, request.ip);
     return reply.send({ ok: true, id });
   });
 
@@ -118,12 +125,14 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
   fastify.delete('/:id', async (request, reply) => {
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
+    const userId = request.session.get("data");
     const { id } = request.params as { id: string };
     const role = await prisma.role.findUnique({ where: { id }, include: { users: true } });
     if (!role) return reply.code(404).send({ error: 'not_found' });
     if (role.users.length) return reply.code(400).send({ error: 'role_in_use' });
     await prisma.rolePermission.deleteMany({ where: { roleId: id } });
     await prisma.role.delete({ where: { id } });
+    await logAdminAction(userId, 'DELETE_ROLE', id, { name: role.name }, request.ip);
     return reply.send({ ok: true, id });
   });
 }

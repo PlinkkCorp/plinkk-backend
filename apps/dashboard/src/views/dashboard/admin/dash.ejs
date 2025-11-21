@@ -1052,7 +1052,7 @@
             if (spinner) spinner.classList.remove('hidden');
 
             try {
-                const res = await fetch(`/api/admin/users/${encodeURIComponent(id)}/badges`, {
+                const res = await fetch(`/api/users/${encodeURIComponent(id)}/badges`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type, value: checked })
