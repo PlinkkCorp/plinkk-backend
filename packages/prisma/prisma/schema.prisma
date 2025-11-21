@@ -54,6 +54,8 @@ model User {
   cosmetics Cosmetic?
   isPublic  Boolean   @default(true)
   views     Int       @default(0)
+  isVerified Boolean  @default(false)
+  isPartner  Boolean  @default(false)
 
   themes       Theme[]
   announcement AnnouncementTarget[]
@@ -71,6 +73,45 @@ model User {
   statusbar        Statusbar?
 
   slags Json @default("[]")
+
+  // Relations pour les signalements
+  reportsMade     Report[] @relation("Reporter")
+  reportsReceived Report[] @relation("ReportedUser")
+  
+  // Relations pour les sessions
+  sessions        Session[]
+}
+
+model Session {
+  id        String   @id @default(nanoid(16))
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ip        String?
+  userAgent String?
+  currentPath String?
+  lastActiveAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+model Report {
+  id        String   @id @default(nanoid(16))
+  reason    String
+  message   String?
+  status    String   @default("PENDING") // PENDING, RESOLVED, DISMISSED
+
+  reporterId String
+  reporter   User   @relation("Reporter", fields: [reporterId], references: [id])
+
+  // Cibles optionnelles
+  reportedUserId String?
+  reportedUser   User?   @relation("ReportedUser", fields: [reportedUserId], references: [id])
+
+  reportedPlinkkId String?
+  reportedPlinkk   Plinkk? @relation(fields: [reportedPlinkkId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Role {
@@ -297,6 +338,7 @@ model Plinkk {
   statusbar   PlinkkStatusbar?
   settings    PlinkkSettings?
   pageStats   PageStat[]        @relation("PageStats")
+  reports     Report[]
 
   host Host?
 
@@ -399,4 +441,14 @@ model BannedEmail {
   deletePlinkk Boolean   @default(false)
   time         Int?      @default(-1)
   revoquedAt   DateTime?
+}
+
+model AdminLog {
+  id        String   @id @default(nanoid(16))
+  adminId   String
+  action    String
+  targetId  String?
+  details   Json?
+  createdAt DateTime @default(now())
+  ip        String?
 }
