@@ -45,6 +45,13 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     neonEnable: qs('#neonEnable'),
     buttonThemeEnable: qs('#buttonThemeEnable'),
     canvaEnable: qs('#canvaEnable'),
+    showEcoBadge: qs('#showEcoBadge'),
+    showZeroTrackerBadge: qs('#showZeroTrackerBadge'),
+    enableVCard: qs('#enableVCard'),
+    publicPhone: qs('#publicPhone'),
+    enableLinkCategories: qs('#enableLinkCategories'),
+    manageCategoriesBtn: qs('#manageCategoriesBtn'),
+    categoriesContainer: qs('#categoriesContainer'),
     selectedThemeIndex: qs('#selectedThemeIndex'),
     selectedAnimationIndex: qs('#selectedAnimationIndex'),
     selectedAnimationButtonIndex: qs('#selectedAnimationButtonIndex'),
@@ -136,9 +143,13 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
         sectionsAPI = [ "background", "plinkk" ]
         sectionsAPIFunction = [ collectPayloadBackground(), collectPayloadPlinkk() ]
         break;
+      case "ethics":
+        sectionsAPI = [ "plinkk" ]
+        sectionsAPIFunction = [ collectPayloadPlinkk() ]
+        break;
       case "links":
-        sectionsAPI = [ "socialIcon", "links" ]
-        sectionsAPIFunction = [ collectPayloadSocialIcon(), collectPayloadLinks() ]
+        sectionsAPI = [ "socialIcon", "links", "plinkk", "categories" ]
+        sectionsAPIFunction = [ collectPayloadSocialIcon(), collectPayloadLinks(), collectPayloadPlinkk(), collectPayloadCategories() ]
         break;
       case "animations":
         sectionsAPI = [ "plinkk" ]
@@ -174,7 +185,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     }
   }
 
-  const state = { background: [], neonColors: [], labels: [], socialIcon: [], links: [], layoutOrder: [] };
+  const state = { background: [], neonColors: [], labels: [], socialIcon: [], links: [], categories: [], layoutOrder: [] };
 
   async function ensureCfg(maxWaitMs = 3000) {
     const start = Date.now();
@@ -204,6 +215,19 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     } catch {}
     f.buttonThemeEnable.checked = (cfg.buttonThemeEnable ?? 1) === 1;
     f.canvaEnable.checked = (cfg.canvaEnable ?? 1) === 1;
+    f.showEcoBadge.checked = (cfg.showEcoBadge ?? true);
+    f.showZeroTrackerBadge.checked = (cfg.showZeroTrackerBadge ?? true);
+    f.enableVCard.checked = (cfg.enableVCard ?? true);
+    f.publicPhone.value = cfg.publicPhone || '';
+    f.enableLinkCategories.checked = (cfg.enableLinkCategories ?? false);
+    
+    if (f.enableLinkCategories.checked) {
+      f.manageCategoriesBtn.classList.remove('hidden');
+      f.categoriesContainer.classList.remove('hidden');
+    } else {
+      f.manageCategoriesBtn.classList.add('hidden');
+      f.categoriesContainer.classList.add('hidden');
+    }
 
     const { themes = [], animations: anims = [], animationBackground: animBgs = [], canvaData: canvases = [] } = await ensureCfg();
     fillSelect(f.selectedThemeIndex, themes, (t, i) => (t?.name ? `${i} · ${t.name}` : `Thème ${i}`));
@@ -259,6 +283,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     state.labels = Array.isArray(cfg.labels) ? cfg.labels.map((x) => ({ ...x })) : [];
   state.socialIcon = Array.isArray(cfg.socialIcon) ? cfg.socialIcon.map((x) => ({ ...x })) : [];
   state.links = Array.isArray(cfg.links) ? cfg.links.map((x) => ({ ...x })) : [];
+  state.categories = Array.isArray(cfg.categories) ? cfg.categories.map((x) => ({ ...x })) : [];
   // Agencement: ordre des sections
   const DEFAULT_LAYOUT = ['profile','username','labels','social','email','links'];
   state.layoutOrder = Array.isArray(cfg.layoutOrder) ? [...cfg.layoutOrder] : [...DEFAULT_LAYOUT];
@@ -267,7 +292,8 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     renderNeon({ container: f.neonList, addBtn: f.addNeonColor, colors: state.neonColors, neonEnableEl: f.neonEnable, scheduleAutoSave });
     renderLabels({ container: f.labelsList, addBtn: f.addLabel, labels: state.labels, scheduleAutoSave });
     renderSocial({ container: f.socialList, addBtn: f.addSocial, socials: state.socialIcon, scheduleAutoSave });
-  renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, scheduleAutoSave });
+    renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave });
+    // TODO: renderCategories({ container: f.categoriesContainer, addBtn: null, categories: state.categories, scheduleAutoSave });
   // Rendu de l'agencement
   renderLayout({ container: f.layoutList, order: state.layoutOrder, scheduleAutoSave });
 
@@ -319,6 +345,11 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       degBackgroundColor: numOrNull(f.degBackgroundColor.value),
       neonEnable: state.neonColors.length > 0 && f.neonEnable?.checked ? 1 : 0,
       buttonThemeEnable: f.buttonThemeEnable.checked ? 1 : 0,
+      showEcoBadge: f.showEcoBadge.checked,
+      showZeroTrackerBadge: f.showZeroTrackerBadge.checked,
+      enableVCard: f.enableVCard.checked,
+      publicPhone: vOrNull(f.publicPhone.value),
+      enableLinkCategories: f.enableLinkCategories.checked,
       backgroundSize: numOrNull(f.backgroundSize.value),
       selectedThemeIndex: numOrNull(f.selectedThemeIndex.value),
       selectedAnimationIndex: numOrNull(f.selectedAnimationIndex.value),
@@ -352,6 +383,12 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
   function collectPayloadLinks() {
     return {
       links: state.links,
+    };
+  }
+
+  function collectPayloadCategories() {
+    return {
+      categories: state.categories,
     };
   }
 
@@ -396,12 +433,25 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     f.profileImage, f.profileIcon, f.iconUrl, f.description,
     f.profileHoverColor, f.degBackgroundColor,
     f.neonEnable, f.buttonThemeEnable, f.canvaEnable,
+    f.showEcoBadge, f.showZeroTrackerBadge, f.enableVCard, f.publicPhone, f.enableLinkCategories,
     f.selectedThemeIndex, f.selectedAnimationIndex,
     f.selectedAnimationButtonIndex, f.selectedAnimationBackgroundIndex,
     f.animationDurationBackground, f.delayAnimationButton, f.backgroundSize,
     f.selectedCanvasIndex,
     f.status_text, f.status_fontTextColor, f.status_statusText,
   ].forEach((el) => attachAutoSave(el, scheduleAutoSave));
+
+  if (f.enableLinkCategories) {
+    f.enableLinkCategories.addEventListener('change', () => {
+      if (f.enableLinkCategories.checked) {
+        f.manageCategoriesBtn.classList.remove('hidden');
+        f.categoriesContainer.classList.remove('hidden');
+      } else {
+        f.manageCategoriesBtn.classList.add('hidden');
+        f.categoriesContainer.classList.add('hidden');
+      }
+    });
+  }
 
   // Ne pas rafraîchir la preview sur chaque frappe pour éviter les doubles reloads.
   // On rafraîchit uniquement après enregistrement auto (saveNow) ou sur clic du bouton.

@@ -9,6 +9,7 @@ import { PrismaClient, User } from "@plinkk/prisma/generated/prisma/client";
 import { apiMeThemesRoutes } from "./me/theme";
 import { apiMePlinkksRoutes } from "./me/plinkks";
 import path from "path";
+import crypto from "crypto";
 
 const pending2fa = new Map<
   string,
@@ -20,6 +21,22 @@ const prisma = new PrismaClient();
 export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.register(apiMeThemesRoutes, { prefix: "/themes" });
   fastify.register(apiMePlinkksRoutes, { prefix: "/plinkks" });
+
+  fastify.post("/apikey", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    
+    const newKey = "plk_" + crypto.randomUUID().replace(/-/g, "");
+    
+    const updated = await prisma.user.update({
+      where: { id: userId as string },
+      data: { apiKey: newKey },
+      select: { apiKey: true },
+    });
+    
+    return reply.send({ apiKey: updated.apiKey });
+  });
+
   fastify.post("/visibility", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });

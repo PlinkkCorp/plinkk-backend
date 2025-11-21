@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
+import { replyView } from "../../../lib/replyView";
 
 const prisma = new PrismaClient();
 
@@ -26,8 +27,7 @@ export default async function dashboardUserSessionsRoutes(fastify: FastifyInstan
             publicPath = defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : user.id;
         } catch (e) {}
 
-        return reply.view('dashboard/user/sessions.ejs', {
-            user,
+        return await replyView(reply, 'dashboard/user/sessions.ejs', user, {
             sessions,
             currentSessionId,
             active: 'sessions',

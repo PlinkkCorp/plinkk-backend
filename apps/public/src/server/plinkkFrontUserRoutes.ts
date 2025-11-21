@@ -383,6 +383,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         socialIcons,
         links,
         pageStatusbar,
+        categories,
       ] = await Promise.all([
         prisma.plinkkSettings.findUnique({ where: { plinkkId: page.id } }),
         prisma.backgroundColor.findMany({
@@ -401,6 +402,10 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           where: { userId: page.user.id, plinkkId: page.id },
         }),
         prisma.plinkkStatusbar.findUnique({ where: { plinkkId: page.id } }),
+        prisma.category.findMany({
+          where: { plinkkId: page.id },
+          orderBy: { order: 'asc' }
+        }),
       ]);
       // Si un thème privé est sélectionné, récupérer ses données, les normaliser en "full shape"
       // et l'injecter comme thème 0 pour le front.
@@ -582,6 +587,11 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         canvaEnable: settings?.canvaEnable ?? 1,
         selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
         layoutOrder: settings?.layoutOrder ?? null,
+        showEcoBadge: settings?.showEcoBadge ?? false,
+        showZeroTrackerBadge: settings?.showZeroTrackerBadge ?? false,
+        enableVCard: settings?.enableVCard ?? false,
+        publicPhone: settings?.publicPhone ?? "",
+        enableLinkCategories: settings?.enableLinkCategories ?? false,
       };
 
       const generated = generateProfileConfig(
@@ -592,7 +602,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         neonColors,
         socialIcons,
         pageStatusbar,
-        injectedObj
+        injectedObj,
+        categories
       ).replaceAll("{{username}}", username);
 
       // If debug=1 in query, return the non-minified generated code for inspection

@@ -7,6 +7,7 @@ import {
   PlinkkStatusbar,
   PlinkkSettings,
   User,
+  Category,
 } from "@plinkk/prisma/generated/prisma";
 
 export function generateProfileConfig(
@@ -17,7 +18,8 @@ export function generateProfileConfig(
   neonColors: NeonColor[],
   socialIcons: SocialIcon[],
   statusBar: PlinkkStatusbar,
-  injectedTheme?: JSON
+  injectedTheme?: JSON,
+  categories: Category[] = []
 ) {
   return `
     export const injectedTheme = ${injectedTheme ? JSON.stringify(injectedTheme) : 'null'};
@@ -27,7 +29,7 @@ export function generateProfileConfig(
         profileIcon: ${JSON.stringify(profile.profileIcon || "")},
         profileSiteText: ${JSON.stringify(profile.profileSiteText || "")},
         userName: ${JSON.stringify(profile.userName || "User")},
-  email: ${JSON.stringify(profile.publicEmail || "")},
+        email: ${JSON.stringify(profile.publicEmail || "")},
         links: ${JSON.stringify(
           links.map((l) => ({
             icon: l.icon,
@@ -37,7 +39,15 @@ export function generateProfileConfig(
             name: l.name,
             description: l.description,
             showDescriptionOnHover: l.showDescriptionOnHover,
-            showDescription: l.showDescription
+            showDescription: l.showDescription,
+            categoryId: l.categoryId
+          }))
+        )},
+        categories: ${JSON.stringify(
+          categories.map(c => ({
+            id: c.id,
+            name: c.name,
+            order: c.order
           }))
         )},
         background: ${JSON.stringify(backgroundColors.map((c) => c.color))},
@@ -98,6 +108,14 @@ export function generateProfileConfig(
           profile.selectedCanvasIndex ?? 16
         },
         layoutOrder: ${JSON.stringify((profile).layoutOrder ?? null)},
+        cosmetics: ${JSON.stringify((profile as any).cosmetics || {})},
+        isVerified: ${profile.isVerified ?? false},
+        isPartner: ${profile.isPartner ?? false},
+        showEcoBadge: ${profile.showEcoBadge ?? false},
+        showZeroTrackerBadge: ${profile.showZeroTrackerBadge ?? false},
+        enableVCard: ${profile.enableVCard ?? false},
+        publicPhone: ${JSON.stringify(profile.publicPhone || "")},
+        enableLinkCategories: ${profile.enableLinkCategories ?? false},
     };
     export default profileData;
     `;

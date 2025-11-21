@@ -172,6 +172,28 @@ export function createUserName(profileData) {
         userName.appendChild(partnerBadge);
     }
 
+    if (profileData.showEcoBadge) {
+        const ecoBadge = document.createElement("span");
+        ecoBadge.className = "badge eco-badge";
+        ecoBadge.title = "Eco-Friendly";
+        ecoBadge.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; color: #10b981;"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>`;
+        ecoBadge.style.marginLeft = "4px";
+        ecoBadge.style.verticalAlign = "middle";
+        ecoBadge.style.display = "inline-flex";
+        userName.appendChild(ecoBadge);
+    }
+
+    if (profileData.showZeroTrackerBadge) {
+        const ztBadge = document.createElement("span");
+        ztBadge.className = "badge zt-badge";
+        ztBadge.title = "Zéro Traqueur";
+        ztBadge.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; color: #3b82f6;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>`;
+        ztBadge.style.marginLeft = "4px";
+        ztBadge.style.verticalAlign = "middle";
+        ztBadge.style.display = "inline-flex";
+        userName.appendChild(ztBadge);
+    }
+
     // --- Flair Logic (Cosmetics) ---
     const cosmetics = profileData.cosmetics || {};
     if (cosmetics.flair) {
@@ -221,6 +243,36 @@ export function createEmailAndDescription(profileData) {
         </svg>
     `;
     emailDiv.appendChild(copyBtn);
+
+    if (profileData.enableVCard) {
+        const vcardBtn = document.createElement("button");
+        vcardBtn.type = "button";
+        vcardBtn.title = "Télécharger VCard";
+        vcardBtn.className = "vcard-btn";
+        vcardBtn.style.marginLeft = "8px";
+        vcardBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`;
+        vcardBtn.onclick = () => {
+            const vcard = [
+                'BEGIN:VCARD',
+                'VERSION:3.0',
+                `FN:${profileData.userName}`,
+                `EMAIL:${profileData.email}`,
+                `TEL:${profileData.publicPhone || ''}`,
+                `URL:${profileData.profileLink || window.location.href}`,
+                `NOTE:${profileData.description || ''}`,
+                'END:VCARD'
+            ].join('\n');
+            const blob = new Blob([vcard], { type: 'text/vcard' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${profileData.userName}.vcf`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+        emailDiv.appendChild(vcardBtn);
+    }
+
     // --- Système de spam & easter egg ---
     let spamCount = 0;
     let lastClick = 0;
@@ -465,11 +517,11 @@ export function createLinkBoxes(profileData) {
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (!profileData.links || !profileData.links.length) {
         console.warn("No links found in profile data.");
+        return [];
     }
-    else if (profileData.links.length > maxLinkNumber) {
-        console.warn(`Too many links found in profile data, only the first ${maxLinkNumber} will be displayed.`);
-    }
-    return profileData.links.slice(0, maxLinkNumber).map(link => {
+    
+    // Helper to create a single link box
+    const createBox = (link) => {
         const discordBox = document.createElement("div");
         const discordIcon = document.createElement("img");
         // Créer le lien principal qui englobe tout le contenu
@@ -638,7 +690,56 @@ export function createLinkBoxes(profileData) {
             discordBox.style.display = "none";
         }
         return discordBox;
-    });
+    };
+
+    if (profileData.enableLinkCategories && profileData.categories && profileData.categories.length > 0) {
+        const elements = [];
+        const linksByCat = {};
+        const otherLinks = [];
+
+        profileData.links.forEach(l => {
+            if (l.categoryId) {
+                if (!linksByCat[l.categoryId]) linksByCat[l.categoryId] = [];
+                linksByCat[l.categoryId].push(l);
+            } else {
+                otherLinks.push(l);
+            }
+        });
+
+        profileData.categories.forEach(cat => {
+            const catLinks = linksByCat[cat.id];
+            if (catLinks && catLinks.length > 0) {
+                const header = document.createElement('h3');
+                header.className = 'category-header';
+                header.textContent = cat.name;
+                header.style.color = profileData.textColor || '#fff'; // Fallback color
+                header.style.marginTop = '20px';
+                header.style.marginBottom = '10px';
+                header.style.textAlign = 'center';
+                header.style.width = '100%';
+                elements.push(header);
+                catLinks.forEach(l => elements.push(createBox(l)));
+            }
+        });
+
+        if (otherLinks.length > 0) {
+            if (elements.length > 0) {
+                const header = document.createElement('h3');
+                header.className = 'category-header';
+                header.textContent = 'Autres';
+                header.style.color = profileData.textColor || '#fff';
+                header.style.marginTop = '20px';
+                header.style.marginBottom = '10px';
+                header.style.textAlign = 'center';
+                header.style.width = '100%';
+                elements.push(header);
+            }
+            otherLinks.forEach(l => elements.push(createBox(l)));
+        }
+        return elements.slice(0, maxLinkNumber + profileData.categories.length + 1); // Rough limit
+    } else {
+        return profileData.links.slice(0, maxLinkNumber).map(createBox);
+    }
 }
 export function validateProfileConfig(profileData, themes, btnIconThemeConfig, canvaData, animationBackground) {
     const errors = [];

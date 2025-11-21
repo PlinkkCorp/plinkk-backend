@@ -165,6 +165,7 @@ fastify.addHook("onRequest", async (request, reply) => {
           socialIcons,
           links,
           pageStatusbar,
+          categories,
         ] = await Promise.all([
           prisma.plinkkSettings.findUnique({ where: { plinkkId: page.id } }),
           prisma.backgroundColor.findMany({
@@ -183,6 +184,10 @@ fastify.addHook("onRequest", async (request, reply) => {
             where: { userId: page.user.id, plinkkId: page.id },
           }),
           prisma.plinkkStatusbar.findUnique({ where: { plinkkId: page.id } }),
+          prisma.category.findMany({
+            where: { plinkkId: page.id },
+            orderBy: { order: 'asc' }
+          }),
         ]);
         let injectedThemeVar = "";
         try {
@@ -363,7 +368,8 @@ fastify.addHook("onRequest", async (request, reply) => {
           neonColors,
           socialIcons,
           pageStatusbar,
-          injectedObj
+          injectedObj,
+          categories
         );
         const mini = minify(generated);
         return reply.type("text/javascript").send(mini.code || "");
