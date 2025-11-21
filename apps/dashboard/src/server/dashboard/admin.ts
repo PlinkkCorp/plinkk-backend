@@ -380,6 +380,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
           publicEmail: true,
           role: true,
           isPublic: true,
+          isVerified: true,
+          isPartner: true,
           cosmetics: true,
           createdAt: true,
           twoFactorEnabled: true,
