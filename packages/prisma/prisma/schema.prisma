@@ -80,6 +80,8 @@ model User {
   
   // Relations pour les sessions
   sessions        Session[]
+
+  apiKey          String? @unique
 }
 
 model Session {
@@ -184,6 +186,21 @@ model Link {
   user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   plinkkId String?
   plinkk   Plinkk? @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+}
+
+model Category {
+  id        String   @id @default(nanoid(16))
+  name      String
+  order     Int      @default(0)
+  plinkkId  String
+  plinkk    Plinkk   @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+  links     Link[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Host {
@@ -331,6 +348,7 @@ model Plinkk {
   updatedAt  DateTime   @default(now()) @updatedAt
 
   links       Link[]
+  categories  Category[]
   labels      Label[]
   socialIcons SocialIcon[]
   background  BackgroundColor[]
@@ -361,6 +379,12 @@ model PlinkkSettings {
   profileHoverColor                String?
   // affichageEmail spécifique à cette Plinkk (email affiché publiquement pour cette page)
   affichageEmail                   String?
+  publicPhone                      String?
+  showEcoBadge                     Boolean @default(true)
+  showZeroTrackerBadge             Boolean @default(true)
+  enableVCard                      Boolean @default(true)
+  enableLinkCategories             Boolean @default(false)
+
   degBackgroundColor               Int?
   neonEnable                       Int?
   buttonThemeEnable                Int?
