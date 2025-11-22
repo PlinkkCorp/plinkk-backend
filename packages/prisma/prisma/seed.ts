@@ -1,6 +1,5 @@
-import { PrismaClient } from '../generated/prisma/client';
+import { prisma } from '..';
 import { PERMISSIONS } from '../permissions';
-const prisma = new PrismaClient();
 
 async function main() {
   const roles = [

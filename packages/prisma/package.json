@@ -13,11 +13,13 @@
     "postinstall": "prisma generate || true"
   },
   "dependencies": {
-    "@prisma/client": "^6.17.1",
-    "prisma": "^6.17.1",
+    "@prisma/adapter-pg": "^7.0.0",
+    "@prisma/client": "^7.0.0",
+    "dotenv": "^17.2.3",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0"
+    "@types/node": "^20.11.0",
+    "prisma": "^7.0.0"
   }
 }
