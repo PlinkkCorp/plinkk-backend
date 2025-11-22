@@ -819,6 +819,32 @@
                                 if (modal) modal.classList.remove('hidden');
                             }
                         })();
+                        (function(){
+                            const refreshBtn = document.getElementById('refreshPreview');
+                            const frame = document.getElementById('preview');
+                            if (!refreshBtn || !frame) return;
+                            
+                            refreshBtn.addEventListener('click', () => {
+                                const svg = refreshBtn.querySelector('svg');
+                                if (svg) svg.classList.add('animate-spin');
+                                
+                                // Reload iframe
+                                try {
+                                    const url = new URL(frame.src);
+                                    url.searchParams.set('t', Date.now());
+                                    frame.src = url.toString();
+                                } catch(e) {
+                                    frame.src = frame.src;
+                                }
+                                
+                                const stopSpin = () => {
+                                    if (svg) svg.classList.remove('animate-spin');
+                                };
+                                
+                                frame.onload = stopSpin;
+                                setTimeout(stopSpin, 2000);
+                            });
+                        })();
                 </script>
     </body>
     </html>
