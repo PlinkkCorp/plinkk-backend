@@ -542,7 +542,19 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       }
     }
 
-    return reply.send({ ok: true });
+    const updatedCategories = await prisma.category.findMany({
+      where: { plinkkId: id },
+      orderBy: { order: "asc" },
+    });
+
+    return reply.send({ 
+      ok: true, 
+      categories: updatedCategories.map(c => ({
+        id: c.id,
+        name: c.name,
+        order: c.order,
+      }))
+    });
   });
 
   fastify.put("/:id/config/statusBar", async (request, reply) => {

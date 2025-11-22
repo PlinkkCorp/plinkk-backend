@@ -86,6 +86,12 @@
                         </button>
                     </li>
                     <li>
+                        <button data-target="#section-categories" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                            Catégories
+                        </button>
+                    </li>
+                    <li>
                         <button data-target="#section-animations" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
                             <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M2 17h20v2H2zM7 9h10v2H7zM4 13h16v2H4z"/></svg>
                             Animations
@@ -343,26 +349,50 @@
                             </button>
                         </div>
                         
-                        <div class="flex items-center justify-between bg-slate-950 p-4 rounded-xl border border-slate-800">
+                        <div id="linksList" class="space-y-3 min-h-[50px]"></div>
+                    </div>
+                </div>
+
+                    <!-- Categories Section -->
+                    <div id="section-categories" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                        <div class="mb-6 flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">Catégories</h3>
+                                <p class="text-sm text-slate-400">Organisez vos liens dans des dossiers.</p>
+                            </div>
+                            <button id="addCategory" type="button" class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors flex items-center gap-2 hidden">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Ajouter une catégorie
+                            </button>
+                        </div>
+
+                        <div class="flex items-center justify-between bg-slate-950 p-4 rounded-xl border border-slate-800 mb-6">
                             <div class="flex items-center gap-3">
                                 <input id="enableLinkCategories" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
                                 <div>
                                     <span class="block text-sm font-medium text-slate-300">Activer les catégories</span>
-                                    <span class="block text-xs text-slate-500">Organisez vos liens par sections.</span>
+                                    <span class="block text-xs text-slate-500">Si désactivé, tous les liens seront affichés en liste simple.</span>
                                 </div>
                             </div>
-                            <button id="manageCategoriesBtn" type="button" class="hidden px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
-                                Gérer les catégories
-                            </button>
+                        </div>
+
+                        <div id="categoriesHint" class="hidden mb-6 p-4 rounded-xl bg-violet-900/20 border border-violet-900/50 text-violet-200 text-sm flex items-start gap-3">
+                            <svg class="w-5 h-5 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <div>
+                                <p class="font-medium">Comment ajouter des liens ?</p>
+                                <p class="text-violet-300/80 mt-1">Pour placer un lien dans une catégorie, allez dans l'onglet <strong>Liens</strong>. Un menu déroulant apparaîtra sur chaque lien pour choisir sa catégorie.</p>
+                            </div>
+                        </div>
+
+                        <div id="categoriesContainer" class="space-y-4 hidden">
+                            <!-- Categories will be rendered here -->
+                        </div>
+                        
+                        <div id="categoriesDisabledMsg" class="text-center py-12 text-slate-500">
+                            <svg class="w-12 h-12 mx-auto mb-3 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                            <p>Activez les catégories pour commencer à organiser vos liens.</p>
                         </div>
                     </div>
-
-                    <div id="categoriesContainer" class="space-y-6 hidden">
-                        <!-- Categories will be rendered here -->
-                    </div>
-
-                    <div id="linksList" class="space-y-3 min-h-[50px]"></div>
-                </div>
 
                 <!-- Animations Section -->
                 <div id="section-animations" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">

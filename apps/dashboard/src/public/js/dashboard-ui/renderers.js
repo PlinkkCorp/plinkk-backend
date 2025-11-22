@@ -335,54 +335,62 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
   if (addBtn) addBtn.onclick = () => { socials.push({ url: 'https://', icon: 'github' }); renderSocial({ container, addBtn, socials, scheduleAutoSave }); scheduleAutoSave(); };
 }
 
-export function renderCategories({ container, addBtn, categories, scheduleAutoSave }) {
+export function renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate }) {
   if (!container) return;
   container.innerHTML = '';
   
-  // Header for categories
-  const header = el('div', { class: 'flex items-center justify-between mb-3' });
-  header.append(el('h4', { class: 'font-medium text-white', text: 'Catégories' }));
-  const addCatBtn = el('button', { type: 'button', class: 'px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors', text: '+ Ajouter' });
-  header.append(addCatBtn);
-  container.append(header);
+  const listContainer = container;
 
-  const listContainer = el('div', { class: 'space-y-2' });
-  container.append(listContainer);
+  const triggerUpdate = () => {
+    scheduleAutoSave();
+    if (onUpdate) onUpdate();
+  };
 
   if (!Array.isArray(categories) || categories.length === 0) {
     listContainer.append(
       emptyState({
         title: 'Aucune catégorie',
         description: 'Créez des catégories pour organiser vos liens.',
-        actionLabel: null,
-        onAction: null,
+        actionLabel: '+ Créer une catégorie',
+        onAction: () => { 
+            categories.push({ name: 'Nouvelle catégorie', order: categories.length }); 
+            renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate }); 
+            triggerUpdate(); 
+        },
       })
     );
   } else {
     categories.forEach((c, idx) => {
-      const row = el('div', { class: 'flex items-center gap-2' });
+      const row = el('div', { class: 'group flex items-center gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition-all' });
       row.dataset.dragIndex = String(idx);
       
-      const gripBtn = el('button', { type: 'button', class: 'h-9 w-9 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 shrink-0', title: 'Déplacer', 'aria-label': 'Déplacer' });
-      gripBtn.style.cursor = 'grab';
-      gripBtn.appendChild(createGripSVG(18));
+      const gripBtn = el('button', { type: 'button', class: 'h-8 w-8 inline-flex items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors cursor-grab active:cursor-grabbing', title: 'Déplacer', 'aria-label': 'Déplacer' });
+      gripBtn.appendChild(createGripSVG(16));
       
-      const nameInput = el('input', { type: 'text', value: c.name || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 flex-1', placeholder: 'Nom de la catégorie' });
-      nameInput.addEventListener('input', () => { c.name = nameInput.value; scheduleAutoSave(); });
+      const contentWrap = el('div', { class: 'flex-1 flex flex-col gap-1' });
+      const nameInput = el('input', { type: 'text', value: c.name || '', class: 'w-full bg-transparent border-none focus:ring-0 text-sm font-medium text-slate-200 placeholder-slate-600 p-0', placeholder: 'Nom de la catégorie' });
+      nameInput.addEventListener('input', () => { c.name = nameInput.value; triggerUpdate(); });
       
-      const rm = trashButton(() => { categories.splice(idx, 1); renderCategories({ container, addBtn, categories, scheduleAutoSave }); scheduleAutoSave(); });
+      const count = links ? links.filter(l => l.categoryId === c.id || (c.name && l.categoryId === c.name)).length : 0;
+      const countBadge = el('span', { class: 'text-xs text-slate-500', text: `${count} lien${count > 1 ? 's' : ''}` });
       
-      row.append(gripBtn, nameInput, rm);
-      try { enableDragHandle(gripBtn, row, listContainer, categories, () => renderCategories({ container, addBtn, categories, scheduleAutoSave }), scheduleAutoSave); } catch {}
+      contentWrap.append(nameInput, countBadge);
+
+      const rm = trashButton(() => { categories.splice(idx, 1); renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate }); triggerUpdate(); }, 'Supprimer la catégorie');
+      
+      row.append(gripBtn, contentWrap, rm);
+      try { enableDragHandle(gripBtn, row, listContainer, categories, () => { renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate }); triggerUpdate(); }, scheduleAutoSave); } catch {}
       listContainer.appendChild(row);
     });
   }
 
-  addCatBtn.onclick = () => { 
-    categories.push({ name: 'Nouvelle catégorie', order: categories.length }); 
-    renderCategories({ container, addBtn, categories, scheduleAutoSave }); 
-    scheduleAutoSave(); 
-  };
+  if (addBtn) {
+      addBtn.onclick = () => { 
+        categories.push({ name: 'Nouvelle catégorie', order: categories.length }); 
+        renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate }); 
+        triggerUpdate(); 
+      };
+  }
 }
 
 export function renderLinks({ container, addBtn, links, categories, scheduleAutoSave }) {
@@ -442,17 +450,10 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       // Category Selector
       const catWrap = el('div', { class: 'w-full md:w-1/3' });
       if (categories && categories.length > 0) {
-        const catSel = el('select', { class: 'w-full h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm' });
+        const catSel = el('select', { class: 'w-full h-10 px-3 rounded-lg bg-slate-900 border border-slate-800 text-sm text-slate-300 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 outline-none transition-all' });
         catSel.append(el('option', { value: '', text: 'Aucune catégorie' }));
         categories.forEach(c => {
-          const opt = el('option', { value: c.id || c.name, text: c.name }); // Use ID if available, fallback to name for new ones (though ID is better)
-          // Note: newly created categories might not have ID yet until saved. 
-          // Ideally we should rely on index or temporary ID, but for now let's assume ID is present or we match by ID.
-          // If ID is missing (newly added), we might have issues linking until save.
-          // A simple workaround is to use the category object reference if we were in memory, but here we serialize.
-          // Let's assume we use ID. If ID is missing, we can't link effectively until save.
-          // For better UX, maybe we should auto-save categories first?
-          // Or just use ID if present.
+          const opt = el('option', { value: c.id || c.name, text: c.name });
           if (c.id === l.categoryId) opt.selected = true;
           catSel.append(opt);
         });
