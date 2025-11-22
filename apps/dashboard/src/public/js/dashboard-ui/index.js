@@ -45,8 +45,8 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     neonEnable: qs('#neonEnable'),
     buttonThemeEnable: qs('#buttonThemeEnable'),
     canvaEnable: qs('#canvaEnable'),
-    showEcoBadge: qs('#showEcoBadge'),
-    showZeroTrackerBadge: qs('#showZeroTrackerBadge'),
+    showVerifiedBadge: qs('#showVerifiedBadge'),
+    showPartnerBadge: qs('#showPartnerBadge'),
     enableVCard: qs('#enableVCard'),
     publicPhone: qs('#publicPhone'),
     enableLinkCategories: qs('#enableLinkCategories'),
@@ -243,8 +243,8 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     } catch {}
     f.buttonThemeEnable.checked = (cfg.buttonThemeEnable ?? 1) === 1;
     f.canvaEnable.checked = (cfg.canvaEnable ?? 1) === 1;
-    if (f.showEcoBadge) f.showEcoBadge.checked = (cfg.showEcoBadge ?? true);
-    if (f.showZeroTrackerBadge) f.showZeroTrackerBadge.checked = (cfg.showZeroTrackerBadge ?? true);
+    if (f.showVerifiedBadge) f.showVerifiedBadge.checked = (cfg.showVerifiedBadge ?? true);
+    if (f.showPartnerBadge) f.showPartnerBadge.checked = (cfg.showPartnerBadge ?? true);
     if (f.enableVCard) f.enableVCard.checked = (cfg.enableVCard ?? true);
     if (f.publicPhone) f.publicPhone.value = cfg.publicPhone || '';
     if (f.enableLinkCategories) f.enableLinkCategories.checked = (cfg.enableLinkCategories ?? false);
@@ -375,8 +375,8 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       degBackgroundColor: numOrNull(f.degBackgroundColor.value),
       neonEnable: state.neonColors.length > 0 && f.neonEnable?.checked ? 1 : 0,
       buttonThemeEnable: f.buttonThemeEnable.checked ? 1 : 0,
-      showEcoBadge: f.showEcoBadge ? f.showEcoBadge.checked : true,
-      showZeroTrackerBadge: f.showZeroTrackerBadge ? f.showZeroTrackerBadge.checked : true,
+      showVerifiedBadge: f.showVerifiedBadge ? f.showVerifiedBadge.checked : true,
+      showPartnerBadge: f.showPartnerBadge ? f.showPartnerBadge.checked : true,
       enableVCard: f.enableVCard ? f.enableVCard.checked : true,
       publicPhone: f.publicPhone ? vOrNull(f.publicPhone.value) : null,
       enableLinkCategories: f.enableLinkCategories ? f.enableLinkCategories.checked : false,
@@ -463,7 +463,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     f.profileImage, f.profileIcon, f.iconUrl, f.description,
     f.profileHoverColor, f.degBackgroundColor,
     f.neonEnable, f.buttonThemeEnable, f.canvaEnable,
-    f.showEcoBadge, f.showZeroTrackerBadge, f.enableVCard, f.publicPhone, f.enableLinkCategories,
+    f.showVerifiedBadge, f.showPartnerBadge, f.enableVCard, f.publicPhone, f.enableLinkCategories,
     f.selectedThemeIndex, f.selectedAnimationIndex,
     f.selectedAnimationButtonIndex, f.selectedAnimationBackgroundIndex,
     f.animationDurationBackground, f.delayAnimationButton, f.backgroundSize,

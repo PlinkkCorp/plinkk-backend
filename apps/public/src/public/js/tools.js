@@ -150,7 +150,7 @@ export function createUserName(profileData) {
     setSafeText(userName, profileData.userName);
 
     // --- Badges Logic ---
-    if (profileData.isVerified) {
+    if (profileData.isVerified && profileData.showVerifiedBadge) {
         const verifiedBadge = document.createElement("span");
         verifiedBadge.className = "badge verified-badge";
         verifiedBadge.title = "Vérifié";
@@ -161,7 +161,7 @@ export function createUserName(profileData) {
         userName.appendChild(verifiedBadge);
     }
 
-    if (profileData.isPartner) {
+    if (profileData.isPartner && profileData.showPartnerBadge) {
         const partnerBadge = document.createElement("span");
         partnerBadge.className = "badge partner-badge";
         partnerBadge.title = "Partenaire";

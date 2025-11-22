@@ -211,14 +211,18 @@
                             <input id="buttonThemeEnable" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
                             <span class="text-sm font-medium text-slate-300">Activer thème des boutons</span>
                         </label>
+                        <% if (user.isVerified) { %>
                         <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                            <input id="showEcoBadge" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
-                            <span class="text-sm font-medium text-slate-300">Afficher badge Eco</span>
+                            <input id="showVerifiedBadge" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
+                            <span class="text-sm font-medium text-slate-300">Afficher badge Vérifié</span>
                         </label>
+                        <% } %>
+                        <% if (user.isPartner) { %>
                         <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                            <input id="showZeroTrackerBadge" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
-                            <span class="text-sm font-medium text-slate-300">Afficher badge Zero Tracker</span>
+                            <input id="showPartnerBadge" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
+                            <span class="text-sm font-medium text-slate-300">Afficher badge Partenaire</span>
                         </label>
+                        <% } %>
                     </div>
                     
                     <!-- Neon Section (Coming Soon) -->

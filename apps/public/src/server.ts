@@ -359,8 +359,8 @@ fastify.addHook("onRequest", async (request, reply) => {
           selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
           layoutOrder: settings?.layoutOrder ?? null,
           publicPhone: settings?.publicPhone ?? null,
-          showEcoBadge: settings?.showEcoBadge ?? false,
-          showZeroTrackerBadge: settings?.showZeroTrackerBadge ?? false,
+          showVerifiedBadge: settings?.showVerifiedBadge ?? true,
+          showPartnerBadge: settings?.showPartnerBadge ?? true,
           enableVCard: settings?.enableVCard ?? false,
           enableLinkCategories: settings?.enableLinkCategories ?? false,
         };
