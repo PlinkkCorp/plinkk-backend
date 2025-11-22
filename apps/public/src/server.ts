@@ -23,6 +23,7 @@ import { staticPagesRoutes } from "./server/staticPagesRoutes";
 import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
 import { replyView } from "./lib/replyView";
 import fastifyRateLimit from "@fastify/rate-limit";
+import fastifyCompress from "@fastify/compress";
 import fastifyHttpProxy from "@fastify/http-proxy";
 import { generateBundle } from "./lib/generateBundle";
 import { resolvePlinkkPage } from "./lib/resolvePlinkkPage";
@@ -47,6 +48,8 @@ fastify.register(fastifyRateLimit, {
   max: 500,
   timeWindow: "2 minutes",
 });
+
+fastify.register(fastifyCompress);
 
 fastify.register(fastifyView, {
   engine: {

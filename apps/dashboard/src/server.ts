@@ -24,6 +24,7 @@ import profileConfig from "./public/config/profileConfig";
 import { authenticator } from "otplib";
 import { replyView } from "./lib/replyView";
 import fastifyRateLimit from "@fastify/rate-limit";
+import fastifyCompress from "@fastify/compress";
 import "dotenv/config";
 import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
 import { generateTheme } from "./lib/generateTheme";
@@ -46,6 +47,8 @@ fastify.register(fastifyRateLimit, {
   max: 500,
   timeWindow: "2 minutes",
 });
+
+fastify.register(fastifyCompress);
 
 fastify.register(fastifyView, {
   engine: {
