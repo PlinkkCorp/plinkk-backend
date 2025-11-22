@@ -150,7 +150,7 @@ export function createUserName(profileData) {
     setSafeText(userName, profileData.userName);
 
     // --- Badges Logic ---
-    if (profileData.isVerified) {
+    if (profileData.isVerified && profileData.showVerifiedBadge) {
         const verifiedBadge = document.createElement("span");
         verifiedBadge.className = "badge verified-badge";
         verifiedBadge.title = "Vérifié";
@@ -161,7 +161,7 @@ export function createUserName(profileData) {
         userName.appendChild(verifiedBadge);
     }
 
-    if (profileData.isPartner) {
+    if (profileData.isPartner && profileData.showPartnerBadge) {
         const partnerBadge = document.createElement("span");
         partnerBadge.className = "badge partner-badge";
         partnerBadge.title = "Partenaire";
@@ -170,28 +170,6 @@ export function createUserName(profileData) {
         partnerBadge.style.verticalAlign = "middle";
         partnerBadge.style.display = "inline-flex";
         userName.appendChild(partnerBadge);
-    }
-
-    if (profileData.showEcoBadge) {
-        const ecoBadge = document.createElement("span");
-        ecoBadge.className = "badge eco-badge";
-        ecoBadge.title = "Eco-Friendly";
-        ecoBadge.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; color: #10b981;"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>`;
-        ecoBadge.style.marginLeft = "4px";
-        ecoBadge.style.verticalAlign = "middle";
-        ecoBadge.style.display = "inline-flex";
-        userName.appendChild(ecoBadge);
-    }
-
-    if (profileData.showZeroTrackerBadge) {
-        const ztBadge = document.createElement("span");
-        ztBadge.className = "badge zt-badge";
-        ztBadge.title = "Zéro Traqueur";
-        ztBadge.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; color: #3b82f6;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>`;
-        ztBadge.style.marginLeft = "4px";
-        ztBadge.style.verticalAlign = "middle";
-        ztBadge.style.display = "inline-flex";
-        userName.appendChild(ztBadge);
     }
 
     // --- Flair Logic (Cosmetics) ---
@@ -243,35 +221,6 @@ export function createEmailAndDescription(profileData) {
         </svg>
     `;
     emailDiv.appendChild(copyBtn);
-
-    if (profileData.enableVCard) {
-        const vcardBtn = document.createElement("button");
-        vcardBtn.type = "button";
-        vcardBtn.title = "Télécharger VCard";
-        vcardBtn.className = "vcard-btn";
-        vcardBtn.style.marginLeft = "8px";
-        vcardBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`;
-        vcardBtn.onclick = () => {
-            const vcard = [
-                'BEGIN:VCARD',
-                'VERSION:3.0',
-                `FN:${profileData.userName}`,
-                `EMAIL:${profileData.email}`,
-                `TEL:${profileData.publicPhone || ''}`,
-                `URL:${profileData.profileLink || window.location.href}`,
-                `NOTE:${profileData.description || ''}`,
-                'END:VCARD'
-            ].join('\n');
-            const blob = new Blob([vcard], { type: 'text/vcard' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${profileData.userName}.vcf`;
-            a.click();
-            URL.revokeObjectURL(url);
-        };
-        emailDiv.appendChild(vcardBtn);
-    }
 
     // --- Système de spam & easter egg ---
     let spamCount = 0;

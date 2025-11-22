@@ -8,10 +8,11 @@ import {
   PlinkkSettings,
   User,
   Category,
+  Cosmetic,
 } from "@plinkk/prisma/generated/prisma";
 
 export function generateProfileConfig(
-  profile: User & PlinkkSettings,
+  profile: User & PlinkkSettings & { cosmetics?: Cosmetic | null },
   links: Link[],
   backgroundColors: BackgroundColor[],
   labels: Label[],
@@ -108,11 +109,11 @@ export function generateProfileConfig(
           profile.selectedCanvasIndex ?? 16
         },
         layoutOrder: ${JSON.stringify((profile).layoutOrder ?? null)},
-        cosmetics: ${JSON.stringify((profile as any).cosmetics || {})},
+        cosmetics: ${JSON.stringify(profile.cosmetics || {})},
         isVerified: ${profile.isVerified ?? false},
         isPartner: ${profile.isPartner ?? false},
-        showEcoBadge: ${profile.showEcoBadge ?? false},
-        showZeroTrackerBadge: ${profile.showZeroTrackerBadge ?? false},
+        showVerifiedBadge: ${profile.showVerifiedBadge ?? false},
+        showPartnerBadge: ${profile.showPartnerBadge ?? false},
         enableVCard: ${profile.enableVCard ?? false},
         publicPhone: ${JSON.stringify(profile.publicPhone || "")},
         enableLinkCategories: ${profile.enableLinkCategories ?? false},

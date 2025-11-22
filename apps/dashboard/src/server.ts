@@ -24,6 +24,7 @@ import profileConfig from "./public/config/profileConfig";
 import { authenticator } from "otplib";
 import { replyView } from "./lib/replyView";
 import fastifyRateLimit from "@fastify/rate-limit";
+import fastifyCompress from "@fastify/compress";
 import "dotenv/config";
 import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
 import { generateTheme } from "./lib/generateTheme";
@@ -46,6 +47,8 @@ fastify.register(fastifyRateLimit, {
   max: 500,
   timeWindow: "2 minutes",
 });
+
+fastify.register(fastifyCompress);
 
 fastify.register(fastifyView, {
   engine: {
@@ -103,6 +106,20 @@ fastify.register(fastifyCron, {
         );
       },
     },
+    {
+      name: "Clean expired sessions",
+      cronTime: "0 0 * * *", // Every day at midnight
+      onTick: async () => {
+        try {
+          const { count } = await prisma.session.deleteMany({
+            where: { expiresAt: { lt: new Date() } },
+          });
+          console.log(`Cleaned ${count} expired sessions`);
+        } catch (e) {
+          console.error("Failed to clean expired sessions", e);
+        }
+      },
+    },
   ],
 });
 
@@ -130,16 +147,28 @@ fastify.addHook("preHandler", async (request, reply) => {
         if (!session || session.expiresAt < new Date()) {
           request.session.delete();
         } else {
-          // Update current path
+          // Update current path with throttling (1 minute)
           const currentPath = request.raw.url;
-          if (currentPath && !currentPath.startsWith('/public') && !currentPath.startsWith('/api')) {
-             await prisma.session.update({
-               where: { id: sessionId },
-               data: { 
-                 currentPath: currentPath.split('?')[0],
-                 lastActiveAt: new Date()
-               }
-             });
+          const now = new Date();
+          const lastActive = session.lastActiveAt
+            ? new Date(session.lastActiveAt)
+            : new Date(0);
+          const shouldUpdate =
+            now.getTime() - lastActive.getTime() > 60 * 1000; // 1 minute
+
+          if (
+            currentPath &&
+            !currentPath.startsWith("/public") &&
+            !currentPath.startsWith("/api") &&
+            shouldUpdate
+          ) {
+            await prisma.session.update({
+              where: { id: sessionId },
+              data: {
+                currentPath: currentPath.split("?")[0],
+                lastActiveAt: now,
+              },
+            });
           }
         }
       } catch (e) {

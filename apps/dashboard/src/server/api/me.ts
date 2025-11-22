@@ -323,6 +323,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       banner?: string, 
       frame?: string, 
       theme?: string,
+      flair?: string,
       data?: any 
     });
     
@@ -336,12 +337,16 @@ export function apiMeRoutes(fastify: FastifyInstance) {
               banner: body.banner ?? "",
               frame: body.frame ?? "none",
               theme: body.theme ?? "system",
+              flair: body.flair ?? "OG",
+              data: body.data ?? {},
             },
             update: {
               bannerUrl: body.bannerUrl,
               banner: body.banner,
               frame: body.frame,
               theme: body.theme,
+              flair: body.flair,
+              data: body.data,
             },
           },
         },
@@ -355,7 +360,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
             frame: true,
             theme: true,
             bannerUrl: true,
-            banner: true
+            banner: true,
+            data: true
           }
         } 
       },

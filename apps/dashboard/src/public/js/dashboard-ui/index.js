@@ -1,6 +1,6 @@
 import { qs, attachAutoSave, fillSelect, vOrNull, numOrNull } from './utils.js';
 import { openIconModal, openPicker, renderPickerGrid, renderBtnThemeCard, closePicker, ensurePlatformEntryModal, pickerSelect } from './pickers.js';
-import { renderBackground, renderNeon, renderLabels, renderSocial, renderLinks, renderLayout } from './renderers.js';
+import { renderBackground, renderNeon, renderLabels, renderSocial, renderLinks, renderLayout, renderCategories } from './renderers.js';
 import { ensureCanvasPreviewModal, openCanvasInlinePreview, buildCanvasPreviewUrl, refreshSelectedCanvasPreview, renderCanvasCard } from './canvas.js';
 import { setupStatusDropdown, updateStatusControlsDisabled, updateStatusPreview } from './status.js';
 
@@ -45,13 +45,14 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     neonEnable: qs('#neonEnable'),
     buttonThemeEnable: qs('#buttonThemeEnable'),
     canvaEnable: qs('#canvaEnable'),
-    showEcoBadge: qs('#showEcoBadge'),
-    showZeroTrackerBadge: qs('#showZeroTrackerBadge'),
+    showVerifiedBadge: qs('#showVerifiedBadge'),
+    showPartnerBadge: qs('#showPartnerBadge'),
     enableVCard: qs('#enableVCard'),
     publicPhone: qs('#publicPhone'),
     enableLinkCategories: qs('#enableLinkCategories'),
-    manageCategoriesBtn: qs('#manageCategoriesBtn'),
     categoriesContainer: qs('#categoriesContainer'),
+    addCategory: qs('#addCategory'),
+    categoriesDisabledMsg: qs('#categoriesDisabledMsg'),
     selectedThemeIndex: qs('#selectedThemeIndex'),
     selectedAnimationIndex: qs('#selectedAnimationIndex'),
     selectedAnimationButtonIndex: qs('#selectedAnimationButtonIndex'),
@@ -137,42 +138,94 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     switch (hash) {
       case "appearance":
         sectionsAPI = [ "plinkk", "neonColor" ]
-        sectionsAPIFunction = [ collectPayloadPlinkk(), collectPayloadNeonColor() ]
+        sectionsAPIFunction = [ collectPayloadPlinkk, collectPayloadNeonColor ]
         break;
       case "background":
         sectionsAPI = [ "background", "plinkk" ]
-        sectionsAPIFunction = [ collectPayloadBackground(), collectPayloadPlinkk() ]
+        sectionsAPIFunction = [ collectPayloadBackground, collectPayloadPlinkk ]
         break;
-      case "ethics":
-        sectionsAPI = [ "plinkk" ]
-        sectionsAPIFunction = [ collectPayloadPlinkk() ]
-        break;
+
       case "links":
-        sectionsAPI = [ "socialIcon", "links", "plinkk", "categories" ]
-        sectionsAPIFunction = [ collectPayloadSocialIcon(), collectPayloadLinks(), collectPayloadPlinkk(), collectPayloadCategories() ]
+        sectionsAPI = [ "socialIcon", "links", "plinkk" ]
+        sectionsAPIFunction = [ collectPayloadSocialIcon, collectPayloadLinks, collectPayloadPlinkk ]
+        break;
+      case "categories":
+        sectionsAPI = [ "categories", "plinkk" ]
+        sectionsAPIFunction = [ collectPayloadCategories, collectPayloadPlinkk ]
         break;
       case "animations":
         sectionsAPI = [ "plinkk" ]
-        sectionsAPIFunction = [ collectPayloadPlinkk() ]
+        sectionsAPIFunction = [ collectPayloadPlinkk ]
         break;
       case "statusbar":
         sectionsAPI = [ "statusBar", "labels" ]
-        sectionsAPIFunction = [ collectPayloadStatusBar(), collectPayloadLabels() ]
+        sectionsAPIFunction = [ collectPayloadStatusBar, collectPayloadLabels ]
         break;
       case "layout":
         sectionsAPI = [ "layout" ]
-        sectionsAPIFunction = [ collectPayloadLayout() ]
+        sectionsAPIFunction = [ collectPayloadLayout ]
         break;
       default:
         sectionsAPI = [ "plinkk" ]
-        sectionsAPIFunction = [ collectPayloadPlinkk() ]
+        sectionsAPIFunction = [ collectPayloadPlinkk ]
         break;
     }
     setStatus('Enregistrement...');
     try {
       for (let i = 0; i < sectionsAPI.length; i++) {
-        const payload = sectionsAPIFunction[i];
-        await putConfig(sectionsAPI[i], payload);
+        const section = sectionsAPI[i];
+        const payloadFn = sectionsAPIFunction[i];
+        const payload = typeof payloadFn === 'function' ? payloadFn() : payloadFn;
+        const res = await putConfig(section, payload);
+        
+        if (section === 'categories' && res.categories && Array.isArray(res.categories)) {
+            state.categories = res.categories;
+            state.links.forEach(l => {
+                const cat = state.categories.find(c => c.name === l.categoryId || c.id === l.categoryId);
+                if (cat) {
+                    l.categoryId = cat.id;
+                }
+            });
+             renderCategories({ 
+              container: f.categoriesContainer, 
+              addBtn: f.addCategory, 
+              categories: state.categories, 
+              scheduleAutoSave,
+              onUpdate: () => {
+                renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave });
+              }
+            });
+        }
+
+        if (section === 'links' && res.links && Array.isArray(res.links)) {
+          // Attempt to reconcile IDs for new links
+          const dbLinks = res.links;
+          const usedDbIds = new Set();
+          
+          // First pass: mark IDs that are already known
+          state.links.forEach(l => {
+            if (l.id && dbLinks.find(d => d.id === l.id)) {
+              usedDbIds.add(l.id);
+            }
+          });
+
+          // Second pass: assign IDs to new links
+          state.links.forEach(l => {
+            if (!l.id) {
+              // Try to find a matching link in DB response that hasn't been matched yet
+              const match = dbLinks.find(d => 
+                !usedDbIds.has(d.id) && 
+                d.url === l.url && 
+                d.text === l.text &&
+                d.name === l.name
+              );
+              if (match) {
+                l.id = match.id;
+                usedDbIds.add(match.id);
+              }
+            }
+          });
+        }
       }
       setStatus(manual ? 'Enregistré ✓' : 'Enregistré automatiquement ✓', 'success');
       // Ne pas recharger instantanément la preview pour éviter le spam en cours de frappe
@@ -215,18 +268,26 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     } catch {}
     f.buttonThemeEnable.checked = (cfg.buttonThemeEnable ?? 1) === 1;
     f.canvaEnable.checked = (cfg.canvaEnable ?? 1) === 1;
-    f.showEcoBadge.checked = (cfg.showEcoBadge ?? true);
-    f.showZeroTrackerBadge.checked = (cfg.showZeroTrackerBadge ?? true);
-    f.enableVCard.checked = (cfg.enableVCard ?? true);
-    f.publicPhone.value = cfg.publicPhone || '';
-    f.enableLinkCategories.checked = (cfg.enableLinkCategories ?? false);
+    if (f.showVerifiedBadge) f.showVerifiedBadge.checked = (cfg.showVerifiedBadge ?? true);
+    if (f.showPartnerBadge) f.showPartnerBadge.checked = (cfg.showPartnerBadge ?? true);
+    if (f.enableVCard) f.enableVCard.checked = (cfg.enableVCard ?? true);
+    if (f.publicPhone) f.publicPhone.value = cfg.publicPhone || '';
+    if (f.enableLinkCategories) f.enableLinkCategories.checked = (cfg.enableLinkCategories ?? false);
     
-    if (f.enableLinkCategories.checked) {
-      f.manageCategoriesBtn.classList.remove('hidden');
-      f.categoriesContainer.classList.remove('hidden');
-    } else {
-      f.manageCategoriesBtn.classList.add('hidden');
-      f.categoriesContainer.classList.add('hidden');
+    f.categoriesHint = qs('#categoriesHint');
+    
+    if (f.enableLinkCategories) {
+      if (f.enableLinkCategories.checked) {
+        f.categoriesContainer.classList.remove('hidden');
+        if (f.addCategory) f.addCategory.classList.remove('hidden');
+        if (f.categoriesDisabledMsg) f.categoriesDisabledMsg.classList.add('hidden');
+        if (f.categoriesHint) f.categoriesHint.classList.remove('hidden');
+      } else {
+        f.categoriesContainer.classList.add('hidden');
+        if (f.addCategory) f.addCategory.classList.add('hidden');
+        if (f.categoriesDisabledMsg) f.categoriesDisabledMsg.classList.remove('hidden');
+        if (f.categoriesHint) f.categoriesHint.classList.add('hidden');
+      }
     }
 
     const { themes = [], animations: anims = [], animationBackground: animBgs = [], canvaData: canvases = [] } = await ensureCfg();
@@ -293,7 +354,16 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     renderLabels({ container: f.labelsList, addBtn: f.addLabel, labels: state.labels, scheduleAutoSave });
     renderSocial({ container: f.socialList, addBtn: f.addSocial, socials: state.socialIcon, scheduleAutoSave });
     renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave });
-    // TODO: renderCategories({ container: f.categoriesContainer, addBtn: null, categories: state.categories, scheduleAutoSave });
+    renderCategories({ 
+      container: f.categoriesContainer, 
+      addBtn: f.addCategory, 
+      categories: state.categories, 
+      links: state.links,
+      scheduleAutoSave,
+      onUpdate: () => {
+        renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave });
+      }
+    });
   // Rendu de l'agencement
   renderLayout({ container: f.layoutList, order: state.layoutOrder, scheduleAutoSave });
 
@@ -345,11 +415,11 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       degBackgroundColor: numOrNull(f.degBackgroundColor.value),
       neonEnable: state.neonColors.length > 0 && f.neonEnable?.checked ? 1 : 0,
       buttonThemeEnable: f.buttonThemeEnable.checked ? 1 : 0,
-      showEcoBadge: f.showEcoBadge.checked,
-      showZeroTrackerBadge: f.showZeroTrackerBadge.checked,
-      enableVCard: f.enableVCard.checked,
-      publicPhone: vOrNull(f.publicPhone.value),
-      enableLinkCategories: f.enableLinkCategories.checked,
+      showVerifiedBadge: f.showVerifiedBadge ? f.showVerifiedBadge.checked : true,
+      showPartnerBadge: f.showPartnerBadge ? f.showPartnerBadge.checked : true,
+      enableVCard: f.enableVCard ? f.enableVCard.checked : true,
+      publicPhone: f.publicPhone ? vOrNull(f.publicPhone.value) : null,
+      enableLinkCategories: f.enableLinkCategories ? f.enableLinkCategories.checked : false,
       backgroundSize: numOrNull(f.backgroundSize.value),
       selectedThemeIndex: numOrNull(f.selectedThemeIndex.value),
       selectedAnimationIndex: numOrNull(f.selectedAnimationIndex.value),
@@ -433,7 +503,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     f.profileImage, f.profileIcon, f.iconUrl, f.description,
     f.profileHoverColor, f.degBackgroundColor,
     f.neonEnable, f.buttonThemeEnable, f.canvaEnable,
-    f.showEcoBadge, f.showZeroTrackerBadge, f.enableVCard, f.publicPhone, f.enableLinkCategories,
+    f.showVerifiedBadge, f.showPartnerBadge, f.enableVCard, f.publicPhone, f.enableLinkCategories,
     f.selectedThemeIndex, f.selectedAnimationIndex,
     f.selectedAnimationButtonIndex, f.selectedAnimationBackgroundIndex,
     f.animationDurationBackground, f.delayAnimationButton, f.backgroundSize,
@@ -441,19 +511,33 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     f.status_text, f.status_fontTextColor, f.status_statusText,
   ].forEach((el) => attachAutoSave(el, scheduleAutoSave));
 
-  if (f.enableLinkCategories) {
+    if (f.enableLinkCategories) {
     f.enableLinkCategories.addEventListener('change', () => {
       if (f.enableLinkCategories.checked) {
-        f.manageCategoriesBtn.classList.remove('hidden');
         f.categoriesContainer.classList.remove('hidden');
+        if (f.addCategory) f.addCategory.classList.remove('hidden');
+        if (f.categoriesDisabledMsg) f.categoriesDisabledMsg.classList.add('hidden');
+        if (f.categoriesHint) f.categoriesHint.classList.remove('hidden');
+        
+        // Force re-render to ensure empty state is shown
+        renderCategories({ 
+            container: f.categoriesContainer, 
+            addBtn: f.addCategory, 
+            categories: state.categories, 
+            links: state.links,
+            scheduleAutoSave,
+            onUpdate: () => {
+                renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave });
+            }
+        });
       } else {
-        f.manageCategoriesBtn.classList.add('hidden');
         f.categoriesContainer.classList.add('hidden');
+        if (f.addCategory) f.addCategory.classList.add('hidden');
+        if (f.categoriesDisabledMsg) f.categoriesDisabledMsg.classList.remove('hidden');
+        if (f.categoriesHint) f.categoriesHint.classList.add('hidden');
       }
     });
-  }
-
-  // Ne pas rafraîchir la preview sur chaque frappe pour éviter les doubles reloads.
+  }  // Ne pas rafraîchir la preview sur chaque frappe pour éviter les doubles reloads.
   // On rafraîchit uniquement après enregistrement auto (saveNow) ou sur clic du bouton.
 
   if (f.status_statusText) f.status_statusText.addEventListener('change', () => updateStatusPreview({ elements: f }));

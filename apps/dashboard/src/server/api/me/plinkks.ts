@@ -170,8 +170,8 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
           ? settings.affichageEmail
           : user?.publicEmail ?? user?.email ?? "",
       publicPhone: settings?.publicPhone ?? null,
-      showEcoBadge: settings?.showEcoBadge ?? true,
-      showZeroTrackerBadge: settings?.showZeroTrackerBadge ?? true,
+      showVerifiedBadge: settings?.showVerifiedBadge ?? true,
+      showPartnerBadge: settings?.showPartnerBadge ?? true,
       enableVCard: settings?.enableVCard ?? true,
       enableLinkCategories: settings?.enableLinkCategories ?? false,
       iconUrl: settings != null ? settings.iconUrl : null,
@@ -251,8 +251,8 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       userName: body.userName,
       affichageEmail: body.affichageEmail,
       publicPhone: body.publicPhone,
-      showEcoBadge: body.showEcoBadge,
-      showZeroTrackerBadge: body.showZeroTrackerBadge,
+      showVerifiedBadge: body.showVerifiedBadge,
+      showPartnerBadge: body.showPartnerBadge,
       enableVCard: body.enableVCard,
       enableLinkCategories: body.enableLinkCategories,
       iconUrl: body.iconUrl,
@@ -475,7 +475,24 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       }
     }
 
-    return reply.send({ ok: true });
+    const updatedLinks = await prisma.link.findMany({
+      where: { userId: String(userId), plinkkId: id },
+    });
+
+    return reply.send({ 
+      ok: true, 
+      links: updatedLinks.map(l => ({
+        id: l.id,
+        icon: l.icon,
+        url: l.url,
+        text: l.text,
+        name: l.name,
+        description: l.description,
+        showDescriptionOnHover: l.showDescriptionOnHover,
+        showDescription: l.showDescription,
+        categoryId: l.categoryId,
+      }))
+    });
   });
 
   fastify.put("/:id/config/categories", async (request, reply) => {
@@ -525,7 +542,19 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       }
     }
 
-    return reply.send({ ok: true });
+    const updatedCategories = await prisma.category.findMany({
+      where: { plinkkId: id },
+      orderBy: { order: "asc" },
+    });
+
+    return reply.send({ 
+      ok: true, 
+      categories: updatedCategories.map(c => ({
+        id: c.id,
+        name: c.name,
+        order: c.order,
+      }))
+    });
   });
 
   fastify.put("/:id/config/statusBar", async (request, reply) => {
@@ -649,8 +678,8 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
           ? settings.affichageEmail
           : page.user.publicEmail ?? null,
       publicPhone: settings?.publicPhone ?? null,
-      showEcoBadge: settings?.showEcoBadge ?? true,
-      showZeroTrackerBadge: settings?.showZeroTrackerBadge ?? true,
+      showVerifiedBadge: settings?.showVerifiedBadge ?? true,
+      showPartnerBadge: settings?.showPartnerBadge ?? true,
       enableVCard: settings?.enableVCard ?? true,
       enableLinkCategories: settings?.enableLinkCategories ?? false,
       canvaEnable: settings?.canvaEnable ?? 1,

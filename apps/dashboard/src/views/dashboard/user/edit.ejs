@@ -54,11 +54,6 @@
                     <div class="flex items-center gap-3">
                         <%- include('../../partials/changePlinkkDropdown.ejs') %>
                     </div>
-
-                    <div class="flex items-center gap-2">
-                        <button id="resetBtn--mobile" class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">Reset</button>
-                        <button id="saveBtn--mobile" class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors">Sauvegarder</button>
-                    </div>
                 </div>
             </div>
 
@@ -71,12 +66,7 @@
                             Profil
                         </button>
                     </li>
-                    <li>
-                        <button data-target="#section-ethics" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
-                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/></svg>
-                            Éthique
-                        </button>
-                    </li>
+
                     <li>
                         <button data-target="#section-appearance" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
                             <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l4 8h8l-6 5 2 9-8-5-8 5 2-9-6-5h8z"/></svg>
@@ -93,6 +83,12 @@
                         <button data-target="#section-links" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
                             <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 13.41L9.17 12l4.24-4.24 1.41 1.41L10.59 13.41zm2.82-2.82L14.83 12 10.59 16.24 9.17 14.83 13.41 10.59z"/></svg>
                             Liens
+                        </button>
+                    </li>
+                    <li>
+                        <button data-target="#section-categories" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                            Catégories
                         </button>
                     </li>
                     <li>
@@ -113,12 +109,7 @@
                             Agencement
                         </button>
                     </li>
-                    <li>
-                        <button data-target="#section-developer" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
-                            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                            Développeur
-                        </button>
-                    </li>
+
                 </ul>
             </nav>
 
@@ -179,6 +170,14 @@
                                 </button>
                             </div>
                         </label>
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Téléphone public <span class="info-i" title="Numéro de téléphone affiché">i</span></span>
+                            <input id="publicPhone" type="tel" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                        </label>
+                        <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                            <input id="enableVCard" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
+                            <span class="text-sm font-medium text-slate-300">Activer vCard</span>
+                        </label>
                         <label class="block space-y-2 md:col-span-2">
                             <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Description <span class="info-i" title="Courte bio affichée sur ta page">i</span></span>
                             <div class="relative">
@@ -191,40 +190,7 @@
                     </div>
                 </div>
 
-                <!-- Ethics Section -->
-                <div id="section-ethics" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                    <div class="mb-6 pb-4 border-b border-slate-800">
-                        <h3 class="text-lg font-semibold text-white">Éthique & Tech</h3>
-                        <p class="text-sm text-slate-400">Options pour un profil plus responsable et transparent.</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                            <input id="showEcoBadge" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500/50"/>
-                            <div>
-                                <span class="block text-sm font-medium text-slate-300">Badge "Eco-Friendly"</span>
-                                <span class="block text-xs text-slate-500">Affiche l'impact carbone réduit de votre page.</span>
-                            </div>
-                        </label>
-                        <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                            <input id="showZeroTrackerBadge" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500/50"/>
-                            <div>
-                                <span class="block text-sm font-medium text-slate-300">Mode "Zéro Traqueur"</span>
-                                <span class="block text-xs text-slate-500">Affiche une promesse de non-espionnage.</span>
-                            </div>
-                        </label>
-                        <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors md:col-span-2">
-                            <input id="enableVCard" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500/50"/>
-                            <div>
-                                <span class="block text-sm font-medium text-slate-300">Bouton "Vcard"</span>
-                                <span class="block text-xs text-slate-500">Permet aux visiteurs de télécharger vos infos de contact.</span>
-                            </div>
-                        </label>
-                        <label class="block space-y-2 md:col-span-2">
-                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Téléphone public (pour VCard) <span class="info-i" title="Numéro inclus dans la VCard">i</span></span>
-                            <input id="publicPhone" type="tel" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 placeholder-slate-600" placeholder="+33 6 12 34 56 78" />
-                        </label>
-                    </div>
-                </div>
+
 
                 <!-- Appearance Section -->
                 <div id="section-appearance" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
@@ -251,6 +217,18 @@
                             <input id="buttonThemeEnable" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
                             <span class="text-sm font-medium text-slate-300">Activer thème des boutons</span>
                         </label>
+                        <% if (user.isVerified) { %>
+                        <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                            <input id="showVerifiedBadge" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
+                            <span class="text-sm font-medium text-slate-300">Afficher badge Vérifié</span>
+                        </label>
+                        <% } %>
+                        <% if (user.isPartner) { %>
+                        <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                            <input id="showPartnerBadge" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
+                            <span class="text-sm font-medium text-slate-300">Afficher badge Partenaire</span>
+                        </label>
+                        <% } %>
                     </div>
                     
                     <!-- Neon Section (Coming Soon) -->
@@ -371,26 +349,50 @@
                             </button>
                         </div>
                         
-                        <div class="flex items-center justify-between bg-slate-950 p-4 rounded-xl border border-slate-800">
+                        <div id="linksList" class="space-y-3 min-h-[50px]"></div>
+                    </div>
+                </div>
+
+                    <!-- Categories Section -->
+                    <div id="section-categories" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                        <div class="mb-6 flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">Catégories</h3>
+                                <p class="text-sm text-slate-400">Organisez vos liens dans des dossiers.</p>
+                            </div>
+                            <button id="addCategory" type="button" class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors flex items-center gap-2 hidden">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Ajouter une catégorie
+                            </button>
+                        </div>
+
+                        <div class="flex items-center justify-between bg-slate-950 p-4 rounded-xl border border-slate-800 mb-6">
                             <div class="flex items-center gap-3">
                                 <input id="enableLinkCategories" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
                                 <div>
                                     <span class="block text-sm font-medium text-slate-300">Activer les catégories</span>
-                                    <span class="block text-xs text-slate-500">Organisez vos liens par sections.</span>
+                                    <span class="block text-xs text-slate-500">Si désactivé, tous les liens seront affichés en liste simple.</span>
                                 </div>
                             </div>
-                            <button id="manageCategoriesBtn" type="button" class="hidden px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
-                                Gérer les catégories
-                            </button>
+                        </div>
+
+                        <div id="categoriesHint" class="hidden mb-6 p-4 rounded-xl bg-violet-900/20 border border-violet-900/50 text-violet-200 text-sm flex items-start gap-3">
+                            <svg class="w-5 h-5 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <div>
+                                <p class="font-medium">Comment ajouter des liens ?</p>
+                                <p class="text-violet-300/80 mt-1">Pour placer un lien dans une catégorie, allez dans l'onglet <strong>Liens</strong>. Un menu déroulant apparaîtra sur chaque lien pour choisir sa catégorie.</p>
+                            </div>
+                        </div>
+
+                        <div id="categoriesContainer" class="space-y-4 hidden">
+                            <!-- Categories will be rendered here -->
+                        </div>
+                        
+                        <div id="categoriesDisabledMsg" class="text-center py-12 text-slate-500">
+                            <svg class="w-12 h-12 mx-auto mb-3 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                            <p>Activez les catégories pour commencer à organiser vos liens.</p>
                         </div>
                     </div>
-
-                    <div id="categoriesContainer" class="space-y-6 hidden">
-                        <!-- Categories will be rendered here -->
-                    </div>
-
-                    <div id="linksList" class="space-y-3 min-h-[50px]"></div>
-                </div>
 
                 <!-- Animations Section -->
                 <div id="section-animations" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
@@ -503,39 +505,7 @@
                     <div class="space-y-3" id="layoutList" role="list"></div>
                 </div>
 
-                <!-- Developer Section -->
-                <div id="section-developer" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                    <div class="mb-6 pb-4 border-b border-slate-800">
-                        <h3 class="text-lg font-semibold text-white">Développeur</h3>
-                        <p class="text-sm text-slate-400">Accès API et outils techniques.</p>
-                    </div>
-                    <div class="space-y-6">
-                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
-                            <label class="block space-y-2">
-                                <span class="text-sm font-medium text-slate-300">Clé API Personnelle</span>
-                                <div class="flex items-center gap-2">
-                                    <div class="relative flex-1">
-                                        <input id="apiKeyField" type="text" readonly value="<%= user.apiKey || 'Aucune clé générée' %>" class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 font-mono text-sm" />
-                                        <button id="copyApiKeyBtn" type="button" class="absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" title="Copier">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                        </button>
-                                    </div>
-                                    <button id="regenerateApiKeyBtn" type="button" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium border border-slate-700 transition-colors">
-                                        Générer
-                                    </button>
-                                </div>
-                                <p class="text-xs text-slate-500">Cette clé donne accès complet à votre compte via l'API. Ne la partagez jamais.</p>
-                            </label>
-                        </div>
-                        
-                        <div>
-                            <a href="/docs/api" target="_blank" class="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 transition-colors text-sm font-medium">
-                                Voir la documentation API
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </section>
 
@@ -631,15 +601,6 @@
                                     btns.forEach(b => b.addEventListener('click', () => selectTab(b.dataset.target)));
                                     const initial = location.hash && sections.some(s => `#${s.id}` === location.hash) ? location.hash : '#section-profile';
                                     selectTab(initial);
-
-                                    const save = document.getElementById('saveBtn');
-                                    const reset = document.getElementById('resetBtn');
-                                    ['saveBtn--mobile','saveBtn--fab'].forEach(id=>{
-                                        const el = document.getElementById(id); if(el && save){ el.addEventListener('click', ()=> save.click()); }
-                                    });
-                                    ['resetBtn--mobile','resetBtn--fab'].forEach(id=>{
-                                        const el = document.getElementById(id); if(el && reset){ el.addEventListener('click', ()=> reset.click()); }
-                                    });
                                 })();
                         </script>
                 <style>
@@ -891,6 +852,32 @@
                                 const modal = document.getElementById('plinkkSelectorModal');
                                 if (modal) modal.classList.remove('hidden');
                             }
+                        })();
+                        (function(){
+                            const refreshBtn = document.getElementById('refreshPreview');
+                            const frame = document.getElementById('preview');
+                            if (!refreshBtn || !frame) return;
+                            
+                            refreshBtn.addEventListener('click', () => {
+                                const svg = refreshBtn.querySelector('svg');
+                                if (svg) svg.classList.add('animate-spin');
+                                
+                                // Reload iframe
+                                try {
+                                    const url = new URL(frame.src);
+                                    url.searchParams.set('t', Date.now());
+                                    frame.src = url.toString();
+                                } catch(e) {
+                                    frame.src = frame.src;
+                                }
+                                
+                                const stopSpin = () => {
+                                    if (svg) svg.classList.remove('animate-spin');
+                                };
+                                
+                                frame.onload = stopSpin;
+                                setTimeout(stopSpin, 2000);
+                            });
                         })();
                 </script>
     </body>
