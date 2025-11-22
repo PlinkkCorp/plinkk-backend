@@ -381,8 +381,8 @@ model PlinkkSettings {
   // affichageEmail spécifique à cette Plinkk (email affiché publiquement pour cette page)
   affichageEmail                   String?
   publicPhone                      String?
-  showEcoBadge                     Boolean @default(true)
-  showZeroTrackerBadge             Boolean @default(true)
+  showVerifiedBadge                Boolean @default(true)
+  showPartnerBadge                 Boolean @default(true)
   enableVCard                      Boolean @default(true)
   enableLinkCategories             Boolean @default(false)
 
