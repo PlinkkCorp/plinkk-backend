@@ -166,6 +166,7 @@ model Cosmetic {
   theme     String? @default("system")
   bannerUrl String? @default("")
   banner    String? @default("")
+  data      Json?
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
