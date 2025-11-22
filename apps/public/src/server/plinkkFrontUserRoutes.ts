@@ -370,7 +370,14 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       reply.header("Vary", "Referer");
       const page = await prisma.plinkk.findFirst({
         where: { slug: username },
-        include: { user: true },
+        include: {
+          user: {
+            include: {
+              cosmetics: true,
+              role: true,
+            },
+          },
+        },
       });
       if (!page) return reply.code(404).send({ error: "Page introuvable" });
 
@@ -587,9 +594,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         canvaEnable: settings?.canvaEnable ?? 1,
         selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
         layoutOrder: settings?.layoutOrder ?? null,
-        showEcoBadge: settings?.showEcoBadge ?? false,
-        showZeroTrackerBadge: settings?.showZeroTrackerBadge ?? false,
-        enableVCard: settings?.enableVCard ?? false,
+        showEcoBadge: settings?.showEcoBadge ?? true,
+        showZeroTrackerBadge: settings?.showZeroTrackerBadge ?? true,
+        enableVCard: settings?.enableVCard ?? true,
         publicPhone: settings?.publicPhone ?? "",
         enableLinkCategories: settings?.enableLinkCategories ?? false,
       };

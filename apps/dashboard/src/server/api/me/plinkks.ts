@@ -475,7 +475,24 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       }
     }
 
-    return reply.send({ ok: true });
+    const updatedLinks = await prisma.link.findMany({
+      where: { userId: String(userId), plinkkId: id },
+    });
+
+    return reply.send({ 
+      ok: true, 
+      links: updatedLinks.map(l => ({
+        id: l.id,
+        icon: l.icon,
+        url: l.url,
+        text: l.text,
+        name: l.name,
+        description: l.description,
+        showDescriptionOnHover: l.showDescriptionOnHover,
+        showDescription: l.showDescription,
+        categoryId: l.categoryId,
+      }))
+    });
   });
 
   fastify.put("/:id/config/categories", async (request, reply) => {

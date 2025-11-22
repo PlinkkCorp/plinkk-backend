@@ -143,10 +143,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
         sectionsAPI = [ "background", "plinkk" ]
         sectionsAPIFunction = [ collectPayloadBackground(), collectPayloadPlinkk() ]
         break;
-      case "ethics":
-        sectionsAPI = [ "plinkk" ]
-        sectionsAPIFunction = [ collectPayloadPlinkk() ]
-        break;
+
       case "links":
         sectionsAPI = [ "socialIcon", "links", "plinkk", "categories" ]
         sectionsAPIFunction = [ collectPayloadSocialIcon(), collectPayloadLinks(), collectPayloadPlinkk(), collectPayloadCategories() ]
@@ -171,8 +168,39 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     setStatus('Enregistrement...');
     try {
       for (let i = 0; i < sectionsAPI.length; i++) {
+        const section = sectionsAPI[i];
         const payload = sectionsAPIFunction[i];
-        await putConfig(sectionsAPI[i], payload);
+        const res = await putConfig(section, payload);
+        
+        if (section === 'links' && res.links && Array.isArray(res.links)) {
+          // Attempt to reconcile IDs for new links
+          const dbLinks = res.links;
+          const usedDbIds = new Set();
+          
+          // First pass: mark IDs that are already known
+          state.links.forEach(l => {
+            if (l.id && dbLinks.find(d => d.id === l.id)) {
+              usedDbIds.add(l.id);
+            }
+          });
+
+          // Second pass: assign IDs to new links
+          state.links.forEach(l => {
+            if (!l.id) {
+              // Try to find a matching link in DB response that hasn't been matched yet
+              const match = dbLinks.find(d => 
+                !usedDbIds.has(d.id) && 
+                d.url === l.url && 
+                d.text === l.text &&
+                d.name === l.name
+              );
+              if (match) {
+                l.id = match.id;
+                usedDbIds.add(match.id);
+              }
+            }
+          });
+        }
       }
       setStatus(manual ? 'Enregistré ✓' : 'Enregistré automatiquement ✓', 'success');
       // Ne pas recharger instantanément la preview pour éviter le spam en cours de frappe
@@ -215,18 +243,20 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     } catch {}
     f.buttonThemeEnable.checked = (cfg.buttonThemeEnable ?? 1) === 1;
     f.canvaEnable.checked = (cfg.canvaEnable ?? 1) === 1;
-    f.showEcoBadge.checked = (cfg.showEcoBadge ?? true);
-    f.showZeroTrackerBadge.checked = (cfg.showZeroTrackerBadge ?? true);
-    f.enableVCard.checked = (cfg.enableVCard ?? true);
-    f.publicPhone.value = cfg.publicPhone || '';
-    f.enableLinkCategories.checked = (cfg.enableLinkCategories ?? false);
+    if (f.showEcoBadge) f.showEcoBadge.checked = (cfg.showEcoBadge ?? true);
+    if (f.showZeroTrackerBadge) f.showZeroTrackerBadge.checked = (cfg.showZeroTrackerBadge ?? true);
+    if (f.enableVCard) f.enableVCard.checked = (cfg.enableVCard ?? true);
+    if (f.publicPhone) f.publicPhone.value = cfg.publicPhone || '';
+    if (f.enableLinkCategories) f.enableLinkCategories.checked = (cfg.enableLinkCategories ?? false);
     
-    if (f.enableLinkCategories.checked) {
-      f.manageCategoriesBtn.classList.remove('hidden');
-      f.categoriesContainer.classList.remove('hidden');
-    } else {
-      f.manageCategoriesBtn.classList.add('hidden');
-      f.categoriesContainer.classList.add('hidden');
+    if (f.enableLinkCategories) {
+      if (f.enableLinkCategories.checked) {
+        f.manageCategoriesBtn.classList.remove('hidden');
+        f.categoriesContainer.classList.remove('hidden');
+      } else {
+        f.manageCategoriesBtn.classList.add('hidden');
+        f.categoriesContainer.classList.add('hidden');
+      }
     }
 
     const { themes = [], animations: anims = [], animationBackground: animBgs = [], canvaData: canvases = [] } = await ensureCfg();
@@ -345,11 +375,11 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       degBackgroundColor: numOrNull(f.degBackgroundColor.value),
       neonEnable: state.neonColors.length > 0 && f.neonEnable?.checked ? 1 : 0,
       buttonThemeEnable: f.buttonThemeEnable.checked ? 1 : 0,
-      showEcoBadge: f.showEcoBadge.checked,
-      showZeroTrackerBadge: f.showZeroTrackerBadge.checked,
-      enableVCard: f.enableVCard.checked,
-      publicPhone: vOrNull(f.publicPhone.value),
-      enableLinkCategories: f.enableLinkCategories.checked,
+      showEcoBadge: f.showEcoBadge ? f.showEcoBadge.checked : true,
+      showZeroTrackerBadge: f.showZeroTrackerBadge ? f.showZeroTrackerBadge.checked : true,
+      enableVCard: f.enableVCard ? f.enableVCard.checked : true,
+      publicPhone: f.publicPhone ? vOrNull(f.publicPhone.value) : null,
+      enableLinkCategories: f.enableLinkCategories ? f.enableLinkCategories.checked : false,
       backgroundSize: numOrNull(f.backgroundSize.value),
       selectedThemeIndex: numOrNull(f.selectedThemeIndex.value),
       selectedAnimationIndex: numOrNull(f.selectedAnimationIndex.value),

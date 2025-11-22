@@ -46,6 +46,13 @@
                     Paramètres
                   </button>
                 </li>
+                <li>
+                  <button class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
+                    data-tab="developer" aria-selected="false">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                    Développeur
+                  </button>
+                </li>
               </ul>
             </nav>
 
@@ -156,45 +163,6 @@
                       </div>
                     </div>
 
-                    <div class="space-y-4">
-                      <h4 class="font-medium text-white">Domaines personnalisés</h4>
-                      <p class="text-sm text-slate-400">Associe un nom de domaine à l'un de tes Plinkks.</p>
-                      
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-slate-950 border border-slate-800">
-                        <div class="space-y-2">
-                          <label class="text-xs font-medium text-slate-300">Sélectionne le Plinkk</label>
-                          <select id="domainPlinkkSelect" class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:border-violet-500 outline-none"></select>
-                        </div>
-                        <div class="space-y-2">
-                          <label class="text-xs font-medium text-slate-300">Nom de domaine</label>
-                          <input id="domainHostname" class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:border-violet-500 outline-none" placeholder="plinkk.example.fr" />
-                        </div>
-                        <div class="md:col-span-2 flex flex-wrap items-center gap-2 pt-2">
-                          <button id="btnDomainSave" class="px-3 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">Activer / Mettre à jour</button>
-                          <button id="btnDomainVerify" class="px-3 py-2 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/20 transition-colors">Vérifier DNS</button>
-                          <button id="btnDomainDelete" class="px-3 py-2 text-xs font-medium rounded-lg bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/20 transition-colors">Désactiver</button>
-                        </div>
-                        
-                        <div id="domainDnsHints" class="hidden md:col-span-2 space-y-3 mt-2 p-3 rounded-lg bg-slate-900/50 border border-slate-800">
-                          <div>
-                            <label class="block text-xs text-slate-400 mb-1">Enregistrement TXT (vérification)</label>
-                            <div class="flex items-center gap-2">
-                              <input id="domainTXT" readonly class="flex-1 px-3 py-2 rounded bg-slate-950 border border-slate-800 text-xs text-slate-300 font-mono" />
-                              <button class="p-2 rounded bg-slate-800 text-slate-400 hover:text-white" onclick="navigator.clipboard.writeText(document.getElementById('domainTXT').value)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
-                            </div>
-                          </div>
-                          <div>
-                            <label class="block text-xs text-slate-400 mb-1">Enregistrement CNAME</label>
-                            <div class="flex items-center gap-2">
-                              <input id="domainCNAME" readonly class="flex-1 px-3 py-2 rounded bg-slate-950 border border-slate-800 text-xs text-slate-300 font-mono" />
-                              <button class="p-2 rounded bg-slate-800 text-slate-400 hover:text-white" onclick="navigator.clipboard.writeText(document.getElementById('domainCNAME').value)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
-                            </div>
-                          </div>
-                          <p class="text-[11px] text-slate-500">La propagation DNS peut prendre jusqu'à 15 minutes.</p>
-                        </div>
-                      </div>
-                    </div>
-
                     <div class="mt-8 pt-6 border-t border-slate-800">
                       <h4 class="font-medium text-rose-400 mb-2">Zone de danger</h4>
                       <div class="p-4 rounded-xl border border-rose-900/30 bg-rose-950/10 flex items-center justify-between">
@@ -249,6 +217,79 @@
                       </div>
                     </div>
                   </form>
+                </div>
+              </div>
+
+              <!-- Developer Panel -->
+              <div id="panel-developer" class="tab-panel hidden animate-slide-up">
+                <div class="space-y-6">
+                    <div class="mb-4 pb-4 border-b border-slate-800">
+                        <h4 class="text-lg font-semibold text-white">Développeur</h4>
+                        <p class="text-sm text-slate-400">Accès API et outils techniques.</p>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                        <label class="block space-y-2">
+                            <span class="text-sm font-medium text-slate-300">Clé API Personnelle</span>
+                            <div class="flex items-center gap-2">
+                                <div class="relative flex-1">
+                                    <input id="apiKeyField" type="text" readonly value="<%= user.apiKey || 'Aucune clé générée' %>" class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 font-mono text-sm" />
+                                    <button id="copyApiKeyBtn" type="button" class="absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" title="Copier">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    </button>
+                                </div>
+                                <button id="regenerateApiKeyBtn" type="button" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium border border-slate-700 transition-colors">
+                                    Générer
+                                </button>
+                            </div>
+                            <p class="text-xs text-slate-500">Cette clé donne accès complet à votre compte via l'API. Ne la partagez jamais.</p>
+                        </label>
+                    </div>
+
+                    <div class="space-y-4 pt-6 border-t border-slate-800">
+                      <h4 class="font-medium text-white">Domaines personnalisés</h4>
+                      <p class="text-sm text-slate-400">Associe un nom de domaine à l'un de tes Plinkks.</p>
+                      
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-slate-950 border border-slate-800">
+                        <div class="space-y-2">
+                          <label class="text-xs font-medium text-slate-300">Sélectionne le Plinkk</label>
+                          <select id="domainPlinkkSelect" class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:border-violet-500 outline-none"></select>
+                        </div>
+                        <div class="space-y-2">
+                          <label class="text-xs font-medium text-slate-300">Nom de domaine</label>
+                          <input id="domainHostname" class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:border-violet-500 outline-none" placeholder="plinkk.example.fr" />
+                        </div>
+                        <div class="md:col-span-2 flex flex-wrap items-center gap-2 pt-2">
+                          <button id="btnDomainSave" class="px-3 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">Activer / Mettre à jour</button>
+                          <button id="btnDomainVerify" class="px-3 py-2 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/20 transition-colors">Vérifier DNS</button>
+                          <button id="btnDomainDelete" class="px-3 py-2 text-xs font-medium rounded-lg bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/20 transition-colors">Désactiver</button>
+                        </div>
+                        
+                        <div id="domainDnsHints" class="hidden md:col-span-2 space-y-3 mt-2 p-3 rounded-lg bg-slate-900/50 border border-slate-800">
+                          <div>
+                            <label class="block text-xs text-slate-400 mb-1">Enregistrement TXT (vérification)</label>
+                            <div class="flex items-center gap-2">
+                              <input id="domainTXT" readonly class="flex-1 px-3 py-2 rounded bg-slate-950 border border-slate-800 text-xs text-slate-300 font-mono" />
+                              <button class="p-2 rounded bg-slate-800 text-slate-400 hover:text-white" onclick="navigator.clipboard.writeText(document.getElementById('domainTXT').value)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                            </div>
+                          </div>
+                          <div>
+                            <label class="block text-xs text-slate-400 mb-1">Enregistrement CNAME</label>
+                            <div class="flex items-center gap-2">
+                              <input id="domainCNAME" readonly class="flex-1 px-3 py-2 rounded bg-slate-950 border border-slate-800 text-xs text-slate-300 font-mono" />
+                              <button class="p-2 rounded bg-slate-800 text-slate-400 hover:text-white" onclick="navigator.clipboard.writeText(document.getElementById('domainCNAME').value)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                            </div>
+                          </div>
+                          <p class="text-[11px] text-slate-500">La propagation DNS peut prendre jusqu'à 15 minutes.</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                        <a href="/docs/api" target="_blank" class="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 transition-colors text-sm font-medium">
+                            Voir la documentation API
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        </a>
+                    </div>
                 </div>
               </div>
             </div>
@@ -464,7 +505,8 @@
         const panels = {
           profile: document.getElementById('panel-profile'),
           security: document.getElementById('panel-security'),
-          settings: document.getElementById('panel-settings')
+          settings: document.getElementById('panel-settings'),
+          developer: document.getElementById('panel-developer')
         };
 
         function setActive(key) {
@@ -970,584 +1012,45 @@
     </script>
 
     <script>
-      (function () {
-        const $ = (s, r = document) => r.querySelector(s);
-        const input = $('#avatarInput');
-        const preview = $('#avatarPreview');
-        const msg = $('#avatarMsg');
+      (function() {
+        const copyBtn = document.getElementById('copyApiKeyBtn');
+        const regenBtn = document.getElementById('regenerateApiKeyBtn');
+        const apiField = document.getElementById('apiKeyField');
 
-        function setMsg(text, ok) {
-          if (!msg) return;
-          msg.textContent = text || '';
-          msg.className = 'mt-2 text-xs ' + (ok ? 'text-emerald-300' : 'text-amber-300');
+        if (copyBtn && apiField) {
+          copyBtn.addEventListener('click', () => {
+            const val = apiField.value;
+            if (!val || val === 'Aucune clé générée') return;
+            navigator.clipboard.writeText(val).then(() => {
+              showAlert('Clé API copiée', 'success');
+            }).catch(() => showAlert('Erreur copie', 'error'));
+          });
         }
 
-        async function uploadAvatar() {
-          if (!input || !input.files || !input.files[0]) {
-            setMsg('Choisis une image.', false);
-            return;
-          }
-
-          const file = input.files[0];
-          if (!/^image\//i.test(file.type)) { setMsg('Fichier non valide (image requise).', false); return; }
-          if (file.size > 2 * 1024 * 1024) { setMsg('Image trop lourde (max 2 Mo).', false); return; }
-          try {
-            const fileToDataUrl = (f) => new Promise((resolve, reject) => {
-              const fr = new FileReader();
-              fr.onload = () => resolve(fr.result);
-              fr.onerror = () => reject(fr.error || new Error('Lecture du fichier échouée'));
-              fr.readAsDataURL(f);
-            });
-            const dataUrl = await fileToDataUrl(file);
-
-            const formData = new FormData();
-            formData.append("file", input.files[0]);
-
-            const res = await fetch("/api/me/avatar", {
-              method: "POST",
-              body: formData,
-            });
-            if (!res.ok) {
-              if (res.status === 413) {
-                setMsg('Image trop lourde (max 128 Ko)', false);
-                return;
+        if (regenBtn) {
+          regenBtn.addEventListener('click', async () => {
+            if (!confirm('Générer une nouvelle clé invalidera l\'ancienne. Continuer ?')) return;
+            
+            try {
+              regenBtn.disabled = true;
+              const res = await fetch('/api/me/apikey', { method: 'POST' });
+              const data = await res.json();
+              
+              if (res.ok && data.apiKey) {
+                if (apiField) apiField.value = data.apiKey;
+                showAlert('Nouvelle clé API générée', 'success');
+              } else {
+                showAlert(data.error || 'Erreur lors de la génération', 'error');
               }
-              throw new Error('HTTP ' + res.status);
+            } catch (e) {
+              console.error(e);
+              showAlert('Erreur réseau', 'error');
+            } finally {
+              regenBtn.disabled = false;
             }
-            const json = await res.json();
-            if (json && (json.url || json.file) && preview) {
-              const raw = json.url || ('/public/uploads/avatars/' + json.file);
-              const url = raw + '?v=' + Date.now();
-              preview.innerHTML = `<img src="${url}" alt="Avatar" class="h-full w-full object-cover" />`;
-
-              const currentId = '<%= user.id %>';
-              document.querySelectorAll('[data-avatar]').forEach(el => {
-                const elUser = el.getAttribute && el.getAttribute('data-avatar-user');
-                if (elUser && elUser === currentId) {
-                  if (el.tagName === 'IMG') {
-                    el.setAttribute('src', url);
-                  } else {
-                    el.innerHTML = `<img data-avatar data-avatar-user="${currentId}" src="${url}" alt="Avatar" class="h-full w-full object-cover" />`;
-                  }
-                }
-              });
-            }
-
-            setMsg('Avatar mis à jour.', true);
-          } catch (err) {
-            console.error(err);
-            setMsg('Échec de l’upload.', false);
-          }
+          });
         }
-
-
-        input?.addEventListener('change', uploadAvatar);
       })();
     </script>
-
-    <script>
-      (function () {
-        const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
-        const panels = {
-          profile: document.getElementById('panel-profile'),
-          security: document.getElementById('panel-security'),
-          settings: document.getElementById('panel-settings')
-        };
-
-        function setActive(key) {
-          tabButtons.forEach(btn => {
-            const t = btn.getAttribute('data-tab');
-            const selected = t === key;
-            btn.setAttribute('aria-selected', selected ? 'true' : 'false');
-            btn.classList.toggle('bg-slate-800/50', selected);
-            btn.classList.toggle('text-white', selected);
-            btn.classList.toggle('text-slate-300', !selected);
-          });
-          Object.keys(panels).forEach(k => {
-            const el = panels[k];
-            if (!el) return;
-            if (k === key) el.classList.remove('hidden'); else el.classList.add('hidden');
-          });
-        }
-
-        setActive('profile');
-
-        tabButtons.forEach(btn => btn.addEventListener('click', () => {
-          const key = btn.getAttribute('data-tab'); if (!key) return; setActive(key);
-        }));
-      })();
-    </script>
-
-    <script>
-      const accountRoot = document.getElementById('accountRoot');
-      const twoFactorEnabled = accountRoot ? accountRoot.getAttribute('data-twofactor') === 'true' : false;
-      document.getElementById('formEmail')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.currentTarget);
-        const payload = Object.fromEntries(fd.entries());
-        const res = await fetch('/api/me/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        const j = await res.json().catch(() => ({}));
-        if (res.ok) {
-          showAlert('Email mis à jour', 'success');
-          try {
-            const newEmail = (j && j.email) ? j.email : payload.email;
-            if (newEmail) {
-              document.querySelectorAll('[data-current-email]').forEach(el => {
-                el.textContent = newEmail;
-              });
-            }
-          } catch (err) {}
-        } else {
-          showAlert(j.error || 'Erreur', 'error');
-        }
-      });
-
-      window.addEventListener('load', () => {
-        const accountRoot = document.getElementById('accountRoot');
-        const userEmail = accountRoot?.getAttribute('data-user-email') || '';
-        const select = document.getElementById('privacyPlinkkSelect');
-        const chkPublic = document.getElementById('togglePublic');
-        const chkEmail = document.getElementById('toggleEmailPublic');
-
-        let plinkkList = [];
-        try {
-          const tpl = document.getElementById('account-plinkks-data');
-          const raw = tpl ? tpl.innerHTML : '[]';
-          plinkkList = JSON.parse(raw || '[]');
-        } catch (_) { plinkkList = []; }
-
-        function populateOptions() {
-          if (!select) return;
-          select.innerHTML = '';
-          if (!plinkkList.length) {
-            const opt = document.createElement('option');
-            opt.value = '';
-            opt.textContent = 'Aucun plinkk';
-            select.appendChild(opt);
-            chkPublic && (chkPublic.disabled = true);
-            chkEmail && (chkEmail.disabled = true);
-            return;
-          }
-          let defaultId = null;
-          plinkkList.forEach(p => {
-            const opt = document.createElement('option');
-            opt.value = p.id;
-            opt.textContent = `${p.name || p.slug || p.id} (${p.slug || p.id})`;
-            if (p.isDefault) defaultId = p.id;
-            select.appendChild(opt);
-          });
-          if (defaultId) select.value = defaultId;
-        }
-
-        async function refreshToggles() {
-          const id = select?.value || '';
-          const p = plinkkList.find(x => x.id === id) || null;
-          if (!p) { if (chkPublic) chkPublic.checked = false; if (chkEmail) chkEmail.checked = false; return; }
-          if (typeof p.isPublic === 'boolean' && chkPublic) chkPublic.checked = !!p.isPublic;
-          try {
-            const res = await fetch(`/api/me/plinkks/${encodeURIComponent(id)}/config`);
-            const j = await res.json().catch(() => ({}));
-            if (chkEmail) chkEmail.checked = j && j.email !== null;
-          } catch (_) { if (chkEmail) chkEmail.checked = false; }
-        }
-
-        populateOptions();
-        refreshToggles();
-        select?.addEventListener('change', refreshToggles);
-
-        chkPublic?.addEventListener('change', async (e) => {
-          const id = select?.value || '';
-          if (!id) return;
-          const checked = e.currentTarget.checked;
-          const res = await fetch(`/api/me/plinkks/${encodeURIComponent(id)}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ isPublic: !!checked })
-          });
-          if (!res.ok) showAlert('Erreur lors du changement de visibilité', 'error');
-          else {
-            const p = plinkkList.find(x => x.id === id); if (p) p.isPublic = !!checked;
-          }
-        });
-
-        chkEmail?.addEventListener('change', async (e) => {
-          const id = select?.value || '';
-          if (!id) return;
-          const checked = e.currentTarget.checked;
-          const payload = { affichageEmail: checked ? (userEmail || null) : null };
-          const res = await fetch(`/api/me/plinkks/${encodeURIComponent(id)}/config/plinkk`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          if (!res.ok) showAlert('Erreur lors du changement visibilité email', 'error');
-        });
-      });
-
-      document.getElementById('formPassword')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.currentTarget);
-        const payload = Object.fromEntries(fd.entries());
-        const res = await fetch('/api/me/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        const j = await res.json().catch(() => ({}));
-        if (res.ok) showAlert('Mot de passe mis à jour', 'success'); else showAlert(j.error || 'Erreur', 'error');
-      });
-
-      (function () {
-        const btnShow = document.getElementById('btnShowDelete');
-        const modal = document.getElementById('deleteModal');
-        const form = document.getElementById('formDeleteAccount');
-        const btnCancel = document.getElementById('btnCancelDelete');
-        const btnConfirm = document.getElementById('btnConfirmDelete');
-        const errorMsg = document.getElementById('deleteError');
-
-        if (!btnShow || !modal || !form) return;
-
-        btnShow.addEventListener('click', () => {
-          modal.classList.remove('hidden');
-          setTimeout(() => {
-            const pwd = document.getElementById('deletePassword');
-            pwd && pwd.focus();
-          }, 100);
-        });
-
-        btnCancel?.addEventListener('click', () => {
-          form.reset();
-          modal.classList.add('hidden');
-          if (errorMsg) { errorMsg.classList.add('hidden'); errorMsg.textContent = ''; }
-        });
-
-        modal.querySelector('.modal-overlay')?.addEventListener('click', () => {
-          form.reset();
-          modal.classList.add('hidden');
-          if (errorMsg) { errorMsg.classList.add('hidden'); errorMsg.textContent = ''; }
-        });
-
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          if (btnConfirm) btnConfirm.disabled = true;
-          if (errorMsg) { errorMsg.classList.add('hidden'); errorMsg.textContent = ''; }
-
-          const fd = new FormData(form);
-          const payload = Object.fromEntries(fd.entries());
-
-          if (!payload.password || String(payload.password).trim() === '') {
-            if (errorMsg) { errorMsg.textContent = 'Entrez votre mot de passe.'; errorMsg.classList.remove('hidden'); }
-            btnConfirm && (btnConfirm.disabled = false);
-            return;
-          }
-          if (twoFactorEnabled) {
-            if (!payload.otp || String(payload.otp).trim().length < 6) {
-              if (errorMsg) { errorMsg.textContent = 'Entrez votre code A2F (6 chiffres).'; errorMsg.classList.remove('hidden'); }
-              btnConfirm && (btnConfirm.disabled = false);
-              return;
-            }
-          }
-
-          try {
-            const res = await fetch('/api/me/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            const j = await res.json().catch(() => ({}));
-            if (!res.ok) {
-              if (errorMsg) { errorMsg.textContent = j.error || 'Suppression impossible'; errorMsg.classList.remove('hidden'); }
-              btnConfirm && (btnConfirm.disabled = false);
-              return;
-            }
-            modal.classList.add('hidden');
-            showAlert('Compte supprimé. Redirection...', 'success');
-            setTimeout(() => { window.location.href = '/'; }, 1400);
-          } catch (err) {
-            console.error(err);
-            if (errorMsg) { errorMsg.textContent = 'Erreur réseau'; errorMsg.classList.remove('hidden'); }
-          } finally {
-            btnConfirm && (btnConfirm.disabled = false);
-          }
-        });
-      })();
-
-      (function () {
-        const disableModal = document.getElementById('disable2faModal');
-        const btnCancel = document.getElementById('btnCancelDisable2fa');
-        const btnConfirm = document.getElementById('btnConfirmDisable2fa');
-        const inputOtp = document.getElementById('disable2faOtp');
-        const errEl = document.getElementById('disable2faError');
-
-        if (!disableModal) return;
-
-        const close = () => { disableModal.classList.add('hidden'); if (errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; } };
-
-        btnCancel?.addEventListener('click', () => { close(); });
-        disableModal.querySelector('[data-disable-overlay]')?.addEventListener('click', () => { close(); });
-
-        btnConfirm?.addEventListener('click', async () => {
-          const val = inputOtp?.value?.trim();
-          if (!val || val.length < 6) { if (errEl) { errEl.textContent = 'Entrez un code A2F valide (6 chiffres)'; errEl.classList.remove('hidden'); } return; }
-          try {
-            btnConfirm.disabled = true;
-            const res = await fetch('/api/me/2fa', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ otp: val }) });
-            const j = await res.json().catch(() => ({}));
-            if (!res.ok) {
-              if (errEl) { errEl.textContent = j.error || 'Erreur lors de la désactivation'; errEl.classList.remove('hidden'); }
-              else showAlert(j.error || 'Erreur lors de la désactivation', 'error');
-              return;
-            }
-            if (j.successful) {
-              showAlert('A2F désactivée', 'success');
-              close();
-              setTimeout(() => location.reload(), 600);
-            } else {
-              if (errEl) { errEl.textContent = 'Erreur lors de la désactivation'; errEl.classList.remove('hidden'); } else showAlert('Erreur lors de la désactivation', 'error');
-            }
-          } catch (err) { console.error(err); showAlert('Erreur réseau', 'error'); } finally { btnConfirm.disabled = false; }
-        });
-      })();
-
-      (function () {
-        const btnEnable = document.getElementById('btnEnable2fa');
-        const btnDisable = document.getElementById('btnDisable2fa');
-        console.debug('A2F buttons found', { btnEnable: !!btnEnable, btnDisable: !!btnDisable });
-        const btnLearn = document.getElementById('btnLearn2fa');
-        const modal = document.getElementById('twoFactorModal');
-        const overlay = document.getElementById('twoFactorOverlay');
-        const qrWrap = document.getElementById('twoFactorQrWrap');
-        const otpauthEl = document.getElementById('twoFactorOtpauth');
-        const btnClose = document.getElementById('btnClose2faModal');
-        const btnReload = document.getElementById('btnReloadAfter2fa');
-
-        async function open2faModalWith(data) {
-          if (!modal) return;
-          qrWrap.innerHTML = '';
-          if (otpauthEl) otpauthEl.value = '';
-          if (data.qrCode) {
-            const img = document.createElement('img');
-            img.src = data.qrCode;
-            img.alt = 'QR A2F';
-            img.className = 'mx-auto';
-            qrWrap.appendChild(img);
-          }
-          if (data.otpauth) {
-            if (otpauthEl) otpauthEl.value = data.otpauth;
-          }
-          modal.classList.remove('hidden');
-          setTimeout(() => { btnClose?.focus(); }, 50);
-        }
-
-        btnLearn?.addEventListener('click', () => {
-          let tips = document.getElementById('twoFactorTipsModal');
-          if (!tips) {
-            tips = document.createElement('div');
-            tips.id = 'twoFactorTipsModal';
-            tips.className = 'fixed inset-0 hidden z-50 grid place-items-center';
-            tips.innerHTML = `
-            <div class="absolute inset-0 bg-black/60" data-tips-overlay></div>
-            <div class="relative w-full max-w-lg mx-4">
-              <div class="rounded-lg bg-slate-900/95 border border-slate-800/60 p-6 shadow-lg">
-                <h3 class="text-lg font-semibold mb-2">Comment fonctionne la A2F</h3>
-                <p class="text-sm text-slate-300 mb-3">Installe une application d'authentification (Google Authenticator, Authy, etc.). Pour activer : clique sur "Activer la A2F", scanne le QR et entre le code généré pour confirmer.</p>
-                <ul class="text-xs text-slate-400 mb-4 list-disc list-inside space-y-1">
-                  <li>Télécharge une app d'authentification sur ton téléphone.</li>
-                  <li>Scanne le QR fourni lors de l'activation.</li>
-                  <li>Saisis le code à 6 chiffres pour terminer l'activation.</li>
-                </ul>
-                <div class="flex items-center justify-end gap-2 mt-4">
-                  <button data-tips-close class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 text-white border border-slate-700">Fermer</button>
-                  <button data-tips-open-A2F class="px-3 py-2 text-sm rounded-md bg-emerald-600 hover:bg-emerald-500 text-white">Activer la A2F</button>
-                </div>
-              </div>
-            </div>
-          `;
-            document.body.appendChild(tips);
-
-            const overlayEl = tips.querySelector('[data-tips-overlay]');
-            const closeBtn = tips.querySelector('[data-tips-close]');
-            const open2faBtn = tips.querySelector('[data-tips-open-2fa]');
-
-            const closeTips = () => { tips.classList.add('hidden'); };
-
-            overlayEl?.addEventListener('click', closeTips);
-            closeBtn?.addEventListener('click', closeTips);
-            open2faBtn?.addEventListener('click', () => { closeTips(); btnEnable?.click(); });
-
-            if (!tips.dataset.bound) {
-              const escHandler = (e) => { if (e.key === 'Escape') closeTips(); };
-              document.addEventListener('keydown', escHandler);
-              tips.dataset.bound = 'true';
-            }
-          }
-
-          tips.classList.remove('hidden');
-          setTimeout(() => {
-            const cb = tips.querySelector('[data-tips-open-2fa]');
-            cb?.focus();
-          }, 50);
-        });
-
-        btnEnable?.addEventListener('click', async () => {
-          try {
-            btnEnable.disabled = true;
-            const res = await fetch('/api/me/2fa', { method: 'POST' });
-            const j = await res.json().catch(() => ({}));
-            if (!res.ok) {
-              (function () {
-                const inputConfirmOtp = document.getElementById('twoFactorConfirmOtp');
-                let errEl = document.getElementById('twoFactorError');
-                if (!errEl) {
-                  errEl = document.createElement('div');
-                  errEl.id = 'twoFactorError';
-                  errEl.className = 'mt-2 text-xs text-red-300';
-                  if (inputConfirmOtp && inputConfirmOtp.parentNode) {
-                    inputConfirmOtp.parentNode.insertBefore(errEl, inputConfirmOtp.nextSibling);
-                  } else {
-                    const modal = document.getElementById('twoFactorModal');
-                    modal && modal.querySelector('.p-6')?.appendChild(errEl);
-                  }
-                }
-                errEl.textContent = j.error || 'Erreur lors de la génération de la A2F';
-              })();
-              return;
-            }
-            if (j.qrCode || j.otpauth) {
-              await open2faModalWith(j);
-            } else if (j.successful) {
-              location.reload();
-            } else {
-              showAlert('Réponse inattendue', 'error');
-            }
-          } catch (err) {
-            console.error(err);
-            showAlert('Erreur réseau lors de la génération du QR', 'error');
-          } finally {
-            btnEnable.disabled = false;
-          }
-        });
-
-        btnDisable?.addEventListener('click', async () => {
-          const disableModal = document.getElementById('disable2faModal');
-          const disableOtp = document.getElementById('disable2faOtp');
-          const disableErr = document.getElementById('disable2faError');
-          if (!disableModal) return;
-          if (disableErr) { disableErr.classList.add('hidden'); disableErr.textContent = ''; }
-          disableOtp && (disableOtp.value = '');
-          disableModal.classList.remove('hidden');
-          setTimeout(() => { disableOtp && disableOtp.focus(); }, 50);
-        });
-
-        const btnConfirm2fa = document.getElementById('btnConfirm2fa');
-        const inputConfirmOtp = document.getElementById('twoFactorConfirmOtp');
-        btnConfirm2fa?.addEventListener('click', async () => {
-          const value = inputConfirmOtp?.value?.trim();
-          if (!value || value.length < 6) { showAlert('Entrez un code A2F valide (6 chiffres)', 'error'); return; }
-          try {
-            btnConfirm2fa.disabled = true;
-            const res = await fetch('/api/me/2fa/confirm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ otp: value }) });
-            const j = await res.json().catch(() => ({}));
-            if (!res.ok) { showAlert(j.error || 'Code invalide', 'error'); return; }
-            if (j.successful) {
-              showAlert('A2F activée avec succès', 'success');
-              document.getElementById('btnReloadAfter2fa')?.classList.remove('hidden');
-              btnConfirm2fa.classList.add('hidden');
-            } else {
-              showAlert('Erreur lors de la confirmation', 'error');
-            }
-          } catch (err) { console.error(err); showAlert('Erreur réseau', 'error'); } finally { btnConfirm2fa.disabled = false; }
-        });
-
-        btnClose?.addEventListener('click', () => { modal.classList.add('hidden'); });
-        overlay?.addEventListener('click', () => { modal.classList.add('hidden'); });
-        btnReload?.addEventListener('click', () => { location.reload(); });
-      })();
-    </script>
-
-    <template id="account-plinkks-data"><%- JSON.stringify((typeof plinkks !=='undefined' ) ? plinkks : ((typeof pages
-        !=='undefined' ) ? pages : [])) %></template>
-
-    <script>
-      (function () {
-        const selectPlinkk = document.getElementById('domainPlinkkSelect');
-        const inputHost = document.getElementById('domainHostname');
-        const btnSave = document.getElementById('btnDomainSave');
-        const btnVerify = document.getElementById('btnDomainVerify');
-        const btnDelete = document.getElementById('btnDomainDelete');
-        const hints = document.getElementById('domainDnsHints');
-        const txt = document.getElementById('domainTXT');
-        const cname = document.getElementById('domainCNAME');
-
-        if (!selectPlinkk || !inputHost) return;
-
-        let list = [];
-        try {
-          const tpl = document.getElementById('account-plinkks-data');
-          const raw = tpl ? tpl.innerHTML : '[]';
-          list = JSON.parse(raw || '[]');
-        } catch (_) { list = []; }
-        selectPlinkk.innerHTML = '';
-        if (!list.length) {
-          const opt = document.createElement('option');
-          opt.value = '';
-          opt.textContent = 'Aucun plinkk';
-          selectPlinkk.appendChild(opt);
-        } else {
-          list.forEach(p => {
-            const opt = document.createElement('option');
-            opt.value = p.id;
-            opt.textContent = `${p.name || p.slug || p.id} (${p.slug || p.id})`;
-            selectPlinkk.appendChild(opt);
-          });
-        }
-
-        function buildTxtRecord(hostname, token) {
-          return `_plinkk-verification.${hostname} IN TXT "plinkk-verify=${token}"`;
-        }
-        function buildCnameRecord(hostname) {
-          return `${hostname} CNAME page.plinkk.fr`;
-        }
-
-        btnSave?.addEventListener('click', async () => {
-          const hostname = (inputHost.value || '').trim();
-          if (!hostname) { showAlert('Entre un nom de domaine', 'error'); return; }
-          try {
-            btnSave.disabled = true;
-            const res = await fetch('/api/me/host', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hostname }) });
-            const j = await res.json().catch(() => ({}));
-            if (!res.ok) { showAlert(j.error || 'Erreur lors de la configuration du domaine', 'error'); return; }
-            if (j.token || (j.verified === false)) {
-              hints?.classList.remove('hidden');
-              if (txt) txt.value = buildTxtRecord(hostname, j.token || 'TOKEN');
-              if (cname) cname.value = buildCnameRecord(hostname);
-              showAlert('Ajoute les enregistrements DNS puis clique sur Vérifier', 'success');
-            } else {
-              showAlert('Domaine enregistré', 'success');
-            }
-          } catch (e) {
-            console.error(e);
-            showAlert('Erreur réseau', 'error');
-          } finally {
-            btnSave.disabled = false;
-          }
-        });
-
-        btnVerify?.addEventListener('click', async () => {
-          try {
-            btnVerify.disabled = true;
-            const res = await fetch('/api/me/host/verify', { method: 'POST' });
-            const j = await res.json().catch(() => ({}));
-            if (j.verified) {
-              showAlert('Domaine vérifié ✓', 'success');
-            } else {
-              showAlert('TXT non détecté, réessaye dans quelques minutes', 'error');
-            }
-          } catch (e) { console.error(e); showAlert('Erreur réseau', 'error'); }
-          finally { btnVerify.disabled = false; }
-        });
-
-        btnDelete?.addEventListener('click', async () => {
-          try {
-            btnDelete.disabled = true;
-            const res = await fetch('/api/me/host', { method: 'DELETE' });
-            const j = await res.json().catch(() => ({}));
-            if (!res.ok) { showAlert(j.error || 'Suppression impossible', 'error'); return; }
-            showAlert('Domaine désactivé', 'success');
-          } catch (e) { console.error(e); showAlert('Erreur réseau', 'error'); }
-          finally { btnDelete.disabled = false; }
-        });
-      })();
-    </script>
+</body>
+</html>

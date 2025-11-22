@@ -358,6 +358,11 @@ fastify.addHook("onRequest", async (request, reply) => {
           canvaEnable: settings?.canvaEnable ?? 1,
           selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
           layoutOrder: settings?.layoutOrder ?? null,
+          publicPhone: settings?.publicPhone ?? null,
+          showEcoBadge: settings?.showEcoBadge ?? false,
+          showZeroTrackerBadge: settings?.showZeroTrackerBadge ?? false,
+          enableVCard: settings?.enableVCard ?? false,
+          enableLinkCategories: settings?.enableLinkCategories ?? false,
         };
 
         const generated = generateProfileConfig(

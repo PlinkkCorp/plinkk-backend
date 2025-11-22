@@ -111,9 +111,9 @@ export function generateProfileConfig(
         cosmetics: ${JSON.stringify((profile as any).cosmetics || {})},
         isVerified: ${profile.isVerified ?? false},
         isPartner: ${profile.isPartner ?? false},
-        showEcoBadge: ${profile.showEcoBadge ?? false},
-        showZeroTrackerBadge: ${profile.showZeroTrackerBadge ?? false},
-        enableVCard: ${profile.enableVCard ?? false},
+        showEcoBadge: ${profile.showEcoBadge ?? true},
+        showZeroTrackerBadge: ${profile.showZeroTrackerBadge ?? true},
+        enableVCard: ${profile.enableVCard ?? true},
         publicPhone: ${JSON.stringify(profile.publicPhone || "")},
         enableLinkCategories: ${profile.enableLinkCategories ?? false},
     };

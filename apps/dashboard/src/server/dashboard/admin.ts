@@ -186,8 +186,14 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       publicPath =
         defaultPlinkk && defaultPlinkk.slug ? defaultPlinkk.slug : userInfo.id;
     } catch (e) {}
+
+    const roles = await prisma.role.findMany({
+      orderBy: { priority: 'desc' }
+    });
+
     return replyView(reply, "dashboard/admin/message.ejs", userInfo, {
       publicPath,
+      roles
     });
   });
 
@@ -240,7 +246,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     const body = request.body as {
       id: string;
       targetUserIds: string[];
-      targetRoles: Role[];
+      targetRoles: string[]; // Changed from Role[] to string[] (IDs)
       level: string;
       text: string;
       dismissible: string;
@@ -252,7 +258,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     const targetUserIds: string[] = Array.isArray(body.targetUserIds)
       ? body.targetUserIds
       : [];
-    const targetRoles: Role[] = Array.isArray(body.targetRoles)
+    const targetRoleIds: string[] = Array.isArray(body.targetRoles)
       ? body.targetRoles
       : [];
     const payload = {
@@ -288,11 +294,11 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
           })),
         });
       }
-      if (targetRoles.length) {
+      if (targetRoleIds.length) {
         await prisma.announcementRoleTarget.createMany({
-          data: targetRoles.map((r) => ({
+          data: targetRoleIds.map((rid) => ({
             announcementId: ann.id,
-            roleId: r.id,
+            roleId: rid,
           })),
         });
       }

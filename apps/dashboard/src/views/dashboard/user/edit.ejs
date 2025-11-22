@@ -71,12 +71,7 @@
                             Profil
                         </button>
                     </li>
-                    <li>
-                        <button data-target="#section-ethics" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
-                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/></svg>
-                            Éthique
-                        </button>
-                    </li>
+
                     <li>
                         <button data-target="#section-appearance" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
                             <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l4 8h8l-6 5 2 9-8-5-8 5 2-9-6-5h8z"/></svg>
@@ -113,12 +108,7 @@
                             Agencement
                         </button>
                     </li>
-                    <li>
-                        <button data-target="#section-developer" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
-                            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                            Développeur
-                        </button>
-                    </li>
+
                 </ul>
             </nav>
 
@@ -191,40 +181,7 @@
                     </div>
                 </div>
 
-                <!-- Ethics Section -->
-                <div id="section-ethics" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                    <div class="mb-6 pb-4 border-b border-slate-800">
-                        <h3 class="text-lg font-semibold text-white">Éthique & Tech</h3>
-                        <p class="text-sm text-slate-400">Options pour un profil plus responsable et transparent.</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                            <input id="showEcoBadge" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500/50"/>
-                            <div>
-                                <span class="block text-sm font-medium text-slate-300">Badge "Eco-Friendly"</span>
-                                <span class="block text-xs text-slate-500">Affiche l'impact carbone réduit de votre page.</span>
-                            </div>
-                        </label>
-                        <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                            <input id="showZeroTrackerBadge" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500/50"/>
-                            <div>
-                                <span class="block text-sm font-medium text-slate-300">Mode "Zéro Traqueur"</span>
-                                <span class="block text-xs text-slate-500">Affiche une promesse de non-espionnage.</span>
-                            </div>
-                        </label>
-                        <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors md:col-span-2">
-                            <input id="enableVCard" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500/50"/>
-                            <div>
-                                <span class="block text-sm font-medium text-slate-300">Bouton "Vcard"</span>
-                                <span class="block text-xs text-slate-500">Permet aux visiteurs de télécharger vos infos de contact.</span>
-                            </div>
-                        </label>
-                        <label class="block space-y-2 md:col-span-2">
-                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Téléphone public (pour VCard) <span class="info-i" title="Numéro inclus dans la VCard">i</span></span>
-                            <input id="publicPhone" type="tel" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 placeholder-slate-600" placeholder="+33 6 12 34 56 78" />
-                        </label>
-                    </div>
-                </div>
+
 
                 <!-- Appearance Section -->
                 <div id="section-appearance" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
@@ -503,39 +460,7 @@
                     <div class="space-y-3" id="layoutList" role="list"></div>
                 </div>
 
-                <!-- Developer Section -->
-                <div id="section-developer" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                    <div class="mb-6 pb-4 border-b border-slate-800">
-                        <h3 class="text-lg font-semibold text-white">Développeur</h3>
-                        <p class="text-sm text-slate-400">Accès API et outils techniques.</p>
-                    </div>
-                    <div class="space-y-6">
-                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
-                            <label class="block space-y-2">
-                                <span class="text-sm font-medium text-slate-300">Clé API Personnelle</span>
-                                <div class="flex items-center gap-2">
-                                    <div class="relative flex-1">
-                                        <input id="apiKeyField" type="text" readonly value="<%= user.apiKey || 'Aucune clé générée' %>" class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 font-mono text-sm" />
-                                        <button id="copyApiKeyBtn" type="button" class="absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" title="Copier">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                        </button>
-                                    </div>
-                                    <button id="regenerateApiKeyBtn" type="button" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium border border-slate-700 transition-colors">
-                                        Générer
-                                    </button>
-                                </div>
-                                <p class="text-xs text-slate-500">Cette clé donne accès complet à votre compte via l'API. Ne la partagez jamais.</p>
-                            </label>
-                        </div>
-                        
-                        <div>
-                            <a href="/docs/api" target="_blank" class="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 transition-colors text-sm font-medium">
-                                Voir la documentation API
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </section>
 
