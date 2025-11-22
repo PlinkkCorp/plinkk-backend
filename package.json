@@ -17,6 +17,7 @@
     "prisma": "^7.0.0"
   },
   "dependencies": {
+    "@fastify/secure-session": "^8.2.0",
     "@prisma/client": "^7.0.0",
     "dotenv": "^17.2.3"
   },
