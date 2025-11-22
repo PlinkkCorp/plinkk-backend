@@ -14,10 +14,10 @@
     "launch-all": "concurrently \"pnpm --filter @plinkk/dashboard dev\" \"pnpm --filter @plinkk/public dev\""
   },
   "devDependencies": {
-    "prisma": "^6.17.1"
+    "prisma": "^7.0.0"
   },
   "dependencies": {
-    "@prisma/client": "^6.17.1"
+    "@prisma/client": "^7.0.0"
   },
   "private": true
 }
