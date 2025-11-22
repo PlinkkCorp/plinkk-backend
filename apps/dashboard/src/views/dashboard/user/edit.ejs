@@ -54,11 +54,6 @@
                     <div class="flex items-center gap-3">
                         <%- include('../../partials/changePlinkkDropdown.ejs') %>
                     </div>
-
-                    <div class="flex items-center gap-2">
-                        <button id="resetBtn--mobile" class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">Reset</button>
-                        <button id="saveBtn--mobile" class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors">Sauvegarder</button>
-                    </div>
                 </div>
             </div>
 
@@ -572,15 +567,6 @@
                                     btns.forEach(b => b.addEventListener('click', () => selectTab(b.dataset.target)));
                                     const initial = location.hash && sections.some(s => `#${s.id}` === location.hash) ? location.hash : '#section-profile';
                                     selectTab(initial);
-
-                                    const save = document.getElementById('saveBtn');
-                                    const reset = document.getElementById('resetBtn');
-                                    ['saveBtn--mobile','saveBtn--fab'].forEach(id=>{
-                                        const el = document.getElementById(id); if(el && save){ el.addEventListener('click', ()=> save.click()); }
-                                    });
-                                    ['resetBtn--mobile','resetBtn--fab'].forEach(id=>{
-                                        const el = document.getElementById(id); if(el && reset){ el.addEventListener('click', ()=> reset.click()); }
-                                    });
                                 })();
                         </script>
                 <style>
