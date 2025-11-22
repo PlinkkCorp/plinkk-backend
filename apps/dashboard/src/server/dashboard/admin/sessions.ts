@@ -6,6 +6,13 @@ import { logAdminAction } from "../../../lib/adminLogger";
 
 const prisma = new PrismaClient();
 
+interface SessionsQuery {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sort?: 'asc' | 'desc';
+}
+
 export function dashboardAdminSessionsRoutes(fastify: FastifyInstance) {
   
   // View: Sessions List
@@ -29,14 +36,14 @@ export function dashboardAdminSessionsRoutes(fastify: FastifyInstance) {
   });
 
   // API: List Sessions
-  fastify.get("/api", async function (request, reply) {
+  fastify.get<{ Querystring: SessionsQuery }>("/api", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     
     const ok = await ensurePermission(request, reply, 'VIEW_ADMIN');
     if (!ok) return;
 
-    const { page = 1, limit = 20, search, sort = 'desc' } = request.query as any;
+    const { page = 1, limit = 20, search, sort = 'desc' } = request.query;
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 

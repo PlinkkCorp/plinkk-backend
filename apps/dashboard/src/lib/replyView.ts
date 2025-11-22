@@ -15,7 +15,7 @@ function computeFrontendUrl(reply: FastifyReply) {
   const env = (process.env.FRONTEND_URL || "").trim();
   if (env) return env.replace(/\/$/, "");
   try {
-    const req: any = (reply as any).request;
+    const req = reply.request;
     const host = String(req?.headers?.host || "");
     const xfProto = String(req?.headers?.["x-forwarded-proto"] || "").toLowerCase();
     const proto = (xfProto || req?.protocol || "https").replace(/:$/, "");

@@ -33,6 +33,6 @@ export function verifyRoleModrator(role: Role | null | undefined): boolean {
 export function verifyRoleIsStaff(role: Role | null | undefined): boolean {
         if (!role) return false;
     // Support both legacy name-based check and new isStaff flag
-    if ((role as any).isStaff === true) return true;
+    if (role.isStaff === true) return true;
     return verifyRoleAdmin(role) || verifyRoleDeveloper(role) || verifyRoleModrator(role);
 }

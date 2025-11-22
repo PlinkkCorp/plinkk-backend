@@ -16,6 +16,33 @@ import { dashboardAdminSessionsRoutes } from "./admin/sessions";
 
 const prisma = new PrismaClient();
 
+interface UserSearchQuery {
+  q?: string;
+  limit?: number;
+}
+
+interface LimitQuery {
+  limit?: number;
+}
+
+interface TopPlinkksQuery {
+  page?: number;
+  limit?: number;
+  sort?: string;
+  order?: 'asc' | 'desc';
+  search?: string;
+}
+
+interface LogsQuery {
+  page?: number;
+  limit?: number;
+  adminId?: string;
+  action?: string;
+  from?: string;
+  to?: string;
+  sort?: 'asc' | 'desc';
+}
+
 export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.register(dashboardAdminReportsRoutes, { prefix: "/reports" });
   fastify.register(dashboardAdminSessionsRoutes, { prefix: "/sessions" });
@@ -206,16 +233,16 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     return reply.send({ messages: list });
   });
 
-  fastify.get("/users/search", async function (request, reply) {
+  fastify.get<{ Querystring: UserSearchQuery }>("/users/search", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
     if (!ok) return;
-    const q = String((request.query as { q: string })?.q as string).trim();
+    const q = String(request.query.q || "").trim();
     if (!q) return reply.send({ users: [] });
     const take = Math.min(
       10,
-      Math.max(1, Number((request.query as { limit: number })?.limit || 8))
+      Math.max(1, Number(request.query.limit || 8))
     );
     const users = await prisma.user.findMany({
       where: {
@@ -689,14 +716,14 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     return reply.send({ from: fmt(start), to: fmt(end), series });
   });
 
-  fastify.get("/stats/logins/recent", async function (request, reply) {
+  fastify.get<{ Querystring: LimitQuery }>("/stats/logins/recent", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     const ok = await ensurePermission(request, reply, 'VIEW_STATS');
     if (!ok) return;
     const limit = Math.min(
       50,
-      Math.max(1, Number((request.query as any)?.limit || 20))
+      Math.max(1, Number(request.query.limit || 20))
     );
     const rows = await prisma.user.findMany({
       select: {
@@ -922,64 +949,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     return reply.send({ from: fmt(start), to: fmt(end), roles, series });
   });
 
-  fastify.get("/stats/plinkks/series", async function (request, reply) {
-    const userId = request.session.get("data");
-    if (!userId) return reply.code(401).send({ error: "unauthorized" });
-    const ok = await ensurePermission(request, reply, 'VIEW_STATS');
-    if (!ok) return;
-    const { from, to } = request.query as { from?: string; to?: string };
-    const now = new Date();
-    const end = to
-      ? new Date(to + "T23:59:59.999Z")
-      : new Date(
-          Date.UTC(
-            now.getUTCFullYear(),
-            now.getUTCMonth(),
-            now.getUTCDate(),
-            23,
-            59,
-            59,
-            999
-          )
-        );
-    const start = from
-      ? new Date(from + "T00:00:00.000Z")
-      : new Date(end.getTime() - 29 * 86400000);
-
-    const fmt = (dt: Date) => {
-      const y = dt.getUTCFullYear();
-      const m = String(dt.getUTCMonth() + 1).padStart(2, "0");
-      const d = String(dt.getUTCDate()).padStart(2, "0");
-      return `${y}-${m}-${d}`;
-    };
-
-    const rows = await prisma.plinkkViewDaily.findMany({
-      where: { date: { gte: start, lte: end } },
-      select: { date: true, count: true },
-    });
-
-    const byDate = new Map<string, number>();
-    for (
-      let t = new Date(start.getTime());
-      t <= end;
-      t = new Date(t.getTime() + 86400000)
-    ) {
-      byDate.set(fmt(t), 0);
-    }
-
-    for (const r of rows) {
-      const key = fmt(new Date(r.date));
-      if (byDate.has(key)) byDate.set(key, (byDate.get(key) || 0) + r.count);
-    }
-
-    const series = Array.from(byDate.entries())
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([date, count]) => ({ date, count }));
-
-    return reply.send({ from: fmt(start), to: fmt(end), series });
-  });
-
-  fastify.get("/stats/plinkks/top", async function (request, reply) {
+  fastify.get<{ Querystring: TopPlinkksQuery }>("/stats/plinkks/top", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     const ok = await ensurePermission(request, reply, 'VIEW_STATS');
@@ -991,7 +961,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       sort = "views",
       order = "desc",
       search = "",
-    } = request.query as any;
+    } = request.query;
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
@@ -1047,10 +1017,9 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       if (!ok) return;
     }
     // Pré-chargement minimal des rôles pour affichage initial
-    // Utilisation de cast any pour éviter les erreurs de typage avant régénération Prisma
     let roles: any[] = [];
     try {
-      roles = await (prisma as any).role.findMany({
+      roles = await prisma.role.findMany({
         include: { permissions: true },
         orderBy: [{ priority: 'desc' }, { name: 'asc' }]
       });
@@ -1058,7 +1027,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       request.log?.error({ err: e }, 'Failed to preload roles');
       roles = [];
     }
-    const perms = await (prisma as any).permission.findMany({ orderBy: [{ category: 'asc' }, { key: 'asc' }] });
+    const perms = await prisma.permission.findMany({ orderBy: [{ category: 'asc' }, { key: 'asc' }] });
     const grouped: Record<string, any[]> = {};
     for (const p of perms) { grouped[p.category] = grouped[p.category] || []; grouped[p.category].push(p); }
     // Construction d'un payload sérialisé base64 pour éviter les corruptions EJS/JSON
@@ -1096,13 +1065,13 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     return replyView(reply, 'dashboard/admin/logs.ejs', userInfo, { publicPath });
   });
 
-  fastify.get("/logs/api", async function (request, reply) {
+  fastify.get<{ Querystring: LogsQuery }>("/logs/api", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     const ok = await ensurePermission(request, reply, 'VIEW_ADMIN_LOGS');
     if (!ok) return;
     
-    const { page = 1, limit = 50, adminId, action, from, to, sort = 'desc' } = request.query as any;
+    const { page = 1, limit = 50, adminId, action, from, to, sort = 'desc' } = request.query;
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
