@@ -1,292 +1,470 @@
-<%- include('../../partials/head.ejs', { title: 'Tableau de bord - Cosmétiques', description: 'Choisis ton flair, cadre, thème et bannière avec aperçu en direct.', robots: 'noindex,nofollow' }) %>
+<%- include('../../partials/head.ejs', { title: 'Tableau de bord - Cosmétiques', description: 'Personnalisez votre profil Plinkk.', robots: 'noindex,nofollow' }) %>
 <%- include('../../partials/header-dash.ejs', { user: user }) %>
-<main class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
+
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
   <%- include('../../partials/asside_dash.ejs', { active: 'cosmetics' }) %>
-  <section class="col-span-12 lg:col-span-9 space-y-4 relative">
-    <div id="comingSoonOverlay" class="absolute -inset-3 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm rounded-xl" aria-hidden="false">
-      <div role="dialog" aria-modal="true" aria-labelledby="comingSoonTitle" aria-describedby="comingSoonDesc" class="mx-4 w-full max-w-lg rounded-xl bg-gradient-to-b from-slate-900/95 to-slate-900/90 border border-slate-700 p-6 text-center text-white shadow-2xl transform transition-all duration-200">
-        <div class="flex items-center justify-center mb-4">
-          <div class="h-12 w-12 rounded-full bg-indigo-600/90 flex items-center justify-center shadow-lg mr-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" role="img">
-              <rect x="3" y="5" width="18" height="12" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2 19h20" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8 9h8" />
-            </svg>
-          </div>
-        </div>
-        <h2 id="comingSoonTitle" class="text-2xl font-semibold mb-2">Fonctionnalité en cours</h2>
-        <p id="comingSoonDesc" class="text-sm text-slate-300 mb-3">Nous améliorons activement cet outil. Il sera disponible prochainement avec une interface dédiée.</p>
-        <p class="text-xs text-slate-400 mb-4">L'interface est désactivée pour l'instant.</p>
-        <div class="flex items-center justify-center gap-3">
-          <button id="notifyMeBtn" class="px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400">Me prévenir</button>
-        </div>
-        <div class="mt-4 text-xs text-slate-400">Ce message restera visible tant que la fonctionnalité est en développement.</div>
+
+  <main class="col-span-12 lg:col-span-10 space-y-6">
+    
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Apparence du Profil</h1>
+        <p class="text-sm text-slate-400 mt-1">Personnalisez les couleurs et effets de votre carte utilisateur.</p>
       </div>
-    </div>
-    <div class="mb-4">
-      <div class="flex items-center justify-between gap-4">
-        <h1 class="text-2xl font-semibold">Cosmétiques</h1>
-        <div class="flex items-center gap-2">
-          <button id="resetBtn" class="px-3 py-2 text-sm rounded-md bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200">Réinitialiser</button>
-        </div>
+      <div class="flex gap-3">
+        <button id="resetBtn" class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">
+          Réinitialiser
+        </button>
+        <button id="saveBtn" class="px-6 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-all hover:scale-105 active:scale-95">
+          Enregistrer
+        </button>
       </div>
     </div>
 
-    <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-      <h2 class="font-medium mb-3">Aperçu</h2>
-      <div id="preview" class="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
-        <div class="flex items-center gap-3">
-          <div id="avatar" class="relative shrink-0 h-12 w-12 rounded-full grid place-items-center bg-indigo-700/70 border border-indigo-600/50 text-white font-bold" data-avatar>
-            <div id="frame" class="pointer-events-none absolute inset-0 rounded-full">
-              <%- include('../../partials/avatar.ejs', { user: user, }) %>
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+      
+      <!-- Preview Column (Sticky) -->
+      <div class="xl:col-span-5 xl:order-2">
+        <div class="sticky top-6 space-y-6">
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl">
+            <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Aperçu en direct</h2>
+            
+            <!-- Profile Card Preview -->
+            <div class="flex justify-center">
+              <div id="previewCard" class="relative w-full max-w-[320px] rounded-3xl overflow-hidden bg-slate-950 border border-slate-800/50 shadow-2xl group transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-violet-500/20 hover:border-violet-500/50">
+                
+                <!-- Dynamic Background Tint -->
+                <div id="previewBg" class="absolute inset-0 opacity-20 transition-opacity duration-300 group-hover:opacity-40"></div>
+                
+                <!-- Effect Overlay -->
+                <div id="previewEffect" class="absolute inset-0 pointer-events-none z-0 opacity-50"></div>
+
+                <!-- Dark Glass Overlay -->
+                <div class="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"></div>
+
+                <!-- Banner (Faded Top) -->
+                <div id="previewBanner" class="absolute inset-x-0 top-0 h-32 bg-cover bg-center opacity-50 transition-transform duration-500 ease-out group-hover:scale-110" style="mask-image: linear-gradient(to bottom, black, transparent); -webkit-mask-image: linear-gradient(to bottom, black, transparent);"></div>
+
+                <!-- Content -->
+                <div class="relative z-10 p-5 flex flex-col">
+                    <!-- Header: Avatar + Role -->
+                    <div class="flex justify-between items-start mb-12">
+                        <!-- Avatar Container -->
+                        <div class="relative h-14 w-14 rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-slate-900 rounded-2xl flex items-center justify-center text-lg font-bold text-slate-400 overflow-hidden ring-2 ring-white/10">
+                                <%- include('../../partials/avatar.ejs', { user: user, className: "w-full h-full object-cover" }) %>
+                            </div>
+                            <!-- Frame Overlay -->
+                            <div id="previewFrame" class="absolute inset-0 pointer-events-none z-20 rounded-2xl"></div>
+                        </div>
+                        
+                        <!-- Role Badge -->
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border bg-white/5 border-white/10 text-slate-300 backdrop-blur-md shadow-sm">
+                            ADMIN
+                        </span>
+                    </div>
+
+                    <!-- User Info -->
+                    <div class="mt-auto pt-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <h3 class="text-lg font-bold text-white tracking-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-slate-400 transition-all truncate">
+                                <%= user.userName %>
+                                <span id="previewFlair" class="hidden ml-2 inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] bg-white/10 text-white/80 align-middle transform -translate-y-0.5 border border-white/10"></span>
+                            </h3>
+                            
+                            <!-- Fake Email -->
+                            <div class="flex-shrink-0 flex items-center gap-1.5 text-[10px] text-slate-400 bg-white/5 rounded-lg px-2 py-1 border border-white/5 max-w-[110px]">
+                                <svg class="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                <span class="truncate">email@exemple.com</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium">@<%= user.id %></p>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="mt-4 flex items-center gap-2">
+                        <button class="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white text-slate-950 text-xs font-bold hover:bg-slate-200 transition-colors shadow-lg shadow-white/5">
+                            <span>Voir</span>
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </button>
+                        <button class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/10 transition-colors backdrop-blur-md">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        </button>
+                    </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 flex justify-center gap-2">
+              <div class="h-1.5 w-1.5 rounded-full bg-slate-700"></div>
+              <div class="h-1.5 w-1.5 rounded-full bg-slate-700"></div>
+              <div class="h-1.5 w-1.5 rounded-full bg-slate-700"></div>
             </div>
           </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="font-semibold"><%= user.userName %></span>
-              <span id="flairBadge" class="hidden text-[10px] px-2 py-0.5 rounded-full bg-slate-700/30 border border-slate-600/50 text-slate-300"></span>
+        </div>
+      </div>
+
+      <!-- Controls Column -->
+      <div class="xl:col-span-7 xl:order-1 space-y-8">
+        
+        <!-- Tabs Navigation -->
+        <div class="flex gap-2 overflow-x-auto pb-2 border-b border-slate-800">
+          <button type="button" class="tab-btn active px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap" data-tab="theme">Thème & Couleurs</button>
+          <button type="button" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap" data-tab="decoration">Décorations</button>
+          <button type="button" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap" data-tab="badges">Badges</button>
+          <button type="button" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap" data-tab="banner">Bannière</button>
+        </div>
+
+        <!-- Tab: Theme -->
+        <div id="tab-theme" class="tab-content space-y-8 animate-fade-in">
+          
+          <!-- Colors -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-white">Couleurs du Profil</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                <label class="block text-xs font-medium text-slate-400 mb-2">Couleur Primaire</label>
+                <div class="flex items-center gap-3">
+                  <input type="color" id="primaryColor" class="h-10 w-10 rounded-lg cursor-pointer bg-transparent border-0 p-0" value="#4c1d95">
+                  <input type="text" id="primaryColorText" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white font-mono" value="#4c1d95">
+                </div>
+              </div>
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                <label class="block text-xs font-medium text-slate-400 mb-2">Couleur Secondaire</label>
+                <div class="flex items-center gap-3">
+                  <input type="color" id="accentColor" class="h-10 w-10 rounded-lg cursor-pointer bg-transparent border-0 p-0" value="#0f172a">
+                  <input type="text" id="accentColorText" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white font-mono" value="#0f172a">
+                </div>
+              </div>
             </div>
-            <p class="text-xs text-slate-400">@<%= user.id %></p>
+          </div>
+
+          <!-- Gradient Style -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-white">Style du Dégradé</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <button type="button" class="gradient-opt p-3 rounded-xl border border-slate-800 bg-slate-900 hover:border-violet-500 transition-all text-center" data-val="linear">
+                <div class="h-10 w-full rounded-lg bg-gradient-to-r from-violet-600 to-slate-900 mb-2"></div>
+                <span class="text-xs text-slate-300">Linéaire</span>
+              </button>
+              <button type="button" class="gradient-opt p-3 rounded-xl border border-slate-800 bg-slate-900 hover:border-violet-500 transition-all text-center" data-val="radial">
+                <div class="h-10 w-full rounded-lg bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-violet-600 to-slate-900 mb-2"></div>
+                <span class="text-xs text-slate-300">Radial</span>
+              </button>
+              <button type="button" class="gradient-opt p-3 rounded-xl border border-slate-800 bg-slate-900 hover:border-violet-500 transition-all text-center" data-val="animated">
+                <div class="h-10 w-full rounded-lg bg-gradient-to-r from-violet-600 via-fuchsia-500 to-violet-600 bg-[length:200%_100%] animate-gradient-x mb-2"></div>
+                <span class="text-xs text-slate-300">Animé</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Effects -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-white">Effets Visuels</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <button type="button" class="effect-opt p-4 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 transition-all text-left" data-val="none">
+                <span class="block text-sm font-medium text-white">Aucun</span>
+              </button>
+              <button type="button" class="effect-opt p-4 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 transition-all text-left" data-val="sparkles">
+                <span class="block text-sm font-medium text-white">✨ Paillettes</span>
+              </button>
+              <button type="button" class="effect-opt p-4 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 transition-all text-left" data-val="noise">
+                <span class="block text-sm font-medium text-white">📺 Grain</span>
+              </button>
+            </div>
           </div>
         </div>
-        <div id="banner" class="mt-3 rounded-md border border-slate-800 h-16 flex items-center justify-center text-xs text-slate-500">Bannière</div>
+
+        <!-- Tab: Decoration -->
+        <div id="tab-decoration" class="tab-content hidden space-y-8 animate-fade-in">
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-white">Cadre d'Avatar</h3>
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-4">
+              <% catalog.frames.forEach(fr => { %>
+                <button type="button" class="frame-opt group relative aspect-square rounded-2xl border border-slate-800 bg-slate-900 hover:border-violet-500 transition-all flex flex-col items-center justify-center gap-2" data-val="<%= fr.key %>">
+                  <div class="h-12 w-12 rounded-full bg-slate-800 relative">
+                    <!-- Frame Preview Logic -->
+                    <div class="absolute inset-0 rounded-full border-2 border-transparent group-hover:border-violet-500/50 transition-colors"></div>
+                  </div>
+                  <span class="text-xs text-slate-400 group-hover:text-white"><%= fr.label %></span>
+                </button>
+              <% }) %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Badges -->
+        <div id="tab-badges" class="tab-content hidden space-y-8 animate-fade-in">
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-white">Badge (Flair)</h3>
+            <p class="text-sm text-slate-400">Sélectionnez un badge à afficher à côté de votre nom.</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <button type="button" class="flair-opt p-3 rounded-xl border border-slate-800 bg-slate-900 hover:border-violet-500 transition-all text-left flex items-center justify-between group" data-val="">
+                <span class="text-sm font-medium text-slate-400 group-hover:text-white">Aucun</span>
+              </button>
+              <% catalog.flairs.forEach(fl => { %>
+                <button type="button" class="flair-opt p-3 rounded-xl border border-slate-800 bg-slate-900 hover:border-violet-500 transition-all text-left flex items-center justify-between group <%= fl.locked ? 'opacity-50 cursor-not-allowed' : '' %>" data-val="<%= fl.key %>" <%= fl.locked ? 'disabled' : '' %>>
+                  <span class="text-sm font-medium text-slate-300 group-hover:text-white"><%= fl.label %></span>
+                  <% if (fl.locked) { %>
+                    <svg class="w-4 h-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                  <% } else { %>
+                    <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] bg-white/10 text-white/80 border border-white/10"><%= fl.label %></span>
+                  <% } %>
+                </button>
+              <% }) %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Banner -->
+        <div id="tab-banner" class="tab-content hidden space-y-8 animate-fade-in">
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-white">Type de Bannière</h3>
+            <div class="space-y-4">
+              <input type="url" id="bannerUrlInput" placeholder="https://exemple.com/image.gif" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all">
+              <p class="text-xs text-slate-500">Supporte les images, GIFs et vidéos MP4.</p>
+            </div>
+            
+            <h4 class="text-sm font-medium text-slate-400 mt-6 mb-3">Prédéfinis</h4>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <% catalog.banners.forEach(b => { %>
+                <button type="button" class="banner-opt h-20 rounded-xl bg-slate-900 border border-slate-800 hover:border-violet-500 overflow-hidden relative" data-val="<%= b.key %>">
+                  <div class="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/20 transition-colors">
+                    <span class="text-xs font-medium text-white"><%= b.label %></span>
+                  </div>
+                </button>
+              <% }) %>
+            </div>
+          </div>
+        </div>
+
       </div>
-      <div id="initialCosmetics" class="hidden"
-           data-flair="<%= (cosmetics && cosmetics.selected && cosmetics.selected.flair) ? String(cosmetics.selected.flair) : '' %>"
-           data-frame="<%= (cosmetics && cosmetics.selected && cosmetics.selected.frame) ? String(cosmetics.selected.frame) : 'none' %>"
-           data-theme="<%= (cosmetics && cosmetics.selected && cosmetics.selected.theme) ? String(cosmetics.selected.theme) : 'system' %>"
-           data-banner="<%= (cosmetics && cosmetics.selected && cosmetics.selected.banner) ? String(cosmetics.selected.banner) : 'none' %>"
-           data-banner-url="<%= (cosmetics && cosmetics.selected && cosmetics.selected.bannerUrl) ? String(cosmetics.selected.bannerUrl) : '' %>"></div>
-  <script id="catalogData" type="application/json"><%- JSON.stringify(catalog) %></script>
     </div>
 
-    <form id="formCosmetics" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="font-medium">Flair</h2>
-        </div>
-        <p class="text-sm text-slate-400">Ce tag est attribué par l’équipe/automatisation. Il peut être ajouté via code. Si vous en avez un, il s’affichera dans l’aperçu.</p>
-      </div>
+    <!-- Toasts Container -->
+    <div id="toasts" class="fixed top-4 right-4 z-50 flex flex-col items-end gap-2 pointer-events-none"></div>
 
-      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-        <h2 class="font-medium mb-2">Cadre</h2>
-        <div class="flex flex-wrap gap-2" role="listbox" aria-label="Cadre">
-          <% catalog.frames.forEach(fr => { %>
-            <button type="button" data-type="frame" data-value="<%= fr.key %>"
-              class="cos-btn px-3 py-1.5 text-xs rounded-md border border-slate-700 bg-slate-800/80 hover:bg-slate-800 text-slate-200">
-              <%= fr.label %>
-            </button>
-          <% }) %>
-        </div>
-      </div>
+    <script>
+      window.showAlert = function(message, type = 'info', opts = {}) {
+        const container = document.getElementById('toasts');
+        if (!container) return console.log(message);
+        const el = document.createElement('div');
+        el.className = 'pointer-events-auto max-w-sm w-full rounded-xl px-4 py-3 text-sm shadow-lg border flex items-center gap-3 animate-slide-in-right';
+        
+        let bg = 'bg-slate-900 text-white border-slate-800';
+        let icon = '';
+        
+        if (type === 'success') {
+          bg = 'bg-slate-900 text-emerald-400 border-emerald-500/30';
+          icon = '<svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+        } else if (type === 'error') {
+          bg = 'bg-slate-900 text-rose-400 border-rose-500/30';
+          icon = '<svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+        }
+        
+        el.className += ' ' + bg;
+        el.innerHTML = `${icon}<span>${message}</span>`;
+        
+        container.appendChild(el);
+        
+        const timeout = opts.timeout || 3500;
+        const remove = () => { 
+          el.style.opacity = '0'; 
+          el.style.transform = 'translateX(100%)';
+          setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 300); 
+        };
+        el.addEventListener('click', remove);
+        setTimeout(remove, timeout);
+        return el;
+      }
+    </script>
 
-      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-        <h2 class="font-medium mb-2">Thème</h2>
-        <div class="flex flex-wrap gap-2" role="listbox" aria-label="Thème">
-          <% catalog.themes.forEach(th => { %>
-            <button type="button" data-type="theme" data-value="<%= th.key %>"
-              class="cos-btn px-3 py-1.5 text-xs rounded-md border border-slate-700 bg-slate-800/80 hover:bg-slate-800 text-slate-200">
-              <%= th.label %>
-            </button>
-          <% }) %>
-        </div>
-      </div>
+    <!-- Initial Data Store -->
+    <% 
+      const data = (cosmetics && cosmetics.data) ? cosmetics.data : {};
+      const initial = {
+        primaryColor: data.primaryColor || '#4c1d95',
+        accentColor: data.accentColor || '#0f172a',
+        gradientType: data.gradientType || 'linear',
+        effect: data.effect || 'none',
+        frame: cosmetics.frame || 'none',
+        bannerUrl: cosmetics.bannerUrl || '',
+        banner: cosmetics.banner || 'none',
+        flair: cosmetics.flair || null
+      };
+    %>
+    <script id="initialData" type="application/json"><%- JSON.stringify(initial) %></script>
 
-      <div class="rounded-xl border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-        <h2 class="font-medium mb-2">Bannière</h2>
-        <div class="flex flex-wrap gap-2" role="listbox" aria-label="Bannière prédéfinie">
-          <% catalog.banners.forEach(b => { %>
-            <button type="button" data-type="banner" data-value="<%= b.key %>"
-              class="cos-btn px-3 py-1.5 text-xs rounded-md border border-slate-700 bg-slate-800/80 hover:bg-slate-800 text-slate-200 text-left">
-              <%= b.label %>
-            </button>
-          <% }) %>
-        </div>
-      </div>
+  </main>
+</div>
 
-      <div class="sm:col-span-2 flex justify-end gap-2">
-        <button type="button" id="saveBtn" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white">Enregistrer</button>
-      </div>
-    </form>
-  </section>
-</main>
+<style>
+  .tab-btn.active { background-color: #7c3aed; color: white; }
+  .tab-btn:not(.active) { background-color: transparent; color: #94a3b8; }
+  .tab-btn:not(.active):hover { background-color: #1e293b; color: #e2e8f0; }
+  
+  @keyframes gradient-x {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .animate-gradient-x { animation: gradient-x 3s ease infinite; }
+  
+  .effect-sparkles { background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 0L12 8L20 10L12 12L10 20L8 12L0 10L8 8L10 0Z' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E"); }
+  .effect-noise { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E"); }
+</style>
 
 <script>
-  const CATALOG = JSON.parse(document.getElementById('catalogData')?.textContent || '{}');
+  const initial = JSON.parse(document.getElementById('initialData').textContent);
+  const state = { ...initial };
 
-  const initEl = document.getElementById('initialCosmetics');
-  const saved = {
-    flair: (initEl?.dataset.flair || '') || null,
-    frame: initEl?.dataset.frame || 'none',
-    theme: initEl?.dataset.theme || 'system',
-    banner: initEl?.dataset.banner || 'none',
-    bannerUrl: initEl?.dataset.bannerUrl || '',
+  // Elements
+  const els = {
+    previewBg: document.getElementById('previewBg'),
+    previewEffect: document.getElementById('previewEffect'),
+    previewFrame: document.getElementById('previewFrame'),
+    previewBanner: document.getElementById('previewBanner'),
+    primaryColor: document.getElementById('primaryColor'),
+    primaryColorText: document.getElementById('primaryColorText'),
+    accentColor: document.getElementById('accentColor'),
+    accentColorText: document.getElementById('accentColorText'),
+    bannerUrlInput: document.getElementById('bannerUrlInput'),
   };
-  const state = { ...saved };
 
-  function flairLabel(key) {
-    const f = (CATALOG?.flairs || []).find(x => String(x.key).toUpperCase() === String(key || '').toUpperCase());
-    return f?.label || key || '';
-  }
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${btn.dataset.tab}`).classList.remove('hidden');
+    });
+  });
 
-  function applyPreview(){
-    const flairBadge = document.getElementById('flairBadge');
-    const showFlair = state.flair && String(state.flair).trim() !== '';
-    if (showFlair) { flairBadge.textContent = flairLabel(state.flair); flairBadge.classList.remove('hidden'); }
-    else { flairBadge.classList.add('hidden'); flairBadge.textContent=''; }
+  // Render Preview
+  function render() {
+    // Background Gradient
+    let bgStyle = '';
+    if (state.gradientType === 'linear') {
+      bgStyle = `background: linear-gradient(135deg, ${state.primaryColor}, ${state.accentColor})`;
+    } else if (state.gradientType === 'radial') {
+      bgStyle = `background: radial-gradient(circle at center, ${state.primaryColor}, ${state.accentColor})`;
+    } else if (state.gradientType === 'animated') {
+      bgStyle = `background: linear-gradient(270deg, ${state.primaryColor}, ${state.accentColor}, ${state.primaryColor}); background-size: 200% 200%; animation: gradient-x 3s ease infinite;`;
+    }
+    els.previewBg.style = bgStyle;
 
-    const frame = document.getElementById('frame');
-    frame.className = 'pointer-events-none absolute inset-0 rounded-full';
-    frame.style.boxShadow = 'none';
-    switch(state.frame){
-      case 'neon': frame.style.boxShadow = '0 0 0 2px rgba(99,102,241,.6), 0 0 24px rgba(99,102,241,.6)'; break;
-      case 'glow': frame.style.boxShadow = '0 0 0 2px rgba(16,185,129,.6), 0 0 24px rgba(16,185,129,.6)'; break;
-      case 'gold': frame.style.boxShadow = '0 0 0 2px rgba(234,179,8,.7), 0 0 20px rgba(234,179,8,.5)'; break;
+    // Effects
+    els.previewEffect.className = 'absolute inset-0 pointer-events-none z-10';
+    if (state.effect === 'sparkles') els.previewEffect.classList.add('effect-sparkles');
+    if (state.effect === 'noise') els.previewEffect.classList.add('effect-noise');
+
+    // Frame
+    els.previewFrame.style = '';
+    if (state.frame === 'neon') els.previewFrame.style = 'box-shadow: 0 0 0 2px rgba(139,92,246,0.8), 0 0 15px rgba(139,92,246,0.6), inset 0 0 10px rgba(139,92,246,0.4); border-radius: 12px;';
+    else if (state.frame === 'glow') els.previewFrame.style = 'box-shadow: 0 0 0 2px rgba(16,185,129,0.8), 0 0 15px rgba(16,185,129,0.6); border-radius: 12px;';
+    else if (state.frame === 'gold') els.previewFrame.style = 'box-shadow: 0 0 0 2px rgba(234,179,8,0.8), 0 0 15px rgba(234,179,8,0.4); border-radius: 12px;';
+
+    // Banner
+    if (state.bannerUrl) {
+      els.previewBanner.style.backgroundImage = `url('${state.bannerUrl}')`;
+      els.previewBanner.style.backgroundSize = 'cover';
+      els.previewBanner.style.backgroundPosition = 'center';
+    } else if (state.banner !== 'none') {
+      // Presets
+      if (state.banner === 'gradient-emerald') els.previewBanner.style.background = 'linear-gradient(135deg, #064e3b, #10b981)';
+      else if (state.banner === 'gradient-fuchsia') els.previewBanner.style.background = 'linear-gradient(135deg, #701a75, #d946ef)';
+      else if (state.banner === 'cosmos') els.previewBanner.style.background = 'linear-gradient(to right, #0f172a, #312e81)';
+      else els.previewBanner.style.background = '#1e293b';
+    } else {
+      els.previewBanner.style.background = `linear-gradient(to right, ${state.primaryColor}, ${state.accentColor})`;
     }
 
-    const preview = document.getElementById('preview');
-    preview.style.outline = 'none';
-    preview.style.boxShadow = 'none';
-    switch(state.theme){
-      case 'dark-emerald': preview.style.outline = '1px solid rgba(16,185,129,.35)'; break;
-      case 'midnight': preview.style.outline = '1px solid rgba(99,102,241,.35)'; break;
-      case 'plasma': preview.style.outline = '1px solid rgba(244,63,94,.35)'; break;
-      default: preview.style.outline = '1px solid rgba(30,41,59,.6)';
+    // Flair
+    const flairEl = document.getElementById('previewFlair');
+    if (state.flair) {
+      flairEl.textContent = state.flair;
+      flairEl.classList.remove('hidden');
+    } else {
+      flairEl.classList.add('hidden');
     }
 
-    const banner = document.getElementById('banner');
-    banner.style.background = 'transparent';
-    banner.style.color = 'rgb(100 116 139)';
-    if (state.banner === 'gradient-emerald') { banner.style.background = 'linear-gradient(135deg,#10b98133,#111827)'; }
-    else if (state.banner === 'gradient-fuchsia') { banner.style.background = 'linear-gradient(135deg,#d946ef33,#111827)'; }
-    else if (state.bannerUrl) { banner.style.background = `center/cover no-repeat url(${state.bannerUrl})`; banner.style.color = 'transparent'; }
+    // Update Inputs
+    els.primaryColor.value = state.primaryColor;
+    els.primaryColorText.value = state.primaryColor;
+    els.accentColor.value = state.accentColor;
+    els.accentColorText.value = state.accentColor;
+    els.bannerUrlInput.value = state.bannerUrl;
 
-    updateActiveButtons('frame', state.frame);
-    updateActiveButtons('theme', state.theme);
-    updateActiveButtons('banner', state.banner);
-  }
-
-  function updateActiveButtons(type, value){
-    document.querySelectorAll(`[data-type="${type}"]`).forEach(btn => {
-      const v = btn.getAttribute('data-value');
-      const isActive = String(v) === String(value);
-      btn.classList.toggle('ring-2', isActive);
-      btn.classList.toggle('ring-indigo-500/70', isActive);
-      btn.classList.toggle('bg-slate-800/80', !isActive);
-      btn.classList.toggle('bg-indigo-600', isActive);
-      btn.classList.toggle('text-white', isActive);
+    // Update Active States
+    document.querySelectorAll('[data-val]').forEach(btn => {
+      const type = btn.classList.contains('gradient-opt') ? 'gradientType' : 
+                   btn.classList.contains('effect-opt') ? 'effect' :
+                   btn.classList.contains('frame-opt') ? 'frame' :
+                   btn.classList.contains('banner-opt') ? 'banner' : 
+                   btn.classList.contains('flair-opt') ? 'flair' : '';
+      if (type && state[type] === btn.dataset.val) {
+        btn.classList.add('ring-2', 'ring-violet-500', 'border-transparent');
+      } else {
+        btn.classList.remove('ring-2', 'ring-violet-500', 'border-transparent');
+      }
     });
   }
 
-  document.querySelectorAll('[data-type]')?.forEach(b => b.addEventListener('click', () => {
-    const t = b.getAttribute('data-type');
-    const v = b.getAttribute('data-value');
-    if (t==='frame') state.frame = v;
-    if (t==='theme') state.theme = v;
-    if (t==='banner') { state.banner = v; if (v !== 'none') {} }
-    applyPreview();
-  }));
+  // Listeners
+  const updateColor = (key, val) => { state[key] = val; render(); };
+  els.primaryColor.addEventListener('input', e => updateColor('primaryColor', e.target.value));
+  els.primaryColorText.addEventListener('input', e => updateColor('primaryColor', e.target.value));
+  els.accentColor.addEventListener('input', e => updateColor('accentColor', e.target.value));
+  els.accentColorText.addEventListener('input', e => updateColor('accentColor', e.target.value));
+  els.bannerUrlInput.addEventListener('input', e => { state.bannerUrl = e.target.value; render(); });
 
-  document.getElementById('bannerUrl')?.addEventListener('input', (e)=>{
-    state.bannerUrl = e.currentTarget.value;
-    if (state.bannerUrl && state.banner !== 'none') {
-      state.banner = 'none';
-    }
-    applyPreview();
-  });
-  document.getElementById('clearBannerUrl')?.addEventListener('click', ()=>{
-    const inp = document.getElementById('bannerUrl');
-    if (inp) inp.value = '';
-    state.bannerUrl = '';
-    applyPreview();
-  });
+  document.querySelectorAll('.gradient-opt').forEach(b => b.addEventListener('click', () => { state.gradientType = b.dataset.val; render(); }));
+  document.querySelectorAll('.effect-opt').forEach(b => b.addEventListener('click', () => { state.effect = b.dataset.val; render(); }));
+  document.querySelectorAll('.frame-opt').forEach(b => b.addEventListener('click', () => { state.frame = b.dataset.val; render(); }));
+  document.querySelectorAll('.banner-opt').forEach(b => b.addEventListener('click', () => { state.banner = b.dataset.val; render(); }));
+  document.querySelectorAll('.flair-opt').forEach(b => b.addEventListener('click', () => { if(!b.disabled) { state.flair = b.dataset.val; render(); } }));
 
-  let saving = false;
-  document.getElementById('saveBtn')?.addEventListener('click', async ()=>{
-    if (saving) return; saving = true;
+  // Save
+  document.getElementById('saveBtn').addEventListener('click', async () => {
     const btn = document.getElementById('saveBtn');
-    if (btn) { btn.textContent = 'Enregistrement...'; btn.disabled = true; btn.classList.add('opacity-70'); }
+    btn.textContent = '...';
     try {
-  const payload = { frame: state.frame, theme: state.theme, banner: state.banner, bannerUrl: state.bannerUrl };
-      const res = await fetch('/api/me/cosmetics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      if (!res.ok) {
-        const j = await res.json().catch(()=>({error:'Erreur'}));
-        alert(j.error || 'Erreur lors de la sauvegarde');
+      const payload = {
+        frame: state.frame,
+        banner: state.banner,
+        bannerUrl: state.bannerUrl,
+        flair: state.flair,
+        data: {
+          primaryColor: state.primaryColor,
+          accentColor: state.accentColor,
+          gradientType: state.gradientType,
+          effect: state.effect
+        }
+      };
+      const res = await fetch('/api/me/cosmetics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        if (window.showAlert) window.showAlert('Sauvegardé !', 'success');
+        else alert('Sauvegardé !');
       } else {
-        const j = await res.json();
-        saved.flair = j.cosmetics?.selected?.flair ?? state.flair;
-        saved.frame = j.cosmetics?.selected?.frame ?? state.frame;
-        saved.theme = j.cosmetics?.selected?.theme ?? state.theme;
-        saved.banner = j.cosmetics?.selected?.banner ?? state.banner;
-        saved.bannerUrl = j.cosmetics?.selected?.bannerUrl ?? state.bannerUrl;
-        alert('Cosmétiques enregistrés');
+        if (window.showAlert) window.showAlert('Erreur lors de la sauvegarde', 'error');
+        else alert('Erreur');
       }
     } catch (e) {
-      alert('Erreur réseau');
-    } finally {
-      saving = false;
-      if (btn) { btn.textContent = 'Enregistrer'; btn.disabled = false; btn.classList.remove('opacity-70'); }
+      if (window.showAlert) window.showAlert('Erreur réseau', 'error');
+      else alert('Erreur réseau');
     }
+    btn.textContent = 'Enregistrer';
   });
 
-  document.getElementById('resetBtn')?.addEventListener('click', ()=>{
-    Object.assign(state, saved);
-    const inp = document.getElementById('bannerUrl');
-    if (inp) inp.value = saved.bannerUrl || '';
-    applyPreview();
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    Object.assign(state, initial);
+    render();
   });
 
-  document.getElementById('starterPack')?.addEventListener('click', async ()=>{
-    const res = await fetch('/api/me/cosmetics/starter-pack', { method: 'POST' });
-    if (res.ok) {
-      const j = await res.json();
-      state.flair = j.cosmetics?.selected?.flair || null;
-      state.frame = j.cosmetics?.selected?.frame || 'none';
-      state.theme = j.cosmetics?.selected?.theme || 'system';
-      state.banner = j.cosmetics?.selected?.banner || 'none';
-      state.bannerUrl = j.cosmetics?.selected?.bannerUrl || '';
-      const inp = document.getElementById('bannerUrl');
-      if (inp) inp.value = state.bannerUrl || '';
-      applyPreview();
-      alert('Starter pack appliqué');
-    } else {
-      alert('Impossible d\'appliquer le starter pack');
-    }
-  });
-
-  applyPreview();
-</script>
-<script>
-  (function(){
-    const overlay = document.getElementById('comingSoonOverlay');
-  const btnNotify = document.getElementById('notifyMeBtn');
-
-    function hideOverlay() {
-      if (!overlay) return;
-      overlay.style.display = 'none';
-    }
-
-    if (overlay) overlay.style.display = '';
-
-    btnNotify?.addEventListener('click', async () => {
-      try {
-        if (btnNotify.disabled) return;
-        btnNotify.disabled = true;
-        btnNotify.textContent = 'Noté — merci';
-        btnNotify.classList.remove('bg-emerald-600');
-        btnNotify.classList.add('bg-emerald-700', 'opacity-80');
-        try {
-          const dialog = overlay.querySelector('[role="dialog"]');
-          if (dialog && !dialog.querySelector('.notify-confirm')) {
-            const note = document.createElement('div');
-            note.className = 'notify-confirm mt-3 text-sm text-slate-300';
-            note.textContent = 'Merci — nous vous préviendrons lorsque la fonctionnalité sera disponible.';
-            dialog.appendChild(note);
-          }
-        } catch (e) {}
-      } catch (e) {
-        alert('Erreur lors de la demande');
-      }
-    });
-  })();
+  render();
 </script>

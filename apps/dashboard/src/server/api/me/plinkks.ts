@@ -137,6 +137,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       socialIcon,
       statusbar,
       links,
+      categories,
     ] = await Promise.all([
       prisma.plinkkSettings.findUnique({ where: { plinkkId: id } }),
       prisma.user.findUnique({ where: { id: String(userId) } }),
@@ -154,6 +155,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       }),
       prisma.plinkkStatusbar.findUnique({ where: { plinkkId: id } }),
       prisma.link.findMany({ where: { userId: String(userId), plinkkId: id } }),
+      prisma.category.findMany({ where: { plinkkId: id }, orderBy: { order: "asc" } }),
     ]);
 
     const cfg = {
@@ -167,6 +169,11 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
         Object.prototype.hasOwnProperty.call(settings, "affichageEmail")
           ? settings.affichageEmail
           : user?.publicEmail ?? user?.email ?? "",
+      publicPhone: settings?.publicPhone ?? null,
+      showEcoBadge: settings?.showEcoBadge ?? true,
+      showZeroTrackerBadge: settings?.showZeroTrackerBadge ?? true,
+      enableVCard: settings?.enableVCard ?? true,
+      enableLinkCategories: settings?.enableLinkCategories ?? false,
       iconUrl: settings != null ? settings.iconUrl : null,
       description: settings != null ? settings.description : null,
       profileHoverColor: settings?.profileHoverColor ?? null,
@@ -206,6 +213,12 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
         description: l.description,
         showDescriptionOnHover: l.showDescriptionOnHover,
         showDescription: l.showDescription,
+        categoryId: l.categoryId,
+      })),
+      categories: categories.map((c) => ({
+        id: c.id,
+        name: c.name,
+        order: c.order,
       })),
       statusbar: statusbar
         ? {
@@ -237,6 +250,11 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       profileSiteText: body.profileSiteText,
       userName: body.userName,
       affichageEmail: body.affichageEmail,
+      publicPhone: body.publicPhone,
+      showEcoBadge: body.showEcoBadge,
+      showZeroTrackerBadge: body.showZeroTrackerBadge,
+      enableVCard: body.enableVCard,
+      enableLinkCategories: body.enableLinkCategories,
       iconUrl: body.iconUrl,
       description: body.description,
       profileHoverColor: body.profileHoverColor,
@@ -433,6 +451,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
               description: l.description ?? undefined,
               showDescriptionOnHover: l.showDescriptionOnHover ?? undefined,
               showDescription: l.showDescription ?? undefined,
+              categoryId: l.categoryId ?? null,
             },
           });
         } else {
@@ -448,6 +467,57 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
               showDescriptionOnHover: l.showDescriptionOnHover ?? undefined,
               showDescription: l.showDescription ?? undefined,
               userId: String(userId),
+              plinkkId: id,
+              categoryId: l.categoryId ?? null,
+            },
+          });
+        }
+      }
+    }
+
+    return reply.send({ ok: true });
+  });
+
+  fastify.put("/:id/config/categories", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    const page = await prisma.plinkk.findFirst({
+      where: { id, userId: String(userId) },
+    });
+    if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
+
+    const body = request.body as { categories: { id?: string, name: string, order: number }[] };
+
+    if (Array.isArray(body.categories)) {
+      const existing = await prisma.category.findMany({
+        where: { plinkkId: id },
+        select: { id: true },
+      });
+      const existingIds = new Set(existing.map((c) => c.id));
+      const incomingIds = new Set(
+        body.categories.map((c) => c.id).filter(Boolean)
+      );
+      const toDelete = Array.from(existingIds).filter(
+        (x) => !incomingIds.has(x as string)
+      );
+      if (toDelete.length > 0)
+        await prisma.category.deleteMany({ where: { id: { in: toDelete as string[] } } });
+      
+      for (const c of body.categories) {
+        if (c.id && existingIds.has(c.id)) {
+          await prisma.category.update({
+            where: { id: c.id },
+            data: {
+              name: c.name,
+              order: c.order,
+            },
+          });
+        } else {
+          await prisma.category.create({
+            data: {
+              name: c.name,
+              order: c.order,
               plinkkId: id,
             },
           });
@@ -540,6 +610,7 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
         neonColors: true,
         socialIcons: true,
         statusbar: true,
+        categories: true,
       },
     });
     if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
@@ -577,6 +648,11 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
         Object.prototype.hasOwnProperty.call(settings, "affichageEmail")
           ? settings.affichageEmail
           : page.user.publicEmail ?? null,
+      publicPhone: settings?.publicPhone ?? null,
+      showEcoBadge: settings?.showEcoBadge ?? true,
+      showZeroTrackerBadge: settings?.showZeroTrackerBadge ?? true,
+      enableVCard: settings?.enableVCard ?? true,
+      enableLinkCategories: settings?.enableLinkCategories ?? false,
       canvaEnable: settings?.canvaEnable ?? 1,
       selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
       layoutOrder: settings?.layoutOrder ?? null,
@@ -588,7 +664,9 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
       page.labels,
       page.neonColors,
       page.socialIcons,
-      page.statusbar
+      page.statusbar,
+      undefined,
+      page.categories
     );
 
     const themes = await generateTheme(page.userId)

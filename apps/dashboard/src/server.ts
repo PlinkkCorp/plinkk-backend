@@ -37,6 +37,7 @@ const PORT = 3001;
 declare module "@fastify/secure-session" {
   interface SessionData {
     data?: string;
+    sessionId?: string;
     returnTo?: string;
   }
 }
@@ -115,6 +116,51 @@ fastify.addHook("onRequest", async (request, reply) => {
   ]);
   if (request.url in reservedRoots) {
     reply.redirect(process.env.FRONTEND_URL + request.url);
+  }
+});
+
+fastify.addHook("preHandler", async (request, reply) => {
+  const userId = request.session.get("data");
+  const sessionId = request.session.get("sessionId");
+
+  if (userId && !String(userId).includes("__totp")) {
+    if (sessionId) {
+      try {
+        const session = await prisma.session.findUnique({ where: { id: sessionId } });
+        if (!session || session.expiresAt < new Date()) {
+          request.session.delete();
+        } else {
+          // Update current path
+          const currentPath = request.raw.url;
+          if (currentPath && !currentPath.startsWith('/public') && !currentPath.startsWith('/api')) {
+             await prisma.session.update({
+               where: { id: sessionId },
+               data: { 
+                 currentPath: currentPath.split('?')[0],
+                 lastActiveAt: new Date()
+               }
+             });
+          }
+        }
+      } catch (e) {
+        // DB error, ignore
+      }
+    } else {
+      // Create session for legacy logins
+      try {
+        const session = await prisma.session.create({
+          data: {
+            userId: String(userId),
+            ip: request.ip,
+            userAgent: request.headers["user-agent"] || "Unknown",
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+          }
+        });
+        request.session.set("sessionId", session.id);
+      } catch (e) {
+        // Ignore creation errors
+      }
+    }
   }
 });
 
@@ -300,8 +346,9 @@ fastify.post("/register", async (req, reply) => {
         email: email,
         password: hashedPassword,
         role: {
-          connect: {
-            id: "USER",
+          connectOrCreate: {
+            where: { name: "USER" },
+            create: { id: "USER", name: "USER" },
           },
         },
       },
@@ -392,6 +439,18 @@ fastify.post("/register", async (req, reply) => {
       (req.query as { returnTo: string })?.returnTo;
     req.log?.info({ returnTo }, "register: returnTo read from request");
     req.session.set("data", user.id);
+    try {
+      const session = await prisma.session.create({
+        data: {
+          userId: user.id,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"] || "Unknown",
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+        }
+      });
+      req.session.set("sessionId", session.id);
+    } catch (e) { req.log.error({ err: e }, "Failed to create session record"); }
+
     req.log?.info(
       { sessionData: req.session.get("data"), cookies: req.headers.cookie },
       "session set after register"
@@ -512,6 +571,18 @@ fastify.post("/login", async (request, reply) => {
     "login: returnTo read from request"
   );
   request.session.set("data", user.id);
+  try {
+    const session = await prisma.session.create({
+      data: {
+        userId: user.id,
+        ip: request.ip,
+        userAgent: request.headers["user-agent"] || "Unknown",
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+      }
+    });
+    request.session.set("sessionId", session.id);
+  } catch (e) { request.log.error({ err: e }, "Failed to create session record"); }
+
   request.log?.info(
     {
       sessionData: request.session.get("data"),
@@ -563,6 +634,18 @@ fastify.post("/totp", async (request, reply) => {
       "totp: returnTo read from request"
     );
     request.session.set("data", user.id);
+    try {
+      const session = await prisma.session.create({
+        data: {
+          userId: user.id,
+          ip: request.ip,
+          userAgent: request.headers["user-agent"] || "Unknown",
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+        }
+      });
+      request.session.set("sessionId", session.id);
+    } catch (e) { request.log.error({ err: e }, "Failed to create session record"); }
+
     request.log?.info(
       {
         sessionData: request.session.get("data"),
@@ -578,13 +661,19 @@ fastify.post("/totp", async (request, reply) => {
   return reply.redirect("/login");
 });
 
-fastify.get("/logout", (req, reply) => {
+fastify.get("/logout", async (req, reply) => {
   try {
     req.log?.info(
       { beforeDelete: req.session.get("data"), cookies: req.headers.cookie },
       "logout: before session.delete"
     );
   } catch (e) {}
+  
+  const sessionId = req.session.get("sessionId");
+  if (sessionId) {
+    try { await prisma.session.delete({ where: { id: sessionId } }); } catch {}
+  }
+
   req.session.delete();
   try {
     req.log?.info(

@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
 import { coerceThemeData } from "../../lib/theme";
 import { verifyRoleIsStaff } from "../../lib/verifyRole";
+import { ensurePermission } from "../../lib/permissions";
 import { generateTheme } from "../../lib/generateTheme";
 
 const prisma = new PrismaClient();
@@ -47,13 +48,8 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
   fastify.post("/:id/approve-update", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const me = await prisma.user.findUnique({
-      where: { id: meId as string },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role))) {
-      return reply.code(403).send({ error: "Forbidden" });
-    }
+    const ok = await ensurePermission(request, reply, 'APPROVE_THEME');
+    if (!ok) return;
     const { id } = request.params as { id: string };
     const t = await prisma.theme.findUnique({
       where: { id },
@@ -76,13 +72,8 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
   fastify.post("/:id/unarchive", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const me = await prisma.user.findUnique({
-      where: { id: meId as string },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role))) {
-      return reply.code(403).send({ error: "Forbidden" });
-    }
+    const ok = await ensurePermission(request, reply, 'ARCHIVE_THEME');
+    if (!ok) return;
     const { id } = request.params as { id: string };
     await prisma.theme.update({
       where: { id },
@@ -94,13 +85,8 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
   fastify.post("/:id/archive", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const me = await prisma.user.findUnique({
-      where: { id: meId as string },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role))) {
-      return reply.code(403).send({ error: "Forbidden" });
-    }
+    const ok = await ensurePermission(request, reply, 'ARCHIVE_THEME');
+    if (!ok) return;
     const { id } = request.params as { id: string };
     await prisma.theme.update({
       where: { id },
@@ -112,13 +98,8 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
   fastify.post("/:id/approve", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const me = await prisma.user.findUnique({
-      where: { id: meId as string },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role))) {
-      return reply.code(403).send({ error: "Forbidden" });
-    }
+    const ok = await ensurePermission(request, reply, 'APPROVE_THEME');
+    if (!ok) return;
     const { id } = request.params as { id: string };
     const updated = await prisma.theme.update({
       where: { id },
@@ -131,13 +112,8 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
   fastify.post("/:id/reject", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const me = await prisma.user.findUnique({
-      where: { id: meId as string },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role))) {
-      return reply.code(403).send({ error: "Forbidden" });
-    }
+    const ok = await ensurePermission(request, reply, 'APPROVE_THEME');
+    if (!ok) return;
     const { id } = request.params as { id: string };
     const updated = await prisma.theme.update({
       where: { id },
@@ -150,13 +126,8 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
   fastify.delete("/:id", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const me = await prisma.user.findUnique({
-      where: { id: meId as string },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role))) {
-      return reply.code(403).send({ error: "Forbidden" });
-    }
+    const ok = await ensurePermission(request, reply, 'DELETE_ANY_THEME');
+    if (!ok) return;
     const { id } = request.params as { id: string };
     try {
       await prisma.theme.delete({ where: { id } });

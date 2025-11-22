@@ -9,7 +9,7 @@ export function parseIdentifier(id?: string | null): { kind: 'default' | 'index'
 }
 
 export async function resolvePlinkkPage(prisma: PrismaClient, username: string, identifier: string | undefined, request?: FastifyRequest) {
-  const user = await prisma.user.findUnique({ where: { id: username }, select: { id: true, role: true } });
+  const user = await prisma.user.findUnique({ where: { id: username }, select: { id: true, role: true, isVerified: true, isPartner: true } });
   if (!user) return { status: 404 as const, error: 'user_not_found' };
 
   const parsed = parseIdentifier(identifier);

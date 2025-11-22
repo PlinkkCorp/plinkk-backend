@@ -11,6 +11,24 @@ import { IncomingMessage, ServerResponse } from "http";
 import { toSafeUser, UserWithInclude } from "../types/user";
 import "dotenv/config"
 
+function computeFrontendUrl(reply: FastifyReply) {
+  const env = (process.env.FRONTEND_URL || "").trim();
+  if (env) return env.replace(/\/$/, "");
+  try {
+    const req: any = (reply as any).request;
+    const host = String(req?.headers?.host || "");
+    const xfProto = String(req?.headers?.["x-forwarded-proto"] || "").toLowerCase();
+    const proto = (xfProto || req?.protocol || "https").replace(/:$/, "");
+    // Si on est sur le sous-domaine dashboard, basculer vers le domaine public
+    let domain = host.replace(/^dash\./i, "");
+    // En dev: dashboard sur 3001 -> public sur 3002
+    domain = domain.replace(/:3001$/i, ":3002");
+    return `${proto}://${domain}`.replace(/\/$/, "");
+  } catch {
+    return "https://plinkk.fr";
+  }
+}
+
 const prisma = new PrismaClient();
 
 export async function replyView(
@@ -31,7 +49,7 @@ export async function replyView(
 ): Promise<string> {
   if (user === null) {
     return reply.code(statusCode).view(template, {
-      frontendUrl: process.env.FRONTEND_URL,
+      frontendUrl: computeFrontendUrl(reply),
       ...data,
     });
   }
@@ -52,7 +70,7 @@ export async function replyView(
     user: toSafeUser(user),
     isAdmin: isAdmin,
     isStaff: isStaff,
-    frontendUrl: process.env.FRONTEND_URL,
+    frontendUrl: computeFrontendUrl(reply),
     ...data,
   });
 }

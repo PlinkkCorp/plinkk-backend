@@ -3,11 +3,13 @@ import { PrismaClient, User } from "@plinkk/prisma/generated/prisma/client";
 import { replyView } from "../lib/replyView";
 import { verifyRoleAdmin, verifyRoleDeveloper } from "../lib/verifyRole";
 import { dashboardAdminRoutes } from "./dashboard/admin";
+import dashboardUserSessionsRoutes from "./dashboard/user/sessions";
 
 const prisma = new PrismaClient();
 
 export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.register(dashboardAdminRoutes, { prefix: "/admin" });
+  fastify.register(dashboardUserSessionsRoutes, { prefix: "/sessions" });
 
   fastify.get("/", async function (request, reply) {
     const userId = request.session.get("data");
@@ -476,6 +478,14 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     return replyView(reply, "dashboard/user/versions.ejs", userInfo, {
       publicPath,
     });
+  });
+
+  fastify.get("/settings", async function (request, reply) {
+    return reply.redirect("/account");
+  });
+
+  fastify.get("/appearance", async function (request, reply) {
+    return reply.redirect("/cosmetics");
   });
 
   fastify.get("/account", async function (request, reply) {

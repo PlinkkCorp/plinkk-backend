@@ -5,6 +5,8 @@ import {
   verifyRoleAdmin,
   verifyRoleDeveloper,
 } from "../../lib/verifyRole";
+import { ensurePermission } from "../../lib/permissions";
+import { logAdminAction } from "../../lib/adminLogger";
 
 const prisma = new PrismaClient();
 
@@ -12,13 +14,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   fastify.get("/:id", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const me = await prisma.user.findUnique({
-      where: { id: meId as string },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role))) {
-      return reply.code(403).send({ error: "Forbidden" });
-    }
+    const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
+    if (!ok) return;
     const { id } = request.params as { id: string };
     const user = await prisma.user.findUnique({
       where: { id },
@@ -29,6 +26,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
         publicEmail: true,
         isPublic: true,
         views: true,
+        isVerified: true,
+        isPartner: true,
         role: { select: { id: true, name: true } },
         plinkks: {
           select: {
@@ -53,12 +52,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   fastify.get("/:id/ban-email", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const me = await prisma.user.findUnique({
-      where: { id: String(meId) },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "Forbidden" });
+    const ok = await ensurePermission(request, reply, 'BAN_USER');
+    if (!ok) return;
     const { id } = request.params as { id: string };
     const u = await prisma.user.findUnique({
       where: { id },
@@ -84,12 +79,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   fastify.post("/:id/ban-email", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const me = await prisma.user.findUnique({
-      where: { id: String(meId) },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "Forbidden" });
+    const ok = await ensurePermission(request, reply, 'BAN_USER');
+    if (!ok) return;
     const { id } = request.params as { id: string };
     const body =
       (request.body as {
@@ -147,18 +138,15 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
         createdAt: new Date(),
       },
     });
+    await logAdminAction(meId, 'BAN_USER', id, { email: u.email, reason: body.reason, time: body.time }, request.ip);
     return reply.send({ ok: true, ban });
   });
 
   fastify.delete("/:id/ban-email", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const me = await prisma.user.findUnique({
-      where: { id: String(meId) },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "Forbidden" });
+    const ok = await ensurePermission(request, reply, 'UNBAN_USER');
+    if (!ok) return;
     const { id } = request.params as { id: string };
     const u = await prisma.user.findUnique({
       where: { id },
@@ -174,19 +162,20 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       where: { email: ban.email },
       data: { revoquedAt: new Date() },
     });
+    await logAdminAction(meId, 'UNBAN_USER', id, { email: u.email }, request.ip);
     return reply.send({ ok: true });
   });
 
   fastify.post("/:id/role", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
+    if (!ok) return;
     const me = await prisma.user.findUnique({
       where: { id: meId as string },
       select: { role: true },
     });
-    if (!(me && verifyRoleIsStaff(me.role))) {
-      return reply.code(403).send({ error: "Forbidden" });
-    }
+    if (!me) return reply.code(401).send({ error: "Unauthorized" });
     const { id } = request.params as { id: string };
     const { role } = request.body as { role: string };
     const dbRole = await prisma.role.findFirst({
@@ -218,19 +207,15 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { roleId: dbRole.id },
       include: { role: true },
     });
+    await logAdminAction(meId, 'UPDATE_USER_ROLE', id, { oldRole: meRole, newRole: targetRole }, request.ip);
     return reply.send({ id: updated.id, role: updated.role });
   });
 
   fastify.post("/:id/cosmetics", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const me = await prisma.user.findUnique({
-      where: { id: meId as string },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role))) {
-      return reply.code(403).send({ error: "Forbidden" });
-    }
+    const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
+    if (!ok) return;
     const { id } = request.params as { id: string };
     const cosmetics = request.body;
     const updated = await prisma.user.update({
@@ -238,34 +223,26 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { cosmetics },
       include: { cosmetics: true },
     });
+    await logAdminAction(meId, 'UPDATE_USER_COSMETICS', id, { cosmetics }, request.ip);
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
   });
 
   fastify.delete("/:id", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const me = await prisma.user.findUnique({
-      where: { id: meId as string },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role))) {
-      return reply.code(403).send({ error: "Forbidden" });
-    }
+    const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
+    if (!ok) return;
     const { id } = request.params as { id: string };
     await prisma.user.delete({ where: { id } });
+    await logAdminAction(meId, 'DELETE_USER', id, {}, request.ip);
     return reply.send({ ok: true });
   });
 
   fastify.post("/:id/2fa/disable", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const me = await prisma.user.findUnique({
-      where: { id: meId as string },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role))) {
-      return reply.code(403).send({ error: "Forbidden" });
-    }
+    const ok = await ensurePermission(request, reply, 'RESET_2FA_USER');
+    if (!ok) return;
     const { id } = request.params as { id: string };
     const target = await prisma.user.findUnique({
       where: { id },
@@ -281,19 +258,15 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       where: { id },
       data: { twoFactorSecret: "", twoFactorEnabled: false },
     });
+    await logAdminAction(meId, 'RESET_2FA_USER', id, {}, request.ip);
     return reply.send({ ok: true, changed: true });
   });
 
   fastify.post("/:id/visibility", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const me = await prisma.user.findUnique({
-      where: { id: meId as string },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role))) {
-      return reply.code(403).send({ error: "Forbidden" });
-    }
+    const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
+    if (!ok) return;
 
     const { id } = request.params as { id: string };
     const { isPublic } = (request.body as { isPublic?: boolean }) ?? {};
@@ -306,19 +279,15 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { isPublic: Boolean(isPublic) },
       select: { id: true, isPublic: true },
     });
+    await logAdminAction(meId, 'UPDATE_USER_VISIBILITY', id, { isPublic }, request.ip);
     return reply.send(updated);
   });
 
   fastify.post("/:id/email-visibility", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const me = await prisma.user.findUnique({
-      where: { id: meId as string },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role))) {
-      return reply.code(403).send({ error: "Forbidden" });
-    }
+    const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
+    if (!ok) return;
 
     const { id } = request.params as { id: string };
     const { isEmailPublic } = (request.body as { isEmailPublic?: boolean }) ?? {};
@@ -338,6 +307,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { publicEmail: newPublicEmail },
       select: { id: true, publicEmail: true },
     });
+    await logAdminAction(meId, 'UPDATE_USER_EMAIL_VISIBILITY', id, { isEmailPublic }, request.ip);
     return reply.send({ id: updated.id, isEmailPublic: Boolean(updated.publicEmail) });
   });
 
@@ -362,18 +332,15 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { mustChangePassword: mustChange },
       select: { id: true, mustChangePassword: true },
     });
+    await logAdminAction(meId, 'FORCE_PASSWORD_RESET', id, { mustChange }, request.ip);
     return reply.send({ id: updated.id, mustChangePassword: updated.mustChangePassword });
   });
 
   fastify.get("/bans/emails", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
-    const me = await prisma.user.findFirst({
-      where: { id: userId },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "forbidden" });
+    const ok = await ensurePermission(request, reply, 'MANAGE_BANNED_EMAILS');
+    if (!ok) return;
     const bans = await prisma.bannedEmail.findMany({
       where: { revoquedAt: null },
       select: { email: true, reason: true, time: true, createdAt: true },
@@ -385,12 +352,13 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   fastify.post("/bans/emails", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const ok = await ensurePermission(request, reply, 'MANAGE_BANNED_EMAILS');
+    if (!ok) return;
     const me = await prisma.user.findFirst({
       where: { id: userId },
-      select: { role: true, id: true },
+      select: { id: true, role: { select: { name: true } } },
     });
-    if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "forbidden" });
+    if (!me) return reply.code(401).send({ error: "unauthorized" });
     const body = request.body as {
       email?: string;
       reason?: string;
@@ -434,6 +402,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     const created = await prisma.bannedEmail.create({
       data: { email, reason, time },
     });
+    await logAdminAction(userId, 'BAN_EMAIL', undefined, { email, reason, time }, request.ip);
     return reply.send({
       ok: true,
       ban: {
@@ -448,12 +417,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   fastify.delete("/bans/emails", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
-    const me = await prisma.user.findFirst({
-      where: { id: userId },
-      select: { role: true },
-    });
-    if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "forbidden" });
+    const ok = await ensurePermission(request, reply, 'MANAGE_BANNED_EMAILS');
+    if (!ok) return;
     const { email } = request.query as { email?: string };
     const target = String(email || "")
       .trim()
@@ -464,18 +429,20 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { revoquedAt: new Date() },
     });
     if (!res.count) return reply.code(404).send({ error: "not_found" });
+    await logAdminAction(userId, 'UNBAN_EMAIL', undefined, { email: target }, request.ip);
     return reply.send({ ok: true, count: res.count });
   });
 
   fastify.post("/bans/emails/bulk", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const ok = await ensurePermission(request, reply, 'MANAGE_BANNED_EMAILS');
+    if (!ok) return;
     const me = await prisma.user.findFirst({
       where: { id: userId },
-      select: { role: true, id: true },
+      select: { id: true, role: { select: { name: true } } },
     });
-    if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "forbidden" });
+    if (!me) return reply.code(401).send({ error: "unauthorized" });
     const body = request.body as {
       emails?: string[];
       reason?: string;
@@ -550,6 +517,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     }
     alreadyBanned.push(...toCreate.filter((e) => existingSet.has(e)));
     const skippedForbidden = toCreate.filter((e) => forbidden.has(e));
+    await logAdminAction(userId, 'BULK_BAN_EMAILS', undefined, { created, alreadyBanned, skippedForbidden, reason }, request.ip);
     return reply.send({
       ok: true,
       created,
@@ -557,5 +525,26 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       invalid,
       skippedForbidden,
     });
+  });
+
+  fastify.post("/:id/badges", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
+    if (!ok) return;
+
+    const { id } = request.params as { id: string };
+    const { type, value } = request.body as { type: 'VERIFIED' | 'PARTNER', value: boolean };
+
+    const data: any = {};
+    if (type === 'VERIFIED') data.isVerified = value;
+    if (type === 'PARTNER') data.isPartner = value;
+
+    if (Object.keys(data).length === 0) return reply.send({ ok: true }); // Nothing to update
+
+    await prisma.user.update({ where: { id }, data });
+    await logAdminAction(userId, 'UPDATE_BADGES', id, { ...data, type }, request.ip);
+
+    return reply.send({ ok: true });
   });
 }

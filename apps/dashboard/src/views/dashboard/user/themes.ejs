@@ -1,7 +1,7 @@
 <%- include('../../partials/head.ejs', { title: 'Tableau de bord - Mes thèmes', description: '', robots: 'noindex,nofollow' }) %>
 <%- include('../../partials/header-dash.ejs') %>
 
-<main class="max-w-7xl mx-auto p-4 space-y-5">
+<main class="max-w-[1600px] mx-auto p-4 space-y-5">
   <h1 class="text-2xl font-semibold">Mes thèmes</h1>
   <section class="flex flex-col lg:flex-row gap-4 items-start">
     <div class="flex-1 rounded-lg border border-slate-800/70 bg-slate-900/60 p-6">
@@ -274,11 +274,32 @@
     btnHover.style.background = norm(v.hover); btnHover.style.color = textColor;
   }
   function updatePreview(){ applyPreviewFromSimplified(buildSimplified(new FormData(form))); }
-  function norm(s){ s = String(s||'').trim(); if (!s.startsWith('#')) s = '#'+s; if (/^#[0-9a-fA-F]{3}$/.test(s)) s = '#'+s.slice(1).split('').map(c=>c+c).join(''); return s; }
+  function norm(s){ s = String(s||'').trim(); if (!s.startsWith('#')) s = '#'+s; if (/^#[0-9a-fA-F]{3}$/.test(s)) s = '#'+s.slice(1).split('').map(c=>c+c).join(''); return /^#[0-9a-fA-F]{6}$/.test(s) ? s : '#000000'; }
   function lum(hex){ const h = norm(hex).slice(1); const r=parseInt(h.slice(0,2),16)/255,g=parseInt(h.slice(2,4),16)/255,b=parseInt(h.slice(4,6),16)/255; const a=[r,g,b].map(v=>v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)); return 0.2126*a[0]+0.7152*a[1]+0.0722*a[2]; }
   function getContrast(bg){ return lum(bg)>0.5 ? '#111827' : '#ffffff'; }
 
   form.addEventListener('input', () => updatePreview());
+
+  function renderMiniForLi(li){
+    try {
+      const raw = li.getAttribute('data-json') || '{}';
+      const parsed = JSON.parse(raw);
+      const mini = li.querySelector('.previewMini'); if (!mini) return;
+      let c = { bg: '#111827', button: '#4f46e5', hover: '#22c55e' };
+      if (parsed.light) c = { bg: parsed.light.bg||c.bg, button: parsed.light.button||c.button, hover: parsed.light.hover||c.hover };
+      else if (parsed.background) c = { bg: parsed.background||c.bg, button: parsed.buttonBackground||c.button, hover: parsed.hoverColor||c.hover };
+      
+      // Sanitize colors
+      c.bg = norm(c.bg);
+      c.button = norm(c.button);
+      c.hover = norm(c.hover);
+
+      mini.innerHTML = `<div style="width:100%;height:100%;background:${c.bg};display:flex;flex-direction:column;justify-content:center;gap:6px;padding:6px">`+
+        `<div style="height:28px;background:${c.button};border-radius:6px;width:70%"></div>`+
+        `<div style="height:20px;background:${c.hover};border-radius:6px;width:50%"></div>`+
+        `</div>`;
+    } catch(e){}
+  }
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(form);
@@ -353,21 +374,6 @@
   }
 
   function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;').replace(/"/g,'&quot;'); }
-
-  function renderMiniForLi(li){
-    try {
-      const raw = li.getAttribute('data-json') || '{}';
-      const parsed = JSON.parse(raw);
-      const mini = li.querySelector('.previewMini'); if (!mini) return;
-      let c = { bg: '#111827', button: '#4f46e5', hover: '#22c55e' };
-      if (parsed.light) c = { bg: parsed.light.bg||c.bg, button: parsed.light.button||c.button, hover: parsed.light.hover||c.hover };
-      else if (parsed.background) c = { bg: parsed.background||c.bg, button: parsed.buttonBackground||c.button, hover: parsed.hoverColor||c.hover };
-      mini.innerHTML = `<div style="width:100%;height:100%;background:${c.bg};display:flex;flex-direction:column;justify-content:center;gap:6px;padding:6px">`+
-        `<div style=\"height:28px;background:${c.button};border-radius:6px;width:70%\"></div>`+
-        `<div style=\"height:20px;background:${c.hover};border-radius:6px;width:50%\"></div>`+
-        `</div>`;
-    } catch(e){}
-  }
 
   function attachCardListeners(li){
     function showConfirm(message){
@@ -595,18 +601,7 @@
     const containers = ['listDrafts','listSubmitted','listApproved','listArchived','listRejected'];
     containers.forEach(id => {
       const grid = document.getElementById(id); if (!grid) return;
-      grid.querySelectorAll('li').forEach(li => {
-      const raw = li.getAttribute('data-json'); let parsed = {};
-      try { parsed = JSON.parse(raw||'{}'); } catch(e){ parsed = {}; }
-      const mini = li.querySelector('.previewMini'); if (!mini) return;
-      let c = { bg: '#111827', button: '#4f46e5', hover: '#22c55e' };
-      if (parsed.light) c = { bg: parsed.light.bg||c.bg, button: parsed.light.button||c.button, hover: parsed.light.hover||c.hover };
-      else if (parsed.background) c = { bg: parsed.background||c.bg, button: parsed.buttonBackground||c.button, hover: parsed.hoverColor||c.hover };
-      mini.innerHTML = `<div style="width:100%;height:100%;background:${c.bg};display:flex;flex-direction:column;justify-content:center;gap:6px;padding:6px">`+
-        `<div style=\"height:28px;background:${c.button};border-radius:6px;width:70%\"></div>`+
-        `<div style=\"height:20px;background:${c.hover};border-radius:6px;width:50%\"></div>`+
-        `</div>`;
-      });
+      grid.querySelectorAll('li').forEach(li => renderMiniForLi(li));
     });
   })();
 

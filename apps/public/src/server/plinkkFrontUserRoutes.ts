@@ -3,22 +3,59 @@ import { existsSync } from "fs";
 import path from "path";
 import { generateProfileConfig } from "../lib/generateConfig";
 import { minify } from "uglify-js";
-import {
-  PlinkkSettings,
-  PrismaClient,
-  User,
-} from "@plinkk/prisma/generated/prisma/client";
-
-const prisma = new PrismaClient();
+import { PlinkkSettings, User } from "@plinkk/prisma/generated/prisma/client";
+// Utilise l'instance Prisma partagée pour éviter des ouvertures multiples du fichier SQLite
+import { prisma } from "@plinkk/prisma";
 
 import { resolvePlinkkPage, parseIdentifier } from "../lib/resolvePlinkkPage";
 import { coerceThemeData } from "../lib/theme";
 import { generateBundle } from "../lib/generateBundle";
 import { generateTheme } from "../lib/generateTheme";
 import { roundedRect, wrapText } from "../lib/fileUtils";
-import { createCanvas, loadImage, registerFont } from "canvas";
+// Chargement paresseux de 'canvas' pour tolérer l'absence de binaire natif (Node 22/Windows)
+type CanvasMod = typeof import("canvas") | null;
+let _canvasMod: CanvasMod = null;
+async function ensureCanvas(): Promise<CanvasMod> {
+  if (_canvasMod !== null) return _canvasMod;
+  try {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+    const mod: typeof import("canvas") = await import("canvas");
+    _canvasMod = mod;
+  } catch (e) {
+    _canvasMod = null;
+  }
+  return _canvasMod;
+}
 
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
+  async function recordPlinkkView(plinkkId: string, userId: string, request: any) {
+    try {
+      await prisma.pageStat.create({
+        data: {
+          plinkkId,
+          eventType: "view",
+          ip: String(request.ip || request.headers?.["x-forwarded-for"] || ""),
+          meta: { userId },
+        },
+      });
+    } catch (e) {
+      request.log?.warn({ err: e }, "recordPlinkkView.pageStat failed");
+    }
+    try {
+      const now = new Date();
+      const y = now.getUTCFullYear();
+      const m = now.getUTCMonth();
+      const d = now.getUTCDate();
+      const dateObj = new Date(Date.UTC(y, m, d));
+      await prisma.plinkkViewDaily.upsert({
+        where: { plinkkId_date: { plinkkId, date: dateObj } },
+        create: { plinkkId, date: dateObj, count: 1 },
+        update: { count: { increment: 1 } },
+      });
+    } catch (e) {
+      request.log?.warn({ err: e }, "recordPlinkkView.daily failed");
+    }
+  }
   fastify.get(
     "/:username",
     { config: { rateLimit: false } },
@@ -111,6 +148,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
               resolved.page && resolved.page.slug
                 ? resolved.page.slug
                 : resolved.user.id;
+            if (!isPreview) {
+              await recordPlinkkView(resolved.page.id, resolved.user.id, request);
+            }
             return reply.view("plinkk/show.ejs", {
               page: resolved.page,
               userId: resolved.user.id,
@@ -131,15 +171,17 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
       // En mode aperçu on n'incrémente pas les vues ni les agrégations journalières
       if (!isPreview) {
-        // Use updateMany instead of update to avoid throwing when the user does not exist
-        // (update would fail with 'No record was found for an update'). updateMany will
-        // silently affect 0 rows if there's no matching user, which is desirable here.
-        await prisma.user.updateMany({
-          where: { id: username },
-          data: { views: { increment: 1 } },
-        });
+        // Incrément des vues utilisateur, robuste aux erreurs SQLite (code 14)
+        try {
+          await prisma.user.updateMany({
+            where: { id: username },
+            data: { views: { increment: 1 } },
+          });
+        } catch (e) {
+          request.log?.warn({ err: e }, "user.updateMany failed (views increment) - skipping");
+        }
 
-        // Enregistrer la vue datée (agrégation quotidienne) dans SQLite sans modifier le client généré
+        // Agrégation quotidienne des vues (UserViewDaily)
         try {
           const now = new Date();
           const y = now.getUTCFullYear();
@@ -153,19 +195,11 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
                 date: dateStr,
               },
             },
-            create: {
-              userId: username,
-              date: dateStr,
-              count: 1,
-            },
-            update: {
-              count: {
-                increment: 1,
-              },
-            },
+            create: { userId: username, date: dateStr, count: 1 },
+            update: { count: { increment: 1 } },
           });
         } catch (e) {
-          request.log?.warn({ err: e }, "Failed to record daily view");
+          request.log?.warn({ err: e }, "Failed to record daily view (userViewDaily upsert)");
         }
       }
 
@@ -223,6 +257,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         resolved.page && resolved.page.slug
           ? resolved.page.slug
           : resolved.user.id;
+      if (!isPreview) {
+        await recordPlinkkView(resolved.page.id, resolved.user.id, request);
+      }
       return reply.view("plinkk/show.ejs", {
         page: resolved.page,
         userId: resolved.user.id,
@@ -346,6 +383,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         socialIcons,
         links,
         pageStatusbar,
+        categories,
       ] = await Promise.all([
         prisma.plinkkSettings.findUnique({ where: { plinkkId: page.id } }),
         prisma.backgroundColor.findMany({
@@ -364,6 +402,10 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           where: { userId: page.user.id, plinkkId: page.id },
         }),
         prisma.plinkkStatusbar.findUnique({ where: { plinkkId: page.id } }),
+        prisma.category.findMany({
+          where: { plinkkId: page.id },
+          orderBy: { order: 'asc' }
+        }),
       ]);
       // Si un thème privé est sélectionné, récupérer ses données, les normaliser en "full shape"
       // et l'injecter comme thème 0 pour le front.
@@ -545,6 +587,11 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         canvaEnable: settings?.canvaEnable ?? 1,
         selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
         layoutOrder: settings?.layoutOrder ?? null,
+        showEcoBadge: settings?.showEcoBadge ?? false,
+        showZeroTrackerBadge: settings?.showZeroTrackerBadge ?? false,
+        enableVCard: settings?.enableVCard ?? false,
+        publicPhone: settings?.publicPhone ?? "",
+        enableLinkCategories: settings?.enableLinkCategories ?? false,
       };
 
       const generated = generateProfileConfig(
@@ -555,7 +602,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         neonColors,
         socialIcons,
         pageStatusbar,
-        injectedObj
+        injectedObj,
+        categories
       ).replaceAll("{{username}}", username);
 
       // If debug=1 in query, return the non-minified generated code for inspection
@@ -602,6 +650,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       username: string;
       identifier: string;
     };
+    // Prévisualisation (preview=1) ne doit pas compter les vues
+    const isPreview = (request.query as { preview?: string })?.preview === "1";
     // Ignore si l'identifiant correspond à un préfixe d'actifs
     if (
       ["css", "js", "images", "canvaAnimation"].includes(String(identifier))
@@ -644,6 +694,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       resolved.page && resolved.page.slug
         ? resolved.page.slug
         : resolved.user.id;
+    if (!isPreview) {
+      await recordPlinkkView(resolved.page.id, resolved.user.id, request);
+    }
     return reply.view("plinkk/show.ejs", {
       page: resolved.page,
       userId: resolved.user.id,
@@ -659,6 +712,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     Params: { username: string };
   }>("/:username/0", async (request, reply) => {
     const { username } = request.params as { username: string };
+    const isPreview = (request.query as { preview?: string })?.preview === "1";
     const resolved = await resolvePlinkkPage(
       prisma,
       username,
@@ -674,6 +728,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     });
     const isOwner =
       (request.session.get("data") as string | undefined) === resolved.user.id;
+    if (!isPreview) {
+      await recordPlinkkView(resolved.page.id, resolved.user.id, request);
+    }
     return reply.view("plinkk/show.ejs", {
       page: resolved.page,
       userId: resolved.user.id,
@@ -711,17 +768,50 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       );
     } catch (e) {}
 
+    try {
+      if (link.plinkkId) {
+        await prisma.pageStat.create({
+          data: {
+            plinkkId: link.plinkkId,
+            eventType: "click",
+            ip: String(req.ip || req.headers?.["x-forwarded-for"] || ""),
+            meta: { linkId, userId: link.userId },
+          },
+        });
+      }
+    } catch (e) {
+      req.log?.warn({ err: e }, "record click pageStat failed");
+    }
     return reply.redirect(link.url);
   });
 
-  registerFont(path.resolve("assets/fonts/Inter-Bold.ttf"), {
-    family: "Inter",
-  });
-  registerFont(path.resolve("assets/fonts/Inter-Regular.ttf"), {
-    family: "Inter",
-  });
-
   fastify.get("/og/:id", async (request, reply) => {
+    const canvasMod = await ensureCanvas();
+    if (!canvasMod) {
+      // Si canvas indisponible (ex: Node 22 sous Windows sans précompilé),
+      // on renvoie une image statique par défaut pour débloquer le dev.
+      try {
+        return reply.sendFile("images/default_profile.png");
+      } catch {
+        return reply.code(501).send({
+          error: "canvas_unavailable",
+          hint:
+            "Le module 'canvas' n'est pas chargé. Utilisez Node 20 LTS ou installez une version compatible de canvas.",
+        });
+      }
+    }
+    const { createCanvas, loadImage, registerFont } = canvasMod;
+
+    // Charger les polices (chemins relatifs au cwd du service)
+    try {
+      registerFont(path.resolve("assets/fonts/Inter-Bold.ttf"), {
+        family: "Inter",
+      });
+      registerFont(path.resolve("assets/fonts/Inter-Regular.ttf"), {
+        family: "Inter",
+      });
+    } catch {}
+
     const { id } = request.params as { id: string };
     const page = await prisma.plinkk.findFirst({
       where: { slug: id },

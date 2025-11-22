@@ -19,6 +19,31 @@ export function createProfileContainer(profileData) {
     profileLink.tabIndex = 0;
     const profilePicWrapper = document.createElement("div");
     profilePicWrapper.className = "profile-pic-wrapper";
+
+    // --- Frame Logic (Cosmetics) ---
+    const cosmetics = profileData.cosmetics || {};
+    const frame = cosmetics.frame;
+    if (frame && frame !== 'none') {
+        const frameDiv = document.createElement("div");
+        frameDiv.className = "avatar-frame";
+        frameDiv.style.position = "absolute";
+        frameDiv.style.inset = "-4px"; // Slightly larger than avatar
+        frameDiv.style.borderRadius = "50%";
+        frameDiv.style.pointerEvents = "none";
+        frameDiv.style.zIndex = "10";
+        
+        if (frame === 'neon') {
+            frameDiv.style.boxShadow = "0 0 0 2px rgba(139,92,246,0.8), 0 0 15px rgba(139,92,246,0.6), inset 0 0 10px rgba(139,92,246,0.4)";
+        } else if (frame === 'glow') {
+            frameDiv.style.boxShadow = "0 0 0 2px rgba(16,185,129,0.8), 0 0 15px rgba(16,185,129,0.6)";
+        } else if (frame === 'gold') {
+            frameDiv.style.boxShadow = "0 0 0 2px rgba(234,179,8,0.8), 0 0 15px rgba(234,179,8,0.4)";
+        }
+        profilePicWrapper.style.position = "relative";
+        profilePicWrapper.appendChild(frameDiv);
+    }
+    // -------------------------------
+
     const profilePic = document.createElement("img");
     if (isSafeUrl(profileData.profileImage)) {
         profilePic.src = profileData.profileImage;
@@ -123,6 +148,70 @@ export function createProfileContainer(profileData) {
 export function createUserName(profileData) {
     const userName = document.createElement("h1");
     setSafeText(userName, profileData.userName);
+
+    // --- Badges Logic ---
+    if (profileData.isVerified) {
+        const verifiedBadge = document.createElement("span");
+        verifiedBadge.className = "badge verified-badge";
+        verifiedBadge.title = "Vérifié";
+        verifiedBadge.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: text-bottom;"><path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" fill="#3B82F6" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.75 12.75L10.25 15.25L16.25 8.75" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        verifiedBadge.style.marginLeft = "6px";
+        verifiedBadge.style.verticalAlign = "middle";
+        verifiedBadge.style.display = "inline-flex";
+        userName.appendChild(verifiedBadge);
+    }
+
+    if (profileData.isPartner) {
+        const partnerBadge = document.createElement("span");
+        partnerBadge.className = "badge partner-badge";
+        partnerBadge.title = "Partenaire";
+        partnerBadge.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: text-bottom;"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#A855F7" stroke="#A855F7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        partnerBadge.style.marginLeft = "4px";
+        partnerBadge.style.verticalAlign = "middle";
+        partnerBadge.style.display = "inline-flex";
+        userName.appendChild(partnerBadge);
+    }
+
+    if (profileData.showEcoBadge) {
+        const ecoBadge = document.createElement("span");
+        ecoBadge.className = "badge eco-badge";
+        ecoBadge.title = "Eco-Friendly";
+        ecoBadge.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; color: #10b981;"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>`;
+        ecoBadge.style.marginLeft = "4px";
+        ecoBadge.style.verticalAlign = "middle";
+        ecoBadge.style.display = "inline-flex";
+        userName.appendChild(ecoBadge);
+    }
+
+    if (profileData.showZeroTrackerBadge) {
+        const ztBadge = document.createElement("span");
+        ztBadge.className = "badge zt-badge";
+        ztBadge.title = "Zéro Traqueur";
+        ztBadge.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; color: #3b82f6;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>`;
+        ztBadge.style.marginLeft = "4px";
+        ztBadge.style.verticalAlign = "middle";
+        ztBadge.style.display = "inline-flex";
+        userName.appendChild(ztBadge);
+    }
+
+    // --- Flair Logic (Cosmetics) ---
+    const cosmetics = profileData.cosmetics || {};
+    if (cosmetics.flair) {
+        const flairSpan = document.createElement("span");
+        flairSpan.className = "user-flair";
+        flairSpan.textContent = cosmetics.flair;
+        flairSpan.style.fontSize = "0.5em";
+        flairSpan.style.marginLeft = "8px";
+        flairSpan.style.verticalAlign = "middle";
+        flairSpan.style.opacity = "0.8";
+        flairSpan.style.background = "rgba(255,255,255,0.1)";
+        flairSpan.style.padding = "2px 6px";
+        flairSpan.style.borderRadius = "6px";
+        flairSpan.style.border = "1px solid rgba(255,255,255,0.2)";
+        userName.appendChild(flairSpan);
+    }
+    // -------------------------------
+
     if (!profileData.userName.trim()) {
         userName.style.display = "none";
     }
@@ -154,6 +243,36 @@ export function createEmailAndDescription(profileData) {
         </svg>
     `;
     emailDiv.appendChild(copyBtn);
+
+    if (profileData.enableVCard) {
+        const vcardBtn = document.createElement("button");
+        vcardBtn.type = "button";
+        vcardBtn.title = "Télécharger VCard";
+        vcardBtn.className = "vcard-btn";
+        vcardBtn.style.marginLeft = "8px";
+        vcardBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`;
+        vcardBtn.onclick = () => {
+            const vcard = [
+                'BEGIN:VCARD',
+                'VERSION:3.0',
+                `FN:${profileData.userName}`,
+                `EMAIL:${profileData.email}`,
+                `TEL:${profileData.publicPhone || ''}`,
+                `URL:${profileData.profileLink || window.location.href}`,
+                `NOTE:${profileData.description || ''}`,
+                'END:VCARD'
+            ].join('\n');
+            const blob = new Blob([vcard], { type: 'text/vcard' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${profileData.userName}.vcf`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+        emailDiv.appendChild(vcardBtn);
+    }
+
     // --- Système de spam & easter egg ---
     let spamCount = 0;
     let lastClick = 0;
@@ -398,11 +517,11 @@ export function createLinkBoxes(profileData) {
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (!profileData.links || !profileData.links.length) {
         console.warn("No links found in profile data.");
+        return [];
     }
-    else if (profileData.links.length > maxLinkNumber) {
-        console.warn(`Too many links found in profile data, only the first ${maxLinkNumber} will be displayed.`);
-    }
-    return profileData.links.slice(0, maxLinkNumber).map(link => {
+    
+    // Helper to create a single link box
+    const createBox = (link) => {
         const discordBox = document.createElement("div");
         const discordIcon = document.createElement("img");
         // Créer le lien principal qui englobe tout le contenu
@@ -571,7 +690,56 @@ export function createLinkBoxes(profileData) {
             discordBox.style.display = "none";
         }
         return discordBox;
-    });
+    };
+
+    if (profileData.enableLinkCategories && profileData.categories && profileData.categories.length > 0) {
+        const elements = [];
+        const linksByCat = {};
+        const otherLinks = [];
+
+        profileData.links.forEach(l => {
+            if (l.categoryId) {
+                if (!linksByCat[l.categoryId]) linksByCat[l.categoryId] = [];
+                linksByCat[l.categoryId].push(l);
+            } else {
+                otherLinks.push(l);
+            }
+        });
+
+        profileData.categories.forEach(cat => {
+            const catLinks = linksByCat[cat.id];
+            if (catLinks && catLinks.length > 0) {
+                const header = document.createElement('h3');
+                header.className = 'category-header';
+                header.textContent = cat.name;
+                header.style.color = profileData.textColor || '#fff'; // Fallback color
+                header.style.marginTop = '20px';
+                header.style.marginBottom = '10px';
+                header.style.textAlign = 'center';
+                header.style.width = '100%';
+                elements.push(header);
+                catLinks.forEach(l => elements.push(createBox(l)));
+            }
+        });
+
+        if (otherLinks.length > 0) {
+            if (elements.length > 0) {
+                const header = document.createElement('h3');
+                header.className = 'category-header';
+                header.textContent = 'Autres';
+                header.style.color = profileData.textColor || '#fff';
+                header.style.marginTop = '20px';
+                header.style.marginBottom = '10px';
+                header.style.textAlign = 'center';
+                header.style.width = '100%';
+                elements.push(header);
+            }
+            otherLinks.forEach(l => elements.push(createBox(l)));
+        }
+        return elements.slice(0, maxLinkNumber + profileData.categories.length + 1); // Rough limit
+    } else {
+        return profileData.links.slice(0, maxLinkNumber).map(createBox);
+    }
 }
 export function validateProfileConfig(profileData, themes, btnIconThemeConfig, canvaData, animationBackground) {
     const errors = [];

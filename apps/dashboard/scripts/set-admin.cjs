@@ -3,7 +3,8 @@
 // Usage: node scripts/set-admin.cjs <identifier>
 // identifier can be user id, userName or email
 
-const { PrismaClient } = require('../generated/prisma/client');
+// Utilise le package workspace @plinkk/prisma (génération centralisée)
+const { PrismaClient } = require('@plinkk/prisma/generated/prisma/client');
 const prisma = new PrismaClient();
 
 async function findUser(identifier) {

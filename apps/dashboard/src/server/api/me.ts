@@ -9,6 +9,7 @@ import { PrismaClient, User } from "@plinkk/prisma/generated/prisma/client";
 import { apiMeThemesRoutes } from "./me/theme";
 import { apiMePlinkksRoutes } from "./me/plinkks";
 import path from "path";
+import crypto from "crypto";
 
 const pending2fa = new Map<
   string,
@@ -20,6 +21,22 @@ const prisma = new PrismaClient();
 export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.register(apiMeThemesRoutes, { prefix: "/themes" });
   fastify.register(apiMePlinkksRoutes, { prefix: "/plinkks" });
+
+  fastify.post("/apikey", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    
+    const newKey = "plk_" + crypto.randomUUID().replace(/-/g, "");
+    
+    const updated = await prisma.user.update({
+      where: { id: userId as string },
+      data: { apiKey: newKey },
+      select: { apiKey: true },
+    });
+    
+    return reply.send({ apiKey: updated.apiKey });
+  });
+
   fastify.post("/visibility", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
@@ -301,35 +318,47 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/cosmetics", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const body = (request.body as { bannerUrl: string, banner: string, frame: string, theme: string });
-    const u = await prisma.user.findUnique({
-      where: { id: userId as string },
-      select: { cosmetics: true },
+    const body = (request.body as { 
+      bannerUrl?: string, 
+      banner?: string, 
+      frame?: string, 
+      theme?: string,
+      data?: any 
     });
-    const cosmetics = u?.cosmetics;
+    
     const updated = await prisma.user.update({
       where: { id: userId as string },
       data: {
         cosmetics: {
           upsert: {
             create: {
-              flair: null,
-              bannerUrl: body.bannerUrl ?? cosmetics.bannerUrl ?? null,
-              banner: body.banner ?? cosmetics.banner ?? null,
-              frame: body.frame ?? cosmetics.frame ?? null,
-              theme: body.theme ?? cosmetics.theme ?? null,
+              bannerUrl: body.bannerUrl ?? "",
+              banner: body.banner ?? "",
+              frame: body.frame ?? "none",
+              theme: body.theme ?? "system",
             },
             update: {
-              flair: null,
-              bannerUrl: body.bannerUrl ?? cosmetics.bannerUrl ?? null,
-              banner: body.banner ?? cosmetics.banner ?? null,
-              frame: body.frame ?? cosmetics.frame ?? null,
-              theme: body.theme ?? cosmetics.theme ?? null,
+              bannerUrl: body.bannerUrl,
+              banner: body.banner,
+              frame: body.frame,
+              theme: body.theme,
             },
           },
         },
       },
-      select: { id: true, cosmetics: true },
+      select: { 
+        id: true, 
+        cosmetics: {
+          select: {
+            id: true,
+            flair: true,
+            frame: true,
+            theme: true,
+            bannerUrl: true,
+            banner: true
+          }
+        } 
+      },
     });
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
   });

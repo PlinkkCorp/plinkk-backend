@@ -277,23 +277,85 @@ export function applyTheme(theme) {
 }
 export function setBackgroundStyles(profileData) {
     const _p = profileData || getProfileData() || {};
-    const colors = Array.isArray(_p.background) ? _p.background.filter(Boolean) : null;
-    const deg = (Number.isFinite(_p.degBackgroundColor) ? _p.degBackgroundColor : 45) || 45;
-    if (colors) {
-        if (colors.length === 0) {
-            // Pas de couleur: ne force pas de background ici, laisser le thème s'appliquer
-            document.body.style.background = '';
-        } else if (colors.length === 1) {
-            document.body.style.background = colors[0];
-        } else {
-            document.body.style.background = `linear-gradient(${deg}deg, ${colors.join(", ")})`;
+
+    // --- Cosmetics Logic (New System) ---
+    const cosmetics = _p.cosmetics || {};
+    const data = cosmetics.data || {};
+    const gradientType = data.gradientType;
+    const primaryColor = data.primaryColor;
+    const accentColor = data.accentColor;
+    const effect = data.effect;
+
+    // Apply Background
+    if (gradientType && primaryColor && accentColor) {
+        let bgStyle = '';
+        if (gradientType === 'linear') {
+             bgStyle = `linear-gradient(135deg, ${primaryColor}, ${accentColor})`;
+             document.body.style.backgroundAttachment = "fixed";
+        } else if (gradientType === 'radial') {
+             bgStyle = `radial-gradient(circle at center, ${primaryColor}, ${accentColor})`;
+             document.body.style.backgroundAttachment = "fixed";
+        } else if (gradientType === 'animated') {
+             bgStyle = `linear-gradient(270deg, ${primaryColor}, ${accentColor}, ${primaryColor})`;
+             document.body.style.backgroundSize = "400% 400%";
+             document.body.style.animation = "gradient-x 15s ease infinite";
+             
+             // Inject keyframes safely
+             const styleSheet = document.styleSheets[0];
+             let hasKeyframes = false;
+             for(let i=0; i<styleSheet.cssRules.length; i++) {
+                 if (styleSheet.cssRules[i].name === 'gradient-x') hasKeyframes = true;
+             }
+             if (!hasKeyframes) {
+                 try {
+                    styleSheet.insertRule(`@keyframes gradient-x { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }`, styleSheet.cssRules.length);
+                 } catch(e) {}
+             }
         }
-        document.body.style.backgroundSize = "cover";
-    } else if (typeof _p.background === 'string' && _p.background.trim() !== '') {
-        document.body.style.background = `url(${_p.background})`;
-        document.body.style.backgroundSize = `${_p.backgroundSize || 100}%`;
+        
+        if (bgStyle) {
+            document.body.style.background = bgStyle;
+        }
     } else {
-        document.body.style.background = '';
+        // Fallback to old system
+        const colors = Array.isArray(_p.background) ? _p.background.filter(Boolean) : null;
+        const deg = (Number.isFinite(_p.degBackgroundColor) ? _p.degBackgroundColor : 45) || 45;
+        if (colors) {
+            if (colors.length === 0) {
+                document.body.style.background = '';
+            } else if (colors.length === 1) {
+                document.body.style.background = colors[0];
+            } else {
+                document.body.style.background = `linear-gradient(${deg}deg, ${colors.join(", ")})`;
+            }
+            document.body.style.backgroundSize = "cover";
+        } else if (typeof _p.background === 'string' && _p.background.trim() !== '') {
+            document.body.style.background = `url(${_p.background})`;
+            document.body.style.backgroundSize = `${_p.backgroundSize || 100}%`;
+        } else {
+            document.body.style.background = '';
+        }
+    }
+
+    // Apply Effects (Overlay)
+    if (effect && effect !== 'none') {
+        // Remove existing effect if any
+        const existingEffect = document.getElementById('cosmetic-effect-overlay');
+        if (existingEffect) existingEffect.remove();
+
+        const effectDiv = document.createElement('div');
+        effectDiv.id = 'cosmetic-effect-overlay';
+        effectDiv.style.position = 'fixed';
+        effectDiv.style.inset = '0';
+        effectDiv.style.pointerEvents = 'none';
+        effectDiv.style.zIndex = '-1'; // Behind content
+        
+        if (effect === 'sparkles') {
+            effectDiv.style.backgroundImage = `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 0L12 8L20 10L12 12L10 20L8 12L0 10L8 8L10 0Z' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E")`;
+        } else if (effect === 'noise') {
+            effectDiv.style.backgroundImage = `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E")`;
+        }
+        document.body.appendChild(effectDiv);
     }
 }
 export function applyAnimation(animation, animationEnabled) {

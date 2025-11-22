@@ -14,6 +14,7 @@ export function emptyState({ title, description, actionLabel, onAction }) {
 }
 
 export function renderBackground({ container, addBtn, colors, scheduleAutoSave }) {
+  if (!container) return;
   container.innerHTML = '';
   if (!Array.isArray(colors) || colors.length === 0) {
     container.append(
@@ -40,10 +41,11 @@ export function renderBackground({ container, addBtn, colors, scheduleAutoSave }
       container.appendChild(row);
     });
   }
-  addBtn.onclick = () => { colors.push('#ffffff'); renderBackground({ container, addBtn, colors, scheduleAutoSave }); scheduleAutoSave(); };
+  if (addBtn) addBtn.onclick = () => { colors.push('#ffffff'); renderBackground({ container, addBtn, colors, scheduleAutoSave }); scheduleAutoSave(); };
 }
 
 export function renderNeon({ container, addBtn, colors, neonEnableEl, scheduleAutoSave }) {
+  if (!container) return;
   container.innerHTML = '';
   if (!Array.isArray(colors) || colors.length === 0) {
     container.append(
@@ -64,7 +66,7 @@ export function renderNeon({ container, addBtn, colors, neonEnableEl, scheduleAu
       container.appendChild(wrap);
     });
   }
-  addBtn.onclick = () => { colors.push('#7289DA'); renderNeon({ container, addBtn, colors, neonEnableEl, scheduleAutoSave }); scheduleAutoSave(); };
+  if (addBtn) addBtn.onclick = () => { colors.push('#7289DA'); renderNeon({ container, addBtn, colors, neonEnableEl, scheduleAutoSave }); scheduleAutoSave(); };
   const hasColors = Array.isArray(colors) && colors.length > 0;
   if (neonEnableEl) {
     if (!hasColors) neonEnableEl.checked = false;
@@ -75,6 +77,7 @@ export function renderNeon({ container, addBtn, colors, neonEnableEl, scheduleAu
 }
 
 export function renderLabels({ container, addBtn, labels, scheduleAutoSave }) {
+  if (!container) return;
   container.innerHTML = '';
   if (!Array.isArray(labels) || labels.length === 0) {
     container.append(
@@ -153,10 +156,11 @@ export function renderLabels({ container, addBtn, labels, scheduleAutoSave }) {
       container.appendChild(row);
     });
   }
-  addBtn.onclick = () => { labels.push({ data: 'Nouveau', color: '#FF6384', fontColor: '#FFFFFF' }); renderLabels({ container, addBtn, labels, scheduleAutoSave }); scheduleAutoSave(); };
+  if (addBtn) addBtn.onclick = () => { labels.push({ data: 'Nouveau', color: '#FF6384', fontColor: '#FFFFFF' }); renderLabels({ container, addBtn, labels, scheduleAutoSave }); scheduleAutoSave(); };
 }
 
 export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
+  if (!container) return;
   container.innerHTML = '';
   const SOCIAL_PLATFORMS = [
     { id: 'github', name: 'GitHub', pattern: 'https://github.com/{handle}', iconSlug: 'github' },
@@ -328,10 +332,61 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
       container.appendChild(row);
     });
   }
-  addBtn.onclick = () => { socials.push({ url: 'https://', icon: 'github' }); renderSocial({ container, addBtn, socials, scheduleAutoSave }); scheduleAutoSave(); };
+  if (addBtn) addBtn.onclick = () => { socials.push({ url: 'https://', icon: 'github' }); renderSocial({ container, addBtn, socials, scheduleAutoSave }); scheduleAutoSave(); };
 }
 
-export function renderLinks({ container, addBtn, links, scheduleAutoSave }) {
+export function renderCategories({ container, addBtn, categories, scheduleAutoSave }) {
+  if (!container) return;
+  container.innerHTML = '';
+  
+  // Header for categories
+  const header = el('div', { class: 'flex items-center justify-between mb-3' });
+  header.append(el('h4', { class: 'font-medium text-white', text: 'Catégories' }));
+  const addCatBtn = el('button', { type: 'button', class: 'px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors', text: '+ Ajouter' });
+  header.append(addCatBtn);
+  container.append(header);
+
+  const listContainer = el('div', { class: 'space-y-2' });
+  container.append(listContainer);
+
+  if (!Array.isArray(categories) || categories.length === 0) {
+    listContainer.append(
+      emptyState({
+        title: 'Aucune catégorie',
+        description: 'Créez des catégories pour organiser vos liens.',
+        actionLabel: null,
+        onAction: null,
+      })
+    );
+  } else {
+    categories.forEach((c, idx) => {
+      const row = el('div', { class: 'flex items-center gap-2' });
+      row.dataset.dragIndex = String(idx);
+      
+      const gripBtn = el('button', { type: 'button', class: 'h-9 w-9 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 shrink-0', title: 'Déplacer', 'aria-label': 'Déplacer' });
+      gripBtn.style.cursor = 'grab';
+      gripBtn.appendChild(createGripSVG(18));
+      
+      const nameInput = el('input', { type: 'text', value: c.name || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 flex-1', placeholder: 'Nom de la catégorie' });
+      nameInput.addEventListener('input', () => { c.name = nameInput.value; scheduleAutoSave(); });
+      
+      const rm = trashButton(() => { categories.splice(idx, 1); renderCategories({ container, addBtn, categories, scheduleAutoSave }); scheduleAutoSave(); });
+      
+      row.append(gripBtn, nameInput, rm);
+      try { enableDragHandle(gripBtn, row, listContainer, categories, () => renderCategories({ container, addBtn, categories, scheduleAutoSave }), scheduleAutoSave); } catch {}
+      listContainer.appendChild(row);
+    });
+  }
+
+  addCatBtn.onclick = () => { 
+    categories.push({ name: 'Nouvelle catégorie', order: categories.length }); 
+    renderCategories({ container, addBtn, categories, scheduleAutoSave }); 
+    scheduleAutoSave(); 
+  };
+}
+
+export function renderLinks({ container, addBtn, links, categories, scheduleAutoSave }) {
+  if (!container) return;
   container.innerHTML = '';
   if (!Array.isArray(links) || links.length === 0) {
     container.append(
@@ -339,7 +394,7 @@ export function renderLinks({ container, addBtn, links, scheduleAutoSave }) {
         title: 'Aucun lien',
         description: 'Créez vos premiers boutons et liens.',
         actionLabel: '+ Ajouter un lien',
-        onAction: () => { links.push({ url: 'https://', name: 'Nouveau', text: 'Link' }); renderLinks({ container, addBtn, links, scheduleAutoSave }); scheduleAutoSave(); },
+        onAction: () => { links.push({ url: 'https://', name: 'Nouveau', text: 'Link' }); renderLinks({ container, addBtn, links, categories, scheduleAutoSave }); scheduleAutoSave(); },
       })
     );
   } else {
@@ -382,14 +437,44 @@ export function renderLinks({ container, addBtn, links, scheduleAutoSave }) {
       line2.append(url, themeWrap);
 
       const line3 = el('div', { class: 'flex items-center gap-2 w-full' });
-      const description = el('input', { type: 'text', value: l.description || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 flex-1' });
-      const rm = trashButton(() => { links.splice(idx, 1); renderLinks({ container, addBtn, links, scheduleAutoSave }); scheduleAutoSave(); });
-      const rmCell = el('div', { class: 'flex justify-end items-center w-24' });
+      const description = el('input', { type: 'text', value: l.description || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 flex-1', placeholder: 'Description (optionnel)' });
+      
+      // Category Selector
+      const catWrap = el('div', { class: 'w-full md:w-1/3' });
+      if (categories && categories.length > 0) {
+        const catSel = el('select', { class: 'w-full h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm' });
+        catSel.append(el('option', { value: '', text: 'Aucune catégorie' }));
+        categories.forEach(c => {
+          const opt = el('option', { value: c.id || c.name, text: c.name }); // Use ID if available, fallback to name for new ones (though ID is better)
+          // Note: newly created categories might not have ID yet until saved. 
+          // Ideally we should rely on index or temporary ID, but for now let's assume ID is present or we match by ID.
+          // If ID is missing (newly added), we might have issues linking until save.
+          // A simple workaround is to use the category object reference if we were in memory, but here we serialize.
+          // Let's assume we use ID. If ID is missing, we can't link effectively until save.
+          // For better UX, maybe we should auto-save categories first?
+          // Or just use ID if present.
+          if (c.id === l.categoryId) opt.selected = true;
+          catSel.append(opt);
+        });
+        catSel.addEventListener('change', () => { l.categoryId = catSel.value || null; scheduleAutoSave(); });
+        catWrap.append(catSel);
+      } else {
+        // Placeholder if no categories
+        // catWrap.classList.add('hidden');
+      }
+
+      const rm = trashButton(() => { links.splice(idx, 1); renderLinks({ container, addBtn, links, categories, scheduleAutoSave }); scheduleAutoSave(); });
+      const rmCell = el('div', { class: 'flex justify-end items-center w-auto' });
       rmCell.append(rm);
-      line3.append(description, rmCell);
+      
+      if (categories && categories.length > 0) {
+        line3.append(description, catWrap, rmCell);
+      } else {
+        line3.append(description, rmCell);
+      }
 
       row.append(line1, line2, line3);
-      try { enableDragHandle(gripBtn, row, container, links, () => renderLinks({ container, addBtn, links, scheduleAutoSave }), scheduleAutoSave); } catch {}
+      try { enableDragHandle(gripBtn, row, container, links, () => renderLinks({ container, addBtn, links, categories, scheduleAutoSave }), scheduleAutoSave); } catch {}
       function setPreviewByValue(val) { if (isUrlish(val)) iconPreview.src = val; else iconPreview.src = val; }
 
       function openIconPickerForLink() {
@@ -477,22 +562,39 @@ export function renderLinks({ container, addBtn, links, scheduleAutoSave }) {
       container.appendChild(row);
     });
   }
-  addBtn.onclick = () => { links.push({ url: 'https://', name: 'Nouveau', text: 'Link' }); renderLinks({ container, addBtn, links, scheduleAutoSave }); scheduleAutoSave(); };
+  if (addBtn) addBtn.onclick = () => { links.push({ url: 'https://', name: 'Nouveau', text: 'Link' }); renderLinks({ container, addBtn, links, categories, scheduleAutoSave }); scheduleAutoSave(); };
 }
 
 // Agencement: réordonner les grandes sections de la page
 export function renderLayout({ container, order, scheduleAutoSave }) {
   if (!container) return;
   container.innerHTML = '';
-  if (!Array.isArray(order)) order = [];
-  // Normaliser: garder uniquement les clés connues et compléter l'ordre manquant
+  
   const KNOWN = ['profile', 'username', 'labels', 'social', 'email', 'links'];
+  
+  // Ensure order is an array and has content, otherwise default to KNOWN
+  if (!Array.isArray(order) || order.length === 0) {
+    // If we can't modify the passed order (e.g. it was null), we can't fix the state upstream easily here 
+    // without a callback, but we can at least render the default layout.
+    // However, index.js passes state.layoutOrder which is initialized.
+    // We'll assume order is a reference to an array we can mutate.
+    if (Array.isArray(order)) {
+        order.splice(0, order.length, ...KNOWN);
+    } else {
+        order = [...KNOWN];
+    }
+  }
+
+  // Normaliser: garder uniquement les clés connues et compléter l'ordre manquant
   const seen = new Set();
   const normalized = [];
   order.forEach(k => { if (KNOWN.includes(k) && !seen.has(k)) { seen.add(k); normalized.push(k); } });
   KNOWN.forEach(k => { if (!seen.has(k)) normalized.push(k); });
+  
   // Refléter dans l'array original (référence partagée)
-  order.splice(0, order.length, ...normalized);
+  if (Array.isArray(order)) {
+      order.splice(0, order.length, ...normalized);
+  }
 
   const LABELS = {
     profile: 'Photo & lien de profil',
@@ -504,13 +606,15 @@ export function renderLayout({ container, order, scheduleAutoSave }) {
   };
 
   normalized.forEach((key, idx) => {
-    const row = el('div', { class: 'flex items-center gap-3 w-full rounded-md border border-slate-800 bg-slate-900/50 px-2 py-2' });
+    const row = el('div', { class: 'flex items-center gap-3 w-full rounded-xl border border-slate-800 bg-slate-900/50 px-3 py-3 select-none hover:border-slate-700 transition-colors' });
     row.dataset.dragIndex = String(idx);
-    const gripBtn = el('button', { type: 'button', class: 'h-9 w-9 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700', title: 'Déplacer', 'aria-label': 'Déplacer' });
-    gripBtn.style.cursor = 'grab';
-    gripBtn.appendChild(createGripSVG(18));
-    const label = el('div', { class: 'text-sm text-slate-200' });
+    
+    const gripBtn = el('button', { type: 'button', class: 'h-8 w-8 inline-flex items-center justify-center rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-400 cursor-grab active:cursor-grabbing transition-colors', title: 'Déplacer', 'aria-label': 'Déplacer' });
+    gripBtn.appendChild(createGripSVG(16));
+    
+    const label = el('div', { class: 'text-sm font-medium text-slate-200' });
     label.textContent = LABELS[key] || key;
+    
     row.append(gripBtn, label);
     try { enableDragHandle(gripBtn, row, container, order, () => renderLayout({ container, order, scheduleAutoSave }), scheduleAutoSave); } catch {}
     container.appendChild(row);

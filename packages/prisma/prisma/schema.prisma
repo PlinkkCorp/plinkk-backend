@@ -54,6 +54,8 @@ model User {
   cosmetics Cosmetic?
   isPublic  Boolean   @default(true)
   views     Int       @default(0)
+  isVerified Boolean  @default(false)
+  isPartner  Boolean  @default(false)
 
   themes       Theme[]
   announcement AnnouncementTarget[]
@@ -71,14 +73,90 @@ model User {
   statusbar        Statusbar?
 
   slags Json @default("[]")
+
+  // Relations pour les signalements
+  reportsMade     Report[] @relation("Reporter")
+  reportsReceived Report[] @relation("ReportedUser")
+  
+  // Relations pour les sessions
+  sessions        Session[]
+
+  apiKey          String? @unique
+}
+
+model Session {
+  id        String   @id @default(nanoid(16))
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ip        String?
+  userAgent String?
+  currentPath String?
+  lastActiveAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+model Report {
+  id        String   @id @default(nanoid(16))
+  reason    String
+  message   String?
+  status    String   @default("PENDING") // PENDING, RESOLVED, DISMISSED
+
+  reporterId String
+  reporter   User   @relation("Reporter", fields: [reporterId], references: [id])
+
+  // Cibles optionnelles
+  reportedUserId String?
+  reportedUser   User?   @relation("ReportedUser", fields: [reportedUserId], references: [id])
+
+  reportedPlinkkId String?
+  reportedPlinkk   Plinkk? @relation(fields: [reportedPlinkkId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Role {
-  id    String @id @default(nanoid(16))
-  name  String @unique
-  users User[]
+  id          String @id @default(nanoid(16))
+  name        String @unique
+  users       User[]
+  isStaff     Boolean @default(false)
+  priority    Int     @default(0) // pour l'ordre d'affichage
+  color       String?            // couleur d'accent éventuelle
+  maxPlinkks  Int?    @default(1)
+  maxThemes   Int?    @default(0)
+  limits      Json?              // structure libre pour futures quotas
+  meta        Json?              // infos supplémentaires (badges, etc.)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
 
+  permissions RolePermission[]
   AnnouncementRoleTarget AnnouncementRoleTarget[]
+}
+
+/// Définition d'une permission atomique, modulaire, catégorisée.
+model Permission {
+  key        String @id            // identifiant unique (ex: MANAGE_USERS)
+  category   String                // catégorie ergonomique (ex: Administration)
+  description String?              // description lisible
+  system     Boolean @default(true) // true: fournie par le code, false: personnalisée
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  roles RolePermission[]
+}
+
+/// Table de jointure N-N entre Role et Permission
+model RolePermission {
+  roleId        String
+  permissionKey String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionKey], references: [key], onDelete: Cascade)
+
+  grantedAt DateTime @default(now())
+
+  @@id([roleId, permissionKey])
 }
 
 model Cosmetic {
@@ -108,6 +186,21 @@ model Link {
   user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   plinkkId String?
   plinkk   Plinkk? @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+}
+
+model Category {
+  id        String   @id @default(nanoid(16))
+  name      String
+  order     Int      @default(0)
+  plinkkId  String
+  plinkk    Plinkk   @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+  links     Link[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Host {
@@ -255,6 +348,7 @@ model Plinkk {
   updatedAt  DateTime   @default(now()) @updatedAt
 
   links       Link[]
+  categories  Category[]
   labels      Label[]
   socialIcons SocialIcon[]
   background  BackgroundColor[]
@@ -262,6 +356,7 @@ model Plinkk {
   statusbar   PlinkkStatusbar?
   settings    PlinkkSettings?
   pageStats   PageStat[]        @relation("PageStats")
+  reports     Report[]
 
   host Host?
 
@@ -284,6 +379,12 @@ model PlinkkSettings {
   profileHoverColor                String?
   // affichageEmail spécifique à cette Plinkk (email affiché publiquement pour cette page)
   affichageEmail                   String?
+  publicPhone                      String?
+  showEcoBadge                     Boolean @default(true)
+  showZeroTrackerBadge             Boolean @default(true)
+  enableVCard                      Boolean @default(true)
+  enableLinkCategories             Boolean @default(false)
+
   degBackgroundColor               Int?
   neonEnable                       Int?
   buttonThemeEnable                Int?
@@ -364,4 +465,14 @@ model BannedEmail {
   deletePlinkk Boolean   @default(false)
   time         Int?      @default(-1)
   revoquedAt   DateTime?
+}
+
+model AdminLog {
+  id        String   @id @default(nanoid(16))
+  adminId   String
+  action    String
+  targetId  String?
+  details   Json?
+  createdAt DateTime @default(now())
+  ip        String?
 }

@@ -159,6 +159,47 @@ Dashboard (admin / utilisateur connecté):
 
 Par défaut: 2 pages par utilisateur (modifiable selon rôle).
 
+### Rôles & Permissions (nouveau)
+
+Le système de rôles est étendu via les modèles `Role`, `Permission` et `RolePermission` (voir `packages/prisma/prisma/schema.prisma`).
+
+Champs additionnels sur `Role`:
+- `isStaff`: booléen permettant de distinguer le staff (accès admin).
+- `priority`: ordre d'affichage / importance.
+- `maxPlinkks`, `maxThemes`: quotas de créations par rôle.
+- `limits`, `meta`: champs JSON libres pour futures extensions/quota/badges.
+
+Permissions atomiques (ex: `MANAGE_ROLES`, `BAN_USER`, `CREATE_THEME`) sont catégorisées pour une interface ergonomique. La page d'administration `/admin/roles` permet:
+- Création / suppression de rôles.
+- Modification des paramètres du rôle (staff, quotas, priorité…).
+- Ajout / retrait de permissions par clé.
+- Visualisation de l'ensemble des permissions groupées par catégorie.
+
+#### Ajout / modification de permissions
+Définies dans `packages/prisma/permissions.ts` (source TypeScript) et `packages/prisma/permissions.js` (version runtime). Pour ajouter une permission:
+1. Ajouter l'entrée à `PERMISSIONS` (clé unique en MAJUSCULES).
+2. `npx prisma db push --schema=packages/prisma/prisma/schema.prisma` si le schéma évolue.
+3. Exécuter le seed: `node scripts/seed-permissions.js` (met à jour rôles & permissions par défaut).
+
+#### Seed initial
+Après un clone fresh:
+```bash
+npx prisma db push --schema=packages/prisma/prisma/schema.prisma
+node scripts/seed-permissions.js
+```
+
+#### Utilisation côté code
+Pour vérifier si un utilisateur possède une permission donnée, récupérer son rôle puis ses `permissions` via Prisma, ou développer un helper (exemple pseudo-code):
+```ts
+async function userHasPermission(prisma, userId: string, key: string) {
+   const user = await prisma.user.findUnique({ where: { id: userId }, include: { role: { include: { permissions: true } } }});
+   return !!user?.role?.permissions?.find(p => p.permissionKey === key);
+}
+```
+
+#### Page d'administration
+`/admin/roles` (accès staff) — EJS + JS vanilla, modulaire et extensible. Ajoutez simplement de nouvelles permissions puis seed pour les voir apparaître.
+
 ## Base de données & migrations
 
 - Schéma: `prisma/schema.prisma`

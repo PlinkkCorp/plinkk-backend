@@ -1,152 +1,163 @@
 <%- include('../../partials/head.ejs', { title: 'Admin - Thèmes', description: '', robots: 'noindex,nofollow' }) %>
 <%- include('../../partials/header-dash.ejs', { user: user }) %>
-<%- include('../../partials/admin-nav.ejs', { user: user }) %>
 
-<main class="max-w-7xl mx-auto p-4 space-y-5">
-  <h1 class="text-2xl font-semibold">Gestion des thèmes</h1>
-  <style>
-    .searchWrap { display:flex; gap:.5rem; }
-    .searchInput { display:flex; align-items:center; gap:.5rem; background:rgba(15,23,42,.6); padding:.25rem .5rem; border-radius:.5rem; border:1px solid rgba(63,63,70,.6); }
-    .searchInput input { background:transparent; border:0; padding:.5rem .25rem; outline:none; color:inherit; width:18rem }
-    .clearBtn { background:transparent; border:0; color:rgba(148,163,184,0.9); cursor:pointer }
-    @media (max-width:640px){ .searchInput input{ width: 100%; } }
-  </style>
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+  <%- include('../../partials/admin-nav.ejs', { user: user, active: 'themes' }) %>
 
-  <div class="flex items-center justify-between gap-3">
-    <div class="flex-1">
-      <div class="searchWrap">
-        <div class="searchInput" role="search">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-slate-400" aria-hidden="true"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <input id="themeSearch" type="search" placeholder="Rechercher un thème ou auteur..." class="text-sm" />
-          <button id="clearSearch" class="clearBtn" title="Effacer la recherche" aria-label="Effacer la recherche">✕</button>
+  <main class="col-span-12 lg:col-span-10 space-y-8">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <h1 class="text-2xl font-bold text-white">Gestion des thèmes</h1>
+    <a href="/themes" class="inline-flex items-center px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium transition-colors">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Créer un thème
+    </a>
+  </div>
+
+  <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6">
+    <div class="flex flex-col md:flex-row gap-4">
+      <div class="flex-1 relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </div>
-        <select id="themeCategoryFilter" class="px-3 py-2 rounded bg-slate-900/60 border border-slate-700 text-sm" aria-label="Filtrer par catégorie de chat">
+        <input id="themeSearch" type="search" 
+          class="block w-full pl-10 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all sm:text-sm" 
+          placeholder="Rechercher un thème ou auteur...">
+        <button id="clearSearch" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300 hidden">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="w-full md:w-64">
+        <select id="themeCategoryFilter" class="block w-full py-2.5 px-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 sm:text-sm">
           <option value="">Toutes catégories</option>
         </select>
       </div>
     </div>
-    <div class="ml-3">
-      <a href="/themes" class="px-3 py-2 rounded bg-emerald-600 text-white text-sm">Créer un thème</a>
+
+    <div class="flex space-x-1 bg-slate-950 p-1 rounded-xl w-fit border border-slate-800" role="tablist">
+      <button class="tabBtn flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-slate-200" data-tab="submitted" role="tab" aria-selected="true">
+        À valider <span class="ml-2 px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-300 text-xs tab-count">0</span>
+      </button>
+      <button class="tabBtn flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-slate-200" data-tab="approved" role="tab" aria-selected="false">
+        Validés <span class="ml-2 px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-300 text-xs tab-count">0</span>
+      </button>
+      <button class="tabBtn flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-slate-200" data-tab="archived" role="tab" aria-selected="false">
+        Archivés <span class="ml-2 px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-300 text-xs tab-count">0</span>
+      </button>
     </div>
-  </div>
 
-  <style>
-    .tabs { display:flex; gap:.5rem; margin-top:.75rem }
-    .tabBtn { padding:.5rem .75rem; border-radius:.5rem; background:transparent; border:1px solid transparent; color:inherit; cursor:pointer }
-    .tabBtn.active { background:rgba(99,102,241,.12); border-color:rgba(99,102,241,.25); }
-    .section-hidden { display:none !important; }
-  </style>
+    <style>
+      .tabBtn.active { background-color: rgb(124 58 237); color: white; }
+      .tabBtn.active .tab-count { background-color: rgba(255,255,255,0.2); color: white; }
+      .section-hidden { display:none !important; }
+    </style>
 
-  <div class="tabs" role="tablist" aria-label="Sections des thèmes">
-    <button class="tabBtn active" data-tab="submitted" role="tab" aria-selected="true">À valider <span class="tab-count ml-2 text-xs text-slate-400">(<span>0</span>)</span></button>
-    <button class="tabBtn" data-tab="approved" role="tab" aria-selected="false">Validés <span class="tab-count ml-2 text-xs text-slate-400">(<span>0</span>)</span></button>
-    <button class="tabBtn" data-tab="archived" role="tab" aria-selected="false">Archivés <span class="tab-count ml-2 text-xs text-slate-400">(<span>0</span>)</span></button>
-  </div>
-
-  <section>
-    <h2 class="text-lg font-semibold mt-4">À valider</h2>
-    <ul id="gridSubmitted" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
+    <section data-section="submitted">
+      <ul id="gridSubmitted" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         <% if ((submitted||[]).length === 0) { %>
-          <li class="server-empty-placeholder col-span-full text-sm text-slate-400">Aucun thème en attente.</li>
+          <li class="server-empty-placeholder col-span-full text-center py-12 text-slate-500">Aucun thème en attente.</li>
         <% } else { %>
         <% submitted.forEach(t => { %>
-          <li draggable="true" class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
-            <div class="flex items-start gap-3">
-              <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
+          <li draggable="true" class="themeCard group relative flex flex-col bg-slate-950 border border-slate-800 rounded-2xl p-4 transition-all hover:border-slate-700" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
+            <div class="flex items-start gap-4">
+              <div class="w-20 h-20 rounded-xl border border-slate-800 overflow-hidden themePreview shrink-0 bg-slate-900"></div>
               <div class="min-w-0 flex-1">
-                <div class="font-medium truncate"><%= t.name %>
+                <div class="flex items-center justify-between gap-2">
+                  <h3 class="font-semibold text-slate-200 truncate"><%= t.name %></h3>
                   <% if (t.pendingUpdate) { %>
-                    <span class="ml-2 text-[10px] px-2 py-0.5 rounded bg-amber-700/40 border border-amber-600/50 text-amber-200 badge-pending-update">MAJ en attente</span>
+                    <span class="shrink-0 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-medium">MAJ</span>
                   <% } %>
                 </div>
-                <div class="text-xs text-slate-400 truncate">par @<%= t.author.userName %></div>
+                <div class="text-xs text-slate-400 truncate mt-0.5">par <span class="text-slate-300">@<%= t.author.userName %></span></div>
                 <% if (t.description) { %>
-                  <div class="text-xs text-slate-400 mt-2 truncate"><%= t.description %></div>
+                  <p class="text-xs text-slate-500 mt-2 line-clamp-2"><%= t.description %></p>
                 <% } %>
-                <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+                <div class="text-[10px] text-slate-600 mt-2">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
               </div>
             </div>
-              <div class="mt-3 flex items-center justify-end gap-2">
-                <% if (t.pendingUpdate) { %>
-                  <button class="approveUpdateBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs">Approuver la MAJ</button>
-                <% } else { %>
-                  <button class="approveBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs">Approuver</button>
-                  <button class="rejectBtn px-3 py-1.5 rounded bg-rose-600 text-white text-xs">Rejeter</button>
-                <% } %>
-                <button class="archiveBtn px-3 py-1.5 rounded bg-slate-700 text-white text-xs">Archiver</button>
-                <a class="px-3 py-1.5 rounded bg-indigo-600 text-white text-xs" href="/admin/themes/<%= t.id %>">Prévisualiser</a>
-              </div>
+            <div class="mt-4 pt-4 border-t border-slate-800 flex items-center justify-end gap-2 actions">
+              <% if (t.pendingUpdate) { %>
+                <button class="approveUpdateBtn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors">Approuver MAJ</button>
+              <% } else { %>
+                <button class="approveBtn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors">Approuver</button>
+                <button class="rejectBtn px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium transition-colors">Rejeter</button>
+              <% } %>
+              <button class="archiveBtn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors">Archiver</button>
+              <a class="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium transition-colors" href="/admin/themes/<%= t.id %>">Voir</a>
+            </div>
           </li>
         <% }) %>
+        <% } %>
       </ul>
-    <% } %>
-  </section>
-  <section>
-    <h2 class="text-lg font-semibold mt-6">Validés</h2>
-    <ul id="gridApproved" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
+    </section>
+
+    <section data-section="approved" class="section-hidden">
+      <ul id="gridApproved" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         <% if ((approved||[]).length === 0) { %>
-          <li class="server-empty-placeholder col-span-full text-sm text-slate-400">Aucun thème validé.</li>
+          <li class="server-empty-placeholder col-span-full text-center py-12 text-slate-500">Aucun thème validé.</li>
         <% } else { %>
         <% approved.forEach(t => { %>
-          <li draggable="true" class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
-            <div class="flex items-start gap-3">
-              <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
+          <li draggable="true" class="themeCard group relative flex flex-col bg-slate-950 border border-slate-800 rounded-2xl p-4 transition-all hover:border-slate-700" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
+            <div class="flex items-start gap-4">
+              <div class="w-20 h-20 rounded-xl border border-slate-800 overflow-hidden themePreview shrink-0 bg-slate-900"></div>
               <div class="min-w-0 flex-1">
-                <div class="font-medium truncate"><%= t.name %></div>
-                <div class="text-xs text-slate-400 truncate">par @<%= t.author.userName %></div>
-                <% if (t.description) { %>
-                  <div class="text-xs text-slate-400 mt-2 truncate"><%= t.description %></div>
-                <% } %>
-                <div class="flex items-center gap-2 mt-1">
-                  <div class="text-[11px] text-slate-500">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+                <div class="flex items-center justify-between gap-2">
+                  <h3 class="font-semibold text-slate-200 truncate"><%= t.name %></h3>
                   <% if (t.pendingUpdate) { %>
-                    <span class="text-[10px] px-2 py-0.5 rounded bg-amber-700/40 border border-amber-600/50 text-amber-200">MAJ en attente</span>
+                    <span class="shrink-0 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-medium">MAJ</span>
                   <% } %>
                 </div>
+                <div class="text-xs text-slate-400 truncate mt-0.5">par <span class="text-slate-300">@<%= t.author.userName %></span></div>
+                <% if (t.description) { %>
+                  <p class="text-xs text-slate-500 mt-2 line-clamp-2"><%= t.description %></p>
+                <% } %>
+                <div class="text-[10px] text-slate-600 mt-2">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
               </div>
             </div>
-            <div class="mt-3 flex items-center justify-end gap-2">
+            <div class="mt-4 pt-4 border-t border-slate-800 flex items-center justify-end gap-2 actions">
               <% if (t.pendingUpdate) { %>
-                <button class="approveUpdateBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs">Approuver la MAJ</button>
+                <button class="approveUpdateBtn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors">Approuver MAJ</button>
               <% } %>
-              <button class="archiveBtn px-3 py-1.5 rounded bg-slate-700 text-white text-xs">Archiver</button>
-              <a class="px-3 py-1.5 rounded bg-indigo-600 text-white text-xs" href="/admin/themes/<%= t.id %>">Prévisualiser</a>
-              <button class="deleteBtn px-3 py-1.5 rounded bg-rose-700 text-white text-xs">Supprimer</button>
+              <button class="archiveBtn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors">Archiver</button>
+              <a class="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium transition-colors" href="/admin/themes/<%= t.id %>">Voir</a>
+              <button class="deleteBtn px-3 py-1.5 rounded-lg bg-rose-900/50 hover:bg-rose-900 text-rose-200 text-xs font-medium transition-colors border border-rose-900/50">Supprimer</button>
             </div>
           </li>
         <% }) %>
+        <% } %>
       </ul>
-    <% } %>
-  </section>
-  <section>
-    <h2 class="text-lg font-semibold mt-6">Archivés</h2>
-    <ul id="gridArchived" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
+    </section>
+
+    <section data-section="archived" class="section-hidden">
+      <ul id="gridArchived" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         <% if ((archived||[]).length === 0) { %>
-          <li class="server-empty-placeholder col-span-full text-sm text-slate-400">Aucun thème archivé.</li>
+          <li class="server-empty-placeholder col-span-full text-center py-12 text-slate-500">Aucun thème archivé.</li>
         <% } else { %>
         <% archived.forEach(t => { %>
-          <li draggable="true" class="themeCard rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
-            <div class="flex items-start gap-3">
-              <div class="w-20 h-20 rounded border border-slate-800 overflow-hidden themePreview" aria-hidden="true"></div>
+          <li draggable="true" class="themeCard group relative flex flex-col bg-slate-950 border border-slate-800 rounded-2xl p-4 transition-all hover:border-slate-700" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
+            <div class="flex items-start gap-4">
+              <div class="w-20 h-20 rounded-xl border border-slate-800 overflow-hidden themePreview shrink-0 bg-slate-900"></div>
               <div class="min-w-0 flex-1">
-                <div class="font-medium truncate"><%= t.name %></div>
-                <div class="text-xs text-slate-400 truncate">par @<%= t.author.userName %></div>
+                <div class="font-semibold text-slate-200 truncate"><%= t.name %></div>
+                <div class="text-xs text-slate-400 truncate mt-0.5">par <span class="text-slate-300">@<%= t.author.userName %></span></div>
                 <% if (t.description) { %>
-                  <div class="text-xs text-slate-400 mt-2 truncate"><%= t.description %></div>
+                  <p class="text-xs text-slate-500 mt-2 line-clamp-2"><%= t.description %></p>
                 <% } %>
-                <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+                <div class="text-[10px] text-slate-600 mt-2">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
               </div>
             </div>
-            <div class="mt-3 flex items-center justify-end gap-2">
-              <button class="unarchiveBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs">Republier</button>
-              <a class="px-3 py-1.5 rounded bg-indigo-600 text-white text-xs" href="/admin/themes/<%= t.id %>">Prévisualiser</a>
-              <button class="deleteBtn px-3 py-1.5 rounded bg-rose-700 text-white text-xs">Supprimer</button>
+            <div class="mt-4 pt-4 border-t border-slate-800 flex items-center justify-end gap-2 actions">
+              <button class="unarchiveBtn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors">Republier</button>
+              <a class="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium transition-colors" href="/admin/themes/<%= t.id %>">Voir</a>
+              <button class="deleteBtn px-3 py-1.5 rounded-lg bg-rose-900/50 hover:bg-rose-900 text-rose-200 text-xs font-medium transition-colors border border-rose-900/50">Supprimer</button>
             </div>
           </li>
         <% }) %>
+        <% } %>
       </ul>
-    <% } %>
-  </section>
+    </section>
+  </div>
 
   <script>
   (function(){
@@ -156,9 +167,12 @@
         c = document.createElement('div');
         c.id = 'toastContainer';
         c.style.position = 'fixed';
-        c.style.right = '16px';
-        c.style.top = '16px';
+        c.style.right = '24px';
+        c.style.top = '24px';
         c.style.zIndex = 99999;
+        c.style.display = 'flex';
+        c.style.flexDirection = 'column';
+        c.style.gap = '12px';
         document.body.appendChild(c);
       }
       return c;
@@ -166,39 +180,50 @@
     function showToast(message, type = 'info', timeout = 3500){
       const container = ensureToastContainer();
       const el = document.createElement('div');
-      el.className = 'toast-item';
-      el.style.marginTop = '8px';
-      el.style.minWidth = '220px';
-      el.style.padding = '10px 12px';
-      el.style.borderRadius = '8px';
-      el.style.color = '#fff';
-      el.style.boxShadow = '0 6px 18px rgba(2,6,23,0.6)';
-      el.style.fontSize = '13px';
-      el.style.opacity = '0';
-      el.style.transition = 'opacity 180ms ease, transform 180ms ease';
-      if (type === 'success') { el.style.background = '#16a34a'; }
-      else if (type === 'error') { el.style.background = '#dc2626'; }
-      else { el.style.background = '#0ea5e9'; }
-      el.textContent = message;
+      el.className = 'flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium transform transition-all duration-300 translate-x-8 opacity-0';
+      
+      if (type === 'success') { 
+        el.className += ' bg-emerald-950/90 border-emerald-800 text-emerald-200';
+        el.innerHTML = `<svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>${message}</span>`;
+      } else if (type === 'error') { 
+        el.className += ' bg-rose-950/90 border-rose-800 text-rose-200';
+        el.innerHTML = `<svg class="w-5 h-5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg><span>${message}</span>`;
+      } else { 
+        el.className += ' bg-slate-800/90 border-slate-700 text-slate-200';
+        el.innerHTML = `<svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>${message}</span>`;
+      }
+      
       container.appendChild(el);
-      requestAnimationFrame(()=>{ el.style.opacity = '1'; el.style.transform = 'translateY(0)'; });
+      requestAnimationFrame(()=>{ el.classList.remove('translate-x-8', 'opacity-0'); });
+      
       const id = setTimeout(()=>{
-        try{ el.style.opacity = '0'; setTimeout(()=>el.remove(), 220); }catch(e){}
+        try{ 
+          el.classList.add('translate-x-8', 'opacity-0');
+          setTimeout(()=>el.remove(), 300); 
+        }catch(e){}
       }, timeout);
-      el.addEventListener('click', ()=>{ clearTimeout(id); try{ el.remove(); }catch(e){} });
+      
+      el.addEventListener('click', ()=>{ clearTimeout(id); el.classList.add('translate-x-8', 'opacity-0'); setTimeout(()=>el.remove(), 300); });
       return el;
     }
+
     const grids = [
       document.getElementById('gridSubmitted'),
       document.getElementById('gridApproved'),
       document.getElementById('gridArchived')
     ].filter(Boolean);
     const search = document.getElementById('themeSearch');
+    const clearBtn = document.getElementById('clearSearch');
+
+    function norm(s){ s = String(s||'').trim(); if (!s.startsWith('#')) s = '#'+s; if (/^#[0-9a-fA-F]{3}$/.test(s)) s = '#'+s.slice(1).split('').map(c=>c+c).join(''); return /^#[0-9a-fA-F]{6}$/.test(s) ? s : '#000000'; }
+
     function extractColors(raw){
       try{ if(!raw) return null; const d = raw;
-        if (d.light && typeof d.light === 'object') return { bg: d.light.bg||'#f5f5f5', button: d.light.button||'#4f46e5', hover: d.light.hover||'#22c55e' };
-        if (d.background) return { bg: d.background||'#111827', button: d.buttonBackground||'#4f46e5', hover: d.hoverColor||'#22c55e' };
-        return { bg: d.bg||'#111827', button: d.button||'#4f46e5', hover: d.hover||'#22c55e' };
+        let c = { bg:'#111827', button:'#4f46e5', hover:'#22c55e' };
+        if (d.light && typeof d.light === 'object') c = { bg: d.light.bg||'#f5f5f5', button: d.light.button||'#4f46e5', hover: d.light.hover||'#22c55e' };
+        else if (d.background) c = { bg: d.background||'#111827', button: d.buttonBackground||'#4f46e5', hover: d.hoverColor||'#22c55e' };
+        else c = { bg: d.bg||'#111827', button: d.button||'#4f46e5', hover: d.hover||'#22c55e' };
+        return { bg: norm(c.bg), button: norm(c.button), hover: norm(c.hover) };
       }catch(e){ return { bg:'#111827', button:'#4f46e5', hover:'#22c55e' }; }
     }
     function renderPreviews(){
@@ -210,8 +235,8 @@
         try{ parsed = JSON.parse(raw||'{}'); }catch(e){ parsed = {}; }
         const c = extractColors(parsed);
         box.innerHTML = `<div style="padding:8px;background:${c.bg};height:100%;display:flex;flex-direction:column;justify-content:center;gap:8px;">`+
-          `<div style=\"height:28px;width:60%;background:${c.button};border-radius:6px;margin:0 auto;\"></div>`+
-          `<div style=\"height:28px;width:40%;background:${c.hover};border-radius:6px;margin:0 auto;\"></div>`+
+          `<div style=\"height:20px;width:60%;background:${c.button};border-radius:4px;margin:0 auto;\"></div>`+
+          `<div style=\"height:20px;width:40%;background:${c.hover};border-radius:4px;margin:0 auto;\"></div>`+
           `</div>`;
         });
       });
@@ -227,7 +252,7 @@
         } else {
           if (!serverMsg) {
             const li = document.createElement('li');
-            li.className = 'server-empty-placeholder col-span-full text-sm text-slate-400';
+            li.className = 'server-empty-placeholder col-span-full text-center py-12 text-slate-500';
             if (id === 'gridSubmitted') li.textContent = 'Aucun thème en attente.';
             if (id === 'gridApproved') li.textContent = 'Aucun thème validé.';
             if (id === 'gridArchived') li.textContent = 'Aucun thème archivé.';
@@ -248,7 +273,7 @@
           const root = map[k];
           const btn = tabButtons.find(tb => tb.dataset.tab === k);
           if (!btn) return;
-          const span = btn.querySelector('.tab-count span');
+          const span = btn.querySelector('.tab-count');
           const count = root ? Array.from(root.querySelectorAll('.themeCard')).filter(el=>el.style.display !== 'none').length : 0;
           if (span) span.textContent = String(count);
         });
@@ -268,38 +293,38 @@
           const del = e.target.closest('.deleteBtn');
           const actBtn = approve||reject||archive||unarchive||approveUpdate||del;
           if (!actBtn) return;
-          const prev = actBtn.textContent; actBtn.disabled = true; actBtn.textContent = 'En cours...';
+          const prev = actBtn.textContent; actBtn.disabled = true; actBtn.textContent = '...';
           const originalParent = li.parentElement;
           const originalNext = li.nextElementSibling;
           let tempMoved = false;
           function transformCardForGrid(card, target){
             try{
               const id = card.dataset.id;
-              const actions = Array.from(card.querySelectorAll('div')).find(d=>d.className && d.className.indexOf('mt-3')!==-1) || card.querySelector('div.mt-3') || card.querySelector('.actions');
+              const actions = card.querySelector('.actions');
               if (!actions) return;
               actions.innerHTML = '';
               if (target === 'approved'){
-                const archive = document.createElement('button'); archive.className = 'archiveBtn px-3 py-1.5 rounded bg-slate-700 text-white text-xs'; archive.textContent = 'Archiver';
-                const preview = document.createElement('a'); preview.className = 'px-3 py-1.5 rounded bg-indigo-600 text-white text-xs'; preview.href = '/admin/themes/'+encodeURIComponent(id); preview.textContent = 'Prévisualiser';
-                const del = document.createElement('button'); del.className = 'deleteBtn px-3 py-1.5 rounded bg-rose-700 text-white text-xs'; del.textContent = 'Supprimer';
+                const archive = document.createElement('button'); archive.className = 'archiveBtn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors'; archive.textContent = 'Archiver';
+                const preview = document.createElement('a'); preview.className = 'px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium transition-colors'; preview.href = '/admin/themes/'+encodeURIComponent(id); preview.textContent = 'Voir';
+                const del = document.createElement('button'); del.className = 'deleteBtn px-3 py-1.5 rounded-lg bg-rose-900/50 hover:bg-rose-900 text-rose-200 text-xs font-medium transition-colors border border-rose-900/50'; del.textContent = 'Supprimer';
                 actions.appendChild(archive); actions.appendChild(preview); actions.appendChild(del);
               } else if (target === 'submitted'){
                 const pending = card.querySelector('.badge-pending-update');
                 if (pending){
-                  const approveUpd = document.createElement('button'); approveUpd.className = 'approveUpdateBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs'; approveUpd.textContent = 'Approuver la MAJ';
+                  const approveUpd = document.createElement('button'); approveUpd.className = 'approveUpdateBtn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors'; approveUpd.textContent = 'Approuver MAJ';
                   actions.appendChild(approveUpd);
                 } else {
-                  const approve = document.createElement('button'); approve.className = 'approveBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs'; approve.textContent = 'Approuver';
-                  const reject = document.createElement('button'); reject.className = 'rejectBtn px-3 py-1.5 rounded bg-rose-600 text-white text-xs'; reject.textContent = 'Rejeter';
+                  const approve = document.createElement('button'); approve.className = 'approveBtn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors'; approve.textContent = 'Approuver';
+                  const reject = document.createElement('button'); reject.className = 'rejectBtn px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium transition-colors'; reject.textContent = 'Rejeter';
                   actions.appendChild(approve); actions.appendChild(reject);
                 }
-                const archive = document.createElement('button'); archive.className = 'archiveBtn px-3 py-1.5 rounded bg-slate-700 text-white text-xs'; archive.textContent = 'Archiver';
-                const preview = document.createElement('a'); preview.className = 'px-3 py-1.5 rounded bg-indigo-600 text-white text-xs'; preview.href = '/admin/themes/'+encodeURIComponent(id); preview.textContent = 'Prévisualiser';
+                const archive = document.createElement('button'); archive.className = 'archiveBtn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors'; archive.textContent = 'Archiver';
+                const preview = document.createElement('a'); preview.className = 'px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium transition-colors'; preview.href = '/admin/themes/'+encodeURIComponent(id); preview.textContent = 'Voir';
                 actions.appendChild(archive); actions.appendChild(preview);
               } else if (target === 'archived'){
-                const unarchive = document.createElement('button'); unarchive.className = 'unarchiveBtn px-3 py-1.5 rounded bg-emerald-600 text-white text-xs'; unarchive.textContent = 'Republier';
-                const preview = document.createElement('a'); preview.className = 'px-3 py-1.5 rounded bg-indigo-600 text-white text-xs'; preview.href = '/admin/themes/'+encodeURIComponent(id); preview.textContent = 'Prévisualiser';
-                const del = document.createElement('button'); del.className = 'deleteBtn px-3 py-1.5 rounded bg-rose-700 text-white text-xs'; del.textContent = 'Supprimer';
+                const unarchive = document.createElement('button'); unarchive.className = 'unarchiveBtn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors'; unarchive.textContent = 'Republier';
+                const preview = document.createElement('a'); preview.className = 'px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium transition-colors'; preview.href = '/admin/themes/'+encodeURIComponent(id); preview.textContent = 'Voir';
+                const del = document.createElement('button'); del.className = 'deleteBtn px-3 py-1.5 rounded-lg bg-rose-900/50 hover:bg-rose-900 text-rose-200 text-xs font-medium transition-colors border border-rose-900/50'; del.textContent = 'Supprimer';
                 actions.appendChild(unarchive); actions.appendChild(preview); actions.appendChild(del);
               }
             }catch(e){}
@@ -309,7 +334,7 @@
               const action = approve ? 'approve' : 'reject';
               if (approve) {
                 const target = document.getElementById('gridApproved');
-                if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); transformCardForGrid(li, 'approved'); target.appendChild(li); }
+                if (target) { const ph = target.querySelector('.server-empty-placeholder'); if (ph) ph.remove(); transformCardForGrid(li, 'approved'); target.appendChild(li); }
                 li.querySelector('.badge-pending-update')?.remove?.();
                 tempMoved = true;
               } else {
@@ -321,14 +346,14 @@
               showToast(approve ? 'Thème approuvé' : 'Thème rejeté', 'success');
               try{ window.__refreshThemePaginators && window.__refreshThemePaginators(); }catch(e){}
             } else if (archive){
-              const target = document.getElementById('gridArchived'); if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); transformCardForGrid(li, 'archived'); target.appendChild(li); }
+              const target = document.getElementById('gridArchived'); if (target) { const ph = target.querySelector('.server-empty-placeholder'); if (ph) ph.remove(); transformCardForGrid(li, 'archived'); target.appendChild(li); }
               tempMoved = true;
               const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/archive', { method: 'POST' });
               if (!res.ok) throw new Error('HTTP '+res.status);
               showToast('Thème archivé', 'success');
               try{ window.__refreshThemePaginators && window.__refreshThemePaginators(); }catch(e){}
             } else if (unarchive){
-              const target = document.getElementById('gridApproved'); if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); transformCardForGrid(li, 'approved'); target.appendChild(li); }
+              const target = document.getElementById('gridApproved'); if (target) { const ph = target.querySelector('.server-empty-placeholder'); if (ph) ph.remove(); transformCardForGrid(li, 'approved'); target.appendChild(li); }
               tempMoved = true;
               const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/unarchive', { method: 'POST' });
               if (!res.ok) throw new Error('HTTP '+res.status);
@@ -336,7 +361,7 @@
               try{ window.__refreshThemePaginators && window.__refreshThemePaginators(); }catch(e){}
             } else if (approveUpdate){
               li.querySelector('.badge-pending-update')?.remove?.();
-              const target = document.getElementById('gridApproved'); if (target) { const ph = target.querySelector('.col-span-full'); if (ph) ph.remove(); transformCardForGrid(li, 'approved'); target.appendChild(li); }
+              const target = document.getElementById('gridApproved'); if (target) { const ph = target.querySelector('.server-empty-placeholder'); if (ph) ph.remove(); transformCardForGrid(li, 'approved'); target.appendChild(li); }
               tempMoved = true;
               const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/approve-update', { method: 'POST' });
               if (!res.ok) throw new Error('HTTP '+res.status);
@@ -369,6 +394,7 @@
     }
     function applyFilter(){
       const q = (search?.value||'').trim().toLowerCase();
+      if (clearBtn) clearBtn.classList.toggle('hidden', !q);
       grids.forEach(grid => {
         Array.from(grid.querySelectorAll('.themeCard')).forEach(card=>{
           const name = card.dataset.name||'';
@@ -441,7 +467,7 @@
 
     function ensureEmptyMessage(grid){
       let m = grid.querySelector('.no-match-msg');
-      if (!m){ m = document.createElement('div'); m.className = 'no-match-msg col-span-full text-sm text-slate-400'; m.style.display='none'; m.textContent = 'Aucun thème correspondant.'; grid.appendChild(m);} return m;
+      if (!m){ m = document.createElement('div'); m.className = 'no-match-msg col-span-full text-center py-12 text-slate-500'; m.style.display='none'; m.textContent = 'Aucun thème correspondant.'; grid.appendChild(m);} return m;
     }
 
   const paginators = {};
@@ -464,7 +490,7 @@
         if (!meta || meta.totalItems === 0) { em.style.display = ''; } else { em.style.display = 'none'; }
         try{
           const btn = tabButtons.find(tb => tb.dataset.tab === k);
-          if (btn) { const span = btn.querySelector('.tab-count span'); if (span) span.textContent = String(meta.totalItems); }
+          if (btn) { const span = btn.querySelector('.tab-count'); if (span) span.textContent = String(meta.totalItems); }
         }catch(e){}
       }});
   paginators[k] = p;
@@ -504,3 +530,4 @@
   })();
   </script>
 </main>
+</div>

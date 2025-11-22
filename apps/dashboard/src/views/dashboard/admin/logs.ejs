@@ -1,0 +1,242 @@
+<%- include('../../partials/head.ejs', { title: 'Logs Admin - Administration', description: 'Historique des actions administratives.', robots: 'noindex,nofollow' }) %>
+<%- include('../../partials/header-dash.ejs', { user: user }) %>
+
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+    <%- include('../../partials/admin-nav.ejs', { user: user, active: 'logs' }) %>
+
+    <main class="col-span-12 lg:col-span-10 space-y-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            <div class="relative z-10">
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Logs d'Audit</h1>
+                <p class="text-slate-400 text-lg">Historique des actions effectuées par les administrateurs.</p>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 mb-6 flex flex-wrap gap-4 items-end">
+            <div class="flex flex-col gap-1">
+                <label class="text-xs text-slate-400 uppercase font-bold">Admin (ID)</label>
+                <input type="text" id="filterAdmin" placeholder="ID Admin..." class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
+            </div>
+            <div class="flex flex-col gap-1">
+                <label class="text-xs text-slate-400 uppercase font-bold">Action</label>
+                <select id="filterAction" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
+                    <option value="">Toutes</option>
+                    <option value="LOGIN">Connexion</option>
+                    <option value="IMPERSONATE">Impersonnification</option>
+                    <option value="UPDATE_USER">Modif. Utilisateur</option>
+                    <option value="BAN_USER">Bannissement</option>
+                    <option value="CREATE_ROLE">Création Rôle</option>
+                    <option value="UPDATE_ROLE">Modif. Rôle</option>
+                    <option value="DELETE_ROLE">Suppr. Rôle</option>
+                    <option value="MANAGE_THEME">Thèmes</option>
+                    <option value="RUN_TASK">Tâches Système</option>
+                </select>
+            </div>
+            <div class="flex flex-col gap-1">
+                <label class="text-xs text-slate-400 uppercase font-bold">De</label>
+                <input type="date" id="filterFrom" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
+            </div>
+            <div class="flex flex-col gap-1">
+                <label class="text-xs text-slate-400 uppercase font-bold">À</label>
+                <input type="date" id="filterTo" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
+            </div>
+            <div class="flex flex-col gap-1">
+                <label class="text-xs text-slate-400 uppercase font-bold">Tri</label>
+                <select id="sortOrder" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
+                    <option value="desc">Récent d'abord</option>
+                    <option value="asc">Ancien d'abord</option>
+                </select>
+            </div>
+            <button onclick="currentPage=1; loadLogs()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-colors h-[38px]">Filtrer</button>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800 bg-slate-950/50 text-xs uppercase tracking-wider text-slate-400">
+                            <th class="px-6 py-4 font-medium">Date</th>
+                            <th class="px-6 py-4 font-medium">Admin</th>
+                            <th class="px-6 py-4 font-medium">Action</th>
+                            <th class="px-6 py-4 font-medium">Cible</th>
+                            <th class="px-6 py-4 font-medium">Détails</th>
+                            <th class="px-6 py-4 font-medium">IP</th>
+                            <th class="px-6 py-4 font-medium"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTableBody" class="text-sm text-slate-300 divide-y divide-slate-800">
+                        <tr><td colspan="7" class="px-6 py-8 text-center text-slate-500">Chargement...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 border-t border-slate-800 bg-slate-950/30 flex justify-between items-center" id="paginationControls">
+                <button id="prevPage" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm disabled:opacity-50">Précédent</button>
+                <span id="pageInfo" class="text-slate-400 text-sm">Page 1</span>
+                <button id="nextPage" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm disabled:opacity-50">Suivant</button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal Détails Log -->
+<div id="logDetailsModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeLogDetails()"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-1">Détails du Log</h2>
+                <p class="text-slate-400 text-sm font-mono" id="modalLogId"></p>
+            </div>
+            <button onclick="closeLogDetails()" class="p-2 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        
+        <div class="space-y-6">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-950 rounded-xl p-4 border border-slate-800">
+                    <label class="text-xs text-slate-500 uppercase font-bold block mb-1">Date</label>
+                    <div id="modalDate" class="text-white font-mono text-sm"></div>
+                </div>
+                <div class="bg-slate-950 rounded-xl p-4 border border-slate-800">
+                    <label class="text-xs text-slate-500 uppercase font-bold block mb-1">IP</label>
+                    <div id="modalIp" class="text-white font-mono text-sm"></div>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 rounded-xl p-4 border border-slate-800">
+                <label class="text-xs text-slate-500 uppercase font-bold block mb-1">Administrateur</label>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold text-white" id="modalAdminAvatar"></div>
+                    <div>
+                        <div id="modalAdminName" class="text-white font-medium"></div>
+                        <div id="modalAdminId" class="text-slate-500 text-xs font-mono"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 rounded-xl p-4 border border-slate-800">
+                <label class="text-xs text-slate-500 uppercase font-bold block mb-1">Action & Cible</label>
+                <div class="flex items-center gap-3 mb-2">
+                    <span id="modalAction" class="px-2 py-1 rounded-lg bg-violet-500/20 text-violet-300 border border-violet-500/30 text-xs font-mono font-bold"></span>
+                    <span class="text-slate-600">sur</span>
+                    <span id="modalTarget" class="text-white font-mono text-sm"></span>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 rounded-xl p-4 border border-slate-800">
+                <label class="text-xs text-slate-500 uppercase font-bold block mb-2">Données JSON</label>
+                <pre id="modalJson" class="text-xs font-mono text-emerald-400 overflow-x-auto whitespace-pre-wrap break-all"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentPage = 1;
+    const limit = 50;
+    let currentLogs = [];
+
+    function openLogDetails(index) {
+        const log = currentLogs[index];
+        if (!log) return;
+
+        document.getElementById('modalLogId').textContent = `ID: ${log.id}`;
+        document.getElementById('modalDate').textContent = new Date(log.createdAt).toLocaleString();
+        document.getElementById('modalIp').textContent = log.ip || 'N/A';
+        
+        document.getElementById('modalAdminName').textContent = log.adminName;
+        document.getElementById('modalAdminId').textContent = log.adminId;
+        document.getElementById('modalAdminAvatar').textContent = log.adminName.charAt(0).toUpperCase();
+        
+        document.getElementById('modalAction').textContent = log.action;
+        document.getElementById('modalTarget').textContent = log.targetId || 'N/A';
+        
+        const jsonStr = log.details ? JSON.stringify(log.details, null, 2) : '{}';
+        document.getElementById('modalJson').textContent = jsonStr;
+
+        document.getElementById('logDetailsModal').classList.remove('hidden');
+    }
+
+    function closeLogDetails() {
+        document.getElementById('logDetailsModal').classList.add('hidden');
+    }
+
+    async function loadLogs() {
+        const tbody = document.getElementById('logsTableBody');
+        tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-slate-500">Chargement...</td></tr>';
+        
+        const adminId = document.getElementById('filterAdmin').value;
+        const action = document.getElementById('filterAction').value;
+        const from = document.getElementById('filterFrom').value;
+        const to = document.getElementById('filterTo').value;
+        const sort = document.getElementById('sortOrder').value;
+
+        const params = new URLSearchParams({
+            page: currentPage,
+            limit: limit,
+            sort: sort
+        });
+        if (adminId) params.append('adminId', adminId);
+        if (action) params.append('action', action);
+        if (from) params.append('from', from);
+        if (to) params.append('to', to);
+
+        try {
+            const res = await fetch(`/admin/logs/api?${params.toString()}`);
+            if (!res.ok) throw new Error('Erreur chargement');
+            const data = await res.json();
+            
+            currentLogs = data.logs; // Store for modal access
+
+            if (data.logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-slate-500">Aucun log trouvé.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.logs.map((log, index) => `
+                <tr class="hover:bg-slate-800/50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-slate-400 font-mono text-xs">${new Date(log.createdAt).toLocaleString()}</td>
+                    <td class="px-6 py-4 font-medium text-white">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold">${log.adminName.charAt(0).toUpperCase()}</div>
+                            ${log.adminName}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono text-violet-300">${log.action}</span>
+                    </td>
+                    <td class="px-6 py-4 text-slate-400 font-mono text-xs">${log.targetId || '-'}</td>
+                    <td class="px-6 py-4 text-slate-500 text-xs max-w-xs truncate">
+                        ${log.details ? JSON.stringify(log.details) : '-'}
+                    </td>
+                    <td class="px-6 py-4 text-slate-500 font-mono text-xs">${log.ip || '-'}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="openLogDetails(${index})" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs rounded-lg transition-colors">
+                            Voir
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('pageInfo').textContent = `Page ${currentPage} / ${Math.ceil(data.total / limit)}`;
+            document.getElementById('prevPage').disabled = currentPage <= 1;
+            document.getElementById('nextPage').disabled = currentPage >= Math.ceil(data.total / limit);
+
+        } catch (e) {
+            tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-rose-500">Erreur lors du chargement des logs.</td></tr>';
+        }
+    }
+
+    document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 1) { currentPage--; loadLogs(); }
+    });
+    document.getElementById('nextPage').addEventListener('click', () => {
+        currentPage++; loadLogs();
+    });
+
+    loadLogs();
+</script>
+</body>
+</html>

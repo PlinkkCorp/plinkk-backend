@@ -1,7 +1,7 @@
 <%- include('../../partials/head.ejs', { title: 'Statistiques', description: 'Aperçu des vues, clics et tendances (en développement).', robots: 'noindex,nofollow' }) %>
 <%- include('../../partials/header-dash.ejs', { user: user }) %>
 
-    <div class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
+    <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-4 px-4 py-4">
       <%- include('../../partials/asside_dash.ejs', { active: 'stats' }) %>
       <main class="col-span-12 lg:col-span-9 space-y-4">
         <div class="mb-4">
@@ -152,76 +152,11 @@
         <script type="module" src="/public/js/dashboard-stats.js"></script>
         <script>
           (function(){
-            const btn = document.getElementById('changePlinkkBtn');
-            const dropdown = document.getElementById('changePlinkkDropdown');
-            const listEl = document.getElementById('changePlinkkList');
-            const search = document.getElementById('changePlinkkSearch');
-            const pagesRaw = document.getElementById('pages-data')?.textContent || '[]';
-            let pages = [];
-            try { pages = JSON.parse(pagesRaw) || []; } catch {}
-
-            if (!btn || !dropdown || !listEl || !search) {
-              const fallbackBtn = document.getElementById('changePlinkk');
-              if (!fallbackBtn) return;
-              fallbackBtn.addEventListener('click', () => {
-                if (pages && pages.length) {
-                  const id = pages[0].id;
-                  if (id) location.href = `/stats?plinkkId=${encodeURIComponent(id)}&autoRedirect=1`;
-                }
-              });
-              return;
-            }
-
-            function buildList() {
-              listEl.innerHTML = '';
-              pages.forEach((p, i) => {
-                const li = document.createElement('li');
-                li.className = 'px-2 py-1 rounded hover:bg-slate-800 cursor-pointer';
-                li.tabIndex = 0;
-                li.setAttribute('role','option');
-                li.dataset.id = p.id;
-                li.textContent = `${p.name} (${p.slug})`;
-                li.addEventListener('click', () => { location.href = `/stats?plinkkId=${encodeURIComponent(p.id)}`; });
-                li.addEventListener('keydown', (e) => { if (e.key === 'Enter') location.href = `/stats?plinkkId=${encodeURIComponent(p.id)}`; });
-                listEl.appendChild(li);
-              });
-            }
-
-            function filterList(q){
-              const needle = (q||'').toLowerCase().trim();
-              Array.from(listEl.children).forEach(li => {
-                const txt = li.textContent || '';
-                li.style.display = txt.toLowerCase().includes(needle) ? '' : 'none';
-              });
-            }
-
-            function toggle(open){
-              dropdown.classList.toggle('hidden', !open);
-              btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-              if (open) { setTimeout(()=> search.focus(), 50); }
-            }
-
-            buildList();
-
-            if (!btn.hasAttribute('data-needs-selection')) {
-              btn.addEventListener('click', (e) => { e.stopPropagation(); toggle(!dropdown.classList.contains('hidden')); search.value = ''; filterList(''); });
-            } else {
-              btn.addEventListener('click', (e) => {
-                e.preventDefault(); e.stopPropagation();
-                btn.classList.add('ring-2','ring-amber-400');
-                setTimeout(()=> btn.classList.remove('ring-2','ring-amber-400'), 700);
-              });
-            }
-            search.addEventListener('input', () => filterList(search.value));
-
-            document.addEventListener('click', () => toggle(false));
-            dropdown.addEventListener('click', (e)=> e.stopPropagation());
-
             const autoOpenRaw = document.getElementById('autoopen-data')?.textContent || 'false';
             const autoOpen = String(autoOpenRaw).trim() === 'true';
-            if (autoOpen && pages.length > 0) {
-              const id = pages[0] && pages[0].id;
-              if (id) location.href = `/stats?plinkkId=${encodeURIComponent(id)}&autoRedirect=1`;
+            if (autoOpen) {
+                const modal = document.getElementById('plinkkSelectorModal');
+                if (modal) modal.classList.remove('hidden');
             }
           })();
           (function(){

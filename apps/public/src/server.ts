@@ -10,10 +10,10 @@ import {
   AnnouncementRoleTarget,
   AnnouncementTarget,
   PlinkkSettings,
-  PrismaClient,
   Role,
   User,
 } from "@plinkk/prisma/generated/prisma/client";
+import { prisma } from "@plinkk/prisma";
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
@@ -31,7 +31,6 @@ import { minify } from "uglify-js";
 import { coerceThemeData } from "./lib/theme";
 import { generateTheme } from "./lib/generateTheme";
 
-const prisma = new PrismaClient();
 const fastify = Fastify({
   logger: true,
 });
@@ -166,6 +165,7 @@ fastify.addHook("onRequest", async (request, reply) => {
           socialIcons,
           links,
           pageStatusbar,
+          categories,
         ] = await Promise.all([
           prisma.plinkkSettings.findUnique({ where: { plinkkId: page.id } }),
           prisma.backgroundColor.findMany({
@@ -184,6 +184,10 @@ fastify.addHook("onRequest", async (request, reply) => {
             where: { userId: page.user.id, plinkkId: page.id },
           }),
           prisma.plinkkStatusbar.findUnique({ where: { plinkkId: page.id } }),
+          prisma.category.findMany({
+            where: { plinkkId: page.id },
+            orderBy: { order: 'asc' }
+          }),
         ]);
         let injectedThemeVar = "";
         try {
@@ -364,7 +368,8 @@ fastify.addHook("onRequest", async (request, reply) => {
           neonColors,
           socialIcons,
           pageStatusbar,
-          injectedObj
+          injectedObj,
+          categories
         );
         const mini = minify(generated);
         return reply.type("text/javascript").send(mini.code || "");
@@ -406,6 +411,18 @@ fastify.get("/", async function (request, reply) {
         include: { role: true },
       })
     : null;
+
+  const [userCount, linkCount, totalViewsResult] = await Promise.all([
+    prisma.user.count(),
+    prisma.link.count(),
+    prisma.plinkk.aggregate({
+      _sum: {
+        views: true,
+      },
+    }),
+  ]);
+  const totalViews = totalViewsResult._sum.views || 0;
+
   let msgs: Announcement[] = [];
   try {
     const now = new Date();
@@ -436,7 +453,11 @@ fastify.get("/", async function (request, reply) {
       msgs = anns.filter((a) => a.global);
     }
   } catch (e) {}
-  return await replyView(reply, "index.ejs", currentUser, {});
+  return await replyView(reply, "index.ejs", currentUser, {
+    userCount,
+    linkCount,
+    totalViews,
+  });
 });
 
 fastify.get("/users", async (request, reply) => {
@@ -449,7 +470,15 @@ fastify.get("/users", async (request, reply) => {
     : null;
   const plinkks = await prisma.plinkk.findMany({
     where: { isPublic: true },
-    include: { settings: true },
+    include: {
+      settings: true,
+      user: {
+        include: {
+          cosmetics: true,
+          role: true,
+        },
+      },
+    },
     orderBy: { createdAt: "asc" },
   });
   let msgs: Announcement[] = [];
@@ -515,7 +544,23 @@ fastify.get("/*", async (request, reply) => {
         include: { role: true },
       })
     : null;
-  return await replyView(reply, "index.ejs", currentUser, {});
+
+  const [userCount, linkCount, totalViewsResult] = await Promise.all([
+    prisma.user.count(),
+    prisma.link.count(),
+    prisma.plinkk.aggregate({
+      _sum: {
+        views: true,
+      },
+    }),
+  ]);
+  const totalViews = totalViewsResult._sum.views || 0;
+
+  return await replyView(reply, "index.ejs", currentUser, {
+    userCount,
+    linkCount,
+    totalViews,
+  });
 });
 
 fastify.setNotFoundHandler((request, reply) => {

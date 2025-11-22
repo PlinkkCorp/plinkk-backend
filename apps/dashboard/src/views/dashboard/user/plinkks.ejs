@@ -1,205 +1,274 @@
-<%- include('../../partials/head.ejs', { title: 'Mes Plinkks', description: 'Gère jusqu\'à 2 profils Plinkk.', robots: 'noindex,nofollow' }) %>
-<%- include('../../partials/header-dash.ejs', { user: user }) %>
+<%- include('../../partials/head.ejs', { title: 'Tableau de bord - Mes Plinkks' ,
+  description: 'Gère tes pages Plinkk, crée-en de nouvelles et modifie-les.' , robots: 'noindex,nofollow' }) %>
+  <%- include('../../partials/header-dash.ejs') %>
+    
+    <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+      <%- include('../../partials/asside_dash.ejs', { active: 'plinkks' }) %>
 
-<div class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-4">
-  <%- include('../../partials/asside_dash.ejs', { active: 'plinkks' }) %>
-  <main class="col-span-12 lg:col-span-9 space-y-4">
-   <% const list = (plinkks && plinkks.length ? plinkks : (pages || [])); const currentCount = list.length; const maxPlinkks = (typeof maxPages !== 'undefined' ? maxPages : 2);
-     const isAdminView = (typeof user !== 'undefined' && user.role && user.role.id === 'ADMIN');
-     const maxPlinkksDisplay = (maxPlinkks === Infinity || isAdminView) ? '∞' : String(maxPlinkks);
-   %>
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <h1 class="text-2xl font-semibold">Mes Plinkks</h1>
-  <div class="text-sm text-slate-400 bg-slate-800 px-2 py-0.5 rounded"> <%= currentCount %> / <%= maxPlinkksDisplay %> </div>
-      </div>
-      <div class="flex items-center gap-4">
-        <div id="plinkkMsg" class="text-sm text-amber-300"><% if (currentCount >= maxPlinkks) { %>Limite atteinte<% } %></div>
-  <% const reached = !(maxPlinkks === Infinity) && (currentCount >= maxPlinkks); %>
-  <button id="btnCreate" class="px-3 py-2 text-sm rounded-md <%= reached ? 'bg-slate-700 text-slate-400 opacity-50 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-500 text-white' %>" <%= reached ? 'disabled' : '' %>><%= 'Créer' %></button>
+        <main class="col-span-12 lg:col-span-10 space-y-6">
+          <!-- Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+            <div>
+              <h1 class="text-2xl font-bold text-white">Mes Plinkks</h1>
+              <p class="text-sm text-slate-400 mt-1">Gérez vos pages et créez-en de nouvelles.</p>
+            </div>
+            <button id="btnCreatePlinkk" class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-all hover:scale-105">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>Créer un Plinkk</span>
+            </button>
+          </div>
+
+          <!-- Plinkks Grid -->
+          <% if (plinkks && plinkks.length> 0) { %>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <% plinkks.forEach(plinkk=> { %>
+                <div class="group relative bg-slate-900 border border-slate-800 rounded-3xl p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-900/10">
+                  <div class="flex items-start justify-between mb-6">
+                    <div class="flex items-center gap-4">
+                      <div class="h-14 w-14 rounded-2xl bg-slate-800 border border-slate-700 overflow-hidden grid place-items-center text-2xl font-bold text-slate-400 group-hover:border-violet-500/30 transition-colors">
+                        <% if (plinkk.pfp) { %>
+                          <img src="/public/uploads/<%= plinkk.pfp %>" alt="<%= plinkk.slug %>" class="h-full w-full object-cover" />
+                        <% } else { %>
+                          <%= plinkk.slug.substring(0, 1).toUpperCase() %>
+                        <% } %>
+                      </div>
+                      <div>
+                        <h3 class="font-bold text-white text-lg group-hover:text-violet-400 transition-colors flex items-center gap-2 flex-wrap">
+                          <%= plinkk.name || plinkk.slug %>
+                        </h3>
+                        <a href="https://plinkk.fr/<%= plinkk.slug %>" target="_blank" class="text-sm text-slate-400 hover:text-violet-400 hover:underline flex items-center gap-1 transition-colors" onclick="event.stopPropagation()">
+                          plinkk.fr/<%= plinkk.slug %>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        </a>
+                      </div>
+                    </div>
+                    
+                    <div class="relative">
+                      <button class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors" onclick="toggleMenu('<%= plinkk.id %>', event)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                      </button>
+                      <!-- Dropdown Menu -->
+                      <div id="menu-<%= plinkk.id %>" class="hidden absolute right-0 top-full mt-2 w-48 bg-slate-900 border border-slate-800 rounded-xl shadow-xl z-20 overflow-hidden animate-scale-in origin-top-right">
+                        <a href="/edit?plinkkId=<%= plinkk.id %>" class="flex items-center gap-2 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                          Modifier
+                        </a>
+                        <button onclick="openDeleteModal('<%= plinkk.id %>', '<%= plinkk.slug %>')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-left">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                          Supprimer
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+                    <div class="flex items-center gap-2 text-xs text-slate-400">
+                      <span class="flex items-center gap-1">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        <%= plinkk.views || 0 %>
+                      </span>
+                      <span class="w-1 h-1 rounded-full bg-slate-700"></span>
+                      <span><%= new Date(plinkk.createdAt).toLocaleDateString() %></span>
+                    </div>
+                    <a href="/edit?plinkkId=<%= plinkk.id %>" class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
+                      Gérer
+                    </a>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          <% } else { %>
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-12 text-center">
+              <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              </div>
+              <h3 class="text-xl font-bold text-white mb-2">Aucun Plinkk</h3>
+              <p class="text-slate-400 mb-8 max-w-md mx-auto">Vous n'avez pas encore créé de page Plinkk. Commencez dès maintenant pour partager vos liens !</p>
+              <button onclick="document.getElementById('btnCreatePlinkk').click()" class="px-6 py-3 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-all hover:scale-105">
+                Créer mon premier Plinkk
+              </button>
+            </div>
+          <% } %>
+        </main>
+    </div>
+
+    <!-- Create Modal -->
+    <div id="createModal" class="fixed inset-0 hidden z-50 grid place-items-center backdrop-blur-sm">
+      <div class="absolute inset-0 bg-black/60 modal-overlay"></div>
+      <div class="relative w-full max-w-md mx-4 animate-scale-in">
+        <div class="rounded-3xl bg-slate-900 border border-slate-800 p-8 shadow-2xl shadow-black/50">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-white">Nouveau Plinkk</h3>
+            <button class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors modal-close">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+
+          <form id="formCreatePlinkk" class="space-y-6">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Identifiant (slug)</label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm">plinkk.fr/</span>
+                <input type="text" name="slug" required pattern="[a-zA-Z0-9-_]+" class="w-full pl-20 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none transition-colors" placeholder="mon-super-plinkk" />
+              </div>
+              <p class="text-xs text-slate-500 mt-2">Lettres, chiffres, tirets et underscores uniquement.</p>
+            </div>
+
+            <div class="flex items-center justify-end gap-3">
+              <button type="button" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors modal-close">Annuler</button>
+              <button type="submit" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors">Créer</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
 
-    <div class="rounded-md border border-slate-800 bg-slate-900/60">
-      <% if (!list || !list.length) { %>
-        <div class="p-4 text-sm text-slate-300">Aucun plinkk. Crée ton premier profil secondaire.</div>
-      <% } else { %>
-        <ul>
-          <% list.forEach(p => { %>
-            <li class="flex items-center justify-between p-3 border-t border-slate-800 first:border-t-0">
-              <div>
-                <div class="font-medium"><%= p.name %></div>
-                <div class="text-xs text-slate-400">Slug: <code><%= p.slug %></code> · <%= p.isDefault ? 'Défaut' : 'Secondaire' %> · <%= (p.visibility === 'PUBLIC' || p.isPublic) ? 'Public' : 'Privé' %></div>
-                <div class="text-xs text-slate-400 mt-1">URL: <a class="text-indigo-300 hover:underline" href="/<%= p.slug %>" target="_blank">/<%= p.slug %></a></div>
-              </div>
-              <div class="flex items-center gap-2 text-xs">
-                <button type="button" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white btnExport" data-export-url="../api/me/plinkks/<%= p.id %>/export.zip" aria-label="Exporter le plinkk">Exporter le plinkk</button>
-                <button class="btnTogglePub px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white" data-id="<%= p.id %>" data-public="<%= (p.visibility === 'PUBLIC' || p.isPublic) ? '1' : '0' %>"><%= (p.visibility === 'PUBLIC' || p.isPublic) ? 'Rendre privé' : 'Rendre public' %></button>
-                <a class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white" href="/plinkks/<%= p.id %>/stats">Voir stats</a>
-                <a class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white" href="/plinkks/<%= p.id %>/edit">Éditer</a>
-                <button class="btnDelete px-2 py-1 rounded bg-red-600 text-white" data-id="<%= p.id %>">Supprimer</button>
-              </div>
-            </li>
-          <% }) %>
-        </ul>
-      <% } %>
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="fixed inset-0 hidden z-50 grid place-items-center backdrop-blur-sm">
+      <div class="absolute inset-0 bg-black/60 modal-overlay"></div>
+      <div class="relative w-full max-w-md mx-4 animate-scale-in">
+        <div class="rounded-3xl bg-slate-900 border border-slate-800 p-8 shadow-2xl shadow-black/50">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="p-3 rounded-full bg-rose-500/10 text-rose-500">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-white">Supprimer ce Plinkk ?</h3>
+              <p class="text-sm text-slate-400">Cette action est irréversible.</p>
+            </div>
+          </div>
+
+          <p class="text-slate-300 mb-6">Êtes-vous sûr de vouloir supprimer <span id="deleteSlug" class="font-bold text-white"></span> ? Toutes les données associées seront perdues.</p>
+
+          <form id="formDeletePlinkk" class="flex items-center justify-end gap-3">
+            <input type="hidden" name="plinkkId" id="deletePlinkkId" />
+            <button type="button" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors modal-close">Annuler</button>
+            <button type="submit" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">Supprimer</button>
+          </form>
+        </div>
+      </div>
     </div>
 
-  <p class="text-xs text-slate-400">Limite actuelle: <%= maxPlinkksDisplay %> plinkks par utilisateur.</p>
-  </main>
-</div>
+    <div id="toasts" class="fixed top-4 right-4 z-50 flex flex-col items-end gap-2 pointer-events-none"></div>
 
     <script>
-  (function(){
-    const $ = (s,r=document)=>r.querySelector(s);
-    const btnCreate = $('#btnCreate');
-    const msgEl = document.getElementById('plinkkMsg');
-
-    function showConfirm(message){
-      return new Promise(resolve => {
-        const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
-        overlay.innerHTML = `
-          <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
-            <div class="mb-4">${message.replace(/</g,'&lt;')}</div>
-            <div class="flex justify-end gap-2">
-              <button class="cancel px-3 py-1.5 rounded-md bg-slate-700 text-sm">Annuler</button>
-              <button class="ok px-3 py-1.5 rounded-md bg-rose-600 text-white text-sm">Supprimer</button>
-            </div>
-          </div>`;
-
-        const btnCancel = overlay.querySelector('.cancel');
-        const btnOk = overlay.querySelector('.ok');
-
-        function cleanup(result){
-          document.removeEventListener('keydown', onKey);
-          overlay.remove();
-          resolve(result);
+      function showAlert(message, type = 'info', opts = {}) {
+        const container = document.getElementById('toasts');
+        if (!container) return console.log(message);
+        const el = document.createElement('div');
+        el.className = 'pointer-events-auto max-w-sm w-full rounded-xl px-4 py-3 text-sm shadow-lg border flex items-center gap-3 animate-slide-in-right';
+        
+        let bg = 'bg-slate-900 text-white border-slate-800';
+        let icon = '';
+        
+        if (type === 'success') {
+          bg = 'bg-slate-900 text-emerald-400 border-emerald-500/30';
+          icon = '<svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+        } else if (type === 'error') {
+          bg = 'bg-slate-900 text-rose-400 border-rose-500/30';
+          icon = '<svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
         }
-
-        function onKey(ev){
-          if (ev.key === 'Escape') { ev.preventDefault(); cleanup(false); }
-          if (ev.key === 'Enter') { ev.preventDefault(); cleanup(true); }
-        }
-
-        btnCancel.addEventListener('click', () => cleanup(false));
-        btnOk.addEventListener('click', () => cleanup(true));
-        overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(false); });
-        document.body.appendChild(overlay);
-        document.addEventListener('keydown', onKey);
-        btnCancel.focus();
-      });
-    }
-
-    function showAlert(message){
-      return new Promise(resolve => {
-        const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
-        overlay.innerHTML = `
-          <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
-            <div class="mb-4">${message.replace(/</g,'&lt;')}</div>
-            <div class="flex justify-end gap-2">
-              <button class="ok px-3 py-1.5 rounded-md bg-indigo-600 text-white text-sm">OK</button>
-            </div>
-          </div>`;
-        const btnOk = overlay.querySelector('.ok');
-        function cleanup(){ overlay.remove(); resolve(); }
-        btnOk.addEventListener('click', cleanup);
-        overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(); });
-        document.body.appendChild(overlay);
-        btnOk.focus();
-      });
-    }
-
-    function showFormCreatePlinkk(){
-      return new Promise(resolve => {
-        const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
-        overlay.innerHTML = `
-          <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
-            <h3 class="font-medium mb-2">Créer un Plinkk</h3>
-            <div class="space-y-2">
-              <label class="text-xs">Slug (ex: pro, perso) — lettres/chiffres/"-" (2-32)</label>
-              <input id="_p_slug" class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700 text-sm" />
-              <label class="text-xs">Nom affiché</label>
-              <input id="_p_name" class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700 text-sm" />
-            </div>
-            <div class="flex justify-end gap-2 mt-4">
-              <button class="cancel px-3 py-1.5 rounded-md bg-slate-700 text-sm">Annuler</button>
-              <button class="ok px-3 py-1.5 rounded-md bg-emerald-600 text-white text-sm">Créer</button>
-            </div>
-          </div>`;
-
-        const btnCancel = overlay.querySelector('.cancel');
-        const btnOk = overlay.querySelector('.ok');
-        const inSlug = overlay.querySelector('#_p_slug');
-        const inName = overlay.querySelector('#_p_name');
-
-        function cleanup(result){ overlay.remove(); resolve(result); }
-        btnCancel.addEventListener('click', () => cleanup(null));
-        btnOk.addEventListener('click', () => {
-          const slug = String(inSlug.value||'').trim();
-          const name = String(inName.value||'').trim();
-          if (!slug || !name) return;
-          cleanup({ slug, name });
-        });
-        inSlug.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') { e.preventDefault(); inName?.focus(); }
-        });
-        inName.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') { e.preventDefault(); btnOk.click(); }
-        });
-        overlay.addEventListener('click', (ev) => { if (ev.target === overlay) cleanup(null); });
-        document.body.appendChild(overlay);
-        inSlug.focus();
-      });
-    }
-
-    function setMsg(t, ok){ if (!msgEl) return; msgEl.textContent = t||''; msgEl.className = ok? 'text-sm text-emerald-400':'text-sm text-rose-400'; }
-
-    btnCreate?.addEventListener('click', async () => {
-      const data = await showFormCreatePlinkk();
-      if (!data) return;
-      try {
-        const res = await fetch('/api/me/plinkks', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ slug: data.slug, name: data.name }) });
-        if (!res.ok) { const t = await res.text(); await showAlert('Erreur: ' + res.status + ' ' + t); return; }
-        const payload = await res.json();
-        setMsg('Plinkk créé ✓', true);
-        location.reload();
-      } catch (e) { await showAlert('Erreur réseau'); }
-    });
-
-    document.addEventListener('click', async (e) => {
-      const el = e.target.closest('button, [data-id], [data-export-url]');
-      if (!el) return;
-      const id = el.dataset?.id;
-
-      if (el.classList?.contains('btnDelete')) {
-        const ok = await showConfirm('Supprimer ce plinkk ?'); if (!ok) return;
-        const res = await fetch('/api/me/plinkks/' + encodeURIComponent(id), { method: 'DELETE' });
-        if (!res.ok) { await showAlert('Erreur'); return; }
-        location.reload();
+        
+        el.className += ' ' + bg;
+        el.innerHTML = `${icon}<span>${message}</span>`;
+        
+        container.appendChild(el);
+        
+        const timeout = opts.timeout || 3500;
+        const remove = () => { 
+          el.style.opacity = '0'; 
+          el.style.transform = 'translateX(100%)';
+          setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 300); 
+        };
+        el.addEventListener('click', remove);
+        setTimeout(remove, timeout);
+        return el;
       }
-      else if (el.classList?.contains('btnDefault')) {
-        const res = await fetch('/api/me/plinkks/' + encodeURIComponent(id), { method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ isDefault: true }) });
-        if (!res.ok) { await showAlert('Erreur'); return; }
-        location.reload();
+
+      // Menu handling
+      function toggleMenu(id, e) {
+        e.stopPropagation();
+        const menu = document.getElementById(`menu-${id}`);
+        const allMenus = document.querySelectorAll('[id^="menu-"]');
+        
+        allMenus.forEach(m => {
+          if (m.id !== `menu-${id}`) m.classList.add('hidden');
+        });
+        
+        menu.classList.toggle('hidden');
       }
-      else if (el.classList?.contains('btnTogglePub')) {
-        const isPub = el.dataset.public === '1';
-        const res = await fetch('/api/me/plinkks/' + encodeURIComponent(id), { method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ isPublic: !isPub }) });
-        if (!res.ok) { await showAlert('Erreur'); return; }
-        location.reload();
-      }
-      else if (el.dataset?.exportUrl) {
-        const url = el.dataset.exportUrl;
+
+      document.addEventListener('click', () => {
+        document.querySelectorAll('[id^="menu-"]').forEach(m => m.classList.add('hidden'));
+      });
+
+      // Modal handling
+      const createModal = document.getElementById('createModal');
+      const deleteModal = document.getElementById('deleteModal');
+      const btnCreate = document.getElementById('btnCreatePlinkk');
+
+      btnCreate?.addEventListener('click', () => {
+        createModal.classList.remove('hidden');
+        createModal.querySelector('input').focus();
+      });
+
+      document.querySelectorAll('.modal-close, .modal-overlay').forEach(el => {
+        el.addEventListener('click', () => {
+          createModal.classList.add('hidden');
+          deleteModal.classList.add('hidden');
+        });
+      });
+
+      // Create Plinkk
+      document.getElementById('formCreatePlinkk')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const slug = fd.get('slug');
+        
         try {
-          window.open(url, '_blank');
-        } catch (e) {
-          window.location.href = url;
+          const res = await fetch('/api/me/plinkks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slug })
+          });
+          
+          if (res.ok) {
+            const data = await res.json();
+            showAlert('Plinkk créé avec succès !', 'success');
+            setTimeout(() => window.location.href = `/edit?plinkkId=${data.id}`, 1000);
+          } else {
+            const err = await res.json();
+            showAlert(err.error || 'Erreur lors de la création', 'error');
+          }
+        } catch (err) {
+          showAlert('Erreur réseau', 'error');
         }
-        return;
+      });
+
+      // Delete Plinkk
+      function openDeleteModal(id, slug) {
+        document.getElementById('deletePlinkkId').value = id;
+        document.getElementById('deleteSlug').textContent = slug;
+        deleteModal.classList.remove('hidden');
       }
-    });
-  })();
-</script>
+
+      document.getElementById('formDeletePlinkk')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('deletePlinkkId').value;
+        
+        try {
+          const res = await fetch(`/api/me/plinkks/${id}`, {
+            method: 'DELETE'
+          });
+          
+          if (res.ok) {
+            showAlert('Plinkk supprimé', 'success');
+            setTimeout(() => window.location.reload(), 1000);
+          } else {
+            showAlert('Erreur lors de la suppression', 'error');
+          }
+        } catch (err) {
+          showAlert('Erreur réseau', 'error');
+        }
+      });
+    </script>
