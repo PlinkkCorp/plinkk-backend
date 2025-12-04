@@ -24,18 +24,11 @@ ENV CI=true
 
 ARG DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 
-RUN pnpm install --ignore-scripts
+RUN pnpm install
 
 RUN DATABASE_URL=$DATABASE_URL pnpm --filter @plinkk/prisma run generate || npx prisma generate --schema=packages/prisma/prisma/schema.prisma
 
-RUN pnpm rebuild
-
 RUN openssl rand -out apps/dashboard/src/secret-key 32
-
-RUN sed -i 's/"strict":.*true/"strict": false/g' apps/dashboard/tsconfig.json || true \
-    && sed -i 's/"compilerOptions": {/"compilerOptions": { "noEmitOnError": false, "skipLibCheck": true, /' apps/dashboard/tsconfig.json || true
-
-RUN sed -i 's/tsc -p tsconfig.json &&/tsc -p tsconfig.json || true \&\&/g' apps/dashboard/package.json || true
 
 RUN DATABASE_URL=$DATABASE_URL pnpm --filter @plinkk/dashboard run build
 
