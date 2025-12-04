@@ -24,11 +24,11 @@ ENV CI=true
 
 ARG DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 
-RUN DATABASE_URL=$DATABASE_URL pnpm install
+RUN pnpm install --ignore-scripts
 
 RUN DATABASE_URL=$DATABASE_URL pnpm --filter @plinkk/prisma run generate || npx prisma generate --schema=packages/prisma/prisma/schema.prisma
 
-RUN DATABASE_URL=$DATABASE_URL pnpm --filter @plinkk/prisma install
+RUN pnpm rebuild
 
 RUN openssl rand -out apps/dashboard/src/secret-key 32
 
