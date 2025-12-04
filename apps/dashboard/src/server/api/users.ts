@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
+import { prisma } from "@plinkk/prisma";
 import {
   verifyRoleIsStaff,
   verifyRoleAdmin,
@@ -8,7 +8,7 @@ import {
 import { ensurePermission } from "../../lib/permissions";
 import { logAdminAction } from "../../lib/adminLogger";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export function apiUsersRoutes(fastify: FastifyInstance) {
   fastify.get("/:id", async (request, reply) => {

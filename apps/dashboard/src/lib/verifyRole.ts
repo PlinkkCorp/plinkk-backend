@@ -1,4 +1,4 @@
-import { Role } from "@plinkk/prisma/generated/prisma";
+import { Role } from "@plinkk/prisma";
 
 export function verifyRoleUser(role: Role | null | undefined): boolean {
     if (!role) return true;

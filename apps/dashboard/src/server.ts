@@ -26,10 +26,9 @@ import { replyView } from "./lib/replyView";
 import fastifyRateLimit from "@fastify/rate-limit";
 import fastifyCompress from "@fastify/compress";
 import "dotenv/config";
-import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
+import { prisma } from "@plinkk/prisma";
 import { generateTheme } from "./lib/generateTheme";
 
-const prisma = new PrismaClient();
 const fastify = Fastify({
   logger: true,
 });

@@ -6,7 +6,7 @@ import {
   RouteGenericInterface,
 } from "fastify";
 import ejs from "ejs";
-import { Announcement, AnnouncementRoleTarget, AnnouncementTarget, PrismaClient, Role } from "@plinkk/prisma/generated/prisma/client";
+import { Announcement, AnnouncementRoleTarget, AnnouncementTarget, Role, prisma } from "@plinkk/prisma";
 import { IncomingMessage, ServerResponse } from "http";
 import { toSafeUser, UserWithInclude } from "../types/user";
 import "dotenv/config"
@@ -29,7 +29,7 @@ function computeFrontendUrl(reply: FastifyReply) {
   }
 }
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export async function replyView(
   reply: FastifyReply<

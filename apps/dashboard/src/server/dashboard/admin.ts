@@ -2,9 +2,9 @@ import { FastifyInstance } from "fastify";
 import {
   Announcement,
   Prisma,
-  PrismaClient,
   Role,
-} from "@plinkk/prisma/generated/prisma/client";
+  prisma,
+} from "@plinkk/prisma";
 import { replyView, getActiveAnnouncementsForUser } from "../../lib/replyView";
 import { verifyRoleIsStaff } from "../../lib/verifyRole";
 import { ensurePermission } from "../../lib/permissions";
@@ -14,7 +14,7 @@ import * as os from "os";
 import { dashboardAdminReportsRoutes } from "./admin/reports";
 import { dashboardAdminSessionsRoutes } from "./admin/sessions";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 interface UserSearchQuery {
   q?: string;

@@ -32,8 +32,9 @@ ARG DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 # et les modules natifs soient correctement construits sur Debian.
 RUN pnpm install
 
-# 2. Génération du client Prisma
+# 2. Génération du client Prisma et build du package
 RUN DATABASE_URL=$DATABASE_URL pnpm --filter @plinkk/prisma run generate || npx prisma generate --schema=packages/prisma/prisma/schema.prisma
+RUN pnpm --filter @plinkk/prisma run build
 
 # 3. Génération de la clé secrète
 RUN openssl rand -out apps/dashboard/src/secret-key 32

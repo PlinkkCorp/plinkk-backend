@@ -1,7 +1,7 @@
 import dns from "dns/promises";
-import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
+import { prisma } from "@plinkk/prisma";
 
-const prisma = new PrismaClient()
+// const prisma = new PrismaClient()
 
 export async function verifyDomain(plinkkId: string) {
   const plinkk = await prisma.plinkk.findUnique({ where: { id: plinkkId }, include: { host: true } });

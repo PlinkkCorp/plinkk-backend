@@ -1,7 +1,7 @@
-import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
+import { prisma } from "@plinkk/prisma";
 import { FastifyReply, FastifyRequest } from "fastify";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export async function getUserPermissionKeys(userId: string): Promise<Set<string>> {
   if (!userId) return new Set();

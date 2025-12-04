@@ -1,8 +1,8 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient, Theme } from "@plinkk/prisma/generated/prisma/client";
+import { Theme, prisma } from "@plinkk/prisma";
 import { coerceThemeData, readBuiltInThemes } from "../../../lib/theme";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export function apiMeThemesRoutes(fastify: FastifyInstance) {
   fastify.post("/:id/archive", async (request, reply) => {

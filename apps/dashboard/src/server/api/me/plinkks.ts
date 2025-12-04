@@ -5,10 +5,10 @@ import {
   NeonColor,
   PlinkkSettings,
   PlinkkStatusbar,
-  PrismaClient,
   SocialIcon,
   User,
-} from "@plinkk/prisma/generated/prisma/client";
+  prisma,
+} from "@plinkk/prisma";
 import {
   reindexNonDefault,
   slugify,
@@ -25,7 +25,7 @@ import { fetchRemoteFile } from "../../../lib/fileUtils";
 import { canvaData } from "../../../public/config/canvaConfig"
 import { generateTheme } from "../../../lib/generateTheme";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export function apiMePlinkksRoutes(fastify: FastifyInstance) {
   fastify.patch("/:id", async (request, reply) => {

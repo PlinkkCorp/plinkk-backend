@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
-import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
+import { prisma } from "@plinkk/prisma";
 import { replyView } from "../../../lib/replyView";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export default async function dashboardUserSessionsRoutes(fastify: FastifyInstance) {
     fastify.get('/', async (req, reply) => {

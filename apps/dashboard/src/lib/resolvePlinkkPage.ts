@@ -1,4 +1,4 @@
-import { PrismaClient, Visibility } from "@plinkk/prisma/generated/prisma/client";
+import { PrismaClient, Visibility } from "@plinkk/prisma";
 import { FastifyRequest } from "fastify";
 
 export function parseIdentifier(id?: string | null): { kind: 'default' | 'index' | 'slug'; value?: number | string } {

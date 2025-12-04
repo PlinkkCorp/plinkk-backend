@@ -1,9 +1,9 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
+import { prisma } from "@plinkk/prisma";
 import { verifyRoleIsStaff } from "../../../lib/verifyRole";
 import { isReservedSlug, slugify, reindexNonDefault } from "../../../lib/plinkkUtils";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export function apiAdminPlinkksRoutes(fastify: FastifyInstance) {
   fastify.patch("/:id", async (request, reply) => {

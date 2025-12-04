@@ -1,11 +1,11 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient, User } from "@plinkk/prisma/generated/prisma/client";
+import { prisma, User } from "@plinkk/prisma";
 import { replyView } from "../lib/replyView";
 import { verifyRoleAdmin, verifyRoleDeveloper } from "../lib/verifyRole";
 import { dashboardAdminRoutes } from "./dashboard/admin";
 import dashboardUserSessionsRoutes from "./dashboard/user/sessions";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.register(dashboardAdminRoutes, { prefix: "/admin" });

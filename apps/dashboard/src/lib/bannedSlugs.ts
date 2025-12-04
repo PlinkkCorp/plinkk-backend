@@ -1,6 +1,6 @@
-import { BannedSlug, PrismaClient } from '@plinkk/prisma/generated/prisma/client';
+import { BannedSlug, prisma } from "@plinkk/prisma";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export async function isBannedSlug(slug: string): Promise<boolean> {
   if (!slug) return true;

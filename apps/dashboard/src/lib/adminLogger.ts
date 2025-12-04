@@ -1,6 +1,4 @@
-import { PrismaClient, Prisma } from '@plinkk/prisma/generated/prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma, Prisma } from '@plinkk/prisma';
 
 export async function logAdminAction(adminId: string, action: string, targetId?: string, details?: any, ip?: string) {
   try {

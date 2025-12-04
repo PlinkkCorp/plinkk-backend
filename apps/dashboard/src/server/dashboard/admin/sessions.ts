@@ -1,10 +1,10 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
+import { prisma } from "@plinkk/prisma";
 import { replyView } from "../../../lib/replyView";
 import { ensurePermission } from "../../../lib/permissions";
 import { logAdminAction } from "../../../lib/adminLogger";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 interface SessionsQuery {
   page?: number;

@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { Plinkk, PrismaClient } from "@plinkk/prisma/generated/prisma/client";
+import { Plinkk, prisma } from "@plinkk/prisma";
 import {
   getMaxPagesForRole,
   reindexNonDefault,
@@ -10,7 +10,7 @@ import {
 } from "../lib/plinkkUtils";
 import { replyView } from "../lib/replyView";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export function plinkkPagesRoutes(fastify: FastifyInstance) {
   fastify.get("/plinkks", async (request, reply) => {

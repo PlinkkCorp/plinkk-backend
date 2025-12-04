@@ -4,12 +4,13 @@ import {
   Label,
   NeonColor,
   SocialIcon,
+  Statusbar,
   PlinkkStatusbar,
   PlinkkSettings,
   User,
   Category,
   Cosmetic,
-} from "@plinkk/prisma/generated/prisma";
+} from "@plinkk/prisma";
 
 export function generateProfileConfig(
   profile: User & PlinkkSettings & { cosmetics?: Cosmetic | null },
@@ -18,7 +19,7 @@ export function generateProfileConfig(
   labels: Label[],
   neonColors: NeonColor[],
   socialIcons: SocialIcon[],
-  statusBar: PlinkkStatusbar,
+  statusBar: Statusbar | PlinkkStatusbar,
   injectedTheme?: JSON,
   categories: Category[] = []
 ) {

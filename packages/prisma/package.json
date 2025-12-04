@@ -1,16 +1,17 @@
 {
   "name": "@plinkk/prisma",
   "version": "1.0.0",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build": "tsc",
     "generate": "prisma generate",
     "migrate:dev": "prisma migrate dev",
     "deploy": "prisma migrate deploy",
     "dev": "prisma dev",
     "studio": "prisma studio",
     "seed": "ts-node prisma/seed.ts",
-    "postinstall": "prisma generate || true"
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.0.0",

@@ -1,11 +1,11 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
+import { prisma } from "@plinkk/prisma";
 import { coerceThemeData } from "../../lib/theme";
 import { verifyRoleIsStaff } from "../../lib/verifyRole";
 import { ensurePermission } from "../../lib/permissions";
 import { generateTheme } from "../../lib/generateTheme";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export function apiThemeRoutes(fastify: FastifyInstance) {
   fastify.get("/approved", async (request, reply) => {

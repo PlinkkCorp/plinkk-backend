@@ -5,7 +5,7 @@ import { verifyDomain } from "../../lib/verifyDNS";
 import bcrypt from "bcrypt";
 import QRCode from "qrcode";
 import { existsSync, mkdirSync, writeFileSync, unlinkSync } from "fs";
-import { PrismaClient, User } from "@plinkk/prisma/generated/prisma/client";
+import { User, prisma } from "@plinkk/prisma";
 import { apiMeThemesRoutes } from "./me/theme";
 import { apiMePlinkksRoutes } from "./me/plinkks";
 import path from "path";
@@ -16,7 +16,7 @@ const pending2fa = new Map<
   { secret: string; otpauth: string; createdAt: number }
 >();
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.register(apiMeThemesRoutes, { prefix: "/themes" });
