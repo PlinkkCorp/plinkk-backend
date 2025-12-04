@@ -22,18 +22,20 @@ RUN npm install -g pnpm@9.12.3
 
 ENV CI=true
 
-RUN pnpm install
+ARG DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 
-RUN pnpm --filter @plinkk/prisma run generate || npx prisma generate --schema=packages/prisma/prisma/schema.prisma
+RUN DATABASE_URL=$DATABASE_URL pnpm install
 
-RUN pnpm --filter @plinkk/prisma install
+RUN DATABASE_URL=$DATABASE_URL pnpm --filter @plinkk/prisma run generate || npx prisma generate --schema=packages/prisma/prisma/schema.prisma
+
+RUN DATABASE_URL=$DATABASE_URL pnpm --filter @plinkk/prisma install
 
 RUN openssl rand -out apps/dashboard/src/secret-key 32
 
-RUN sed -i 's/"strict": true/"strict": false/g' apps/dashboard/tsconfig.json || true \
+RUN sed -i 's/"strict":.*true/"strict": false/g' apps/dashboard/tsconfig.json || true \
     && sed -i 's/"compilerOptions": {/"compilerOptions": { "noEmitOnError": false, "skipLibCheck": true, /' apps/dashboard/tsconfig.json || true
 
-RUN pnpm --filter @plinkk/dashboard run build
+RUN DATABASE_URL=$DATABASE_URL pnpm --filter @plinkk/dashboard run build
 
 CMD ["sh", "-c", "pnpm --filter @plinkk/prisma run generate && pnpm --filter @plinkk/prisma run deploy && pnpm --filter @plinkk/dashboard run start"]
 
