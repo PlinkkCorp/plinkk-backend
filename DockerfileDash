@@ -26,7 +26,7 @@ RUN pnpm install
 
 RUN pnpm --filter @plinkk/prisma install
 
-RUN pnpx @fastify/secure-session > apps/dashboard/src/secret-key
+RUN openssl rand -out apps/dashboard/src/secret-key 32
 
 RUN pnpm --filter @plinkk/dashboard run build
 
