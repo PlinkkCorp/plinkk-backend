@@ -10,7 +10,7 @@
     "delete_inactive": "node scripts/delete_inactive_user.js ",
     "seed:role": "ts-node prisma/seed.ts",
     "prisma:generate": "prisma generate --generator=dashboard && prisma generate --generator=public",
-    "build": "pnpm -r build",
+    "build": "tsc -p tsconfig.json || true && node scripts/copy-static.mjs",
     "launch-all": "concurrently \"pnpm --filter @plinkk/dashboard dev\" \"pnpm --filter @plinkk/public dev\""
   },
   "devDependencies": {
