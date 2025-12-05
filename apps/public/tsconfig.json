@@ -10,7 +10,7 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "paths": {
-            "@plinkk/prisma": ["../../packages/prisma"]
+            "@plinkk/prisma": ["../../packages/prisma/index.ts"]
         }
     },
     "include": ["src"],
