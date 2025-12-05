@@ -25,6 +25,8 @@ ENV DATABASE_URL="file:./dev.db"
 
 RUN pnpm --filter @plinkk/prisma run generate
 
+RUN pnpm --filter @plinkk/prisma run build
+
 RUN pnpx @fastify/secure-session > apps/dashboard/src/secret-key
 
 RUN pnpm --filter @plinkk/dashboard run build
