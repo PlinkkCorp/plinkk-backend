@@ -11,9 +11,7 @@
         "outDir": "dist",
         "rootDir": "src",
         "esModuleInterop": true,
-        "paths": {
-            "@plinkk/prisma": ["../../packages/prisma/index.ts"]
-        }
+        "preserveSymlinks": true
     },
     "include": ["src"],
     "exclude": ["dist", "src/public"]
