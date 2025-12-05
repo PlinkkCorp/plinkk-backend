@@ -10,10 +10,10 @@
         "target": "es2022",
         "outDir": "dist",
         "rootDir": "src",
-        "esModuleInterop": true
-    },
-    "paths": {
-      "@plinkk/prisma": ["../../packages/prisma"]
+        "esModuleInterop": true,
+        "paths": {
+            "@plinkk/prisma": ["../../packages/prisma"]
+        }
     },
     "include": ["src"],
     "exclude": ["dist", "src/public"]
