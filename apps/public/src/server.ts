@@ -12,7 +12,7 @@ import {
   PlinkkSettings,
   Role,
   User,
-} from "@plinkk/prisma/generated/prisma/client";
+} from "@plinkk/prisma";
 import { prisma } from "@plinkk/prisma";
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";

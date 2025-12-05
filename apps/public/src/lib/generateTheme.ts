@@ -1,4 +1,4 @@
-import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
+import { PrismaClient } from "@plinkk/prisma";
 import builtInThemes from "./builtInThemes";
 import { builtInThemesTypes, coerceThemeData } from "./theme";
 

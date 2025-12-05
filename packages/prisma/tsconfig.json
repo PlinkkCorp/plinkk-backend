@@ -10,5 +10,5 @@
     "outDir": "dist",
     "rootDir": "."
   },
-  "include": ["index.ts", "generated/**/*"]
+  "include": ["index.ts"]
 }

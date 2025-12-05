@@ -3,7 +3,7 @@ import { existsSync } from "fs";
 import path from "path";
 import { generateProfileConfig } from "../lib/generateConfig";
 import { minify } from "uglify-js";
-import { PlinkkSettings, User } from "@plinkk/prisma/generated/prisma/client";
+import { PlinkkSettings, User } from "@plinkk/prisma";
 // Utilise l'instance Prisma partagée pour éviter des ouvertures multiples du fichier SQLite
 import { prisma } from "@plinkk/prisma";
 

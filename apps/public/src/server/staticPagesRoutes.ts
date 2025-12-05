@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient } from "@plinkk/prisma/generated/prisma/client";
+import { PrismaClient } from "@plinkk/prisma";
 import { replyView } from "../lib/replyView";
 
 const prisma = new PrismaClient();

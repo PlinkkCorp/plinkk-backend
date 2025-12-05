@@ -49,6 +49,7 @@
     "fastify-cli": "^7.4.0",
     "fastify-cron": "^1.4.0",
     "otplib": "^12.0.1",
+    "@otplib/preset-default": "^12.0.1",
     "qrcode": "^1.5.4",
     "rimraf": "^5.0.10",
     "ts-node": "^10.9.2",

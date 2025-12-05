@@ -9,7 +9,7 @@ import {
   User,
   Category,
   Cosmetic,
-} from "@plinkk/prisma/generated/prisma";
+} from "@plinkk/prisma";
 
 export function generateProfileConfig(
   profile: User & PlinkkSettings & { cosmetics?: Cosmetic | null },
