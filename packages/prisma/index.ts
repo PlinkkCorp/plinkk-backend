@@ -1,9 +1,9 @@
-import { PrismaClient } from "./generated/prisma/index";
+import { PrismaClient } from "./generated/prisma";
 // import { PrismaPg } from "@prisma/adapter-pg"
 import path from "path";
 import fs from "fs";
 
-export * from "./generated/prisma/index";
+export * from "./generated/prisma";
 
 
 if (!process.env.DATABASE_URL || process.env.DATABASE_URL.startsWith("file:")) {
