@@ -24,8 +24,8 @@ ENV CI=true
 
 RUN pnpm install && pnpm rebuild canvas
 
-RUN pnpm --filter @plinkk/prisma run generate
-RUN pnpm --filter @plinkk/prisma run build && cp -r packages/prisma/generated packages/prisma/dist/
+RUN pnpm --filter @plinkk/prisma install
+RUN pnpm --filter @plinkk/prisma run build
 
 RUN pnpx @fastify/secure-session > apps/public/src/secret-key
 

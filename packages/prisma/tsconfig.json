@@ -3,12 +3,10 @@
     "esModuleInterop": true,
     "types": ["node"],
     "moduleResolution": "node",
-    "module": "commonjs",
     "declaration": true,
     "target": "ES2020",
     "outDir": "dist",
-    "rootDir": ".",
-    "preserveSymlinks": true
+    "rootDir": "."
   },
   "include": ["index.ts", "generated/**/*"]
 }
