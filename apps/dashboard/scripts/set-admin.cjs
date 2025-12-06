@@ -4,8 +4,7 @@
 // identifier can be user id, userName or email
 
 // Utilise le package workspace @plinkk/prisma (génération centralisée)
-const { PrismaClient } = require('@plinkk/prisma/generated/prisma/client');
-const prisma = new PrismaClient();
+const { prisma } = require('@plinkk/prisma');
 
 async function findUser(identifier) {
   // try by id
@@ -16,16 +15,6 @@ async function findUser(identifier) {
   if (user) return user;
   // try by userName
   return await prisma.user.findFirst({ where: { userName: identifier } }).catch(() => null);
-}
-
-async function ensureAdminRole() {
-  const name = 'ADMIN';
-  const role = await prisma.role.upsert({
-    where: { name },
-    update: {},
-    create: { id: name, name },
-  });
-  return role;
 }
 
 async function main() {
@@ -43,7 +32,18 @@ async function main() {
       process.exit(1);
     }
 
-    const role = await ensureAdminRole();
+    // Ensure ADMIN role exists
+    const role = await prisma.role.upsert({
+      where: { name: 'ADMIN' },
+      update: {},
+      create: { 
+        name: 'ADMIN',
+        isStaff: true,
+        priority: 100,
+        maxPlinkks: 100,
+        maxThemes: 100
+      },
+    });
 
     await prisma.user.update({ where: { id: user.id }, data: { roleId: role.id } });
 
