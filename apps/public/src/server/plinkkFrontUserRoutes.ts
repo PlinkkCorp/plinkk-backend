@@ -291,7 +291,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     }
   );
 
-  fastify.get("/:username.js", async function (request, reply) {
+  fastify.get("/:username.js", { config: { compress: false } }, async function (request, reply) {
     const { username } = request.params as {
       username: string;
     };
