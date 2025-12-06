@@ -949,6 +949,57 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     return reply.send({ from: fmt(start), to: fmt(end), roles, series });
   });
 
+  fastify.get("/stats/plinkks/series", async function (request, reply) {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const ok = await ensurePermission(request, reply, 'VIEW_STATS');
+    if (!ok) return;
+    const { from, to } = request.query as { from?: string; to?: string };
+    const now = new Date();
+    const end = to
+      ? new Date(to + "T23:59:59.999Z")
+      : new Date(
+          Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate(),
+            23,
+            59,
+            59,
+            999
+          )
+        );
+    const start = from
+      ? new Date(from + "T00:00:00.000Z")
+      : new Date(end.getTime() - 29 * 86400000);
+    const fmt = (dt: Date) => {
+      const y = dt.getUTCFullYear();
+      const m = String(dt.getUTCMonth() + 1).padStart(2, "0");
+      const d = String(dt.getUTCDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    };
+    const rows = await prisma.plinkk.findMany({
+      where: { createdAt: { gte: start, lte: end } },
+      select: { createdAt: true },
+    });
+    const byDate = new Map<string, number>();
+    for (
+      let t = new Date(start.getTime());
+      t <= end;
+      t = new Date(t.getTime() + 86400000)
+    ) {
+      byDate.set(fmt(t), 0);
+    }
+    for (const r of rows) {
+      const key = fmt(new Date(r.createdAt));
+      if (byDate.has(key)) byDate.set(key, (byDate.get(key) || 0) + 1);
+    }
+    const series = Array.from(byDate.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, count]) => ({ date, count }));
+    return reply.send({ from: fmt(start), to: fmt(end), series });
+  });
+
   fastify.get<{ Querystring: TopPlinkksQuery }>("/stats/plinkks/top", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
