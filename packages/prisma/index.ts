@@ -43,4 +43,4 @@ if (!process.env.DATABASE_URL || process.env.DATABASE_URL.startsWith("file:")) {
 
 // const adapter = new PrismaPg({ connectionString })
 // export const prisma = new PrismaClient({ adapter });
-export const prisma = new PrismaClient();
+export const prisma = new PrismaClient({} as any);
