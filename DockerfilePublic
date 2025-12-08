@@ -32,4 +32,4 @@ RUN pnpm --filter @plinkk/public run build
 
 CMD ["sh", "-c", "pnpm --filter @plinkk/public run start"]
 
-EXPOSE 3001
+EXPOSE 3002
