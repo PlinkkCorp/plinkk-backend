@@ -21,7 +21,7 @@ ENV CI=true
 
 RUN pnpm install
 
-RUN pnpm --filter @plinkk/prisma run generate
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" pnpm --filter @plinkk/prisma run generate
 
 RUN pnpm --filter @plinkk/prisma run build
 
