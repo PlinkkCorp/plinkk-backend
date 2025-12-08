@@ -775,7 +775,7 @@ fastify.setErrorHandler((error, request, reply) => {
   }
   const userId = request.session.get("data");
   return reply.code(500).view("erreurs/500.ejs", {
-    message: (error)?.message ?? "",
+    message: (error as any)?.message ?? "",
     currentUser: userId ? { id: userId } : null,
   });
 });
