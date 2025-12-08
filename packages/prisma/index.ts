@@ -1,4 +1,5 @@
 import { PrismaClient } from "./generated/prisma/client";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 // import { PrismaPg } from "@prisma/adapter-pg"
 import path from "path";
 import fs from "fs";
@@ -39,8 +40,7 @@ if (!process.env.DATABASE_URL || process.env.DATABASE_URL.startsWith("file:")) {
 	process.env.DATABASE_URL = `file:${dbAbsolute}`;
 }
 
-// const connectionString = `${process.env.DATABASE_URL}`
+const connectionString = `${process.env.DATABASE_URL}`
 
-// const adapter = new PrismaPg({ connectionString })
-// export const prisma = new PrismaClient({ adapter });
-export const prisma = new PrismaClient({} as any);
+const adapter = new PrismaLibSql({ url: connectionString });
+export const prisma = new PrismaClient({ adapter });
