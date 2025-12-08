@@ -1,5 +1,6 @@
 import { prisma } from '..';
 import { PERMISSIONS } from '../permissions';
+import 'dotenv/config';
 
 async function main() {
   const roles = [
