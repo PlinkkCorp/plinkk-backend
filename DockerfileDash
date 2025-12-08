@@ -21,7 +21,7 @@ ENV CI=true
 
 RUN pnpm install
 
-ENV DATABASE_URL="file:./dev.db"
+RUN pnpx prisma migrate reset --force
 
 RUN pnpm --filter @plinkk/prisma run generate
 
