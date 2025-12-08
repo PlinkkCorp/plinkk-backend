@@ -1,8 +1,6 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient } from "@plinkk/prisma";
+import { prisma } from "@plinkk/prisma";
 import { replyView } from "../lib/replyView";
-
-const prisma = new PrismaClient();
 
 export function staticPagesRoutes(fastify: FastifyInstance) {
   fastify.get("/about", async (request, reply) => {

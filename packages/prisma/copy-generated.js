@@ -22,6 +22,12 @@ function copyDir(src, dest) {
 
 if (fs.existsSync(src)) {
     copyDir(src, dest);
+    // Remove package.json from dist/generated/prisma to avoid conflict with node16 resolution
+    const pkgJsonPath = path.join(dest, 'prisma', 'package.json');
+    if (fs.existsSync(pkgJsonPath)) {
+        fs.unlinkSync(pkgJsonPath);
+        console.log('Removed package.json from dist/generated/prisma');
+    }
     console.log('Copied generated files to dist/generated');
 } else {
     console.log('No generated files found to copy');
