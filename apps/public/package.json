@@ -35,7 +35,7 @@
     "@fastify/secure-session": "^8.2.0",
     "@fastify/static": "^8.2.0",
     "@fastify/view": "^11.1.1",
-    "@plinkk/prisma": "file:../../packages/prisma",
+    "@plinkk/prisma": "workspace:*",
     "@prisma/client": "^7.0.0",
     "@types/archiver": "^6.0.3",
     "@types/uglify-js": "^3.17.5",
