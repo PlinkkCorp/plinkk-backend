@@ -1,54 +1,53 @@
-<%- include('../partials/head', { title: 'Erreur serveur' }) %>
+<%- include('../partials/head', { title: 'Erreur serveur - Plinkk' }) %>
 <%- include('../partials/header') %>
-<main class="mx-auto max-w-xl px-4 sm:px-6 lg:px-8 py-20 text-center">
-  <div class="glass ring-gradient rounded-2xl p-8">
-    <div class="text-5xl font-bold">500</div>
-    <p class="mt-3 text-slate-300">Désolé, une erreur est survenue.</p>
-    <% if (typeof message === 'string' && message) { %>
-      <div class="mt-4 text-left">
-        <div class="relative">
-          <pre id="errorMessage" class="text-xs text-slate-400 bg-slate-900/60 border border-slate-800/60 rounded p-3 overflow-auto"><%= message %></pre>
-          <button type="button" id="copyErrorBtn" aria-label="Copier l'erreur"
-            class="absolute top-2 right-2 inline-flex items-center gap-2 px-2 py-1 text-xs bg-slate-800/70 hover:bg-slate-700 rounded text-slate-200">
-            Copier
-          </button>
+
+<main class="relative flex min-h-[calc(100vh-4rem)] items-center justify-center overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
+  <!-- Background Effects -->
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-rose-500/20 rounded-full blur-[100px] pointer-events-none"></div>
+  
+  <div class="relative z-10 max-w-2xl text-center">
+    <p class="text-base font-semibold text-rose-400">500</p>
+    <h1 class="mt-4 text-4xl font-bold tracking-tight text-white sm:text-6xl">Erreur serveur</h1>
+    <p class="mt-6 text-lg leading-8 text-slate-400">
+      Oups ! Quelque chose s'est mal passé de notre côté. Nos équipes ont été notifiées et travaillent à la résolution du problème.
+    </p>
+    <div class="mt-10 flex items-center justify-center gap-x-6">
+      <a href="/" class="rounded-full bg-white/10 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-white/20 ring-1 ring-inset ring-white/10 transition-all hover:scale-105">
+        Retour à l'accueil
+      </a>
+      <a href="#" onclick="window.location.reload()" class="text-sm font-semibold leading-6 text-white hover:text-rose-300 transition-colors">
+        Réessayer <span aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+
+    <% if (typeof message !== 'undefined' && message) { %>
+      <div class="mt-12">
+        <button onclick="const el = document.getElementById('errorDetails'); el.classList.toggle('hidden'); this.textContent = el.classList.contains('hidden') ? 'Voir les détails techniques' : 'Masquer les détails';" class="text-xs font-medium text-slate-500 hover:text-slate-300 transition-colors flex items-center justify-center gap-2 mx-auto">
+          Voir les détails techniques
+          <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+        </button>
+        
+        <div id="errorDetails" class="hidden mt-4 max-w-lg mx-auto text-left animate-in fade-in slide-in-from-top-2 duration-200">
+          <div class="relative group rounded-xl bg-[#0B1020] border border-rose-500/20 p-4 shadow-xl shadow-rose-900/5">
+            <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button onclick="navigator.clipboard.writeText(document.getElementById('errorText').textContent).then(() => { const b = this; const old = b.innerHTML; b.innerHTML = '<span class=\'text-emerald-400\'>Copié !</span>'; setTimeout(() => b.innerHTML = old, 2000); })" class="p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-xs text-slate-400 hover:text-white transition-colors border border-white/5">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+              </button>
+            </div>
+            <div class="font-mono text-xs text-rose-300/90 break-all whitespace-pre-wrap max-h-64 overflow-y-auto custom-scrollbar" id="errorText"><%= message %></div>
+          </div>
+          <p class="mt-2 text-[10px] text-slate-600 text-center">Copiez ce message pour le transmettre au support.</p>
         </div>
       </div>
-
-      <script>
-        (function(){
-          var btn = document.getElementById('copyErrorBtn');
-          var pre = document.getElementById('errorMessage');
-          if (!btn || !pre) return;
-          btn.addEventListener('click', function(){
-            var text = pre.innerText || pre.textContent || '';
-            if (!navigator.clipboard) {
-              try {
-                var range = document.createRange();
-                range.selectNodeContents(pre);
-                var sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(range);
-                document.execCommand('copy');
-                sel.removeAllRanges();
-                showCopied();
-              } catch (e) {
-                console.warn('Copy failed', e);
-              }
-              return;
-            }
-            navigator.clipboard.writeText(text).then(showCopied, function(){ console.warn('Copy failed');});
-          });
-          function showCopied(){
-            var original = btn.innerHTML;
-            btn.textContent = 'Copié !';
-            setTimeout(function(){ btn.innerHTML = original; }, 1500);
-          }
-        })();
-      </script>
     <% } %>
-    <a href="/" class="mt-6 inline-block px-4 py-2.5 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white">Retour à l’accueil</a>
   </div>
-  <p class="mt-4 text-sm text-slate-400">Si le problème persiste, <a href="/contact" class="text-indigo-300 hover:text-indigo-200">contactez‑nous</a>.</p>
 </main>
+
+<style>
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>
+
 <%- include('../partials/footer') %>
