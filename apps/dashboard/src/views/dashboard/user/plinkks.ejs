@@ -195,13 +195,13 @@
 
       async function exportPlinkk(id) {
         try {
-          const res = await fetch(`/api/me/plinkks/${id}/export`);
+          const res = await fetch(`/api/me/plinkks/${id}/export.zip`);
           if (res.ok) {
             const blob = await res.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `plinkk-${id}.json`;
+            a.download = `plinkk-${id}.zip`;
             document.body.appendChild(a);
             a.click();
             a.remove();

@@ -743,7 +743,8 @@ export function createIconList(profileData) {
             if (/^(https?:\/\/|\/|data:)/i.test(iconVal)) {
                 iconImg.src = iconVal;
             } else {
-                iconImg.src = `/public/images/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
+                const prefix = (window.__PLINKK_EXPORT_MODE__) ? '.' : '';
+                iconImg.src = `${prefix}/public/images/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
             }
         setSafeText(iconImg, iconData.icon);
         iconImg.alt = iconData.icon;

@@ -24,6 +24,7 @@ import ejs from "ejs";
 import { fetchRemoteFile } from "../../../lib/fileUtils";
 import { canvaData } from "../../../public/config/canvaConfig"
 import { generateTheme } from "../../../lib/generateTheme";
+import { existsSync } from "fs";
 
 // const prisma = new PrismaClient();
 
@@ -702,35 +703,79 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
 
     const archive = archiver("zip", { zlib: { level: 9 } });
 
+    archive.on('error', function(err) {
+      console.error("Archiver error:", err);
+      if (!reply.raw.headersSent) {
+        reply.code(500).send({ error: 'Archiver error' });
+      }
+    });
+
     reply
       .header("Content-Type", "application/zip")
       .header("Content-Disposition", "attachment; filename=plinkk_" + page.name + ".zip");
 
     archive.pipe(reply.raw);
 
-    archive.append(await ejs.renderFile(path.join(__dirname, "..", "..", "..", "views", "plinkk", "show.ejs"), { page: page, userId: page.userId, username: page.userId }), { name: "index.html" });
+    const showEjsPath = path.join(__dirname, "..", "..", "..", "..", "..", "public", "src", "views", "plinkk", "show.ejs");
+    if (!existsSync(showEjsPath)) {
+       console.error("show.ejs not found at", showEjsPath);
+       throw new Error("Template show.ejs not found");
+    }
+
+    archive.append(await ejs.renderFile(showEjsPath, { page: page, userId: page.userId, username: page.userId, isExport: true }), { name: "index.html" });
     archive.append(js, { name: page.slug + ".js" });
     archive.append(config, { name: "config.js" });
     archive.append(JSON.stringify(themes), { name: "themes.json" });
-    const analyticsScript = await fetchRemoteFile("https://analytics.plinkk.fr/script.js");
+    let analyticsScript = "";
+    try {
+      analyticsScript = await fetchRemoteFile("https://analytics.plinkk.fr/script.js");
+    } catch (e) {
+      console.error("Failed to fetch analytics script", e);
+    }
     archive.append(analyticsScript, { name: "umami_script.js" });
-    const canvaId = page.settings.canvaEnable ? page.settings.selectedCanvasIndex : null
-    if (canvaId !== null) {
-      archive.file(path.join(__dirname, "..", "..", "..", "public", "canvaAnimation", canvaData[canvaId].fileNames), { name: "canvaAnimation/" + canvaData[canvaId].fileNames })
+    
+    const canvaId = pageProfile.canvaEnable ? pageProfile.selectedCanvasIndex : null;
+    if (canvaId !== null && canvaData[canvaId]) {
+      const p = path.join(__dirname, "..", "..", "..", "public", "canvaAnimation", canvaData[canvaId].fileNames);
+      if (existsSync(p)) archive.file(p, { name: "canvaAnimation/" + canvaData[canvaId].fileNames });
     }
 
-    archive.file(path.join(__dirname, "..", "..", "..", "public", "css", "styles.css"), { name: "css/styles.css" });
-    archive.file(path.join(__dirname, "..", "..", "..", "public", "css", "button.css"), { name: "css/button.css" });
+    const cssPath = path.join(__dirname, "..", "..", "..", "public", "css", "styles.css");
+    if (existsSync(cssPath)) archive.file(cssPath, { name: "css/styles.css" });
+    
+    const btnCssPath = path.join(__dirname, "..", "..", "..", "public", "css", "button.css");
+    if (existsSync(btnCssPath)) archive.file(btnCssPath, { name: "css/button.css" });
 
-    if (page.settings.profileImage.startsWith("/public/")) archive.file(path.join(__dirname, "..", "..", "..", ...page.settings.profileImage.split("/")), { name: page.settings.profileImage})
-    if (page.settings.profileIcon.startsWith("/public/")) archive.file(path.join(__dirname, "..", "..", "..", ...page.settings.profileIcon.split("/")), { name: page.settings.profileIcon})
-    if (page.settings.iconUrl.startsWith("/public/")) archive.file(path.join(__dirname, "..", "..", "..", ...page.settings.iconUrl.split("/")), { name: page.settings.iconUrl})
+    if (pageProfile.profileImage && pageProfile.profileImage.startsWith("/public/")) {
+        const p = path.join(__dirname, "..", "..", "..", ...pageProfile.profileImage.split("/"));
+        if (existsSync(p)) archive.file(p, { name: pageProfile.profileImage});
+    }
+    if (pageProfile.profileIcon && pageProfile.profileIcon.startsWith("/public/")) {
+        const p = path.join(__dirname, "..", "..", "..", ...pageProfile.profileIcon.split("/"));
+        if (existsSync(p)) archive.file(p, { name: pageProfile.profileIcon});
+    }
+    if (pageProfile.iconUrl && pageProfile.iconUrl.startsWith("/public/")) {
+        const p = path.join(__dirname, "..", "..", "..", ...pageProfile.iconUrl.split("/"));
+        if (existsSync(p)) archive.file(p, { name: pageProfile.iconUrl});
+    }
 
     for (const link of page.links) {
-      if (link.icon.startsWith("/public/")) archive.file(path.join(__dirname, "..", "..", "..", ...link.icon.split("/")), { name: link.icon });
+      if (link.icon && link.icon.startsWith("/public/")) {
+         const p = path.join(__dirname, "..", "..", "..", ...link.icon.split("/"));
+         if (existsSync(p)) archive.file(p, { name: link.icon });
+      }
     }
     for (const socialIcon of page.socialIcons) {
-      archive.file(path.join(__dirname, "..", "..", "..", "public", "images", "icons", socialIcon.icon + ".svg"), { name: "public/images/icons/" + socialIcon.icon + ".svg" });
+      const iconName = socialIcon.icon.toLowerCase().replace(/ /g, '-');
+      const p = path.join(__dirname, "..", "..", "..", "public", "images", "icons", iconName + ".svg");
+      console.log("Checking social icon:", p, "Exists:", existsSync(p));
+      if (existsSync(p)) archive.file(p, { name: "public/images/icons/" + iconName + ".svg" });
+      else {
+          // Try to find it in apps/public if not found in dashboard
+          const p2 = path.join(__dirname, "..", "..", "..", "..", "..", "public", "src", "public", "images", "icons", iconName + ".svg");
+          console.log("Checking social icon in public app:", p2, "Exists:", existsSync(p2));
+          if (existsSync(p2)) archive.file(p2, { name: "public/images/icons/" + iconName + ".svg" });
+      }
     }
 
     await archive.finalize();
