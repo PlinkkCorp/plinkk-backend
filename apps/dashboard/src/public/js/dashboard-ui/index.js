@@ -270,7 +270,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     f.canvaEnable.checked = (cfg.canvaEnable ?? 1) === 1;
     if (f.showVerifiedBadge) f.showVerifiedBadge.checked = (cfg.showVerifiedBadge ?? true);
     if (f.showPartnerBadge) f.showPartnerBadge.checked = (cfg.showPartnerBadge ?? true);
-    if (f.enableVCard) f.enableVCard.checked = (cfg.enableVCard ?? true);
+    // if (f.enableVCard) f.enableVCard.checked = (cfg.enableVCard ?? true);
     if (f.publicPhone) f.publicPhone.value = cfg.publicPhone || '';
     if (f.enableLinkCategories) f.enableLinkCategories.checked = (cfg.enableLinkCategories ?? false);
     
@@ -417,7 +417,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       buttonThemeEnable: f.buttonThemeEnable.checked ? 1 : 0,
       showVerifiedBadge: f.showVerifiedBadge ? f.showVerifiedBadge.checked : true,
       showPartnerBadge: f.showPartnerBadge ? f.showPartnerBadge.checked : true,
-      enableVCard: f.enableVCard ? f.enableVCard.checked : true,
+      enableVCard: false, // f.enableVCard ? f.enableVCard.checked : true,
       publicPhone: f.publicPhone ? vOrNull(f.publicPhone.value) : null,
       enableLinkCategories: f.enableLinkCategories ? f.enableLinkCategories.checked : false,
       backgroundSize: numOrNull(f.backgroundSize.value),
@@ -503,7 +503,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     f.profileImage, f.profileIcon, f.iconUrl, f.description,
     f.profileHoverColor, f.degBackgroundColor,
     f.neonEnable, f.buttonThemeEnable, f.canvaEnable,
-    f.showVerifiedBadge, f.showPartnerBadge, f.enableVCard, f.publicPhone, f.enableLinkCategories,
+    f.showVerifiedBadge, f.showPartnerBadge, /* f.enableVCard, */ f.publicPhone, f.enableLinkCategories,
     f.selectedThemeIndex, f.selectedAnimationIndex,
     f.selectedAnimationButtonIndex, f.selectedAnimationBackgroundIndex,
     f.animationDurationBackground, f.delayAnimationButton, f.backgroundSize,
