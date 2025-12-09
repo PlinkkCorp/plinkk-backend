@@ -22,60 +22,60 @@
 
     <main class="col-span-12 lg:col-span-10 space-y-8">
         <!-- Header -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-6 rounded-3xl border border-slate-800 relative overflow-hidden">
             <div class="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
             <div class="relative z-10">
-                <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Administration</h1>
-                <p class="text-slate-400 text-lg">Gérez les utilisateurs, les thèmes et la modération.</p>
+                <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Administration</h1>
+                <p class="text-slate-400 text-base">Gérez les utilisateurs, les thèmes et la modération.</p>
             </div>
         </div>
 
         <!-- Stats Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl hover:border-violet-500/50 transition-all group">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-violet-500/10 rounded-2xl text-violet-400 group-hover:scale-110 transition-transform">
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl hover:border-violet-500/50 transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="p-2.5 bg-violet-500/10 rounded-2xl text-violet-400 group-hover:scale-110 transition-transform">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     </div>
                 </div>
                 <p class="text-slate-400 text-sm font-medium">Utilisateurs</p>
-                <h3 class="text-3xl font-bold text-white mt-1"><%= totalUsersCount %></h3>
+                <h3 class="text-2xl font-bold text-white mt-1"><%= totalUsersCount %></h3>
             </div>
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl hover:border-amber-500/50 transition-all group">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-amber-500/10 rounded-2xl text-amber-400 group-hover:scale-110 transition-transform">
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl hover:border-amber-500/50 transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="p-2.5 bg-amber-500/10 rounded-2xl text-amber-400 group-hover:scale-110 transition-transform">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                     </div>
                 </div>
                 <p class="text-slate-400 text-sm font-medium">Thèmes en attente</p>
-                <h3 class="text-3xl font-bold text-white mt-1"><%= pendingCount %></h3>
+                <h3 class="text-2xl font-bold text-white mt-1"><%= pendingCount %></h3>
             </div>
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl hover:border-emerald-500/50 transition-all group">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-emerald-500/10 rounded-2xl text-emerald-400 group-hover:scale-110 transition-transform">
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl hover:border-emerald-500/50 transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="p-2.5 bg-emerald-500/10 rounded-2xl text-emerald-400 group-hover:scale-110 transition-transform">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                     </div>
                 </div>
                 <p class="text-slate-400 text-sm font-medium">Profils Publics</p>
-                <h3 class="text-3xl font-bold text-white mt-1"><%= totalPublicCount %></h3>
+                <h3 class="text-2xl font-bold text-white mt-1"><%= totalPublicCount %></h3>
             </div>
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl hover:border-slate-600 transition-all group">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-slate-800 rounded-2xl text-slate-400 group-hover:scale-110 transition-transform">
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-3xl hover:border-slate-600 transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="p-2.5 bg-slate-800 rounded-2xl text-slate-400 group-hover:scale-110 transition-transform">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                     </div>
                 </div>
                 <p class="text-slate-400 text-sm font-medium">Profils Privés</p>
-                <h3 class="text-3xl font-bold text-white mt-1"><%= privateCount %></h3>
+                <h3 class="text-2xl font-bold text-white mt-1"><%= privateCount %></h3>
             </div>
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
             <!-- Users List -->
             <section class="xl:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden flex flex-col">
-                <div class="p-6 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="p-5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h2 class="font-bold text-white text-xl">Utilisateurs</h2>
+                        <h2 class="font-bold text-white text-lg">Utilisateurs</h2>
                         <p class="text-sm text-slate-400 mt-1">Total: <span id="totalCount" class="text-white font-medium"><%= users.length %></span></p>
                     </div>
                     
@@ -123,7 +123,7 @@
                                 const uViews = typeof u.views === 'number' ? u.views : 0;
                                 const mustChange = !!u.mustChangePassword;
                             %>
-                                <li class="relative rounded-2xl border border-slate-800 p-4 bg-slate-950/50 hover:border-violet-500/30 transition-all group"
+                                <li class="relative rounded-2xl border border-slate-800 p-3.5 bg-slate-950/50 hover:border-violet-500/30 transition-all group"
                                     data-name="<%- (u.userName||'').toLowerCase() %>"
                                     data-id="<%- (u.id||'').toLowerCase() %>"
                                     data-role="<%- (u.role && (u.role.id || u.role.name)) ? (u.role.id || u.role.name) : 'USER' %>"
@@ -139,7 +139,7 @@
                                     data-search="<%- (u.userName+' '+u.id+' '+(u.publicEmail||u.email||'')).toLowerCase() %>">
                                     
                                     <div class="flex items-start gap-4">
-                                        <div class="w-12 h-12 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-black/20">
+                                        <div class="w-10 h-10 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-white font-bold text-base shadow-lg shadow-black/20">
                                             <%= (u.userName||u.id||'?').charAt(0).toUpperCase() %>
                                         </div>
                                         
@@ -228,9 +228,9 @@
             <!-- Sidebar -->
             <aside class="space-y-6">
                 <!-- Pending Themes -->
-                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="font-bold text-white text-lg">Thèmes en attente</h2>
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-bold text-white text-base">Thèmes en attente</h2>
                         <a href="/dashboard/admin/themes" class="text-xs font-medium text-violet-400 hover:text-violet-300">Voir tout →</a>
                     </div>
                     
