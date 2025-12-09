@@ -965,7 +965,7 @@
           if (!hostname) { showAlert('Entre un nom de domaine', 'error'); return; }
           try {
             btnSave.disabled = true;
-            const res = await fetch('/api/me/host', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hostname }) });
+            const res = await fetch('/api/me/host', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hostname, plinkkId: selectPlinkk.value }) });
             const j = await res.json().catch(() => ({}));
             if (!res.ok) { showAlert(j.error || 'Erreur lors de la configuration du domaine', 'error'); return; }
             if (j.token || (j.verified === false)) {
@@ -987,7 +987,7 @@
         btnVerify?.addEventListener('click', async () => {
           try {
             btnVerify.disabled = true;
-            const res = await fetch('/api/me/host/verify', { method: 'POST' });
+            const res = await fetch('/api/me/host/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plinkkId: selectPlinkk.value }) });
             const j = await res.json().catch(() => ({}));
             if (j.verified) {
               showAlert('Domaine vérifié ✓', 'success');
@@ -1001,7 +1001,7 @@
         btnDelete?.addEventListener('click', async () => {
           try {
             btnDelete.disabled = true;
-            const res = await fetch('/api/me/host', { method: 'DELETE' });
+            const res = await fetch('/api/me/host', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plinkkId: selectPlinkk.value }) });
             const j = await res.json().catch(() => ({}));
             if (!res.ok) { showAlert(j.error || 'Suppression impossible', 'error'); return; }
             showAlert('Domaine désactivé', 'success');
