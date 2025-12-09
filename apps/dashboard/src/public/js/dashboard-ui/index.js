@@ -47,7 +47,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     canvaEnable: qs('#canvaEnable'),
     showVerifiedBadge: qs('#showVerifiedBadge'),
     showPartnerBadge: qs('#showPartnerBadge'),
-    enableVCard: qs('#enableVCard'),
+    // enableVCard: qs('#enableVCard'),
     publicPhone: qs('#publicPhone'),
     enableLinkCategories: qs('#enableLinkCategories'),
     categoriesContainer: qs('#categoriesContainer'),
