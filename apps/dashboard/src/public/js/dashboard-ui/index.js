@@ -158,8 +158,8 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
         sectionsAPIFunction = [ collectPayloadPlinkk ]
         break;
       case "statusbar":
-        sectionsAPI = [ "statusBar", "labels" ]
-        sectionsAPIFunction = [ collectPayloadStatusBar, collectPayloadLabels ]
+        sectionsAPI = [ "statusBar" ]
+        sectionsAPIFunction = [ collectPayloadStatusBar ]
         break;
       case "layout":
         sectionsAPI = [ "layout" ]
@@ -346,12 +346,12 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
   state.links = Array.isArray(cfg.links) ? cfg.links.map((x) => ({ ...x })) : [];
   state.categories = Array.isArray(cfg.categories) ? cfg.categories.map((x) => ({ ...x })) : [];
   // Agencement: ordre des sections
-  const DEFAULT_LAYOUT = ['profile','username','labels','social','email','links'];
-  state.layoutOrder = Array.isArray(cfg.layoutOrder) ? [...cfg.layoutOrder] : [...DEFAULT_LAYOUT];
+  const DEFAULT_LAYOUT = ['profile','username','social','email','links'];
+  state.layoutOrder = Array.isArray(cfg.layoutOrder) ? [...cfg.layoutOrder].filter(x => x !== 'labels') : [...DEFAULT_LAYOUT];
 
     renderBackground({ container: f.backgroundList, addBtn: f.addBackgroundColor, colors: state.background, scheduleAutoSave });
     renderNeon({ container: f.neonList, addBtn: f.addNeonColor, colors: state.neonColors, neonEnableEl: f.neonEnable, scheduleAutoSave });
-    renderLabels({ container: f.labelsList, addBtn: f.addLabel, labels: state.labels, scheduleAutoSave });
+    // renderLabels({ container: f.labelsList, addBtn: f.addLabel, labels: state.labels, scheduleAutoSave });
     renderSocial({ container: f.socialList, addBtn: f.addSocial, socials: state.socialIcon, scheduleAutoSave });
     renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave });
     renderCategories({ 

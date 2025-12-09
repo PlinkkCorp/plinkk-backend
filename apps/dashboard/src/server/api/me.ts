@@ -271,28 +271,52 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/host", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    
     const body = (request.body as { hostname: string, plinkkId: string });
+    if (!body.hostname || !body.plinkkId) {
+        return reply.code(400).send({ error: "Données manquantes" });
+    }
+
     const hostname = body.hostname.trim();
-    const plinkkId = body.plinkkId
+    const plinkkId = body.plinkkId;
+
+    // Vérifier que le plinkk appartient à l'utilisateur
+    const plinkk = await prisma.plinkk.findFirst({
+        where: { id: plinkkId, userId: userId as string }
+    });
+    if (!plinkk) return reply.code(404).send({ error: "Plinkk introuvable" });
+
+    // Vérifier si le domaine est déjà utilisé par un autre plinkk
+    const existingHost = await prisma.host.findUnique({ where: { id: hostname } });
+    if (existingHost && existingHost.plinkkId !== plinkkId) {
+        return reply.code(409).send({ error: "Ce nom de domaine est déjà utilisé" });
+    }
+
     const token = crypto.randomUUID();
-    const updated = await prisma.host.upsert({
-      where: { plinkkId: plinkkId },
-      create: {
-        id: hostname,
-        plinkkId: plinkkId,
-        verified: false,
-        verifyToken: token,
-      },
-      update: {
-        id: hostname,
-        verified: false,
-        verifyToken: token,
-      },
-    });
-    return reply.send({
-      token: updated.verifyToken,
-      verified: updated.verified,
-    });
+    
+    try {
+        const updated = await prisma.host.upsert({
+        where: { plinkkId: plinkkId },
+        create: {
+            id: hostname,
+            plinkkId: plinkkId,
+            verified: false,
+            verifyToken: token,
+        },
+        update: {
+            id: hostname,
+            verified: false,
+            verifyToken: token,
+        },
+        });
+        return reply.send({
+        token: updated.verifyToken,
+        verified: updated.verified,
+        });
+    } catch (e) {
+        request.log.error(e);
+        return reply.code(500).send({ error: "Erreur lors de l'enregistrement du domaine" });
+    }
   });
 
   fastify.post("/host/verify", async (request, reply) => {
