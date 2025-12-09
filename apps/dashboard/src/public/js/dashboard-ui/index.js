@@ -231,7 +231,12 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       // Ne pas recharger instantanément la preview pour éviter le spam en cours de frappe
       schedulePreviewRefresh();
     } catch (e) {
-      setStatus('Erreur: ' + (e?.message || ''), 'error');
+      let msg = e?.message || '';
+      try {
+         const json = JSON.parse(msg);
+         if (json.error) msg = json.error;
+      } catch {}
+      setStatus('Erreur: ' + msg, 'error');
     } finally {
       saving = false;
       if (saveQueued) { saveQueued = false; scheduleAutoSave(); }

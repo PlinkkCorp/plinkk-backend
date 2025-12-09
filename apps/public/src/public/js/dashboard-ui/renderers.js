@@ -250,7 +250,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
             card.type = 'button';
             card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left flex items-center gap-3';
             const img = document.createElement('img');
-            img.src = `/images/icons/${item.iconSlug}.svg`;
+            img.src = `/public/images/icons/${item.iconSlug}.svg`;
             img.className = 'h-8 w-8 rounded bg-slate-800 border border-slate-700';
             const col = document.createElement('div');
             const title = document.createElement('div');
