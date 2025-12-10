@@ -1,5 +1,5 @@
-import Fastify from "fastify";
 import "dotenv/config";
+import Fastify from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { registerPlugins } from "./config/fastify";
 import { registerCronJobs } from "./config/cron";
