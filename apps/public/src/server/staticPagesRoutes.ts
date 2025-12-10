@@ -1,147 +1,75 @@
-import { FastifyInstance } from "fastify";
+import { FastifyInstance, FastifyRequest } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { replyView } from "../lib/replyView";
 
+const STATIC_PAGES = [
+  { path: "/about", template: "about/about.ejs" },
+  { path: "/privacy", template: "about/privacy.ejs" },
+  { path: "/terms", template: "about/terms.ejs" },
+  { path: "/cookies", template: "about/cookies.ejs" },
+  { path: "/legal", template: "about/legal.ejs" },
+  { path: "/docs", template: "docs.ejs" },
+];
+
+async function getCurrentUser(request: FastifyRequest) {
+  const userId = request.session.get("data");
+  return userId ? await prisma.user.findUnique({ where: { id: userId } }) : null;
+}
+
+function getBaseUrl(request: FastifyRequest): string {
+  const host =
+    (request.headers["x-forwarded-host"] as string) ||
+    (request.headers.host as string) ||
+    "0.0.0.0:3001";
+  const proto = (
+    (request.headers["x-forwarded-proto"] as string) ||
+    (request.protocol as string) ||
+    "http"
+  ).split(",")[0];
+  return `${proto}://${host}`;
+}
+
+const BLOCKED_BOTS = [
+  "Baiduspider", "360Spider", "Sogouspider", "Yisouspider", "PetalBot",
+  "Bytespider", "GPTBot", "OAI-SearchBot", "anthropic-ai", "ClaudeBot",
+  "PerplexityBot", "Google-Extended", "Applebot-Extended", "meta-externalagent",
+  "DuckAssistBot", "ChatGPT-User", "Gemini-Deep-Research", "GoogleAgent-Mariner",
+  "Google-NotebookLM", "CCBot", "Claude-User", "Claude-SearchBot",
+  "Perplexity-User", "AI2Bot", "MistralAI-User",
+];
+
+const SITEMAP_STATIC_PATHS = [
+  "", "about", "contact", "privacy", "terms", "cookies", "legal", "users", "dashboard", "docs",
+];
+
 export function staticPagesRoutes(fastify: FastifyInstance) {
-  fastify.get("/about", async (request, reply) => {
-    const currentUserId = request.session.get("data");
-    const currentUser = currentUserId
-      ? await prisma.user.findUnique({
-          where: { id: currentUserId },
-        })
-      : null;
-    return await replyView(reply, "about/about.ejs", currentUser, {});
-  });
+  for (const page of STATIC_PAGES) {
+    fastify.get(page.path, async (request, reply) => {
+      const currentUser = await getCurrentUser(request);
+      return replyView(reply, page.template, currentUser, {});
+    });
+  }
 
-  fastify.get("/privacy", async (request, reply) => {
-    const currentUserId = request.session.get("data");
-    const currentUser = currentUserId
-      ? await prisma.user.findUnique({
-          where: { id: currentUserId },
-        })
-      : null;
-    return await replyView(reply, "about/privacy.ejs", currentUser, {});
-  });
-
-  fastify.get("/terms", async (request, reply) => {
-    const currentUserId = request.session.get("data")
-    const currentUser = currentUserId
-      ? await prisma.user.findUnique({
-          where: { id: currentUserId },
-        })
-      : null;
-    return await replyView(reply, "about/terms.ejs", currentUser, {});
-  });
-
-  fastify.get("/cookies", async (request, reply) => {
-    const currentUserId = request.session.get("data")
-    const currentUser = currentUserId
-      ? await prisma.user.findUnique({
-          where: { id: currentUserId },
-        })
-      : null;
-    return await replyView(reply, "about/cookies.ejs", currentUser, {});
-  });
-
-  fastify.get("/legal", async (request, reply) => {
-    const currentUserId = request.session.get("data")
-    const currentUser = currentUserId
-      ? await prisma.user.findUnique({
-          where: { id: currentUserId },
-        })
-      : null;
-    return await replyView(reply, "about/legal.ejs", currentUser, {});
-  });
-
-  fastify.get("/docs", async (request, reply) => {
-    const currentUserId = request.session.get("data")
-    const currentUser = currentUserId
-      ? await prisma.user.findUnique({
-          where: { id: currentUserId },
-        })
-      : null;
-    return await replyView(reply, "docs.ejs", currentUser, {});
-  });
-
-  // Accept trailing slash as well and redirect to canonical path
   fastify.get("/docs/", async (request, reply) => {
     return reply.code(301).redirect("/docs");
   });
 
-  // robots.txt
   fastify.get("/robots.txt", async (request, reply) => {
-    const host =
-      (request.headers["x-forwarded-host"] as string) ||
-      (request.headers.host as string) ||
-      "0.0.0.0:3001";
-    const proto = (
-      (request.headers["x-forwarded-proto"] as string) ||
-      (request.protocol as string) ||
-      "http"
-    ).split(",")[0];
-    const base = `${proto}://${host}`;
-    const txt = 
-    `User-agent: Baiduspider
-User-agent: 360Spider
-User-agent: Sogouspider
-User-agent: Yisouspider
-User-agent: PetalBot
-User-agent: Bytespider
-User-agent: GPTBot
-User-agent: OAI-SearchBot
-User-agent: anthropic-ai
-User-agent: ClaudeBot
-User-agent: PerplexityBot
-User-agent: Google-Extended
-User-agent: Applebot-Extended
-User-agent: meta-externalagent
-User-agent: DuckAssistBot
-User-agent: ChatGPT-User
-User-agent: Gemini-Deep-Research
-User-agent: GoogleAgent-Mariner
-User-agent: Google-NotebookLM
-User-agent: CCBot
-User-agent: Claude-User
-User-agent: Claude-SearchBot
-User-agent: Perplexity-User
-User-agent: AI2Bot
-User-agent: MistralAI-User
+    const base = getBaseUrl(request);
+    const botRules = BLOCKED_BOTS.map((bot) => `User-agent: ${bot}`).join("\n");
+    const txt = `${botRules}
 Disallow: /
 
 User-agent: *
 Allow: /
 Sitemap: ${base}/sitemap.xml
-
-    `
-    reply
-      .type("text/plain")
-      .send(txt);
+`;
+    reply.type("text/plain").send(txt);
   });
 
-  // sitemap.xml
   fastify.get("/sitemap.xml", async (request, reply) => {
-    const host =
-      (request.headers["x-forwarded-host"] as string) ||
-      (request.headers.host as string) ||
-      "0.0.0.0:3001";
-    const proto = (
-      (request.headers["x-forwarded-proto"] as string) ||
-      (request.protocol as string) ||
-      "http"
-    ).split(",")[0];
-    const base = `${proto}://${host}`;
-    const staticUrls = [
-      "",
-      "about",
-      "contact",
-      "privacy",
-      "terms",
-      "cookies",
-      "legal",
-      "users",
-      "dashboard",
-      "docs",
-    ].map((p) => (p ? `${base}/${p}` : `${base}/`));
+    const base = getBaseUrl(request);
+    const staticUrls = SITEMAP_STATIC_PATHS.map((p) => (p ? `${base}/${p}` : `${base}/`));
     const users = await prisma.user.findMany({
       select: { id: true },
       orderBy: { createdAt: "asc" },

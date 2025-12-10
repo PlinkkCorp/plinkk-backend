@@ -7,7 +7,7 @@ import QRCode from "qrcode";
 import { existsSync, mkdirSync, writeFileSync, unlinkSync } from "fs";
 import { User, prisma } from "@plinkk/prisma";
 import { apiMeThemesRoutes } from "./me/theme";
-import { apiMePlinkksRoutes } from "./me/plinkks";
+import { apiMePlinkksRoutes } from "./me/plinkks/index";
 import path from "path";
 import crypto from "crypto";
 
