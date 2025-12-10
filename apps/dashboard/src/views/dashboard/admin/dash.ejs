@@ -130,7 +130,7 @@
                                     data-role-name="<%- (u.role && (u.role.name || u.role.id)) ? (u.role.name || u.role.id) : 'USER' %>"
                                     data-visible="<%- u.isPublic ? 'public' : 'private' %>"
                                     data-email-public="<%- u.publicEmail ? '1' : '0' %>"
-                                    data-twofa="<%- (u.twoFactorEnabled || (u.twoFactorSecret && u.twoFactorSecret !== '')) ? '1' : '0' %>"
+                                    data-twofa="<%- u.twoFactorEnabled ? '1' : '0' %>"
                                     data-views="<%- uViews %>"
                                     data-plinkks-count="<%- plCount %>"
                                     data-plinkks-active="<%- plActive %>"

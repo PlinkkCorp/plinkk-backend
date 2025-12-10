@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { prisma, User } from "@plinkk/prisma";
 import { replyView } from "../lib/replyView";
 import { verifyRoleAdmin, verifyRoleDeveloper } from "../lib/verifyRole";
-import { dashboardAdminRoutes } from "./dashboard/admin";
+import { dashboardAdminRoutes } from "./dashboard/admin/index";
 import dashboardUserSessionsRoutes from "./dashboard/user/sessions";
 
 // const prisma = new PrismaClient();

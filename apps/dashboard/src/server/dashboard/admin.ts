@@ -418,7 +418,6 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
           cosmetics: true,
           createdAt: true,
           twoFactorEnabled: true,
-          twoFactorSecret: true,
           plinkks: {
             select: {
               id: true,
