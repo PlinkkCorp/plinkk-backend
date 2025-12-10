@@ -8,307 +8,394 @@
   <link rel="icon" href="/public/images/logo.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="/umami_script.js" data-website-id="69e21905-d1fc-48c8-a64e-26a6ad5ad089" data-host-url="https://analytics.plinkk.fr"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --ease-out-quad: cubic-bezier(.22, 1, .36, 1);
+    * { font-family: 'Inter', system-ui, sans-serif; }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
     }
-
-    /* Page + card */
+    
+    @keyframes float-delayed {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-15px) rotate(-5deg); }
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+    
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
     @keyframes fade-in {
-      from {
-        opacity: 0
-      }
-
-      to {
-        opacity: 1
-      }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
-
-    @keyframes slide-up {
-      from {
-        opacity: 0;
-        transform: translateY(8px)
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0)
-      }
+    
+    @keyframes slide-in-right {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
     }
-
-    @keyframes bg-pan {
-      0% {
-        background-position: 0% 50%
-      }
-
-      50% {
-        background-position: 100% 50%
-      }
-
-      100% {
-        background-position: 0% 50%
-      }
+    
+    @keyframes slide-in-left {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
     }
-
-    .animate-fade-in {
-      animation: fade-in .36s var(--ease-out-quad) both
-    }
-
-    .animate-slide-up {
-      animation: slide-up .4s var(--ease-out-quad) both
-    }
-
-    @keyframes in-right {
-      from {
-        opacity: 0;
-        transform: translateX(16px)
-      }
-
-      to {
-        opacity: 1;
-        transform: translateX(0)
-      }
-    }
-
-    @keyframes in-left {
-      from {
-        opacity: 0;
-        transform: translateX(-16px)
-      }
-
-      to {
-        opacity: 1;
-        transform: translateX(0)
-      }
-    }
-
-    @keyframes out-right {
-      from {
-        opacity: 1;
-        transform: translateX(0)
-      }
-
-      to {
-        opacity: 0;
-        transform: translateX(16px)
-      }
-    }
-
-    @keyframes out-left {
-      from {
-        opacity: 1;
-        transform: translateX(0)
-      }
-
-      to {
-        opacity: 0;
-        transform: translateX(-16px)
-      }
-    }
-
-    .animate-in-right {
-      animation: in-right .28s var(--ease-out-quad) both
-    }
-
-    .animate-in-left {
-      animation: in-left .28s var(--ease-out-quad) both
-    }
-
-    .animate-out-right {
-      animation: out-right.24s var(--ease-out-quad) both
-    }
-
-    .animate-out-left {
-      animation: out-left .24s var(--ease-out-quad) both
-    }
-
+    
     @keyframes shake {
-
-      0%,
-      100% {
-        transform: translateX(0)
-      }
-
-      20% {
-        transform: translateX(-6px)
-      }
-
-      40% {
-        transform: translateX(6px)
-      }
-
-      60% {
-        transform: translateX(-4px)
-      }
-
-      80% {
-        transform: translateX(4px)
-      }
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+    
+    .animate-float { animation: float 6s ease-in-out infinite; }
+    .animate-float-delayed { animation: float-delayed 7s ease-in-out infinite; animation-delay: 1s; }
+    .animate-pulse-glow { animation: pulse-glow 4s ease-in-out infinite; }
+    .animate-gradient { animation: gradient-shift 8s ease infinite; background-size: 200% 200%; }
+    .animate-fade-up { animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .animate-fade-in { animation: fade-in 0.4s ease forwards; }
+    .animate-slide-right { animation: slide-in-right 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .animate-slide-left { animation: slide-in-left 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .animate-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+    
+    .glass-card {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .input-field {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid rgba(100, 116, 139, 0.2);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .input-field:focus {
+      background: rgba(30, 41, 59, 0.8);
+      border-color: rgba(139, 92, 246, 0.5);
+      box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1), 0 0 30px rgba(139, 92, 246, 0.1);
+    }
+    
+    .input-field-signup:focus {
+      border-color: rgba(16, 185, 129, 0.5);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1), 0 0 30px rgba(16, 185, 129, 0.1);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 40px rgba(139, 92, 246, 0.4);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0) scale(0.98);
+    }
+    
+    .btn-signup {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    .btn-signup:hover {
+      box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+    }
+    
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    
+    .tab-indicator {
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .animate-shake {
-      animation: shake .36s cubic-bezier(.36, .07, .19, .97) both
+    .form-section {
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
-    #authCard {
-      transition: transform .18s var(--ease-out-quad), filter .18s var(--ease-out-quad)
-    }
-
-    #authCard.loading {
-      transform: scale(.995);
-      filter: saturate(.95) brightness(.98)
+    .form-section.hidden {
+      display: none;
     }
 
     @media (prefers-reduced-motion: reduce) {
-      * {
-        animation-duration: .01ms !important;
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
-        transition-duration: 0s !important;
-        scroll-behavior: auto !important
+        transition-duration: 0.01ms !important;
       }
     }
   </style>
 </head>
 
-<body class="min-h-screen text-slate-100 grid place-items-center p-4 animate-fade-in" style="background: radial-gradient(1200px 800px at 10% 10%, rgba(79,70,229,.25), transparent 60%),
-                       radial-gradient(1200px 800px at 90% 90%, rgba(2,132,199,.25), transparent 60%),
-                       linear-gradient(120deg, #0f172a, #0b1220 35%, #111827 70%, #0b1022);
-               background-size: 200% 200%;
-               animation: bg-pan 18s ease infinite;">
-  <main class="w-full max-w-md">
-    <div class="mb-6 flex items-center justify-center gap-2 text-slate-200 animate-slide-up">
-      <img src="/public/images/logo.svg" alt="Plinkk" class="h-9 w-9 rounded shadow" />
-      <h1 class="text-xl font-semibold tracking-tight">Plinkk</h1>
-    </div>
+<body class="min-h-screen bg-slate-950 text-white overflow-x-hidden">
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="orb w-[600px] h-[600px] bg-violet-600/30 -top-48 -left-48 animate-float"></div>
+    <div class="orb w-[500px] h-[500px] bg-indigo-600/20 top-1/4 right-0 animate-float-delayed"></div>
+    <div class="orb w-[400px] h-[400px] bg-fuchsia-600/20 bottom-0 left-1/4 animate-pulse-glow"></div>
+    <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxjaXJjbGUgZmlsbD0iI2ZmZiIgZmlsbC1vcGFjaXR5PSIuMDMiIGN4PSIzMCIgY3k9IjMwIiByPSIxIi8+PC9nPjwvc3ZnPg==')] opacity-50"></div>
+  </div>
 
-    <div id="authCard"
-      class="relative rounded-2xl border border-slate-800/60 bg-slate-900/60 backdrop-blur-md shadow-2xl overflow-hidden animate-slide-up ring-1 ring-white/5"
-      style="animation-delay:60ms">
-      <nav id="tabs" class="relative grid grid-cols-2 text-sm">
-        <button id="tabLogin" type="button" class="px-4 py-3 font-medium text-indigo-300 focus:outline-none"
-          aria-selected="true">Connexion</button>
-        <button id="tabSignup" type="button"
-          class="px-4 py-3 font-medium text-slate-400 hover:text-slate-200 focus:outline-none"
-          aria-selected="false">Inscription</button>
-        <span id="tabIndicator"
-          class="pointer-events-none absolute bottom-0 left-0 h-0.5 w-1/2 bg-indigo-500 transition-transform duration-300 ease-out"></span>
-      </nav>
-
-      <section id="loginForm" class="p-5 space-y-4">
-        <form action="/login" method="post" class="space-y-3">
-          <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
-          <label class="block text-sm">
-            <span class="text-slate-300">E-mail ou nom d'utilisateur</span>
-            <input type="text" name="email" required
-              class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 outline-none ring-0 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-600/30 transition"
-              placeholder="vous@exemple.com ou votrepseudo" />
-          </label>
-          <label class="block text-sm">
-            <span class="text-slate-300">Mot de passe</span>
-            <div class="relative mt-1">
-              <input id="loginPassword" type="password" name="password" required
-                class="w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 pr-10 outline-none ring-0 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-600/30 transition"
-                placeholder="••••••••" />
-              <button type="button"
-                class="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-200 focus:outline-none"
-                data-toggle="#loginPassword" aria-label="Afficher/masquer le mot de passe">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M2.036 12.322a1.012 1.012 0 010-.644C3.423 7.51 7.36 5 12 5c4.64 0 8.577 2.51 9.964 6.678.07.214.07.45 0 .644C20.577 16.49 16.64 19 12 19c-4.64 0-8.577-2.51-9.964-6.678z" />
-                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none" />
-                </svg>
-              </button>
-            </div>
-          </label>
-          <button type="submit"
-            class="w-full mt-2 rounded-md bg-indigo-600 hover:bg-indigo-500 active:scale-[.99] text-white font-medium py-2.5 shadow transition">
-            Se connecter
-          </button>
-        </form>
-        <p class="errorClass"></p>
-        <p class="text-center text-xs text-slate-400">
-          Pas de compte ?
-          <button id="switchToSignup" type="button"
-            class="text-indigo-300 hover:text-indigo-200 underline underline-offset-4">Créer un compte</button>
-        </p>
-      </section>
-
-      <section id="signupForm" class="p-5 space-y-4 hidden">
-        <form action="/register" method="post" class="space-y-3">
-          <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
-          <label class="block text-sm">
-            <span class="text-slate-300">Nom d'utilisateur</span>
-            <input type="text" name="username" required minlength="3" maxlength="30"
-              class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 outline-none ring-0 focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-600/30 transition"
-              placeholder="votrepseudo" />
-          </label>
-          <label class="block text-sm">
-            <span class="text-slate-300">Adresse e-mail</span>
-            <input type="email" name="email" required
-              class="mt-1 w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 outline-none ring-0 focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-600/30 transition"
-              placeholder="vous@exemple.com" />
-          </label>
-          <label class="block text-sm">
-            <span class="text-slate-300">Mot de passe</span>
-            <div class="relative mt-1">
-              <input id="signupPassword" type="password" name="password" required
-                class="w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 pr-10 outline-none ring-0 focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-600/30 transition"
-                placeholder="••••••••" />
-              <button type="button"
-                class="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-200 focus:outline-none"
-                data-toggle="#signupPassword" aria-label="Afficher/masquer le mot de passe">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M2.036 12.322a1.012 1.012 0 010-.644C3.423 7.51 7.36 5 12 5c4.64 0 8.577 2.51 9.964 6.678.07.214.07.45 0 .644C20.577 16.49 16.64 19 12 19c-4.64 0-8.577-2.51-9.964-6.678z" />
-                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none" />
-                </svg>
-              </button>
-            </div>
-          </label>
-          <label class="block text-sm">
-            <span class="text-slate-300">Confirmer le mot de passe</span>
-            <div class="relative mt-1">
-              <input id="signupPasswordVerif" type="password" name="passwordVerif" required
-                class="w-full rounded bg-slate-900/60 border border-slate-800/60 px-3 py-2 pr-10 outline-none ring-0 focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-600/30 transition"
-                placeholder="••••••••" />
-              <button type="button"
-                class="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-200 focus:outline-none"
-                data-toggle="#signupPasswordVerif" aria-label="Afficher/masquer le mot de passe">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M2.036 12.322a1.012 1.012 0 010-.644C3.423 7.51 7.36 5 12 5c4.64 0 8.577 2.51 9.964 6.678.07.214.07.45 0 .644C20.577 16.49 16.64 19 12 19c-4.64 0-8.577-2.51-9.964-6.678z" />
-                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" fill="none" />
-                </svg>
-              </button>
-            </div>
-          </label>
-          <label class="flex items-start gap-2 text-sm">
-            <input type="checkbox" name="acceptTerms" required class="mt-1 h-4 w-4 rounded border-slate-700 bg-slate-800 text-indigo-600 focus:ring-indigo-500" />
-            <span class="text-slate-300">J'accepte les <a href="/terms" class="underline hover:text-white">Conditions générales d'utilisation (CGU)</a> et la <a href="/privacy" class="underline hover:text-white">politique de confidentialité</a>.</span>
-          </label>
-          <button type="submit"
-            class="w-full mt-2 rounded-md bg-emerald-600 hover:bg-emerald-500 active:scale-[.99] text-white font-medium py-2.5 shadow transition">
-            S'inscrire
-          </button>
-        </form>
-        <p class="errorClass"></p>
-        <p class="text-center text-xs text-slate-400">
-          Déjà un compte ?
-          <button id="switchToLogin" type="button"
-            class="text-indigo-300 hover:text-indigo-200 underline underline-offset-4">Se connecter</button>
-        </p>
-      </section>
-
-      <div id="loadingOverlay"
-        class="hidden absolute inset-0 bg-slate-900/70 backdrop-blur-sm flex flex-col items-center justify-center gap-3 text-slate-200">
-        <svg class="h-6 w-6 text-indigo-300 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+  <main class="relative min-h-screen flex items-center justify-center p-4 sm:p-6">
+    <div class="w-full max-w-md">
+    <a href="<%= frontendUrl %>" class="inline-flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium mb-6 transition-colors group animate-fade-up" style="animation-delay: 0.05s; opacity: 0;">
+      <svg class="h-4 w-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
-        <div class="text-sm font-medium">Enregistrement...</div>
+        Retour à l'accueil
+      </a>
+
+      <div class="text-center mb-8 animate-fade-up" style="animation-delay: 0.1s; opacity: 0;">
+        <a href="<%= frontendUrl %>" class="inline-flex items-center gap-3 group">
+          <div class="relative">
+            <div class="absolute inset-0 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
+            <img src="/public/images/logo.svg" alt="Plinkk" class="relative h-12 w-12 rounded-2xl shadow-2xl" />
+          </div>
+          <span class="text-2xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">Plinkk</span>
+        </a>
+        <p class="mt-4 text-slate-400 text-sm">Créez votre page de liens personnalisée</p>
+      </div>
+
+      <div id="authCard" class="glass-card rounded-3xl shadow-2xl overflow-hidden animate-fade-up" style="animation-delay: 0.2s; opacity: 0;">
+        <div class="relative">
+          <nav id="tabs" class="grid grid-cols-2 relative z-10">
+            <button id="tabLogin" type="button" 
+              class="py-4 text-sm font-semibold transition-colors duration-300 text-white"
+              aria-selected="true">
+              Connexion
+            </button>
+            <button id="tabSignup" type="button" 
+              class="py-4 text-sm font-semibold transition-colors duration-300 text-slate-400 hover:text-slate-200"
+              aria-selected="false">
+              Inscription
+            </button>
+          </nav>
+          <div class="absolute bottom-0 left-0 right-0 h-px bg-slate-800"></div>
+          <div id="tabIndicator" class="tab-indicator absolute bottom-0 left-0 w-1/2 h-0.5 bg-gradient-to-r from-violet-500 to-indigo-500"></div>
+        </div>
+
+        <section id="loginForm" class="form-section p-6 sm:p-8">
+          <form action="/login" method="post" class="space-y-5">
+            <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
+            
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-slate-300">E-mail ou nom d'utilisateur</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <input type="text" name="email" required
+                  class="input-field w-full pl-12 pr-4 py-3.5 rounded-xl text-white placeholder-slate-500 outline-none"
+                  placeholder="vous@exemple.com" />
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-slate-300">Mot de passe</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <input id="loginPassword" type="password" name="password" required
+                  class="input-field w-full pl-12 pr-12 py-3.5 rounded-xl text-white placeholder-slate-500 outline-none"
+                  placeholder="••••••••" />
+                <button type="button" data-toggle="#loginPassword"
+                  class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-slate-300 transition-colors"
+                  aria-label="Afficher/masquer le mot de passe">
+                  <svg class="eye-open h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <svg class="eye-closed h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <p class="errorClass"></p>
+
+            <button type="submit"
+              class="btn-primary w-full py-4 rounded-xl text-white font-semibold shadow-lg">
+              Se connecter
+            </button>
+          </form>
+
+          <div class="mt-6 text-center">
+            <p class="text-sm text-slate-400">
+              Pas encore de compte ?
+              <button id="switchToSignup" type="button" class="text-violet-400 hover:text-violet-300 font-medium ml-1 transition-colors">
+                Créer un compte
+              </button>
+            </p>
+          </div>
+        </section>
+
+        <section id="signupForm" class="form-section p-6 sm:p-8 hidden">
+          <form action="/register" method="post" class="space-y-4">
+            <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
+            
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-slate-300">Nom d'utilisateur</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <span class="text-slate-500 font-medium">@</span>
+                </div>
+                <input type="text" name="username" required minlength="3" maxlength="30"
+                  class="input-field input-field-signup w-full pl-10 pr-4 py-3.5 rounded-xl text-white placeholder-slate-500 outline-none"
+                  placeholder="votrepseudo" />
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-slate-300">Adresse e-mail</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <input type="email" name="email" required
+                  class="input-field input-field-signup w-full pl-12 pr-4 py-3.5 rounded-xl text-white placeholder-slate-500 outline-none"
+                  placeholder="vous@exemple.com" />
+              </div>
+            </div>
+
+            <!-- Password Field -->
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-slate-300">Mot de passe</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <input id="signupPassword" type="password" name="password" required
+                  class="input-field input-field-signup w-full pl-12 pr-12 py-3.5 rounded-xl text-white placeholder-slate-500 outline-none"
+                  placeholder="Minimum 8 caractères" />
+                <button type="button" data-toggle="#signupPassword"
+                  class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-slate-300 transition-colors"
+                  aria-label="Afficher/masquer le mot de passe">
+                  <svg class="eye-open h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <svg class="eye-closed h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Confirm Password Field -->
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-slate-300">Confirmer le mot de passe</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <input id="signupPasswordVerif" type="password" name="passwordVerif" required
+                  class="input-field input-field-signup w-full pl-12 pr-12 py-3.5 rounded-xl text-white placeholder-slate-500 outline-none"
+                  placeholder="••••••••" />
+                <button type="button" data-toggle="#signupPasswordVerif"
+                  class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-slate-300 transition-colors"
+                  aria-label="Afficher/masquer le mot de passe">
+                  <svg class="eye-open h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <svg class="eye-closed h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Terms Checkbox -->
+            <div class="flex items-start gap-3 pt-2">
+              <div class="flex items-center h-6">
+                <input type="checkbox" name="acceptTerms" required 
+                  class="h-5 w-5 rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0 cursor-pointer" />
+              </div>
+              <label class="text-sm text-slate-400 leading-relaxed">
+                J'accepte les <a href="/terms" class="text-emerald-400 hover:text-emerald-300 underline underline-offset-2">CGU</a> et la <a href="/privacy" class="text-emerald-400 hover:text-emerald-300 underline underline-offset-2">politique de confidentialité</a>
+              </label>
+            </div>
+
+            <!-- Error Message -->
+            <p class="errorClass"></p>
+
+            <!-- Submit Button -->
+            <button type="submit"
+              class="btn-primary btn-signup w-full py-4 rounded-xl text-white font-semibold shadow-lg mt-2">
+              Créer mon compte
+            </button>
+          </form>
+
+          <!-- Switch Link -->
+          <div class="mt-6 text-center">
+            <p class="text-sm text-slate-400">
+              Déjà un compte ?
+              <button id="switchToLogin" type="button" class="text-emerald-400 hover:text-emerald-300 font-medium ml-1 transition-colors">
+                Se connecter
+              </button>
+            </p>
+          </div>
+        </section>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="hidden absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-50">
+          <div class="relative">
+            <div class="h-12 w-12 rounded-full border-2 border-violet-500/20"></div>
+            <div class="absolute top-0 left-0 h-12 w-12 rounded-full border-2 border-transparent border-t-violet-500 animate-spin"></div>
+          </div>
+          <span class="text-sm font-medium text-slate-300">Chargement...</span>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="mt-8 text-center animate-fade-up" style="animation-delay: 0.3s; opacity: 0;">
+        <p class="text-xs text-slate-500">
+          © 2024 Plinkk. Tous droits réservés.
+        </p>
       </div>
     </div>
   </main>
@@ -319,18 +406,17 @@
       const vars = query.split('&');
       for (const v of vars) {
         const pair = v.split('=');
-        if (pair[0] === variable) { return pair[1]; }
+        if (pair[0] === variable) return decodeURIComponent(pair[1] || '');
       }
       return '';
     }
 
     function showError(message) {
-      const nodes = document.getElementsByClassName('errorClass');
-      for (const el of nodes) {
+      document.querySelectorAll('.errorClass').forEach(el => {
         el.textContent = message;
-        el.className = 'errorClass mt-1 rounded-lg border border-rose-700 bg-rose-900/40 text-rose-200 text-sm px-3 py-2 animate-shake';
+        el.className = 'errorClass p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm animate-shake';
         el.addEventListener('animationend', () => el.classList.remove('animate-shake'), { once: true });
-      }
+      });
     }
 
     const state = { current: 'login' };
@@ -341,12 +427,13 @@
       const indicator = document.getElementById('tabIndicator');
       const isLogin = which === 'login';
 
-      tabLogin.className = 'px-4 py-3 font-medium ' + (isLogin ? 'text-indigo-300' : 'text-slate-400 hover:text-slate-200');
-      tabSignup.className = 'px-4 py-3 font-medium ' + (!isLogin ? 'text-indigo-300' : 'text-slate-400 hover:text-slate-200');
-      tabLogin.setAttribute('aria-selected', isLogin ? 'true' : 'false');
-      tabSignup.setAttribute('aria-selected', !isLogin ? 'true' : 'false');
+      tabLogin.className = `py-4 text-sm font-semibold transition-colors duration-300 ${isLogin ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`;
+      tabSignup.className = `py-4 text-sm font-semibold transition-colors duration-300 ${!isLogin ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`;
+      tabLogin.setAttribute('aria-selected', isLogin);
+      tabSignup.setAttribute('aria-selected', !isLogin);
 
       indicator.style.transform = isLogin ? 'translateX(0%)' : 'translateX(100%)';
+      indicator.className = `tab-indicator absolute bottom-0 left-0 w-1/2 h-0.5 ${isLogin ? 'bg-gradient-to-r from-violet-500 to-indigo-500' : 'bg-gradient-to-r from-emerald-500 to-teal-500'}`;
     }
 
     function activateTab(which) {
@@ -356,23 +443,22 @@
       const signup = document.getElementById('signupForm');
       const fromEl = state.current === 'login' ? login : signup;
       const toEl = which === 'login' ? login : signup;
-      const direction = which === 'login' ? 'left' : 'right';
 
-      toEl.classList.remove('hidden');
-      toEl.classList.remove('animate-out-left', 'animate-out-right', 'animate-in-left', 'animate-in-right');
-      fromEl.classList.remove('animate-out-left', 'animate-out-right', 'animate-in-left', 'animate-in-right');
-
-      toEl.classList.add(direction === 'right' ? 'animate-in-right' : 'animate-in-left');
-      fromEl.classList.add(direction === 'right' ? 'animate-out-left' : 'animate-out-right');
-
-      fromEl.addEventListener('animationend', () => {
+      fromEl.style.opacity = '0';
+      fromEl.style.transform = which === 'login' ? 'translateX(20px)' : 'translateX(-20px)';
+      
+      setTimeout(() => {
         fromEl.classList.add('hidden');
-        fromEl.classList.remove('animate-out-left', 'animate-out-right');
-      }, { once: true });
-
-      toEl.addEventListener('animationend', () => {
-        toEl.classList.remove('animate-in-left', 'animate-in-right');
-      }, { once: true });
+        toEl.classList.remove('hidden');
+        toEl.style.opacity = '0';
+        toEl.style.transform = which === 'login' ? 'translateX(-20px)' : 'translateX(20px)';
+        
+        requestAnimationFrame(() => {
+          toEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+          toEl.style.opacity = '1';
+          toEl.style.transform = 'translateX(0)';
+        });
+      }, 200);
 
       state.current = which;
       updateTabsUI(which);
@@ -382,30 +468,42 @@
       document.querySelectorAll('[data-toggle]').forEach(btn => {
         const target = document.querySelector(btn.getAttribute('data-toggle'));
         if (!target) return;
+        
         btn.addEventListener('click', () => {
           const isPwd = target.type === 'password';
           target.type = isPwd ? 'text' : 'password';
-          btn.classList.toggle('text-indigo-300', isPwd);
+          
+          const eyeOpen = btn.querySelector('.eye-open');
+          const eyeClosed = btn.querySelector('.eye-closed');
+          
+          if (isPwd) {
+            eyeOpen.classList.add('hidden');
+            eyeClosed.classList.remove('hidden');
+          } else {
+            eyeOpen.classList.remove('hidden');
+            eyeClosed.classList.add('hidden');
+          }
         });
       });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       const err = getQueryVariable('error');
-      if (err) { showError(decodeURIComponent(err)); }
+      if (err) showError(err);
 
       document.getElementById('tabLogin').addEventListener('click', () => activateTab('login'));
       document.getElementById('tabSignup').addEventListener('click', () => activateTab('signup'));
       document.getElementById('switchToSignup').addEventListener('click', () => activateTab('signup'));
       document.getElementById('switchToLogin').addEventListener('click', () => activateTab('login'));
 
-      if (location.hash === '#signup') { activateTab('signup'); }
+      if (location.hash === '#signup') activateTab('signup');
       updateTabsUI(state.current);
       attachPasswordToggles();
 
-      const signupFormEl = document.querySelector('#signupForm form');
-      const overlay = document.getElementById('loadingOverlay');
-      const card = document.getElementById('authCard');
+      // Trigger animations
+      document.querySelectorAll('.animate-fade-up').forEach(el => {
+        el.style.opacity = '1';
+      });
     });
   </script>
 </body>
