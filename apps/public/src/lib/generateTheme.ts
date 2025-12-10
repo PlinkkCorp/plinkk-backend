@@ -19,7 +19,7 @@ export async function generateTheme(userId?: string) {
       data: true,
       author: { select: { id: true, userName: true } },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: "asc" },
   });
   const list = [];
   for (const t of community) {
