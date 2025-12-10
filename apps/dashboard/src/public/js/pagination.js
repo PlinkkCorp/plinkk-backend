@@ -1,7 +1,3 @@
-// Module de pagination réutilisable
-// Exporte une fonction createPaginator(container, options)
-// options: { pageSize, selectors: { items: string, prev, next, current, total }, onRender: function(pageItems, meta) }
-
 (function(global){
   function createPaginator(root, opts){
     let pageSize = (opts && opts.pageSize) || 21;
@@ -14,7 +10,6 @@
     let filtered = items.slice();
     let currentPage = 1;
 
-    // url sync helpers
     function getPageFromUrl(){
       try{
         const params = new URLSearchParams(window.location.search);
@@ -35,7 +30,6 @@
       }catch(e){ /* ignore */ }
     }
 
-    // react to back/forward
     window.addEventListener('popstate', () => {
       const p = getPageFromUrl();
       if (p) {
@@ -46,11 +40,9 @@
       render();
     });
 
-    // initial page from url (before first render)
     const initial = getPageFromUrl();
     if (initial) currentPage = initial;
 
-    // build controls if not present
     let controls = root.querySelector('.paginator-controls');
     if (!controls) {
       controls = document.createElement('div');
@@ -110,7 +102,6 @@
       const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
       if (currentPage > totalPages) currentPage = totalPages;
       if (elCurrent) {
-        // update input value for inputs, otherwise update text content
         if (elCurrent.tagName === 'INPUT') elCurrent.value = String(currentPage);
         else elCurrent.textContent = String(currentPage);
       }
@@ -128,11 +119,9 @@
       });
       onRender(filtered.slice(start, end), { currentPage, pageSize, totalItems: filtered.length });
       updateMeta();
-      // update url (replace state to avoid flooding history on initial renders)
       updateUrlWithPage(currentPage, false);
     }
 
-    // wire current page input (if present) and page size selector
     if (elCurrent) {
       if (elCurrent.tagName === 'INPUT') {
         elCurrent.addEventListener('change', () => {
@@ -169,13 +158,11 @@
 
     function setFiltered(list){ filtered = list.slice(); currentPage = 1; render(); }
     function sortWith(compareFn){
-      // reorder items in DOM according to compareFn
       const sorted = items.slice().sort(compareFn);
       const frag = document.createDocumentFragment();
       sorted.forEach(i => frag.appendChild(i));
       root.appendChild(frag);
       items = Array.from(root.querySelectorAll(itemsSelector));
-      // re-apply filter using current filter criteria
       setFiltered(filtered);
     }
 
@@ -186,7 +173,6 @@
   if (btnFirst) btnFirst.addEventListener('click', () => { if (currentPage !== 1) { currentPage = 1; updateUrlWithPage(currentPage, true); render(); } });
   if (btnLast) btnLast.addEventListener('click', () => { const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize)); if (currentPage !== totalPages) { currentPage = totalPages; updateUrlWithPage(currentPage, true); render(); } });
 
-    // public API
     return {
       render,
       setFiltered,
@@ -200,6 +186,5 @@
     };
   }
 
-  // expose
   global.__PlinkkPaginator = { createPaginator };
 })(window);

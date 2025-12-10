@@ -15,7 +15,6 @@ interface ReportsQuery {
 
 export function dashboardAdminReportsRoutes(fastify: FastifyInstance) {
   
-  // View: Reports List
   fastify.get("/", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin/reports")}`);
@@ -35,7 +34,6 @@ export function dashboardAdminReportsRoutes(fastify: FastifyInstance) {
     return replyView(reply, "dashboard/admin/reports.ejs", userInfo, { publicPath });
   });
 
-  // API: List Reports
   fastify.get<{ Querystring: ReportsQuery }>("/api", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
@@ -68,7 +66,6 @@ export function dashboardAdminReportsRoutes(fastify: FastifyInstance) {
     return reply.send({ reports, total });
   });
 
-  // API: Update Status
   fastify.post("/:id/status", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });

@@ -30,7 +30,6 @@ async function copyDir(src, dest) {
 
 async function main() {
   const tasks = [];
-  // public -> dist/public
   tasks.push(
     (async () => {
       try {
@@ -43,7 +42,6 @@ async function main() {
     })()
   );
 
-  // views -> dist/views
   tasks.push(
     (async () => {
       try {
@@ -56,7 +54,6 @@ async function main() {
     })()
   );
 
-  // secret-key -> dist/secret-key
   tasks.push(
     (async () => {
       try {

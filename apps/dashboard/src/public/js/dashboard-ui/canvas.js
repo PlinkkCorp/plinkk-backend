@@ -13,13 +13,10 @@ function loadScript(src) {
 
 async function renderCanvasInto(container, item) {
   if (!container || !item) return;
-  // Reset container
   container.innerHTML = '';
   container.style.position = 'relative';
   container.style.background = '#0b1220';
   container.style.overflow = 'hidden';
-  // Maintain aspect ratio via parent style already set
-  // Create canvas
   const canvas = document.createElement('canvas');
   canvas.style.position = 'absolute';
   canvas.style.inset = '0';
@@ -27,7 +24,6 @@ async function renderCanvasInto(container, item) {
   canvas.style.height = '100%';
   container.appendChild(canvas);
   const ctx = canvas.getContext('2d');
-  // Resize to client size
   function resize() {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
@@ -35,19 +31,16 @@ async function renderCanvasInto(container, item) {
   const ro = new ResizeObserver(resize); ro.observe(canvas); resize();
 
   try {
-    // Load external libs first (if any)
     const ext = item?.extension;
     if (Array.isArray(ext)) {
       for (const e of ext) await loadScript(e);
     } else if (typeof ext === 'string' && ext && ext !== 'none') {
       await loadScript(ext);
     }
-    // Special-case matrix which depends on two extra local files
     if (item?.fileNames === 'matrix-effect/app.js') {
       await loadScript('/public/canvaAnimation/matrix-effect/effect.js');
       await loadScript('/public/canvaAnimation/matrix-effect/symbol.js');
     }
-    // Load the animation file itself
     await loadScript(`/public/canvaAnimation/${item?.fileNames}`);
     if (typeof window.runCanvasAnimation === 'function') {
       window.runCanvasAnimation(ctx, canvas);
@@ -137,7 +130,6 @@ export function refreshSelectedCanvasPreview({ cfg, canvaEnableEl, selectedCanva
   if (!selectedCanvasPreviewFrame || !item) return;
   const previewOn = !!canvasPreviewEnable?.checked;
   if (!enabled || !previewOn) {
-    // Clear any previous inline/iframe preview
     if (selectedCanvasPreviewFrame.tagName === 'IFRAME') {
       selectedCanvasPreviewFrame.src = 'about:blank';
     } else {
@@ -145,11 +137,9 @@ export function refreshSelectedCanvasPreview({ cfg, canvaEnableEl, selectedCanva
     }
     return;
   }
-  // If target is an iframe, keep using the simpler URL-based preview
   if (selectedCanvasPreviewFrame.tagName === 'IFRAME') {
     selectedCanvasPreviewFrame.src = buildCanvasPreviewUrl(item);
   } else {
-    // Inline render inside the div container
     renderCanvasInto(selectedCanvasPreviewFrame, item);
   }
 }

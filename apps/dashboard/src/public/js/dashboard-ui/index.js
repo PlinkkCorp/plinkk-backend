@@ -228,7 +228,6 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
         }
       }
       setStatus(manual ? 'Enregistré ✓' : 'Enregistré automatiquement ✓', 'success');
-      // Ne pas recharger instantanément la preview pour éviter le spam en cours de frappe
       schedulePreviewRefresh();
     } catch (e) {
       let msg = e?.message || '';
@@ -266,7 +265,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     f.description.value = cfg.description || '';
     f.profileHoverColor.value = cfg.profileHoverColor || '#7289DA';
     f.degBackgroundColor.value = cfg.degBackgroundColor ?? 45;
-    // Synchroniser le cadran (dot) avec la valeur chargée après remplissage
+
     try {
       f.degBackgroundColor.dispatchEvent(new Event('input', { bubbles: true }));
       f.degBackgroundColor.dispatchEvent(new Event('change', { bubbles: true }));
@@ -350,7 +349,6 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
   state.socialIcon = Array.isArray(cfg.socialIcon) ? cfg.socialIcon.map((x) => ({ ...x })) : [];
   state.links = Array.isArray(cfg.links) ? cfg.links.map((x) => ({ ...x })) : [];
   state.categories = Array.isArray(cfg.categories) ? cfg.categories.map((x) => ({ ...x })) : [];
-  // Agencement: ordre des sections
   const DEFAULT_LAYOUT = ['profile','username','social','email','links'];
   state.layoutOrder = Array.isArray(cfg.layoutOrder) ? [...cfg.layoutOrder].filter(x => x !== 'labels') : [...DEFAULT_LAYOUT];
 
@@ -369,22 +367,18 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
         renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave });
       }
     });
-  // Rendu de l'agencement
   renderLayout({ container: f.layoutList, order: state.layoutOrder, scheduleAutoSave });
 
-    // Inverser l'ordre des couleurs de background (bouton ajouté dans template)
     if (f.invertBackgroundColors) {
       f.invertBackgroundColors.addEventListener('click', () => {
         state.background.reverse();
         renderBackground({ container: f.backgroundList, addBtn: f.addBackgroundColor, colors: state.background, scheduleAutoSave });
-        // On enregistre et on laissera le rafraîchissement se faire après save (pour éviter les doubles reload)
         scheduleAutoSave();
       });
     }
 
     const hasNeonColors = state.neonColors.length > 0;
     if (f.neonEnable) {
-      // Forcer désactivation visuelle du néon pour l'instant
       f.neonEnable.checked = false;
       f.neonEnable.disabled = true;
       f.neonEnable.title = 'Néon temporairement désactivé';
@@ -394,23 +388,19 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
 
   function isMasked(el) {
     if (!el) return false;
-    // el peut être un input ou textarea
     return !!(el.classList?.contains('masked-field') || (el.dataset && typeof el.dataset._originalValue !== 'undefined'));
   }
 
   function maskedOr(val, el) {
-    // Si masqué on renvoie null pour que le backend traite comme champ vide/absent
     return isMasked(el) ? null : val;
   }
 
   function collectPayloadPlinkk() {
     return {
-      // Champs non masquables gardent la valeur telle quelle
       profileLink: vOrNull(f.profileLink.value),
       profileImage: vOrNull(f.profileImage.value),
       userName: vOrNull(f.userName.value),
 
-      // Champs masquables: renvoyer null si masqués
       profileIcon: maskedOr(vOrNull(f.profileIcon.value), f.profileIcon),
       profileSiteText: maskedOr(vOrNull(f.profileSiteText.value), f.profileSiteText),
       affichageEmail: maskedOr(vOrNull(f.email.value), f.email),
@@ -500,7 +490,6 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     try { const cfg = await fetchConfig(); fillForm(cfg); setStatus('Données rechargées', 'success'); }
     catch (e) { setStatus('Erreur: ' + (e?.message || ''), 'error'); }
   });
-  // Bouton manuel: respecter le throttle également
   refreshBtn?.addEventListener('click', (e) => { e.preventDefault(); schedulePreviewRefresh(); });
 
   [
@@ -524,7 +513,6 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
         if (f.categoriesDisabledMsg) f.categoriesDisabledMsg.classList.add('hidden');
         if (f.categoriesHint) f.categoriesHint.classList.remove('hidden');
         
-        // Force re-render to ensure empty state is shown
         renderCategories({ 
             container: f.categoriesContainer, 
             addBtn: f.addCategory, 
@@ -542,8 +530,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
         if (f.categoriesHint) f.categoriesHint.classList.add('hidden');
       }
     });
-  }  // Ne pas rafraîchir la preview sur chaque frappe pour éviter les doubles reloads.
-  // On rafraîchit uniquement après enregistrement auto (saveNow) ou sur clic du bouton.
+  }
 
   if (f.status_statusText) f.status_statusText.addEventListener('change', () => updateStatusPreview({ elements: f }));
   f.status_text?.addEventListener('input', () => { updateStatusControlsDisabled({ elements: f }); scheduleAutoSave(); });
@@ -597,14 +584,12 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
           const head = document.createElement('div'); head.className = 'flex items-center justify-between';
           const title = document.createElement('div'); title.className = 'font-medium truncate'; title.textContent = `#${idx} · ${theme?.name || 'Thème'}`;
           const meta = document.createElement('div'); meta.className = 'flex items-center gap-2';
-          // Creator tag
           const creator = document.createElement('span'); creator.className = 'text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300';
           if (theme?.author && theme.author.userName) {
             creator.textContent = `par ${theme.author.userName}`;
           } else {
             creator.textContent = 'original';
           }
-          // Info button
           const infoBtn = document.createElement('button'); infoBtn.type = 'button'; infoBtn.className = 'size-6 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700'; infoBtn.title = 'Infos';
           infoBtn.innerHTML = '<svg class="h-3.5 w-3.5 text-slate-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
           infoBtn.addEventListener('click', (ev) => {
@@ -681,7 +666,6 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
 
     function ensureAnimationLoops(animStr) {
       if (!animStr) return '';
-      // Insère 'infinite' si pas déjà présent
       return /\binfinite\b/.test(animStr) ? animStr : `${animStr} infinite`;
     }
 
@@ -697,8 +681,6 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       previewBox.className = 'rounded border border-slate-800 p-4 flex items-center justify-center';
       const dot = document.createElement('div');
       dot.className = 'h-6 w-6 rounded-full bg-indigo-400';
-      // Appliquer l'animation via style.animation, en prenant uniquement le nom s'il contient durée par défaut
-      // item.keyframes est du type "fade 1s ease-in-out"; on garde tel quel pour un aperçu parlant
   dot.style.animation = ensureAnimationLoops(item?.keyframes || '');
       previewBox.append(dot);
       card.append(head, previewBox);
@@ -728,7 +710,6 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     const anims = cfgReady.animations || [];
     const animBgs = cfgReady.animationBackground || [];
 
-    // Helpers pour mise à jour des labels visibles
     function setAnimLabel(inputEl, items, idx) {
       if (!inputEl) return;
       idx = Number(idx || 0) || 0;
@@ -740,7 +721,6 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     const animButtonLabel = qs('#selectedAnimationButtonLabel');
     const animBgLabel = qs('#selectedAnimationBackgroundLabel');
 
-    // Remplir labels initiaux
     setAnimLabel(animArticleLabel, anims, f.selectedAnimationIndex?.value);
     setAnimLabel(animButtonLabel, anims, f.selectedAnimationButtonIndex?.value);
     setAnimLabel(animBgLabel, animBgs, f.selectedAnimationBackgroundIndex?.value);
@@ -755,7 +735,6 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
           scheduleAutoSave();
         },
       }));
-      // Ouverture en cliquant sur le champ
       animArticleLabel?.addEventListener('click', () => animArticleBtn.click());
       animArticleLabel?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); animArticleBtn.click(); } });
     }

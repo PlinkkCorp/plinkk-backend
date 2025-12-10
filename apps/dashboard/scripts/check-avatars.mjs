@@ -32,7 +32,6 @@ async function main() {
       const fp = path.join(avatarsDir, filename);
       info.fileExists = fs.existsSync(fp);
       if (!info.fileExists) missingFiles++;
-      // detect corrupted case: value like "/public/uploads/avatars/data:image/..."
       if (/^\/public\/uploads\/avatars\/data:/i.test(img)) {
         corrupted++;
         console.warn(`Corrupted image value for user ${u.id}: ${img}`);
@@ -58,14 +57,12 @@ async function main() {
       info.fileExists = fs.existsSync(fp);
       if (!info.fileExists) missingFiles++;
     } else {
-      // likely a raw filename like "hash.ext"
       info.kind = 'raw-filename';
       const fp = path.join(avatarsDir, img);
       info.fileExists = fs.existsSync(fp);
       if (!info.fileExists) missingFiles++;
     }
 
-    // Print summary per-user when there's a problem
     if (info.kind === 'public-avatar' && info.fileExists === false) {
       console.log(`${u.id}: ${img} -> file MISSING`);
     } else if (info.kind === 'raw-filename' && info.fileExists === false) {

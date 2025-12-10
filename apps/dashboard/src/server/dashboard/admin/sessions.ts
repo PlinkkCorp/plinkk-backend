@@ -35,7 +35,7 @@ export function dashboardAdminSessionsRoutes(fastify: FastifyInstance) {
     return replyView(reply, "dashboard/admin/sessions.ejs", userInfo, { publicPath });
   });
 
-  // API: List Sessions
+
   fastify.get<{ Querystring: SessionsQuery }>("/api", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
@@ -57,9 +57,6 @@ export function dashboardAdminSessionsRoutes(fastify: FastifyInstance) {
       };
     }
 
-    // Clean up expired sessions first (optional, but good hygiene)
-    // await prisma.session.deleteMany({ where: { expiresAt: { lt: new Date() } } });
-
     const [sessions, total] = await Promise.all([
       prisma.session.findMany({
         where,
@@ -77,7 +74,6 @@ export function dashboardAdminSessionsRoutes(fastify: FastifyInstance) {
     return reply.send({ sessions, total, currentSessionId });
   });
 
-  // API: Revoke Session
   fastify.delete("/:id", async function (request, reply) {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
@@ -96,7 +92,6 @@ export function dashboardAdminSessionsRoutes(fastify: FastifyInstance) {
     }
   });
   
-  // API: Revoke All for User
   fastify.delete("/user/:userId", async function (request, reply) {
     const adminId = request.session.get("data");
     if (!adminId) return reply.code(401).send({ error: "unauthorized" });

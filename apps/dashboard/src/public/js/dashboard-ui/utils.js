@@ -1,4 +1,3 @@
-// Utils for Dashboard UI
 export const qs = (s, r = document) => r.querySelector(s);
 export const qsa = (s, r = document) => Array.from(r.querySelectorAll(s));
 
@@ -112,13 +111,11 @@ export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, rende
     if (rowEl) rowEl.style.display = '';
     if (prevUserSelect !== '') {
       document.body.style.userSelect = prevUserSelect;
-      document.body.style.webkitUserSelect = prevUserSelect;
     }
   }
 
   function onPointerDown(e) {
     if (dragging) return;
-    // Commence uniquement si clic sur le handle (pas sur des inputs voisins)
     e.preventDefault();
     e.stopPropagation();
 
@@ -128,9 +125,7 @@ export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, rende
     offsetY = e.clientY - startRect.top;
     prevUserSelect = document.body.style.userSelect || '';
     document.body.style.userSelect = 'none';
-    document.body.style.webkitUserSelect = 'none';
 
-    // Construire le fantôme
     ghost = rowEl.cloneNode(true);
     ghost.style.position = 'fixed';
     ghost.style.left = `${startRect.left}px`;
@@ -147,13 +142,11 @@ export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, rende
     ghost.style.background = 'rgba(15,23,42,0.96)';
     document.body.appendChild(ghost);
 
-    // Placeholder à la place de la ligne
     placeholder = createPlaceholder(startRect.height);
     const parent = rowEl.parentNode;
     parent.insertBefore(placeholder, rowEl);
     rowEl.style.display = 'none';
 
-    // Indices
     startIndex = Number(rowEl.dataset.dragIndex || '-1');
     targetIndex = startIndex;
 
@@ -173,15 +166,13 @@ export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, rende
     }
 
     const rows = Array.from(containerEl.children).filter((c) => c !== ghost && c !== placeholder && isDraggableRow(c));
-    // Trouver la position d’insertion selon le centre vertical du fantôme
     const ghostMidY = y + startRect.height / 2;
-    let newIndex = rows.length; // par défaut, à la fin
+    let newIndex = rows.length; 
     for (let i = 0; i < rows.length; i++) {
       const r = rows[i].getBoundingClientRect();
       const mid = r.top + r.height / 2;
       if (ghostMidY < mid) { newIndex = i; break; }
     }
-    // Déplacer le placeholder si besoin
     const currentIndex = Array.from(containerEl.children).indexOf(placeholder);
     const desiredEl = rows[newIndex];
     if (desiredEl && containerEl.contains(desiredEl)) {
@@ -195,21 +186,19 @@ export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, rende
   function onPointerUp(e) {
     if (!dragging) return;
     e.preventDefault();
-    let desiredIndex = Math.max(0, Math.min(targetIndex, itemsArray.length)); // peut être égal à length (ajout en fin)
+    let desiredIndex = Math.max(0, Math.min(targetIndex, itemsArray.length));
     const originalIdx = Number(rowEl.dataset.dragIndex || '-1');
 
     cleanup();
 
     if (originalIdx >= 0 && originalIdx < itemsArray.length && desiredIndex !== originalIdx) {
       const item = itemsArray.splice(originalIdx, 1)[0];
-      // Si on déplace vers le bas, l'index cible se décale d'une unité après retrait
       if (originalIdx < desiredIndex) desiredIndex -= 1;
       const finalIndex = Math.max(0, Math.min(desiredIndex, itemsArray.length));
       itemsArray.splice(finalIndex, 0, item);
       renderFn(itemsArray);
       scheduleAutoSave();
     } else {
-      // Rien n’a changé, re-render pour rétablir les data-index cohérents
       renderFn(itemsArray);
     }
   }

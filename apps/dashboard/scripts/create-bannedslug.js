@@ -1,7 +1,3 @@
-#!/usr/bin/env node
-// Create the BannedSlug table directly in SQLite if it does not exist.
-// This avoids running `prisma migrate` when migrations have issues and is
-// intended for development only.
 const { PrismaClient } = require('../generated/prisma/client');
 const prisma = new PrismaClient();
 

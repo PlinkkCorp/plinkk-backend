@@ -1,6 +1,3 @@
-/*
- Frontend logic for Plinkk dashboard editor (Monaco + JSON config)
-*/
 (function () {
   const saveBtn = document.getElementById("saveBtn");
   const formatBtn = document.getElementById("formatBtn");
@@ -114,7 +111,6 @@
     });
   }
 
-  // Initial load
   setStatus("Chargement de la configuration...", "");
   loadConfig()
     .then((cfg) => {

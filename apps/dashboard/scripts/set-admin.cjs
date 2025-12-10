@@ -6,17 +6,13 @@
 const fs = require('fs');
 const path = require('path');
 
-// Utilise le package workspace @plinkk/prisma (génération centralisée)
 const { prisma } = require('@plinkk/prisma');
 
 async function findUser(identifier) {
-  // try by id
   let user = await prisma.user.findUnique({ where: { id: identifier } }).catch(() => null);
   if (user) return user;
-  // try by email
   user = await prisma.user.findUnique({ where: { email: identifier } }).catch(() => null);
   if (user) return user;
-  // try by userName
   return await prisma.user.findFirst({ where: { userName: identifier } }).catch(() => null);
 }
 
@@ -37,7 +33,6 @@ async function main() {
       process.exit(1);
     }
 
-    // Ensure ADMIN role exists
     const role = await prisma.role.upsert({
       where: { name: 'ADMIN' },
       update: {},
@@ -50,7 +45,6 @@ async function main() {
       },
     });
 
-    // Define permissions
     const PERMISSIONS = [
       { key: 'VIEW_ADMIN', category: 'Administration', description: 'Accéder à l’interface administrative' },
       { key: 'MANAGE_ROLES', category: 'Administration', description: 'Créer / modifier / supprimer des rôles' },
@@ -83,7 +77,6 @@ async function main() {
       { key: 'MANAGE_REPORTS', category: 'Modération', description: 'Gérer les signalements' }
     ];
 
-    // Upsert permissions and assign to role
     for (const p of PERMISSIONS) {
       await prisma.permission.upsert({
         where: { key: p.key },

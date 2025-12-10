@@ -1,8 +1,6 @@
 import { setSafeText, isSafeUrl, isSafeColor, disableDrag, disableContextMenuOnImage } from './security.js';
 import { btnIconThemeConfig } from '../config/btnIconThemeConfig.js';
-// themes are provided at runtime by src/public/js/init.js via the exported
-// `themes` array which is populated from the server-side DB. Do not import
-// the old static config file.
+
 export function createProfileContainer(profileData) {
     const profileContainer = document.createElement("div");
     profileContainer.className = "profile-container";

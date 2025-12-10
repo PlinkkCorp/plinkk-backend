@@ -1,5 +1,4 @@
 import { getCookie, setCookie } from './cookies.js';
-// 1. Définition centralisée des Easter Eggs
 export const easterEggsList = [
     {
         name: "konamiEgg",
@@ -94,7 +93,6 @@ export const easterEggsList = [
                 userSelect: "none"
             });
             document.body.appendChild(companion);
-            // Mouvement naturel
             let direction = 1;
             let pos = 0;
             let speed = 1.5 + Math.random() * 1.5;
@@ -102,13 +100,11 @@ export const easterEggsList = [
             let bouncePhase = 0;
             let lastTimestamp = null;
             function animateSVG() {
-                // Queue qui remue
                 const tail = companion.querySelector('.cat-tail');
                 if (tail) {
                     const t = Date.now() / 300;
                     tail.setAttribute("transform", `rotate(${Math.sin(t) * 20} 50 37)`);
                 }
-                // Oreilles qui bougent
                 const earL = companion.querySelector('.cat-ear-left');
                 const earR = companion.querySelector('.cat-ear-right');
                 if (earL)
@@ -135,13 +131,11 @@ export const easterEggsList = [
                         pos = 0;
                         speed = 1.5 + Math.random() * 1.5;
                     }
-                    // Animation de rebond
                     bouncePhase += 0.08 * dt + Math.random() * 0.01;
                     const bounce = 8 * Math.abs(Math.sin(bouncePhase));
                     companion.style.left = pos + "px";
                     companion.style.bottom = (20 + bounce) + "px";
                     companion.style.transform = direction === 1 ? "scaleX(1)" : "scaleX(-1)";
-                    // Pause aléatoire
                     if (Math.random() < 0.003) {
                         isPaused = true;
                         setTimeout(() => {
@@ -163,11 +157,9 @@ export const easterEggsList = [
             }
         }
     },
-    // Ajoute ici d'autres eggs au même format
 ];
-// 2. Initialisation des Easter Eggs (détection)
+
 export function initEasterEggs() {
-    // Konami
     let konami = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65], konamiIndex = 0;
     window.addEventListener("keydown", function (e) {
         if (e.keyCode === konami[konamiIndex]) {
@@ -181,7 +173,6 @@ export function initEasterEggs() {
             konamiIndex = 0;
         }
     });
-    // Reverse
     let reverseBuffer = "";
     window.addEventListener("keydown", function (e) {
         var _a;
@@ -205,7 +196,7 @@ export function initEasterEggs() {
         }
     });
 }
-// 3. Fonction pour débloquer un egg
+
 export function unlockEgg(eggName) {
     const egg = easterEggsList.find(e => e.name === eggName);
     if (!egg)
@@ -239,7 +230,7 @@ export function unlockEgg(eggName) {
         }
     }
 }
-// 4. Affiche un message temporaire lors du déblocage
+
 export function showEggUnlockedModal(label, firstTime) {
     const modal = document.createElement("div");
     modal.className = "egg-unlocked-modal";
@@ -266,7 +257,7 @@ export function showEggUnlockedModal(label, firstTime) {
     document.body.appendChild(modal);
     setTimeout(() => modal.remove(), 2000);
 }
-// 5. Génère dynamiquement le bouton et le modal
+
 export function createEasterEggGearButton() {
     const article = document.querySelector("article");
     if (document.getElementById("easter-egg-gear-btn"))
@@ -307,7 +298,7 @@ export function createEasterEggGearButton() {
             modal.style.display = "none";
         }
     });
-    // Style du bouton
+
     Object.assign(btn.style, {
         position: "absolute",
         top: "10px",
@@ -325,13 +316,11 @@ export function createEasterEggGearButton() {
         transition: "background 0.5s"
     });
     article === null || article === void 0 ? void 0 : article.appendChild(btn);
-    // Titre
     const titleDiv = document.createElement("div");
     titleDiv.style.marginBottom = "8px";
     titleDiv.style.fontWeight = "bold";
     titleDiv.textContent = "Easter Eggs";
     modal.appendChild(titleDiv);
-    // Compteur d'easter eggs débloqués aligné à droite du titre, collé au bord droit du modal
     titleDiv.style.display = "flex";
     titleDiv.style.justifyContent = "space-between";
     titleDiv.style.alignItems = "center";
@@ -355,7 +344,6 @@ export function createEasterEggGearButton() {
     }
 }
 export function updateEasterEggModal(modal) {
-    // Vide le contenu sauf le titre (premier enfant)
     while (modal.children.length > 1) {
         modal.removeChild(modal.lastChild);
     }
@@ -394,14 +382,14 @@ export function updateEasterEggModal(modal) {
         modal.appendChild(row);
     });
 }
-// Easter Egg : compagnon après 1h cumulée sur la page
+
 export function trackCompanionEggTime() {
     const EGG_NAME = "companionEgg";
     const UNLOCK_COOKIE = "companionEgg";
     const STORAGE_KEY = "companionEggTime";
     const UNLOCK_TIME = 3600; // en secondes (1h)
     if (getCookie(UNLOCK_COOKIE))
-        return; // déjà débloqué
+        return; 
     let time = parseInt(localStorage.getItem(STORAGE_KEY) || "0", 10);
     setInterval(() => {
         time++;

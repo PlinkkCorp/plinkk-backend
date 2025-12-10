@@ -1067,7 +1067,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       const ok = await ensurePermission(request, reply, 'MANAGE_ROLES', { mode: 'redirect' });
       if (!ok) return;
     }
-    // Pré-chargement minimal des rôles pour affichage initial
+
     let roles: any[] = [];
     try {
       roles = await prisma.role.findMany({
@@ -1081,7 +1081,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     const perms = await prisma.permission.findMany({ orderBy: [{ category: 'asc' }, { key: 'asc' }] });
     const grouped: Record<string, any[]> = {};
     for (const p of perms) { grouped[p.category] = grouped[p.category] || []; grouped[p.category].push(p); }
-    // Construction d'un payload sérialisé base64 pour éviter les corruptions EJS/JSON
+
     const rolesForPayload = roles.map(r => ({
       id: r.id,
       name: r.name,
@@ -1145,7 +1145,6 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       prisma.adminLog.count({ where })
     ]);
     
-    // Enrich logs with admin names
     const adminIds = [...new Set(logs.map(l => l.adminId))];
     const admins = await prisma.user.findMany({ where: { id: { in: adminIds } }, select: { id: true, userName: true } });
     const adminMap = new Map(admins.map(a => [a.id, a.userName]));
@@ -1168,10 +1167,8 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
     const target = await prisma.user.findUnique({ where: { id } });
     if (!target) return reply.code(404).send({ error: "not_found" });
 
-    // Log action
     await logAdminAction(userId, 'IMPERSONATE', id, { targetName: target.userName }, request.ip);
 
-    // Set session
     request.session.set("data", target.id);
     return reply.send({ ok: true, redirectUrl: '/dashboard' });
   });
@@ -1235,11 +1232,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
 
     await logAdminAction(userId, 'RUN_TASK', undefined, { script }, request.ip);
 
-    // Execute script
-    const scriptPath = `./scripts/${script}`; // Assuming scripts are in root/scripts or apps/dashboard/scripts? 
-    // Based on workspace info: apps/dashboard/scripts/ and root/scripts/ exist. 
-    // I'll assume root scripts for now or try to find them.
-    // The workspace info shows `apps/dashboard/scripts/` has these files.
+    const scriptPath = `./scripts/${script}`; 
     
     const cmd = `node apps/dashboard/scripts/${script}`;
     

@@ -1,6 +1,5 @@
 import { qs, el } from './utils.js';
 
-// Icon catalog modal
 const iconModal = qs('#iconModal');
 const iconModalClose = qs('#iconModalClose');
 const iconSearch = qs('#iconSearch');
@@ -59,7 +58,6 @@ iconOverlay?.addEventListener('click', closeIconModal);
 iconModal?.addEventListener('click', (e) => { if (e.target === iconModal) closeIconModal(); });
 iconSearch?.addEventListener('input', () => populateIconGrid(iconSearch.value));
 
-// Generic picker modal
 const pickerModal = qs('#pickerModal');
 const pickerClose = qs('#pickerClose');
 const pickerTitle = qs('#pickerTitle');
@@ -134,7 +132,7 @@ export function renderBtnThemeCard(item, idx) {
   card.setAttribute('type', 'button');
   card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left flex items-center gap-3';
   const img = document.createElement('img');
-  const iconUrl = (item.icon || '')//.replace('{{username}}', `/${window.__PLINKK_USER_ID__}`);
+  const iconUrl = (item.icon || '') //.replace('{{username}}', `/${window.__PLINKK_USER_ID__}`);
   img.src = iconUrl;
   img.alt = item.name || '';
   img.className = 'h-8 w-8 object-contain rounded bg-slate-800 border border-slate-700';
@@ -151,7 +149,6 @@ export function renderBtnThemeCard(item, idx) {
   return card;
 }
 
-// Platform entry modal (form)
 let platformEntryModal = null;
 export function ensurePlatformEntryModal() {
   if (platformEntryModal) return platformEntryModal;

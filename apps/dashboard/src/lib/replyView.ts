@@ -19,7 +19,6 @@ function computeFrontendUrl(reply: FastifyReply) {
     const host = String(req?.headers?.host || "");
     const xfProto = String(req?.headers?.["x-forwarded-proto"] || "").toLowerCase();
     const proto = (xfProto || req?.protocol || "https").replace(/:$/, "");
-    // Si on est sur le sous-domaine dashboard, basculer vers le domaine public
     let domain = host.replace(/^dash\./i, "");
     // En dev: dashboard sur 3001 -> public sur 3002
     domain = domain.replace(/:3001$/i, ":3002");

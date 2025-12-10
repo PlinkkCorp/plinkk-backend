@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const { PrismaClient } = require("../generated/prisma/client");
 const prisma = new PrismaClient();
 

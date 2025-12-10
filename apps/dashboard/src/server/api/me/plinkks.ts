@@ -68,7 +68,6 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
-  // Delete plinkk
   fastify.delete("/:id", async (request, reply) => {
     const userId = request.session.get("data") as string | undefined;
     if (!userId) return reply.code(401).send({ error: "unauthorized" });

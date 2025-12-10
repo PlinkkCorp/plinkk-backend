@@ -280,13 +280,11 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const hostname = body.hostname.trim();
     const plinkkId = body.plinkkId;
 
-    // Vérifier que le plinkk appartient à l'utilisateur
     const plinkk = await prisma.plinkk.findFirst({
         where: { id: plinkkId, userId: userId as string }
     });
     if (!plinkk) return reply.code(404).send({ error: "Plinkk introuvable" });
 
-    // Vérifier si le domaine est déjà utilisé par un autre plinkk
     const existingHost = await prisma.host.findUnique({ where: { id: hostname } });
     if (existingHost && existingHost.plinkkId !== plinkkId) {
         return reply.code(409).send({ error: "Ce nom de domaine est déjà utilisé" });

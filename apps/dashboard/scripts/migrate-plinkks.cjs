@@ -1,18 +1,3 @@
-/*
-  Migration: User-level profile -> default Plinkk pages
-  - For each user, ensure a default Plinkk exists (index=0, isDefault=true)
-  - Create PlinkkSettings from user fields (if missing)
-  - Attach user content (links, labels, social icons, background colors, neon colors)
-    to the default Plinkk by setting plinkkId where it's currently null
-  - If a user Statusbar exists, copy it to PlinkkStatusbar for the default page (non-destructive)
-
-  Usage:
-    node scripts/migrate-plinkks.cjs             # migrate all users
-    node scripts/migrate-plinkks.cjs @handle     # migrate only one user (user.id)
-
-  Idempotent: safe to re-run; it only fills missing data.
-*/
-
 require('dotenv').config();
 
 if (!process.env.DATABASE_URL) {

@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-// Diagnostic rapide: interroge la table BannedSlug et affiche le résultat ou l'erreur
 const { PrismaClient } = require('../generated/prisma/client');
 const prisma = new PrismaClient();
 

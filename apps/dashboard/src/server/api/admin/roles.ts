@@ -6,7 +6,7 @@ import { logAdminAction } from '../../../lib/adminLogger';
 // const prisma = new PrismaClient();
 
 export function apiAdminRolesRoutes(fastify: FastifyInstance) {
-  // Liste des rôles + permissions agrégées
+
   fastify.get('/', async (request, reply) => {
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
@@ -30,7 +30,6 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
     return reply.send({ roles: payload });
   });
 
-  // Liste des permissions disponibles (groupées par catégorie)
   fastify.get('/permissions', async (request, reply) => {
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
@@ -43,7 +42,6 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
     return reply.send({ permissions: grouped });
   });
 
-  // Création d'un rôle
   fastify.post('/', async (request, reply) => {
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
@@ -54,7 +52,7 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
     const existing = await prisma.role.findUnique({ where: { name } });
     if (existing) return reply.code(409).send({ error: 'role_exists' });
     const role = await prisma.role.create({ data: { name, id: name, isStaff: !!body.isStaff, priority: body.priority || 0, color: body.color || null, maxPlinkks: body.maxPlinkks ?? 1, maxThemes: body.maxThemes ?? 0 } });
-    // Inhérite par défaut des permissions du rôle USER si aucune liste fournie
+
     let permKeys = Array.isArray(body.permissions) ? body.permissions : [];
     if (!permKeys.length) {
       try {
@@ -73,7 +71,6 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true, roleId: role.id });
   });
 
-  // Réordonner les rôles (top = priorité la plus haute)
   fastify.post('/reorder', async (request, reply) => {
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
@@ -88,7 +85,6 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
-  // Mise à jour d'un rôle (champs + ajout/retrait permissions)
   fastify.patch('/:id', async (request, reply) => {
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
@@ -121,7 +117,6 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true, id });
   });
 
-  // Suppression d'un rôle
   fastify.delete('/:id', async (request, reply) => {
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;

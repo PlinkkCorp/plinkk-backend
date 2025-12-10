@@ -8,7 +8,7 @@ import {
   verifyRolePartner,
 } from "./verifyRole";
 
-export const MAX_PAGES_DEFAULT = 1; // default users can create 1 plinkk
+export const MAX_PAGES_DEFAULT = 1;
 
 export function slugify(input: string): string {
   return (input || "")
@@ -22,15 +22,12 @@ export function slugify(input: string): string {
 }
 
 export function getMaxPagesForRole(role?: Role | null): number {
-  // USER: 1, PARTNER: 2, DEVELOPER: 3, ADMIN: unlimited (represented by Infinity)
   if (verifyRoleAdmin(role)) return Infinity;
   if (verifyRoleDeveloper(role)) return 3;
   if (verifyRolePartner(role)) return 2;
   return MAX_PAGES_DEFAULT;
 }
 
-// Identifiants réservés (chemins, préfixes d'actifs, zones système)
-// Vérifie si un slug est réservé (in-memory ou DB)
 export async function isReservedSlug(
   prisma: PrismaClient,
   slug: string
@@ -38,14 +35,12 @@ export async function isReservedSlug(
   if (!slug) return true;
   if (RESERVED_SLUGS.has(slug)) return true;
   try {
-    // if DB has BannedSlug model, consider it as banned list
     return await isBannedSlug(slug);
   } catch (e) {
     return RESERVED_SLUGS.has(slug);
   }
 }
 
-// Suggestion de slug unique: ajoute -1, -2... (évite de sauter directement à -2)
 export async function suggestUniqueSlug(
   prisma: PrismaClient,
   userId: string,
@@ -63,7 +58,6 @@ export async function suggestUniqueSlug(
   }
 }
 
-// Attribue un index disponible (>0), 0 est réservé à la page par défaut
 export async function getNextIndex(
   prisma: PrismaClient,
   userId: string
@@ -78,7 +72,6 @@ export async function getNextIndex(
   return i;
 }
 
-// Réindexe toutes les pages non-défaut en séquence 1..N selon createdAt
 export async function reindexNonDefault(
   prisma: PrismaClient,
   userId: string
@@ -102,30 +95,25 @@ export async function reindexNonDefault(
   }
 }
 
-// Génère un slug unique à l'échelle du système (tous comptes), en ajoutant -1, -2... si nécessaire
 export async function suggestGloballyUniqueSlug(
   prisma: PrismaClient,
   baseSlug: string,
   excludePlinkkId?: string,
-  // allowCandidateIfUserId: if provided, a candidate equal to this user id will be permitted
   allowCandidateIfUserId?: string
 ): Promise<string> {
   const base = baseSlug || "page";
   let i = 0;
   while (true) {
     const candidate = i === 0 ? base : `${base}-${i}`;
-    // Éviter les mots réservés
     if (await isReservedSlug(prisma, candidate)) {
       i++;
       continue;
     }
-    // Le slug ne doit pas entrer en conflit avec un @ (User.id)
     const userHit = await prisma.user.findUnique({ where: { id: candidate } });
     if (userHit && userHit.id !== allowCandidateIfUserId) {
       i++;
       continue;
     }
-    // Le slug ne doit pas entrer en conflit avec un autre plinkk (global)
     const plinkkHit = await prisma.plinkk.findFirst({
       where: {
         slug: candidate,
@@ -140,7 +128,6 @@ export async function suggestGloballyUniqueSlug(
   }
 }
 
-// Création centralisée d'un Plinkk (applique quota, slug global, défaut/index)
 export async function createPlinkkForUser(
   prisma: PrismaClient,
   userId: string,
@@ -161,7 +148,6 @@ export async function createPlinkkForUser(
   if (count >= maxPages) throw new Error("max_pages_reached");
   const name = (opts.name || "Page").trim() || "Page";
   const base = slugify(opts.slugBase || name);
-  // Allow the created user's id to be used as the plinkk slug for their main Plinkk
   const slug = await suggestGloballyUniqueSlug(prisma, base, undefined, userId);
   const isFirst = count === 0;
   const index = isFirst ? 0 : await getNextIndex(prisma, userId);
@@ -178,7 +164,6 @@ export async function createPlinkkForUser(
     },
   });
   try {
-    // Create PlinkkSettings from example profileConfig (non-blocking)
     await prisma.plinkkSettings.create({
       data: {
         plinkkId: created.id,

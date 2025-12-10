@@ -1,15 +1,9 @@
 import { getCookie, setCookie } from './cookies.js';
 import { canvaData } from '../config/canvaConfig.js';
-// profileData est fourni par init.js via import dynamique de profileConfig.js
-// On y accède indirectement quand nécessaire (il est importé dans init.js)
-// `themes` is exported/populated by src/public/js/init.js at runtime. We avoid
-// a static import to prevent circular imports and allow themes to come from
-// the DB via the server API.
+
 import { themes } from './init.js';
 import { animationBackground } from '../config/animationConfig.js';
 
-// Helper safe getter for profileData to avoid ReferenceError when imports
-// are circular. init.js exposes the parsed config on window.__PLINKK_PROFILE_DATA__.
 function getProfileData() {
     try {
         if (typeof profileData !== 'undefined') return profileData;
@@ -156,9 +150,8 @@ export function applyTheme(theme) {
             themeToggle.style.boxShadow = `0 0 10px ${theme.buttonBackground}`;
         });
     }
-    // Apply the new property articleHoverBoxShadow
+
     const styleSheet = document.styleSheets[0];
-    // Vérifications de sécurité pour éviter les valeurs invalides
     if (theme.articleHoverBoxShadow && theme.articleHoverBoxShadow.trim() !== '') {
         try {
             styleSheet.insertRule(`
@@ -171,7 +164,7 @@ export function applyTheme(theme) {
             console.warn('Invalid articleHoverBoxShadow value:', theme.articleHoverBoxShadow, e);
         }
     }
-    // Apply scrollbar styles avec vérifications
+
     try {
         styleSheet.insertRule(`
             ::-webkit-scrollbar {
@@ -259,7 +252,7 @@ export function applyTheme(theme) {
     else {
         console.log("Easter eggs modal not found - will be created when needed.");
     }
-    // Appliquer le style à tous les boutons .show-desc-btn
+
     const boutonsAffichageDescription = document.querySelectorAll(".show-desc-btn");
     boutonsAffichageDescription.forEach((bouton) => {
         const htmlBouton = bouton;
@@ -281,7 +274,6 @@ export function setBackgroundStyles(profileData) {
     const deg = (Number.isFinite(_p.degBackgroundColor) ? _p.degBackgroundColor : 45) || 45;
     if (colors) {
         if (colors.length === 0) {
-            // Pas de couleur: ne force pas de background ici, laisser le thème s'appliquer
             document.body.style.background = '';
         } else if (colors.length === 1) {
             document.body.style.background = colors[0];
@@ -323,10 +315,8 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
         canvas.height = window.innerHeight;
         document.body.id = "container";
         try {
-            // Pour Matrix effect, nous devons charger les dépendances d'abord
             if (canvaData[selectedCanvasIndex].fileNames === 'matrix-effect/app.js') {
                 console.log("Loading Matrix Effect animation...");
-                // Fonction helper pour charger un script
                 const loadScript = (src) => {
                     return new Promise((resolve, reject) => {
                         console.log("Loading script:", src);
@@ -343,7 +333,6 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
                         document.body.appendChild(script);
                     });
                 };
-                // Charger les scripts dans l'ordre
                 loadScript('/canvaAnimation/matrix-effect/effect.js')
                     .then(() => {
                     console.log("Effect.js loaded, checking window.Effect:", typeof window.Effect);
@@ -369,7 +358,6 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
                 });
             }
             else {
-                // Pour les autres animations
                 const script = document.createElement("script");
                 script.src = `/canvaAnimation/${canvaData[selectedCanvasIndex].fileNames}`;
                 document.body.appendChild(script);
@@ -398,7 +386,6 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
     else {
         document.body.style.animation = "none";
     }
-    // Appliquer le neon si activé avec vérifications
     const _p_neon = getProfileData() || {};
     if ((_p_neon.neonEnable) === 0) {
         try {
@@ -433,7 +420,6 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
 }
 export function addEmailStyles() {
     const styleSheet = document.styleSheets[0];
-    // Vérifier que le thème existe et a les propriétés nécessaires
     const _p = getProfileData() || {};
     const currentTheme = themes[(_p.selectedThemeIndex || 0) % themes.length];
     const borderColor = (currentTheme === null || currentTheme === void 0 ? void 0 : currentTheme.buttonHoverBackground) || '#2C2F33';

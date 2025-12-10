@@ -1,12 +1,7 @@
-#!/usr/bin/env node
-// Script minimal pour renommer un plinkk slug conflictué en une variante disponible
-// Usage: node scripts/rename-plinkk-slug.js <existing-slug>
-
 const { PrismaClient } = require('../generated/prisma/client');
 const prisma = new PrismaClient();
 
 async function findAvailable(base) {
-  // try base, base-1, base-2...
   let i = 0;
   while (true) {
     const candidate = i === 0 ? base : `${base}-${i}`;
@@ -35,7 +30,6 @@ async function main() {
     console.log('Le slug est déjà optimal:', slug);
     process.exit(0);
   }
-  // update
   await prisma.plinkk.update({ where: { id: p.id }, data: { slug: available } });
   console.log(`Renommé plinkk id=${p.id} slug: ${slug} -> ${available}`);
   await prisma.$disconnect();

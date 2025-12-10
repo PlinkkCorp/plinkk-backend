@@ -1,39 +1,29 @@
 import { createToggleThemeButton, applyAnimation, applyAnimationButton, applyDynamicStyles, applyFirstTheme } from './styleTools.js';
 import { createProfileContainer, createUserName, createStatusBar, createLabelButtons, createIconList, createEmailAndDescription, createLinkBoxes } from './tools.js';
 import { initEasterEggs } from './easterEggs.js';
-// profileData/injectedTheme seront importés dynamiquement par page
 import { loadThemes } from './themesStore.js';
-// We'll load built-ins + community themes from the server. We first handle
-// injectedTheme (exported by profileConfig) then append the built-ins/themes
-// returned by the API so indices remain stable.
-// Start with an empty themes array; it will be populated below.
+
 export const themes = [];
-// Start loading themes immediately and expose a promise to await completion.
 export const themesLoaded = (async () => {
     try {
         const payload = await loadThemes((window.__PLINKK_IDENTIFIER__ || (location.pathname.split('/').filter(Boolean)[1] || '')).trim());
         if (payload && Array.isArray(payload.builtIns) && payload.builtIns.length) {
-            // Copy built-ins into themes (they will be appended after injected)
             payload.builtIns.forEach(t => themes.push(t));
         }
         if (payload && Array.isArray(payload.theme) && payload.theme.length) {
-            // community/mine themes appended after built-ins
             payload.theme.forEach(t => themes.push(t));
         }
-    } catch (e) {
-        // ignore
-    }
+    } catch (e) {/* ignore */}
 })();
 import { animations, styleSheet } from '../config/animationConfig.js';
 import { canvaData } from '../config/canvaConfig.js';
+
 document.addEventListener("DOMContentLoaded", async function () {
     var _a, _b;
-    // Résoudre username/slug depuis les globals fournis par la vue
     const username = (window.__PLINKK_USERNAME__ || (location.pathname.split('/').filter(Boolean)[0] || '')).trim();
     const identifier = (window.__PLINKK_IDENTIFIER__ || (location.pathname.split('/').filter(Boolean)[1] || '')).trim();
     const params = new URLSearchParams(location.search);
     if (identifier) params.set('username', identifier);
-    // Importer la config de la page (non-cachée côté serveur)
     const mod = await import(`/config.js?${params}`);
     const profileData = mod.profileData;
     const injectedTheme = mod.injectedTheme;
@@ -47,32 +37,27 @@ document.addEventListener("DOMContentLoaded", async function () {
             return;
         }
     }
-    // validateProfileConfig(parsedProfileData); // Uncomment if you have a validation function
+    // validateProfileConfig(parsedProfileData); // Decommenter pour désactiver la validation
     if (!parsedProfileData || typeof parsedProfileData !== 'object') {
         console.error("profileData is not defined or is not an object.");
         return;
     }
-    // Expose parsedProfileData as a global to support modules that access
-    // profileData indirectly (e.g. styleTools.js) and to avoid issues from
-    // circular imports. Use a namespaced property to avoid collisions.
+
     try {
         window.profileData = parsedProfileData;
         window.__PLINKK_PROFILE_DATA__ = parsedProfileData;
     }
-    catch (e) {
-        // ignore if window is not writable for some reason
-    }
+    catch (e) { /* ignore */ }
     const article = document.getElementById("profile-article");
     if (!article) {
         console.error("Element with id 'profile-article' not found.");
         return;
     }
-    // Rendu des sections selon l'ordre choisi (layoutOrder) si présent
+
     try {
         const DEFAULT_LAYOUT = ['profile','username','labels','social','email','links'];
         let order = Array.isArray(profileData.layoutOrder) ? profileData.layoutOrder.slice() : DEFAULT_LAYOUT;
         const KNOWN = new Set(DEFAULT_LAYOUT);
-        // Normaliser: garder seulement les connus puis ajouter les manquants dans l'ordre par défaut
         const filtered = order.filter(k => KNOWN.has(k));
         DEFAULT_LAYOUT.forEach(k => { if (!filtered.includes(k)) filtered.push(k); });
         const renderers = {
@@ -88,7 +73,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         };
         filtered.forEach(key => { try { renderers[key] && renderers[key](); } catch (e) { /* ignore */ } });
     } catch (e) {
-        // Fallback: ordre historique
         article.appendChild(createProfileContainer(profileData));
         article.appendChild(createUserName(profileData));
         createStatusBar(profileData);
@@ -96,25 +80,18 @@ document.addEventListener("DOMContentLoaded", async function () {
         createIconList(profileData);
         article.appendChild(createEmailAndDescription(profileData));
     }
-    // Wait for themes to be loaded (built-ins + community). This ensures
-    // selectedThemeIndex refers to the final ordering and that applyFirstTheme
-    // receives a real theme object.
+
     try {
         await themesLoaded;
     } catch (_) { }
 
-    // If the server exported an injectedTheme in profileConfig.js, insert it
-    // into the themes array (avoid duplicates) and update selectedThemeIndex if needed.
+
     try {
         if (injectedTheme && typeof injectedTheme === 'object') {
-            // Avoid duplicates by shallow compare
             const same = (a, b) => a && b && a.background === b.background && a.buttonBackground === b.buttonBackground && a.textColor === b.textColor;
             const existing = themes.findIndex(t => same(t, injectedTheme));
             if (existing === -1) {
-                // Place injected theme at the start so it has priority
                 themes.unshift(injectedTheme);
-                // If user previously selected a theme by index and it was >=0,
-                // leave it as-is; injectedTheme becomes index 0.
                 profileData.selectedThemeIndex = 0;
             } else {
                 profileData.selectedThemeIndex = existing;
@@ -122,14 +99,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     } catch (e) { console.warn('injectedTheme handling failed', e); }
 
-    // Ensure selectedThemeIndex is a valid integer and within the available range
     try {
         let idx = Number(profileData.selectedThemeIndex);
         if (!Number.isFinite(idx) || isNaN(idx)) idx = 0;
         if (!Array.isArray(themes) || themes.length === 0) {
             idx = 0;
         } else {
-            // Normalize to [0 .. themes.length-1]
             idx = ((Math.floor(idx) % themes.length) + themes.length) % themes.length;
         }
         profileData.selectedThemeIndex = idx;
@@ -142,7 +117,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     else {
         createToggleThemeButton(themes[profileData.selectedThemeIndex % themes.length]);
     }
-    // Si les liens n'ont pas été rendus par l'ordre ci-dessus (par ex. fallback), rendre maintenant
     try {
         const hasLinksRendered = !!document.querySelector('#profile-article .discord-box, #profile-article .button');
         if (!hasLinksRendered) {
@@ -162,7 +136,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         console.warn("Icon URL is not defined.");
     }
     document.head.appendChild(link);
-    // N'ajoute pas le footer en mode aperçu (?preview=1)
     const isPreview = new URLSearchParams(window.location.search).get('preview') === '1';
     if (!isPreview) {
         const footer = document.createElement("footer");
@@ -173,7 +146,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     initEasterEggs();
 
-    // Réagir aux modifications externes du thème injecté (console / bookmarklet)
     try {
         window.addEventListener('plinkk:theme-updated', (ev) => {
             try {
@@ -181,14 +153,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                 const idx = detail && typeof detail.index === 'number' ? detail.index : window.__PLINKK_INJECTED_THEME_INDEX__;
                 const theme = (typeof idx === 'number') ? themes[idx % themes.length] : (window.__PLINKK_INJECTED_THEME__ || null);
                 if (theme) {
-                    // Recréation du bouton si nécessaire
                     try { createToggleThemeButton(theme); } catch (e) { }
                     try { applyFirstTheme(theme); } catch (e) { }
                 }
             } catch (e) { }
         });
     } catch (e) { }
-    // Désactiver le néon globalement (override temporaire)
     try { profileData.neonEnable = 0; } catch(_) {}
     if (!animations || !animations.length) {
         console.warn("Animations array is empty or not defined.");

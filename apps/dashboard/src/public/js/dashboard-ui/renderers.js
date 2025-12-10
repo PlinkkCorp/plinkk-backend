@@ -573,12 +573,7 @@ export function renderLayout({ container, order, scheduleAutoSave }) {
   
   const KNOWN = ['profile', 'username', 'labels', 'social', 'email', 'links'];
   
-  // Ensure order is an array and has content, otherwise default to KNOWN
   if (!Array.isArray(order) || order.length === 0) {
-    // If we can't modify the passed order (e.g. it was null), we can't fix the state upstream easily here 
-    // without a callback, but we can at least render the default layout.
-    // However, index.js passes state.layoutOrder which is initialized.
-    // We'll assume order is a reference to an array we can mutate.
     if (Array.isArray(order)) {
         order.splice(0, order.length, ...KNOWN);
     } else {
@@ -586,13 +581,11 @@ export function renderLayout({ container, order, scheduleAutoSave }) {
     }
   }
 
-  // Normaliser: garder uniquement les clés connues et compléter l'ordre manquant
   const seen = new Set();
   const normalized = [];
   order.forEach(k => { if (KNOWN.includes(k) && !seen.has(k)) { seen.add(k); normalized.push(k); } });
   KNOWN.forEach(k => { if (!seen.has(k)) normalized.push(k); });
   
-  // Refléter dans l'array original (référence partagée)
   if (Array.isArray(order)) {
       order.splice(0, order.length, ...normalized);
   }

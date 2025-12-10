@@ -1,6 +1,3 @@
-// Stats dashboard (client-side)
-// Expects window.__STATS__ = { views: number, links: Array<{id:string,text?:string,name?:string,url:string,clicks:number}> }
-
 const qs = (s, r = document) => r.querySelector(s);
 const qsa = (s, r = document) => Array.from(r.querySelectorAll(s));
 
@@ -55,7 +52,7 @@ function buildBarChart(container, data, { maxBars = 10 } = {}) {
   bars.forEach((b, i) => {
     const y = 5 + i * (barH + gap);
     const w = Math.max(2, Math.round((b.clicks / maxVal) * innerW));
-    // Label gauche
+
     const label = document.createElementNS(svg.namespaceURI, 'text');
     label.setAttribute('x', String(8));
     label.setAttribute('y', String(y + barH * 0.7));
@@ -63,7 +60,7 @@ function buildBarChart(container, data, { maxBars = 10 } = {}) {
     label.setAttribute('font-size', '12');
     label.textContent = (b.label || 'Sans titre').slice(0, 34);
     svg.appendChild(label);
-    // Barre
+
     const rectBg = document.createElementNS(svg.namespaceURI, 'rect');
     rectBg.setAttribute('x', String(leftLabelW));
     rectBg.setAttribute('y', String(y));
@@ -83,7 +80,6 @@ function buildBarChart(container, data, { maxBars = 10 } = {}) {
     rect.setAttribute('fill', '#6366f1');
     svg.appendChild(rect);
 
-    // Valeur à droite
     const val = document.createElementNS(svg.namespaceURI, 'text');
     val.setAttribute('x', String(leftLabelW + innerW + 8));
     val.setAttribute('y', String(y + barH * 0.7));
@@ -95,7 +91,6 @@ function buildBarChart(container, data, { maxBars = 10 } = {}) {
   container.appendChild(svg);
 }
 
-// Graphique en ligne/aire pour séries journalières
 function drawLineChart(container, series) {
   container.innerHTML = '';
   if (!series.length) {
@@ -115,7 +110,6 @@ function drawLineChart(container, series) {
   svg.setAttribute('width', '100%');
   svg.setAttribute('height', String(height));
 
-  // Axes simples (graduations horizontales)
   const gridCount = 4;
   for (let i = 0; i <= gridCount; i++) {
     const yVal = (i / gridCount) * maxY;
@@ -137,7 +131,6 @@ function drawLineChart(container, series) {
     svg.appendChild(label);
   }
 
-  // Aire
   let d = '';
   series.forEach((p, i) => {
     const x = pad.l + i * stepX;
@@ -150,7 +143,6 @@ function drawLineChart(container, series) {
   area.setAttribute('opacity', '0.15');
   svg.appendChild(area);
 
-  // Ligne
   const path = document.createElementNS(svg.namespaceURI, 'path');
   path.setAttribute('d', d);
   path.setAttribute('fill', 'none');
@@ -158,7 +150,6 @@ function drawLineChart(container, series) {
   path.setAttribute('stroke-width', '2');
   svg.appendChild(path);
 
-  // Points
   series.forEach((p, i) => {
     const x = pad.l + i * stepX;
     const y = pad.t + innerH - (p.count / maxY) * innerH;
@@ -173,7 +164,6 @@ function drawLineChart(container, series) {
   container.appendChild(svg);
 }
 
-// Catégorisation par domaine d'URL
 function getHostnameSafe(url) {
   try { return new URL(url).hostname || ''; } catch { return ''; }
 }
@@ -194,7 +184,6 @@ function classifyCategory(url, fallbackLabel = '') {
     if (t.re.test(hay)) return t.name;
   }
   if (!h) return 'Autres';
-  // Heuristique: domaines perso
   return 'Site perso / Autres';
 }
 
@@ -283,7 +272,6 @@ async function main() {
     const { rows, top } = applyFilters(data.links || []);
     renderTable(rows);
     buildBarChart(qs('#chartTop'), rows, { maxBars: top });
-    // Catégories (agrégat sur liste filtrée)
     const catData = aggregateCategories(rows);
     buildBarChart(qs('#chartCategories'), catData, { maxBars: 8 });
     qs('#exportCsv').onclick = () => downloadBlob(makeCSV(rows), 'stats-links.csv');
@@ -291,7 +279,6 @@ async function main() {
   ['#fSearch', '#fMin', '#fTop'].forEach((sel) => qs(sel)?.addEventListener('input', apply));
   apply();
 
-  // Vue datée
   const chartContainer = qs('#chartViews');
   const fRange = qs('#fRange');
   async function refreshViews() {
@@ -300,7 +287,7 @@ async function main() {
   const { series } = await fetchDailyViews(days);
   drawLineChart(chartContainer, series);
     } catch (e) {
-      // Fallback: utiliser la série 30j préchargée côté serveur si disponible
+
       const preloadRaw = root?.getAttribute('data-views-daily') || '[]';
       try {
         const preload = JSON.parse(preloadRaw) || [];
@@ -317,7 +304,6 @@ async function main() {
   fRange?.addEventListener('change', refreshViews);
   await refreshViews();
 
-  // Clics datés
   const chartClicks = qs('#chartClicks');
   async function fetchDailyClicks(days) {
     const now = new Date();
