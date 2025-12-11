@@ -70,7 +70,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
         .code(400)
         .send({ error: "Seuls les brouillons sont modifiables" });
     const body = request.body as { name: string, description: string, data: string, isPrivate: boolean };
-    let patch: Theme;
+    const patch: Partial<Theme> = {};
     if (typeof body.name === "string" && body.name.trim())
       patch.name = body.name.trim();
     if (typeof body.description === "string")

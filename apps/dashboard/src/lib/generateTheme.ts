@@ -13,7 +13,12 @@ export async function generateTheme(userId?: string) {
   }
 
   const community = await prisma.theme.findMany({
-    where: { status: "APPROVED", isPrivate: false },
+    where: { 
+      status: "APPROVED", 
+      isPrivate: false,
+      // Exclure les thèmes de l'utilisateur s'il est connecté (ils seront ajoutés séparément)
+      ...(userId ? { authorId: { not: userId } } : {})
+    },
     select: {
       id: true,
       name: true,

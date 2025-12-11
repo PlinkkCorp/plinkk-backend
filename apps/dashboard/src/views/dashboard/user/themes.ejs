@@ -1,277 +1,585 @@
 <%- include('../../partials/head.ejs', { title: 'Tableau de bord - Mes thèmes', description: '', robots: 'noindex,nofollow' }) %>
 <%- include('../../partials/header-dash.ejs') %>
 
-<main class="max-w-[1600px] mx-auto p-4 space-y-5">
-  <h1 class="text-2xl font-semibold">Mes thèmes</h1>
-  <section class="flex flex-col lg:flex-row gap-4 items-start">
-    <div class="flex-1 rounded-lg border border-slate-800/70 bg-slate-900/60 p-6">
-      <h2 class="font-medium mb-3">Créer/éditer un thème</h2>
-      <form id="themeForm" class="space-y-3">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <input name="name" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm" placeholder="Nom du thème" required />
-          <input name="description" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm" placeholder="Description (optionnel)" />
-        </div>
-        <label class="flex items-center gap-2 text-sm text-slate-300">
-          <input id="isPrivate" type="checkbox" class="rounded border-slate-700" />
-          Thème privé (utilisable uniquement sur votre profil)
-        </label>
-        <div class="rounded-md border border-slate-800">
-          <div class="px-3 py-2 text-xs text-slate-400 border-b border-slate-800">Couleurs (Light)</div>
-          <div class="p-3 grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-              <label class="block text-xs mb-1">Background</label>
-              <div class="flex gap-2">
-                <input name="light_bg" type="text" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm color-text" placeholder="#f5f5f5" />
-                <input name="light_bg_color" type="color" class="h-10 w-12 rounded color-input" />
-              </div>
-            </div>
-            <div>
-              <label class="block text-xs mb-1">Bouton</label>
-              <div class="flex gap-2">
-                <input name="light_button" type="text" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm color-text" placeholder="#4f46e5" />
-                <input name="light_button_color" type="color" class="h-10 w-12 rounded color-input" />
-              </div>
-            </div>
-            <div>
-              <label class="block text-xs mb-1">Hover</label>
-              <div class="flex gap-2">
-                <input name="light_hover" type="text" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm color-text" placeholder="#22c55e" />
-                <input name="light_hover_color" type="color" class="h-10 w-12 rounded color-input" />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="rounded-md border border-slate-800">
-          <div class="px-3 py-2 text-xs text-slate-400 border-b border-slate-800">Couleurs (Dark)</div>
-          <div class="p-3 grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-              <label class="block text-xs mb-1">Background</label>
-              <div class="flex gap-2">
-                <input name="dark_bg" type="text" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm color-text" placeholder="#0b1020" />
-                <input name="dark_bg_color" type="color" class="h-10 w-12 rounded color-input" />
-              </div>
-            </div>
-            <div>
-              <label class="block text-xs mb-1">Bouton</label>
-              <div class="flex gap-2">
-                <input name="dark_button" type="text" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm color-text" placeholder="#4f46e5" />
-                <input name="dark_button_color" type="color" class="h-10 w-12 rounded color-input" />
-              </div>
-            </div>
-            <div>
-              <label class="block text-xs mb-1">Hover</label>
-              <div class="flex gap-2">
-                <input name="dark_hover" type="text" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-700 text-sm color-text" placeholder="#22c55e" />
-                <input name="dark_hover_color" type="color" class="h-10 w-12 rounded color-input" />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <button class="px-3 py-2 text-sm rounded-md bg-emerald-600 hover:bg-emerald-500 text-white" type="submit">Enregistrer brouillon</button>
-          <button id="submitThemeBtn" class="px-3 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-500 text-white" type="button" disabled>Soumettre</button>
-          <button id="resetThemeBtn" class="px-3 py-2 text-sm rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700" type="button">Réinitialiser</button>
-          <button id="usePrivateBtn" class="px-3 py-2 text-sm rounded-md bg-amber-700 hover:bg-amber-600 text-white" type="button" title="Utiliser ce thème privé sur mon profil">Utiliser sur mon profil</button>
-        </div>
-        <div id="themeMsg" class="text-xs text-slate-400"></div>
-      </form>
-    </div>
-    <aside class="w-full lg:w-96 rounded-lg border border-slate-800/70 bg-slate-900/60 p-6 flex-shrink-0">
-      <h2 class="font-medium mb-3">Aperçu</h2>
-      <div id="previewTabs" class="flex items-center gap-2 mb-3 text-xs">
-        <button data-mode="light" class="px-2 py-1 rounded bg-slate-800 border border-slate-700">Light</button>
-        <button data-mode="dark" class="px-2 py-1 rounded bg-slate-800 border border-slate-700">Dark</button>
-      </div>
-      <div id="previewBox" class="rounded-lg p-4 border border-slate-800 h-56 flex items-center justify-center">
-        <div class="w-full max-w-xs">
-          <div class="flex flex-col gap-3 items-center">
-            <button id="btnPrimary" class="px-4 py-2 text-sm rounded shadow">Bouton</button>
-            <button id="btnHover" class="px-4 py-2 text-sm rounded shadow">Hover</button>
-            <p class="mt-3 text-sm text-slate-400 text-center">Aperçu en direct pour vos couleurs</p>
-          </div>
-        </div>
-      </div>
-    </aside>
-  </section>
+<style>
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+  .color-picker-wrapper { position: relative; }
+  .color-picker-wrapper input[type="color"] { 
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%); 
+    width: 40px; height: 40px; border: none; cursor: pointer; 
+    border-radius: 8px; overflow: hidden; opacity: 0; 
+  }
+  .color-picker-wrapper .color-preview {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    width: 24px; height: 24px; border-radius: 6px; border: 2px solid rgba(255,255,255,0.1);
+    pointer-events: none; transition: all 0.2s ease;
+  }
+  .color-picker-wrapper:hover .color-preview { border-color: rgba(255,255,255,0.3); transform: translateY(-50%) scale(1.05); }
+  .theme-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .theme-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px -8px rgba(0,0,0,0.4); }
+  .preview-phone { 
+    width: 140px; height: 280px; border-radius: 20px; 
+    border: 3px solid #1e293b; position: relative; overflow: hidden;
+    box-shadow: 0 15px 35px -10px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05);
+    transition: all 0.4s ease; flex-shrink: 0;
+  }
+  .preview-phone::before {
+    content: ''; position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+    width: 45px; height: 14px; background: #1e293b; border-radius: 8px; z-index: 10;
+  }
+  .preview-phone-inner { 
+    width: 100%; height: 100%; padding: 30px 10px 15px; 
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    transition: background 0.4s ease;
+  }
+  .preview-avatar { 
+    width: 36px; height: 36px; border-radius: 50%; 
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
+    border: 2px solid rgba(255,255,255,0.1); flex-shrink: 0;
+  }
+  .preview-username { font-size: 11px; font-weight: 600; opacity: 0.9; }
+  .preview-bio { font-size: 8px; opacity: 0.5; text-align: center; }
+  .preview-btn { 
+    width: 100%; padding: 7px 10px; border-radius: 8px; 
+    font-size: 9px; font-weight: 500; text-align: center;
+    transition: all 0.3s ease; cursor: pointer; border: none;
+  }
+  .status-badge { 
+    font-size: 10px; padding: 2px 8px; border-radius: 20px; 
+    font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .status-draft { background: rgba(100,116,139,0.2); color: #94a3b8; border: 1px solid rgba(100,116,139,0.3); }
+  .status-submitted { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+  .status-approved { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); }
+  .status-archived { background: rgba(107,114,128,0.15); color: #9ca3af; border: 1px solid rgba(107,114,128,0.3); }
+  .status-rejected { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+  .btn-action {
+    padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 500;
+    transition: all 0.2s ease; border: none; cursor: pointer;
+  }
+  .btn-action:hover { transform: translateY(-1px); }
+  .btn-edit { background: rgba(99,102,241,0.15); color: #818cf8; }
+  .btn-edit:hover { background: rgba(99,102,241,0.25); }
+  .btn-submit { background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; }
+  .btn-submit:hover { box-shadow: 0 4px 15px rgba(99,102,241,0.4); }
+  .btn-delete { background: rgba(239,68,68,0.15); color: #f87171; }
+  .btn-delete:hover { background: rgba(239,68,68,0.25); }
+  .btn-archive { background: rgba(107,114,128,0.15); color: #9ca3af; }
+  .btn-archive:hover { background: rgba(107,114,128,0.25); }
+  .btn-use { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+  .btn-use:hover { box-shadow: 0 4px 15px rgba(245,158,11,0.4); }
+  .section-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  }
+  .section-header h3 { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+  .section-header .count {
+    font-size: 10px; padding: 2px 6px; border-radius: 20px;
+    background: rgba(99,102,241,0.15); color: #818cf8;
+  }
+  .empty-state {
+    text-align: center; padding: 30px 20px;
+    background: linear-gradient(135deg, rgba(15,23,42,0.5), rgba(30,41,59,0.3));
+    border-radius: 16px; border: 1px dashed rgba(100,116,139,0.3);
+  }
+  .empty-state svg { width: 40px; height: 40px; margin: 0 auto 12px; opacity: 0.3; }
+  .input-modern {
+    width: 100%; padding: 10px 14px; padding-right: 44px;
+    background: rgba(15,23,42,0.6); border: 1px solid rgba(71,85,105,0.4);
+    border-radius: 10px; color: #e2e8f0; font-size: 13px;
+    transition: all 0.2s ease;
+  }
+  .input-modern:focus { 
+    outline: none; border-color: #4f46e5; 
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+  }
+  .input-modern::placeholder { color: #64748b; }
+  .glass-card {
+    background: linear-gradient(135deg, rgba(15,23,42,0.8), rgba(30,41,59,0.6));
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(71,85,105,0.3);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+  .mode-label {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 4px 10px; border-radius: 8px; margin-bottom: 8px;
+  }
+</style>
 
-  <section class="rounded-lg border border-slate-800/70 bg-slate-900/60 p-4">
-    <h2 class="font-medium mb-3">Mes thèmes</h2>
-    <% if ((myThemes||[]).length === 0) { %>
-      <p class="text-sm text-slate-400">Aucun thème pour l’instant.</p>
-    <% } else { %>
-      <div class="space-y-6">
+<div class="max-w-[1800px] mx-auto p-4 lg:p-6">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <%- include('../../partials/asside_dash.ejs', { active: 'themes' }) %>
+
+    <main class="lg:col-span-10 space-y-5 animate-fade-in">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h3 class="text-sm font-semibold mb-2">Brouillons</h3>
-          <ul id="listDrafts" class="flex flex-wrap gap-3">
-          <% myThemes.filter(t=>t.status==='DRAFT').forEach(t => { %>
-            <li class="w-full sm:w-1/2 lg:w-1/3 rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-id="<%= t.id %>" data-status="DRAFT" data-json='<%- JSON.stringify(t.data||{}) %>'>
-            <div class="flex items-start gap-3">
-              <div class="w-16 h-16 rounded border border-slate-800 overflow-hidden previewMini"></div>
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2">
-                  <strong class="truncate"><%= t.name %></strong>
-                  <span class="ml-1 text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300">DRAFT</span>
+          <h1 class="text-2xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Mes thèmes</h1>
+          <p class="text-slate-400 text-sm mt-0.5">Créez et gérez vos thèmes personnalisés</p>
+        </div>
+        <span class="px-3 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-medium self-start">
+          <svg class="w-3.5 h-3.5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+          <%= (myThemes||[]).length %> thème<%= (myThemes||[]).length > 1 ? 's' : '' %>
+        </span>
+      </div>
+
+      <section class="grid grid-cols-1 xl:grid-cols-12 gap-5">
+        <div class="xl:col-span-7 glass-card p-5">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+            </div>
+            <div>
+              <h2 class="font-semibold">Éditeur de thème</h2>
+              <p class="text-xs text-slate-400">Personnalisez les couleurs</p>
+            </div>
+          </div>
+
+          <form id="themeForm" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1.5">Nom du thème *</label>
+                <input name="name" class="input-modern !pr-4" placeholder="Ex: Ocean Blue" required />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1.5">Description</label>
+                <input name="description" class="input-modern !pr-4" placeholder="Courte description..." />
+              </div>
+            </div>
+
+            <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/30 border border-slate-700/50 cursor-pointer hover:bg-slate-800/50 transition-colors">
+              <input id="isPrivate" type="checkbox" class="w-4 h-4 rounded border-slate-600 text-indigo-500 focus:ring-indigo-500/30" />
+              <div class="flex-1">
+                <span class="text-sm font-medium">Thème privé</span>
+                <p class="text-xs text-slate-400">Utilisable uniquement sur votre profil</p>
+              </div>
+              <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            </label>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="rounded-xl border border-slate-700/50 overflow-hidden">
+                <div class="px-3 py-2 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-b border-slate-700/50 flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
+                  <span class="text-xs font-medium text-amber-200">Mode clair</span>
                 </div>
-                <% if (t.description) { %><div class="text-xs text-slate-400 truncate"><%= t.description %></div><% } %>
-                <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
-              </div>
-            </div>
-            <div class="mt-3 flex items-center justify-end gap-2">
-                <button class="editOne px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white/90 text-xs" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>Éditer</button>
-                <button class="submitOne px-2 py-1 rounded bg-indigo-600 text-white text-xs" data-id="<%= t.id %>">Soumettre</button>
-                <button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="<%= t.id %>">Supprimer</button>
-            </div>
-          </li>
-          <% }) %>
-          </ul>
-        </div>
-
-        <div>
-          <h3 class="text-sm font-semibold mb-2">En attente de validation</h3>
-          <ul id="listSubmitted" class="flex flex-wrap gap-3">
-          <% myThemes.filter(t=>t.status==='SUBMITTED').forEach(t => { %>
-            <li class="w-full sm:w-1/2 lg:w-1/3 rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-id="<%= t.id %>" data-status="SUBMITTED" data-json='<%- JSON.stringify(t.data||{}) %>'>
-              <div class="flex items-start gap-3">
-                <div class="w-16 h-16 rounded border border-slate-800 overflow-hidden previewMini"></div>
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2">
-                    <strong class="truncate"><%= t.name %></strong>
-                    <span class="ml-1 text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300">SUBMITTED</span>
+                <div class="p-3 space-y-2.5 bg-slate-900/40">
+                  <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">Arrière-plan</label>
+                    <div class="color-picker-wrapper">
+                      <input name="light_bg" type="text" class="input-modern !py-2 !text-xs color-text" placeholder="#f5f5f5" />
+                      <input name="light_bg_color" type="color" class="color-input" value="#f5f5f5" />
+                      <div class="color-preview" style="background:#f5f5f5"></div>
+                    </div>
                   </div>
-                  <% if (t.description) { %><div class="text-xs text-slate-400 truncate"><%= t.description %></div><% } %>
-                  <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+                  <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">Boutons</label>
+                    <div class="color-picker-wrapper">
+                      <input name="light_button" type="text" class="input-modern !py-2 !text-xs color-text" placeholder="#4f46e5" />
+                      <input name="light_button_color" type="color" class="color-input" value="#4f46e5" />
+                      <div class="color-preview" style="background:#4f46e5"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">Survol</label>
+                    <div class="color-picker-wrapper">
+                      <input name="light_hover" type="text" class="input-modern !py-2 !text-xs color-text" placeholder="#22c55e" />
+                      <input name="light_hover_color" type="color" class="color-input" value="#22c55e" />
+                      <div class="color-preview" style="background:#22c55e"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="mt-3 flex items-center justify-end gap-2">
-                <button class="archiveOne px-2 py-1 rounded bg-slate-700/80 border border-slate-600/50 text-white text-xs" data-id="<%= t.id %>">Archiver</button>
-                <button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="<%= t.id %>">Supprimer</button>
+
+              <div class="rounded-xl border border-slate-700/50 overflow-hidden">
+                <div class="px-3 py-2 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border-b border-slate-700/50 flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                  <span class="text-xs font-medium text-indigo-200">Mode sombre</span>
+                </div>
+                <div class="p-3 space-y-2.5 bg-slate-900/40">
+                  <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">Arrière-plan</label>
+                    <div class="color-picker-wrapper">
+                      <input name="dark_bg" type="text" class="input-modern !py-2 !text-xs color-text" placeholder="#0b1020" />
+                      <input name="dark_bg_color" type="color" class="color-input" value="#0b1020" />
+                      <div class="color-preview" style="background:#0b1020"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">Boutons</label>
+                    <div class="color-picker-wrapper">
+                      <input name="dark_button" type="text" class="input-modern !py-2 !text-xs color-text" placeholder="#4f46e5" />
+                      <input name="dark_button_color" type="color" class="color-input" value="#4f46e5" />
+                      <div class="color-preview" style="background:#4f46e5"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">Survol</label>
+                    <div class="color-picker-wrapper">
+                      <input name="dark_hover" type="text" class="input-modern !py-2 !text-xs color-text" placeholder="#22c55e" />
+                      <input name="dark_hover_color" type="color" class="color-input" value="#22c55e" />
+                      <div class="color-preview" style="background:#22c55e"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 pt-2">
+              <button id="createAndSubmitBtn" class="btn-action btn-submit px-4 py-2" type="submit">
+                <svg class="w-3.5 h-3.5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Créer & Soumettre
+              </button>
+              <button id="saveDraftBtn" class="btn-action px-4 py-2 bg-slate-600/50 text-slate-300 hover:bg-slate-600/70" type="button">
+                <svg class="w-3.5 h-3.5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                Brouillon
+              </button>
+              <button id="usePrivateBtn" class="btn-action btn-use px-4 py-2" type="button" title="Utiliser ce thème privé">
+                <svg class="w-3.5 h-3.5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                Utiliser
+              </button>
+              <button id="resetThemeBtn" class="btn-action px-4 py-2 bg-slate-700/50 text-slate-300 hover:bg-slate-700/70 ml-auto" type="button">
+                <svg class="w-3.5 h-3.5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                Reset
+              </button>
+            </div>
+            <div id="themeMsg" class="text-sm font-medium"></div>
+          </form>
+        </div>
+
+        <aside class="xl:col-span-5 glass-card p-5">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
+              <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            </div>
+            <div>
+              <h2 class="font-semibold">Aperçu en direct</h2>
+              <p class="text-xs text-slate-400">Light & Dark côte à côte</p>
+            </div>
+          </div>
+
+          <div class="flex items-start justify-center gap-4 flex-wrap">
+            <div class="flex flex-col items-center">
+              <div class="mode-label bg-amber-500/20 text-amber-300 flex items-center gap-1.5">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
+                Light
+              </div>
+              <div id="previewLight" class="preview-phone">
+                <div class="preview-phone-inner" style="background: #f5f5f5;">
+                  <div class="preview-avatar"></div>
+                  <div class="preview-username light-text" style="color: #111;">@username</div>
+                  <div class="preview-bio light-text" style="color: #111;">Ma bio</div>
+                  <button class="preview-btn light-btn" style="background: #4f46e5; color: white;">Mon lien</button>
+                  <button class="preview-btn light-hover" style="background: #22c55e; color: white;">Autre lien</button>
+                  <button class="preview-btn" style="background: rgba(0,0,0,0.05); color: #333; border: 1px solid rgba(0,0,0,0.1);">Lien 3</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-col items-center">
+              <div class="mode-label bg-indigo-500/20 text-indigo-300 flex items-center gap-1.5">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                Dark
+              </div>
+              <div id="previewDark" class="preview-phone">
+                <div class="preview-phone-inner" style="background: #0b1020;">
+                  <div class="preview-avatar"></div>
+                  <div class="preview-username dark-text" style="color: #fff;">@username</div>
+                  <div class="preview-bio dark-text" style="color: #fff;">Ma bio</div>
+                  <button class="preview-btn dark-btn" style="background: #4f46e5; color: white;">Mon lien</button>
+                  <button class="preview-btn dark-hover" style="background: #22c55e; color: white;">Autre lien</button>
+                  <button class="preview-btn" style="background: rgba(255,255,255,0.05); color: #ccc; border: 1px solid rgba(255,255,255,0.1);">Lien 3</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p class="mt-4 text-xs text-slate-500 text-center">Les couleurs s'appliquent en temps réel</p>
+        </aside>
+      </section>
+
+      <section class="glass-card p-5 animate-fade-in" style="animation-delay: 0.15s">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+      </div>
+      <div>
+        <h2 class="font-semibold text-lg">Ma collection</h2>
+        <p class="text-xs text-slate-400">Tous vos thèmes organisés par statut</p>
+      </div>
+    </div>
+
+    <% if ((myThemes||[]).length === 0) { %>
+      <div class="empty-state">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+        <h3 class="text-lg font-medium text-slate-300 mb-2">Aucun thème créé</h3>
+        <p class="text-sm text-slate-500">Commencez à créer votre premier thème personnalisé !</p>
+      </div>
+    <% } else { %>
+      <div class="space-y-8">
+        <% const drafts = myThemes.filter(t=>t.status==='DRAFT'); %>
+        <% if (drafts.length > 0) { %>
+        <div>
+          <div class="section-header">
+            <div class="w-2 h-2 rounded-full bg-slate-400"></div>
+            <h3>Brouillons</h3>
+            <span class="count"><%= drafts.length %></span>
+          </div>
+          <ul id="listDrafts" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <% drafts.forEach(t => { %>
+            <li class="theme-card rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4" data-id="<%= t.id %>" data-status="DRAFT" data-json='<%- JSON.stringify(t.data||{}) %>'>
+              <div class="flex items-start gap-4">
+                <div class="w-20 h-20 rounded-xl border border-slate-700/50 overflow-hidden previewMini flex-shrink-0 shadow-lg"></div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <strong class="truncate text-base"><%= t.name %></strong>
+                    <span class="status-badge status-draft">Brouillon</span>
+                  </div>
+                  <% if (t.description) { %><div class="text-xs text-slate-400 truncate mt-1"><%= t.description %></div><% } %>
+                  <div class="text-[11px] text-slate-500 mt-2 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <%= new Date(t.updatedAt).toLocaleString('fr-FR') %>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 flex items-center justify-end gap-2 pt-3 border-t border-slate-700/30">
+                <button class="editOne btn-action btn-edit" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>Éditer</button>
+                <button class="submitOne btn-action btn-submit" data-id="<%= t.id %>">Soumettre</button>
+                <button class="deleteOne btn-action btn-delete" data-id="<%= t.id %>">Supprimer</button>
               </div>
             </li>
           <% }) %>
           </ul>
         </div>
+        <% } %>
 
+        <!-- En attente -->
+        <% const submitted = myThemes.filter(t=>t.status==='SUBMITTED'); %>
+        <% if (submitted.length > 0) { %>
         <div>
-          <h3 class="text-sm font-semibold mb-2">Validés</h3>
-          <ul id="listApproved" class="flex flex-wrap gap-3">
-          <% myThemes.filter(t=>t.status==='APPROVED').forEach(t => { %>
-            <li class="w-full sm:w-1/2 lg:w-1/3 rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-id="<%= t.id %>" data-status="APPROVED" data-json='<%- JSON.stringify(t.data||{}) %>'>
-              <div class="flex items-start gap-3">
-                <div class="w-16 h-16 rounded border border-slate-800 overflow-hidden previewMini"></div>
+          <div class="section-header">
+            <div class="w-2 h-2 rounded-full bg-amber-400"></div>
+            <h3>En attente de validation</h3>
+            <span class="count"><%= submitted.length %></span>
+          </div>
+          <ul id="listSubmitted" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <% submitted.forEach(t => { %>
+            <li class="theme-card rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4" data-id="<%= t.id %>" data-status="SUBMITTED" data-json='<%- JSON.stringify(t.data||{}) %>'>
+              <div class="flex items-start gap-4">
+                <div class="w-20 h-20 rounded-xl border border-slate-700/50 overflow-hidden previewMini flex-shrink-0 shadow-lg"></div>
                 <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2">
-                    <strong class="truncate"><%= t.name %></strong>
-                    <span class="ml-1 text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300">APPROVED</span>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <strong class="truncate text-base"><%= t.name %></strong>
+                    <span class="status-badge status-submitted">En attente</span>
+                  </div>
+                  <% if (t.description) { %><div class="text-xs text-slate-400 truncate mt-1"><%= t.description %></div><% } %>
+                  <div class="text-[11px] text-slate-500 mt-2 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <%= new Date(t.updatedAt).toLocaleString('fr-FR') %>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 flex items-center justify-end gap-2 pt-3 border-t border-slate-700/30">
+                <button class="archiveOne btn-action btn-archive" data-id="<%= t.id %>">Archiver</button>
+                <button class="deleteOne btn-action btn-delete" data-id="<%= t.id %>">Supprimer</button>
+              </div>
+            </li>
+          <% }) %>
+          </ul>
+        </div>
+        <% } %>
+
+        <!-- Validés -->
+        <% const approved = myThemes.filter(t=>t.status==='APPROVED'); %>
+        <% if (approved.length > 0) { %>
+        <div>
+          <div class="section-header">
+            <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+            <h3>Validés</h3>
+            <span class="count"><%= approved.length %></span>
+          </div>
+          <ul id="listApproved" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <% approved.forEach(t => { %>
+            <li class="theme-card rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4" data-id="<%= t.id %>" data-status="APPROVED" data-json='<%- JSON.stringify(t.data||{}) %>'>
+              <div class="flex items-start gap-4">
+                <div class="w-20 h-20 rounded-xl border border-slate-700/50 overflow-hidden previewMini flex-shrink-0 shadow-lg"></div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <strong class="truncate text-base"><%= t.name %></strong>
+                    <span class="status-badge status-approved">Validé</span>
                     <% if (t.pendingUpdate) { %>
-                      <span class="ml-1 text-[10px] px-2 py-0.5 rounded bg-amber-700/40 border border-amber-600/50 text-amber-200">MAJ en attente</span>
+                      <span class="status-badge" style="background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);">MAJ en attente</span>
                     <% } %>
                   </div>
-                  <% if (t.description) { %><div class="text-xs text-slate-400 truncate"><%= t.description %></div><% } %>
-                  <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
-                </div>
-              </div>
-              <div class="mt-3 flex items-center justify-end gap-2">
-                <button class="archiveOne px-2 py-1 rounded bg-slate-700/80 border border-slate-600/50 text-white text-xs" data-id="<%= t.id %>">Archiver</button>
-                <button class="editOne px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white/90 text-xs" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>Éditer</button>
-                <button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="<%= t.id %>">Supprimer</button>
-              </div>
-            </li>
-          <% }) %>
-          </ul>
-        </div>
-
-        <div>
-          <h3 class="text-sm font-semibold mb-2">Archivés</h3>
-          <ul id="listArchived" class="flex flex-wrap gap-3">
-          <% myThemes.filter(t=>t.status==='ARCHIVED').forEach(t => { %>
-            <li class="w-full sm:w-1/2 lg:w-1/3 rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-id="<%= t.id %>" data-status="ARCHIVED" data-json='<%- JSON.stringify(t.data||{}) %>'>
-              <div class="flex items-start gap-3">
-                <div class="w-16 h-16 rounded border border-slate-800 overflow-hidden previewMini"></div>
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2">
-                    <strong class="truncate"><%= t.name %></strong>
-                    <span class="ml-1 text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300">ARCHIVED</span>
+                  <% if (t.description) { %><div class="text-xs text-slate-400 truncate mt-1"><%= t.description %></div><% } %>
+                  <div class="text-[11px] text-slate-500 mt-2 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <%= new Date(t.updatedAt).toLocaleString('fr-FR') %>
                   </div>
-                  <% if (t.description) { %><div class="text-xs text-slate-400 truncate"><%= t.description %></div><% } %>
-                  <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
                 </div>
               </div>
-              <div class="mt-3 flex items-center justify-end gap-2">
-                <button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="<%= t.id %>">Supprimer</button>
+              <div class="mt-4 flex items-center justify-end gap-2 pt-3 border-t border-slate-700/30">
+                <button class="archiveOne btn-action btn-archive" data-id="<%= t.id %>">Archiver</button>
+                <button class="editOne btn-action btn-edit" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>Éditer</button>
+                <button class="deleteOne btn-action btn-delete" data-id="<%= t.id %>">Supprimer</button>
               </div>
             </li>
           <% }) %>
           </ul>
         </div>
+        <% } %>
 
+        <!-- Archivés -->
+        <% const archived = myThemes.filter(t=>t.status==='ARCHIVED'); %>
+        <% if (archived.length > 0) { %>
         <div>
-          <h3 class="text-sm font-semibold mb-2">Rejetés</h3>
-          <ul id="listRejected" class="flex flex-wrap gap-3">
-          <% myThemes.filter(t=>t.status==='REJECTED').forEach(t => { %>
-            <li class="w-full sm:w-1/2 lg:w-1/3 rounded border border-slate-800 bg-slate-900 p-3 text-sm" data-id="<%= t.id %>" data-status="REJECTED" data-json='<%- JSON.stringify(t.data||{}) %>'>
-              <div class="flex items-start gap-3">
-                <div class="w-16 h-16 rounded border border-slate-800 overflow-hidden previewMini"></div>
+          <div class="section-header">
+            <div class="w-2 h-2 rounded-full bg-slate-500"></div>
+            <h3>Archivés</h3>
+            <span class="count"><%= archived.length %></span>
+          </div>
+          <ul id="listArchived" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <% archived.forEach(t => { %>
+            <li class="theme-card rounded-2xl border border-slate-700/50 bg-slate-800/20 p-4 opacity-60" data-id="<%= t.id %>" data-status="ARCHIVED" data-json='<%- JSON.stringify(t.data||{}) %>'>
+              <div class="flex items-start gap-4">
+                <div class="w-20 h-20 rounded-xl border border-slate-700/50 overflow-hidden previewMini flex-shrink-0 shadow-lg"></div>
                 <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2">
-                    <strong class="truncate"><%= t.name %></strong>
-                    <span class="ml-1 text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300">REJECTED</span>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <strong class="truncate text-base"><%= t.name %></strong>
+                    <span class="status-badge status-archived">Archivé</span>
                   </div>
-                  <% if (t.description) { %><div class="text-xs text-slate-400 truncate"><%= t.description %></div><% } %>
-                  <div class="text-[11px] text-slate-500 mt-1">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
+                  <% if (t.description) { %><div class="text-xs text-slate-400 truncate mt-1"><%= t.description %></div><% } %>
+                  <div class="text-[11px] text-slate-500 mt-2 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <%= new Date(t.updatedAt).toLocaleString('fr-FR') %>
+                  </div>
                 </div>
               </div>
-              <div class="mt-3 flex items-center justify-end gap-2">
-                <button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="<%= t.id %>">Supprimer</button>
+              <div class="mt-4 flex items-center justify-end gap-2 pt-3 border-t border-slate-700/30">
+                <button class="deleteOne btn-action btn-delete" data-id="<%= t.id %>">Supprimer</button>
               </div>
             </li>
           <% }) %>
           </ul>
         </div>
+        <% } %>
+
+        <!-- Rejetés -->
+        <% const rejected = myThemes.filter(t=>t.status==='REJECTED'); %>
+        <% if (rejected.length > 0) { %>
+        <div>
+          <div class="section-header">
+            <div class="w-2 h-2 rounded-full bg-red-400"></div>
+            <h3>Rejetés</h3>
+            <span class="count"><%= rejected.length %></span>
+          </div>
+          <ul id="listRejected" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <% rejected.forEach(t => { %>
+            <li class="theme-card rounded-2xl border border-red-500/20 bg-red-500/5 p-4" data-id="<%= t.id %>" data-status="REJECTED" data-json='<%- JSON.stringify(t.data||{}) %>'>
+              <div class="flex items-start gap-4">
+                <div class="w-20 h-20 rounded-xl border border-slate-700/50 overflow-hidden previewMini flex-shrink-0 shadow-lg"></div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <strong class="truncate text-base"><%= t.name %></strong>
+                    <span class="status-badge status-rejected">Rejeté</span>
+                  </div>
+                  <% if (t.description) { %><div class="text-xs text-slate-400 truncate mt-1"><%= t.description %></div><% } %>
+                  <div class="text-[11px] text-slate-500 mt-2 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <%= new Date(t.updatedAt).toLocaleString('fr-FR') %>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 flex items-center justify-end gap-2 pt-3 border-t border-slate-700/30">
+                <button class="editOne btn-action btn-edit" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>Rééditer</button>
+                <button class="deleteOne btn-action btn-delete" data-id="<%= t.id %>">Supprimer</button>
+              </div>
+            </li>
+          <% }) %>
+          </ul>
+        </div>
+        <% } %>
       </div>
     <% } %>
-  </section>
-</main>
+      </section>
+    </main>
+  </div>
+</div>
 
 <script>
 (function(){
   const $ = (s, r=document) => r.querySelector(s);
   const form = $('#themeForm');
   const msg = $('#themeMsg');
-  const btnSubmit = $('#submitThemeBtn');
-  const previewBox = $('#previewBox');
-  const btnPrimary = $('#btnPrimary');
-  const btnHover = $('#btnHover');
+  const createAndSubmitBtn = $('#createAndSubmitBtn');
+  const saveDraftBtn = $('#saveDraftBtn');
+  const previewLightBox = $('#previewLight');
+  const previewDarkBox = $('#previewDark');
+  const previewLightInner = previewLightBox?.querySelector('.preview-phone-inner');
+  const previewDarkInner = previewDarkBox?.querySelector('.preview-phone-inner');
   const resetBtn = $('#resetThemeBtn');
   const isPrivateEl = document.getElementById('isPrivate');
   const usePrivateBtn = document.getElementById('usePrivateBtn');
   let editId = null;
   let editStatus = null;
-  let previewMode = 'light';
 
-  function setMsg(t, ok){ msg.textContent = t||''; msg.className = 'text-xs ' + (ok ? 'text-emerald-400' : 'text-amber-300'); }
+  function setMsg(t, ok){ msg.textContent = t||''; msg.className = 'text-sm font-medium ' + (ok ? 'text-emerald-400' : 'text-amber-300'); }
+  
   function linkColorInputs() {
     document.querySelectorAll('.color-input').forEach((ci) => {
       const wrapper = ci.parentElement;
       const txt = wrapper?.querySelector('.color-text');
+      const preview = wrapper?.querySelector('.color-preview');
       if (!txt) return;
-      ci.addEventListener('input', () => { txt.value = ci.value; updatePreview(); });
-      txt.addEventListener('input', () => { if (/^#?[0-9a-fA-F]{3,6}$/.test(txt.value.trim())) ci.value = txt.value.startsWith('#')?txt.value:('#'+txt.value); updatePreview(); });
+      ci.addEventListener('input', () => { 
+        txt.value = ci.value; 
+        if (preview) preview.style.background = ci.value;
+        updatePreview(); 
+      });
+      txt.addEventListener('input', () => { 
+        if (/^#?[0-9a-fA-F]{3,6}$/.test(txt.value.trim())) {
+          const val = txt.value.startsWith('#') ? txt.value : ('#'+txt.value);
+          ci.value = val;
+          if (preview) preview.style.background = val;
+        }
+        updatePreview(); 
+      });
     });
   }
+  
   function buildSimplified(fd){
     const o = Object.fromEntries(fd.entries());
     const light = { bg: o.light_bg || '#f5f5f5', button: o.light_button || '#4f46e5', hover: o.light_hover || '#22c55e' };
     const dark  = { bg: o.dark_bg || '#0b1020',  button: o.dark_button || '#4f46e5', hover: o.dark_hover || '#22c55e' };
     return { light, dark };
   }
+
   function applyPreviewFromSimplified(sim){
-    const v = previewMode === 'dark' ? sim.dark : sim.light;
-    const textColor = getContrast(v.bg);
-    const btnText = getContrast(v.button);
-    previewBox.style.background = norm(v.bg);
-    previewBox.style.color = textColor;
-    btnPrimary.style.background = norm(v.button); btnPrimary.style.color = btnText;
-    btnHover.style.background = norm(v.hover); btnHover.style.color = textColor;
+    // Update Light preview
+    if (previewLightInner) {
+      const lv = sim.light;
+      const ltextColor = getContrast(lv.bg);
+      const lbtnText = getContrast(lv.button);
+      const lhoverText = getContrast(lv.hover);
+      previewLightInner.style.background = norm(lv.bg);
+      previewLightInner.querySelectorAll('.light-text').forEach(el => el.style.color = ltextColor);
+      const lBtn = previewLightInner.querySelector('.light-btn');
+      if (lBtn) { lBtn.style.background = norm(lv.button); lBtn.style.color = lbtnText; }
+      const lHover = previewLightInner.querySelector('.light-hover');
+      if (lHover) { lHover.style.background = norm(lv.hover); lHover.style.color = lhoverText; }
+    }
+    // Update Dark preview
+    if (previewDarkInner) {
+      const dv = sim.dark;
+      const dtextColor = getContrast(dv.bg);
+      const dbtnText = getContrast(dv.button);
+      const dhoverText = getContrast(dv.hover);
+      previewDarkInner.style.background = norm(dv.bg);
+      previewDarkInner.querySelectorAll('.dark-text').forEach(el => el.style.color = dtextColor);
+      const dBtn = previewDarkInner.querySelector('.dark-btn');
+      if (dBtn) { dBtn.style.background = norm(dv.button); dBtn.style.color = dbtnText; }
+      const dHover = previewDarkInner.querySelector('.dark-hover');
+      if (dHover) { dHover.style.background = norm(dv.hover); dHover.style.color = dhoverText; }
+    }
   }
   function updatePreview(){ applyPreviewFromSimplified(buildSimplified(new FormData(form))); }
   function norm(s){ s = String(s||'').trim(); if (!s.startsWith('#')) s = '#'+s; if (/^#[0-9a-fA-F]{3}$/.test(s)) s = '#'+s.slice(1).split('').map(c=>c+c).join(''); return /^#[0-9a-fA-F]{6}$/.test(s) ? s : '#000000'; }
@@ -294,79 +602,144 @@
       c.button = norm(c.button);
       c.hover = norm(c.hover);
 
-      mini.innerHTML = `<div style="width:100%;height:100%;background:${c.bg};display:flex;flex-direction:column;justify-content:center;gap:6px;padding:6px">`+
-        `<div style="height:28px;background:${c.button};border-radius:6px;width:70%"></div>`+
-        `<div style="height:20px;background:${c.hover};border-radius:6px;width:50%"></div>`+
+      mini.innerHTML = `<div style="width:100%;height:100%;background:${c.bg};display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;padding:10px">`+
+        `<div style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,0.2),rgba(255,255,255,0.05));border:1px solid rgba(255,255,255,0.1)"></div>`+
+        `<div style="height:14px;background:${c.button};border-radius:6px;width:85%"></div>`+
+        `<div style="height:12px;background:${c.hover};border-radius:5px;width:70%"></div>`+
         `</div>`;
     } catch(e){}
   }
+
+  // Fonction pour créer un thème (retourne l'ID)
+  async function createTheme(payload) {
+    const url = editId && editStatus !== 'APPROVED' ? ('/api/me/themes/'+encodeURIComponent(editId)) : '/api/me/themes';
+    const method = editId && editStatus !== 'APPROVED' ? 'PATCH' : 'POST';
+    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const j = await res.json();
+    if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
+    return j;
+  }
+
+  // Fonction pour soumettre un thème
+  async function submitTheme(id) {
+    const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/submit', { method: 'POST' });
+    const j = await res.json();
+    if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
+    return j;
+  }
+
+  // Créer & Soumettre (bouton principal)
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(form);
-    const name = (fd.get('name')||'').toString().trim(); if (!name) { setMsg('Nom requis', false); return; }
-  const payload = { name, description: (fd.get('description')||'').toString(), data: buildSimplified(fd), isPrivate: !!isPrivateEl.checked };
+    const name = (fd.get('name')||'').toString().trim(); 
+    if (!name) { setMsg('Nom requis', false); return; }
+    const payload = { name, description: (fd.get('description')||'').toString(), data: buildSimplified(fd), isPrivate: !!isPrivateEl.checked };
+    
+    createAndSubmitBtn.disabled = true;
+    const prevText = createAndSubmitBtn.innerHTML;
+    createAndSubmitBtn.innerHTML = '<svg class="w-3.5 h-3.5 inline mr-1 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Création...';
+    
     try {
-    const url = editId && editStatus !== 'APPROVED' ? ('/api/me/themes/'+encodeURIComponent(editId)) : '/api/me/themes';
-    const method = editId && editStatus !== 'APPROVED' ? 'PATCH' : 'POST';
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      const j = await res.json();
-  if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
-      setMsg('Brouillon enregistré. Vous pouvez soumettre.', true);
-  btnSubmit.disabled = false;
-  btnSubmit.dataset.id = j.id;
-  editId = j.id;
-  editStatus = 'DRAFT';
-      try {
-        const theme = j;
-        let list = document.getElementById('listDrafts');
-        if (!list) {
-          const h3 = Array.from(document.querySelectorAll('h3')).find(h=>/Brouillons/i.test(h.textContent||''));
-          if (h3) list = h3.nextElementSibling;
-        }
-        if (list) {
-          const li = createThemeLi(theme);
-          list.appendChild(li);
-          renderMiniForLi(li);
-          attachCardListeners(li);
-        }
-      } catch (e) {}
-    } catch(err){ setMsg(err.message||'Erreur', false); }
+      // Étape 1: Créer le thème
+      const created = await createTheme(payload);
+      
+      // Étape 2: Soumettre automatiquement (sauf si privé)
+      if (!isPrivateEl.checked) {
+        createAndSubmitBtn.innerHTML = '<svg class="w-3.5 h-3.5 inline mr-1 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Soumission...';
+        await submitTheme(created.id);
+        setMsg('Thème créé et soumis pour validation ✓', true);
+      } else {
+        setMsg('Thème privé créé ✓', true);
+      }
+      
+      setTimeout(() => location.reload(), 800);
+    } catch(err) { 
+      setMsg(err.message||'Erreur', false); 
+      createAndSubmitBtn.disabled = false;
+      createAndSubmitBtn.innerHTML = prevText;
+    }
+  });
+
+  // Enregistrer brouillon (sans soumettre)
+  saveDraftBtn.addEventListener('click', async () => {
+    const fd = new FormData(form);
+    const name = (fd.get('name')||'').toString().trim(); 
+    if (!name) { setMsg('Nom requis', false); return; }
+    const payload = { name, description: (fd.get('description')||'').toString(), data: buildSimplified(fd), isPrivate: !!isPrivateEl.checked };
+    
+    const wasNewTheme = !editId; // Savoir si c'est une création ou mise à jour
+    
+    saveDraftBtn.disabled = true;
+    const prevText = saveDraftBtn.innerHTML;
+    saveDraftBtn.innerHTML = '<svg class="w-3.5 h-3.5 inline mr-1 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>...';
+    
+    try {
+      const created = await createTheme(payload);
+      editId = created.id;
+      editStatus = 'DRAFT';
+      setMsg('Brouillon enregistré ✓', true);
+      
+      // Recharger la page pour afficher le nouveau thème
+      setTimeout(() => location.reload(), 500);
+    } catch(err) { 
+      setMsg(err.message||'Erreur', false); 
+      saveDraftBtn.disabled = false;
+      saveDraftBtn.innerHTML = prevText;
+    }
   });
 
   function createThemeLi(t){
     const li = document.createElement('li');
-    li.className = 'w-full sm:w-1/2 lg:w-1/3 rounded border border-slate-800 bg-slate-900 p-3 text-sm';
+    li.className = 'theme-card rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4';
     li.setAttribute('data-id', String(t.id||''));
+    li.setAttribute('data-status', t.status || 'DRAFT');
     li.setAttribute('data-json', JSON.stringify(t.data||{}));
     const name = escapeHtml(t.name||'');
-    const desc = t.description ? `<div class="text-xs text-slate-400 truncate">${escapeHtml(t.description)}</div>` : '';
+    const desc = t.description ? `<div class="text-xs text-slate-400 truncate mt-1">${escapeHtml(t.description)}</div>` : '';
     const status = escapeHtml(t.status||'DRAFT');
     const updated = t.updatedAt ? new Date(t.updatedAt).toLocaleString('fr-FR') : '';
+    let statusClass = 'status-draft';
+    let statusLabel = 'Brouillon';
+    if (status === 'SUBMITTED') { statusClass = 'status-submitted'; statusLabel = 'En attente'; }
+    else if (status === 'APPROVED') { statusClass = 'status-approved'; statusLabel = 'Validé'; }
+    else if (status === 'ARCHIVED') { statusClass = 'status-archived'; statusLabel = 'Archivé'; }
+    else if (status === 'REJECTED') { statusClass = 'status-rejected'; statusLabel = 'Rejeté'; }
+    
     let actions = '';
     if (status === 'DRAFT') {
-      actions = `<button class="editOne px-2 py-1 rounded bg-slate-800 border border-slate-700 text-white/90 text-xs" data-id="${escapeHtml(t.id)}" data-json='${escapeHtml(JSON.stringify(t.data||{}))}'>Éditer</button>
-                <button class="submitOne px-2 py-1 rounded bg-indigo-600 text-white text-xs" data-id="${escapeHtml(t.id)}">Soumettre</button>
-                <button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="${escapeHtml(t.id)}">Supprimer</button>`;
+      actions = `<button class="editOne btn-action btn-edit" data-id="${escapeHtml(t.id)}" data-json='${escapeHtml(JSON.stringify(t.data||{}))}'>Éditer</button>
+                <button class="submitOne btn-action btn-submit" data-id="${escapeHtml(t.id)}">Soumettre</button>
+                <button class="deleteOne btn-action btn-delete" data-id="${escapeHtml(t.id)}">Supprimer</button>`;
     } else if (status === 'REJECTED') {
-      actions = `<button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="${escapeHtml(t.id)}">Supprimer</button>`;
-    } else if (status === 'SUBMITTED' || status === 'APPROVED') {
-      actions = `<button class="deleteOne px-2 py-1 rounded bg-rose-700/80 border border-rose-600/50 text-white text-xs" data-id="${escapeHtml(t.id)}">Supprimer</button>`;
+      actions = `<button class="editOne btn-action btn-edit" data-id="${escapeHtml(t.id)}" data-json='${escapeHtml(JSON.stringify(t.data||{}))}'>Rééditer</button>
+                <button class="deleteOne btn-action btn-delete" data-id="${escapeHtml(t.id)}">Supprimer</button>`;
+    } else if (status === 'SUBMITTED') {
+      actions = `<button class="archiveOne btn-action btn-archive" data-id="${escapeHtml(t.id)}">Archiver</button>
+                <button class="deleteOne btn-action btn-delete" data-id="${escapeHtml(t.id)}">Supprimer</button>`;
+    } else if (status === 'APPROVED') {
+      actions = `<button class="archiveOne btn-action btn-archive" data-id="${escapeHtml(t.id)}">Archiver</button>
+                <button class="editOne btn-action btn-edit" data-id="${escapeHtml(t.id)}" data-json='${escapeHtml(JSON.stringify(t.data||{}))}'>Éditer</button>
+                <button class="deleteOne btn-action btn-delete" data-id="${escapeHtml(t.id)}">Supprimer</button>`;
     } else {
-      actions = '';
+      actions = `<button class="deleteOne btn-action btn-delete" data-id="${escapeHtml(t.id)}">Supprimer</button>`;
     }
     li.innerHTML = `
-      <div class="flex items-start gap-3">
-        <div class="w-16 h-16 rounded border border-slate-800 overflow-hidden previewMini"></div>
+      <div class="flex items-start gap-4">
+        <div class="w-20 h-20 rounded-xl border border-slate-700/50 overflow-hidden previewMini flex-shrink-0 shadow-lg"></div>
         <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2">
-            <strong class="truncate">${name}</strong>
-            <span class="ml-1 text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300">${status}</span>
+          <div class="flex items-center gap-2 flex-wrap">
+            <strong class="truncate text-base">${name}</strong>
+            <span class="status-badge ${statusClass}">${statusLabel}</span>
           </div>
           ${desc}
-          <div class="text-[11px] text-slate-500 mt-1">Mis à jour ${updated}</div>
+          <div class="text-[11px] text-slate-500 mt-2 flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            ${updated}
+          </div>
         </div>
       </div>
-      <div class="mt-3 flex items-center justify-end gap-2">
+      <div class="mt-4 flex items-center justify-end gap-2 pt-3 border-t border-slate-700/30">
         ${actions}
       </div>
     `;
@@ -376,16 +749,23 @@
   function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;').replace(/"/g,'&quot;'); }
 
   function attachCardListeners(li){
-    function showConfirm(message){
+    function showConfirm(message, actionText = 'Supprimer'){
       return new Promise(resolve => {
         const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
+        overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm';
+        overlay.style.animation = 'fadeIn 0.2s ease-out';
         overlay.innerHTML = `
-          <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
-            <div class="mb-4">${escapeHtml(message)}</div>
-            <div class="flex justify-end gap-2">
-              <button class="cancel px-3 py-1.5 rounded-md bg-slate-700 text-sm">Annuler</button>
-              <button class="ok px-3 py-1.5 rounded-md bg-rose-600 text-white text-sm">Supprimer</button>
+          <div class="w-full max-w-sm mx-4 bg-slate-900 border border-slate-700/50 rounded-2xl p-6 shadow-2xl" style="animation: fadeIn 0.3s ease-out">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-xl bg-rose-500/20 flex items-center justify-center">
+                <svg class="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              </div>
+              <h3 class="font-semibold text-lg">Confirmation</h3>
+            </div>
+            <p class="text-slate-300 mb-6">${escapeHtml(message)}</p>
+            <div class="flex justify-end gap-3">
+              <button class="cancel px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-medium transition-colors">Annuler</button>
+              <button class="ok px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-medium transition-colors">${escapeHtml(actionText)}</button>
             </div>
           </div>`;
 
@@ -430,8 +810,8 @@
         form.dark_hover.value = dark.hover || '';
         syncTextToColorInputs();
         editId = id; editStatus = li?.getAttribute('data-status') || 'DRAFT';
-        btnSubmit.dataset.id = id; btnSubmit.disabled = false;
-        btnSubmit.textContent = (editStatus === 'APPROVED') ? 'Proposer une MAJ' : 'Soumettre';
+        
+        createAndSubmitBtn.textContent = (editStatus === 'APPROVED') ? 'Proposer une MAJ' : 'Cr�er & Soumettre';
         setMsg(editStatus === 'APPROVED' ? 'Édition d’un thème validé. Cliquez sur "Proposer une MAJ" pour envoyer la mise à jour.' : 'Édition du brouillon chargée.', true);
         updatePreview();
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -441,12 +821,13 @@
     const submitBtn = li.querySelector('.submitOne');
     if (submitBtn) submitBtn.addEventListener('click', async () => {
       const id = submitBtn.dataset.id; if (!id) return;
-      submitBtn.disabled = true; submitBtn.textContent = 'En cours...';
+      submitBtn.disabled = true; submitBtn.textContent = '...';
       try {
         const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/submit', { method: 'POST' });
         const j = await res.json();
         if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
-        const badge = li.querySelector('span'); if (badge) badge.textContent = 'PENDING';
+        const badge = li.querySelector('.status-badge'); 
+        if (badge) { badge.textContent = 'En attente'; badge.className = 'status-badge status-submitted'; }
         submitBtn.remove();
         setMsg('Soumis pour validation ✓', true);
       } catch(err){ alert('Erreur de soumission'); submitBtn.disabled = false; submitBtn.textContent = 'Soumettre'; }
@@ -454,12 +835,13 @@
     const delBtn = li.querySelector('.deleteOne');
     if (delBtn) delBtn.addEventListener('click', async () => {
       const id = delBtn.dataset.id; if (!id) return;
-      const ok = await showConfirm('Supprimer ce thème ?'); if (!ok) return;
+      const ok = await showConfirm('Êtes-vous sûr de vouloir supprimer ce thème ? Cette action est irréversible.'); if (!ok) return;
       delBtn.disabled = true; delBtn.textContent = '...';
       try {
         const res = await fetch('/api/me/themes/'+encodeURIComponent(id), { method: 'DELETE' });
         if (!res.ok) throw new Error('HTTP '+res.status);
-        li.remove();
+        li.style.animation = 'fadeIn 0.3s ease-out reverse';
+        setTimeout(() => li.remove(), 300);
       } catch(err){ alert('Suppression impossible'); delBtn.disabled = false; delBtn.textContent = 'Supprimer'; }
     });
 
@@ -501,29 +883,8 @@
     });
   }
 
-  btnSubmit.addEventListener('click', async () => {
-    const id = btnSubmit.dataset.id || editId; if (!id) return;
-    try {
-      if (editStatus === 'APPROVED') {
-        const fd = new FormData(form);
-        const payload = { data: buildSimplified(fd), message: 'Mise à jour via bouton principal' };
-        const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        const j = await res.json();
-        if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
-        setMsg('Mise à jour envoyée ✓', true);
-      } else {
-        const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/submit', { method: 'POST' });
-        const j = await res.json();
-        if (!res.ok) throw new Error(j.error||('HTTP '+res.status));
-        setMsg('Soumis pour validation ✓', true);
-      }
-      btnSubmit.disabled = true;
-      setTimeout(()=>location.reload(), 700);
-    } catch(err){ setMsg(err.message||'Erreur', false); }
-  });
-
   usePrivateBtn.addEventListener('click', async () => {
-    const id = btnSubmit.dataset.id || editId; if (!id) { setMsg('Enregistrez le brouillon d\'abord', false); return; }
+    const id = editId; if (!id) { setMsg('Enregistrez d\'abord un brouillon', false); return; }
     if (!isPrivateEl.checked) { setMsg('Cochez "Thème privé" pour l\'utiliser en privé', false); return; }
     try {
       const res = await fetch('/api/me/themes/select', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ themeId: id }) });
@@ -531,71 +892,6 @@
       setMsg('Thème privé sélectionné pour votre profil ✓', true);
     } catch(err){ setMsg(err.message||'Erreur', false); }
   });
-
-  document.querySelectorAll('.submitOne').forEach(btn => btn.addEventListener('click', async () => {
-    const id = btn.dataset.id; if (!id) return;
-    btn.disabled = true; btn.textContent = 'En cours...';
-    try {
-      const res = await fetch('/api/me/themes/'+encodeURIComponent(id)+'/submit', { method: 'POST' });
-      if (!res.ok) throw new Error('HTTP '+res.status);
-      location.reload();
-    } catch(err){ alert('Erreur de soumission'); btn.disabled = false; btn.textContent = 'Soumettre'; }
-  }));
-
-  document.querySelectorAll('.deleteOne').forEach(btn => btn.addEventListener('click', async () => {
-    const id = btn.dataset.id; if (!id) return;
-    const ok = await (async function(){
-      const overlay = document.createElement('div');
-      overlay.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/50';
-      overlay.innerHTML = `
-        <div class="w-full max-w-md mx-4 bg-slate-900 border border-slate-700 rounded-md p-4 text-sm">
-          <div class="mb-4">Supprimer ce thème ?</div>
-          <div class="flex justify-end gap-2">
-            <button class="cancel px-3 py-1.5 rounded-md bg-slate-700 text-sm">Annuler</button>
-            <button class="ok px-3 py-1.5 rounded-md bg-rose-600 text-white text-sm">Supprimer</button>
-          </div>
-        </div>`;
-      const btnCancel = overlay.querySelector('.cancel');
-      const btnOk = overlay.querySelector('.ok');
-      return new Promise(res => {
-        function cleanup(v){ overlay.remove(); res(v); }
-        btnCancel.addEventListener('click', () => cleanup(false));
-        btnOk.addEventListener('click', () => cleanup(true));
-        overlay.addEventListener('click', (ev)=>{ if (ev.target === overlay) cleanup(false); });
-        document.body.appendChild(overlay);
-        btnCancel.focus();
-      });
-    })();
-    if (!ok) return;
-    btn.disabled = true; btn.textContent = '...';
-    try {
-      const res = await fetch('/api/me/themes/'+encodeURIComponent(id), { method: 'DELETE' });
-      if (!res.ok) throw new Error('HTTP '+res.status);
-      const li = btn.closest('li'); if (li) li.remove();
-    } catch(err){ alert('Suppression impossible'); btn.disabled = false; btn.textContent = 'Supprimer'; }
-  }));
-
-  document.querySelectorAll('.editOne').forEach(btn => btn.addEventListener('click', () => {
-    const id = btn.dataset.id; const raw = btn.getAttribute('data-json');
-    try {
-      const full = raw ? JSON.parse(raw) : null;
-      const light = full && full.background ? { bg: full.background, button: full.buttonBackground, hover: full.hoverColor } : { bg: '', button: '', hover: '' };
-      const dark = full && full.opposite ? { bg: full.opposite.background, button: full.opposite.buttonBackground, hover: full.opposite.hoverColor } : { bg: '', button: '', hover: '' };
-      form.name.value = btn.closest('li').querySelector('strong')?.textContent || '';
-      form.description.value = '';
-      form.light_bg.value = light.bg || '';
-      form.light_button.value = light.button || '';
-      form.light_hover.value = light.hover || '';
-      form.dark_bg.value = dark.bg || '';
-      form.dark_button.value = dark.button || '';
-      form.dark_hover.value = dark.hover || '';
-      syncTextToColorInputs();
-      editId = id; btnSubmit.dataset.id = id; btnSubmit.disabled = false;
-      setMsg('Édition du brouillon chargée.', true);
-      updatePreview();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch {}
-  }));
 
   (function renderMyPreviews(){
     const containers = ['listDrafts','listSubmitted','listApproved','listArchived','listRejected'];
@@ -607,16 +903,44 @@
 
   function syncTextToColorInputs(){
     document.querySelectorAll('.color-text').forEach((txt)=>{
-      const col = txt.parentElement?.querySelector('.color-input');
-      if (col) { const v = String(txt.value||''); col.value = /^#/.test(v)?v:('#'+v); }
+      const wrapper = txt.parentElement;
+      const col = wrapper?.querySelector('.color-input');
+      const preview = wrapper?.querySelector('.color-preview');
+      if (col) { 
+        const v = String(txt.value||''); 
+        const normalizedVal = /^#/.test(v) ? v : ('#'+v);
+        col.value = normalizedVal;
+        if (preview) preview.style.background = normalizedVal;
+      }
     });
   }
-  resetBtn?.addEventListener('click', () => { form.reset(); editId = null; btnSubmit.disabled = true; btnSubmit.dataset.id = ''; setMsg('', true); syncTextToColorInputs(); updatePreview(); });
-
-  document.querySelectorAll('#previewTabs [data-mode]')?.forEach((b)=>{
-    b.addEventListener('click', ()=>{ previewMode = b.getAttribute('data-mode')||'light'; updatePreview(); });
+  resetBtn?.addEventListener('click', () => { 
+    form.reset(); 
+    editId = null; 
+    editStatus = null;
+    createAndSubmitBtn.textContent = 'Créer & Soumettre';
+    setMsg('', true); 
+    syncTextToColorInputs(); 
+    updatePreview(); 
   });
 
+  // Dédupliquer les thèmes au cas où il y aurait des doublons dans le DOM
+  function deduplicateThemes() {
+    const seenIds = new Set();
+    ['listDrafts','listSubmitted','listApproved','listArchived','listRejected'].forEach(listId => {
+      const ul = document.getElementById(listId); if (!ul) return;
+      ul.querySelectorAll('li[data-id]').forEach(li => {
+        const id = li.getAttribute('data-id');
+        if (seenIds.has(id)) {
+          li.remove(); // Supprimer le doublon
+        } else {
+          seenIds.add(id);
+        }
+      });
+    });
+  }
+
+  deduplicateThemes();
   linkColorInputs();
   syncTextToColorInputs();
   updatePreview();
