@@ -228,33 +228,78 @@
             <!-- Sidebar -->
             <aside class="space-y-6">
                 <!-- Pending Themes -->
-                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="font-bold text-white text-base">Thèmes en attente</h2>
-                        <a href="/dashboard/admin/themes" class="text-xs font-medium text-violet-400 hover:text-violet-300">Voir tout →</a>
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
+                    <div class="p-5 border-b border-slate-800 bg-gradient-to-r from-amber-500/5 to-transparent">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 rounded-xl bg-amber-500/10">
+                                    <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="font-bold text-white text-base">Thèmes en attente</h2>
+                                    <p class="text-xs text-slate-500"><%= pendingCount %> en attente de validation</p>
+                                </div>
+                            </div>
+                            <a href="/admin/themes" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="Voir tout">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </div>
                     </div>
                     
-                    <% if (typeof pendingThemes==='undefined' || !pendingThemes || pendingThemes.length===0) { %>
-                        <div class="text-center py-8 border border-dashed border-slate-800 rounded-2xl">
-                            <p class="text-sm text-slate-500">Aucun thème en attente.</p>
-                        </div>
-                    <% } else { %>
-                        <ul class="space-y-3">
-                            <% pendingThemes.forEach(t=> { %>
-                                <li class="bg-slate-950/50 border border-slate-800 rounded-2xl p-3 flex items-center gap-3 hover:border-violet-500/30 transition-colors">
-                                    <div class="w-12 h-12 rounded-xl overflow-hidden previewMini shadow-sm"></div>
-                                    <div class="min-w-0 flex-1">
-                                        <div class="font-semibold text-white text-sm truncate"><%= t.name %></div>
-                                        <div class="text-xs text-slate-500 truncate">Par @<%= t.authorId %></div>
-                                    </div>
-                                    <div class="flex flex-col gap-1.5">
-                                        <a href="/dashboard/admin/themes/validate/<%= t.id %>" class="px-2.5 py-1 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-[10px] font-medium text-center transition-colors">Valider</a>
-                                        <a href="/dashboard/admin/themes/<%= t.id %>" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-medium text-center transition-colors">Voir</a>
-                                    </div>
-                                </li>
-                            <% }) %>
-                        </ul>
-                    <% } %>
+                    <div class="p-4">
+                        <% if (typeof pendingThemes==='undefined' || !pendingThemes || pendingThemes.length===0) { %>
+                            <div class="text-center py-10">
+                                <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-slate-800/50 flex items-center justify-center">
+                                    <svg class="w-7 h-7 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                                <p class="text-sm text-slate-500 font-medium">Tout est à jour !</p>
+                                <p class="text-xs text-slate-600 mt-1">Aucun thème en attente de validation</p>
+                            </div>
+                        <% } else { %>
+                            <ul class="space-y-2">
+                                <% pendingThemes.slice(0, 5).forEach(t=> { 
+                                    const themeData = typeof t.data === 'string' ? JSON.parse(t.data) : (t.data || {});
+                                    const darkBg = themeData.dark?.bg || themeData.opposite?.background || '#0f172a';
+                                    const darkBtn = themeData.dark?.button || themeData.opposite?.buttonBackground || '#4f46e5';
+                                %>
+                                    <li class="group bg-slate-950/50 border border-slate-800 rounded-2xl p-3 hover:border-amber-500/30 hover:bg-slate-950 transition-all">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-11 h-11 rounded-xl overflow-hidden shadow-lg flex-shrink-0" style="background: <%= darkBg %>;">
+                                                <div class="w-full h-full flex flex-col items-center justify-center gap-1 p-2">
+                                                    <div class="w-4 h-4 rounded-full bg-white/10 border border-white/5"></div>
+                                                    <div class="w-full h-1.5 rounded" style="background: <%= darkBtn %>;"></div>
+                                                </div>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="font-semibold text-white text-sm truncate group-hover:text-amber-200 transition-colors"><%= t.name %></div>
+                                                <div class="text-[11px] text-slate-500 truncate">par <span class="text-violet-400">@<%= t.authorId %></span></div>
+                                            </div>
+                                            <div class="flex gap-1.5">
+                                                <button onclick="quickApproveTheme('<%= t.id %>')" class="p-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white transition-all" title="Approuver">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                </button>
+                                                <a href="/admin/themes" class="p-2 rounded-lg bg-slate-800 hover:bg-violet-600 text-slate-400 hover:text-white transition-all" title="Voir détails">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                <% }) %>
+                            </ul>
+                            <% if (pendingThemes.length > 5) { %>
+                                <a href="/admin/themes" class="mt-3 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-white text-xs font-medium transition-colors">
+                                    <span>Voir les <%= pendingThemes.length - 5 %> autres</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                </a>
+                            <% } %>
+                        <% } %>
+                    </div>
                 </div>
             </aside>
         </div>
@@ -480,6 +525,54 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Quick approve theme function
+    async function quickApproveTheme(themeId) {
+        try {
+            const res = await fetch('/api/themes/' + themeId + '/approve', { method: 'POST' });
+            if (!res.ok) throw new Error('Erreur HTTP ' + res.status);
+            // Remove the theme item from the list
+            const item = document.querySelector(`li button[onclick*="${themeId}"]`)?.closest('li');
+            if (item) {
+                item.style.transition = 'all 0.3s';
+                item.style.opacity = '0';
+                item.style.transform = 'translateX(20px)';
+                setTimeout(() => {
+                    item.remove();
+                    // Update pending count
+                    const countEl = document.querySelector('.text-amber-400.text-2xl, h3.text-2xl');
+                    if (countEl) {
+                        const current = parseInt(countEl.textContent) || 0;
+                        if (current > 0) countEl.textContent = current - 1;
+                    }
+                }, 300);
+            }
+            showToast('Thème approuvé avec succès', 'success');
+        } catch (err) {
+            showToast('Erreur: ' + err.message, 'error');
+        }
+    }
+
+    // Toast notification
+    function showToast(message, type = 'info') {
+        let container = document.getElementById('toastContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.className = 'fixed right-6 top-6 z-[99999] flex flex-col gap-3';
+            document.body.appendChild(container);
+        }
+        const el = document.createElement('div');
+        el.className = 'flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium transform transition-all duration-300 translate-x-8 opacity-0';
+        const colors = { success: 'bg-emerald-950/90 border-emerald-800 text-emerald-200', error: 'bg-rose-950/90 border-rose-800 text-rose-200', info: 'bg-slate-800/90 border-slate-700 text-slate-200' };
+        el.className += ' ' + (colors[type] || colors.info);
+        el.innerHTML = '<span>' + message + '</span>';
+        container.appendChild(el);
+        requestAnimationFrame(() => el.classList.remove('translate-x-8', 'opacity-0'));
+        setTimeout(() => { el.classList.add('translate-x-8', 'opacity-0'); setTimeout(() => el.remove(), 300); }, 3500);
+    }
+</script>
 
 <script>
     (function () {

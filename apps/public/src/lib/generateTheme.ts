@@ -54,6 +54,7 @@ export async function generateTheme(userId?: string) {
         data: true,
         author: { select: { id: true, userName: true } },
       },
+      orderBy: { createdAt: "asc" },
     });
     for (const t of mine) {
       let full;

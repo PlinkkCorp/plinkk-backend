@@ -1,533 +1,449 @@
 <%- include('../../partials/head.ejs', { title: 'Admin - Thèmes', description: '', robots: 'noindex,nofollow' }) %>
 <%- include('../../partials/header-dash.ejs', { user: user }) %>
 
+<style>
+  .stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border-radius: 1rem;
+    border: 1px solid rgb(51 65 85 / 0.5);
+    background: rgb(15 23 42 / 0.5);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .stat-card:hover { border-color: rgb(71 85 105); }
+  .stat-card.active { border-color: rgb(139 92 246 / 0.5); background: rgb(139 92 246 / 0.1); }
+  .theme-admin-card {
+    position: relative;
+    background: rgb(15 23 42 / 0.5);
+    border: 1px solid rgb(51 65 85);
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+  .theme-admin-card:hover { border-color: rgb(71 85 105); box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.3); }
+  .theme-preview-box { width: 100%; aspect-ratio: 4/3; position: relative; overflow: hidden; background: rgb(30 41 59); }
+  .badge-pending { padding: 2px 8px; border-radius: 9999px; background: rgb(245 158 11 / 0.15); border: 1px solid rgb(245 158 11 / 0.3); color: rgb(251 191 36); font-size: 10px; font-weight: 600; text-transform: uppercase; }
+  .badge-new { padding: 2px 8px; border-radius: 9999px; background: rgb(34 197 94 / 0.15); border: 1px solid rgb(34 197 94 / 0.3); color: rgb(74 222 128); font-size: 10px; font-weight: 600; text-transform: uppercase; }
+  .action-btn { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 500; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px; }
+  .action-btn-approve { background: rgb(5 150 105); color: white; }
+  .action-btn-approve:hover { background: rgb(4 120 87); }
+  .action-btn-reject { background: rgb(225 29 72); color: white; }
+  .action-btn-reject:hover { background: rgb(190 18 60); }
+  .action-btn-archive { background: rgb(51 65 85); color: rgb(203 213 225); }
+  .action-btn-archive:hover { background: rgb(71 85 105); }
+  .action-btn-view { background: rgb(124 58 237); color: white; }
+  .action-btn-view:hover { background: rgb(109 40 217); }
+  .action-btn-delete { background: rgb(127 29 29 / 0.5); color: rgb(252 165 165); border: 1px solid rgb(127 29 29 / 0.5); }
+  .action-btn-delete:hover { background: rgb(127 29 29); }
+  .action-btn-restore { background: rgb(5 150 105); color: white; }
+  .action-btn-restore:hover { background: rgb(4 120 87); }
+  .section-hidden { display: none !important; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
+</style>
+
 <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
   <%- include('../../partials/admin-nav.ejs', { user: user, active: 'themes' }) %>
 
-  <main class="col-span-12 lg:col-span-10 space-y-8">
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-    <h1 class="text-2xl font-bold text-white">Gestion des thèmes</h1>
-    <a href="/themes" class="inline-flex items-center px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium transition-colors">
-      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-      Créer un thème
-    </a>
-  </div>
-
-  <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6">
-    <div class="flex flex-col md:flex-row gap-4">
-      <div class="flex-1 relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-        <input id="themeSearch" type="search" 
-          class="block w-full pl-10 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all sm:text-sm" 
-          placeholder="Rechercher un thème ou auteur...">
-        <button id="clearSearch" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300 hidden">
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-        </button>
+  <main class="col-span-12 lg:col-span-10 space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Gestion des thèmes</h1>
+        <p class="text-sm text-slate-400 mt-1">Validez, archivez et gérez les thèmes de la communauté</p>
       </div>
-      <div class="w-full md:w-64">
-        <select id="themeCategoryFilter" class="block w-full py-2.5 px-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 sm:text-sm">
-          <option value="">Toutes catégories</option>
+      <a href="/themes" class="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white text-sm font-medium transition-all shadow-lg shadow-violet-900/30">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Créer un thème
+      </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="stat-card active" data-tab="submitted">
+        <div class="text-3xl font-bold text-amber-400" id="statSubmitted"><%= (submitted||[]).length %></div>
+        <div class="text-xs text-slate-400 mt-1">En attente</div>
+      </div>
+      <div class="stat-card" data-tab="approved">
+        <div class="text-3xl font-bold text-emerald-400" id="statApproved"><%= (approved||[]).length %></div>
+        <div class="text-xs text-slate-400 mt-1">Validés</div>
+      </div>
+      <div class="stat-card" data-tab="rejected">
+        <div class="text-3xl font-bold text-rose-400" id="statRejected"><%= (rejected||[]).length %></div>
+        <div class="text-xs text-slate-400 mt-1">Rejetés</div>
+      </div>
+      <div class="stat-card" data-tab="archived">
+        <div class="text-3xl font-bold text-slate-400" id="statArchived"><%= (archived||[]).length %></div>
+        <div class="text-xs text-slate-400 mt-1">Archivés</div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-4">
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1 relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+          <input id="themeSearch" type="search" class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all text-sm" placeholder="Rechercher par nom ou auteur...">
+        </div>
+        <select id="sortOrder" class="px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50">
+          <option value="newest">Plus récents</option>
+          <option value="oldest">Plus anciens</option>
+          <option value="name">Par nom</option>
         </select>
       </div>
     </div>
 
-    <div class="flex space-x-1 bg-slate-950 p-1 rounded-xl w-fit border border-slate-800" role="tablist">
-      <button class="tabBtn flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-slate-200" data-tab="submitted" role="tab" aria-selected="true">
-        À valider <span class="ml-2 px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-300 text-xs tab-count">0</span>
-      </button>
-      <button class="tabBtn flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-slate-200" data-tab="approved" role="tab" aria-selected="false">
-        Validés <span class="ml-2 px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-300 text-xs tab-count">0</span>
-      </button>
-      <button class="tabBtn flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all text-slate-400 hover:text-slate-200" data-tab="archived" role="tab" aria-selected="false">
-        Archivés <span class="ml-2 px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-300 text-xs tab-count">0</span>
-      </button>
-    </div>
+    <!-- Sections -->
+    <% const sections = [
+      { key: 'submitted', title: 'En attente de validation', data: submitted || [], emptyMsg: 'Aucun thème en attente', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+      { key: 'approved', title: 'Thèmes validés', data: approved || [], emptyMsg: 'Aucun thème validé', icon: 'M5 13l4 4L19 7' },
+      { key: 'rejected', title: 'Thèmes rejetés', data: rejected || [], emptyMsg: 'Aucun thème rejeté', icon: 'M6 18L18 6M6 6l12 12' },
+      { key: 'archived', title: 'Thèmes archivés', data: archived || [], emptyMsg: 'Aucun thème archivé', icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4' }
+    ]; %>
 
-    <style>
-      .tabBtn.active { background-color: rgb(124 58 237); color: white; }
-      .tabBtn.active .tab-count { background-color: rgba(255,255,255,0.2); color: white; }
-      .section-hidden { display:none !important; }
-    </style>
+    <% sections.forEach((sec, idx) => { %>
+    <section data-section="<%= sec.key %>" class="<%= idx > 0 ? 'section-hidden' : '' %>">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
+          <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= sec.icon %>"/>
+          </svg>
+        </div>
+        <h2 class="text-lg font-semibold text-white"><%= sec.title %></h2>
+        <span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium section-count"><%= sec.data.length %></span>
+      </div>
 
-    <section data-section="submitted">
-      <ul id="gridSubmitted" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        <% if ((submitted||[]).length === 0) { %>
-          <li class="server-empty-placeholder col-span-full text-center py-12 text-slate-500">Aucun thème en attente.</li>
-        <% } else { %>
-        <% submitted.forEach(t => { %>
-          <li draggable="true" class="themeCard group relative flex flex-col bg-slate-950 border border-slate-800 rounded-2xl p-4 transition-all hover:border-slate-700" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
-            <div class="flex items-start gap-4">
-              <div class="w-20 h-20 rounded-xl border border-slate-800 overflow-hidden themePreview shrink-0 bg-slate-900"></div>
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center justify-between gap-2">
-                  <h3 class="font-semibold text-slate-200 truncate"><%= t.name %></h3>
-                  <% if (t.pendingUpdate) { %>
-                    <span class="shrink-0 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-medium">MAJ</span>
-                  <% } %>
+      <% if (sec.data.length === 0) { %>
+        <div class="empty-state text-center py-16 bg-slate-900/30 rounded-2xl border border-slate-800/50">
+          <svg class="w-12 h-12 mx-auto text-slate-700 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="<%= sec.icon %>"/>
+          </svg>
+          <p class="text-slate-500"><%= sec.emptyMsg %></p>
+        </div>
+      <% } else { %>
+        <ul id="grid<%= sec.key.charAt(0).toUpperCase() + sec.key.slice(1) %>" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <% sec.data.forEach(t => { %>
+            <li class="themeCard theme-admin-card animate-slide-in" 
+                data-name="<%- (t.name||'').toLowerCase() %>" 
+                data-author="<%- (t.author?.userName||'').toLowerCase() %>" 
+                data-id="<%= t.id %>" 
+                data-status="<%= sec.key.toUpperCase() %>"
+                data-json='<%- JSON.stringify(t.data||{}) %>'
+                data-updated="<%= new Date(t.updatedAt).getTime() %>">
+              
+              <div class="theme-preview-box themePreview"></div>
+              
+              <div class="p-4">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <h3 class="font-semibold text-white truncate"><%= t.name %></h3>
+                      <% if (t.pendingUpdate) { %><span class="badge-pending">MAJ</span><% } %>
+                      <% const isNew = (Date.now() - new Date(t.createdAt).getTime()) < 24*60*60*1000; %>
+                      <% if (isNew && sec.key === 'submitted') { %><span class="badge-new">Nouveau</span><% } %>
+                    </div>
+                    <div class="text-xs text-slate-400 mt-1">par <span class="text-violet-400">@<%= t.author?.userName %></span></div>
+                  </div>
+                  <div class="text-[10px] text-slate-600"><%= new Date(t.updatedAt).toLocaleDateString('fr-FR') %></div>
                 </div>
-                <div class="text-xs text-slate-400 truncate mt-0.5">par <span class="text-slate-300">@<%= t.author.userName %></span></div>
-                <% if (t.description) { %>
-                  <p class="text-xs text-slate-500 mt-2 line-clamp-2"><%= t.description %></p>
+                
+                <% if (t.description) { %><p class="text-xs text-slate-500 mt-2 line-clamp-2"><%= t.description %></p><% } %>
+                <% if (t.pendingUpdateMessage) { %>
+                  <div class="mt-2 px-2 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <p class="text-[10px] text-amber-400/80 font-medium">Message MAJ:</p>
+                    <p class="text-xs text-amber-300 mt-0.5"><%= t.pendingUpdateMessage %></p>
+                  </div>
                 <% } %>
-                <div class="text-[10px] text-slate-600 mt-2">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
-              </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-slate-800 flex items-center justify-end gap-2 actions">
-              <% if (t.pendingUpdate) { %>
-                <button class="approveUpdateBtn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors">Approuver MAJ</button>
-              <% } else { %>
-                <button class="approveBtn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors">Approuver</button>
-                <button class="rejectBtn px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium transition-colors">Rejeter</button>
-              <% } %>
-              <button class="archiveBtn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors">Archiver</button>
-              <a class="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium transition-colors" href="/admin/themes/<%= t.id %>">Voir</a>
-            </div>
-          </li>
-        <% }) %>
-        <% } %>
-      </ul>
-    </section>
 
-    <section data-section="approved" class="section-hidden">
-      <ul id="gridApproved" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        <% if ((approved||[]).length === 0) { %>
-          <li class="server-empty-placeholder col-span-full text-center py-12 text-slate-500">Aucun thème validé.</li>
-        <% } else { %>
-        <% approved.forEach(t => { %>
-          <li draggable="true" class="themeCard group relative flex flex-col bg-slate-950 border border-slate-800 rounded-2xl p-4 transition-all hover:border-slate-700" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
-            <div class="flex items-start gap-4">
-              <div class="w-20 h-20 rounded-xl border border-slate-800 overflow-hidden themePreview shrink-0 bg-slate-900"></div>
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center justify-between gap-2">
-                  <h3 class="font-semibold text-slate-200 truncate"><%= t.name %></h3>
-                  <% if (t.pendingUpdate) { %>
-                    <span class="shrink-0 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-medium">MAJ</span>
+                <div class="mt-4 pt-3 border-t border-slate-800/50 flex flex-wrap items-center justify-end gap-2 actions-container">
+                  <% if (sec.key === 'submitted') { %>
+                    <% if (t.pendingUpdate) { %>
+                      <button class="approveUpdateBtn action-btn action-btn-approve">Approuver MAJ</button>
+                      <button class="rejectUpdateBtn action-btn action-btn-reject">Rejeter MAJ</button>
+                    <% } else { %>
+                      <button class="approveBtn action-btn action-btn-approve">Approuver</button>
+                      <button class="rejectBtn action-btn action-btn-reject">Rejeter</button>
+                    <% } %>
+                  <% } else if (sec.key === 'approved') { %>
+                    <% if (t.pendingUpdate) { %>
+                      <button class="approveUpdateBtn action-btn action-btn-approve">Approuver MAJ</button>
+                      <button class="rejectUpdateBtn action-btn action-btn-reject">Rejeter MAJ</button>
+                    <% } %>
+                    <button class="archiveBtn action-btn action-btn-archive">Archiver</button>
+                  <% } else if (sec.key === 'rejected') { %>
+                    <button class="approveBtn action-btn action-btn-approve">Approuver</button>
+                    <button class="deleteBtn action-btn action-btn-delete">Supprimer</button>
+                  <% } else if (sec.key === 'archived') { %>
+                    <button class="unarchiveBtn action-btn action-btn-restore">Republier</button>
+                    <button class="deleteBtn action-btn action-btn-delete">Supprimer</button>
                   <% } %>
+                  <button class="previewBtn action-btn action-btn-view">Aperçu</button>
                 </div>
-                <div class="text-xs text-slate-400 truncate mt-0.5">par <span class="text-slate-300">@<%= t.author.userName %></span></div>
-                <% if (t.description) { %>
-                  <p class="text-xs text-slate-500 mt-2 line-clamp-2"><%= t.description %></p>
-                <% } %>
-                <div class="text-[10px] text-slate-600 mt-2">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
               </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-slate-800 flex items-center justify-end gap-2 actions">
-              <% if (t.pendingUpdate) { %>
-                <button class="approveUpdateBtn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors">Approuver MAJ</button>
-              <% } %>
-              <button class="archiveBtn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors">Archiver</button>
-              <a class="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium transition-colors" href="/admin/themes/<%= t.id %>">Voir</a>
-              <button class="deleteBtn px-3 py-1.5 rounded-lg bg-rose-900/50 hover:bg-rose-900 text-rose-200 text-xs font-medium transition-colors border border-rose-900/50">Supprimer</button>
-            </div>
-          </li>
-        <% }) %>
-        <% } %>
-      </ul>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
     </section>
-
-    <section data-section="archived" class="section-hidden">
-      <ul id="gridArchived" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        <% if ((archived||[]).length === 0) { %>
-          <li class="server-empty-placeholder col-span-full text-center py-12 text-slate-500">Aucun thème archivé.</li>
-        <% } else { %>
-        <% archived.forEach(t => { %>
-          <li draggable="true" class="themeCard group relative flex flex-col bg-slate-950 border border-slate-800 rounded-2xl p-4 transition-all hover:border-slate-700" data-name="<%- (t.name||'').toLowerCase() %>" data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>" data-json='<%- JSON.stringify(t.data||{}) %>'>
-            <div class="flex items-start gap-4">
-              <div class="w-20 h-20 rounded-xl border border-slate-800 overflow-hidden themePreview shrink-0 bg-slate-900"></div>
-              <div class="min-w-0 flex-1">
-                <div class="font-semibold text-slate-200 truncate"><%= t.name %></div>
-                <div class="text-xs text-slate-400 truncate mt-0.5">par <span class="text-slate-300">@<%= t.author.userName %></span></div>
-                <% if (t.description) { %>
-                  <p class="text-xs text-slate-500 mt-2 line-clamp-2"><%= t.description %></p>
-                <% } %>
-                <div class="text-[10px] text-slate-600 mt-2">Mis à jour <%= new Date(t.updatedAt).toLocaleString('fr-FR') %></div>
-              </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-slate-800 flex items-center justify-end gap-2 actions">
-              <button class="unarchiveBtn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors">Republier</button>
-              <a class="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium transition-colors" href="/admin/themes/<%= t.id %>">Voir</a>
-              <button class="deleteBtn px-3 py-1.5 rounded-lg bg-rose-900/50 hover:bg-rose-900 text-rose-200 text-xs font-medium transition-colors border border-rose-900/50">Supprimer</button>
-            </div>
-          </li>
-        <% }) %>
-        <% } %>
-      </ul>
-    </section>
-  </div>
-
-  <script>
-  (function(){
-    function ensureToastContainer(){
-      let c = document.getElementById('toastContainer');
-      if (!c) {
-        c = document.createElement('div');
-        c.id = 'toastContainer';
-        c.style.position = 'fixed';
-        c.style.right = '24px';
-        c.style.top = '24px';
-        c.style.zIndex = 99999;
-        c.style.display = 'flex';
-        c.style.flexDirection = 'column';
-        c.style.gap = '12px';
-        document.body.appendChild(c);
-      }
-      return c;
-    }
-    function showToast(message, type = 'info', timeout = 3500){
-      const container = ensureToastContainer();
-      const el = document.createElement('div');
-      el.className = 'flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium transform transition-all duration-300 translate-x-8 opacity-0';
-      
-      if (type === 'success') { 
-        el.className += ' bg-emerald-950/90 border-emerald-800 text-emerald-200';
-        el.innerHTML = `<svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>${message}</span>`;
-      } else if (type === 'error') { 
-        el.className += ' bg-rose-950/90 border-rose-800 text-rose-200';
-        el.innerHTML = `<svg class="w-5 h-5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg><span>${message}</span>`;
-      } else { 
-        el.className += ' bg-slate-800/90 border-slate-700 text-slate-200';
-        el.innerHTML = `<svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>${message}</span>`;
-      }
-      
-      container.appendChild(el);
-      requestAnimationFrame(()=>{ el.classList.remove('translate-x-8', 'opacity-0'); });
-      
-      const id = setTimeout(()=>{
-        try{ 
-          el.classList.add('translate-x-8', 'opacity-0');
-          setTimeout(()=>el.remove(), 300); 
-        }catch(e){}
-      }, timeout);
-      
-      el.addEventListener('click', ()=>{ clearTimeout(id); el.classList.add('translate-x-8', 'opacity-0'); setTimeout(()=>el.remove(), 300); });
-      return el;
-    }
-
-    const grids = [
-      document.getElementById('gridSubmitted'),
-      document.getElementById('gridApproved'),
-      document.getElementById('gridArchived')
-    ].filter(Boolean);
-    const search = document.getElementById('themeSearch');
-    const clearBtn = document.getElementById('clearSearch');
-
-    function norm(s){ s = String(s||'').trim(); if (!s.startsWith('#')) s = '#'+s; if (/^#[0-9a-fA-F]{3}$/.test(s)) s = '#'+s.slice(1).split('').map(c=>c+c).join(''); return /^#[0-9a-fA-F]{6}$/.test(s) ? s : '#000000'; }
-
-    function extractColors(raw){
-      try{ if(!raw) return null; const d = raw;
-        let c = { bg:'#111827', button:'#4f46e5', hover:'#22c55e' };
-        if (d.light && typeof d.light === 'object') c = { bg: d.light.bg||'#f5f5f5', button: d.light.button||'#4f46e5', hover: d.light.hover||'#22c55e' };
-        else if (d.background) c = { bg: d.background||'#111827', button: d.buttonBackground||'#4f46e5', hover: d.hoverColor||'#22c55e' };
-        else c = { bg: d.bg||'#111827', button: d.button||'#4f46e5', hover: d.hover||'#22c55e' };
-        return { bg: norm(c.bg), button: norm(c.button), hover: norm(c.hover) };
-      }catch(e){ return { bg:'#111827', button:'#4f46e5', hover:'#22c55e' }; }
-    }
-    function renderPreviews(){
-      grids.forEach(grid => {
-        Array.from(grid.querySelectorAll('.themeCard')).forEach(card=>{
-        const box = card.querySelector('.themePreview');
-        const raw = card.getAttribute('data-json');
-        let parsed = {};
-        try{ parsed = JSON.parse(raw||'{}'); }catch(e){ parsed = {}; }
-        const c = extractColors(parsed);
-        box.innerHTML = `<div style="padding:8px;background:${c.bg};height:100%;display:flex;flex-direction:column;justify-content:center;gap:8px;">`+
-          `<div style=\"height:20px;width:60%;background:${c.button};border-radius:4px;margin:0 auto;\"></div>`+
-          `<div style=\"height:20px;width:40%;background:${c.hover};border-radius:4px;margin:0 auto;\"></div>`+
-          `</div>`;
-        });
-      });
-    }
-    function tidyServerEmptyPlaceholders(){
-      ['gridSubmitted','gridApproved','gridArchived'].forEach(id => {
-        const grid = document.getElementById(id);
-        if (!grid) return;
-        const hasItem = grid.querySelectorAll('.themeCard').length > 0;
-        const serverMsg = grid.querySelector('.server-empty-placeholder');
-        if (hasItem) {
-          if (serverMsg) serverMsg.remove();
-        } else {
-          if (!serverMsg) {
-            const li = document.createElement('li');
-            li.className = 'server-empty-placeholder col-span-full text-center py-12 text-slate-500';
-            if (id === 'gridSubmitted') li.textContent = 'Aucun thème en attente.';
-            if (id === 'gridApproved') li.textContent = 'Aucun thème validé.';
-            if (id === 'gridArchived') li.textContent = 'Aucun thème archivé.';
-            grid.appendChild(li);
-          }
-        }
-      });
-    }
-
-    function updateTabCounts(){
-      try{
-        const map = {
-          submitted: document.getElementById('gridSubmitted'),
-          approved: document.getElementById('gridApproved'),
-          archived: document.getElementById('gridArchived')
-        };
-        Object.keys(map).forEach(k => {
-          const root = map[k];
-          const btn = tabButtons.find(tb => tb.dataset.tab === k);
-          if (!btn) return;
-          const span = btn.querySelector('.tab-count');
-          const count = root ? Array.from(root.querySelectorAll('.themeCard')).filter(el=>el.style.display !== 'none').length : 0;
-          if (span) span.textContent = String(count);
-        });
-      }catch(e){}
-    }
-    function wireActions(){
-      grids.forEach(grid => {
-        grid.addEventListener('click', async (e)=>{
-          const li = e.target.closest('.themeCard');
-          if (!li) return;
-          const id = li.dataset.id;
-          const approve = e.target.closest('.approveBtn');
-          const reject = e.target.closest('.rejectBtn');
-          const archive = e.target.closest('.archiveBtn');
-          const unarchive = e.target.closest('.unarchiveBtn');
-          const approveUpdate = e.target.closest('.approveUpdateBtn');
-          const del = e.target.closest('.deleteBtn');
-          const actBtn = approve||reject||archive||unarchive||approveUpdate||del;
-          if (!actBtn) return;
-          const prev = actBtn.textContent; actBtn.disabled = true; actBtn.textContent = '...';
-          const originalParent = li.parentElement;
-          const originalNext = li.nextElementSibling;
-          let tempMoved = false;
-          function transformCardForGrid(card, target){
-            try{
-              const id = card.dataset.id;
-              const actions = card.querySelector('.actions');
-              if (!actions) return;
-              actions.innerHTML = '';
-              if (target === 'approved'){
-                const archive = document.createElement('button'); archive.className = 'archiveBtn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors'; archive.textContent = 'Archiver';
-                const preview = document.createElement('a'); preview.className = 'px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium transition-colors'; preview.href = '/admin/themes/'+encodeURIComponent(id); preview.textContent = 'Voir';
-                const del = document.createElement('button'); del.className = 'deleteBtn px-3 py-1.5 rounded-lg bg-rose-900/50 hover:bg-rose-900 text-rose-200 text-xs font-medium transition-colors border border-rose-900/50'; del.textContent = 'Supprimer';
-                actions.appendChild(archive); actions.appendChild(preview); actions.appendChild(del);
-              } else if (target === 'submitted'){
-                const pending = card.querySelector('.badge-pending-update');
-                if (pending){
-                  const approveUpd = document.createElement('button'); approveUpd.className = 'approveUpdateBtn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors'; approveUpd.textContent = 'Approuver MAJ';
-                  actions.appendChild(approveUpd);
-                } else {
-                  const approve = document.createElement('button'); approve.className = 'approveBtn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors'; approve.textContent = 'Approuver';
-                  const reject = document.createElement('button'); reject.className = 'rejectBtn px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium transition-colors'; reject.textContent = 'Rejeter';
-                  actions.appendChild(approve); actions.appendChild(reject);
-                }
-                const archive = document.createElement('button'); archive.className = 'archiveBtn px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors'; archive.textContent = 'Archiver';
-                const preview = document.createElement('a'); preview.className = 'px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium transition-colors'; preview.href = '/admin/themes/'+encodeURIComponent(id); preview.textContent = 'Voir';
-                actions.appendChild(archive); actions.appendChild(preview);
-              } else if (target === 'archived'){
-                const unarchive = document.createElement('button'); unarchive.className = 'unarchiveBtn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors'; unarchive.textContent = 'Republier';
-                const preview = document.createElement('a'); preview.className = 'px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium transition-colors'; preview.href = '/admin/themes/'+encodeURIComponent(id); preview.textContent = 'Voir';
-                const del = document.createElement('button'); del.className = 'deleteBtn px-3 py-1.5 rounded-lg bg-rose-900/50 hover:bg-rose-900 text-rose-200 text-xs font-medium transition-colors border border-rose-900/50'; del.textContent = 'Supprimer';
-                actions.appendChild(unarchive); actions.appendChild(preview); actions.appendChild(del);
-              }
-            }catch(e){}
-          }
-          try{
-            if (approve || reject){
-              const action = approve ? 'approve' : 'reject';
-              if (approve) {
-                const target = document.getElementById('gridApproved');
-                if (target) { const ph = target.querySelector('.server-empty-placeholder'); if (ph) ph.remove(); transformCardForGrid(li, 'approved'); target.appendChild(li); }
-                li.querySelector('.badge-pending-update')?.remove?.();
-                tempMoved = true;
-              } else {
-                li.remove();
-                tempMoved = true;
-              }
-              const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/'+action, { method: 'POST' });
-              if (!res.ok) throw new Error('HTTP '+res.status);
-              showToast(approve ? 'Thème approuvé' : 'Thème rejeté', 'success');
-              try{ window.__refreshThemePaginators && window.__refreshThemePaginators(); }catch(e){}
-            } else if (archive){
-              const target = document.getElementById('gridArchived'); if (target) { const ph = target.querySelector('.server-empty-placeholder'); if (ph) ph.remove(); transformCardForGrid(li, 'archived'); target.appendChild(li); }
-              tempMoved = true;
-              const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/archive', { method: 'POST' });
-              if (!res.ok) throw new Error('HTTP '+res.status);
-              showToast('Thème archivé', 'success');
-              try{ window.__refreshThemePaginators && window.__refreshThemePaginators(); }catch(e){}
-            } else if (unarchive){
-              const target = document.getElementById('gridApproved'); if (target) { const ph = target.querySelector('.server-empty-placeholder'); if (ph) ph.remove(); transformCardForGrid(li, 'approved'); target.appendChild(li); }
-              tempMoved = true;
-              const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/unarchive', { method: 'POST' });
-              if (!res.ok) throw new Error('HTTP '+res.status);
-              showToast('Thème republié', 'success');
-              try{ window.__refreshThemePaginators && window.__refreshThemePaginators(); }catch(e){}
-            } else if (approveUpdate){
-              li.querySelector('.badge-pending-update')?.remove?.();
-              const target = document.getElementById('gridApproved'); if (target) { const ph = target.querySelector('.server-empty-placeholder'); if (ph) ph.remove(); transformCardForGrid(li, 'approved'); target.appendChild(li); }
-              tempMoved = true;
-              const res = await fetch('/api/themes/'+encodeURIComponent(id)+'/approve-update', { method: 'POST' });
-              if (!res.ok) throw new Error('HTTP '+res.status);
-              showToast('MAJ approuvée', 'success');
-              try{ window.__refreshThemePaginators && window.__refreshThemePaginators(); }catch(e){}
-            } else if (del){
-              const ok = window.confirm('Supprimer définitivement ce thème ?');
-              if (!ok) { actBtn.disabled = false; actBtn.textContent = prev; return; }
-              li.remove(); tempMoved = true;
-              const res = await fetch('/api/themes/'+encodeURIComponent(id), { method: 'DELETE' });
-              if (!res.ok) throw new Error('HTTP '+res.status);
-              showToast('Thème supprimé', 'success');
-              try{ window.__refreshThemePaginators && window.__refreshThemePaginators(); }catch(e){}
-            }
-          }catch(err){
-            try{
-              if (tempMoved) {
-                if (!originalParent) {
-                } else {
-                  if (originalNext) originalParent.insertBefore(li, originalNext);
-                  else originalParent.appendChild(li);
-                }
-              }
-            }catch(e){}
-            showToast('Erreur lors de l\'opération', 'error');
-          }
-          finally { if (document.body.contains(li)) { actBtn.disabled = false; actBtn.textContent = prev; } }
-        });
-      });
-    }
-    function applyFilter(){
-      const q = (search?.value||'').trim().toLowerCase();
-      if (clearBtn) clearBtn.classList.toggle('hidden', !q);
-      grids.forEach(grid => {
-        Array.from(grid.querySelectorAll('.themeCard')).forEach(card=>{
-          const name = card.dataset.name||'';
-          const author = card.dataset.author||'';
-          const ok = !q || name.includes(q) || author.includes(q);
-          card.style.display = ok ? '' : 'none';
-        });
-      });
-    }
-    search?.addEventListener('input', applyFilter);
-    renderPreviews(); wireActions();
-    function setupDragAndDrop(){}
-    setupDragAndDrop();
-
-    window.__refreshThemePaginators = function(){
-      try{
-        const container = window.__themeAdminPaginators || {};
-        Object.keys(container).forEach(k=>{
-          const p = container[k]; if (!p) return;
-          const root = (k === 'submitted') ? document.getElementById('gridSubmitted') : (k === 'approved' ? document.getElementById('gridApproved') : document.getElementById('gridArchived'));
-          if (!root) return;
-          const items = Array.from(root.querySelectorAll('.themeCard'));
-          try{ p.setFiltered(items); }catch(e){}
-        });
-      }catch(e){}
-      try{ if (window.__onThemesUpdated) window.__onThemesUpdated(); }catch(e){}
-      try{ tidyServerEmptyPlaceholders(); }catch(e){}
-      try{ updateTabCounts(); }catch(e){}
-    };
-  })();
-  </script>
-  <script src="/public/js/pagination.js"></script>
-  <script>
-  (function(){
-    const grids = {
-      submitted: document.getElementById('gridSubmitted'),
-      approved: document.getElementById('gridApproved'),
-      archived: document.getElementById('gridArchived')
-    };
-    const search = document.getElementById('themeSearch');
-    const catSelect = document.getElementById('themeCategoryFilter');
-    function collectCategories(){
-      const cats = new Set();
-      Object.values(grids).forEach(g=>{
-        if (!g) return;
-        Array.from(g.querySelectorAll('.themeCard')).forEach(card=>{
-          try{ const raw = card.getAttribute('data-json')||'{}'; const parsed = JSON.parse(raw); const cat = (parsed.chat && parsed.chat.category) || parsed.category || parsed.chatCategory || ''; if (cat) cats.add(String(cat)); }catch(e){}
-        });
-      });
-      return Array.from(cats).sort();
-    }
-
-    function populateCategorySelect(){
-      if (!catSelect) return;
-      const prev = catSelect.value;
-      while (catSelect.options.length > 1) catSelect.remove(1);
-      const cats = collectCategories();
-      cats.forEach(c=>{
-        const o = document.createElement('option'); o.value = c; o.textContent = c; catSelect.appendChild(o);
-      });
-      try{ if (prev) catSelect.value = prev; }catch(e){}
-    }
-
-    window.__onThemesUpdated = function(){
-      try{ populateCategorySelect(); }catch(e){}
-      try{ renderPreviews(); }catch(e){}
-      try{ applyFilter(); }catch(e){}
-      try{ updateTabCounts(); }catch(e){}
-    };
-
-    function ensureEmptyMessage(grid){
-      let m = grid.querySelector('.no-match-msg');
-      if (!m){ m = document.createElement('div'); m.className = 'no-match-msg col-span-full text-center py-12 text-slate-500'; m.style.display='none'; m.textContent = 'Aucun thème correspondant.'; grid.appendChild(m);} return m;
-    }
-
-  const paginators = {};
-  window.__themeAdminPaginators = window.__themeAdminPaginators || {};
-    const tabButtons = Array.from(document.querySelectorAll('.tabBtn'));
-    function showTab(name){
-      ['submitted','approved','archived'].forEach(s=>{
-        const sec = document.getElementById('grid'+(s==='submitted'?'Submitted': s==='approved'?'Approved':'Archived'))?.closest('section') || document.querySelector('[data-section="'+s+'"]');
-        if (sec) sec.classList.toggle('section-hidden', s!==name);
-      });
-      tabButtons.forEach(b=>{ const is = b.dataset.tab === name; b.classList.toggle('active', is); b.setAttribute('aria-selected', String(is)); });
-    }
-    tabButtons.forEach(b=> b.addEventListener('click', ()=> showTab(b.dataset.tab)));
-
-    Object.keys(grids).forEach(k=>{
-      const g = grids[k]; if (!g) return;
-      if (!window.__PlinkkPaginator) return;
-      const p = window.__PlinkkPaginator.createPaginator(g, { pageSize: 9, selectors: { items: '.themeCard' }, onRender: (pageItems, meta) => {
-        const em = ensureEmptyMessage(g);
-        if (!meta || meta.totalItems === 0) { em.style.display = ''; } else { em.style.display = 'none'; }
-        try{
-          const btn = tabButtons.find(tb => tb.dataset.tab === k);
-          if (btn) { const span = btn.querySelector('.tab-count'); if (span) span.textContent = String(meta.totalItems); }
-        }catch(e){}
-      }});
-  paginators[k] = p;
-  try{ window.__themeAdminPaginators[k] = p; }catch(e){}
-      p.render();
-    });
-
-    showTab('submitted');
-
-    function applyFilter(){
-      const q = (search?.value||'').trim().toLowerCase();
-      const cat = (catSelect?.value||'').trim();
-      Object.keys(paginators).forEach(k=>{
-        const p = paginators[k];
-        const all = p.getAll();
-        const filtered = all.filter(li => {
-          const name = (li.dataset.name||'') + ' ' + (li.dataset.author||'');
-          const matchesQ = !q || name.toLowerCase().includes(q);
-          if (!matchesQ) return false;
-          if (!cat) return true;
-          try{ const raw = li.getAttribute('data-json')||'{}'; const parsed = JSON.parse(raw);
-            const c = (parsed.chat && parsed.chat.category) || parsed.category || parsed.chatCategory || '';
-            return String(c) === String(cat);
-          }catch(e){ return false; }
-        });
-        p.setFiltered(filtered);
-      });
-    }
-
-  search?.addEventListener('input', applyFilter);
-  catSelect?.addEventListener('change', applyFilter);
-  const clearBtn = document.getElementById('clearSearch');
-  clearBtn?.addEventListener('click', (e)=>{ e.preventDefault(); if (search) search.value=''; applyFilter(); if (search) search.focus(); });
-
-    populateCategorySelect();
-    applyFilter();
-  })();
-  </script>
-</main>
+    <% }) %>
+  </main>
 </div>
+
+<!-- Modal Preview -->
+<div id="previewModal" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" id="modalBackdrop"></div>
+  <div class="absolute inset-4 md:inset-8 lg:inset-16 flex items-center justify-center">
+    <div class="w-full max-w-4xl bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden shadow-2xl">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+        <div>
+          <h3 id="modalTitle" class="text-lg font-semibold text-white">Aperçu</h3>
+          <p id="modalAuthor" class="text-sm text-slate-400"></p>
+        </div>
+        <button id="closeModal" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <div class="text-xs text-slate-400 mb-2 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
+              Mode clair
+            </div>
+            <div id="modalPreviewLight" class="aspect-[9/16] max-h-[400px] rounded-2xl border border-slate-700 overflow-hidden"></div>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400 mb-2 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+              Mode sombre
+            </div>
+            <div id="modalPreviewDark" class="aspect-[9/16] max-h-[400px] rounded-2xl border border-slate-700 overflow-hidden"></div>
+          </div>
+        </div>
+        <div id="modalDescription" class="mt-4 p-3 rounded-xl bg-slate-800/50 text-sm text-slate-300 hidden"></div>
+        <div id="modalActions" class="mt-6 flex items-center justify-end gap-3"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  function showToast(message, type = 'info', timeout = 3500){
+    let container = document.getElementById('toastContainer');
+    if (!container) { container = document.createElement('div'); container.id = 'toastContainer'; container.className = 'fixed right-6 top-6 z-[99999] flex flex-col gap-3'; document.body.appendChild(container); }
+    const el = document.createElement('div');
+    el.className = 'flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium transform transition-all duration-300 translate-x-8 opacity-0';
+    const colors = { success: 'bg-emerald-950/90 border-emerald-800 text-emerald-200', error: 'bg-rose-950/90 border-rose-800 text-rose-200', info: 'bg-slate-800/90 border-slate-700 text-slate-200' };
+    el.className += ' ' + colors[type];
+    el.innerHTML = '<span>' + message + '</span>';
+    container.appendChild(el);
+    requestAnimationFrame(() => el.classList.remove('translate-x-8', 'opacity-0'));
+    const id = setTimeout(() => { el.classList.add('translate-x-8', 'opacity-0'); setTimeout(() => el.remove(), 300); }, timeout);
+    el.onclick = () => { clearTimeout(id); el.classList.add('translate-x-8', 'opacity-0'); setTimeout(() => el.remove(), 300); };
+  }
+
+  function norm(s){ s = String(s||'').trim(); if (!s.startsWith('#')) s = '#'+s; if (/^#[0-9a-fA-F]{3}$/.test(s)) s = '#'+s.slice(1).split('').map(c=>c+c).join(''); return /^#[0-9a-fA-F]{6}$/.test(s) ? s : '#1e293b'; }
+
+  function extractColors(raw) {
+    try {
+      if (!raw) return { light: { bg:'#f8fafc', button:'#4f46e5', hover:'#22c55e' }, dark: { bg:'#0f172a', button:'#4f46e5', hover:'#22c55e' } };
+      const d = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      let light = { bg:'#f8fafc', button:'#4f46e5', hover:'#22c55e' };
+      let dark = { bg:'#0f172a', button:'#4f46e5', hover:'#22c55e' };
+      if (d.light) light = { bg: norm(d.light.bg), button: norm(d.light.button), hover: norm(d.light.hover) };
+      else if (d.background) light = { bg: norm(d.background), button: norm(d.buttonBackground), hover: norm(d.hoverColor) };
+      if (d.dark) dark = { bg: norm(d.dark.bg), button: norm(d.dark.button), hover: norm(d.dark.hover) };
+      else if (d.opposite) dark = { bg: norm(d.opposite.background), button: norm(d.opposite.buttonBackground), hover: norm(d.opposite.hoverColor) };
+      return { light, dark };
+    } catch(e) { return { light: { bg:'#f8fafc', button:'#4f46e5', hover:'#22c55e' }, dark: { bg:'#0f172a', button:'#4f46e5', hover:'#22c55e' } }; }
+  }
+
+  function renderPreviewBox(container, colors, isDark) {
+    const c = isDark ? colors.dark : colors.light;
+    container.innerHTML = '<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;background:'+c.bg+'"><div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,0.2),rgba(0,0,0,0.1));border:2px solid rgba(128,128,128,0.2)"></div><div style="width:70%;height:14px;background:'+c.button+';border-radius:8px;margin-top:8px"></div><div style="width:55%;height:12px;background:'+c.hover+';border-radius:6px"></div><div style="width:60%;height:12px;background:rgba(128,128,128,0.2);border-radius:6px"></div></div>';
+  }
+
+  function renderCardPreview(container, raw) {
+    const colors = extractColors(raw);
+    const c = colors.dark;
+    container.innerHTML = '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;background:'+c.bg+'"><div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(0,0,0,0.1));border:2px solid rgba(128,128,128,0.2)"></div><div style="width:70%;height:12px;background:'+c.button+';border-radius:6px;margin-top:4px"></div><div style="width:55%;height:10px;background:'+c.hover+';border-radius:5px"></div><div style="width:60%;height:10px;background:rgba(128,128,128,0.15);border-radius:5px"></div></div>';
+  }
+
+  function renderAllPreviews() { document.querySelectorAll('.themeCard').forEach(card => { const preview = card.querySelector('.themePreview'); const raw = card.getAttribute('data-json'); if (preview) renderCardPreview(preview, raw); }); }
+
+  const statCards = document.querySelectorAll('.stat-card');
+  const sections = document.querySelectorAll('[data-section]');
+  function showSection(key) { statCards.forEach(c => c.classList.toggle('active', c.dataset.tab === key)); sections.forEach(s => s.classList.toggle('section-hidden', s.dataset.section !== key)); }
+  statCards.forEach(card => card.addEventListener('click', () => showSection(card.dataset.tab)));
+
+  const searchInput = document.getElementById('themeSearch');
+  const sortSelect = document.getElementById('sortOrder');
+
+  function applyFilters() {
+    const q = (searchInput?.value || '').toLowerCase().trim();
+    const sort = sortSelect?.value || 'newest';
+    document.querySelectorAll('[data-section]').forEach(section => {
+      const grid = section.querySelector('ul');
+      if (!grid) return;
+      const cards = Array.from(grid.querySelectorAll('.themeCard'));
+      cards.forEach(card => { const name = card.dataset.name || ''; const author = card.dataset.author || ''; card.style.display = (!q || name.includes(q) || author.includes(q)) ? '' : 'none'; });
+      const visibleCards = cards.filter(c => c.style.display !== 'none');
+      visibleCards.sort((a, b) => {
+        if (sort === 'newest') return parseInt(b.dataset.updated) - parseInt(a.dataset.updated);
+        if (sort === 'oldest') return parseInt(a.dataset.updated) - parseInt(b.dataset.updated);
+        if (sort === 'name') return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+        return 0;
+      });
+      visibleCards.forEach(card => grid.appendChild(card));
+    });
+    updateCounts();
+  }
+  searchInput?.addEventListener('input', applyFilters);
+  sortSelect?.addEventListener('change', applyFilters);
+
+  function updateCounts() {
+    const counts = { submitted: 0, approved: 0, rejected: 0, archived: 0 };
+    document.querySelectorAll('.themeCard').forEach(card => { if (card.style.display === 'none') return; const status = (card.dataset.status || '').toLowerCase(); if (counts[status] !== undefined) counts[status]++; });
+    document.getElementById('statSubmitted').textContent = counts.submitted;
+    document.getElementById('statApproved').textContent = counts.approved;
+    document.getElementById('statRejected').textContent = counts.rejected;
+    document.getElementById('statArchived').textContent = counts.archived;
+  }
+
+  const modal = document.getElementById('previewModal');
+  const modalBackdrop = document.getElementById('modalBackdrop');
+  const closeModalBtn = document.getElementById('closeModal');
+  let currentModalTheme = null;
+
+  function openModal(card) {
+    currentModalTheme = card;
+    const raw = card.getAttribute('data-json');
+    const name = card.querySelector('h3')?.textContent || 'Thème';
+    const author = card.querySelector('.text-violet-400')?.textContent || '';
+    const desc = card.querySelector('.line-clamp-2')?.textContent || '';
+    const colors = extractColors(raw);
+    const status = card.dataset.status?.toLowerCase();
+
+    document.getElementById('modalTitle').textContent = name;
+    document.getElementById('modalAuthor').textContent = author ? 'par ' + author : '';
+    const descEl = document.getElementById('modalDescription');
+    if (desc) { descEl.textContent = desc; descEl.classList.remove('hidden'); } else descEl.classList.add('hidden');
+
+    renderPreviewBox(document.getElementById('modalPreviewLight'), colors, false);
+    renderPreviewBox(document.getElementById('modalPreviewDark'), colors, true);
+
+    const actionsEl = document.getElementById('modalActions');
+    actionsEl.innerHTML = '';
+    if (status === 'submitted') {
+      const hasPending = card.querySelector('.badge-pending');
+      if (hasPending) { actionsEl.innerHTML = '<button class="modalApproveUpdate px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium">Approuver MAJ</button><button class="modalRejectUpdate px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-medium ml-2">Rejeter MAJ</button>'; }
+      else { actionsEl.innerHTML = '<button class="modalApprove px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium">Approuver</button><button class="modalReject px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-medium ml-2">Rejeter</button>'; }
+    } else if (status === 'approved') { actionsEl.innerHTML = '<button class="modalArchive px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-medium">Archiver</button>'; }
+    else if (status === 'rejected' || status === 'archived') { actionsEl.innerHTML = '<button class="modalRestore px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium">'+(status==='archived'?'Republier':'Approuver')+'</button><button class="modalDelete px-4 py-2 rounded-xl bg-rose-900/50 hover:bg-rose-800 text-rose-200 font-medium border border-rose-800/50 ml-2">Supprimer</button>'; }
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() { modal.classList.add('hidden'); document.body.style.overflow = ''; currentModalTheme = null; }
+  closeModalBtn?.addEventListener('click', closeModal);
+  modalBackdrop?.addEventListener('click', closeModal);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  async function apiCall(endpoint, method = 'POST') { const res = await fetch(endpoint, { method }); if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); }
+
+  function moveCard(card, targetGridId, newStatus) {
+    const targetGrid = document.getElementById(targetGridId);
+    if (!targetGrid) return;
+    card.dataset.status = newStatus;
+    card.style.animation = 'none';
+    targetGrid.appendChild(card);
+    requestAnimationFrame(() => { card.style.animation = ''; });
+    updateCounts();
+  }
+
+  function rebuildCardActions(card, status) {
+    const actionsDiv = card.querySelector('.actions-container');
+    if (!actionsDiv) return;
+    actionsDiv.innerHTML = '';
+    if (status === 'submitted') { actionsDiv.innerHTML = '<button class="approveBtn action-btn action-btn-approve">Approuver</button><button class="rejectBtn action-btn action-btn-reject">Rejeter</button><button class="previewBtn action-btn action-btn-view">Aperçu</button>'; }
+    else if (status === 'approved') { actionsDiv.innerHTML = '<button class="archiveBtn action-btn action-btn-archive">Archiver</button><button class="previewBtn action-btn action-btn-view">Aperçu</button>'; }
+    else if (status === 'rejected') { actionsDiv.innerHTML = '<button class="approveBtn action-btn action-btn-approve">Approuver</button><button class="deleteBtn action-btn action-btn-delete">Supprimer</button><button class="previewBtn action-btn action-btn-view">Aperçu</button>'; }
+    else if (status === 'archived') { actionsDiv.innerHTML = '<button class="unarchiveBtn action-btn action-btn-restore">Republier</button><button class="deleteBtn action-btn action-btn-delete">Supprimer</button><button class="previewBtn action-btn action-btn-view">Aperçu</button>'; }
+  }
+
+  async function handleAction(btn, card) {
+    const id = card.dataset.id;
+    if (!id) return;
+    const prevText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '...';
+
+    try {
+      if (btn.classList.contains('approveBtn') || btn.classList.contains('modalApprove')) {
+        await apiCall('/api/themes/' + id + '/approve');
+        moveCard(card, 'gridApproved', 'APPROVED');
+        rebuildCardActions(card, 'approved');
+        showToast('Thème approuvé', 'success');
+      } else if (btn.classList.contains('rejectBtn') || btn.classList.contains('modalReject')) {
+        await apiCall('/api/themes/' + id + '/reject');
+        moveCard(card, 'gridRejected', 'REJECTED');
+        rebuildCardActions(card, 'rejected');
+        showToast('Thème rejeté', 'success');
+      } else if (btn.classList.contains('archiveBtn') || btn.classList.contains('modalArchive')) {
+        await apiCall('/api/themes/' + id + '/archive');
+        moveCard(card, 'gridArchived', 'ARCHIVED');
+        rebuildCardActions(card, 'archived');
+        showToast('Thème archivé', 'success');
+      } else if (btn.classList.contains('unarchiveBtn') || btn.classList.contains('modalRestore')) {
+        const status = card.dataset.status?.toLowerCase();
+        if (status === 'archived') await apiCall('/api/themes/' + id + '/unarchive');
+        else await apiCall('/api/themes/' + id + '/approve');
+        moveCard(card, 'gridApproved', 'APPROVED');
+        rebuildCardActions(card, 'approved');
+        showToast('Thème restauré', 'success');
+      } else if (btn.classList.contains('approveUpdateBtn') || btn.classList.contains('modalApproveUpdate')) {
+        await apiCall('/api/themes/' + id + '/approve-update');
+        card.querySelector('.badge-pending')?.remove();
+        moveCard(card, 'gridApproved', 'APPROVED');
+        rebuildCardActions(card, 'approved');
+        showToast('MAJ approuvée', 'success');
+      } else if (btn.classList.contains('rejectUpdateBtn') || btn.classList.contains('modalRejectUpdate')) {
+        await apiCall('/api/themes/' + id + '/reject-update');
+        card.querySelector('.badge-pending')?.remove();
+        rebuildCardActions(card, card.dataset.status?.toLowerCase() || 'approved');
+        showToast('MAJ rejetée', 'success');
+      } else if (btn.classList.contains('deleteBtn') || btn.classList.contains('modalDelete')) {
+        if (!confirm('Supprimer définitivement ce thème ?')) { btn.disabled = false; btn.innerHTML = prevText; return; }
+        await apiCall('/api/themes/' + id, 'DELETE');
+        card.remove();
+        showToast('Thème supprimé', 'success');
+      }
+      closeModal();
+    } catch(err) {
+      showToast('Erreur: ' + err.message, 'error');
+      btn.disabled = false;
+      btn.innerHTML = prevText;
+    }
+  }
+
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    if (btn.classList.contains('previewBtn')) { const card = btn.closest('.themeCard'); if (card) openModal(card); return; }
+    const card = btn.closest('.themeCard');
+    if (card && (btn.classList.contains('approveBtn') || btn.classList.contains('rejectBtn') || btn.classList.contains('archiveBtn') || btn.classList.contains('unarchiveBtn') || btn.classList.contains('approveUpdateBtn') || btn.classList.contains('rejectUpdateBtn') || btn.classList.contains('deleteBtn'))) { handleAction(btn, card); return; }
+    if (currentModalTheme && (btn.classList.contains('modalApprove') || btn.classList.contains('modalReject') || btn.classList.contains('modalArchive') || btn.classList.contains('modalRestore') || btn.classList.contains('modalApproveUpdate') || btn.classList.contains('modalRejectUpdate') || btn.classList.contains('modalDelete'))) { handleAction(btn, currentModalTheme); }
+  });
+
+  renderAllPreviews();
+  updateCounts();
+})();
+</script>

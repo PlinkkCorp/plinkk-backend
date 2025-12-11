@@ -8,6 +8,7 @@ import {
   getSubmittedThemes,
   getApprovedThemes,
   getArchivedThemes,
+  getRejectedThemes,
   getThemeById,
 } from "../../../services/themeService";
 
@@ -16,10 +17,11 @@ export function adminThemesRoutes(fastify: FastifyInstance) {
     const ok = await ensurePermission(request, reply, "VIEW_ADMIN", { mode: "redirect" });
     if (!ok) return;
 
-    const [submitted, approved, archived] = await Promise.all([
+    const [submitted, approved, archived, rejected] = await Promise.all([
       getSubmittedThemes(),
       getApprovedThemes(),
       getArchivedThemes(),
+      getRejectedThemes(),
     ]);
 
     const approvedWithPending = approved.filter((t) => t.pendingUpdate);
@@ -31,6 +33,7 @@ export function adminThemesRoutes(fastify: FastifyInstance) {
       submitted: mergedSubmitted,
       approved: approvedFiltered,
       archived,
+      rejected,
       publicPath: request.publicPath,
     });
   });

@@ -84,6 +84,21 @@ export async function getArchivedThemes() {
   });
 }
 
+export async function getRejectedThemes() {
+  return prisma.theme.findMany({
+    where: { status: "REJECTED", isPrivate: false },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      author: { select: { id: true, userName: true } },
+      updatedAt: true,
+      data: true,
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+}
+
 export async function getThemeById(id: string) {
   return prisma.theme.findUnique({
     where: { id },

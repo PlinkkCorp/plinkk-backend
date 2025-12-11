@@ -69,6 +69,29 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
+  fastify.post("/:id/reject-update", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const ok = await ensurePermission(request, reply, 'APPROVE_THEME');
+    if (!ok) return;
+    const { id } = request.params as { id: string };
+    const t = await prisma.theme.findUnique({
+      where: { id },
+      select: { pendingUpdate: true },
+    });
+    if (!t || !t.pendingUpdate)
+      return reply.code(400).send({ error: "Aucune mise à jour en attente" });
+    await prisma.theme.update({
+      where: { id },
+      data: {
+        pendingUpdate: null,
+        pendingUpdateAt: null,
+        pendingUpdateMessage: null,
+      },
+    });
+    return reply.send({ ok: true });
+  });
+
   fastify.post("/:id/unarchive", async (request, reply) => {
     const meId = request.session.get("data");
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
