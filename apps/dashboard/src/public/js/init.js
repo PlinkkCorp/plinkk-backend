@@ -144,7 +144,7 @@ function createFooter(profileData) {
     const theme = themes[themeIndex];
     
     const footer = document.createElement('footer');
-    footer.innerHTML = `Design with ❤️ by <a href="http://plinkk.fr" target="_blank" rel="noopener noreferrer"><p style="color:${theme?.buttonTextColor || 'defaultColor'};display:inline;padding:2px 2px 2px 4px;border-radius:5px;background-color:${theme?.buttonBackground || 'defaultColor'};">PlinkkCorp©</p></a>`;
+    footer.innerHTML = `Design with ❤️ by <a href="http://plinkk.fr" target="_blank" rel="noopener noreferrer"><p style="color:${theme?.buttonTextColor || 'defaultColor'};display:inline;padding:2px 2px 2px 4px;border-radius:5px;background-color:${theme?.buttonBackground || 'defaultColor'};">Plinkk©</p></a>`;
     footer.style.zIndex = '9999';
     
     document.body.appendChild(footer);

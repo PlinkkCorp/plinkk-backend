@@ -249,6 +249,39 @@
     el.onclick = () => { clearTimeout(id); el.classList.add('translate-x-8', 'opacity-0'); setTimeout(() => el.remove(), 300); };
   }
 
+  function showConfirm(message, actionText = 'Supprimer') {
+    return new Promise(resolve => {
+      const overlay = document.createElement('div');
+      overlay.className = 'fixed inset-0 z-[100000] flex items-center justify-center bg-black/70 backdrop-blur-sm';
+      overlay.style.animation = 'fadeIn 0.15s ease-out';
+      overlay.innerHTML = `
+        <div class="w-full max-w-sm mx-4 bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-2xl transform transition-all" style="animation: scaleIn 0.2s ease-out">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-rose-500/20 flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <h3 class="font-semibold text-lg text-white">Confirmation</h3>
+          </div>
+          <p class="text-slate-300 mb-6">${message.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
+          <div class="flex justify-end gap-3">
+            <button class="cancelBtn px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium transition-colors">Annuler</button>
+            <button class="confirmBtn px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-medium transition-colors">${actionText.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</button>
+          </div>
+        </div>`;
+      const style = document.createElement('style');
+      style.textContent = '@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}';
+      overlay.appendChild(style);
+      function cleanup(result) { overlay.remove(); document.removeEventListener('keydown', onKey); resolve(result); }
+      function onKey(e) { if (e.key === 'Escape') cleanup(false); if (e.key === 'Enter') cleanup(true); }
+      overlay.querySelector('.cancelBtn').addEventListener('click', () => cleanup(false));
+      overlay.querySelector('.confirmBtn').addEventListener('click', () => cleanup(true));
+      overlay.addEventListener('click', e => { if (e.target === overlay) cleanup(false); });
+      document.body.appendChild(overlay);
+      document.addEventListener('keydown', onKey);
+      overlay.querySelector('.cancelBtn').focus();
+    });
+  }
+
   function norm(s){ s = String(s||'').trim(); if (!s.startsWith('#')) s = '#'+s; if (/^#[0-9a-fA-F]{3}$/.test(s)) s = '#'+s.slice(1).split('').map(c=>c+c).join(''); return /^#[0-9a-fA-F]{6}$/.test(s) ? s : '#1e293b'; }
 
   function extractColors(raw) {
@@ -421,7 +454,8 @@
         rebuildCardActions(card, card.dataset.status?.toLowerCase() || 'approved');
         showToast('MAJ rejetée', 'success');
       } else if (btn.classList.contains('deleteBtn') || btn.classList.contains('modalDelete')) {
-        if (!confirm('Supprimer définitivement ce thème ?')) { btn.disabled = false; btn.innerHTML = prevText; return; }
+        const ok = await showConfirm('Supprimer définitivement ce thème ? Cette action est irréversible.');
+        if (!ok) { btn.disabled = false; btn.innerHTML = prevText; return; }
         await apiCall('/api/themes/' + id, 'DELETE');
         card.remove();
         showToast('Thème supprimé', 'success');
