@@ -278,66 +278,33 @@ export function applyTheme(theme) {
 export function setBackgroundStyles(profileData) {
     const _p = profileData || getProfileData() || {};
 
-    // --- Cosmetics Logic (New System) ---
+    // --- Cosmetics Logic (effects only, gradient is independent) ---
     const cosmetics = _p.cosmetics || {};
     const data = cosmetics.data || {};
-    const gradientType = data.gradientType;
-    const primaryColor = data.primaryColor;
-    const accentColor = data.accentColor;
     const effect = data.effect;
 
-    // Apply Background
-    if (gradientType && primaryColor && accentColor) {
-        let bgStyle = '';
-        if (gradientType === 'linear') {
-             bgStyle = `linear-gradient(135deg, ${primaryColor}, ${accentColor})`;
-             document.body.style.backgroundAttachment = "fixed";
-        } else if (gradientType === 'radial') {
-             bgStyle = `radial-gradient(circle at center, ${primaryColor}, ${accentColor})`;
-             document.body.style.backgroundAttachment = "fixed";
-        } else if (gradientType === 'animated') {
-             bgStyle = `linear-gradient(270deg, ${primaryColor}, ${accentColor}, ${primaryColor})`;
-             document.body.style.backgroundSize = "400% 400%";
-             document.body.style.animation = "gradient-x 15s ease infinite";
-             
-             // Inject keyframes safely
-             const styleSheet = document.styleSheets[0];
-             let hasKeyframes = false;
-             for(let i=0; i<styleSheet.cssRules.length; i++) {
-                 if (styleSheet.cssRules[i].name === 'gradient-x') hasKeyframes = true;
-             }
-             if (!hasKeyframes) {
-                 try {
-                    styleSheet.insertRule(`@keyframes gradient-x { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }`, styleSheet.cssRules.length);
-                 } catch(e) {}
-             }
-        }
-        
-        if (bgStyle) {
-            document.body.style.background = bgStyle;
-        }
-    } else {
-        // Fallback to old system
-        const colors = Array.isArray(_p.background) ? _p.background.filter(Boolean) : null;
-        const deg = (Number.isFinite(_p.degBackgroundColor) ? _p.degBackgroundColor : 45) || 45;
-        if (colors) {
-            if (colors.length === 0) {
-                document.body.style.background = '';
-            } else if (colors.length === 1) {
-                document.body.style.background = colors[0];
-            } else {
-                document.body.style.background = `linear-gradient(${deg}deg, ${colors.join(", ")})`;
-            }
-            document.body.style.backgroundSize = "cover";
-        } else if (typeof _p.background === 'string' && _p.background.trim() !== '') {
-            document.body.style.background = `url(${_p.background})`;
-            document.body.style.backgroundSize = `${_p.backgroundSize || 100}%`;
-        } else {
+    // Always use Plinkk background (independent from cosmetics)
+    const colors = Array.isArray(_p.background) ? _p.background.filter(Boolean) : null;
+    const deg = (Number.isFinite(_p.degBackgroundColor) ? _p.degBackgroundColor : 45) || 45;
+    
+    if (colors) {
+        if (colors.length === 0) {
             document.body.style.background = '';
+        } else if (colors.length === 1) {
+            document.body.style.background = colors[0];
+        } else {
+            document.body.style.background = `linear-gradient(${deg}deg, ${colors.join(", ")})`;
         }
+        document.body.style.backgroundSize = "cover";
+        document.body.style.backgroundAttachment = "fixed";
+    } else if (typeof _p.background === 'string' && _p.background.trim() !== '') {
+        document.body.style.background = `url(${_p.background})`;
+        document.body.style.backgroundSize = `${_p.backgroundSize || 100}%`;
+    } else {
+        document.body.style.background = '';
     }
 
-    // Apply Effects (Overlay)
+    // Apply Effects (Overlay) from cosmetics
     if (effect && effect !== 'none') {
         // Remove existing effect if any
         const existingEffect = document.getElementById('cosmetic-effect-overlay');
