@@ -31,27 +31,24 @@
                     <div class="p-3 bg-blue-500/10 rounded-xl text-blue-400">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                     </div>
-                    <span class="text-xs font-medium text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-lg">+12%</span>
                 </div>
                 <p class="text-slate-400 text-sm font-medium">Vues totales</p>
-                <h3 class="text-3xl font-bold text-white mt-1"><%= (typeof stats !== 'undefined' && stats.views) ? stats.views : 0 %></h3>
+                <h3 class="text-3xl font-bold text-white mt-1"><%= new Intl.NumberFormat('fr-FR').format((typeof stats !== 'undefined' && stats.views) ? stats.views : 0) %></h3>
             </div>
             <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
                 <div class="flex items-center justify-between mb-4">
                     <div class="p-3 bg-violet-500/10 rounded-xl text-violet-400">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                     </div>
-                    <span class="text-xs font-medium text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-lg">+5%</span>
                 </div>
                 <p class="text-slate-400 text-sm font-medium">Clics totaux</p>
-                <h3 class="text-3xl font-bold text-white mt-1"><%= (typeof stats !== 'undefined' && stats.clicks) ? stats.clicks : 0 %></h3>
+                <h3 class="text-3xl font-bold text-white mt-1"><%= new Intl.NumberFormat('fr-FR').format((typeof stats !== 'undefined' && stats.clicks) ? stats.clicks : 0) %></h3>
             </div>
             <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
                 <div class="flex items-center justify-between mb-4">
                     <div class="p-3 bg-pink-500/10 rounded-xl text-pink-400">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg>
                     </div>
-                    <span class="text-xs font-medium text-slate-500 bg-slate-800 px-2 py-1 rounded-lg">Avg</span>
                 </div>
                 <p class="text-slate-400 text-sm font-medium">Taux de clic (CTR)</p>
                 <h3 class="text-3xl font-bold text-white mt-1"><%= (typeof stats !== 'undefined' && stats.ctr) ? stats.ctr : '0%' %></h3>

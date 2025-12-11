@@ -26,7 +26,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
     const userInfo = request.currentUser!;
     const userId = request.userId!;
 
-    const [linksCount, socialsCount, labelsCount, recentLinks, plinkks] = await Promise.all([
+    const [linksCount, socialsCount, labelsCount, recentLinks, plinkks, userViews, totalClicks] = await Promise.all([
       prisma.link.count({ where: { userId } }),
       prisma.socialIcon.count({ where: { userId } }),
       prisma.label.count({ where: { userId } }),
@@ -37,13 +37,34 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       }),
       prisma.plinkk.findMany({
         where: { userId },
-        select: { id: true, name: true, slug: true, isDefault: true },
+        select: { id: true, name: true, slug: true, isDefault: true, views: true },
         orderBy: [{ isDefault: "desc" }, { index: "asc" }],
+      }),
+      // Total views across all user's plinkks
+      prisma.plinkk.aggregate({
+        where: { userId },
+        _sum: { views: true },
+      }),
+      // Total clicks across all user's links
+      prisma.link.aggregate({
+        where: { userId },
+        _sum: { clicks: true },
       }),
     ]);
 
+    const views = userViews._sum.views || 0;
+    const clicks = totalClicks._sum.clicks || 0;
+    const ctr = views > 0 ? ((clicks / views) * 100).toFixed(1) + '%' : '0%';
+
     return replyView(reply, "dashboard.ejs", userInfo, {
-      stats: { links: linksCount, socials: socialsCount, labels: labelsCount },
+      stats: { 
+        links: linksCount, 
+        socials: socialsCount, 
+        labels: labelsCount,
+        views,
+        clicks,
+        ctr,
+      },
       links: recentLinks,
       plinkks,
       publicPath: request.publicPath,
