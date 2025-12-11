@@ -407,7 +407,15 @@ export function createEmailAndDescription(profileData) {
     const descriptionDiv = document.createElement("div");
     descriptionDiv.className = "profile-description";
     const descriptionText = document.createElement("p");
-    setSafeText(descriptionText, profileData.description);
+    // Escape HTML then convert newlines to <br> for line breaks
+    const escapedDescription = profileData.description
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+        .replace(/\n/g, '<br>');
+    descriptionText.innerHTML = escapedDescription;
     descriptionDiv.appendChild(descriptionText);
     container.appendChild(emailDiv);
     container.appendChild(descriptionDiv);
