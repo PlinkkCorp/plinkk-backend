@@ -1,3 +1,4 @@
+import { S3Client } from "@aws-sdk/client-s3";
 import https from "https";
 
 export function roundedRect(ctx, x, y, w, h, r) {
@@ -29,16 +30,29 @@ export function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
 
 export function fetchRemoteFile(url: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
-      if (res.statusCode !== 200) {
-        reject(new Error(`Erreur HTTP ${res.statusCode} pour ${url}`));
-        return;
-      }
+    https
+      .get(url, (res) => {
+        if (res.statusCode !== 200) {
+          reject(new Error(`Erreur HTTP ${res.statusCode} pour ${url}`));
+          return;
+        }
 
-      let data = "";
-      res.setEncoding("utf8");
-      res.on("data", (chunk) => (data += chunk));
-      res.on("end", () => resolve(data));
-    }).on("error", reject);
+        let data = "";
+        res.setEncoding("utf8");
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => resolve(data));
+      })
+      .on("error", reject);
+  });
+}
+
+export function getS3Client() {
+  return new S3Client({
+    region: "us-east-1",
+    credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY_ID,
+      secretAccessKey: process.env.S3_SECRET_KEY,
+    },
+    endpoint: "https://s3.marvideo.fr",
   });
 }

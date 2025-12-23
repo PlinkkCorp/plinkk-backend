@@ -501,7 +501,7 @@
             }
             const json = await res.json();
             if (json && (json.url || json.file) && preview) {
-              const raw = json.url || ('/public/uploads/avatars/' + json.file);
+              const raw = json.url || json.file;
               const url = raw + '?v=' + Date.now();
               preview.innerHTML = `<img src="${url}" alt="Avatar" class="h-full w-full object-cover" />`;
 

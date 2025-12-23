@@ -323,9 +323,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       }
     })).image
 
-    console.log(userIcon)
-
-    return reply.sendFile(userIcon || "images/default_profile.png");
+    return reply.sendFile(userIcon || "https://s3.marvideo.fr/plinkk-image/default_profile.png");
   });
 
   fastify.get(

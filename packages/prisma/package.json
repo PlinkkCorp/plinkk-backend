@@ -13,6 +13,7 @@
     "build": "tsc && node copy-generated.js",
     "generate": "prisma generate",
     "migrate:dev": "prisma migrate dev",
+    "migrate": "prisma migrate",
     "deploy": "prisma migrate deploy",
     "dev": "prisma dev",
     "studio": "prisma studio",

@@ -34,6 +34,7 @@ export async function registerPlugins(fastify: FastifyInstance) {
 
   await fastify.register(fastifyMultipart, {
     limits: { fileSize: 2 * 1024 * 1024 },
+    attachFieldsToBody: false
   });
 
   await fastify.register(fastifyCookie);
