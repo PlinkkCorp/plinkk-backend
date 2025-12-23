@@ -1,6 +1,9 @@
 packages:
-  - 'apps/*'
-  - 'packages/*'
+  - apps/*
+  - packages/*
+
+onlyBuiltDependencies:
+  - sharp
 
 overrides:
   globe: 11.0.3

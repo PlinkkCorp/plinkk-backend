@@ -4,15 +4,13 @@ import z from "zod";
 import { verifyDomain } from "../../lib/verifyDNS";
 import bcrypt from "bcrypt";
 import QRCode from "qrcode";
-import { existsSync, mkdirSync, writeFileSync, unlinkSync } from "fs";
 import { User, prisma } from "@plinkk/prisma";
 import { apiMeThemesRoutes } from "./me/theme";
 import { apiMePlinkksRoutes } from "./me/plinkks/index";
-import path from "path";
 import crypto from "crypto";
 import { Upload } from "@aws-sdk/lib-storage";
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getS3Client } from "../../lib/fileUtils";
+import sharp from "sharp"
 
 const pending2fa = new Map<
   string,
@@ -452,12 +450,17 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const hash = me.id;
     const dedupName = `${hash}.${ext}`;
 
+    const img = await sharp(buf)
+      .resize({ width: 256, height: 256 })
+      .webp()
+      .toBuffer()
+
     const upload = new Upload({
       client: getS3Client(),
       params: {
         Bucket: "plinkk-image",
         Key: "profiles/" + dedupName,
-        Body: buf,
+        Body: img,
       },
       partSize: 5 * 1024 * 1024,
     });
