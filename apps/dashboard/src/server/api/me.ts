@@ -11,7 +11,7 @@ import { apiMePlinkksRoutes } from "./me/plinkks/index";
 import path from "path";
 import crypto from "crypto";
 import { Upload } from "@aws-sdk/lib-storage";
-import { S3Client } from "@aws-sdk/client-s3";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getS3Client } from "../../lib/fileUtils";
 
 const pending2fa = new Map<
@@ -451,15 +451,12 @@ export function apiMeRoutes(fastify: FastifyInstance) {
 
     const hash = me.id;
     const dedupName = `${hash}.${ext}`;
-    // const filePath = path.join(dir, dedupName);
-    // const publicUrl = `/public/uploads/avatars/${dedupName}`;
-    const oldVal = me?.image || null;
 
     const upload = new Upload({
       client: getS3Client(),
       params: {
-        Bucket: "plinkk-image/profile",
-        Key: dedupName,
+        Bucket: "plinkk-image",
+        Key: "profiles" + dedupName,
         Body: buf,
       },
       partSize: 5 * 1024 * 1024,
@@ -467,30 +464,10 @@ export function apiMeRoutes(fastify: FastifyInstance) {
 
     const up = await upload.done()
 
-    // writeFileSync(filePath, buf);
-
     await prisma.user.update({
       where: { id: me.id },
       data: { image: up.Location },
     });
-
-    /* if (oldVal && oldVal !== publicUrl) {
-      const refs = await prisma.user.count({ where: { image: oldVal } });
-      if (refs === 0) {
-        try {
-          let oldPath = "";
-          if (oldVal.startsWith("/public/uploads/avatars/")) {
-            oldPath = path.join(
-              __dirname,
-              oldVal.replace(/^\/public\//, "public/")
-            );
-          } else {
-            oldPath = path.join(dir, oldVal);
-          }
-          if (existsSync(oldPath)) unlinkSync(oldPath);
-        } catch {}
-      }
-    } */
 
     return reply.send({ ok: true, file: dedupName, url: up.Location });
   });
