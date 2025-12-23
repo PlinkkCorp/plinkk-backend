@@ -1,5 +1,6 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import https from "https";
+import "dotenv/config"
 
 export function roundedRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
