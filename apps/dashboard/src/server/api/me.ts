@@ -448,7 +448,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     if (!me) return reply.code(404).send({ error: "Utilisateur introuvable" });
 
     const hash = me.id;
-    const dedupName = `${hash}.${ext}`;
+    const dedupName = `${hash}.webp`;
 
     const img = await sharp(buf)
       .resize({ width: 256, height: 256 })
