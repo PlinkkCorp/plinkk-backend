@@ -458,7 +458,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const upload = new Upload({
       client: getS3Client(),
       params: {
-        Bucket: "plinkk-image",
+        Bucket: "plinkk-image/profile",
         Key: dedupName,
         Body: buf,
       },
