@@ -456,7 +456,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       client: getS3Client(),
       params: {
         Bucket: "plinkk-image",
-        Key: "profiles" + dedupName,
+        Key: "profiles/" + dedupName,
         Body: buf,
       },
       partSize: 5 * 1024 * 1024,
