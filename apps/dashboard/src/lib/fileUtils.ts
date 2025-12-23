@@ -54,5 +54,6 @@ export function getS3Client() {
       secretAccessKey: process.env.S3_SECRET_KEY,
     },
     endpoint: "https://s3.marvideo.fr",
+    forcePathStyle: true
   });
 }
