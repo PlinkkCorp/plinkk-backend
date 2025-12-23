@@ -1,7 +1,7 @@
 export const profileData = {
     profileLink: "https://plinkk.fr", // Lien du profil 
-    profileImage: "/public/images/default_profile.png", // Image de profil
-    profileIcon: "/public/images/logo.svg", // Icone derrière le profil
+    profileImage: "https://s3.marvideo.fr/plinkk-image/default_profile.png", // Image de profil
+    profileIcon: "https://s3.marvideo.fr/plinkk-image/logo.svg", // Icone derrière le profil
     profileSiteText: "Plinkk", // Nom derrière le profil
     userName: "Plinkk User", // Nom affiché sur la page et dans le titre de l'onglet
     email: "user@plinkk.fr", // Adresse mail affichée sur la page

@@ -6,7 +6,7 @@ function setupImageFallback(img, wrapper, userName) {
         try {
             if (!this._triedFallback) {
                 this._triedFallback = true;
-                this.src = "/public/images/logo.png";
+                this.src = "https://s3.marvideo.fr/plinkk-image/logo.svg";
                 return;
             }
         } catch (e) {}
@@ -43,7 +43,7 @@ export function createProfileContainer(profileData) {
     const profilePicWrapper = el('div', { class: 'profile-pic-wrapper' });
     
     const profilePic = el('img', {
-        src: isSafeUrl(profileData.profileImage) ? profileData.profileImage : '/public/images/logo.png',
+        src: isSafeUrl(profileData.profileImage) ? profileData.profileImage : 'https://s3.marvideo.fr/plinkk-image/logo.svg',
         alt: 'Profile Picture',
         class: 'profile-pic',
         loading: 'lazy'
@@ -59,7 +59,7 @@ export function createProfileContainer(profileData) {
     const profileLinkSpan = el('span');
     
     const profileIcon = el('img', {
-        src: isSafeUrl(profileData.profileIcon) ? profileData.profileIcon : '/public/images/icons/default-icon.svg',
+        src: isSafeUrl(profileData.profileIcon) ? profileData.profileIcon : 'https://s3.marvideo.fr/plinkk-image/default_profile.png',
         alt: 'globe',
         class: 'profile-icon',
         loading: 'lazy'
@@ -69,7 +69,7 @@ export function createProfileContainer(profileData) {
         try {
             if (!this._triedFallback) {
                 this._triedFallback = true;
-                this.src = "/public/images/icons/default-icon.svg";
+                this.src = "https://s3.marvideo.fr/plinkk-image/default_profile.png";
                 return;
             }
         } catch (e) {}

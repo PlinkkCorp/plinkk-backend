@@ -26,25 +26,6 @@ async function main() {
       info.kind = 'data-url';
     } else if (/^https?:\/\//i.test(img)) {
       info.kind = 'external-url';
-    } else if (img.startsWith('/public/uploads/avatars/')) {
-      info.kind = 'public-avatar';
-      const filename = img.replace('/public/uploads/avatars/', '');
-      const fp = path.join(avatarsDir, filename);
-      info.fileExists = fs.existsSync(fp);
-      if (!info.fileExists) missingFiles++;
-      if (/^\/public\/uploads\/avatars\/data:/i.test(img)) {
-        corrupted++;
-        console.warn(`Corrupted image value for user ${u.id}: ${img}`);
-        if (fix) {
-          const fixed = img.replace(/^\/public\/uploads\/avatars\//i, '');
-          try {
-            await prisma.user.update({ where: { id: u.id }, data: { image: fixed } });
-            console.info(`  -> fixed in DB for user ${u.id}`);
-          } catch (e) {
-            console.error(`  -> failed to fix for ${u.id}:`, e.message || e);
-          }
-        }
-      }
     } else if (img.startsWith('/public/uploads/plinkk/')) {
       info.kind = 'public-plinkk';
       const filename = img.replace('/public/uploads/plinkk/', '');

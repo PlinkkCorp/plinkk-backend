@@ -38,7 +38,7 @@ export async function populateIconGrid(filterText) {
       card.setAttribute('type', 'button');
       card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 flex flex-col items-center gap-2';
       const img = document.createElement('img');
-      img.src = `/public/images/icons/${i.slug}.svg`;
+      img.src = `https://s3.marvideo.fr/plinkk-image/icons/${i.slug}.svg`;
       img.alt = i.displayName;
       img.className = 'h-10 w-10 object-contain';
       const label = document.createElement('div');

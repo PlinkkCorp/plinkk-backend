@@ -10,12 +10,12 @@
   <% const desc=(typeof description !=='undefined' && description) ? description
     : 'Crée ta page de liens élégante et personnalisée avec Plinkk.' ; %>
     <% const robotsVal=(typeof robots !=='undefined' && robots) ? robots : 'index,follow' ; %>
-      <% const img=(typeof image !=='undefined' && image) ? image : '/public/images/logo.svg' ; %>
+      <% const img=(typeof image !=='undefined' && image) ? image : 'https://s3.marvideo.fr/plinkk-image/logo.svg' ; %>
         <% const canon=(typeof canonical !=='undefined' && canonical) ? canonical : null; %>
           <meta name="description" content="<%= desc %>" />
           <meta name="robots" content="<%= robotsVal %>" />
           <meta name="theme-color" content="#0B1020" />
-          <link rel="icon" href="/public/images/logo.svg" />
+          <link rel="icon" href="https://s3.marvideo.fr/plinkk-image/logo.svg" />
           <meta property="og:site_name" content="Plinkk" />
           <meta property="og:type" content="website" />
           <meta property="og:title"

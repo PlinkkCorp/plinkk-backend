@@ -859,7 +859,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       const image = page.settings.profileImage.startsWith("/public/")
         ? request.protocol + "://" + request.host + page.settings.profileImage
         : page.settings.profileImage ||
-          request.host + "/public/images/default-avatar.png";
+          request.host + "https://s3.marvideo.fr/plinkk-image/default_profile.png";
       const avatar = await loadImage(image);
 
       // Halo néon violet autour de l'avatar

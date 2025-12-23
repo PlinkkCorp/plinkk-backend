@@ -49,7 +49,7 @@ export function createProfileContainer(profileData) {
         profilePic.src = profileData.profileImage;
     }
     else {
-        profilePic.src = "/public/images/logo.png";
+        profilePic.src = "https://s3.marvideo.fr/plinkk-image/logo.svg";
     }
     // Try a single fallback to the username logo, then stop retrying to avoid infinite loops
     profilePic.onerror = function () {
@@ -57,7 +57,7 @@ export function createProfileContainer(profileData) {
             if (!this._triedFallback) {
                 this._triedFallback = true;
                 // Attempt a single fallback
-                this.src = "/public/images/logo.png";
+                this.src = "https://s3.marvideo.fr/plinkk-image/logo.svg";
                 return;
             }
         }
@@ -95,14 +95,14 @@ export function createProfileContainer(profileData) {
         profileIcon.src = profileData.profileIcon;
     }
     else {
-        profileIcon.src = "/public/images/icons/default-icon.svg";
+        profileIcon.src = "https://s3.marvideo.fr/plinkk-image/default_profile.png";
     }
     // Single-attempt fallback for the icon, then stop retrying
     profileIcon.onerror = function () {
         try {
             if (!this._triedFallback) {
                 this._triedFallback = true;
-                this.src = "/public/images/icons/default-icon.svg";
+                this.src = "https://s3.marvideo.fr/plinkk-image/default_profile.png";
                 return;
             }
         }
@@ -820,7 +820,7 @@ export function createIconList(profileData) {
             if (/^(https?:\/\/|\/|data:)/i.test(iconVal)) {
                 iconImg.src = iconVal;
             } else {
-                iconImg.src = `/public/images/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
+                iconImg.src = `https://s3.marvideo.fr/plinkk-image/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
             }
         setSafeText(iconImg, iconData.icon);
         iconImg.alt = iconData.icon;

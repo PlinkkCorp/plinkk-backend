@@ -2,15 +2,15 @@ import { el } from '../../core/domUtils.js';
 import { isSafeUrl, disableDrag, disableContextMenuOnImage } from '../../security.js';
 
 const DEFAULT_ICONS = {
-    twitter: '/public/images/icons/twitter.svg',
-    instagram: '/public/images/icons/instagram.svg',
-    youtube: '/public/images/icons/youtube.svg',
-    tiktok: '/public/images/icons/tiktok.svg',
-    discord: '/public/images/icons/discord.svg',
-    github: '/public/images/icons/github.svg',
-    linkedin: '/public/images/icons/linkedin.svg',
-    twitch: '/public/images/icons/twitch.svg',
-    default: '/public/images/icons/link.svg'
+    twitter: 'https://s3.marvideo.fr/plinkk-image/icons/twitter.svg',
+    instagram: 'https://s3.marvideo.fr/plinkk-image/icons/instagram.svg',
+    youtube: 'https://s3.marvideo.fr/plinkk-image/icons/youtube.svg',
+    tiktok: 'https://s3.marvideo.fr/plinkk-image/icons/tiktok.svg',
+    discord: 'https://s3.marvideo.fr/plinkk-image/icons/discord.svg',
+    github: 'https://s3.marvideo.fr/plinkk-image/icons/github.svg',
+    linkedin: 'https://s3.marvideo.fr/plinkk-image/icons/linkedin.svg',
+    twitch: 'https://s3.marvideo.fr/plinkk-image/icons/twitch.svg',
+    default: 'https://s3.marvideo.fr/plinkk-image/icons/link.svg'
 };
 
 function detectPlatform(url) {
