@@ -1,0 +1,26 @@
+<%- include('../partials/head', { title: 'Délai d\'attente dépassé - Plinkk' }) %>
+<%- include('../partials/header') %>
+
+<main class="relative flex min-h-[calc(100vh-4rem)] items-center justify-center overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
+  <!-- Background Effects -->
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-[100px] pointer-events-none"></div>
+  <div class="absolute top-1/2 left-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-fuchsia-500/10 rounded-full blur-[80px] pointer-events-none"></div>
+
+  <div class="relative z-10 max-w-2xl text-center">
+    <p class="text-base font-semibold text-indigo-400">504</p>
+    <h1 class="mt-4 text-4xl font-bold tracking-tight text-white sm:text-6xl">Délai d'attente dépassé</h1>
+    <p class="mt-6 text-lg leading-8 text-slate-400">
+      Le serveur n'a pas répondu dans les délais impartis. Veuillez réessayer plus tard.
+    </p>
+    <div class="mt-10 flex items-center justify-center gap-x-6">
+      <a href="/" class="rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-all hover:scale-105">
+        Retour à l'accueil
+      </a>
+      <a href="mailto:contact@plinkk.fr" class="text-sm font-semibold leading-6 text-white hover:text-indigo-300 transition-colors">
+        Contactez le support <span aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
