@@ -7,6 +7,17 @@ const iconGrid = qs('#iconGrid');
 let iconCatalog = [];
 let iconSelectCallback = null;
 
+// Expose a small helper to allow server-rendered upload buttons to trigger selection
+try {
+  if (typeof window !== 'undefined') {
+    window.__DASH_PICKERS__ = window.__DASH_PICKERS__ || {};
+    window.__DASH_PICKERS__.iconSelect = (v) => {
+      try { if (iconSelectCallback) iconSelectCallback(v); } catch (e) {}
+      try { closeIconModal(); } catch (e) {}
+    };
+  }
+} catch (e) {}
+
 async function ensureIconCatalog() {
   if (iconCatalog.length) return iconCatalog;
   const res = await fetch('/api/icons');
