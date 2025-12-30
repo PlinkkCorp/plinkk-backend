@@ -5,7 +5,6 @@
     <%- include('partials/asside_dash.ejs', { active: 'dashboard' }) %>
 
     <main class="col-span-12 lg:col-span-10 space-y-8">
-        <!-- Welcome & Header -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
             <div class="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
             <div class="relative z-10">
@@ -24,42 +23,39 @@
             </div>
         </div>
 
-        <!-- Stats Overview -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-blue-500/10 rounded-xl text-blue-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    </div>
-                </div>
-                <p class="text-slate-400 text-sm font-medium">Vues totales</p>
-                <h3 class="text-3xl font-bold text-white mt-1"><%= new Intl.NumberFormat('fr-FR').format((typeof stats !== 'undefined' && stats.views) ? stats.views : 0) %></h3>
-            </div>
-            <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-violet-500/10 rounded-xl text-violet-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                    </div>
-                </div>
-                <p class="text-slate-400 text-sm font-medium">Clics totaux</p>
-                <h3 class="text-3xl font-bold text-white mt-1"><%= new Intl.NumberFormat('fr-FR').format((typeof stats !== 'undefined' && stats.clicks) ? stats.clicks : 0) %></h3>
-            </div>
-            <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="p-3 bg-pink-500/10 rounded-xl text-pink-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg>
-                    </div>
-                </div>
-                <p class="text-slate-400 text-sm font-medium">Taux de clic (CTR)</p>
-                <h3 class="text-3xl font-bold text-white mt-1"><%= (typeof stats !== 'undefined' && stats.ctr) ? stats.ctr : '0%' %></h3>
-            </div>
-        </div>
+        
 
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            <!-- Main Content Column -->
-            <div class="xl:col-span-2 space-y-8">
-                
-                <!-- Quick Actions Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            <div class="space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="p-3 bg-blue-500/10 rounded-xl text-blue-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </div>
+                        </div>
+                        <p class="text-slate-400 text-sm font-medium">Vues totales</p>
+                        <h3 class="text-3xl font-bold text-white mt-1"><%= new Intl.NumberFormat('fr-FR').format((typeof stats !== 'undefined' && stats.views) ? stats.views : 0) %></h3>
+                    </div>
+                    <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="p-3 bg-violet-500/10 rounded-xl text-violet-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                            </div>
+                        </div>
+                        <p class="text-slate-400 text-sm font-medium">Clics totaux</p>
+                        <h3 class="text-3xl font-bold text-white mt-1"><%= new Intl.NumberFormat('fr-FR').format((typeof stats !== 'undefined' && stats.clicks) ? stats.clicks : 0) %></h3>
+                    </div>
+                    <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="p-3 bg-pink-500/10 rounded-xl text-pink-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20V10M18 20V4"></path></svg>
+                            </div>
+                        </div>
+                        <p class="text-slate-400 text-sm font-medium">Taux de clic (CTR)</p>
+                        <h3 class="text-3xl font-bold text-white mt-1"><%= (typeof stats !== 'undefined' && stats.ctr) ? stats.ctr : '0%' %></h3>
+                    </div>
+                </div>
                 <div>
                     <h2 class="text-lg font-semibold text-white mb-4">Actions rapides</h2>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -67,7 +63,7 @@
                             <div class="w-12 h-12 rounded-full bg-violet-500/10 text-violet-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
                             </div>
-                            <span class="text-sm font-medium text-slate-300 group-hover:text-white">Ajouter un lien</span>
+                            <span class="text-sm text-center font-medium text-slate-300 group-hover:text-white">Ajouter un lien</span>
                         </a>
                         <a href="/appearance" class="group flex flex-col items-center justify-center p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-pink-500/50 transition-all cursor-pointer">
                             <div class="w-12 h-12 rounded-full bg-pink-500/10 text-pink-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
@@ -90,7 +86,6 @@
                     </div>
                 </div>
 
-                <!-- Recent Activity / Links -->
                 <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
                     <div class="p-6 border-b border-slate-800 flex justify-between items-center">
                         <h3 class="font-semibold text-white text-lg">Vos liens performants</h3>
@@ -101,7 +96,7 @@
                             <thead class="bg-slate-950/50 text-xs uppercase font-semibold text-slate-500">
                                 <tr>
                                     <th class="px-6 py-4">Titre</th>
-                                    <th class="px-6 py-4">Destination</th>
+                                    <th class="px-6 py-4">Lien</th>
                                     <th class="px-6 py-4 text-right">Clics</th>
                                     <th class="px-6 py-4 text-right">Statut</th>
                                 </tr>
@@ -109,14 +104,18 @@
                             <tbody class="divide-y divide-slate-800 text-sm">
                                 <% if (typeof links !== 'undefined' && links.length > 0) { %>
                                     <% links.slice(0, 5).forEach(link => { %>
+
+                                    <!--<script>console.log(<%- JSON.stringify(link) %>);</script>-->
+
                                     <tr class="hover:bg-slate-800/30 transition-colors">
-                                        <td class="px-6 py-4 font-medium text-slate-200"><%= link.name || 'Sans titre' %></td>
+                                        <td class="px-6 py-4 font-medium text-slate-200"><%= link.text || 'Sans titre' %></td>
                                         <td class="px-6 py-4 text-slate-400 truncate max-w-[200px]"><%= link.url %></td>
                                         <td class="px-6 py-4 text-right text-slate-300"><%= link.clicks || 0 %></td>
                                         <td class="px-6 py-4 text-right">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400">Actif</span>
                                         </td>
                                     </tr>
+                                    
                                     <% }) %>
                                 <% } else { %>
                                     <tr>
@@ -137,8 +136,7 @@
                 </div>
             </div>
 
-            <!-- Preview Column -->
-            <div class="xl:col-span-1">
+            <div>
                 <div class="sticky top-8">
                     <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-6 shadow-2xl shadow-black/50 relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-violet-900/20 to-transparent pointer-events-none"></div>
@@ -150,12 +148,9 @@
                             </a>
                         </div>
                         
-                        <!-- Phone Mockup -->
                         <div class="relative mx-auto border-slate-950 bg-slate-950 border-[10px] rounded-[3rem] h-[600px] w-[300px] shadow-xl ring-1 ring-slate-800">
-                            <!-- Notch -->
                             <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-slate-950 rounded-b-2xl z-20"></div>
                             
-                            <!-- Screen -->
                             <div class="w-full h-full rounded-[2.3rem] overflow-hidden bg-white relative z-10">
                                 <iframe 
                                     id="preview"

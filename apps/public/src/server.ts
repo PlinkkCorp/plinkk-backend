@@ -582,6 +582,27 @@ fastify.setNotFoundHandler((request, reply) => {
   });
 });
 
+fastify.addHook('onSend', async (request, reply, payload) => {
+  if (request.raw.url?.startsWith("/api")) return payload;
+
+  const statusCode = reply.statusCode;
+  if ([401, 403, 410, 429, 503, 504].includes(statusCode)) {
+    const contentType = reply.getHeader('content-type');
+    if (contentType && typeof contentType === 'string' && contentType.includes('application/json')) {
+      // Remplacer par la vue d'erreur
+      const userId = request.session.get("data");
+      const viewData = {
+        currentUser: userId ? { id: userId } : null,
+        dashboardUrl: process.env.DASHBOARD_URL,
+      };
+      const html = await fastify.view(`erreurs/${statusCode}.ejs`, viewData);
+      reply.header('content-type', 'text/html');
+      return html;
+    }
+  }
+  return payload;
+});
+
 fastify.setErrorHandler((error, request, reply) => {
   fastify.log.error(error);
   if (request.raw.url?.startsWith("/api")) {

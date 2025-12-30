@@ -11,6 +11,7 @@ import { plinkkPagesRoutes } from "./server/plinkkPagesRoutes";
 import { authRoutes } from "./routes/auth";
 import { generateTheme } from "./lib/generateTheme";
 import { replyView } from "./lib/replyView";
+import { getPublicPath } from "./services/plinkkService";
 
 declare module "@fastify/secure-session" {
   interface SessionData {
@@ -78,7 +79,43 @@ async function bootstrap() {
         })
       : null;
 
-    return await replyView(reply, "index.ejs", currentUser, {});
+    if (!currentUser) {
+      return reply.redirect("/login");
+    }
+
+    const userId = currentUserId!;
+
+    const [linksCount, socialsCount, labelsCount, recentLinks, plinkks, userViews, totalClicks] = await Promise.all([
+      prisma.link.count({ where: { userId } }),
+      prisma.socialIcon.count({ where: { userId } }),
+      prisma.label.count({ where: { userId } }),
+      prisma.link.findMany({
+        where: { userId },
+        orderBy: { id: "desc" },
+        take: 10,
+      }),
+      prisma.plinkk.findMany({
+        where: { userId },
+        select: { id: true, name: true, slug: true, isDefault: true, views: true },
+        orderBy: [{ isDefault: "desc" }, { index: "asc" }],
+      }),
+      // Total views across all user's plinkks
+      prisma.plinkk.aggregate({
+        where: { userId },
+        _sum: { views: true },
+      }),
+      // Total clicks across all user's links
+      prisma.link.aggregate({
+        where: { userId },
+        _sum: { clicks: true },
+      }),
+    ]);
+
+    const views = userViews._sum.views || 0;
+    const clicks = totalClicks._sum.clicks || 0;
+    const ctr = views > 0 ? ((clicks / views) * 100).toFixed(1) + '%' : '0%';
+
+    return reply.callNotFound();
   });
 
   fastify.setNotFoundHandler((request, reply) => {
