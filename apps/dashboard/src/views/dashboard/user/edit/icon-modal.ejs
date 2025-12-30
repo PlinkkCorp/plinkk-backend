@@ -1,0 +1,54 @@
+<div id="iconModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/60 animate-fade-in"></div>
+    <div class="relative mx-auto mt-16 w-[92vw] max-w-3xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+            <h3 class="font-semibold">Choisir une icône</h3>
+            <button id="iconModalClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
+        </div>
+        <div class="p-4 space-y-3">
+            <input id="iconSearch" type="text" placeholder="Rechercher..." class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700" />
+            <% function __imgUrl(u){ if(!u) return null; try { if (/^https?:\/\//i.test(u) || String(u).startsWith('/')) return u; return '/public/uploads/' + u; } catch(e){ return u; } } %>
+            <div id="userUploadsSection" class="space-y-2">
+                <div class="text-sm text-slate-300">Mes importations</div>
+                <% 
+                    const __groups = {};
+                    if (typeof user !== 'undefined' && user && user.image) {
+                        (__groups['Profil'] = __groups['Profil'] || []).push(user.image);
+                    }
+                    if (typeof pages !== 'undefined' && Array.isArray(pages)) {
+                        pages.forEach(p => {
+                            if (p && p.pfp) {
+                                const g = 'Plinkks';
+                                (__groups[g] = __groups[g] || []).push(p.pfp);
+                            }
+                        });
+                    }
+                    // categorize by path fragments if present
+                    const otherUploads = [];
+                    // convert to array of groups
+                    const __groupKeys = Object.keys(__groups);
+                %>
+                <div id="userUploadsGrid" class="space-y-3 max-h-36 overflow-auto">
+                    <% if (__groupKeys.length === 0) { %>
+                        <div class="text-xs text-slate-500">Aucun fichier importé.</div>
+                    <% } %>
+                    <% __groupKeys.forEach(function(k){ %>
+                        <div class="space-y-1">
+                            <div class="text-xs font-medium text-slate-300"><%= k %></div>
+                            <div class="grid grid-cols-4 gap-3">
+                                <% (__groups[k] || []).forEach(function(u){ const __u = __imgUrl(u); if (!__u) return; const fileName = String(u).split('/').pop(); %>
+                                    <button type="button" class="p-2 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 flex flex-col items-center justify-center" onclick="(window.__DASH_PICKERS__ && window.__DASH_PICKERS__.iconSelect) ? window.__DASH_PICKERS__.iconSelect(<%= JSON.stringify(__u) %>) : null">
+                                        <img src="<%= __u %>" class="h-10 w-10 object-contain" alt="upload" />
+                                        <span class="text-xs text-slate-300 mt-2 block truncate max-w-[80px]"><%= fileName %></span>
+                                    </button>
+                                <% }) %>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+            <div class="text-sm text-slate-300">Bibliothèque d'icônes</div>
+            <div id="iconGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-auto"></div>
+        </div>
+    </div>
+</div>

@@ -41,9 +41,21 @@ export async function populateIconGrid(filterText) {
   await ensureIconCatalog();
   const term = (filterText || '').toLowerCase();
   iconGrid.innerHTML = '';
-  iconCatalog
-    .filter((i) => !term || i.displayName.toLowerCase().includes(term) || i.slug.includes(term))
-    .forEach((i) => {
+  const items = iconCatalog.filter((i) => !term || i.displayName.toLowerCase().includes(term) || i.slug.includes(term));
+  // Group by first letter of displayName for browsability
+  const groups = {};
+  items.forEach(i => {
+    const key = (i.displayName && String(i.displayName).charAt(0).toUpperCase()) || '#';
+    (groups[key] = groups[key] || []).push(i);
+  });
+  Object.keys(groups).sort().forEach(letter => {
+    const header = document.createElement('div');
+    header.className = 'text-xs font-medium text-slate-300 col-span-full';
+    header.textContent = letter;
+    iconGrid.appendChild(header);
+    const inner = document.createElement('div');
+    inner.className = 'contents';
+    groups[letter].forEach(i => {
       const card = document.createElement('button');
       card.setAttribute('type', 'button');
       card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 flex flex-col items-center gap-2';
@@ -61,6 +73,7 @@ export async function populateIconGrid(filterText) {
       });
       iconGrid.appendChild(card);
     });
+  });
 }
 
 iconModalClose?.addEventListener('click', closeIconModal);

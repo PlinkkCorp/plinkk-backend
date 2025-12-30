@@ -1,0 +1,71 @@
+<div id="linkModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" tabindex="-1">
+    <div class="absolute inset-0 bg-black/60 animate-fade-in"></div>
+    <div class="relative mx-auto mt-12 w-[92vw] max-w-2xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in p-4">
+        <div class="flex items-center justify-between px-2 py-1 border-b border-slate-800 mb-4">
+            <h3 id="linkModalTitle" class="font-semibold">Modifier le lien</h3>
+            <button id="linkModalClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
+        </div>
+        <div class="space-y-3">
+            <label class="block space-y-1">
+                <span class="text-sm text-slate-300">Titre <span class="info-i" title="Texte affiché sur le bouton ; court et descriptif">?</span></span>
+                <input id="linkModalTitleInput" type="text" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+            </label>
+            <label class="block space-y-1">
+                <span class="text-sm text-slate-300">URL <span class="info-i" title="Adresse complète (le préfixe https:// est ajouté automatiquement)">?</span></span>
+                <div class="relative flex">
+                    <button id="linkModalSchemeBtn" type="button" class="inline-flex items-center px-3 rounded-l-lg bg-slate-800 border border-r-0 border-slate-800 text-slate-300">
+                        <span id="linkModalSchemeLabel">https://</span>
+                        <svg class="ml-2" width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 3l4 4 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div id="linkModalSchemeMenu" class="hidden absolute left-0 mt-10 w-40 rounded bg-slate-900 border border-slate-800 shadow-lg z-50">
+                        <button type="button" data-scheme="https" class="w-full text-left px-3 py-2 hover:bg-slate-800">https://</button>
+                        <button type="button" data-scheme="http" class="w-full text-left px-3 py-2 hover:bg-slate-800">http://</button>
+                    </div>
+                    <input id="linkModalUrlInput" type="text" class="flex-1 px-3 py-2 rounded-r-lg bg-slate-900 border border-slate-800" placeholder="example.com/chemin" />
+                </div>
+            </label>
+            <label class="block space-y-1">
+                <span class="text-sm text-slate-300">Icône <span class="info-i" title="Bibliothèque = icône prédéfinie (non modifiable), URL = coller l'adresse, Importer = uploader un fichier (SVG/PNG)">?</span></span>
+                <div class="flex items-center gap-3">
+                    <select id="linkModalIconSource" class="px-3 py-2 rounded bg-slate-900 border border-slate-800 text-sm w-40">
+                        <option value="catalog">Bibliothèque</option>
+                        <option value="url">URL</option>
+                        <option value="upload">Importer</option>
+                    </select>
+                    <div class="flex-1">
+                        <div id="linkModalIconPickerWrap" class="hidden">
+                            <div class="flex items-center gap-2">
+                                <input id="linkModalIconInput" type="text" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-800" placeholder="Cliquer pour choisir" readonly />
+                                <button id="linkModalPickIconBtn" type="button" class="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">Choisir</button>
+                            </div>
+                        </div>
+                        <div id="linkModalIconUrlWrap" class="hidden">
+                            <input id="linkModalIconInputUrl" type="url" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" placeholder="https://exemple.com/icone.svg" />
+                        </div>
+                        <div id="linkModalIconUploadWrap" class="hidden">
+                            <input id="linkModalIconUpload" type="file" accept="image/*,image/svg+xml" class="block w-full text-sm text-slate-300" />
+                        </div>
+                    </div>
+                </div>
+            </label>
+            <label class="block space-y-1">
+                <span class="text-sm text-slate-300">Description (optionnelle) <span class="info-i" title="Texte court affiché sous le titre, optionnel">?</span></span>
+                <input id="linkModalDescInput" type="text" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+            </label>
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex-1">
+                    <label class="block text-sm text-slate-300">Catégorie <span class="info-i" title="Attribuez ce lien à une catégorie pour l'organisation">?</span></label>
+                    <select id="linkModalCategory" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-800 text-sm"></select>
+                </div>
+                <div class="w-40">
+                    <label class="block text-sm text-slate-300">Ouvrir dans un nouvel onglet <span class="info-i" title="Ouvre le lien dans un nouvel onglet si coché">?</span></label>
+                    <input id="linkModalNewTab" type="checkbox" class="size-5 mt-2" />
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-800 mt-4">
+                <button id="linkModalCancel" class="px-4 py-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">Annuler</button>
+                <button id="linkModalSave" class="px-4 py-2 rounded bg-emerald-700 hover:bg-emerald-600 text-white">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
