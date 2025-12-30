@@ -1,876 +1,1262 @@
-<%- include('../../partials/head.ejs', { title: 'Tableau de bord - Édition', description: 'Configure les sections, apparence et arrière‑plan de ta page.', robots: 'noindex,nofollow' }) %>
-<%- include('../../partials/header-dash.ejs', { user: user }) %>
+<%- include('../../partials/head.ejs', { title: 'Tableau de bord - Édition' ,
+    description: 'Configure les sections, apparence et arrière‑plan de ta page.' , robots: 'noindex,nofollow' }) %>
+    <%- include('../../partials/header-dash.ejs', { user: user }) %>
 
-<div id="mobileEditNotice" class="md:hidden fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-    <div class="relative w-full max-w-lg mx-auto bg-slate-800/85 border border-slate-700 rounded-lg p-5 text-center text-white">
-        <button id="mobileEditNoticeClose" class="absolute right-3 top-3 size-8 rounded bg-slate-800 hover:bg-slate-700 text-white">✕</button>
-        <h2 class="text-lg font-semibold mb-2">Édition indisponible sur mobile</h2>
-        <p class="text-sm text-slate-300 mb-4">L'interface d'édition n'est pas accessible depuis un petit écran. Utilisez un ordinateur ou activez le mode « affichage bureau » de votre navigateur pour modifier votre page.</p>
-        <div class="flex items-center justify-center gap-2">
-            <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>" target="_blank" class="px-3 py-2 rounded bg-emerald-700/80 hover:bg-emerald-600 text-white">Ouvrir la page</a>
+        <div id="mobileEditNotice"
+            class="md:hidden fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4" role="dialog"
+            aria-modal="true">
+            <div
+                class="relative w-full max-w-lg mx-auto bg-slate-800/85 border border-slate-700 rounded-lg p-5 text-center text-white">
+                <button id="mobileEditNoticeClose"
+                    class="absolute right-3 top-3 size-8 rounded bg-slate-800 hover:bg-slate-700 text-white">✕</button>
+                <h2 class="text-lg font-semibold mb-2">Édition indisponible sur mobile</h2>
+                <p class="text-sm text-slate-300 mb-4">L'interface d'édition n'est pas accessible depuis un petit écran.
+                    Utilisez un ordinateur ou activez le mode « affichage bureau » de votre navigateur pour modifier
+                    votre page.</p>
+                <div class="flex items-center justify-center gap-2">
+                    <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>"
+                        target="_blank"
+                        class="px-3 py-2 rounded bg-emerald-700/80 hover:bg-emerald-600 text-white">Ouvrir la page</a>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
 
-<script>
-    (function(){
-        const notice = document.getElementById('mobileEditNotice');
-        const closeBtn = document.getElementById('mobileEditNoticeClose');
-        const main = document.querySelector('main');
+        <script>
+            (function () {
+                const notice = document.getElementById('mobileEditNotice');
+                const closeBtn = document.getElementById('mobileEditNoticeClose');
+                const main = document.querySelector('main');
 
-        if (!notice) return;
+                if (!notice) return;
 
-        if (main) main.classList.add('hidden');
+                if (main) main.classList.add('hidden');
 
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                notice.classList.add('hidden');
-                if (main) main.classList.remove('hidden');
-            });
-        }
-    })();
-</script>
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => {
+                        notice.classList.add('hidden');
+                        if (main) main.classList.remove('hidden');
+                    });
+                }
+            })();
+        </script>
 
         <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-    <%- include('../../partials/asside_dash.ejs', { active: 'edit' }) %>
+            <%- include('../../partials/asside_dash.ejs', { active: 'edit' }) %>
 
-    <main class="col-span-12 lg:col-span-10 grid grid-cols-1 xl:grid-cols-12 gap-8">
-        <section class="xl:col-span-7 space-y-6">
-            <!-- Header Section -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl">
-                <div class="min-w-0">
-                    <h1 class="text-2xl font-bold text-white flex items-center gap-3">
-                        Configuration
-                        <% if (typeof plinkk !== 'undefined' && plinkk) { %>
-                            <span class="text-sm font-normal text-slate-400 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
-                                <%= plinkk.name %> <span class="text-slate-500">/</span> <span class="text-violet-400"><%= plinkk.slug %></span>
-                            </span>
-                        <% } %>
-                    </h1>
-                    <div id="status" class="text-xs text-emerald-400 mt-2 font-medium h-4"></div>
-                </div>
-                
-                <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-3">
-                        <%- include('../../partials/changePlinkkDropdown.ejs') %>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation Tabs -->
-            <nav class="bg-slate-900 border border-slate-800 p-2 rounded-2xl overflow-x-auto scrollbar-hide">
-                <ul class="flex gap-2 min-w-max" id="tabs">
-                    <li>
-                        <button data-target="#section-profile" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2" aria-selected="true">
-                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-3.33 0-8 1.67-8 5v1h16v-1c0-3.33-4.67-5-8-5z"/></svg>
-                            Profil
-                        </button>
-                    </li>
-
-                    <li>
-                        <button data-target="#section-appearance" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
-                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l4 8h8l-6 5 2 9-8-5-8 5 2-9-6-5h8z"/></svg>
-                            Apparence
-                        </button>
-                    </li>
-                    <li>
-                        <button data-target="#section-background" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
-                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v12H4zM7 9h10v6H7z"/></svg>
-                            Arrière-plan
-                        </button>
-                    </li>
-                    <li>
-                        <button data-target="#section-links" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
-                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 13.41L9.17 12l4.24-4.24 1.41 1.41L10.59 13.41zm2.82-2.82L14.83 12 10.59 16.24 9.17 14.83 13.41 10.59z"/></svg>
-                            Liens
-                        </button>
-                    </li>
-                    <li>
-                        <button data-target="#section-categories" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
-                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
-                            Catégories
-                        </button>
-                    </li>
-                    <li>
-                        <button data-target="#section-animations" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
-                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M2 17h20v2H2zM7 9h10v2H7zM4 13h16v2H4z"/></svg>
-                            Animations
-                        </button>
-                    </li>
-                    <li>
-                        <button data-target="#section-statusbar" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
-                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 5h18v2H3zM3 9h18v6H3zM3 17h18v2H3z"/></svg>
-                            Status
-                        </button>
-                    </li>
-                    <li>
-                        <button data-target="#section-layout" class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
-                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16v2H4zM4 11h10v2H4zM4 17h13v2H4z"/></svg>
-                            Agencement
-                        </button>
-                    </li>
-
-                </ul>
-            </nav>
-
-            <!-- Content Sections -->
-            <div class="space-y-6">
-                <!-- Profile Section -->
-                <div id="section-profile" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg animate-slide-up">
-                    <div class="mb-6 pb-4 border-b border-slate-800">
-                        <h3 class="text-lg font-semibold text-white">Profil</h3>
-                        <p class="text-sm text-slate-400">Informations de base affichées publiquement.</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Lien du profil <span class="info-i" title="Lien externe vers ton profil principal">i</span></span>
-                            <input id="profileLink" type="url" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 placeholder-slate-600" placeholder="https://..." />
-                        </label>
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Texte du site <span class="info-i" title="Texte court affiché à côté du lien">i</span></span>
-                            <div class="relative">
-                                <input id="profileSiteText" data-maskable="true" type="text" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
-                                <button type="button" data-target="profileSiteText" class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-                                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                </button>
+                <main class="col-span-12 lg:col-span-10 grid grid-cols-1 xl:grid-cols-12 gap-8">
+                    <section class="xl:col-span-7 space-y-6">
+                        <div
+                            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+                            <div class="min-w-0">
+                                <h1 class="text-2xl font-bold text-white flex items-center gap-3">
+                                    Configuration
+                                    <% if (typeof plinkk !=='undefined' && plinkk) { %>
+                                        <span
+                                            class="text-sm font-normal text-slate-400 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+                                            <%= plinkk.name %> <span class="text-slate-500">/</span> <span
+                                                    class="text-violet-400">
+                                                    <%= plinkk.slug %>
+                                                </span>
+                                        </span>
+                                        <% } %>
+                                </h1>
+                                <div id="status" class="text-xs text-emerald-400 mt-2 font-medium h-4"></div>
                             </div>
-                        </label>
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Nom affiché <span class="info-i" title="Nom public visible sur ta page">i</span></span>
-                            <input id="userName" type="text" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
-                        </label>
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Email <span class="info-i" title="Adresse e‑mail de contact">i</span></span>
-                            <div class="relative">
-                                <input id="email" data-maskable="true" type="email" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
-                                <button type="button" data-target="email" class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-                                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                </button>
-                            </div>
-                        </label>
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Image de profil (URL) <span class="info-i" title="URL d’une image carrée">i</span></span>
-                            <input id="profileImage" type="url" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
-                        </label>
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Icône de profil (URL) <span class="info-i" title="Petite icône affichée près de ton nom">i</span></span>
-                            <div class="relative">
-                                <input id="profileIcon" data-maskable="true" type="url" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
-                                <button type="button" data-target="profileIcon" class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-                                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                </button>
-                            </div>
-                        </label>
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Icône d’onglet (URL) <span class="info-i" title="Favicon affichée dans l’onglet">i</span></span>
-                            <div class="relative">
-                                <input id="iconUrl" data-maskable="true" type="url" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
-                                <button type="button" data-target="iconUrl" class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-                                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                </button>
-                            </div>
-                        </label>
-                        <label class="block space-y-2 md:col-span-2">
-                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Description <span class="info-i" title="Courte bio affichée sur ta page">i</span></span>
-                            <div class="relative">
-                                <textarea id="description" data-maskable="true" rows="3" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 resize-none"></textarea>
-                                <button type="button" data-target="description" class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-                                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                </button>
-                            </div>
-                        </label>
-                    </div>
-                </div>
 
-
-
-                <!-- Appearance Section -->
-                <div id="section-appearance" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                    <div class="mb-6 pb-4 border-b border-slate-800">
-                        <h3 class="text-lg font-semibold text-white">Apparence</h3>
-                        <p class="text-sm text-slate-400">Couleurs et options d’affichage.</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Couleur hover <span class="info-i" title="Couleur au survol">i</span></span>
                             <div class="flex items-center gap-3">
-                                <input id="profileHoverColor" type="color" class="h-12 w-20 rounded-lg bg-slate-950 border border-slate-800 p-1 cursor-pointer" />
-                                <span class="text-xs text-slate-500">Cliquez pour changer</span>
-                            </div>
-                        </label>
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Thème <span class="info-i" title="Palette de couleurs prédéfinie">i</span></span>
-                            <div class="flex items-center gap-2">
-                                <select id="selectedThemeIndex" class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none"></select>
-                                <button id="openThemePicker" type="button" class="px-4 py-3 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-medium shadow-lg shadow-fuchsia-900/20 transition-colors">Choisir</button>
-                            </div>
-                        </label>
-                        <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                            <input id="buttonThemeEnable" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
-                            <span class="text-sm font-medium text-slate-300">Activer thème des boutons</span>
-                        </label>
-                        <% if (user.isVerified) { %>
-                        <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                            <input id="showVerifiedBadge" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
-                            <span class="text-sm font-medium text-slate-300">Afficher badge Vérifié</span>
-                        </label>
-                        <% } %>
-                        <% if (user.isPartner) { %>
-                        <label class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                            <input id="showPartnerBadge" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
-                            <span class="text-sm font-medium text-slate-300">Afficher badge Partenaire</span>
-                        </label>
-                        <% } %>
-                    </div>
-                    
-                    <!-- Neon Section (Coming Soon) -->
-                    <div class="mt-8 pt-6 border-t border-slate-800">
-                        <div class="relative rounded-2xl border border-slate-800 bg-slate-950/50 overflow-hidden group">
-                            <div class="absolute inset-0 bg-gradient-to-br from-fuchsia-500/5 to-violet-500/5"></div>
-                            <div class="p-6 flex items-center justify-between opacity-40">
-                                <div>
-                                    <h4 class="font-medium text-white">Couleurs Néon</h4>
-                                    <p class="text-xs text-slate-400 mt-1">Personnalisation avancée des effets lumineux</p>
-                                </div>
-                                <button disabled class="px-4 py-2 rounded-lg bg-slate-800 text-slate-400 text-sm">Bientôt</button>
-                            </div>
-                            <div class="absolute inset-0 flex items-center justify-center backdrop-blur-[1px]">
-                                <div class="px-6 py-3 rounded-full bg-slate-900/90 border border-slate-700 shadow-xl flex items-center gap-3">
-                                    <span class="flex h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse"></span>
-                                    <span class="text-sm font-medium text-slate-200">En cours de développement</span>
+                                <div class="flex items-center gap-3">
+                                    <%- include('../../partials/changePlinkkDropdown.ejs') %>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Background Section -->
-                <div id="section-background" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                    <div class="mb-6 pb-4 border-b border-slate-800 flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold text-white">Arrière‑plan</h3>
-                            <p class="text-sm text-slate-400">Dégradés et animations.</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button id="invertBackgroundColors" type="button" class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">Inverser</button>
-                            <button id="addBackgroundColor" type="button" class="px-3 py-2 text-xs font-medium rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-900/20 transition-colors">+ Couleur</button>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Angle du dégradé <span class="info-i" title="Orientation en degrés">i</span></span>
-                            <div class="flex items-center gap-4 bg-slate-950 p-3 rounded-xl border border-slate-800">
-                                <input id="degBackgroundColor" type="number" class="w-20 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-center text-white font-mono" />
-                                <div id="degDial" class="deg-dial shrink-0" tabindex="0" role="slider" aria-label="Angle">
-                                    <div class="deg-dial-dot"></div>
+                        <nav
+                            class="bg-slate-900 border border-slate-800 p-2 rounded-2xl overflow-x-auto scrollbar-hide">
+                            <ul class="flex gap-2 min-w-max" id="tabs">
+                                <li>
+                                    <button data-target="#section-profile"
+                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
+                                        aria-selected="true">
+                                        <svg class="size-4" viewBox="0 0 24 24" fill="currentColor">
+                                            <path
+                                                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-3.33 0-8 1.67-8 5v1h16v-1c0-3.33-4.67-5-8-5z" />
+                                        </svg>
+                                        Profil
+                                    </button>
+                                </li>
+
+                                <li>
+                                    <button data-target="#section-appearance"
+                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                                        <svg class="size-4" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 2l4 8h8l-6 5 2 9-8-5-8 5 2-9-6-5h8z" />
+                                        </svg>
+                                        Apparence
+                                    </button>
+                                </li>
+                                <li>
+                                    <button data-target="#section-background"
+                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                                        <svg class="size-4" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M4 6h16v12H4zM7 9h10v6H7z" />
+                                        </svg>
+                                        Arrière-plan
+                                    </button>
+                                </li>
+                                <li>
+                                    <button data-target="#section-links"
+                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                                        <svg class="size-4" viewBox="0 0 24 24" fill="currentColor">
+                                            <path
+                                                d="M10.59 13.41L9.17 12l4.24-4.24 1.41 1.41L10.59 13.41zm2.82-2.82L14.83 12 10.59 16.24 9.17 14.83 13.41 10.59z" />
+                                        </svg>
+                                        Liens
+                                    </button>
+                                </li>
+                                <li>
+                                    <button data-target="#section-categories"
+                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                                        <svg class="size-4" viewBox="0 0 24 24" fill="currentColor">
+                                            <path
+                                                d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+                                        </svg>
+                                        Catégories
+                                    </button>
+                                </li>
+                                <li>
+                                    <button data-target="#section-animations"
+                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                                        <svg class="size-4" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M2 17h20v2H2zM7 9h10v2H7zM4 13h16v2H4z" />
+                                        </svg>
+                                        Animations
+                                    </button>
+                                </li>
+                                <li>
+                                    <button data-target="#section-statusbar"
+                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                                        <svg class="size-4" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M3 5h18v2H3zM3 9h18v6H3zM3 17h18v2H3z" />
+                                        </svg>
+                                        Status
+                                    </button>
+                                </li>
+                                <li>
+                                    <button data-target="#section-layout"
+                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                                        <svg class="size-4" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M4 5h16v2H4zM4 11h10v2H4zM4 17h13v2H4z" />
+                                        </svg>
+                                        Agencement
+                                    </button>
+                                </li>
+
+                            </ul>
+                        </nav>
+
+                        <div class="space-y-6">
+                            <div id="section-profile"
+                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg animate-slide-up">
+                                <div class="mb-6 pb-4 border-b border-slate-800">
+                                    <h3 class="text-lg font-semibold text-white">Profil</h3>
+                                    <p class="text-sm text-slate-400">Informations de base affichées publiquement.</p>
                                 </div>
-                                <span class="text-xs text-slate-500">Faites tourner pour ajuster</span>
-                            </div>
-                        </label>
-                    </div>
-                    
-                    <div id="backgroundList" class="space-y-2 mb-8" role="list"></div>
-                    
-                    <div class="pt-6 border-t border-slate-800">
-                        <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <h4 class="font-medium text-white">Canvas Animé</h4>
-                                <p class="text-xs text-slate-400">Effets d'arrière-plan dynamiques.</p>
-                            </div>
-                            <label class="flex items-center gap-3 cursor-pointer">
-                                <span class="text-sm font-medium text-slate-300">Activer</span>
-                                <div class="relative inline-flex items-center cursor-pointer">
-                                    <input id="canvaEnable" type="checkbox" class="sr-only peer">
-                                    <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
-                                </div>
-                            </label>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="md:col-span-2 space-y-2">
-                                <label class="text-sm font-medium text-slate-300">Animation</label>
-                                <div class="relative">
-                                    <select id="selectedCanvasIndex" class="hidden"></select>
-                                    <input id="selectedCanvasLabel" type="text" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer" placeholder="Choisir une animation..." readonly />
-                                    <button id="openCanvasPicker" type="button" class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-medium transition-colors">Parcourir</button>
-                                </div>
-                            </div>
-                            
-                            <div class="md:col-span-2 space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <label class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
-                                        <input id="canvasPreviewEnable" type="checkbox" class="rounded border-slate-700 bg-slate-900 text-cyan-600 focus:ring-cyan-600/50" />
-                                        Afficher l'aperçu
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Lien du
+                                            profil <span class="info-i"
+                                                title="Lien externe vers ton profil principal">i</span></span>
+                                        <input id="profileLink" type="url"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 placeholder-slate-600"
+                                            placeholder="https://..." />
+                                    </label>
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Texte
+                                            du site <span class="info-i"
+                                                title="Texte court affiché à côté du lien">i</span></span>
+                                        <div class="relative">
+                                            <input id="profileSiteText" data-maskable="true" type="text"
+                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                                            <button type="button" data-target="profileSiteText"
+                                                class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                                                <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+                                                    <circle cx="12" cy="12" r="3"></circle>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </label>
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Nom
+                                            affiché <span class="info-i"
+                                                title="Nom public visible sur ta page">i</span></span>
+                                        <input id="userName" type="text"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                                    </label>
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Email
+                                            <span class="info-i" title="Adresse e‑mail de contact">i</span></span>
+                                        <div class="relative">
+                                            <input id="email" data-maskable="true" type="email"
+                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                                            <button type="button" data-target="email"
+                                                class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                                                <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+                                                    <circle cx="12" cy="12" r="3"></circle>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </label>
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Image
+                                            de profil (URL) <span class="info-i"
+                                                title="URL d’une image carrée">i</span></span>
+                                        <input id="profileImage" type="url"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                                    </label>
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Icône
+                                            de profil (URL) <span class="info-i"
+                                                title="Petite icône affichée près de ton nom">i</span></span>
+                                        <div class="relative">
+                                            <input id="profileIcon" data-maskable="true" type="url"
+                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                                            <button type="button" data-target="profileIcon"
+                                                class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                                                <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+                                                    <circle cx="12" cy="12" r="3"></circle>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </label>
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Icône
+                                            d’onglet (URL) <span class="info-i"
+                                                title="Favicon affichée dans l’onglet">i</span></span>
+                                        <div class="relative">
+                                            <input id="iconUrl" data-maskable="true" type="url"
+                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                                            <button type="button" data-target="iconUrl"
+                                                class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                                                <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+                                                    <circle cx="12" cy="12" r="3"></circle>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </label>
+                                    <label class="block space-y-2 md:col-span-2">
+                                        <span
+                                            class="text-sm font-medium text-slate-300 flex items-center gap-2">Description
+                                            <span class="info-i" title="Courte bio affichée sur ta page">i</span></span>
+                                        <div class="relative">
+                                            <textarea id="description" data-maskable="true" rows="3"
+                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 resize-none"></textarea>
+                                            <button type="button" data-target="description"
+                                                class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                                                <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+                                                    <circle cx="12" cy="12" r="3"></circle>
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </label>
                                 </div>
-                                <div id="selectedCanvasPreview" class="relative rounded-2xl border border-slate-800 overflow-hidden bg-slate-950 aspect-video flex items-center justify-center">
-                                    <div id="selectedCanvasPreviewOverlay" class="absolute inset-0 bg-slate-950/80 flex items-center justify-center text-slate-500 text-sm hidden">Aperçu désactivé</div>
-                                    <div id="selectedCanvasPreviewFrame" class="w-full h-full"></div>
+                            </div>
+
+
+
+                            <div id="section-appearance"
+                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                                <div class="mb-6 pb-4 border-b border-slate-800">
+                                    <h3 class="text-lg font-semibold text-white">Apparence</h3>
+                                    <p class="text-sm text-slate-400">Couleurs et options d’affichage.</p>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Links Section -->
-                <div id="section-links" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                    <div class="mb-6 flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold text-white">Réseaux Sociaux</h3>
-                            <p class="text-sm text-slate-400">Vos profils sociaux (Instagram, X, etc.)</p>
-                        </div>
-                        <button id="addSocial" type="button" class="px-4 py-2 text-sm font-medium rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white shadow-lg shadow-fuchsia-900/20 transition-colors flex items-center gap-2">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            Ajouter
-                        </button>
-                    </div>
-                    <div id="socialList" class="space-y-3 mb-8 min-h-[50px]"></div>
-                    
-                    <div class="border-t border-slate-800 my-6"></div>
-                    
-                    <div class="mb-6 flex flex-col gap-4">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h3 class="text-lg font-semibold text-white">Liens</h3>
-                                <p class="text-sm text-slate-400">Vos liens principaux.</p>
-                            </div>
-                            <button id="addLink" type="button" class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors flex items-center gap-2">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                Ajouter un lien
-                            </button>
-                        </div>
-                        
-                        <div id="linksList" class="space-y-3 min-h-[50px]"></div>
-                    </div>
-                </div>
-
-                    <!-- Categories Section -->
-                    <div id="section-categories" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                        <div class="mb-6 flex items-center justify-between">
-                            <div>
-                                <h3 class="text-lg font-semibold text-white">Catégories</h3>
-                                <p class="text-sm text-slate-400">Organisez vos liens dans des dossiers.</p>
-                            </div>
-                            <button id="addCategory" type="button" class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors flex items-center gap-2 hidden">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                Ajouter une catégorie
-                            </button>
-                        </div>
-
-                        <div class="flex items-center justify-between bg-slate-950 p-4 rounded-xl border border-slate-800 mb-6">
-                            <div class="flex items-center gap-3">
-                                <input id="enableLinkCategories" type="checkbox" class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50"/>
-                                <div>
-                                    <span class="block text-sm font-medium text-slate-300">Activer les catégories</span>
-                                    <span class="block text-xs text-slate-500">Si désactivé, tous les liens seront affichés en liste simple.</span>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Couleur
+                                            hover <span class="info-i" title="Couleur au survol">i</span></span>
+                                        <div class="flex items-center gap-3">
+                                            <input id="profileHoverColor" type="color"
+                                                class="h-12 w-20 rounded-lg bg-slate-950 border border-slate-800 p-1 cursor-pointer" />
+                                            <span class="text-xs text-slate-500">Cliquez pour changer</span>
+                                        </div>
+                                    </label>
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Thème
+                                            <span class="info-i" title="Palette de couleurs prédéfinie">i</span></span>
+                                        <div class="flex items-center gap-2">
+                                            <select id="selectedThemeIndex"
+                                                class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none"></select>
+                                            <button id="openThemePicker" type="button"
+                                                class="px-4 py-3 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-medium shadow-lg shadow-fuchsia-900/20 transition-colors">Choisir</button>
+                                        </div>
+                                    </label>
+                                    <label
+                                        class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                                        <input id="buttonThemeEnable" type="checkbox"
+                                            class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50" />
+                                        <span class="text-sm font-medium text-slate-300">Activer thème des
+                                            boutons</span>
+                                    </label>
+                                    <% if (user.isVerified) { %>
+                                        <label
+                                            class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                                            <input id="showVerifiedBadge" type="checkbox"
+                                                class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50" />
+                                            <span class="text-sm font-medium text-slate-300">Afficher badge
+                                                Vérifié</span>
+                                        </label>
+                                        <% } %>
+                                            <% if (user.isPartner) { %>
+                                                <label
+                                                    class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                                                    <input id="showPartnerBadge" type="checkbox"
+                                                        class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50" />
+                                                    <span class="text-sm font-medium text-slate-300">Afficher badge
+                                                        Partenaire</span>
+                                                </label>
+                                                <% } %>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div id="categoriesHint" class="hidden mb-6 p-4 rounded-xl bg-violet-900/20 border border-violet-900/50 text-violet-200 text-sm flex items-start gap-3">
-                            <svg class="w-5 h-5 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <div>
-                                <p class="font-medium">Comment ajouter des liens ?</p>
-                                <p class="text-violet-300/80 mt-1">Pour placer un lien dans une catégorie, allez dans l'onglet <strong>Liens</strong>. Un menu déroulant apparaîtra sur chaque lien pour choisir sa catégorie.</p>
-                            </div>
-                        </div>
-
-                        <div id="categoriesContainer" class="space-y-4 hidden">
-                            <!-- Categories will be rendered here -->
-                        </div>
-                        
-                        <div id="categoriesDisabledMsg" class="text-center py-12 text-slate-500">
-                            <svg class="w-12 h-12 mx-auto mb-3 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
-                            <p>Activez les catégories pour commencer à organiser vos liens.</p>
-                        </div>
-                    </div>
-
-                <!-- Animations Section -->
-                <div id="section-animations" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                    <div class="mb-6 pb-4 border-b border-slate-800">
-                        <h3 class="text-lg font-semibold text-white">Animations</h3>
-                        <p class="text-sm text-slate-400">Dynamisez votre page.</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300">Apparition des éléments</span>
-                            <div class="relative">
-                                <select id="selectedAnimationIndex" class="hidden"></select>
-                                <input id="selectedAnimationLabel" type="text" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer" readonly />
-                                <button id="openAnimArticlePicker" type="button" class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium transition-colors">Choisir</button>
-                            </div>
-                        </label>
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300">Animation des boutons</span>
-                            <div class="relative">
-                                <select id="selectedAnimationButtonIndex" class="hidden"></select>
-                                <input id="selectedAnimationButtonLabel" type="text" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer" readonly />
-                                <button id="openAnimButtonPicker" type="button" class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium transition-colors">Choisir</button>
-                            </div>
-                        </label>
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300">Animation de fond</span>
-                            <div class="relative">
-                                <select id="selectedAnimationBackgroundIndex" class="hidden"></select>
-                                <input id="selectedAnimationBackgroundLabel" type="text" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer" readonly />
-                                <button id="openAnimBackgroundPicker" type="button" class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium transition-colors">Choisir</button>
-                            </div>
-                        </label>
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300">Durée anim background (s)</span>
-                            <input id="animationDurationBackground" type="number" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
-                        </label>
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300">Délai anim bouton (s)</span>
-                            <input id="delayAnimationButton" step="0.01" type="number" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
-                        </label>
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300">Taille background (%)</span>
-                            <input id="backgroundSize" type="number" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Status Section -->
-                <div id="section-statusbar" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                    <div class="mb-6 pb-4 border-b border-slate-800">
-                        <h3 class="text-lg font-semibold text-white">Barre de statut</h3>
-                        <p class="text-sm text-slate-400">Message et état affichés sous le profil.</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <label class="block space-y-2 md:col-span-2">
-                            <span class="text-sm font-medium text-slate-300">Message de statut</span>
-                            <input id="status_text" type="text" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 placeholder-slate-600" placeholder="Ex: En train de coder..." />
-                        </label>
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300">Couleur du texte (0=clair, 1=foncé)</span>
-                            <input id="status_fontTextColor" type="number" min="0" max="1" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
-                        </label>
-                        <div class="space-y-2">
-                            <span class="text-sm font-medium text-slate-300 block">État</span>
-                            <div class="relative inline-block w-full" id="statusDropdown">
-                                <button id="statusDropdownBtn" type="button" class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 hover:bg-slate-900 transition-colors">
-                                    <div class="flex items-center gap-3">
-                                        <span class="size-3 rounded-full bg-slate-500 shadow-sm"></span>
-                                        <span class="status-current-label">Hors‑ligne</span>
+                                <div class="mt-8 pt-6 border-t border-slate-800">
+                                    <div
+                                        class="relative rounded-2xl border border-slate-800 bg-slate-950/50 overflow-hidden group">
+                                        <div
+                                            class="absolute inset-0 bg-gradient-to-br from-fuchsia-500/5 to-violet-500/5">
+                                        </div>
+                                        <div class="p-6 flex items-center justify-between opacity-40">
+                                            <div>
+                                                <h4 class="font-medium text-white">Couleurs Néon</h4>
+                                                <p class="text-xs text-slate-400 mt-1">Personnalisation avancée des
+                                                    effets lumineux</p>
+                                            </div>
+                                            <button disabled
+                                                class="px-4 py-2 rounded-lg bg-slate-800 text-slate-400 text-sm">Bientôt</button>
+                                        </div>
+                                        <div
+                                            class="absolute inset-0 flex items-center justify-center backdrop-blur-[1px]">
+                                            <div
+                                                class="px-6 py-3 rounded-full bg-slate-900/90 border border-slate-700 shadow-xl flex items-center gap-3">
+                                                <span
+                                                    class="flex h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse"></span>
+                                                <span class="text-sm font-medium text-slate-200">En cours de
+                                                    développement</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <svg class="size-4 text-slate-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd"/></svg>
-                                </button>
-                                <div id="statusDropdownPanel" class="absolute z-20 mt-2 w-full rounded-xl border border-slate-800 bg-slate-900 shadow-xl p-1 hidden">
-                                    <button type="button" class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200" data-value="online">
-                                        <span class="size-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span> En ligne
-                                    </button>
-                                    <button type="button" class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200" data-value="busy">
-                                        <span class="size-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span> Occupé
-                                    </button>
-                                    <button type="button" class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200" data-value="away">
-                                        <span class="size-2.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></span> Absent
-                                    </button>
-                                    <button type="button" class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200" data-value="offline">
-                                        <span class="size-2.5 rounded-full bg-slate-500"></span> Hors‑ligne
-                                    </button>
                                 </div>
                             </div>
-                            <input type="hidden" id="status_statusText" />
-                        </div>
-                    </div>
-                    
-                    <div class="mt-8 pt-6 border-t border-slate-800 hidden">
-                        <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <h4 class="font-medium text-white">Labels</h4>
-                                <p class="text-xs text-slate-400">Badges affichés sous votre profil.</p>
+
+                            <div id="section-background"
+                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                                <div class="mb-6 pb-4 border-b border-slate-800 flex items-center justify-between">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Arrière‑plan</h3>
+                                        <p class="text-sm text-slate-400">Dégradés et animations.</p>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <button id="invertBackgroundColors" type="button"
+                                            class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">Inverser</button>
+                                        <button id="addBackgroundColor" type="button"
+                                            class="px-3 py-2 text-xs font-medium rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-900/20 transition-colors">+
+                                            Couleur</button>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Angle
+                                            du dégradé <span class="info-i"
+                                                title="Orientation en degrés">i</span></span>
+                                        <div
+                                            class="flex items-center gap-4 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                                            <input id="degBackgroundColor" type="number"
+                                                class="w-20 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-center text-white font-mono" />
+                                            <div id="degDial" class="deg-dial shrink-0" tabindex="0" role="slider"
+                                                aria-label="Angle">
+                                                <div class="deg-dial-dot"></div>
+                                            </div>
+                                            <span class="text-xs text-slate-500">Faites tourner pour ajuster</span>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div id="backgroundList" class="space-y-2 mb-8" role="list"></div>
+
+                                <div class="pt-6 border-t border-slate-800">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div>
+                                            <h4 class="font-medium text-white">Canvas Animé</h4>
+                                            <p class="text-xs text-slate-400">Effets d'arrière-plan dynamiques.</p>
+                                        </div>
+                                        <label class="flex items-center gap-3 cursor-pointer">
+                                            <span class="text-sm font-medium text-slate-300">Activer</span>
+                                            <div class="relative inline-flex items-center cursor-pointer">
+                                                <input id="canvaEnable" type="checkbox" class="sr-only peer">
+                                                <div
+                                                    class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600">
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div class="md:col-span-2 space-y-2">
+                                            <label class="text-sm font-medium text-slate-300">Animation</label>
+                                            <div class="relative">
+                                                <select id="selectedCanvasIndex" class="hidden"></select>
+                                                <input id="selectedCanvasLabel" type="text"
+                                                    class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer"
+                                                    placeholder="Choisir une animation..." readonly />
+                                                <button id="openCanvasPicker" type="button"
+                                                    class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-medium transition-colors">Parcourir</button>
+                                            </div>
+                                        </div>
+
+                                        <div class="md:col-span-2 space-y-2">
+                                            <div class="flex items-center justify-between">
+                                                <label
+                                                    class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
+                                                    <input id="canvasPreviewEnable" type="checkbox"
+                                                        class="rounded border-slate-700 bg-slate-900 text-cyan-600 focus:ring-cyan-600/50" />
+                                                    Afficher l'aperçu
+                                                </label>
+                                            </div>
+                                            <div id="selectedCanvasPreview"
+                                                class="relative rounded-2xl border border-slate-800 overflow-hidden bg-slate-950 aspect-video flex items-center justify-center">
+                                                <div id="selectedCanvasPreviewOverlay"
+                                                    class="absolute inset-0 bg-slate-950/80 flex items-center justify-center text-slate-500 text-sm hidden">
+                                                    Aperçu désactivé</div>
+                                                <div id="selectedCanvasPreviewFrame" class="w-full h-full"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <button id="addLabel" type="button" class="px-3 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">+ Ajouter</button>
+
+                            <div id="section-links"
+                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                                <div class="mb-6 flex items-center justify-between">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Réseaux Sociaux</h3>
+                                        <p class="text-sm text-slate-400">Vos profils sociaux (Instagram, X, etc.)</p>
+                                    </div>
+                                    <button id="addSocial" type="button"
+                                        class="px-4 py-2 text-sm font-medium rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white shadow-lg shadow-fuchsia-900/20 transition-colors flex items-center gap-2">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                        Ajouter
+                                    </button>
+                                </div>
+                                <div id="socialList" class="space-y-3 mb-8 min-h-[50px]"></div>
+
+                                <div class="border-t border-slate-800 my-6"></div>
+
+                                <div class="mb-6 flex flex-col gap-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h3 class="text-lg font-semibold text-white">Liens</h3>
+                                            <p class="text-sm text-slate-400">Vos liens principaux.</p>
+                                        </div>
+                                        <button id="addLink" type="button"
+                                            class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors flex items-center gap-2">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                            </svg>
+                                            Ajouter un lien
+                                        </button>
+                                    </div>
+
+                                    <div class="flex items-center gap-3 mt-3">
+                                        <input id="quickAddInput" type="text" placeholder="Titre | https://..." class="flex-1 px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 placeholder-slate-600" />
+                                        <span class="info-i" title="Format: 'Titre | https://...' ou uniquement l'URL">?</span>
+                                        <button id="quickAddBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-sm">Ajouter</button>
+                                        <button id="openAddModalBtn" type="button" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm">Avancé</button>
+                                    </div>
+
+                                    <div id="linksList" class="space-y-3 min-h-[50px]"></div>
+                                </div>
+                            </div>
+
+                            <div id="section-categories"
+                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                                <div class="mb-6 flex items-center justify-between">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Catégories</h3>
+                                        <p class="text-sm text-slate-400">Organisez vos liens dans des dossiers.</p>
+                                    </div>
+                                    <button id="addCategory" type="button"
+                                        class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors flex items-center gap-2 hidden">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                        Ajouter une catégorie
+                                    </button>
+                                </div>
+
+                                <div
+                                    class="flex items-center justify-between bg-slate-950 p-4 rounded-xl border border-slate-800 mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <input id="enableLinkCategories" type="checkbox"
+                                            class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50" />
+                                        <div>
+                                            <span class="block text-sm font-medium text-slate-300">Activer les
+                                                catégories</span>
+                                            <span class="block text-xs text-slate-500">Si désactivé, tous les liens
+                                                seront affichés en liste simple.</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="categoriesHint"
+                                    class="hidden mb-6 p-4 rounded-xl bg-violet-900/20 border border-violet-900/50 text-violet-200 text-sm flex items-start gap-3">
+                                    <svg class="w-5 h-5 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2">
+                                        <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <p class="font-medium">Comment ajouter des liens ?</p>
+                                        <p class="text-violet-300/80 mt-1">Pour placer un lien dans une catégorie, allez
+                                            dans l'onglet <strong>Liens</strong>. Un menu déroulant apparaîtra sur
+                                            chaque lien pour choisir sa catégorie.</p>
+                                    </div>
+                                </div>
+
+                                <div id="categoriesContainer" class="space-y-4 hidden">
+                                    <!-- Categories will be rendered here -->
+                                </div>
+
+                                <div id="categoriesDisabledMsg" class="text-center py-12 text-slate-500">
+                                    <svg class="w-12 h-12 mx-auto mb-3 opacity-50" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="1.5">
+                                        <path
+                                            d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+                                    </svg>
+                                    <p>Activez les catégories pour commencer à organiser vos liens.</p>
+                                </div>
+                            </div>
+
+                            <!-- Animations Section -->
+                            <div id="section-animations"
+                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                                <div class="mb-6 pb-4 border-b border-slate-800">
+                                    <h3 class="text-lg font-semibold text-white">Animations</h3>
+                                    <p class="text-sm text-slate-400">Dynamisez votre page.</p>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300">Apparition des éléments</span>
+                                        <div class="relative">
+                                            <select id="selectedAnimationIndex" class="hidden"></select>
+                                            <input id="selectedAnimationLabel" type="text"
+                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer"
+                                                readonly />
+                                            <button id="openAnimArticlePicker" type="button"
+                                                class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium transition-colors">Choisir</button>
+                                        </div>
+                                    </label>
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300">Animation des boutons</span>
+                                        <div class="relative">
+                                            <select id="selectedAnimationButtonIndex" class="hidden"></select>
+                                            <input id="selectedAnimationButtonLabel" type="text"
+                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer"
+                                                readonly />
+                                            <button id="openAnimButtonPicker" type="button"
+                                                class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium transition-colors">Choisir</button>
+                                        </div>
+                                    </label>
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300">Animation de fond</span>
+                                        <div class="relative">
+                                            <select id="selectedAnimationBackgroundIndex" class="hidden"></select>
+                                            <input id="selectedAnimationBackgroundLabel" type="text"
+                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer"
+                                                readonly />
+                                            <button id="openAnimBackgroundPicker" type="button"
+                                                class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium transition-colors">Choisir</button>
+                                        </div>
+                                    </label>
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300">Durée anim background
+                                            (s)</span>
+                                        <input id="animationDurationBackground" type="number"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
+                                    </label>
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300">Délai anim bouton (s)</span>
+                                        <input id="delayAnimationButton" step="0.01" type="number"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
+                                    </label>
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300">Taille background (%)</span>
+                                        <input id="backgroundSize" type="number"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="section-statusbar"
+                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                                <div class="mb-6 pb-4 border-b border-slate-800">
+                                    <h3 class="text-lg font-semibold text-white">Barre de statut</h3>
+                                    <p class="text-sm text-slate-400">Message et état affichés sous le profil.</p>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <label class="block space-y-2 md:col-span-2">
+                                        <span class="text-sm font-medium text-slate-300">Message de statut</span>
+                                        <input id="status_text" type="text"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 placeholder-slate-600"
+                                            placeholder="Ex: En train de coder..." />
+                                    </label>
+                                    <label class="block space-y-2">
+                                        <span class="text-sm font-medium text-slate-300">Couleur du texte (0=clair,
+                                            1=foncé)</span>
+                                        <input id="status_fontTextColor" type="number" min="0" max="1"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
+                                    </label>
+                                    <div class="space-y-2">
+                                        <span class="text-sm font-medium text-slate-300 block">État</span>
+                                        <div class="relative inline-block w-full" id="statusDropdown">
+                                            <button id="statusDropdownBtn" type="button"
+                                                class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 hover:bg-slate-900 transition-colors">
+                                                <div class="flex items-center gap-3">
+                                                    <span class="size-3 rounded-full bg-slate-500 shadow-sm"></span>
+                                                    <span class="status-current-label">Hors‑ligne</span>
+                                                </div>
+                                                <svg class="size-4 text-slate-500" viewBox="0 0 20 20"
+                                                    fill="currentColor">
+                                                    <path fill-rule="evenodd"
+                                                        d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                            <div id="statusDropdownPanel"
+                                                class="absolute z-20 mt-2 w-full rounded-xl border border-slate-800 bg-slate-900 shadow-xl p-1 hidden">
+                                                <button type="button"
+                                                    class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200"
+                                                    data-value="online">
+                                                    <span
+                                                        class="size-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
+                                                    En ligne
+                                                </button>
+                                                <button type="button"
+                                                    class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200"
+                                                    data-value="busy">
+                                                    <span
+                                                        class="size-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span>
+                                                    Occupé
+                                                </button>
+                                                <button type="button"
+                                                    class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200"
+                                                    data-value="away">
+                                                    <span
+                                                        class="size-2.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></span>
+                                                    Absent
+                                                </button>
+                                                <button type="button"
+                                                    class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200"
+                                                    data-value="offline">
+                                                    <span class="size-2.5 rounded-full bg-slate-500"></span> Hors‑ligne
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="status_statusText" />
+                                    </div>
+                                </div>
+
+                                <div class="mt-8 pt-6 border-t border-slate-800 hidden">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div>
+                                            <h4 class="font-medium text-white">Labels</h4>
+                                            <p class="text-xs text-slate-400">Badges affichés sous votre profil.</p>
+                                        </div>
+                                        <button id="addLabel" type="button"
+                                            class="px-3 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">+
+                                            Ajouter</button>
+                                    </div>
+                                    <div id="labelsList" class="space-y-3"></div>
+                                </div>
+                            </div>
+
+                            <div id="section-layout"
+                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                                <div class="mb-6 pb-4 border-b border-slate-800">
+                                    <h3 class="text-lg font-semibold text-white">Agencement</h3>
+                                    <p class="text-sm text-slate-400">Réordonnez les sections par glisser-déposer.</p>
+                                </div>
+                                <div class="space-y-3" id="layoutList" role="list"></div>
+                            </div>
+
+
                         </div>
-                        <div id="labelsList" class="space-y-3"></div>
-                    </div>
+                    </section>
+
+                    <aside class="xl:col-span-5 space-y-6">
+                        <div class="sticky top-24">
+                            <div
+                                class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-6 shadow-2xl shadow-black/50 relative overflow-hidden">
+                                <div
+                                    class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-violet-900/10 to-transparent pointer-events-none">
+                                </div>
+
+                                <div class="flex items-center justify-between mb-6 relative z-10">
+                                    <h3 class="text-base font-semibold text-white">Aperçu en direct</h3>
+                                    <div class="flex items-center gap-2">
+                                        <button id="refreshPreview"
+                                            class="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                                            title="Rafraîchir">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path
+                                                    d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
+                                            </svg>
+                                        </button>
+                                        <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>"
+                                            target="_blank"
+                                            class="p-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors"
+                                            title="Ouvrir">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6">
+                                                </path>
+                                                <polyline points="15 3 21 3 21 9"></polyline>
+                                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="relative mx-auto border-slate-950 bg-slate-950 border-[10px] rounded-[3rem] h-[650px] w-[320px] shadow-xl ring-1 ring-slate-800">
+                                    <div
+                                        class="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-slate-950 rounded-b-2xl z-20">
+                                    </div>
+
+                                    <div class="w-full h-full rounded-[2.3rem] overflow-hidden bg-white relative z-10">
+                                        <iframe id="preview"
+                                            src="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %>?preview=1<% } else { %>/<%= user.id %>?preview=1<% } %>"
+                                            class="w-full h-full border-0" title="Preview"></iframe>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6 flex justify-center gap-2">
+                                    <button type="button" data-view="mobile"
+                                        class="px-3 py-1.5 text-xs font-medium rounded-full bg-slate-800 text-white border border-slate-700">Mobile</button>
+                                    <button type="button" data-view="desktop"
+                                        class="px-3 py-1.5 text-xs font-medium rounded-full bg-slate-900 text-slate-400 border border-slate-800 hover:bg-slate-800">Desktop</button>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                </main>
+        </div>
+        <!-- Link Edit Modal -->
+        <div id="linkModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" tabindex="-1">
+            <div class="absolute inset-0 bg-black/60 animate-fade-in"></div>
+            <div class="relative mx-auto mt-12 w-[92vw] max-w-2xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in p-4">
+                <div class="flex items-center justify-between px-2 py-1 border-b border-slate-800 mb-4">
+                    <h3 id="linkModalTitle" class="font-semibold">Modifier le lien</h3>
+                    <button id="linkModalClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
                 </div>
-
-                <!-- Layout Section -->
-                <div id="section-layout" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                    <div class="mb-6 pb-4 border-b border-slate-800">
-                        <h3 class="text-lg font-semibold text-white">Agencement</h3>
-                        <p class="text-sm text-slate-400">Réordonnez les sections par glisser-déposer.</p>
-                    </div>
-                    <div class="space-y-3" id="layoutList" role="list"></div>
-                </div>
-
-
-            </div>
-        </section>
-
-        <!-- Preview Sidebar -->
-        <aside class="xl:col-span-5 space-y-6">
-            <div class="sticky top-24">
-                <div class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-6 shadow-2xl shadow-black/50 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-violet-900/10 to-transparent pointer-events-none"></div>
-                    
-                    <div class="flex items-center justify-between mb-6 relative z-10">
-                        <h3 class="text-base font-semibold text-white">Aperçu en direct</h3>
-                        <div class="flex items-center gap-2">
-                            <button id="refreshPreview" class="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="Rafraîchir">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
+                <div class="space-y-3">
+                    <label class="block space-y-1">
+                        <span class="text-sm text-slate-300">Titre <span class="info-i" title="Texte affiché sur le bouton ; court et descriptif">?</span></span>
+                        <input id="linkModalTitleInput" type="text" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+                    </label>
+                    <label class="block space-y-1">
+                        <span class="text-sm text-slate-300">URL <span class="info-i" title="Adresse complète (le préfixe https:// est ajouté automatiquement)">?</span></span>
+                        <div class="relative flex">
+                            <button id="linkModalSchemeBtn" type="button" class="inline-flex items-center px-3 rounded-l-lg bg-slate-800 border border-r-0 border-slate-800 text-slate-300">
+                                <span id="linkModalSchemeLabel">https://</span>
+                                <svg class="ml-2" width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 3l4 4 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                             </button>
-                            <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>" target="_blank" class="p-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors" title="Ouvrir">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                            </a>
+                            <div id="linkModalSchemeMenu" class="hidden absolute left-0 mt-10 w-40 rounded bg-slate-900 border border-slate-800 shadow-lg z-50">
+                                <button type="button" data-scheme="https" class="w-full text-left px-3 py-2 hover:bg-slate-800">https://</button>
+                                <button type="button" data-scheme="http" class="w-full text-left px-3 py-2 hover:bg-slate-800">http://</button>
+                            </div>
+                            <input id="linkModalUrlInput" type="text" class="flex-1 px-3 py-2 rounded-r-lg bg-slate-900 border border-slate-800" placeholder="example.com/chemin" />
+                        </div>
+                    </label>
+                    <label class="block space-y-1">
+                        <span class="text-sm text-slate-300">Icône <span class="info-i" title="Bibliothèque = icône prédéfinie (non modifiable), URL = coller l'adresse, Importer = uploader un fichier (SVG/PNG)">?</span></span>
+                        <div class="flex items-center gap-3">
+                            <select id="linkModalIconSource" class="px-3 py-2 rounded bg-slate-900 border border-slate-800 text-sm w-40">
+                                <option value="catalog">Bibliothèque</option>
+                                <option value="url">URL</option>
+                                <option value="upload">Importer</option>
+                            </select>
+                            <div class="flex-1">
+                                <div id="linkModalIconPickerWrap" class="hidden">
+                                    <div class="flex items-center gap-2">
+                                        <input id="linkModalIconInput" type="text" class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-800" placeholder="Cliquer pour choisir" readonly />
+                                        <button id="linkModalPickIconBtn" type="button" class="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">Choisir</button>
+                                    </div>
+                                </div>
+                                <div id="linkModalIconUrlWrap" class="hidden">
+                                    <input id="linkModalIconInputUrl" type="url" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" placeholder="https://exemple.com/icone.svg" />
+                                </div>
+                                <div id="linkModalIconUploadWrap" class="hidden">
+                                    <input id="linkModalIconUpload" type="file" accept="image/*,image/svg+xml" class="block w-full text-sm text-slate-300" />
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="block space-y-1">
+                        <span class="text-sm text-slate-300">Description (optionnelle) <span class="info-i" title="Texte court affiché sous le titre, optionnel">?</span></span>
+                        <input id="linkModalDescInput" type="text" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
+                    </label>
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex-1">
+                            <label class="block text-sm text-slate-300">Catégorie <span class="info-i" title="Attribuez ce lien à une catégorie pour l'organisation">?</span></label>
+                            <select id="linkModalCategory" class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-800 text-sm"></select>
+                        </div>
+                        <div class="w-40">
+                            <label class="block text-sm text-slate-300">Ouvrir dans un nouvel onglet <span class="info-i" title="Ouvre le lien dans un nouvel onglet si coché">?</span></label>
+                            <input id="linkModalNewTab" type="checkbox" class="size-5 mt-2" />
                         </div>
                     </div>
-                    
-                    <!-- Phone Mockup -->
-                    <div class="relative mx-auto border-slate-950 bg-slate-950 border-[10px] rounded-[3rem] h-[650px] w-[320px] shadow-xl ring-1 ring-slate-800">
-                        <!-- Notch -->
-                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-slate-950 rounded-b-2xl z-20"></div>
-                        
-                        <!-- Screen -->
-                        <div class="w-full h-full rounded-[2.3rem] overflow-hidden bg-white relative z-10">
-                            <iframe 
-                                id="preview"
-                                src="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %>?preview=1<% } else { %>/<%= user.id %>?preview=1<% } %>" 
-                                class="w-full h-full border-0"
-                                title="Preview"
-                            ></iframe>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-6 flex justify-center gap-2">
-                        <button type="button" data-view="mobile" class="px-3 py-1.5 text-xs font-medium rounded-full bg-slate-800 text-white border border-slate-700">Mobile</button>
-                        <button type="button" data-view="desktop" class="px-3 py-1.5 text-xs font-medium rounded-full bg-slate-900 text-slate-400 border border-slate-800 hover:bg-slate-800">Desktop</button>
+                    <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-800 mt-4">
+                        <button id="linkModalCancel" class="px-4 py-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">Annuler</button>
+                        <button id="linkModalSave" class="px-4 py-2 rounded bg-emerald-700 hover:bg-emerald-600 text-white">Enregistrer</button>
                     </div>
                 </div>
             </div>
-        </aside>
-    </main>
-</div>
-                    <div id="iconModal" class="fixed inset-0 z-50 hidden">
-                        <div class="absolute inset-0 bg-black/60 animate-fade-in"></div>
-                        <div class="relative mx-auto mt-16 w-[92vw] max-w-3xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in">
-                            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800">
-                                <h3 class="font-semibold">Choisir une icône</h3>
-                                <button id="iconModalClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
-                            </div>
-                            <div class="p-4 space-y-3">
-                                <input id="iconSearch" type="text" placeholder="Rechercher..." class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700" />
-                                <div id="iconGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-auto"></div>
-                            </div>
-                        </div>
+        </div>
+
+        <div id="iconModal" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-black/60 animate-fade-in"></div>
+            <div
+                class="relative mx-auto mt-16 w-[92vw] max-w-3xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+                    <h3 class="font-semibold">Choisir une icône</h3>
+                    <button id="iconModalClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
+                </div>
+                <div class="p-4 space-y-3">
+                    <input id="iconSearch" type="text" placeholder="Rechercher..."
+                        class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700" />
+                    <div id="iconGrid"
+                        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-auto"></div>
+                </div>
+            </div>
+        </div>
+        <div id="pickerModal" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-black/60 animate-fade-in"></div>
+            <div
+                class="relative mx-auto mt-16 w-[92vw] max-w-5xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <a id="pickerCreateBtn" href="/themes" target="_blank"
+                            class="hidden px-3 py-1.5 text-sm rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors">Créer
+                            mon propre thème</a>
+                        <h3 id="pickerTitle" class="font-semibold">Sélection</h3>
                     </div>
-                    <div id="pickerModal" class="fixed inset-0 z-50 hidden">
-                        <div class="absolute inset-0 bg-black/60 animate-fade-in"></div>
-                        <div class="relative mx-auto mt-16 w-[92vw] max-w-5xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in">
-                                                        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800">
-                                                                <div class="flex items-center gap-3">
-                                                                    <a id="pickerCreateBtn" href="/themes" target="_blank" class="hidden px-3 py-1.5 text-sm rounded-md bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/40 text-white shadow transition-colors">Créer mon propre thème</a>
-                                                                    <h3 id="pickerTitle" class="font-semibold">Sélection</h3>
-                                                                </div>
-                                                                <div class="flex items-center gap-2">
-                                                                    <button id="pickerClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
-                                                                </div>
-                                                        </div>
-                            <div class="p-4 space-y-3">
-                                <input id="pickerSearch" type="text" placeholder="Rechercher..." class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700" />
-                                                                <div id="pickerGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[64vh] overflow-auto"></div>
-                            </div>
-                        </div>
+                    <div class="flex items-center gap-2">
+                        <button id="pickerClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
                     </div>
+                </div>
+                <div class="p-4 space-y-3">
+                    <input id="pickerSearch" type="text" placeholder="Rechercher..."
+                        class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700" />
+                    <div id="pickerGrid"
+                        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[64vh] overflow-auto">
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <script>
-                                window.__PLINKK_USER_ID__ = "<%= user.id %>";
-                                (function(){
-                                    const btns = Array.from(document.querySelectorAll('.tab-btn'));
-                                    const sections = Array.from(document.querySelectorAll('[id^="section-"]'));
-                                    const selectTab = (target) => {
-                                        sections.forEach(s => s.classList.toggle('hidden', `#${s.id}` !== target));
-                                        btns.forEach(b => b.setAttribute('aria-selected', b.dataset.target === target ? 'true' : 'false'));
-                                        if (history.replaceState) {
-                                            history.replaceState(null, '', target);
-                                        } else {
-                                            location.hash = target;
-                                        }
-                                    };
-                                    btns.forEach(b => b.addEventListener('click', () => selectTab(b.dataset.target)));
-                                    const initial = location.hash && sections.some(s => `#${s.id}` === location.hash) ? location.hash : '#section-profile';
-                                    selectTab(initial);
-                                })();
-                        </script>
-                <style>
-                    .masked-field { background-color: rgba(100,100,100,0.12) !important; opacity: 0.65; cursor: not-allowed; }
-                    .masked-field:disabled { color: inherit; }
-                    .masked-field[readonly] { color: inherit; }
-                    .mask-toggle { line-height: 1; }
-
-                    .info-i { display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; font-size:10px; line-height:1; border-radius:9999px; border:1px solid rgba(148,163,184,0.35); color:#cbd5e1; margin-left:6px; cursor:help; background: rgba(15,23,42,0.5); }
-                    .info-i:hover { background: rgba(30,41,59,0.6); color:#e5e7eb; border-color: rgba(148,163,184,0.6); }
-
-                    .deg-dial { position: relative; width: 72px; height: 72px; border-radius: 100%; border: 1px solid #334155; background: radial-gradient(closest-side, rgba(30,41,59,0.9), rgba(15,23,42,0.9)); box-shadow: inset 0 0 0 2px rgba(148,163,184,0.1); outline: none; user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab; }
-                    .deg-dial:focus { box-shadow: 0 0 0 2px rgba(99,102,241,0.55), inset 0 0 0 2px rgba(148,163,184,0.1); }
-                    .deg-dial.is-dragging { cursor: grabbing; }
-                    .deg-dial-dot { position: absolute; width: 14px; height: 14px; border-radius: 100%; background: #93c5fd; border: 2px solid #1f2937; top: 50%; left: 50%; box-shadow: 0 0 0 1px rgba(148,163,184,0.35); pointer-events: auto; cursor: grab; }
-                    .deg-dial:active .deg-dial-dot, .deg-dial.is-dragging .deg-dial-dot { background: #3b82f6; cursor: grabbing; }
-                </style>
-                <script>
-                    (function(){
-                        const USER_ID = window.__PLINKK_USER_ID__ || 'self';
-                        const PLINKK_ID = window.__PLINKK_SELECTED_ID__ || 'default';
-                        const LS_PREFIX = 'PLK_MASK:';
-
-                        function lsGet(key){ try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } }
-                        function lsSet(key, val){ try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
-                        function lsDel(key){ try { localStorage.removeItem(key); } catch {} }
-                        function getKey(inputId){ return `${LS_PREFIX}${USER_ID}:${PLINKK_ID}:${inputId}`; }
-
-                        function applyMaskedState(input, btn, saved){
-                            if (!input || !btn) return;
-                            const isMasked = !!(saved && saved.masked);
-                            
-                            btn.setAttribute('title', 'Masquer / afficher le champ');
-                            btn.setAttribute('aria-pressed', isMasked ? 'true' : 'false');
-
-                            if (isMasked) {
-                                if (saved && typeof saved.value !== 'undefined') {
-                                    input.value = saved.value;
-                                }
-                                input.dataset._originalValue = input.value ?? '';
-                                input.readOnly = true;
-                                input.disabled = true;
-                                input.classList.add('masked-field');
-                                btn.innerHTML = '<svg class="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a20.81 20.81 0 0 1 5.06-6.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.82 20.82 0 0 1-4.87 6.82M1 1l22 22"/></svg>';
-                            } else {
-                                if (typeof input.dataset._originalValue !== 'undefined') {
-                                    input.value = input.dataset._originalValue;
-                                    delete input.dataset._originalValue;
-                                }
-                                input.readOnly = false;
-                                input.disabled = false;
-                                input.classList.remove('masked-field');
-                                btn.innerHTML = '<svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
-                            }
-                        }
-
-                        const buttons = Array.from(document.querySelectorAll('.mask-toggle'));
-                        buttons.forEach(btn => {
-                            const targetId = btn.getAttribute('data-target');
-                            if (!targetId) return;
-                            const input = document.getElementById(targetId);
-                            if (!input) return;
-
-                            const key = getKey(targetId);
-                            const saved = lsGet(key);
-                            applyMaskedState(input, btn, saved);
-
-                            btn.addEventListener('click', () => {
-                                const currentlyMasked = btn.getAttribute('aria-pressed') === 'true';
-                                if (!currentlyMasked) {
-                                    const value = input.value ?? '';
-                                    lsSet(key, { masked: true, value });
-                                    applyMaskedState(input, btn, { masked: true, value });
-                                } else {
-                                    lsDel(key);
-                                    applyMaskedState(input, btn, { masked: false });
-                                }
-                                if (window.__DASH_TRIGGER_SAVE__) {
-                                    window.__DASH_TRIGGER_SAVE__();
-                                }
-                            });
-                        });
-
-                        function clearMaskedValues() {
-                            document.querySelectorAll('[data-maskable]')
-                                .forEach(inp => {
-                                    const key = getKey(inp.id);
-                                    const saved = lsGet(key);
-                                    const isMasked = (typeof inp.dataset._originalValue !== 'undefined') || inp.classList.contains('masked-field') || (saved && saved.masked);
-                                    if (isMasked) {
-                                        inp.value = '';
-                                    }
-                                });
-                        }
-
-                        document.addEventListener('click', (e) => {
-                            const saveBtn = e.target.closest && e.target.closest('#saveBtn, #saveBtn--mobile, #saveBtn--fab');
-                            if (saveBtn) {
-                                clearMaskedValues();
-                            }
-                        }, true);
-
-                        (function attachFormInterceptor(){
-                            const sample = document.querySelector('[data-maskable]');
-                            if (!sample) return;
-                            const form = sample.closest('form');
-                            if (!form) return;
-                            form.addEventListener('submit', (ev) => {
-                                clearMaskedValues();
-                            });
-                        })();
-                    })();
-                </script>
-                <script type="module">
-                    import canvaData from '/public/config/canvaConfig.js';
-                    import { animations, animationBackground } from '/public/config/animationConfig.js';
-                    import btnIconThemeConfig from '/public/config/btnIconThemeConfig.js';
-                    import labelPresets from '/public/config/labelPresets.js';
-                    try {
-                        const res = await fetch(`/themes.json?userId=${encodeURIComponent("<%= user.id %>")}`);
-                        let builtIns = [];
-                        let community = [];
-                        if (res.ok) {
-                            const payload = await res.json();
-                            builtIns = Array.isArray(payload.builtIns) ? payload.builtIns : [];
-                            community = Array.isArray(payload.theme) ? payload.theme : [];
-                        }
-                        const mergedThemes = builtIns.concat(community);
-                        window.__PLINKK_CFG__ = { themes: mergedThemes, canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
-                    } catch (e) {
-                        window.__PLINKK_CFG__ = { themes: [], canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
+        <script>
+            window.__PLINKK_USER_ID__ = "<%= user.id %>";
+            (function () {
+                const btns = Array.from(document.querySelectorAll('.tab-btn'));
+                const sections = Array.from(document.querySelectorAll('[id^="section-"]'));
+                const selectTab = (target) => {
+                    sections.forEach(s => s.classList.toggle('hidden', `#${s.id}` !== target));
+                    btns.forEach(b => b.setAttribute('aria-selected', b.dataset.target === target ? 'true' : 'false'));
+                    if (history.replaceState) {
+                        history.replaceState(null, '', target);
+                    } else {
+                        location.hash = target;
                     }
-                </script>
-                <script>
-                    (function(){
-                        const input = document.getElementById('degBackgroundColor');
-                        const dial = document.getElementById('degDial');
-                        const dot = dial ? dial.querySelector('.deg-dial-dot') : null;
-                        if (!input || !dial || !dot) return;
+                };
+                btns.forEach(b => b.addEventListener('click', () => selectTab(b.dataset.target)));
+                const initial = location.hash && sections.some(s => `#${s.id}` === location.hash) ? location.hash : '#section-profile';
+                selectTab(initial);
+            })();
+        </script>
+        <style>
+            .masked-field {
+                background-color: rgba(100, 100, 100, 0.12) !important;
+                opacity: 0.65;
+                cursor: not-allowed;
+            }
 
-                        function clampDeg(n){ n = Math.round(Number(n)||0); n %= 360; if (n < 0) n += 360; return n; }
-                        function setAria(val){ dial.setAttribute('aria-valuenow', String(val)); }
-                        function setDot(val){ dot.style.transform = `translate(-50%, -50%) rotate(${val - 90}deg) translate(26px, 0)`; }
-                        function syncFromInput(){ const v = clampDeg(input.value); setDot(v); setAria(v); }
-                        function syncFromDeg(val){ const v = clampDeg(val); input.value = String(v); setDot(v); setAria(v); if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); }
+            .masked-field:disabled {
+                color: inherit;
+            }
 
-                        setTimeout(syncFromInput, 0);
+            .masked-field[readonly] {
+                color: inherit;
+            }
 
-                        input.addEventListener('input', () => syncFromInput());
-                        input.addEventListener('change', () => { if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); });
+            .mask-toggle {
+                line-height: 1;
+            }
 
-                        function posToDeg(clientX, clientY){
-                            const rect = dial.getBoundingClientRect();
-                            const cx = rect.left + rect.width/2; const cy = rect.top + rect.height/2;
-                            const dx = clientX - cx; const dy = clientY - cy;
-                            let angle = Math.atan2(dy, dx) * 180/Math.PI;
-                            angle = (angle + 360) % 360;
-                            angle = (angle + 90) % 360;
-                            return Math.round(angle);
+            .info-i {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 14px;
+                height: 14px;
+                font-size: 10px;
+                line-height: 1;
+                border-radius: 9999px;
+                border: 1px solid rgba(148, 163, 184, 0.35);
+                color: #cbd5e1;
+                margin-left: 6px;
+                cursor: help;
+                background: rgba(15, 23, 42, 0.5);
+            }
+
+            .info-i:hover {
+                background: rgba(30, 41, 59, 0.6);
+                color: #e5e7eb;
+                border-color: rgba(148, 163, 184, 0.6);
+            }
+
+            .deg-dial {
+                position: relative;
+                width: 72px;
+                height: 72px;
+                border-radius: 100%;
+                border: 1px solid #334155;
+                background: radial-gradient(closest-side, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+                box-shadow: inset 0 0 0 2px rgba(148, 163, 184, 0.1);
+                outline: none;
+                user-select: none;
+                -webkit-user-select: none;
+                touch-action: none;
+                cursor: grab;
+            }
+
+            .deg-dial:focus {
+                box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.55), inset 0 0 0 2px rgba(148, 163, 184, 0.1);
+            }
+
+            .deg-dial.is-dragging {
+                cursor: grabbing;
+            }
+
+            .deg-dial-dot {
+                position: absolute;
+                width: 14px;
+                height: 14px;
+                border-radius: 100%;
+                background: #93c5fd;
+                border: 2px solid #1f2937;
+                top: 50%;
+                left: 50%;
+                box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.35);
+                pointer-events: auto;
+                cursor: grab;
+            }
+
+            .deg-dial:active .deg-dial-dot,
+            .deg-dial.is-dragging .deg-dial-dot {
+                background: #3b82f6;
+                cursor: grabbing;
+            }
+        </style>
+        <script>
+            (function () {
+                const USER_ID = window.__PLINKK_USER_ID__ || 'self';
+                const PLINKK_ID = window.__PLINKK_SELECTED_ID__ || 'default';
+                const LS_PREFIX = 'PLK_MASK:';
+
+                function lsGet(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } }
+                function lsSet(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch { } }
+                function lsDel(key) { try { localStorage.removeItem(key); } catch { } }
+                function getKey(inputId) { return `${LS_PREFIX}${USER_ID}:${PLINKK_ID}:${inputId}`; }
+
+                function applyMaskedState(input, btn, saved) {
+                    if (!input || !btn) return;
+                    const isMasked = !!(saved && saved.masked);
+
+                    btn.setAttribute('title', 'Masquer / afficher le champ');
+                    btn.setAttribute('aria-pressed', isMasked ? 'true' : 'false');
+
+                    if (isMasked) {
+                        if (saved && typeof saved.value !== 'undefined') {
+                            input.value = saved.value;
                         }
-
-                        let dragging = false;
-                        function onPointerMove(e){
-                            if (!dragging) return;
-                            const pt = e.touches?.[0] || e;
-                            syncFromDeg(posToDeg(pt.clientX, pt.clientY));
-                            e.preventDefault();
+                        input.dataset._originalValue = input.value ?? '';
+                        input.readOnly = true;
+                        input.disabled = true;
+                        input.classList.add('masked-field');
+                        btn.innerHTML = '<svg class="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a20.81 20.81 0 0 1 5.06-6.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.82 20.82 0 0 1-4.87 6.82M1 1l22 22"/></svg>';
+                    } else {
+                        if (typeof input.dataset._originalValue !== 'undefined') {
+                            input.value = input.dataset._originalValue;
+                            delete input.dataset._originalValue;
                         }
-                        function onPointerUp(){
-                            dragging = false;
-                            dial.classList.remove('is-dragging');
-                            window.removeEventListener('mousemove', onPointerMove, { passive: false });
-                            window.removeEventListener('mouseup', onPointerUp);
-                            window.removeEventListener('touchmove', onPointerMove);
-                            window.removeEventListener('touchend', onPointerUp);
+                        input.readOnly = false;
+                        input.disabled = false;
+                        input.classList.remove('masked-field');
+                        btn.innerHTML = '<svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+                    }
+                }
+
+                const buttons = Array.from(document.querySelectorAll('.mask-toggle'));
+                buttons.forEach(btn => {
+                    const targetId = btn.getAttribute('data-target');
+                    if (!targetId) return;
+                    const input = document.getElementById(targetId);
+                    if (!input) return;
+
+                    const key = getKey(targetId);
+                    const saved = lsGet(key);
+                    applyMaskedState(input, btn, saved);
+
+                    btn.addEventListener('click', () => {
+                        const currentlyMasked = btn.getAttribute('aria-pressed') === 'true';
+                        if (!currentlyMasked) {
+                            const value = input.value ?? '';
+                            lsSet(key, { masked: true, value });
+                            applyMaskedState(input, btn, { masked: true, value });
+                        } else {
+                            lsDel(key);
+                            applyMaskedState(input, btn, { masked: false });
                         }
-                        function startDrag(e){
-                            e.preventDefault();
-                            dragging = true;
-                            dial.classList.add('is-dragging');
-                            const pt = e.touches?.[0] || e;
-                            syncFromDeg(posToDeg(pt.clientX, pt.clientY));
-                            window.addEventListener('mousemove', onPointerMove, { passive: false });
-                            window.addEventListener('mouseup', onPointerUp);
-                            window.addEventListener('touchmove', onPointerMove, { passive: false });
-                            window.addEventListener('touchend', onPointerUp);
-                            dial.focus();
+                        if (window.__DASH_TRIGGER_SAVE__) {
+                            window.__DASH_TRIGGER_SAVE__();
                         }
+                    });
+                });
 
-                        dial.addEventListener('mousedown', startDrag);
-                        dial.addEventListener('touchstart', startDrag, { passive: false });
-
-                        dial.addEventListener('wheel', (e) => {
-                            if (document.activeElement !== dial) return;
-                            e.preventDefault();
-                            const delta = e.deltaY || e.deltaX || 0;
-                            const step = e.shiftKey ? 10 : 1;
-                            const dir = delta > 0 ? -step : step;
-                            const val = clampDeg((Number(input.value)||0) + dir);
-                            syncFromDeg(val);
-                        }, { passive: false });
-
-                        dial.addEventListener('keydown', (e) => {
-                            const step = (e.shiftKey ? 10 : 1);
-                            let val = clampDeg(input.value);
-                            if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { val = clampDeg(val + step); syncFromDeg(val); e.preventDefault(); }
-                            if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { val = clampDeg(val - step); syncFromDeg(val); e.preventDefault(); }
-                            if (e.key === 'Home') { syncFromDeg(0); e.preventDefault(); }
-                            if (e.key === 'End') { syncFromDeg(359); e.preventDefault(); }
+                function clearMaskedValues() {
+                    document.querySelectorAll('[data-maskable]')
+                        .forEach(inp => {
+                            const key = getKey(inp.id);
+                            const saved = lsGet(key);
+                            const isMasked = (typeof inp.dataset._originalValue !== 'undefined') || inp.classList.contains('masked-field') || (saved && saved.masked);
+                            if (isMasked) {
+                                inp.value = '';
+                            }
                         });
-                    })();
-                </script>
-                <script type="application/json" id="pages-data"><%- JSON.stringify(typeof pages !== 'undefined' ? pages : []) %></script>
-                <script type="application/json" id="autoopen-data"><%= (typeof autoOpenPlinkkModal !== 'undefined' && autoOpenPlinkkModal) ? 'true' : 'false' %></script>
-                <% if (typeof plinkk !== 'undefined' && plinkk) { %>
-                <script>window.__PLINKK_SELECTED_ID__ = "<%= plinkk.id %>";</script>
-                <% } %>
+                }
+
+                document.addEventListener('click', (e) => {
+                    const saveBtn = e.target.closest && e.target.closest('#saveBtn, #saveBtn--mobile, #saveBtn--fab');
+                    if (saveBtn) {
+                        clearMaskedValues();
+                    }
+                }, true);
+
+                (function attachFormInterceptor() {
+                    const sample = document.querySelector('[data-maskable]');
+                    if (!sample) return;
+                    const form = sample.closest('form');
+                    if (!form) return;
+                    form.addEventListener('submit', (ev) => {
+                        clearMaskedValues();
+                    });
+                })();
+            })();
+        </script>
+        <script type="module">
+            import canvaData from '/public/config/canvaConfig.js';
+            import { animations, animationBackground } from '/public/config/animationConfig.js';
+            import btnIconThemeConfig from '/public/config/btnIconThemeConfig.js';
+            import labelPresets from '/public/config/labelPresets.js';
+            try {
+                const res = await fetch(`/themes.json?userId=${encodeURIComponent("<%= user.id %>")}`);
+                let builtIns = [];
+                let community = [];
+                if (res.ok) {
+                    const payload = await res.json();
+                    builtIns = Array.isArray(payload.builtIns) ? payload.builtIns : [];
+                    community = Array.isArray(payload.theme) ? payload.theme : [];
+                }
+                const mergedThemes = builtIns.concat(community);
+                window.__PLINKK_CFG__ = { themes: mergedThemes, canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
+            } catch (e) {
+                window.__PLINKK_CFG__ = { themes: [], canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
+            }
+        </script>
+        <script>
+            (function () {
+                const input = document.getElementById('degBackgroundColor');
+                const dial = document.getElementById('degDial');
+                const dot = dial ? dial.querySelector('.deg-dial-dot') : null;
+                if (!input || !dial || !dot) return;
+
+                function clampDeg(n) { n = Math.round(Number(n) || 0); n %= 360; if (n < 0) n += 360; return n; }
+                function setAria(val) { dial.setAttribute('aria-valuenow', String(val)); }
+                function setDot(val) { dot.style.transform = `translate(-50%, -50%) rotate(${val - 90}deg) translate(26px, 0)`; }
+                function syncFromInput() { const v = clampDeg(input.value); setDot(v); setAria(v); }
+                function syncFromDeg(val) { const v = clampDeg(val); input.value = String(v); setDot(v); setAria(v); if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); }
+
+                setTimeout(syncFromInput, 0);
+
+                input.addEventListener('input', () => syncFromInput());
+                input.addEventListener('change', () => { if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); });
+
+                function posToDeg(clientX, clientY) {
+                    const rect = dial.getBoundingClientRect();
+                    const cx = rect.left + rect.width / 2; const cy = rect.top + rect.height / 2;
+                    const dx = clientX - cx; const dy = clientY - cy;
+                    let angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                    angle = (angle + 360) % 360;
+                    angle = (angle + 90) % 360;
+                    return Math.round(angle);
+                }
+
+                let dragging = false;
+                function onPointerMove(e) {
+                    if (!dragging) return;
+                    const pt = e.touches?.[0] || e;
+                    syncFromDeg(posToDeg(pt.clientX, pt.clientY));
+                    e.preventDefault();
+                }
+                function onPointerUp() {
+                    dragging = false;
+                    dial.classList.remove('is-dragging');
+                    window.removeEventListener('mousemove', onPointerMove, { passive: false });
+                    window.removeEventListener('mouseup', onPointerUp);
+                    window.removeEventListener('touchmove', onPointerMove);
+                    window.removeEventListener('touchend', onPointerUp);
+                }
+                function startDrag(e) {
+                    e.preventDefault();
+                    dragging = true;
+                    dial.classList.add('is-dragging');
+                    const pt = e.touches?.[0] || e;
+                    syncFromDeg(posToDeg(pt.clientX, pt.clientY));
+                    window.addEventListener('mousemove', onPointerMove, { passive: false });
+                    window.addEventListener('mouseup', onPointerUp);
+                    window.addEventListener('touchmove', onPointerMove, { passive: false });
+                    window.addEventListener('touchend', onPointerUp);
+                    dial.focus();
+                }
+
+                dial.addEventListener('mousedown', startDrag);
+                dial.addEventListener('touchstart', startDrag, { passive: false });
+
+                dial.addEventListener('wheel', (e) => {
+                    if (document.activeElement !== dial) return;
+                    e.preventDefault();
+                    const delta = e.deltaY || e.deltaX || 0;
+                    const step = e.shiftKey ? 10 : 1;
+                    const dir = delta > 0 ? -step : step;
+                    const val = clampDeg((Number(input.value) || 0) + dir);
+                    syncFromDeg(val);
+                }, { passive: false });
+
+                dial.addEventListener('keydown', (e) => {
+                    const step = (e.shiftKey ? 10 : 1);
+                    let val = clampDeg(input.value);
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { val = clampDeg(val + step); syncFromDeg(val); e.preventDefault(); }
+                    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { val = clampDeg(val - step); syncFromDeg(val); e.preventDefault(); }
+                    if (e.key === 'Home') { syncFromDeg(0); e.preventDefault(); }
+                    if (e.key === 'End') { syncFromDeg(359); e.preventDefault(); }
+                });
+            })();
+        </script>
+        <script type="application/json"
+            id="pages-data"><%- JSON.stringify(typeof pages !== 'undefined' ? pages : []) %></script>
+        <script type="application/json"
+            id="autoopen-data"><%= (typeof autoOpenPlinkkModal !== 'undefined' && autoOpenPlinkkModal) ? 'true' : 'false' %></script>
+        <% if (typeof plinkk !=='undefined' && plinkk) { %>
+            <script>window.__PLINKK_SELECTED_ID__ = "<%= plinkk.id %>";</script>
+            <% } %>
                 <script type="module" src="/public/js/dashboard-ui/index.js"></script>
                 <script>
-                        (function(){
-                            const frame = document.getElementById('preview');
-                            const wrap = frame && frame.parentElement;
-                            if (!frame || !wrap) return;
-                            const setMobile = (on) => {
-                                if (on) { frame.style.width = '390px'; frame.style.margin = '0 auto'; }
-                                else { frame.style.width = '100%'; frame.style.margin = '0'; }
-                            };
-                            document.querySelectorAll('[data-view]')?.forEach(btn=>{
-                                btn.addEventListener('click', ()=> setMobile(btn.getAttribute('data-view')==='mobile'));
-                            });
-                        })();
-                        (function(){
-                            try {
-                                const nameInput = document.getElementById('userName');
-                                const headerName = document.getElementById('headerPlinkkName');
-                                if (nameInput && headerName) {
-                                    nameInput.addEventListener('input', () => {
-                                        const v = nameInput.value || '';
-                                        headerName.textContent = v || headerName.getAttribute('data-original') || '';
-                                    });
-                                    headerName.setAttribute('data-original', headerName.textContent || '');
-                                }
-                            } catch (e) {}
-                        })();
-                        (function(){
-                            const autoOpenRaw = document.getElementById('autoopen-data')?.textContent || 'false';
-                            const autoOpen = String(autoOpenRaw).trim() === 'true';
-                            if (autoOpen) {
-                                const modal = document.getElementById('plinkkSelectorModal');
-                                if (modal) modal.classList.remove('hidden');
+                    (function () {
+                        const frame = document.getElementById('preview');
+                        const wrap = frame && frame.parentElement;
+                        if (!frame || !wrap) return;
+                        const setMobile = (on) => {
+                            if (on) { frame.style.width = '390px'; frame.style.margin = '0 auto'; }
+                            else { frame.style.width = '100%'; frame.style.margin = '0'; }
+                        };
+                        document.querySelectorAll('[data-view]')?.forEach(btn => {
+                            btn.addEventListener('click', () => setMobile(btn.getAttribute('data-view') === 'mobile'));
+                        });
+                    })();
+                    (function () {
+                        try {
+                            const nameInput = document.getElementById('userName');
+                            const headerName = document.getElementById('headerPlinkkName');
+                            if (nameInput && headerName) {
+                                nameInput.addEventListener('input', () => {
+                                    const v = nameInput.value || '';
+                                    headerName.textContent = v || headerName.getAttribute('data-original') || '';
+                                });
+                                headerName.setAttribute('data-original', headerName.textContent || '');
                             }
-                        })();
-                        (function(){
-                            const refreshBtn = document.getElementById('refreshPreview');
-                            const frame = document.getElementById('preview');
-                            if (!refreshBtn || !frame) return;
-                            
-                            refreshBtn.addEventListener('click', () => {
-                                const svg = refreshBtn.querySelector('svg');
-                                if (svg) svg.classList.add('animate-spin');
-                                
-                                // Reload iframe
-                                try {
-                                    const url = new URL(frame.src);
-                                    url.searchParams.set('t', Date.now());
-                                    frame.src = url.toString();
-                                } catch(e) {
-                                    frame.src = frame.src;
-                                }
-                                
-                                const stopSpin = () => {
-                                    if (svg) svg.classList.remove('animate-spin');
-                                };
-                                
-                                frame.onload = stopSpin;
-                                setTimeout(stopSpin, 2000);
-                            });
-                        })();
+                        } catch (e) { }
+                    })();
+                    (function () {
+                        const autoOpenRaw = document.getElementById('autoopen-data')?.textContent || 'false';
+                        const autoOpen = String(autoOpenRaw).trim() === 'true';
+                        if (autoOpen) {
+                            const modal = document.getElementById('plinkkSelectorModal');
+                            if (modal) modal.classList.remove('hidden');
+                        }
+                    })();
+                    (function () {
+                        const refreshBtn = document.getElementById('refreshPreview');
+                        const frame = document.getElementById('preview');
+                        if (!refreshBtn || !frame) return;
+
+                        refreshBtn.addEventListener('click', () => {
+                            const svg = refreshBtn.querySelector('svg');
+                            if (svg) svg.classList.add('animate-spin');
+
+                            // Reload iframe
+                            try {
+                                const url = new URL(frame.src);
+                                url.searchParams.set('t', Date.now());
+                                frame.src = url.toString();
+                            } catch (e) {
+                                frame.src = frame.src;
+                            }
+
+                            const stopSpin = () => {
+                                if (svg) svg.classList.remove('animate-spin');
+                            };
+
+                            frame.onload = stopSpin;
+                            setTimeout(stopSpin, 2000);
+                        });
+                    })();
                 </script>
-    </body>
-    </html>
+                </body>
+
+                </html>

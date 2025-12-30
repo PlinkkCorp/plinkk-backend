@@ -447,174 +447,310 @@ export function renderCategories({ container, addBtn, categories, links, schedul
 export function renderLinks({ container, addBtn, links, categories, scheduleAutoSave }) {
   if (!container) return;
   container.innerHTML = '';
-  if (!Array.isArray(links) || links.length === 0) {
-    container.append(
-      emptyState({
-        title: 'Aucun lien',
-        description: 'Créez vos premiers boutons et liens.',
-        actionLabel: '+ Ajouter un lien',
-        onAction: () => { links.push({ url: 'https://', name: 'Nouveau', text: 'Link' }); renderLinks({ container, addBtn, links, categories, scheduleAutoSave }); scheduleAutoSave(); },
-      })
-    );
-  } else {
-    links.forEach((l, idx) => {
-      const row = el('div', { class: 'flex flex-col gap-2 md:gap-3' });
-      row.dataset.dragIndex = String(idx);
-      const line1 = el('div', { class: 'flex items-center gap-2 w-full' });
-      const iconWrap = el('div', { class: 'flex items-center gap-2 w-full md:w-1/3' });
-      const gripBtn = el('button', { type: 'button', class: 'h-9 w-9 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 mr-3', title: 'Déplacer', 'aria-label': 'Déplacer' });
-      gripBtn.style.cursor = 'grab';
-      gripBtn.appendChild(createGripSVG(18));
-      const iconPreview = el('img', { class: 'h-8 w-8 rounded bg-slate-800 border border-slate-700' });
-      const sourceSel = el('select', { class: 'h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm w-32' }, []);
-      ;['catalog','url','upload'].forEach(v => {
-        const o = el('option', { value: v, text: v === 'catalog' ? 'Librairie' : v === 'url' ? 'Lien' : 'Importer' });
-        sourceSel.appendChild(o);
-      });
-      const catalogWrap = el('div', { class: 'relative flex-1' });
-      const icon = el('input', { type: 'text', value: l.icon || '', placeholder: 'Cliquer pour choisir', class: 'pl-3 pr-20 py-2 w-full rounded bg-slate-900 border border-slate-800 cursor-pointer', readonly: 'true', tabindex: '0' });
-      const pickBtnIcon = el('button', { class: 'absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 border border-slate-700 hover:bg-slate-700', text: 'Choisir', type: 'button' });
-      catalogWrap.append(icon, pickBtnIcon);
-      const urlWrap = el('div', { class: 'flex-1 hidden' });
-      const iconUrlInput = el('input', { type: 'url', class: 'px-3 py-2 w-full rounded bg-slate-900 border border-slate-800', placeholder: 'https://exemple.com/icone.svg' });
-      urlWrap.append(iconUrlInput);
-      const uploadWrap = el('div', { class: 'flex-1 hidden' });
-      const fileInput = el('input', { type: 'file', accept: 'image/*,image/svg+xml', class: 'block w-full text-sm text-slate-300 file:mr-2 file:py-2 file:px-3 file:rounded file:border-0 file:text-sm file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700' });
-      uploadWrap.append(fileInput);
-      iconWrap.append(gripBtn, iconPreview, catalogWrap, urlWrap, uploadWrap);
 
-      const text = el('input', { type: 'text', value: l.text || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 flex-1' });
-      line1.append(iconWrap, sourceSel, text);
+  // Bind quick add controls if present in DOM
+  const quickInput = document.getElementById('quickAddInput');
+  const quickBtn = document.getElementById('quickAddBtn');
+  const openAddModalBtn = document.getElementById('openAddModalBtn');
 
-      const line2 = el('div', { class: 'flex items-center gap-2 w-full' });
-      const url = el('input', { type: 'url', value: l.url || 'https://', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 flex-1' });
-      const themeWrap = el('div', { class: 'relative w-full md:w-1/3' });
-      const themeDisplay = el('input', { type: 'text', class: 'pl-3 pr-20 py-2 w-full rounded bg-slate-900 border border-slate-800 cursor-pointer', readonly: 'true', placeholder: 'Choisir un thème' });
-      themeDisplay.value = l.name && String(l.name).trim() !== '' ? String(l.name) : '';
-      const themePickBtn = el('button', { class: 'absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 border border-slate-700 hover:bg-slate-700', text: 'Choisir', type: 'button', title: 'Choisir le thème du bouton' });
-      themeWrap.append(themeDisplay, themePickBtn);
-      line2.append(url, themeWrap);
+  // Helper to open modal (single init)
+  const modal = document.getElementById('linkModal');
+  const modalTitle = modal && document.getElementById('linkModalTitleInput');
+  const modalUrl = modal && document.getElementById('linkModalUrlInput');
+  let modalIcon = modal && document.getElementById('linkModalIconInput');
+  const modalDesc = modal && document.getElementById('linkModalDescInput');
+  const modalCat = modal && document.getElementById('linkModalCategory');
+  const modalNewTab = modal && document.getElementById('linkModalNewTab');
+  const modalSaveBtn = modal && document.getElementById('linkModalSave');
+  const modalCancelBtn = modal && document.getElementById('linkModalCancel');
+  const modalCloseBtn = modal && document.getElementById('linkModalClose');
+  const modalSchemeBtn = modal && document.getElementById('linkModalSchemeBtn');
+  const modalSchemeMenu = modal && document.getElementById('linkModalSchemeMenu');
 
-      const line3 = el('div', { class: 'flex items-center gap-2 w-full' });
-      const description = el('input', { type: 'text', value: l.description || '', class: 'px-3 py-2 rounded bg-slate-900 border border-slate-800 flex-1', placeholder: 'Description (optionnel)' });
-      
-      // Category Selector
-      const catWrap = el('div', { class: 'w-full md:w-1/3' });
-      if (categories && categories.length > 0) {
-        const catSel = el('select', { class: 'w-full h-10 px-3 rounded-lg bg-slate-900 border border-slate-800 text-sm text-slate-300 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 outline-none transition-all' });
-        catSel.append(el('option', { value: '', text: 'Aucune catégorie' }));
-        categories.forEach(c => {
-          const opt = el('option', { value: c.id || c.name, text: c.name });
-          if (c.id === l.categoryId) opt.selected = true;
-          catSel.append(opt);
-        });
-        catSel.addEventListener('change', () => { l.categoryId = catSel.value || null; scheduleAutoSave(); });
-        catWrap.append(catSel);
-      } else {
-        // Placeholder if no categories
-        // catWrap.classList.add('hidden');
-      }
+  function fillCategorySelect() {
+    if (!modalCat) return;
+    modalCat.innerHTML = '';
+    modalCat.append(el('option', { value: '', text: 'Aucune catégorie' }));
+    (categories || []).forEach(c => modalCat.append(el('option', { value: c.id || c.name, text: c.name })));
+  }
 
-      const rm = trashButton(() => { links.splice(idx, 1); renderLinks({ container, addBtn, links, categories, scheduleAutoSave }); scheduleAutoSave(); });
-      const rmCell = el('div', { class: 'flex justify-end items-center w-auto' });
-      rmCell.append(rm);
-      
-      if (categories && categories.length > 0) {
-        line3.append(description, catWrap, rmCell);
-      } else {
-        line3.append(description, rmCell);
-      }
+  let editingIndex = null;
+  function openLinkModal(idx) {
+    if (!modal) return;
+    editingIndex = (typeof idx === 'number') ? idx : null;
+    const l = (editingIndex !== null) ? links[editingIndex] : { url: '', text: '', icon: '', description: '', categoryId: null, newTab: false };
+    fillCategorySelect();
+    modalTitle.value = l.text || '';
+    // store URL without scheme in the input (prefix shown in UI)
+    try {
+      const raw = l.url || '';
+      modalUrl.value = String(raw).replace(/^https?:\/\//i, '') || '';
+      // set scheme display based on existing url
+      let scheme = 'https';
+      if (/^http:/.test(String(raw))) scheme = 'http';
+      try { if (modal) modal.dataset.urlScheme = scheme; } catch {}
+      try { if (modalSchemeBtn) modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = scheme + '://'; } catch {}
+    } catch {
+      modalUrl.value = l.url || '';
+    }
+    // Icon source handling
+    const iconSourceEl = document.getElementById('linkModalIconSource');
+    const iconInput = document.getElementById('linkModalIconInput');
+    const iconUrlInput = document.getElementById('linkModalIconInputUrl');
+    const iconPickerWrap = document.getElementById('linkModalIconPickerWrap');
+    const iconUrlWrap = document.getElementById('linkModalIconUrlWrap');
+    const iconUploadWrap = document.getElementById('linkModalIconUploadWrap');
+    const iconUpload = document.getElementById('linkModalIconUpload');
+    const pickBtn = document.getElementById('linkModalPickIconBtn');
 
-      row.append(line1, line2, line3);
-      try { enableDragHandle(gripBtn, row, container, links, () => renderLinks({ container, addBtn, links, categories, scheduleAutoSave }), scheduleAutoSave); } catch {}
-      function setPreviewByValue(val) { if (isUrlish(val)) iconPreview.src = val; else iconPreview.src = val; }
+    function showIconSource(src) {
+      iconPickerWrap.classList.toggle('hidden', src !== 'catalog');
+      iconUrlWrap.classList.toggle('hidden', src !== 'url');
+      iconUploadWrap.classList.toggle('hidden', src !== 'upload');
+    }
 
-      function openIconPickerForLink() {
+    // determine default source
+    let src = 'catalog';
+    if (l.icon) {
+      if (String(l.icon).startsWith('data:')) src = 'upload';
+      else if (/https?:\/\//.test(l.icon)) src = 'url';
+      else src = 'catalog';
+    }
+
+    if (iconSourceEl) iconSourceEl.value = src;
+    if (iconInput) iconInput.value = (src === 'catalog' && l.icon) ? l.icon : '';
+    if (iconUrlInput) iconUrlInput.value = (src === 'url' && l.icon) ? l.icon : '';
+
+    showIconSource(iconSourceEl ? iconSourceEl.value : src);
+
+    // Bind picker/upload handlers
+    if (iconSourceEl && !iconSourceEl._bound) {
+      iconSourceEl.addEventListener('change', () => { showIconSource(iconSourceEl.value); });
+      iconSourceEl._bound = true;
+    }
+    if (pickBtn && !pickBtn._bound) {
+      pickBtn.addEventListener('click', () => {
         openIconModal((slug) => {
           const replaced = `https://s3.marvideo.fr/plinkk-image/icons/${slug}.svg`;
-          icon.value = replaced;
-          l.icon = replaced;
-          setPreviewByValue(l.icon);
-          scheduleAutoSave();
+          if (iconInput) iconInput.value = replaced;
         });
-      }
-      pickBtnIcon.addEventListener('click', openIconPickerForLink);
-      icon.addEventListener('click', openIconPickerForLink);
-      icon.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openIconPickerForLink(); } });
-      iconUrlInput.addEventListener('input', () => { l.icon = iconUrlInput.value; setPreviewByValue(l.icon); scheduleAutoSave(); });
-      fileInput.addEventListener('change', (e) => { const file = e.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { l.icon = String(reader.result || ''); setPreviewByValue(l.icon); scheduleAutoSave(); }; reader.readAsDataURL(file); });
-
-      const initialSource = l.icon ? (l.icon.startsWith('data:') ? 'upload' : (isUrlish(l.icon) ? 'url' : 'catalog')) : 'catalog';
-      sourceSel.value = initialSource;
-      if (initialSource === 'catalog') { catalogWrap.classList.remove('hidden'); }
-      if (initialSource === 'url') { urlWrap.classList.remove('hidden'); iconUrlInput.value = l.icon || ''; }
-      if (initialSource === 'upload') { uploadWrap.classList.remove('hidden'); }
-      setPreviewByValue(l.icon || icon.value);
-      sourceSel.addEventListener('change', () => {
-        const v = sourceSel.value;
-        catalogWrap.classList.toggle('hidden', v !== 'catalog');
-        urlWrap.classList.toggle('hidden', v !== 'url');
-        uploadWrap.classList.toggle('hidden', v !== 'upload');
-        if (v === 'catalog') { l.icon = icon.value; setPreviewByValue(l.icon); scheduleAutoSave(); }
-        if (v === 'url') { l.icon = iconUrlInput.value; setPreviewByValue(l.icon); scheduleAutoSave(); }
       });
-      text.addEventListener('input', () => { l.text = text.value; scheduleAutoSave(); });
-      url.addEventListener('input', () => { l.url = url.value; scheduleAutoSave(); });
-      description.addEventListener('input', () => { l.description = description.value; scheduleAutoSave(); });
-      const openThemePicker = () => {
-        const items = window.__PLINKK_CFG__?.btnIconThemeConfig || [];
-        const itemsWithNone = [{ __none: true, name: 'Aucun' }, ...items];
-        const { openPicker, renderBtnThemeCard } = window.__DASH_PICKERS__;
-        openPicker({
-          title: 'Choisir un thème de bouton',
-          type: 'btn-theme',
-          items: itemsWithNone,
-          renderCard: (item, i) => {
-            // Rendu d'une carte simple pour l'option "Aucun"
-            if (item && item.__none) {
-              const card = document.createElement('button');
-              card.type = 'button';
-              card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left flex items-center gap-3';
-              const badge = document.createElement('div');
-              badge.className = 'h-8 w-8 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 text-slate-300 text-xs';
-              badge.textContent = 'Ø';
-              const col = document.createElement('div');
-              const title = document.createElement('div');
-              title.className = 'font-medium';
-              title.textContent = 'Aucun';
-              const small = document.createElement('div');
-              small.className = 'text-xs text-slate-400';
-              small.textContent = 'Désactiver le thème';
-              col.append(title, small);
-              card.append(badge, col);
-              card.addEventListener('click', () => { window.__DASH_PICKERS__.pickerOnSelect?.(i); });
-              return card;
-            }
-            // Sinon, déléguer au renderer existant
-            return renderBtnThemeCard(item, i);
-          },
-          onSelect: (i) => {
-            const chosen = itemsWithNone[i];
-            if (chosen?.name) {
-              themeDisplay.value = chosen.name;
-              l.name = chosen.name;
-            }
-            if (chosen?.icon) {
-              const replaced = chosen.icon //.replace('{{username}}', `/${window.__PLINKK_USER_ID__}`);
-              icon.value = replaced;
-              l.icon = replaced;
-            }
-            scheduleAutoSave();
-          },
-        });
-      };
-      themePickBtn.addEventListener('click', openThemePicker);
-      themeDisplay.addEventListener('click', openThemePicker);
-      themeDisplay.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openThemePicker(); } });
-      container.appendChild(row);
-    });
+      pickBtn._bound = true;
+    }
+    if (iconUpload && !iconUpload._bound) {
+      iconUpload.addEventListener('change', (e) => {
+        const file = e.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => {
+          // store in the URL input as data URL
+          if (iconUrlInput) iconUrlInput.value = String(reader.result || '');
+        }; reader.readAsDataURL(file);
+      });
+      iconUpload._bound = true;
+    }
+
+    modalIcon = document.getElementById('linkModalIconInput') || document.getElementById('linkModalIconInputUrl');
+    modalDesc.value = l.description || '';
+    modalCat.value = l.categoryId || '';
+    modalNewTab.checked = !!l.newTab;
+    // Persist editing index on modal element so the save handler (bound once) can read it
+    try { if (editingIndex !== null) modal.dataset.editingIndex = String(editingIndex); else delete modal.dataset.editingIndex; } catch {}
+    // If icon source is catalog, ensure the input is readonly (cannot edit the stored library link)
+    try {
+      if (iconSourceEl && iconSourceEl.value === 'catalog') {
+        if (iconInput) iconInput.setAttribute('readonly', 'true');
+      } else {
+        if (iconInput) iconInput.removeAttribute('readonly');
+      }
+    } catch {}
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+    try { modalTitle && modalTitle.focus(); } catch {}
   }
-  if (addBtn) addBtn.onclick = () => { links.push({ url: 'https://', name: 'Nouveau', text: 'Link' }); renderLinks({ container, addBtn, links, categories, scheduleAutoSave }); scheduleAutoSave(); };
+
+  function closeLinkModal() {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+    try { if (modal) delete modal.dataset.editingIndex; } catch {}
+    editingIndex = null;
+  }
+
+  // Initialize modal buttons only once
+  if (modal && !modal._initialized) {
+    // scheme menu toggle and selection handlers
+    if (modalSchemeBtn && modalSchemeMenu && !modalSchemeBtn._bound) {
+      modalSchemeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        modalSchemeMenu.classList.toggle('hidden');
+      });
+      // choose scheme
+      Array.from(modalSchemeMenu.querySelectorAll('button[data-scheme]')).forEach(b => {
+        b.addEventListener('click', (ev) => {
+          const s = ev.currentTarget.getAttribute('data-scheme');
+          try { modal.dataset.urlScheme = s; } catch {}
+          try { modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = s + '://'; } catch {}
+          modalSchemeMenu.classList.add('hidden');
+          // focus url input
+          try { modalUrl && modalUrl.focus(); } catch {}
+        });
+      });
+      // close on outside click
+      document.addEventListener('click', () => { try { modalSchemeMenu.classList.add('hidden'); } catch {} });
+      modalSchemeBtn._bound = true;
+    }
+    // auto-detect scheme if user pastes 'http(s)://' in the URL input
+    if (modalUrl && !modalUrl._schemeBound) {
+      modalUrl.addEventListener('input', (e) => {
+        try {
+          const v = String(modalUrl.value || '');
+          if (/^https?:\/\//i.test(v)) {
+            // extract scheme and rest, set dataset, update label and remove scheme from input
+            const match = v.match(/^(https?):\/\/(.*)$/i);
+            if (match) {
+              const s = match[1].toLowerCase();
+              const rest = match[2] || '';
+              try { modal.dataset.urlScheme = s; } catch {}
+              try { modalSchemeBtn && (modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = s + '://'); } catch {}
+              // update input without the scheme
+              if (modalUrl.value !== rest) modalUrl.value = rest;
+            }
+          }
+        } catch (err) {}
+      });
+      modalUrl._schemeBound = true;
+    }
+    if (modalSaveBtn) modalSaveBtn.addEventListener('click', () => {
+      // determine icon based on selected source
+      const iconSourceEl = document.getElementById('linkModalIconSource');
+      let iconValue = '';
+      if (iconSourceEl) {
+        if (iconSourceEl.value === 'catalog') iconValue = document.getElementById('linkModalIconInput')?.value.trim() || '';
+        else if (iconSourceEl.value === 'url') iconValue = document.getElementById('linkModalIconInputUrl')?.value.trim() || '';
+        else if (iconSourceEl.value === 'upload') iconValue = document.getElementById('linkModalIconInputUrl')?.value.trim() || '';
+      } else {
+        iconValue = (document.getElementById('linkModalIconInput') || document.getElementById('linkModalIconInputUrl'))?.value.trim() || '';
+      }
+
+      // reconstruct full url with selected scheme (default https)
+      let rawUrl = (modalUrl.value || '').trim();
+      rawUrl = rawUrl.replace(/^https?:\/\//i, '');
+      let scheme = 'https';
+      try { scheme = modal && modal.dataset && modal.dataset.urlScheme ? modal.dataset.urlScheme : 'https'; } catch { scheme = 'https'; }
+      const fullUrl = rawUrl ? (scheme + '://' + rawUrl) : (scheme + '://');
+      const payload = { text: modalTitle.value.trim(), url: fullUrl, icon: iconValue, description: modalDesc.value.trim() || '', categoryId: modalCat.value || null, newTab: !!modalNewTab.checked };
+      // read editing index from modal dataset (safe across re-renders)
+      let mi = null;
+      try { mi = modal && modal.dataset && modal.dataset.editingIndex ? parseInt(modal.dataset.editingIndex, 10) : null; } catch { mi = null; }
+      if (mi !== null && !isNaN(mi)) {
+        Object.assign(links[mi], payload);
+      } else {
+        links.push(payload);
+      }
+      renderLinks({ container, addBtn, links, categories, scheduleAutoSave });
+      scheduleAutoSave();
+      closeLinkModal();
+    });
+    if (modalCancelBtn) modalCancelBtn.addEventListener('click', () => closeLinkModal());
+    if (modalCloseBtn) modalCloseBtn.addEventListener('click', () => closeLinkModal());
+    // close on Escape
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) closeLinkModal(); });
+    modal._initialized = true;
+  }
+
+  // Quick add handler
+  if (quickBtn && quickInput) {
+    quickBtn.onclick = () => {
+      const v = String(quickInput.value || '').trim();
+      if (!v) return;
+      // Accept formats: "Titre | url" or just url
+      let title = '';
+      let url = '';
+      if (v.includes('|')) {
+        [title, url] = v.split('|').map(s => s.trim());
+      } else if (/https?:\/\//.test(v)) {
+        url = v;
+      } else {
+        // treat as title only
+        title = v;
+      }
+      if (!url && title && /https?:\/\//.test(title)) { url = title; title = ''; }
+      // normalize url: remove existing scheme and prefix https://
+      const normalize = (s) => { if (!s) return ''; const t = String(s).trim().replace(/^https?:\/\//i, ''); return t; };
+      const raw = normalize(url);
+      const full = raw ? ('https://' + raw) : 'https://';
+      const item = { text: title || raw || 'Nouveau', url: full, icon: '', description: '', categoryId: null, newTab: false };
+      links.push(item);
+      quickInput.value = '';
+      renderLinks({ container, addBtn, links, categories, scheduleAutoSave });
+      scheduleAutoSave();
+    };
+  }
+  if (openAddModalBtn) {
+    openAddModalBtn.onclick = () => openLinkModal(null);
+  }
+
+  // If no links, show an empty state (below quick add)
+  if (!Array.isArray(links) || links.length === 0) {
+    container.append(emptyState({ title: 'Aucun lien', description: 'Créez vos premiers boutons et liens.', actionLabel: '+ Ajouter un lien', onAction: () => openLinkModal(null) }));
+    return;
+  }
+
+  links.forEach((l, idx) => {
+    const row = el('div', { class: 'flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-800 bg-slate-900' });
+    row.dataset.dragIndex = String(idx);
+
+    const left = el('div', { class: 'flex items-center gap-3 min-w-0' });
+    const grip = el('button', { type: 'button', class: 'h-8 w-8 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-400 cursor-grab', title: 'Déplacer' });
+    grip.appendChild(createGripSVG(16));
+
+    const iconImg = el('img', { class: 'h-10 w-10 rounded bg-slate-800 border border-slate-700 object-cover' });
+    if (l.icon) iconImg.src = l.icon;
+    const textWrap = el('div', { class: 'min-w-0' });
+    const title = el('div', { class: 'text-sm font-medium text-slate-200 truncate' }); title.textContent = l.text || l.name || '';
+    const small = el('div', { class: 'text-xs text-slate-400 truncate' }); small.textContent = l.url || '';
+    textWrap.append(title, small);
+
+    left.append(grip, iconImg, textWrap);
+
+    const actions = el('div', { class: 'flex items-center gap-2' });
+
+    // Toggle as accessible checkbox to avoid accidental form navigation
+    const toggleWrap = el('div', { class: 'inline-flex items-center gap-2' });
+    const toggleInput = el('input', { type: 'checkbox', 'aria-label': 'Activer / Désactiver' });
+    if (l.enabled === false) toggleInput.checked = false; else toggleInput.checked = true;
+    const toggleBtn = el('button', { type: 'button', class: (toggleInput.checked ? 'px-3 py-1 rounded text-xs bg-emerald-700 text-white' : 'px-3 py-1 rounded text-xs bg-slate-800 text-slate-400'), title: 'Activer / Désactiver' });
+    toggleBtn.textContent = toggleInput.checked ? 'On' : 'Off';
+    toggleInput.addEventListener('change', (e) => {
+      e.stopPropagation();
+      l.enabled = !!toggleInput.checked;
+      toggleBtn.className = l.enabled ? 'px-3 py-1 rounded text-xs bg-emerald-700 text-white' : 'px-3 py-1 rounded text-xs bg-slate-800 text-slate-400';
+      toggleBtn.textContent = l.enabled ? 'On' : 'Off';
+      renderLinks({ container, addBtn, links, categories, scheduleAutoSave });
+      scheduleAutoSave();
+    });
+    // allow clicking the visible button to toggle state (no navigation)
+    toggleBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); toggleInput.checked = !toggleInput.checked; toggleInput.dispatchEvent(new Event('change')); });
+    toggleWrap.append(toggleInput, toggleBtn);
+
+    const editBtn = el('button', { type: 'button', class: 'px-3 py-1 rounded text-xs bg-slate-800 hover:bg-slate-700 text-slate-200', title: 'Modifier' });
+    editBtn.textContent = 'Modifier';
+    editBtn.addEventListener('click', () => openLinkModal(idx));
+
+    const dupBtn = el('button', { type: 'button', class: 'px-3 py-1 rounded text-xs bg-slate-800 hover:bg-slate-700 text-slate-200', title: 'Dupliquer' });
+    dupBtn.textContent = 'Dupliquer';
+    dupBtn.addEventListener('click', () => { links.splice(idx + 1, 0, JSON.parse(JSON.stringify(l))); renderLinks({ container, addBtn, links, categories, scheduleAutoSave }); scheduleAutoSave(); });
+
+    const rm = trashButton(() => { links.splice(idx, 1); renderLinks({ container, addBtn, links, categories, scheduleAutoSave }); scheduleAutoSave(); });
+
+    // Do not render the On/Off toggle for now; keep actions compact
+    actions.append(editBtn, dupBtn, rm);
+
+    row.append(left, actions);
+    try { enableDragHandle(grip, row, container, links, () => renderLinks({ container, addBtn, links, categories, scheduleAutoSave }), scheduleAutoSave); } catch {}
+
+    container.appendChild(row);
+  });
+
+  if (addBtn) addBtn.onclick = () => openLinkModal(null);
 }
 
 // Agencement: réordonner les grandes sections de la page
