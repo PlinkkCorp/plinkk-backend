@@ -651,6 +651,17 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
     });
     if (modalCancelBtn) modalCancelBtn.addEventListener('click', () => closeLinkModal());
     if (modalCloseBtn) modalCloseBtn.addEventListener('click', () => closeLinkModal());
+    try {
+      const modalOverlay = modal.firstElementChild;
+      if (modalOverlay && !modalOverlay._boundClose) {
+        modalOverlay.addEventListener('click', () => closeLinkModal());
+        modalOverlay._boundClose = true;
+      }
+      if (!modal._boundOuterClose) {
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeLinkModal(); });
+        modal._boundOuterClose = true;
+      }
+    } catch (e) {}
     // close on Escape
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) closeLinkModal(); });
     modal._initialized = true;
