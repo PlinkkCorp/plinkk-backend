@@ -225,6 +225,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
     { id: 'vrchat', name: 'VRChat', pattern: 'https://vrchat.com/home/user/{handle}', iconSlug: 'vrchat' },
     { id: 'line', name: 'LINE', pattern: 'https://line.me/ti/p/{handle}', iconSlug: 'line' },
   ];
+  try { window.__SOCIAL_PLATFORM_LIST__ = SOCIAL_PLATFORMS; } catch (e) {}
 
   if (!Array.isArray(socials) || socials.length === 0) {
     container.append(
@@ -237,149 +238,108 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
     );
   } else {
     socials.forEach((s, idx) => {
-      const row = el('div', { class: 'flex flex-col md:flex-row items-center gap-2' });
+      // Display row (same UI as links)
+      const row = el('div', { class: 'flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-800 bg-slate-900' });
       row.dataset.dragIndex = String(idx);
-      const gripBtn = el('button', { type: 'button', class: 'h-9 w-9 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 ml-0 self-center shrink-0', title: 'Déplacer', 'aria-label': 'Déplacer' });
-      gripBtn.style.cursor = 'grab';
-      gripBtn.appendChild(createGripSVG(18));
-      const urlSourceSel = el('select', { class: 'h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm w-full md:w-40' });
-      ;['platform','custom'].forEach(v => urlSourceSel.appendChild(el('option', { value: v, text: v === 'platform' ? 'Plateforme' : 'Personnalisé' })));
-      const urlWrap = el('div', { class: 'relative w-full md:w-1/3' });
-      const urlCellWrapper = el('div', { class: 'flex items-center gap-2 w-full md:w-auto' });
-      const url = el('input', { type: 'url', value: s.url || '', class: 'pl-3 pr-20 py-2 w-full rounded bg-slate-900 border border-slate-800' });
-      const urlPickBtn = el('button', { type: 'button', text: 'Choisir', class: 'absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 border border-slate-700 hover:bg-slate-700' });
-      urlWrap.append(url, urlPickBtn);
-      urlCellWrapper.append(gripBtn);
 
-      const iconWrap = el('div', { class: 'flex items-center gap-2 w-full md:w-1/3' });
-      const iconPreview = el('img', { class: 'h-8 w-8 rounded bg-slate-800 border border-slate-700' });
-      const sourceSel = el('select', { class: 'h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm' }, []);
-      ;['catalog','url','upload'].forEach(v => {
-        const o = el('option', { value: v, text: v === 'catalog' ? 'Librairie' : v === 'url' ? 'Lien' : 'Importer' });
-        sourceSel.appendChild(o);
-      });
-      const catalogWrap = el('div', { class: 'relative flex-1' });
-      const iconName = el('input', { type: 'text', value: s.icon || '', class: 'pl-3 pr-20 py-2 w-full rounded bg-slate-900 border border-slate-800 cursor-pointer', placeholder: 'Cliquer pour choisir', readonly: 'true', tabindex: '0' });
-      const pickBtn = el('button', { class: 'absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 border border-slate-700 hover:bg-slate-700', text: 'Choisir', type: 'button' });
-      catalogWrap.append(iconName, pickBtn);
-      const iconUrlWrap = el('div', { class: 'flex-1 hidden' });
-      const iconUrlInput = el('input', { type: 'url', class: 'px-3 py-2 w-full rounded bg-slate-900 border border-slate-800', placeholder: 'https://exemple.com/icone.svg' });
-      iconUrlWrap.append(iconUrlInput);
-      const iconUploadWrap = el('div', { class: 'flex-1 hidden' });
-      const fileInput = el('input', { type: 'file', accept: 'image/*,image/svg+xml', class: 'block w-full text-sm text-slate-300 file:mr-2 file:py-2 file:px-3 file:rounded file:border-0 file:text-sm file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700' });
-      iconUploadWrap.append(fileInput);
+      const left = el('div', { class: 'flex items-center gap-3 min-w-0' });
+      const grip = el('button', { type: 'button', class: 'h-8 w-8 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-400 cursor-grab', title: 'Déplacer' });
+      grip.appendChild(createGripSVG(16));
+
+      const iconImg = el('img', { class: 'h-10 w-10 rounded bg-slate-800 border border-slate-700 object-cover' });
+      if (s.icon) { iconImg.src = isUrlish(s.icon) ? s.icon : `https://s3.marvideo.fr/plinkk-image/icons/${s.icon}.svg`; }
+      const textWrap = el('div', { class: 'min-w-0' });
+      const title = el('div', { class: 'text-sm font-medium text-slate-200 truncate' }); title.textContent = s.name || s.title || (s.url || '').replace(/^https?:\/\//, '');
+      const small = el('div', { class: 'text-xs text-slate-400 truncate' }); small.textContent = s.url || '';
+      textWrap.append(title, small);
+
+      left.append(grip, iconImg, textWrap);
+
+      const actions = el('div', { class: 'flex items-center gap-2' });
+
+      const editBtn = el('button', { type: 'button', class: 'px-3 py-1 rounded text-xs bg-slate-800 hover:bg-slate-700 text-slate-200', title: 'Modifier' }); editBtn.textContent = 'Modifier';
+      const dupBtn = el('button', { type: 'button', class: 'px-3 py-1 rounded text-xs bg-slate-800 hover:bg-slate-700 text-slate-200', title: 'Dupliquer' }); dupBtn.textContent = 'Dupliquer';
       const rm = trashButton(() => { socials.splice(idx, 1); renderSocial({ container, addBtn, socials, scheduleAutoSave }); scheduleAutoSave(); });
-      const rmCell = el('div', { class: 'flex justify-end items-center w-full md:w-16' });
 
-      function setPreviewByValue(val) {
-        if (isUrlish(val)) iconPreview.src = val;
-        else {
-          iconPreview.src = `https://s3.marvideo.fr/plinkk-image/icons/${val}.svg`;
-        }
-      }
-      function updateFromCatalog() { s.icon = iconName.value; setPreviewByValue(s.icon); scheduleAutoSave(); }
-      function updateFromUrl() { s.icon = iconUrlInput.value; setPreviewByValue(s.icon); scheduleAutoSave(); }
-      function updateFromUpload(file) {
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => { s.icon = String(reader.result || ''); setPreviewByValue(s.icon); scheduleAutoSave(); };
-        reader.readAsDataURL(file);
-      }
-      function openPickerForIcon() { openIconModal((slug) => { iconName.value = slug; updateFromCatalog(); }); }
+      function openEditor() {
+        const editor = el('div', { class: 'flex flex-col md:flex-row items-center gap-2 p-2 bg-slate-950 rounded border border-slate-800' });
+        const gripBtn = el('button', { type: 'button', class: 'h-9 w-9 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 ml-0 self-center shrink-0', title: 'Déplacer' }); gripBtn.style.cursor = 'grab'; gripBtn.appendChild(createGripSVG(18));
+        const urlSourceSel = el('select', { class: 'h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm w-full md:w-40' }); ['custom'].forEach(v => urlSourceSel.appendChild(el('option', { value: v, text: 'Personnalisé' })));
+        const urlWrap = el('div', { class: 'relative w-full md:w-1/3' });
+        const url = el('input', { type: 'url', value: s.url || '', class: 'pl-3 pr-20 py-2 w-full rounded bg-slate-900 border border-slate-800' });
+        const urlPickBtn = el('button', { type: 'button', text: 'Choisir', class: 'absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 border border-slate-700 hover:bg-slate-700' });
+        urlWrap.append(url, urlPickBtn);
 
-      const initialSource = s.icon ? (s.icon.startsWith('data:') ? 'upload' : (isUrlish(s.icon) ? 'url' : 'catalog')) : 'catalog';
-      sourceSel.value = initialSource;
-      if (initialSource === 'catalog') { catalogWrap.classList.remove('hidden'); iconName.value = s.icon || ''; }
-      if (initialSource === 'url') { iconUrlWrap.classList.remove('hidden'); iconUrlInput.value = s.icon || ''; }
-      if (initialSource === 'upload') { iconUploadWrap.classList.remove('hidden'); }
-      setPreviewByValue(s.icon || iconName.value);
+        const iconWrap = el('div', { class: 'flex items-center gap-2 w-full md:w-1/3' });
+        const iconPreview = el('img', { class: 'h-8 w-8 rounded bg-slate-800 border border-slate-700' });
+        const sourceSel = el('select', { class: 'h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm' }, []);
+        ['catalog','url','upload'].forEach(v => sourceSel.appendChild(el('option', { value: v, text: v === 'catalog' ? 'Librairie' : v === 'url' ? 'Lien' : 'Importer' })));
+        const catalogWrap = el('div', { class: 'relative flex-1' });
+        const iconName = el('input', { type: 'text', value: s.icon || '', class: 'pl-3 pr-20 py-2 w-full rounded bg-slate-900 border border-slate-800 cursor-pointer', placeholder: 'Cliquer pour choisir', readonly: 'true', tabindex: '0' });
+        const pickBtn = el('button', { class: 'absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 border border-slate-700 hover:bg-slate-700', text: 'Choisir', type: 'button' }); catalogWrap.append(iconName, pickBtn);
+        const iconUrlWrap = el('div', { class: 'flex-1 hidden' }); const iconUrlInput = el('input', { type: 'url', class: 'px-3 py-2 w-full rounded bg-slate-900 border border-slate-800', placeholder: 'https://exemple.com/icone.svg' }); iconUrlWrap.append(iconUrlInput);
+        const iconUploadWrap = el('div', { class: 'flex-1 hidden' }); const fileInput = el('input', { type: 'file', accept: 'image/*,image/svg+xml', class: 'block w-full text-sm text-slate-300 file:mr-2 file:py-2 file:px-3 file:rounded file:border-0 file:text-sm file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700' }); iconUploadWrap.append(fileInput);
+        const saveBtn = el('button', { type: 'button', class: 'px-3 py-1 rounded text-xs bg-emerald-700 text-white' }); saveBtn.textContent = 'Valider';
+        const cancelBtn = el('button', { type: 'button', class: 'px-3 py-1 rounded text-xs bg-slate-800 text-slate-200' }); cancelBtn.textContent = 'Annuler';
 
-      const { openPicker } = window.__DASH_PICKERS__;
-      function openPlatformPicker() {
-        openPicker({
-          title: 'Choisir une plateforme',
-          type: 'platform',
-          items: SOCIAL_PLATFORMS,
-          renderCard: (item, i) => {
-            const card = document.createElement('button');
-            card.type = 'button';
-            card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left flex items-center gap-3';
-            const img = document.createElement('img');
-            img.src = `https://s3.marvideo.fr/plinkk-image/icons/${item.iconSlug}.svg`;
-            img.className = 'h-8 w-8 rounded bg-slate-800 border border-slate-700';
-            const col = document.createElement('div');
-            const title = document.createElement('div');
-            title.className = 'font-medium';
-            title.textContent = item.name;
-            const small = document.createElement('div');
-            small.className = 'text-xs text-slate-400';
-            small.textContent = item.pattern;
-            col.append(title, small);
-            card.append(img, col);
-            card.addEventListener('click', () => { window.__DASH_PICKERS__.pickerOnSelect?.(i); });
-            return card;
-          },
-          onSelect: (i) => {
-            const plat = SOCIAL_PLATFORMS[i];
-            if (!plat) return;
-            window.__OPEN_PLATFORM_MODAL__(plat, ({ handle, country, path }) => {
-              let final = '';
-              if (plat.id === 'apple-music') {
-                const c = (country || 'fr').trim();
-                const p = (path || '').trim().replace(/^\/+/, '');
-                if (c && p) final = `https://music.apple.com/${c}/${p}`;
-              } else if (plat.id === 'apple-podcasts') {
-                const c = (country || 'fr').trim();
-                const p = (path || '').trim().replace(/^\/+/, '');
-                if (c && p) final = `https://podcasts.apple.com/${c}/${p}`;
-              } else {
-                const h = (handle || '').trim();
-                final = plat.pattern.replace('{handle}', h);
-              }
-              if (final) { url.value = final; s.url = final; }
-              if (!s.icon || sourceSel.value === 'catalog') { iconName.value = plat.iconSlug; updateFromCatalog(); }
-              scheduleAutoSave();
-            });
-          },
-        });
+        function setPreviewByValue(val) { if (isUrlish(val)) iconPreview.src = val; else iconPreview.src = `https://s3.marvideo.fr/plinkk-image/icons/${val}.svg`; }
+        function updateFromCatalog() { s.icon = iconName.value; setPreviewByValue(s.icon); }
+        function updateFromUrl() { s.icon = iconUrlInput.value; setPreviewByValue(s.icon); }
+        function updateFromUpload(file) { if (!file) return; const reader = new FileReader(); reader.onload = () => { s.icon = String(reader.result || ''); setPreviewByValue(s.icon); }; reader.readAsDataURL(file); }
+        function openPickerForIcon() { openIconModal((slug) => { iconName.value = slug; updateFromCatalog(); }); }
+
+        const initialSource = s.icon ? (s.icon.startsWith('data:') ? 'upload' : (isUrlish(s.icon) ? 'url' : 'catalog')) : 'catalog';
+        sourceSel.value = initialSource; if (initialSource === 'catalog') { catalogWrap.classList.remove('hidden'); iconName.value = s.icon || ''; }
+        if (initialSource === 'url') { iconUrlWrap.classList.remove('hidden'); iconUrlInput.value = s.icon || ''; }
+        if (initialSource === 'upload') { iconUploadWrap.classList.remove('hidden'); }
+        setPreviewByValue(s.icon || iconName.value);
+
+        pickBtn.addEventListener('click', openPickerForIcon);
+        iconName.addEventListener('click', openPickerForIcon);
+        iconName.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPickerForIcon(); } });
+        iconUrlInput.addEventListener('input', updateFromUrl);
+        fileInput.addEventListener('change', (e) => updateFromUpload(e.target.files?.[0]));
+        sourceSel.addEventListener('change', () => { const v = sourceSel.value; catalogWrap.classList.toggle('hidden', v !== 'catalog'); iconUrlWrap.classList.toggle('hidden', v !== 'url'); iconUploadWrap.classList.toggle('hidden', v !== 'upload'); if (v === 'catalog') updateFromCatalog(); if (v === 'url') updateFromUrl(); });
+
+        const { openPicker } = window.__DASH_PICKERS__;
+        function openPlatformPicker() { openPicker({ title: 'Choisir une plateforme', type: 'platform', items: SOCIAL_PLATFORMS, onSelect: (i) => { const plat = SOCIAL_PLATFORMS[i]; if (!plat) return; window.__OPEN_PLATFORM_MODAL__(plat, ({ handle, country, path }) => { let final = ''; if (plat.id === 'apple-music') { const c = (country || 'fr').trim(); const p = (path || '').trim().replace(/^\/+/, ''); if (c && p) final = `https://music.apple.com/${c}/${p}`; } else if (plat.id === 'apple-podcasts') { const c = (country || 'fr').trim(); const p = (path || '').trim().replace(/^\/+/, ''); if (c && p) final = `https://podcasts.apple.com/${c}/${p}`; } else { const h = (handle || '').trim(); final = plat.pattern.replace('{handle}', h); } if (final) { url.value = final; s.url = final; } if (!s.icon || sourceSel.value === 'catalog') { iconName.value = plat.iconSlug; updateFromCatalog(); } scheduleAutoSave(); }); } }); }
+        urlPickBtn.addEventListener('click', openPlatformPicker);
+        url.addEventListener('input', () => { s.url = url.value; });
+
+        editor.append(gripBtn, urlSourceSel, urlWrap, iconWrap, el('div', { class: 'flex items-center gap-2' }, []));
+        const actionWrap = el('div', { class: 'flex items-center gap-2' }); actionWrap.append(saveBtn, cancelBtn);
+        editor.append(actionWrap);
+
+        row.replaceWith(editor);
+
+        saveBtn.addEventListener('click', () => { s.url = url.value; s.icon = s.icon; renderSocial({ container, addBtn, socials, scheduleAutoSave }); scheduleAutoSave(); });
+        cancelBtn.addEventListener('click', () => { renderSocial({ container, addBtn, socials, scheduleAutoSave }); });
       }
 
-      pickBtn.addEventListener('click', openPickerForIcon);
-      iconName.addEventListener('click', openPickerForIcon);
-      iconName.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPickerForIcon(); } });
-      iconUrlInput.addEventListener('input', updateFromUrl);
-      fileInput.addEventListener('change', (e) => updateFromUpload(e.target.files?.[0]));
-      sourceSel.addEventListener('change', () => {
-        const v = sourceSel.value;
-        catalogWrap.classList.toggle('hidden', v !== 'catalog');
-        iconUrlWrap.classList.toggle('hidden', v !== 'url');
-        iconUploadWrap.classList.toggle('hidden', v !== 'upload');
-        if (v === 'catalog') updateFromCatalog();
-        if (v === 'url') updateFromUrl();
+      editBtn.addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        try {
+          if (window && window.__OPEN_SOCIAL_MODAL__) {
+              const prefill = { text: s.name || s.title || '', url: s.url || '', icon: s.icon || '', description: s.description || '', categoryId: s.categoryId || null, newTab: !!s.newTab };
+              window.__OPEN_SOCIAL_MODAL__(null, {
+                prefill,
+                onSave: (payload) => {
+                    try { s.url = payload.url; s.icon = payload.icon; s.newTab = !!payload.newTab; } catch (e) {}
+                    renderSocial({ container, addBtn, socials, scheduleAutoSave });
+                    scheduleAutoSave();
+                  }
+              });
+              return;
+            }
+        } catch (err) {}
+        // fallback to inline editor
+        openEditor();
       });
+      dupBtn.addEventListener('click', () => { socials.splice(idx + 1, 0, JSON.parse(JSON.stringify(s))); renderSocial({ container, addBtn, socials, scheduleAutoSave }); scheduleAutoSave(); });
 
-      const initialUrlMode = s.url && !/^https?:\/\//i.test(s.url) && !s.url.startsWith('/') ? 'custom' : 'platform';
-      urlSourceSel.value = initialUrlMode;
-      const applyUrlMode = () => {
-        const isPlatform = urlSourceSel.value === 'platform';
-        url.readOnly = isPlatform;
-        url.classList.toggle('cursor-pointer', isPlatform);
-        urlPickBtn.classList.toggle('hidden', !isPlatform);
-      };
-      applyUrlMode();
-      urlSourceSel.addEventListener('change', () => applyUrlMode());
-      url.addEventListener('input', () => { s.url = url.value; scheduleAutoSave(); });
-      urlPickBtn.addEventListener('click', openPlatformPicker);
-      urlWrap.addEventListener('click', (e) => { if (e.target === urlPickBtn) return; if (urlSourceSel.value === 'platform') openPlatformPicker(); });
-      url.addEventListener('click', () => { if (urlSourceSel.value === 'platform') openPlatformPicker(); });
-      url.addEventListener('keydown', (e) => { if (urlSourceSel.value !== 'platform') return; if (e.key === 'Enter' || e.key === ' ' || e.code === 'Space') { e.preventDefault(); openPlatformPicker(); } });
-
-      iconWrap.append(iconPreview, sourceSel, catalogWrap, iconUrlWrap, iconUploadWrap);
-      rmCell.append(rm);
-      const gripWrap = el('div', { class: 'w-full md:w-auto flex items-center' });
-      gripWrap.append(urlCellWrapper);
-      row.append(gripWrap, urlSourceSel, urlWrap, iconWrap, rmCell);
-      try { enableDragHandle(gripBtn, row, container, socials, () => renderSocial({ container, addBtn, socials, scheduleAutoSave }), scheduleAutoSave); } catch {}
+      actions.append(editBtn, dupBtn, rm);
+      row.append(left, actions);
+      try { enableDragHandle(grip, row, container, socials, () => renderSocial({ container, addBtn, socials, scheduleAutoSave }), scheduleAutoSave); } catch {}
       container.appendChild(row);
     });
   }
@@ -547,6 +507,128 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       iconUpload._bound = true;
     }
 
+    // If modal opened in social mode, render presets (grid of platform cards) inside the modal
+    try {
+      const isSocialMode = modal && modal.dataset && modal.dataset.mode === 'social';
+      if (isSocialMode && urlWrap) {
+        let presetsWrap = document.getElementById('linkModalSocialPresets');
+        if (!presetsWrap) {
+          presetsWrap = el('div', { id: 'linkModalSocialPresets', class: 'mt-3 grid grid-cols-4 gap-2' });
+          // place presets below URL input
+          urlWrap.appendChild(presetsWrap);
+        }
+        if (!presetsWrap._bound) {
+          const platforms = window.__SOCIAL_PLATFORM_LIST__ || [];
+          presetsWrap.innerHTML = '';
+
+          // header with title and optional "Voir tout"
+          const hdr = el('div', { class: 'flex items-center justify-between w-full mb-2' });
+          const title = el('div', { class: 'text-sm font-medium text-slate-200', text: 'Presets' });
+          hdr.appendChild(title);
+          if (platforms.length > 12) {
+            const seeAll = el('button', { type: 'button', class: 'text-xs text-sky-400 hover:text-sky-300', text: 'Voir tout' });
+            seeAll.addEventListener('click', () => {
+              const { openPicker } = window.__DASH_PICKERS__ || {};
+              if (!openPicker) return;
+              openPicker({
+                title: 'Toutes les plateformes',
+                type: 'platform',
+                items: platforms,
+                renderCard: (item) => {
+                  const card = document.createElement('button');
+                  card.type = 'button';
+                  card.className = 'p-3 rounded border border-slate-700 bg-slate-900 hover:bg-slate-800 text-left flex items-center gap-3';
+                  const img = document.createElement('img');
+                  img.src = `https://s3.marvideo.fr/plinkk-image/icons/${item.iconSlug}.svg`;
+                  img.className = 'h-8 w-8 rounded bg-slate-800';
+                  const col = document.createElement('div');
+                  const title = document.createElement('div');
+                  title.className = 'font-medium';
+                  title.textContent = item.name;
+                  const small = document.createElement('div');
+                  small.className = 'text-xs text-slate-400';
+                  small.textContent = item.pattern || item.id;
+                  col.append(title, small);
+                  card.append(img, col);
+                  return card;
+                },
+                onSelect: (i) => {
+                  const plat = platforms[i];
+                  if (!plat) return;
+                  try {
+                    window.__OPEN_PLATFORM_MODAL__(plat, ({ handle, country, path }) => {
+                      let final = '';
+                      if (plat.id === 'apple-music') {
+                        const c = (country || 'fr').trim();
+                        const p = (path || '').trim().replace(/^\/+/, '');
+                        if (c && p) final = `https://music.apple.com/${c}/${p}`;
+                      } else if (plat.id === 'apple-podcasts') {
+                        const c = (country || 'fr').trim();
+                        const p = (path || '').trim().replace(/^\/+/, '');
+                        if (c && p) final = `https://podcasts.apple.com/${c}/${p}`;
+                      } else {
+                        const h = (handle || '').trim();
+                        final = plat.pattern.replace('{handle}', h);
+                      }
+                      if (final) {
+                        if (url) url.value = final;
+                        try { modal.dataset.urlScheme = /^http:/.test(final) ? 'http' : 'https'; } catch {}
+                        const iconSourceEl = document.getElementById('linkModalIconSource');
+                        const iconInput = document.getElementById('linkModalIconInput');
+                        if (iconSourceEl) iconSourceEl.value = 'catalog';
+                        if (iconInput) iconInput.value = `https://s3.marvideo.fr/plinkk-image/icons/${plat.iconSlug}.svg`;
+                      }
+                    });
+                  } catch (e) {}
+                }
+              });
+            });
+            hdr.appendChild(seeAll);
+          }
+          presetsWrap.appendChild(hdr);
+
+          // grid of presets
+          const grid = el('div', { class: 'grid grid-cols-6 gap-2 w-full' });
+          platforms.slice(0, 24).forEach((plat) => {
+            const btn = el('button', { type: 'button', class: 'flex flex-col items-center gap-1 p-2 rounded border border-slate-700 bg-gradient-to-b from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-center text-xs transition', title: plat.name });
+            const img = el('img', { src: `https://s3.marvideo.fr/plinkk-image/icons/${plat.iconSlug}.svg`, class: 'h-7 w-7' });
+            const label = el('div', { class: 'text-xs text-slate-300 truncate w-full', text: plat.name });
+            btn.append(img, label);
+            btn.addEventListener('click', () => {
+              try {
+                window.__OPEN_PLATFORM_MODAL__(plat, ({ handle, country, path }) => {
+                  let final = '';
+                  if (plat.id === 'apple-music') {
+                    const c = (country || 'fr').trim();
+                    const p = (path || '').trim().replace(/^\/+/, '');
+                    if (c && p) final = `https://music.apple.com/${c}/${p}`;
+                  } else if (plat.id === 'apple-podcasts') {
+                    const c = (country || 'fr').trim();
+                    const p = (path || '').trim().replace(/^\/+/, '');
+                    if (c && p) final = `https://podcasts.apple.com/${c}/${p}`;
+                  } else {
+                    const h = (handle || '').trim();
+                    final = plat.pattern.replace('{handle}', h);
+                  }
+                  if (final) {
+                    if (url) url.value = final;
+                    try { modal.dataset.urlScheme = /^http:/.test(final) ? 'http' : 'https'; } catch {}
+                    const iconSourceEl = document.getElementById('linkModalIconSource');
+                    const iconInput = document.getElementById('linkModalIconInput');
+                    if (iconSourceEl) iconSourceEl.value = 'catalog';
+                    if (iconInput) iconInput.value = `https://s3.marvideo.fr/plinkk-image/icons/${plat.iconSlug}.svg`;
+                  }
+                });
+              } catch (e) {}
+            });
+            grid.appendChild(btn);
+          });
+          presetsWrap.appendChild(grid);
+          presetsWrap._bound = true;
+        }
+      }
+    } catch (e) {}
+
     modalIcon = document.getElementById('linkModalIconInput') || document.getElementById('linkModalIconInputUrl');
     modalDesc.value = l.description || '';
     modalCat.value = l.categoryId || '';
@@ -573,6 +655,237 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
     try { if (modal) delete modal.dataset.editingIndex; } catch {}
     editingIndex = null;
   }
+
+  // Expose a helper to let other renderers reuse the link modal.
+  // Usage: window.__OPEN_LINK_MODAL__(idxOrNull, { prefill: {...}, onSave: (payload)=>{} })
+  try {
+    window.__OPEN_LINK_MODAL__ = (idx, opts) => {
+      try { if (modal) modal.dataset.mode = 'link'; } catch (e) {}
+      openLinkModal(idx);
+      if (!opts) return;
+      try {
+        const p = opts.prefill || {};
+        if (p.text !== undefined) modalTitle.value = p.text;
+        if (p.url !== undefined) {
+          // remove scheme for input
+          modalUrl.value = String(p.url || '').replace(/^https?:\/\//i, '');
+          try { modal.dataset.urlScheme = p.url && /^http:/.test(p.url) ? 'http' : 'https'; } catch {}
+          try { modalSchemeBtn && (modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = (modal.dataset.urlScheme || 'https') + '://'); } catch {}
+        }
+        if (p.icon !== undefined) {
+          const iconSourceEl = document.getElementById('linkModalIconSource');
+          const iconInput = document.getElementById('linkModalIconInput');
+          const iconUrlInput = document.getElementById('linkModalIconInputUrl');
+          if (iconSourceEl) {
+            let src = 'catalog';
+            if (String(p.icon).startsWith('data:')) src = 'upload'; else if (/https?:\/\//.test(p.icon)) src = 'url';
+            iconSourceEl.value = src;
+            if (src === 'catalog') { if (iconInput) iconInput.value = p.icon; }
+            if (src === 'url' || src === 'upload') { if (iconUrlInput) iconUrlInput.value = p.icon; }
+            const iconPickerWrap = document.getElementById('linkModalIconPickerWrap');
+            const iconUrlWrap = document.getElementById('linkModalIconUrlWrap');
+            const iconUploadWrap = document.getElementById('linkModalIconUploadWrap');
+            if (iconPickerWrap) iconPickerWrap.classList.toggle('hidden', iconSourceEl.value !== 'catalog');
+            if (iconUrlWrap) iconUrlWrap.classList.toggle('hidden', iconSourceEl.value !== 'url');
+            if (iconUploadWrap) iconUploadWrap.classList.toggle('hidden', iconSourceEl.value !== 'upload');
+          }
+        }
+        if (p.description !== undefined) modalDesc.value = p.description || '';
+        if (p.categoryId !== undefined && modalCat) modalCat.value = p.categoryId || '';
+        if (p.newTab !== undefined && modalNewTab) modalNewTab.checked = !!p.newTab;
+      } catch (e) {}
+      if (opts.onSave && modal) modal._externalSaveHandler = opts.onSave;
+    };
+  } catch (e) {}
+  // Separate social modal helper that reuses link modal DOM but marks mode and allows different save handling
+  try {
+    window.__OPEN_SOCIAL_MODAL__ = (idx, opts) => {
+      try { if (modal) modal.dataset.mode = 'social'; } catch (e) {}
+      openLinkModal(idx);
+      if (!opts) return;
+      try {
+        const p = opts.prefill || {};
+        if (p.text !== undefined) modalTitle.value = p.text;
+        if (p.url !== undefined) modalUrl.value = String(p.url || '').replace(/^https?:\/\//i, '');
+        if (p.icon !== undefined) {
+          const iconSourceEl = document.getElementById('linkModalIconSource');
+          const iconInput = document.getElementById('linkModalIconInput');
+          const iconUrlInput = document.getElementById('linkModalIconInputUrl');
+          if (iconSourceEl) {
+            let src = 'catalog';
+            if (String(p.icon).startsWith('data:')) src = 'upload'; else if (/https?:\/\//.test(p.icon)) src = 'url';
+            iconSourceEl.value = src;
+            if (src === 'catalog') { if (iconInput) iconInput.value = p.icon; }
+            if (src === 'url' || src === 'upload') { if (iconUrlInput) iconUrlInput.value = p.icon; }
+            const iconPickerWrap = document.getElementById('linkModalIconPickerWrap');
+            const iconUrlWrap = document.getElementById('linkModalIconUrlWrap');
+            const iconUploadWrap = document.getElementById('linkModalIconUploadWrap');
+            if (iconPickerWrap) iconPickerWrap.classList.toggle('hidden', iconSourceEl.value !== 'catalog');
+            if (iconUrlWrap) iconUrlWrap.classList.toggle('hidden', iconSourceEl.value !== 'url');
+            if (iconUploadWrap) iconUploadWrap.classList.toggle('hidden', iconSourceEl.value !== 'upload');
+          }
+        }
+        if (p.description !== undefined) modalDesc.value = p.description || '';
+        if (p.categoryId !== undefined && modalCat) modalCat.value = p.categoryId || '';
+        if (p.newTab !== undefined && modalNewTab) modalNewTab.checked = !!p.newTab;
+      } catch (e) {}
+      if (opts.onSave && modal) modal._externalSaveHandler = opts.onSave;
+    };
+  } catch (e) {}
+
+  // When opening in social mode, adapt the modal DOM: hide category/newTab, change header, ensure platform button visible
+  try {
+    const originalAdjust = () => {};
+    const adjustSocialModeUI = () => {
+      if (!modal) return;
+      const isSocial = modal.dataset && modal.dataset.mode === 'social';
+      // header/title
+      try {
+        const header = modal.querySelector('h2') || modal.querySelector('.modal-title');
+        if (header) header.textContent = isSocial ? 'Modifier le réseau social' : 'Modifier le lien';
+      } catch (e) {}
+      // hide title and description and category for social mode
+      try {
+        const titleEl = document.getElementById('linkModalTitleInput');
+        if (titleEl && titleEl.parentElement) titleEl.parentElement.style.display = isSocial ? 'none' : '';
+      } catch (e) {}
+      try {
+        const desc = document.getElementById('linkModalDescInput');
+        if (desc && desc.parentElement) desc.parentElement.style.display = isSocial ? 'none' : '';
+      } catch (e) {}
+      try {
+        const cat = document.getElementById('linkModalCategory');
+        if (cat && cat.parentElement) cat.parentElement.style.display = isSocial ? 'none' : '';
+      } catch (e) {}
+      // show newTab checkbox wrapper for social mode
+      try {
+        const newTab = document.getElementById('linkModalNewTab');
+        if (newTab && newTab.parentElement) newTab.parentElement.style.display = isSocial ? '' : '';
+      } catch (e) {}
+      // add presets button above URL for social mode
+      try {
+        const modalContent = document.querySelector('#linkModal .space-y-3');
+        if (!modalContent) return;
+        const urlLabel = modalContent.querySelector('label:has(#linkModalUrlInput)');
+        if (!urlLabel) return;
+        let presetsBtn = document.getElementById('linkModalPresetsBtn');
+        if (isSocial) {
+          if (!presetsBtn) {
+            presetsBtn = el('button', { type: 'button', id: 'linkModalPresetsBtn', class: 'w-full px-3 py-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium', text: 'Presets' });
+            urlLabel.before(presetsBtn);
+            presetsBtn.addEventListener('click', (ev) => {
+              ev.preventDefault();
+              // create a new modal for presets
+              const modal = el('div', { class: 'fixed inset-0 z-50', id: 'presetsModal' });
+              const backdrop = el('div', { class: 'absolute inset-0 bg-black/60 animate-fade-in' });
+              const content = el('div', { class: 'relative mx-auto mt-16 w-[92vw] max-w-5xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in' });
+              const header = el('div', { class: 'flex items-center justify-between px-4 py-3 border-b border-slate-800' });
+              header.append(el('h3', { class: 'font-semibold', text: 'Choisir une plateforme' }));
+              const closeBtn = el('button', { class: 'size-8 rounded bg-slate-800 hover:bg-slate-700', text: '✕' });
+              closeBtn.addEventListener('click', () => modal.remove());
+              header.append(closeBtn);
+              content.append(header);
+              const body = el('div', { class: 'p-4 space-y-3' });
+              const searchInput = el('input', { type: 'text', placeholder: 'Rechercher une plateforme...', class: 'w-full px-3 py-2 rounded bg-slate-800 border border-slate-700 text-slate-200' });
+              body.append(searchInput);
+              const grid = el('div', { class: 'grid grid-cols-6 gap-2 w-full max-h-96 overflow-auto' });
+              const platforms = window.__SOCIAL_PLATFORM_LIST__ || [];
+              const platformBtns = [];
+              platforms.slice(0, 24).forEach((plat) => {
+                const btn = el('button', { type: 'button', class: 'flex flex-col items-center gap-1 p-2 rounded border border-slate-700 bg-gradient-to-b from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-center text-xs transition', title: plat.name, 'data-name': plat.name.toLowerCase() });
+                const img = el('img', { src: `https://s3.marvideo.fr/plinkk-image/icons/${plat.iconSlug}.svg`, class: 'h-7 w-7' });
+                const label = el('div', { class: 'text-xs text-slate-300 truncate w-full', text: plat.name });
+                btn.append(img, label);
+                btn.addEventListener('click', () => {
+                  modal.remove();
+                  try { window.__OPEN_PLATFORM_MODAL__(plat, ({ handle, country, path }) => {
+                    let final = '';
+                    if (plat.id === 'apple-music') {
+                      const c = (country || 'fr').trim();
+                      const p = (path || '').trim().replace(/^\/+/, '');
+                      if (c && p) final = `https://music.apple.com/${c}/${p}`;
+                    } else if (plat.id === 'apple-podcasts') {
+                      const c = (country || 'fr').trim();
+                      const p = (path || '').trim().replace(/^\/+/, '');
+                      if (c && p) final = `https://podcasts.apple.com/${c}/${p}`;
+                    } else {
+                      const h = (handle || '').trim();
+                      final = plat.pattern.replace('{handle}', h);
+                    }
+                    if (final) {
+                      const urlEl = document.getElementById('linkModalUrlInput');
+                      if (urlEl) urlEl.value = final;
+                      const iconSourceEl = document.getElementById('linkModalIconSource');
+                      const iconInput = document.getElementById('linkModalIconInput');
+                      if (iconSourceEl) iconSourceEl.value = 'catalog';
+                      if (iconInput) iconInput.value = `https://s3.marvideo.fr/plinkk-image/icons/${plat.iconSlug}.svg`;
+                    }
+                  }); } catch (e) {}
+                });
+                grid.appendChild(btn);
+                platformBtns.push(btn);
+              });
+              body.append(grid);
+              content.append(body);
+              modal.append(backdrop, content);
+              document.body.append(modal);
+              // close on backdrop click
+              backdrop.addEventListener('click', () => modal.remove());
+              // search functionality
+              searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                platformBtns.forEach(btn => {
+                  const name = btn.getAttribute('data-name');
+                  if (name.includes(query)) {
+                    btn.style.display = '';
+                  } else {
+                    btn.style.display = 'none';
+                  }
+                });
+              });
+              searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  const firstVisible = platformBtns.find(btn => btn.style.display !== 'none');
+                  if (firstVisible) firstVisible.click();
+                }
+              });
+            });
+          }
+          presetsBtn.style.display = '';
+        } else {
+          if (presetsBtn) presetsBtn.style.display = 'none';
+        }
+      } catch (e) {}
+      // add Enter key handling for inputs
+      try {
+        const inputs = modalContent.querySelectorAll('input:not([type="checkbox"]), select');
+        const allFields = Array.from(modalContent.querySelectorAll('input:not([type="checkbox"]), select, textarea'));
+        inputs.forEach((input, index) => {
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              const currentIndex = allFields.indexOf(input);
+              const nextField = allFields[currentIndex + 1];
+              if (nextField) {
+                nextField.focus();
+              } else {
+                // submit
+                const saveBtn = document.getElementById('linkModalSave');
+                if (saveBtn) saveBtn.click();
+              }
+            }
+          });
+        });
+      } catch (e) {}
+    };
+    // observe modal dataset changes could be complex; call adjust when modal is opened/closed via existing handlers
+    // patch openLinkModal and closeLinkModal points by wrapping existing functions: call adjust after openLinkModal sets modal visible
+    const oldOpen = openLinkModal;
+    openLinkModal = function(idx) { oldOpen(idx); try { adjustSocialModeUI(); } catch(e){} };
+    const oldClose = closeLinkModal;
+    closeLinkModal = function() { try { if (modal) { delete modal.dataset.mode; } } catch(e){}; try { adjustSocialModeUI(); } catch(e){}; oldClose(); };
+  } catch (e) {}
 
   // Initialize modal buttons only once
   if (modal && !modal._initialized) {
@@ -637,6 +950,18 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       try { scheme = modal && modal.dataset && modal.dataset.urlScheme ? modal.dataset.urlScheme : 'https'; } catch { scheme = 'https'; }
       const fullUrl = rawUrl ? (scheme + '://' + rawUrl) : (scheme + '://');
       const payload = { text: modalTitle.value.trim(), url: fullUrl, icon: iconValue, description: modalDesc.value.trim() || '', categoryId: modalCat.value || null, newTab: !!modalNewTab.checked };
+
+      // If an external save handler was provided (via window.__OPEN_LINK_MODAL__), call it instead
+      try {
+        if (modal && modal._externalSaveHandler) {
+          try { modal._externalSaveHandler(payload); } catch (err) {}
+          try { delete modal._externalSaveHandler; } catch (e) { modal._externalSaveHandler = null; }
+          renderLinks({ container, addBtn, links, categories, scheduleAutoSave });
+          scheduleAutoSave();
+          closeLinkModal();
+          return;
+        }
+      } catch (e) {}
       // read editing index from modal dataset (safe across re-renders)
       let mi = null;
       try { mi = modal && modal.dataset && modal.dataset.editingIndex ? parseInt(modal.dataset.editingIndex, 10) : null; } catch { mi = null; }
