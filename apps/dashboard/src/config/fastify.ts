@@ -60,7 +60,7 @@ export async function registerPlugins(fastify: FastifyInstance) {
     },
     startRedirectPath: "/login/github",
     callbackUri: (req) =>
-      `${req.protocol}://${req.hostname}/login/github/callback`,
+      `https://dash.plinkk.fr/login/github/callback`,
   });
 
   await fastify.register(fastifyOAuth2, {
@@ -75,7 +75,7 @@ export async function registerPlugins(fastify: FastifyInstance) {
     },
     startRedirectPath: "/login/discord",
     callbackUri: (req) =>
-      `${req.protocol}://${req.hostname}:3001/login/discord/callback`,
+      `https://dash.plinkk.fr/login/discord/callback`,
   });
 
   await fastify.register(fastifyCors, { origin: true });
