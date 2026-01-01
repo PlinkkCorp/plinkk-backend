@@ -53,8 +53,8 @@ export async function registerPlugins(fastify: FastifyInstance) {
     scope: ["user:email", "read:user"],
     credentials: {
       client: {
-        id: "Ov23li8q4gwChRgYlU8t",
-        secret: "4fa99f807e247b236fdf74fb298c2675871a8fa3",
+        id: process.env.GITHUB_OAUTH2_ID,
+        secret: process.env.GITHUB_OAUTH2_SECRET,
       },
       auth: fastifyOAuth2.GITHUB_CONFIGURATION,
     },
@@ -68,8 +68,8 @@ export async function registerPlugins(fastify: FastifyInstance) {
     scope: ["identify", "email"],
     credentials: {
       client: {
-        id: "1455925598995349702",
-        secret: "DkQ0sYP677TgXSgLnEY-NiiCZq0o6rM6",
+        id: process.env.DISCORD_OAUTH2_ID,
+        secret: process.env.DISCORD_OAUTH2_SECRET,
       },
       auth: fastifyOAuth2.DISCORD_CONFIGURATION,
     },
