@@ -176,7 +176,7 @@ export function registerRoutes(fastify: FastifyInstance) {
   });
 }
 
-async function createDefaultPlinkk(req: any, userId: string, username: string) {
+export async function createDefaultPlinkk(req: any, userId: string, username: string) {
   try {
     const createdPlinkk = await createPlinkkForUser(prisma, userId, {
       name: username,

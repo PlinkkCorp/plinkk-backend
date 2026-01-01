@@ -10,7 +10,7 @@ import { redirectWithError } from "../../utils/errorRedirect";
 export function loginRoutes(fastify: FastifyInstance) {
   fastify.get("/login", async (request, reply) => {
     const currentUserId = request.session.get("data");
-    
+
     if (currentUserId && !String(currentUserId).includes("__totp")) {
       try {
         const exists = await prisma.user.findUnique({
@@ -35,8 +35,9 @@ export function loginRoutes(fastify: FastifyInstance) {
           })
         : null;
 
-    const returnToQuery = (request.query as { returnTo: string })?.returnTo || "";
-    
+    const returnToQuery =
+      (request.query as { returnTo: string })?.returnTo || "";
+
     return await replyView(reply, "connect.ejs", currentUser, {
       returnTo: returnToQuery,
     });
@@ -74,7 +75,9 @@ export function loginRoutes(fastify: FastifyInstance) {
         include: { role: true },
       });
     } else {
-      const withoutAt = identifier.startsWith("@") ? identifier.slice(1) : identifier;
+      const withoutAt = identifier.startsWith("@")
+        ? identifier.slice(1)
+        : identifier;
       const candidateId = slugify(withoutAt);
       user = await prisma.user.findFirst({
         where: {
@@ -110,7 +113,9 @@ export function loginRoutes(fastify: FastifyInstance) {
         (request.query as { returnTo: string })?.returnTo;
       request.session.set("data", user.id + "__totp");
       return reply.redirect(
-        `/totp${returnToQuery ? `?returnTo=${encodeURIComponent(returnToQuery)}` : ""}`
+        `/totp${
+          returnToQuery ? `?returnTo=${encodeURIComponent(returnToQuery)}` : ""
+        }`
       );
     }
 
@@ -129,7 +134,10 @@ export function loginRoutes(fastify: FastifyInstance) {
   });
 }
 
-async function checkUserBan(email: string, identifier: string): Promise<string | null> {
+async function checkUserBan(
+  email: string,
+  identifier: string
+): Promise<string | null> {
   try {
     const ban = await prisma.bannedEmail.findFirst({
       where: { email, revoquedAt: null },

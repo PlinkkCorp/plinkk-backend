@@ -10,16 +10,7 @@ import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkPagesRoutes } from "./server/plinkkPagesRoutes";
 import { authRoutes } from "./routes/auth";
 import { generateTheme } from "./lib/generateTheme";
-import { replyView } from "./lib/replyView";
-import { getPublicPath } from "./services/plinkkService";
-
-declare module "@fastify/secure-session" {
-  interface SessionData {
-    data?: string;
-    sessionId?: string;
-    returnTo?: string;
-  }
-}
+import { registerOAuth2 } from "./config/fastifyOAuth2";
 
 const fastify = Fastify({ logger: true });
 const PORT = 3001;
@@ -27,6 +18,7 @@ const PORT = 3001;
 async function bootstrap() {
   await registerPlugins(fastify);
   await registerCronJobs(fastify);
+  await registerOAuth2(fastify)
 
   registerReservedRootsHook(fastify);
   registerSessionValidator(fastify);
