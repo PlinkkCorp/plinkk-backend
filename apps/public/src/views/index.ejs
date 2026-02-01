@@ -14,220 +14,1223 @@
     <meta name="twitter:title" content="Plinkk — Votre univers en un seul lien" />
     <meta name="twitter:description" content="L'alternative open-source à Linktree. Créez une page de liens magnifique, rapide et entièrement personnalisable." />
     <meta name="twitter:image" content="https://s3.marvideo.fr/plinkk-image/logo.svg" />
+    <style>
+      :root {
+        --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+      }
+      html { scroll-behavior: smooth; }
+      
+      /* Scroll reveal animations */
+      .reveal {
+        opacity: 0;
+        transform: translateY(60px);
+        filter: blur(10px);
+        transition: opacity 1s var(--ease-out-expo), transform 1.2s var(--ease-out-expo), filter 0.8s var(--ease-out-expo);
+      }
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+      }
+      .reveal-delay-1 { transition-delay: 0.15s; }
+      .reveal-delay-2 { transition-delay: 0.3s; }
+      .reveal-delay-3 { transition-delay: 0.45s; }
+      .reveal-delay-4 { transition-delay: 0.6s; }
+      .reveal-delay-5 { transition-delay: 0.75s; }
+      
+      /* Scale animation with blur */
+      .reveal-scale {
+        opacity: 0;
+        transform: scale(0.85);
+        filter: blur(15px);
+        transition: opacity 1s var(--ease-out-expo), transform 1.2s var(--ease-out-expo), filter 0.8s var(--ease-out-expo);
+      }
+      .reveal-scale.visible {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+      }
+      
+      /* Slide from left */
+      .reveal-left {
+        opacity: 0;
+        transform: translateX(-80px);
+        filter: blur(8px);
+        transition: opacity 1s var(--ease-out-expo), transform 1.2s var(--ease-out-expo), filter 0.8s var(--ease-out-expo);
+      }
+      .reveal-left.visible {
+        opacity: 1;
+        transform: translateX(0);
+        filter: blur(0);
+      }
+      
+      /* Slide from right */
+      .reveal-right {
+        opacity: 0;
+        transform: translateX(80px);
+        filter: blur(8px);
+        transition: opacity 1s var(--ease-out-expo), transform 1.2s var(--ease-out-expo), filter 0.8s var(--ease-out-expo);
+      }
+      .reveal-right.visible {
+        opacity: 1;
+        transform: translateX(0);
+        filter: blur(0);
+      }
+      
+      /* Fade only */
+      .reveal-fade {
+        opacity: 0;
+        transition: opacity 1.2s var(--ease-out-expo);
+      }
+      .reveal-fade.visible {
+        opacity: 1;
+      }
+      
+      /* Parallax */
+      .parallax {
+        will-change: transform;
+      }
+      
+      /* Magnetic button */
+      .magnetic-btn {
+        position: relative;
+        transition: transform 0.3s var(--ease-out-quart);
+      }
+      .magnetic-btn-inner {
+        transition: transform 0.3s var(--ease-out-quart);
+      }
+      
+      /* Marquee */
+      @keyframes marquee {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+      .marquee-track {
+        animation: marquee 25s linear infinite;
+      }
+      .marquee:hover .marquee-track {
+        animation-play-state: paused;
+      }
+      
+      /* Counter animation */
+      .counter {
+        font-variant-numeric: tabular-nums;
+      }
+      
+      /* Gradient text */
+      .gradient-text {
+        background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .gradient-text-color {
+        background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      
+      /* Hero title */
+      .hero-title {
+        font-size: clamp(3rem, 12vw, 9rem);
+        line-height: 0.95;
+        letter-spacing: -0.04em;
+        font-weight: 600;
+      }
+      .hero-title .reveal {
+        display: block;
+        overflow: hidden;
+      }
+      .hero-title .reveal span {
+        display: inline-block;
+      }
+      
+      /* Text shimmer effect */
+      @keyframes shimmer {
+        0% { background-position: -200% center; }
+        100% { background-position: 200% center; }
+      }
+      .gradient-text-color {
+        background: linear-gradient(90deg, #818cf8, #c084fc, #f472b6, #818cf8);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: shimmer 8s linear infinite;
+      }
+      
+      /* Section title */
+      .section-title {
+        font-size: clamp(2rem, 5vw, 4rem);
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+        font-weight: 600;
+      }
+      
+      /* Glow effect */
+      .glow-purple {
+        background: radial-gradient(ellipse 600px 400px at 50% 50%, rgba(139, 92, 246, 0.15), transparent);
+      }
+      .glow-blue {
+        background: radial-gradient(ellipse 500px 300px at 50% 50%, rgba(59, 130, 246, 0.1), transparent);
+      }
+      
+      /* Phone mockup */
+      .phone-glow {
+        background: conic-gradient(from 180deg at 50% 50%, #818cf8 0deg, #c084fc 120deg, #f472b6 240deg, #818cf8 360deg);
+        filter: blur(60px);
+        opacity: 0.4;
+      }
+      
+      /* Bento grid */
+      .bento-item {
+        background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+        border: 1px solid rgba(255,255,255,0.06);
+        transition: all 0.5s var(--ease-out-expo);
+        position: relative;
+        overflow: hidden;
+      }
+      .bento-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+        transition: left 0.8s var(--ease-out-expo);
+      }
+      .bento-item:hover::before {
+        left: 100%;
+      }
+      .bento-item:hover {
+        border-color: rgba(255,255,255,0.15);
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+      }
+      .bento-item .w-12,
+      .bento-item .w-14 {
+        transition: all 0.5s var(--ease-out-expo);
+      }
+      .bento-item:hover .w-12,
+      .bento-item:hover .w-14 {
+        transform: scale(1.1) rotate(5deg);
+      }
+      
+      /* Smooth link */
+      .smooth-link {
+        position: relative;
+      }
+      .smooth-link::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background: currentColor;
+        transform: scaleX(0);
+        transform-origin: right;
+        transition: transform 0.4s var(--ease-out-expo);
+      }
+      .smooth-link:hover::after {
+        transform: scaleX(1);
+        transform-origin: left;
+      }
+      
+      /* Button styles */
+      .btn-primary {
+        background: #fff;
+        color: #000;
+        font-weight: 500;
+        transition: all 0.4s var(--ease-out-expo);
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(0,0,0,0.1);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+      }
+      .btn-primary:hover::before {
+        width: 300px;
+        height: 300px;
+      }
+      .btn-primary:hover {
+        transform: scale(1.08);
+        box-shadow: 0 25px 50px rgba(255,255,255,0.2);
+      }
+      .btn-ghost {
+        color: rgba(255,255,255,0.7);
+        border: 1px solid rgba(255,255,255,0.15);
+        transition: all 0.4s var(--ease-out-expo);
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-ghost::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 0;
+        background: rgba(255,255,255,0.08);
+        transition: height 0.4s var(--ease-out-expo);
+      }
+      .btn-ghost:hover::before {
+        height: 100%;
+      }
+      .btn-ghost:hover {
+        color: #fff;
+        border-color: rgba(255,255,255,0.4);
+        transform: translateY(-3px);
+      }
+      
+      /* Cursor follower */
+      .cursor-glow {
+        pointer-events: none;
+        position: fixed;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+        transform: translate(-50%, -50%);
+        transition: opacity 0.3s;
+        z-index: 0;
+      }
+      
+      /* Number styling */
+      .big-number {
+        font-size: clamp(3rem, 12vw, 10rem);
+        font-weight: 600;
+        line-height: 1;
+        letter-spacing: -0.05em;
+      }
+      
+      /* Progress bar */
+      .scroll-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: rgba(255,255,255,0.1);
+        z-index: 9999;
+      }
+      .scroll-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #818cf8, #c084fc, #f472b6);
+        width: 0%;
+        transition: width 0.1s linear;
+      }
+      
+      /* Horizontal scroll section - PINNED */
+      .horizontal-section {
+        position: relative;
+        width: 100%;
+        background: linear-gradient(180deg, transparent 0%, rgba(139, 92, 246, 0.03) 50%, transparent 100%);
+      }
+      .horizontal-section.is-pinned {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+      }
+      .horizontal-section-spacer {
+        display: none;
+      }
+      .horizontal-section-spacer.active {
+        display: block;
+      }
+      .horizontal-scroll-container {
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+      }
+      .horizontal-scroll-track {
+        display: flex;
+        gap: 0;
+        transition: transform 0.5s var(--ease-out-expo);
+        will-change: transform;
+      }
+      .horizontal-panel {
+        flex-shrink: 0;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+      .step-card {
+        max-width: 600px;
+        text-align: center;
+        opacity: 0;
+        transform: translateX(120px) scale(0.8) rotateY(15deg);
+        filter: blur(20px);
+        transition: all 0.9s var(--ease-out-expo);
+        perspective: 1000px;
+      }
+      .step-card.active {
+        opacity: 1;
+        transform: translateX(0) scale(1) rotateY(0deg);
+        filter: blur(0);
+      }
+      .step-card .step-number {
+        opacity: 0;
+        transform: translateY(-30px) scale(1.2);
+        transition: all 0.8s var(--ease-out-expo) 0.2s;
+      }
+      .step-card.active .step-number {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      .step-card .step-icon {
+        opacity: 0;
+        transform: scale(0) rotate(-180deg);
+        transition: all 0.7s var(--ease-out-expo) 0.3s;
+      }
+      .step-card.active .step-icon {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+      .step-card .step-title {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.6s var(--ease-out-expo) 0.4s;
+      }
+      .step-card.active .step-title {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .step-card .step-desc {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.6s var(--ease-out-expo) 0.5s;
+      }
+      .step-card.active .step-desc {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .step-number {
+        font-size: clamp(8rem, 25vw, 16rem);
+        font-weight: 700;
+        line-height: 1;
+        background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.02) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 80px rgba(255,255,255,0.1);
+      }
+      .step-icon {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: -5rem auto 2rem;
+        box-shadow: 0 25px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1);
+        position: relative;
+      }
+      .step-icon::before {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%);
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+      .step-card.active .step-icon::before {
+        opacity: 1;
+      }
+      .step-icon::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        box-shadow: inset 0 0 30px rgba(255,255,255,0.1);
+      }
+      .step-title {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 600;
+        color: white;
+        margin-bottom: 1.5rem;
+        letter-spacing: -0.02em;
+      }
+      .step-desc {
+        font-size: 1.25rem;
+        color: rgba(255,255,255,0.6);
+        line-height: 1.8;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+      
+      /* Floating animation for icons */
+      @keyframes floatIcon {
+        0%, 100% { transform: scale(1) rotate(0deg) translateY(0); }
+        50% { transform: scale(1) rotate(0deg) translateY(-8px); }
+      }
+      .step-card.active .step-icon {
+        animation: floatIcon 3s ease-in-out infinite;
+        animation-delay: 0.5s;
+      }
+      
+      /* Glow pulse for active icon */
+      @keyframes glowPulse {
+        0%, 100% { box-shadow: 0 25px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1), 0 0 40px currentColor; }
+        50% { box-shadow: 0 25px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1), 0 0 60px currentColor; }
+      }
+      .step-card.active .step-icon {
+        animation: floatIcon 3s ease-in-out infinite, glowPulse 2s ease-in-out infinite;
+        animation-delay: 0.5s, 0s;
+      }
+      
+      /* Progress dots */
+      .step-progress {
+        position: absolute;
+        bottom: 3rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 1.5rem;
+        z-index: 10;
+        padding: 1rem 2rem;
+        background: rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+        border-radius: 50px;
+        border: 1px solid rgba(255,255,255,0.1);
+      }
+      .step-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        border: none;
+        transition: all 0.5s var(--ease-out-expo);
+        cursor: pointer;
+        position: relative;
+      }
+      .step-dot::before {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        transition: all 0.5s var(--ease-out-expo);
+      }
+      .step-dot:hover {
+        background: rgba(255,255,255,0.4);
+        transform: scale(1.2);
+      }
+      .step-dot.active {
+        background: white;
+        transform: scale(1.3);
+        box-shadow: 0 0 20px rgba(255,255,255,0.6);
+      }
+      .step-dot.active::before {
+        border-color: rgba(255,255,255,0.3);
+      }
+      
+      /* Scroll wheel hint */
+      .scroll-wheel-hint {
+        position: absolute;
+        bottom: 3rem;
+        right: 3rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        color: rgba(255,255,255,0.5);
+        font-size: 0.875rem;
+      }
+      .scroll-wheel {
+        width: 28px;
+        height: 44px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 14px;
+        position: relative;
+      }
+      .scroll-wheel::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4px;
+        height: 10px;
+        background: rgba(255,255,255,0.6);
+        border-radius: 2px;
+        animation: scrollWheelAnim 2s ease-in-out infinite;
+      }
+      @keyframes scrollWheelAnim {
+        0%, 100% { opacity: 1; top: 8px; }
+        50% { opacity: 0.3; top: 20px; }
+      }
+    </style>
   `
 }) %>
 <%- include('partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
 
-<main class="relative isolate overflow-hidden">
-  <!-- Background Effects -->
-  <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-    <div class="absolute left-[50%] top-0 -translate-x-1/2 blur-3xl opacity-20" aria-hidden="true">
-      <div class="aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc]" style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"></div>
-    </div>
-  </div>
+<!-- Scroll progress bar -->
+<div class="scroll-progress">
+  <div class="scroll-progress-bar" id="scrollProgress"></div>
+</div>
 
+<!-- Cursor glow effect -->
+<div class="cursor-glow hidden lg:block" id="cursorGlow"></div>
+
+<main class="relative overflow-hidden">
+  
   <!-- Hero Section -->
-  <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-40">
-    <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8 animate-slide-up">
-      <div class="mt-24 sm:mt-32 lg:mt-16">
-        <a href="https://github.com/PlinkkCorp/plinkk" target="_blank" class="inline-flex space-x-6">
-          <span class="rounded-full bg-indigo-500/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-400 ring-1 ring-inset ring-indigo-500/20">Nouveautés</span>
-          <span class="inline-flex items-center space-x-2 text-sm font-medium leading-6 text-slate-300">
-            <span>v1.0.0 disponible</span>
-            <svg class="h-5 w-5 text-slate-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" /></svg>
-          </span>
+  <section class="relative min-h-screen flex flex-col justify-center px-6 lg:px-12">
+    <!-- Background glow -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full glow-purple pointer-events-none parallax" data-speed="-0.2"></div>
+    
+    <div class="relative z-10 max-w-[1400px] mx-auto w-full pt-32 pb-20">
+      <!-- Overline -->
+      <div class="reveal flex items-center gap-3 mb-8">
+        <div class="w-12 h-px bg-gradient-to-r from-violet-500 to-transparent"></div>
+        <span class="text-sm text-slate-400 tracking-widest uppercase">Open Source Link Platform</span>
+      </div>
+      
+      <!-- Main title -->
+      <h1 class="hero-title text-white mb-8">
+        <span class="reveal block">Tous vos liens.</span>
+        <span class="reveal reveal-delay-1 block gradient-text-color">Un seul endroit.</span>
+      </h1>
+      
+      <!-- Subtitle -->
+      <p class="reveal reveal-delay-2 text-xl lg:text-2xl text-slate-400 max-w-2xl mb-12 leading-relaxed">
+        L'alternative open-source à Linktree. Créez, personnalisez et partagez votre page de liens en quelques minutes.
+      </p>
+      
+      <!-- CTA buttons -->
+      <div class="reveal reveal-delay-3 flex flex-wrap items-center gap-4 mb-20">
+        <a href="<%= dashboardUrl %>/login#signup" class="magnetic-btn btn-primary px-8 py-4 rounded-full text-base inline-flex items-center gap-2">
+          <span class="magnetic-btn-inner">Commencer — C'est gratuit</span>
+        </a>
+        <a href="https://github.com/PlinkkCorp/plinkk" target="_blank" class="btn-ghost px-6 py-4 rounded-full text-base inline-flex items-center gap-2">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          Star on GitHub
         </a>
       </div>
-      <h1 class="mt-10 text-4xl font-bold tracking-tight text-white sm:text-6xl">
-        Votre univers, <br>
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">en un seul lien.</span>
-      </h1>
-      <p class="mt-6 text-lg leading-8 text-slate-300">
-        Plinkk est l'alternative open-source ultime pour centraliser vos réseaux sociaux, projets et contenus. Rapide, beau et respectueux de vos données.
-      </p>
-      <div class="mt-10 flex items-center gap-x-6">
-        <a href="<%= dashboardUrl %>/login#signup" class="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-all hover:scale-105">
-          Créer ma page
-        </a>
-        <a href="/users" class="text-sm font-semibold leading-6 text-white hover:text-indigo-300 transition-colors">
-          Explorer les profils <span aria-hidden="true">→</span>
-        </a>
-        <a href="https://discord.gg/qGKJbPhuFj" target="_blank" class="text-sm font-semibold leading-6 text-white hover:text-indigo-300 transition-colors">
-          Rejoindre le Discord <span aria-hidden="true">→</span>
-        </a>
+      
+      <!-- Scroll indicator -->
+      <div class="reveal reveal-delay-4 flex items-center gap-3 text-slate-500">
+        <div class="w-6 h-10 rounded-full border border-slate-700 flex items-start justify-center p-2">
+          <div class="w-1 h-2 bg-slate-500 rounded-full animate-bounce"></div>
+        </div>
+        <span class="text-sm">Scroll pour découvrir</span>
       </div>
     </div>
+  </section>
+
+  <!-- Marquee Section -->
+  <section class="py-12 border-y border-white/5 overflow-hidden marquee">
+    <div class="marquee-track flex items-center gap-16 whitespace-nowrap">
+      <% const items = ['Open Source', 'Personnalisable', 'Rapide', 'Gratuit', 'Analytics', 'Thèmes', 'Mobile First', 'SEO Optimisé']; %>
+      <% for(let i = 0; i < 3; i++) { %>
+        <% items.forEach(item => { %>
+          <span class="text-2xl lg:text-3xl font-medium text-white/20 flex items-center gap-4">
+            <%= item %>
+            <span class="w-2 h-2 rounded-full bg-violet-500/50"></span>
+          </span>
+        <% }); %>
+      <% } %>
+    </div>
+  </section>
+
+  <!-- Phone Preview Section -->
+  <section class="relative py-32 lg:py-48 px-6 lg:px-12">
+    <div class="absolute inset-0 glow-blue pointer-events-none"></div>
     
-    <!-- Preview / Interactive Element -->
-    <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mt-0 lg:mr-0 lg:max-w-none lg:flex-none xl:ml-32 animate-pop-in" style="animation-delay: 200ms;">
-      <div class="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
-        <div class="-m-2 rounded-xl bg-slate-900/5 p-2 ring-1 ring-inset ring-slate-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
-          <div class="relative rounded-xl bg-slate-800/80 shadow-2xl ring-1 ring-white/10 backdrop-blur-sm overflow-hidden w-[20rem] sm:w-[24rem]">
-            <!-- Browser/App Header -->
-            <div class="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-slate-900/50">
-              <div class="flex gap-1.5">
-                <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
-                <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
-                <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
-              </div>
-              <div class="flex-1 text-center text-xs font-medium text-slate-500 font-mono">plinkk.me/demo</div>
-            </div>
-            
-            <!-- Content Preview -->
-            <div class="relative aspect-[9/16] bg-slate-950">
-               <iframe 
-                  id="preview"
+    <div class="relative max-w-[1400px] mx-auto">
+      <div class="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+        
+        <!-- Text content -->
+        <div>
+          <span class="reveal text-violet-400 text-sm font-medium tracking-wider uppercase mb-4 block">Aperçu en direct</span>
+          <h2 class="reveal reveal-delay-1 section-title text-white mb-6">
+            Votre page,<br>votre identité
+          </h2>
+          <p class="reveal reveal-delay-2 text-lg text-slate-400 leading-relaxed mb-8 max-w-lg">
+            Chaque détail compte. Personnalisez les couleurs, les polices, les animations et créez une page qui vous ressemble vraiment.
+          </p>
+          <a class="reveal reveal-delay-3 smooth-link text-white inline-flex items-center gap-2 text-lg" href="<%= dashboardUrl %>/login#signup">
+            Créer ma page
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+          </a>
+        </div>
+        
+        <!-- Phone mockup -->
+        <div class="reveal-scale relative">
+          <div class="absolute inset-0 phone-glow -z-10 scale-150"></div>
+          <div class="parallax relative mx-auto w-[280px] lg:w-[320px]" data-speed="0.05">
+            <!-- Phone frame -->
+            <div class="relative bg-zinc-900 rounded-[3rem] p-3 ring-1 ring-white/10">
+              <div class="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 bg-zinc-900 rounded-b-2xl z-10"></div>
+              <div class="relative rounded-[2.3rem] overflow-hidden bg-black aspect-[9/19]">
+                <iframe 
                   src="<%= typeof frontendUrl !== 'undefined' ? frontendUrl : '' %>/demo?preview=1" 
                   class="absolute inset-0 w-full h-full border-0"
                   title="Preview"
-               ></iframe>
+                  loading="lazy"
+                ></iframe>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Feature Section 1 -->
-  <div class="mx-auto max-w-7xl px-6 lg:px-8 py-24 sm:py-32">
-    <div class="mx-auto max-w-2xl lg:text-center">
-      <h2 class="text-base font-semibold leading-7 text-indigo-400">Tout inclus</h2>
-      <p class="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">Tout ce dont vous avez besoin pour briller</p>
-      <p class="mt-6 text-lg leading-8 text-slate-300">
-        Plus qu'une simple liste de liens. Plinkk est une plateforme complète pour gérer votre présence en ligne.
-      </p>
-    </div>
-    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-      <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
-        
-        <div class="flex flex-col bg-slate-900/40 backdrop-blur-md rounded-3xl p-8 border border-white/5 hover:border-indigo-500/30 transition-colors group">
-          <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-white">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-indigo-500/10 group-hover:bg-indigo-500/20 transition-colors">
-              <svg class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
-            </div>
-            Personnalisation illimitée
-          </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-400">
-            <p class="flex-auto">Thèmes, couleurs, polices, animations... Créez une page qui vous ressemble vraiment, sans aucune limite.</p>
-          </dd>
-        </div>
-
-        <div class="flex flex-col bg-slate-900/40 backdrop-blur-md rounded-3xl p-8 border border-white/5 hover:border-emerald-500/30 transition-colors group">
-          <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-white">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors">
-              <svg class="h-6 w-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            </div>
-            Open Source & Gratuit
-          </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-400">
-            <p class="flex-auto">Le code est transparent, auditable et gratuit. Hébergez-le vous-même ou utilisez notre instance officielle.</p>
-          </dd>
-        </div>
-
-        <div class="flex flex-col bg-slate-900/40 backdrop-blur-md rounded-3xl p-8 border border-white/5 hover:border-fuchsia-500/30 transition-colors group">
-          <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-white">
-            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-fuchsia-500/10 group-hover:bg-fuchsia-500/20 transition-colors">
-              <svg class="h-6 w-6 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-            </div>
-            Performance Extrême
-          </dt>
-          <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-400">
-            <p class="flex-auto">Construit avec les dernières technologies web pour un chargement instantané, même sur mobile.</p>
-          </dd>
-        </div>
-
-      </dl>
-    </div>
-  </div>
+  </section>
 
   <!-- Stats Section -->
-  <div class="bg-slate-900/50 py-24 sm:py-32 border-y border-white/5">
-    <div class="mx-auto max-w-7xl px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl lg:max-w-none">
-        <div class="text-center">
-          <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Une communauté en pleine croissance</h2>
-          <p class="mt-4 text-lg leading-8 text-slate-300">Rejoignez des créateurs qui font confiance à Plinkk.</p>
+  <section class="py-32 px-6 lg:px-12 border-y border-white/5">
+    <div class="max-w-[1400px] mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-24">
+        
+        <div class="reveal text-center md:text-left">
+          <p class="big-number gradient-text counter" data-target="<%= typeof userCount !== 'undefined' ? userCount : 0 %>">0</p>
+          <p class="text-slate-400 text-lg mt-2">Créateurs actifs</p>
         </div>
-        <dl class="mt-16 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-3">
-          <div class="flex flex-col bg-white/5 p-8">
-            <dt class="text-sm font-semibold leading-6 text-slate-300">Utilisateurs actifs</dt>
-            <dd class="order-first text-3xl font-semibold tracking-tight text-white"><%= new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(typeof userCount !== 'undefined' ? userCount : 0) %></dd>
-          </div>
-          <div class="flex flex-col bg-white/5 p-8">
-            <dt class="text-sm font-semibold leading-6 text-slate-300">Liens créés</dt>
-            <dd class="order-first text-3xl font-semibold tracking-tight text-white"><%= new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(typeof linkCount !== 'undefined' ? linkCount : 0) %></dd>
-          </div>
-          <div class="flex flex-col bg-white/5 p-8">
-            <dt class="text-sm font-semibold leading-6 text-slate-300">Vues totales</dt>
-            <dd class="order-first text-3xl font-semibold tracking-tight text-white"><%= new Intl.NumberFormat('fr-FR', { notation: "compact", compactDisplay: "short" }).format(typeof totalViews !== 'undefined' ? totalViews : 0) %></dd>
-          </div>
-        </dl>
+        
+        <div class="reveal reveal-delay-1 text-center md:text-left">
+          <p class="big-number gradient-text counter" data-target="<%= typeof linkCount !== 'undefined' ? linkCount : 0 %>">0</p>
+          <p class="text-slate-400 text-lg mt-2">Liens partagés</p>
+        </div>
+        
+        <div class="reveal reveal-delay-2 text-center md:text-left">
+          <p class="big-number gradient-text counter" data-target="<%= typeof totalViews !== 'undefined' ? totalViews : 0 %>">0</p>
+          <p class="text-slate-400 text-lg mt-2">Vues totales</p>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- How it works Section -->
-  <div class="mx-auto max-w-7xl px-6 lg:px-8 py-24 sm:py-32">
-    <div class="mx-auto max-w-2xl text-center">
-      <h2 class="text-base font-semibold leading-7 text-indigo-400">Simple comme bonjour</h2>
-      <p class="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">Lancez-vous en 3 étapes</p>
-    </div>
-    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-      <div class="grid grid-cols-1 gap-y-16 lg:grid-cols-3 lg:gap-x-8">
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-white">
-            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
-              <span class="font-bold text-white">1</span>
+  <!-- Features Bento Grid -->
+  <section class="py-32 lg:py-48 px-6 lg:px-12">
+    <div class="max-w-[1400px] mx-auto">
+      
+      <!-- Section header -->
+      <div class="max-w-2xl mb-20">
+        <span class="reveal text-violet-400 text-sm font-medium tracking-wider uppercase mb-4 block">Fonctionnalités</span>
+        <h2 class="reveal reveal-delay-1 section-title text-white mb-6">
+          Tout pour créer la page parfaite
+        </h2>
+        <p class="reveal reveal-delay-2 text-lg text-slate-400 leading-relaxed">
+          Des outils puissants, une expérience simple. Concentrez-vous sur votre contenu, on s'occupe du reste.
+        </p>
+      </div>
+      
+      <!-- Bento grid -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        <!-- Feature 1 - Large -->
+        <div class="reveal bento-item rounded-3xl p-8 lg:p-10 md:col-span-2 lg:col-span-2 lg:row-span-2 flex flex-col justify-between min-h-[400px]">
+          <div>
+            <div class="w-14 h-14 rounded-2xl bg-violet-500/10 flex items-center justify-center mb-6">
+              <svg class="w-7 h-7 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"></path></svg>
             </div>
-            Créez votre compte
-          </dt>
-          <dd class="mt-2 text-base leading-7 text-slate-400">Choisissez votre nom d'utilisateur unique (plinkk.me/vous) et inscrivez-vous en quelques secondes.</dd>
+            <h3 class="text-2xl lg:text-3xl font-semibold text-white mb-4">Personnalisation totale</h3>
+            <p class="text-slate-400 text-lg leading-relaxed max-w-md">
+              Thèmes prédéfinis ou création sur mesure. Couleurs, polices, animations : tout est modifiable pour refléter votre identité unique.
+            </p>
+          </div>
+          <div class="mt-8 flex -space-x-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500"></div>
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500"></div>
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-pink-500"></div>
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500"></div>
+            <div class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-xs text-white">+∞</div>
+          </div>
         </div>
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-white">
-            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
-              <span class="font-bold text-white">2</span>
-            </div>
-            Ajoutez vos liens
-          </dt>
-          <dd class="mt-2 text-base leading-7 text-slate-400">Réseaux sociaux, musique, vidéos, boutiques... Ajoutez tout ce que vous voulez partager.</dd>
+        
+        <!-- Feature 2 -->
+        <div class="reveal reveal-delay-1 bento-item rounded-3xl p-8">
+          <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-5">
+            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"></path></svg>
+          </div>
+          <h3 class="text-xl font-semibold text-white mb-3">Analytics temps réel</h3>
+          <p class="text-slate-400">Suivez vos clics, sources de trafic et performances en un coup d'œil.</p>
         </div>
-        <div class="relative pl-16">
-          <dt class="text-base font-semibold leading-7 text-white">
-            <div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
-              <span class="font-bold text-white">3</span>
-            </div>
-            Personnalisez & Partagez
-          </dt>
-          <dd class="mt-2 text-base leading-7 text-slate-400">Choisissez un thème ou créez le vôtre, puis partagez votre lien unique partout.</dd>
+        
+        <!-- Feature 3 -->
+        <div class="reveal reveal-delay-2 bento-item rounded-3xl p-8">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-5">
+            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"></path></svg>
+          </div>
+          <h3 class="text-xl font-semibold text-white mb-3">100% Open Source</h3>
+          <p class="text-slate-400">Code transparent, communauté active. Vos données restent vôtres.</p>
+        </div>
+        
+        <!-- Feature 4 -->
+        <div class="reveal bento-item rounded-3xl p-8">
+          <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-5">
+            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"></path></svg>
+          </div>
+          <h3 class="text-xl font-semibold text-white mb-3">Ultra performant</h3>
+          <p class="text-slate-400">Chargement en moins de 100ms. Performance optimale garantie.</p>
+        </div>
+        
+        <!-- Feature 5 -->
+        <div class="reveal reveal-delay-1 bento-item rounded-3xl p-8">
+          <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center mb-5">
+            <svg class="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"></path></svg>
+          </div>
+          <h3 class="text-xl font-semibold text-white mb-3">Mobile First</h3>
+          <p class="text-slate-400">Design responsive parfait sur tous les appareils.</p>
+        </div>
+        
+        <!-- Feature 6 -->
+        <div class="reveal reveal-delay-2 bento-item rounded-3xl p-8">
+          <div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-5">
+            <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"></path></svg>
+          </div>
+          <h3 class="text-xl font-semibold text-white mb-3">Domaine perso</h3>
+          <p class="text-slate-400">Utilisez votre propre domaine ou notre URL courte.</p>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- CTA Section -->
-  <div class="relative isolate mt-32 px-6 py-32 sm:mt-40 sm:py-40 lg:px-8">
-    <div class="absolute inset-0 -z-10 overflow-hidden">
-       <div class="absolute left-[50%] top-1/2 -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-20" aria-hidden="true">
-        <div class="aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc]" style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"></div>
+  <!-- How it works - Horizontal Scroll -->
+  <div class="horizontal-section-spacer" id="horizontalSpacer"></div>
+  <section class="horizontal-section" id="howItWorks">
+    <div class="horizontal-scroll-container">
+      <!-- Section header (intro panel) -->
+      <div class="horizontal-scroll-track" id="horizontalTrack">
+        
+        <!-- Panel 0: Intro -->
+        <div class="horizontal-panel">
+          <div class="step-card active" data-step="0">
+            <span class="text-violet-400 text-sm font-medium tracking-wider uppercase mb-4 block">Comment ça marche</span>
+            <h2 class="section-title text-white mb-6">
+              3 étapes.<br>2 minutes.
+            </h2>
+            <p class="text-lg text-slate-400 leading-relaxed max-w-md mx-auto">
+              Créer votre page de liens n'a jamais été aussi simple. Suivez le guide.
+            </p>
+          </div>
+        </div>
+        
+        <!-- Panel 1: Create account -->
+        <div class="horizontal-panel">
+          <div class="step-card" data-step="1">
+            <span class="step-number">01</span>
+            <div class="step-icon bg-gradient-to-br from-violet-500 to-fuchsia-500">
+              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            </div>
+            <h3 class="step-title">Créez votre compte</h3>
+            <p class="step-desc">
+              Inscrivez-vous en quelques secondes avec votre email ou via GitHub, Discord, Google.
+            </p>
+          </div>
+        </div>
+        
+        <!-- Panel 2: Add links -->
+        <div class="horizontal-panel">
+          <div class="step-card" data-step="2">
+            <span class="step-number">02</span>
+            <div class="step-icon bg-gradient-to-br from-blue-500 to-cyan-500">
+              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+            </div>
+            <h3 class="step-title">Ajoutez vos liens</h3>
+            <p class="step-desc">
+              Réseaux sociaux, portfolio, boutique, musique... Tout ce que vous voulez partager.
+            </p>
+          </div>
+        </div>
+        
+        <!-- Panel 3: Share -->
+        <div class="horizontal-panel">
+          <div class="step-card" data-step="3">
+            <span class="step-number">03</span>
+            <div class="step-icon bg-gradient-to-br from-pink-500 to-rose-500">
+              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+            </div>
+            <h3 class="step-title">Partagez partout</h3>
+            <p class="step-desc">
+              Personnalisez le design, puis partagez votre lien unique sur tous vos réseaux.
+            </p>
+          </div>
+        </div>
+        
+      </div>
+      
+      <!-- Progress dots -->
+      <div class="step-progress">
+        <div class="step-dot active" data-dot="0"></div>
+        <div class="step-dot" data-dot="1"></div>
+        <div class="step-dot" data-dot="2"></div>
+        <div class="step-dot" data-dot="3"></div>
+      </div>
+      
+      <!-- Scroll wheel hint -->
+      <div class="scroll-wheel-hint" id="scrollWheelHint">
+        <div class="scroll-wheel"></div>
+        <span>Scrollez</span>
       </div>
     </div>
-    <div class="mx-auto max-w-2xl text-center">
-      <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Prêt à commencer ?<br>Rejoignez Plinkk aujourd'hui.</h2>
-      <p class="mx-auto mt-6 max-w-xl text-lg leading-8 text-slate-300">
-        Créez votre compte gratuitement et commencez à personnaliser votre page en quelques secondes.
+  </section>
+
+  <!-- Final CTA -->
+  <section class="py-32 lg:py-48 px-6 lg:px-12 relative">
+    <div class="absolute inset-0 glow-purple pointer-events-none"></div>
+    
+    <div class="relative max-w-4xl mx-auto text-center">
+      <h2 class="reveal section-title text-white mb-6">
+        Prêt à créer votre page ?
+      </h2>
+      <p class="reveal reveal-delay-1 text-xl text-slate-400 mb-12 max-w-xl mx-auto">
+        Rejoignez des milliers de créateurs. Gratuit, pour toujours. Aucune carte bancaire requise.
       </p>
-      <div class="mt-10 flex items-center justify-center gap-x-6">
-        <a href="<%= dashboardUrl %>/login#signup" class="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-all hover:scale-105">
-          S'inscrire gratuitement
+      
+      <div class="reveal reveal-delay-2 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="<%= dashboardUrl %>/login#signup" class="magnetic-btn btn-primary px-10 py-5 rounded-full text-lg">
+          <span class="magnetic-btn-inner">Commencer maintenant</span>
         </a>
-        <a href="/about" class="text-sm font-semibold leading-6 text-white hover:text-indigo-300 transition-colors">
-          En savoir plus <span aria-hidden="true">→</span>
+        <a href="/users" class="btn-ghost px-8 py-5 rounded-full text-lg">
+          Voir des exemples
         </a>
       </div>
+      
+      <p class="reveal reveal-delay-3 text-slate-500 text-sm mt-8">
+        Open source • Gratuit • Personnalisable
+      </p>
     </div>
-  </div>
+  </section>
 
 </main>
+
 <%- include('partials/footer') %>
+
+<script>
+  // Intersection Observer for reveal animations
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        
+        // Counter animation
+        if (entry.target.querySelector('.counter')) {
+          entry.target.querySelectorAll('.counter').forEach(counter => {
+            animateCounter(counter);
+          });
+        }
+        if (entry.target.classList.contains('counter')) {
+          animateCounter(entry.target);
+        }
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -80px 0px' });
+
+  document.querySelectorAll('.reveal, .reveal-scale, .reveal-left, .reveal-right, .reveal-fade').forEach(el => {
+    revealObserver.observe(el);
+  });
+
+  // Counter animation function
+  const animatedCounters = new Set();
+  function animateCounter(el) {
+    if (animatedCounters.has(el)) return;
+    animatedCounters.add(el);
+    
+    const target = parseInt(el.dataset.target) || 0;
+    const duration = 2000;
+    const start = performance.now();
+    
+    function update(currentTime) {
+      const elapsed = currentTime - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(target * easeOut);
+      
+      if (target >= 1000000) {
+        el.textContent = (current / 1000000).toFixed(1) + 'M';
+      } else if (target >= 1000) {
+        el.textContent = (current / 1000).toFixed(1) + 'K';
+      } else {
+        el.textContent = current.toLocaleString('fr-FR');
+      }
+      
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      }
+    }
+    
+    requestAnimationFrame(update);
+  }
+
+  // Scroll progress bar
+  const progressBar = document.getElementById('scrollProgress');
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = (scrollTop / docHeight) * 100;
+    progressBar.style.width = progress + '%';
+  }, { passive: true });
+
+  // Cursor glow effect
+  const cursorGlow = document.getElementById('cursorGlow');
+  if (cursorGlow && window.innerWidth > 1024) {
+    let mouseX = 0, mouseY = 0;
+    let glowX = 0, glowY = 0;
+    
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+    
+    function animateGlow() {
+      glowX += (mouseX - glowX) * 0.1;
+      glowY += (mouseY - glowY) * 0.1;
+      cursorGlow.style.left = glowX + 'px';
+      cursorGlow.style.top = glowY + 'px';
+      requestAnimationFrame(animateGlow);
+    }
+    animateGlow();
+  }
+
+  // Magnetic button effect
+  document.querySelectorAll('.magnetic-btn').forEach(btn => {
+    const inner = btn.querySelector('.magnetic-btn-inner');
+    
+    btn.addEventListener('mousemove', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      
+      btn.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
+      if (inner) inner.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px)`;
+    });
+    
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transform = '';
+      if (inner) inner.style.transform = '';
+    });
+  });
+
+  // Parallax effect
+  const parallaxElements = document.querySelectorAll('.parallax');
+  if (parallaxElements.length && window.innerWidth > 768) {
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      parallaxElements.forEach(el => {
+        const speed = parseFloat(el.dataset.speed) || 0.1;
+        const rect = el.getBoundingClientRect();
+        const centerY = rect.top + rect.height / 2;
+        const viewportCenter = window.innerHeight / 2;
+        const distance = centerY - viewportCenter;
+        el.style.transform = `translateY(${distance * speed}px)`;
+      });
+    }, { passive: true });
+  }
+
+  // Horizontal scroll section with REAL scroll hijacking
+  const horizontalSection = document.getElementById('howItWorks');
+  const horizontalSpacer = document.getElementById('horizontalSpacer');
+  const horizontalTrack = document.getElementById('horizontalTrack');
+  const stepCards = document.querySelectorAll('.step-card');
+  const stepDots = document.querySelectorAll('.step-dot');
+  const scrollWheelHint = document.getElementById('scrollWheelHint');
+  
+  if (horizontalSection && horizontalTrack && window.innerWidth > 768) {
+    const totalPanels = 4;
+    let currentPanel = 0;
+    let isPinned = false;
+    let isAnimating = false;
+    let sectionTop = 0;
+    let accumulatedDelta = 0;
+    const deltaThreshold = 100; // Amount of scroll needed to change panel
+    
+    // Calculate section position
+    function updateSectionPosition() {
+      if (!isPinned) {
+        sectionTop = horizontalSection.getBoundingClientRect().top + window.scrollY;
+      }
+    }
+    updateSectionPosition();
+    window.addEventListener('resize', updateSectionPosition);
+    
+    // Update panel display
+    function updatePanel(panelIndex) {
+      const translateX = panelIndex * -100;
+      horizontalTrack.style.transform = `translateX(${translateX}vw)`;
+      
+      stepCards.forEach(card => {
+        const cardIndex = parseInt(card.dataset.step);
+        if (cardIndex <= panelIndex) {
+          card.classList.add('active');
+        } else {
+          card.classList.remove('active');
+        }
+      });
+      
+      stepDots.forEach((dot, index) => {
+        if (index <= panelIndex) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+      
+      // Hide scroll hint on last panel
+      if (scrollWheelHint) {
+        scrollWheelHint.style.opacity = panelIndex >= totalPanels - 1 ? '0' : '1';
+      }
+    }
+    
+    // Pin/unpin section
+    function pinSection() {
+      if (!isPinned) {
+        isPinned = true;
+        sectionTop = window.scrollY;
+        horizontalSection.classList.add('is-pinned');
+        horizontalSpacer.classList.add('active');
+        horizontalSpacer.style.height = '100vh';
+        document.body.style.overflow = 'hidden';
+      }
+    }
+    
+    function unpinSection() {
+      if (isPinned) {
+        isPinned = false;
+        horizontalSection.classList.remove('is-pinned');
+        horizontalSpacer.classList.remove('active');
+        horizontalSpacer.style.height = '0';
+        document.body.style.overflow = '';
+      }
+    }
+    
+    // Handle wheel events
+    function handleWheel(e) {
+      updateSectionPosition();
+      
+      const rect = horizontalSection.getBoundingClientRect();
+      const isInView = rect.top <= 0 && rect.bottom >= window.innerHeight;
+      
+      // Check if we should pin
+      if (!isPinned && rect.top <= 0 && currentPanel === 0 && e.deltaY > 0) {
+        pinSection();
+        e.preventDefault();
+        return;
+      }
+      
+      if (isPinned) {
+        e.preventDefault();
+        
+        // Accumulate scroll delta
+        accumulatedDelta += e.deltaY;
+        
+        if (Math.abs(accumulatedDelta) >= deltaThreshold && !isAnimating) {
+          isAnimating = true;
+          
+          if (accumulatedDelta > 0 && currentPanel < totalPanels - 1) {
+            // Scroll down - next panel
+            currentPanel++;
+            updatePanel(currentPanel);
+          } else if (accumulatedDelta < 0 && currentPanel > 0) {
+            // Scroll up - previous panel
+            currentPanel--;
+            updatePanel(currentPanel);
+          } else if (accumulatedDelta > 0 && currentPanel >= totalPanels - 1) {
+            // At last panel, scrolling down - unpin and continue
+            unpinSection();
+            window.scrollTo({ top: sectionTop + 10, behavior: 'instant' });
+          } else if (accumulatedDelta < 0 && currentPanel === 0) {
+            // At first panel, scrolling up - unpin and go back
+            unpinSection();
+            window.scrollTo({ top: sectionTop - 10, behavior: 'instant' });
+          }
+          
+          accumulatedDelta = 0;
+          
+          setTimeout(() => {
+            isAnimating = false;
+          }, 500);
+        }
+      }
+    }
+    
+    // Handle touch events for mobile
+    let touchStartY = 0;
+    function handleTouchStart(e) {
+      touchStartY = e.touches[0].clientY;
+    }
+    
+    function handleTouchMove(e) {
+      if (!isPinned) return;
+      
+      const touchY = e.touches[0].clientY;
+      const deltaY = touchStartY - touchY;
+      
+      if (Math.abs(deltaY) > 30) {
+        handleWheel({ deltaY, preventDefault: () => e.preventDefault() });
+        touchStartY = touchY;
+      }
+    }
+    
+    // Check scroll position to trigger pin
+    function checkScrollPosition() {
+      if (isPinned) return;
+      
+      const rect = horizontalSection.getBoundingClientRect();
+      
+      // If section is at top and we're scrolling through it
+      if (rect.top <= 0 && rect.top > -100) {
+        // Will be pinned on next wheel event
+      }
+    }
+    
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('scroll', checkScrollPosition, { passive: true });
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    
+    // Dot click navigation
+    stepDots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        if (isPinned) {
+          currentPanel = index;
+          updatePanel(currentPanel);
+        }
+      });
+    });
+    
+  } else if (horizontalTrack) {
+    // Mobile fallback: show all cards stacked
+    stepCards.forEach(card => card.classList.add('active'));
+    horizontalTrack.style.flexDirection = 'column';
+    horizontalTrack.style.transform = 'none';
+    document.querySelectorAll('.horizontal-panel').forEach(panel => {
+      panel.style.width = '100%';
+      panel.style.height = 'auto';
+      panel.style.minHeight = '70vh';
+    });
+    if (horizontalSection) {
+      horizontalSection.style.height = 'auto';
+    }
+    const container = document.querySelector('.horizontal-scroll-container');
+    if (container) {
+      container.style.height = 'auto';
+      container.style.flexDirection = 'column';
+    }
+    // Hide progress and hint on mobile
+    const stepProgress = document.querySelector('.step-progress');
+    if (stepProgress) stepProgress.style.display = 'none';
+    if (scrollWheelHint) scrollWheelHint.style.display = 'none';
+  }
+</script>
 
