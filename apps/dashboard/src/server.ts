@@ -9,6 +9,7 @@ import { registerSessionValidator } from "./middleware/sessionValidator";
 import { apiRoutes } from "./server/apiRoutes";
 import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkPagesRoutes } from "./server/plinkkPagesRoutes";
+import { linkTrackingRoutes } from "./server/linkTrackingRoutes";
 import { authRoutes } from "./routes/auth";
 import { generateTheme } from "./lib/generateTheme";
 import { registerOAuth2 } from "./config/fastifyOAuth2";
@@ -27,6 +28,7 @@ async function bootstrap() {
   fastify.register(apiRoutes, { prefix: "/api" });
   fastify.register(dashboardRoutes);
   fastify.register(plinkkPagesRoutes);
+  fastify.register(linkTrackingRoutes);
   authRoutes(fastify);
 
   fastify.get(

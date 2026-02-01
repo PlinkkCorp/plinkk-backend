@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { request } from "undici";
+import "../types/index";
 import { GithubUser } from "../types/githubUser";
 import { prisma } from "@plinkk/prisma";
 import { slugify } from "../lib/plinkkUtils";

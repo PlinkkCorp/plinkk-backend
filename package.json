@@ -14,6 +14,8 @@
     "launch-all": "concurrently \"pnpm --filter @plinkk/dashboard dev\" \"pnpm --filter @plinkk/public dev\""
   },
   "devDependencies": {
+    "@prisma/adapter-pg": "^7.3.0",
+    "pg": "^8.16.3",
     "prisma": "^7.0.0"
   },
   "dependencies": {

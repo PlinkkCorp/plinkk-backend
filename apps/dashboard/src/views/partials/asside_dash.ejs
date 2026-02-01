@@ -71,6 +71,10 @@
                         <span class="bg-slate-800 text-slate-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-700"><%= plinkkCount %></span>
                     <% } %>
                 </a>
+                <a href="/redirects" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('redirects') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    <span class="font-medium">Redirections</span>
+                </a>
             </div>
 
             <!-- Account -->

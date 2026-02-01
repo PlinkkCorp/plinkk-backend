@@ -15,10 +15,9 @@ import { replyView } from "../lib/replyView";
 export function plinkkPagesRoutes(fastify: FastifyInstance) {
   fastify.get("/plinkks", async (request, reply) => {
     const userId = request.session.get("data") as string | undefined;
-    if (!userId)
-      return reply.redirect(
-        `/login?returnTo=${encodeURIComponent("/plinkks")}`
-      );
+    if (!userId) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent("/plinkks")}`);
+    }
     const me = await prisma.user.findUnique({
       where: { id: userId },
       include: { role: true }

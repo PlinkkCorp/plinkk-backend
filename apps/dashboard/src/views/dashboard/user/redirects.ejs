@@ -1,0 +1,338 @@
+<%- include('../../partials/head.ejs', { title: 'Mes Redirections', description: 'Gérez vos liens de redirection courts.', robots: 'noindex,nofollow' }) %>
+
+<%- include('../../partials/header-dash.ejs', { user: user }) %>
+
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+    <%- include('../../partials/asside_dash.ejs', { user: user, active: 'redirects' }) %>
+
+    <main class="col-span-12 lg:col-span-10 space-y-8">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            <div class="relative z-10">
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Mes Redirections</h1>
+                <p class="text-slate-400 text-lg">Créez des liens courts personnalisés vers vos ressources.</p>
+            </div>
+            <button onclick="openCreateModal()" class="relative z-10 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-violet-500/25 transition-all duration-300 hover:-translate-y-0.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Nouvelle Redirection
+            </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-violet-500/10 rounded-xl">
+                        <svg class="w-6 h-6 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-white"><%= redirectCount %> / <%= maxRedirects %></p>
+                        <p class="text-sm text-slate-400">Redirections créées</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-emerald-500/10 rounded-xl">
+                        <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-white"><%= totalClicks %></p>
+                        <p class="text-sm text-slate-400">Clics totaux</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-amber-500/10 rounded-xl">
+                        <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-white"><%= redirects.filter(r => r.isActive).length %></p>
+                        <p class="text-sm text-slate-400">Redirections actives</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Redirections List -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
+            <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+                <h2 class="font-bold text-white text-xl">Vos Redirections</h2>
+            </div>
+            
+            <% if (redirects.length === 0) { %>
+                <div class="p-12 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-slate-800 rounded-2xl flex items-center justify-center">
+                        <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-2">Aucune redirection</h3>
+                    <p class="text-slate-400 mb-6">Créez votre première redirection pour partager des liens courts.</p>
+                    <button onclick="openCreateModal()" class="inline-flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white font-medium rounded-xl hover:bg-violet-500 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Créer une redirection
+                    </button>
+                </div>
+            <% } else { %>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-800 text-xs uppercase text-slate-500 bg-slate-950/50">
+                                <th class="p-4 font-medium">Slug / Titre</th>
+                                <th class="p-4 font-medium">URL cible</th>
+                                <th class="p-4 font-medium text-center">Clics</th>
+                                <th class="p-4 font-medium text-center">Statut</th>
+                                <th class="p-4 font-medium text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800">
+                            <% redirects.forEach(redirect => { 
+                                const isExpired = redirect.expiresAt && new Date(redirect.expiresAt) < new Date();
+                            %>
+                                <tr class="hover:bg-slate-800/30 transition-colors group">
+                                    <td class="p-4">
+                                        <div class="flex flex-col gap-1">
+                                            <div class="flex items-center gap-2">
+                                                <code class="px-2 py-1 bg-violet-500/10 text-violet-400 rounded-lg text-sm font-mono">/r/<%= redirect.slug %></code>
+                                                <button onclick="copyToClipboard('<%= process.env.FRONTEND_URL || 'https://plinkk.fr' %>/r/<%= redirect.slug %>')" class="p-1 text-slate-500 hover:text-white transition-colors" title="Copier le lien">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                                                </button>
+                                            </div>
+                                            <% if (redirect.title) { %>
+                                                <span class="text-sm text-slate-400"><%= redirect.title %></span>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                    <td class="p-4">
+                                        <a href="<%= redirect.targetUrl %>" target="_blank" class="text-sm text-slate-300 hover:text-white transition-colors flex items-center gap-1 max-w-xs truncate">
+                                            <%= redirect.targetUrl.length > 50 ? redirect.targetUrl.substring(0, 50) + '...' : redirect.targetUrl %>
+                                            <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                        </a>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <span class="text-lg font-bold text-white"><%= redirect.clicks %></span>
+                                    </td>
+                                    <td class="p-4 text-center">
+                                        <% if (isExpired) { %>
+                                            <span class="px-2 py-1 rounded-full bg-rose-500/10 text-rose-400 text-xs border border-rose-500/20">Expiré</span>
+                                        <% } else if (redirect.isActive) { %>
+                                            <span class="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs border border-emerald-500/20">Actif</span>
+                                        <% } else { %>
+                                            <span class="px-2 py-1 rounded-full bg-slate-500/10 text-slate-400 text-xs border border-slate-500/20">Inactif</span>
+                                        <% } %>
+                                    </td>
+                                    <td class="p-4">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <a href="/redirects/<%= redirect.id %>/stats" class="p-2 rounded-xl hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="Statistiques">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                                            </a>
+                                            <button onclick="openEditModal('<%= redirect.id %>', '<%= redirect.slug %>', '<%= redirect.targetUrl.replace(/'/g, "\\'") %>', '<%= redirect.title ? redirect.title.replace(/'/g, "\\'") : '' %>', <%= redirect.isActive %>, '<%= redirect.expiresAt ? new Date(redirect.expiresAt).toISOString().split('T')[0] : '' %>')" class="p-2 rounded-xl hover:bg-violet-500/10 text-slate-400 hover:text-violet-400 transition-colors" title="Modifier">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                            </button>
+                                            <button onclick="confirmDelete('<%= redirect.id %>', '<%= redirect.slug %>')" class="p-2 rounded-xl hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 transition-colors" title="Supprimer">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
+        </div>
+    </main>
+</div>
+
+<!-- Create/Edit Modal -->
+<div id="redirectModal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                <form id="redirectForm" onsubmit="submitForm(event)">
+                    <input type="hidden" id="editId" name="editId" value="">
+                    <div class="bg-slate-900 px-6 py-5">
+                        <h3 class="text-xl font-bold text-white mb-6" id="modalTitle">Nouvelle Redirection</h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label for="slug" class="block text-sm font-medium text-slate-300 mb-2">Slug <span class="text-rose-400">*</span></label>
+                                <div class="flex items-center">
+                                    <span class="px-3 py-2.5 bg-slate-800 border border-slate-700 border-r-0 rounded-l-xl text-slate-400 text-sm">/r/</span>
+                                    <input type="text" id="slug" name="slug" required minlength="2" maxlength="50" pattern="[a-zA-Z0-9_-]+" class="flex-1 px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-r-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent" placeholder="mon-lien">
+                                </div>
+                                <p class="mt-1 text-xs text-slate-500">Lettres, chiffres, tirets et underscores uniquement</p>
+                            </div>
+                            
+                            <div>
+                                <label for="targetUrl" class="block text-sm font-medium text-slate-300 mb-2">URL cible <span class="text-rose-400">*</span></label>
+                                <input type="url" id="targetUrl" name="targetUrl" required class="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent" placeholder="https://example.com/ma-page">
+                            </div>
+                            
+                            <div>
+                                <label for="title" class="block text-sm font-medium text-slate-300 mb-2">Titre (optionnel)</label>
+                                <input type="text" id="title" name="title" maxlength="100" class="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent" placeholder="Mon lien GitHub">
+                            </div>
+                            
+                            <div>
+                                <label for="expiresAt" class="block text-sm font-medium text-slate-300 mb-2">Date d'expiration (optionnel)</label>
+                                <input type="date" id="expiresAt" name="expiresAt" class="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                            </div>
+                            
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" id="isActive" name="isActive" checked class="w-4 h-4 rounded border-slate-600 bg-slate-800 text-violet-600 focus:ring-violet-500 focus:ring-offset-slate-900">
+                                <label for="isActive" class="text-sm font-medium text-slate-300">Activer la redirection</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-950/50 px-6 py-4 flex justify-end gap-3">
+                        <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors">Annuler</button>
+                        <button type="submit" class="px-5 py-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-violet-500/25 transition-all">
+                            <span id="submitBtnText">Créer</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 z-50 hidden" aria-labelledby="delete-modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" onclick="closeDeleteModal()"></div>
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md">
+                <div class="bg-slate-900 px-6 py-5">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="p-3 bg-rose-500/10 rounded-xl">
+                            <svg class="w-6 h-6 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white">Supprimer la redirection</h3>
+                            <p class="text-sm text-slate-400">Cette action est irréversible.</p>
+                        </div>
+                    </div>
+                    <p class="text-slate-300 mb-1">Êtes-vous sûr de vouloir supprimer la redirection :</p>
+                    <code id="deleteSlugDisplay" class="px-2 py-1 bg-violet-500/10 text-violet-400 rounded-lg text-sm font-mono"></code>
+                </div>
+                <div class="bg-slate-950/50 px-6 py-4 flex justify-end gap-3">
+                    <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors">Annuler</button>
+                    <button type="button" id="confirmDeleteBtn" onclick="deleteRedirect()" class="px-5 py-2 bg-rose-600 text-white font-semibold rounded-xl hover:bg-rose-500 transition-colors">
+                        Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let deleteTargetId = null;
+
+function openCreateModal() {
+    document.getElementById('modalTitle').textContent = 'Nouvelle Redirection';
+    document.getElementById('submitBtnText').textContent = 'Créer';
+    document.getElementById('editId').value = '';
+    document.getElementById('redirectForm').reset();
+    document.getElementById('isActive').checked = true;
+    document.getElementById('redirectModal').classList.remove('hidden');
+}
+
+function openEditModal(id, slug, targetUrl, title, isActive, expiresAt) {
+    document.getElementById('modalTitle').textContent = 'Modifier la Redirection';
+    document.getElementById('submitBtnText').textContent = 'Enregistrer';
+    document.getElementById('editId').value = id;
+    document.getElementById('slug').value = slug;
+    document.getElementById('targetUrl').value = targetUrl;
+    document.getElementById('title').value = title;
+    document.getElementById('isActive').checked = isActive;
+    document.getElementById('expiresAt').value = expiresAt;
+    document.getElementById('redirectModal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('redirectModal').classList.add('hidden');
+}
+
+function confirmDelete(id, slug) {
+    deleteTargetId = id;
+    document.getElementById('deleteSlugDisplay').textContent = '/r/' + slug;
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+    deleteTargetId = null;
+}
+
+async function submitForm(e) {
+    e.preventDefault();
+    const form = document.getElementById('redirectForm');
+    const editId = document.getElementById('editId').value;
+    const isEdit = !!editId;
+    
+    const data = {
+        slug: document.getElementById('slug').value,
+        targetUrl: document.getElementById('targetUrl').value,
+        title: document.getElementById('title').value || undefined,
+        isActive: document.getElementById('isActive').checked,
+        expiresAt: document.getElementById('expiresAt').value || undefined
+    };
+    
+    try {
+        const url = isEdit ? `/api/me/redirects/${editId}` : '/api/me/redirects';
+        const method = isEdit ? 'PUT' : 'POST';
+        
+        const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await res.json();
+        
+        if (!res.ok) {
+            alert(result.error || 'Une erreur est survenue');
+            return;
+        }
+        
+        window.location.reload();
+    } catch (err) {
+        console.error(err);
+        alert('Erreur de connexion au serveur');
+    }
+}
+
+async function deleteRedirect() {
+    if (!deleteTargetId) return;
+    
+    try {
+        const res = await fetch(`/api/me/redirects/${deleteTargetId}`, {
+            method: 'DELETE'
+        });
+        
+        if (!res.ok) {
+            const result = await res.json();
+            alert(result.error || 'Une erreur est survenue');
+            return;
+        }
+        
+        window.location.reload();
+    } catch (err) {
+        console.error(err);
+        alert('Erreur de connexion au serveur');
+    }
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        // Optionnel: afficher une notification
+    });
+}
+</script>
+
+<%- include('../../partials/footer.ejs') %>

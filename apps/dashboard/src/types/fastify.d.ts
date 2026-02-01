@@ -16,8 +16,17 @@ export interface OAuth2AccessTokenResult {
   };
 }
 
-export interface FastifyOAuth2Namespace {
-  getAccessTokenFromAuthorizationCodeFlow(request: unknown): Promise<OAuth2AccessTokenResult>;
+declare module "fastify" {
+  interface FastifyInstance {
+    githubOAuth2: FastifyOAuth2Namespace;
+    discordOAuth2: FastifyOAuth2Namespace;
+  }
+
+  interface FastifyRequest {
+    userId?: string;
+    currentUser?: import("@plinkk/prisma").User & { role: import("@plinkk/prisma").Role | null };
+    publicPath?: string;
+  }
 }
 
 declare module "fastify" {

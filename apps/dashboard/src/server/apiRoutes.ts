@@ -14,6 +14,7 @@ import { apiThemeRoutes } from "./api/theme";
 import { apiUsersRoutes } from "./api/users";
 import { apiAdminPlinkksRoutes } from "./api/admin/plinkks";
 import { apiAdminRolesRoutes } from "./api/admin/roles";
+import { apiAdminRedirectsRoutes } from "./api/admin/redirects";
 
 // const prisma = new PrismaClient();
 
@@ -23,6 +24,7 @@ export function apiRoutes(fastify: FastifyInstance) {
   fastify.register(apiUsersRoutes, { prefix: "/users" });
   fastify.register(apiAdminPlinkksRoutes, { prefix: "/admin/plinkks" });
   fastify.register(apiAdminRolesRoutes, { prefix: "/admin/roles" });
+  fastify.register(apiAdminRedirectsRoutes, { prefix: "/admin/redirects" });
 
   fastify.get("/roles", async (request, reply) => {
     const userId = request.session.get("data");

@@ -10,6 +10,7 @@ import { dashboardEditRoutes } from "./dashboard/edit";
 import { dashboardAccountRoutes } from "./dashboard/account";
 import { dashboardThemesRoutes } from "./dashboard/themes";
 import { dashboardVersionsRoutes } from "./dashboard/versions";
+import { dashboardRedirectsRoutes } from "./dashboard/redirects";
 import { getPublicPath } from "../services/plinkkService";
 
 export function dashboardRoutes(fastify: FastifyInstance) {
@@ -21,6 +22,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.register(dashboardAccountRoutes, { prefix: "/account" });
   fastify.register(dashboardThemesRoutes, { prefix: "/themes" });
   fastify.register(dashboardVersionsRoutes, { prefix: "/versions" });
+  fastify.register(dashboardRedirectsRoutes, { prefix: "/redirects" });
 
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
     const userInfo = request.currentUser!;

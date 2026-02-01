@@ -90,4 +90,11 @@ export const PERMISSIONS: PermissionDefinition[] = [
   { key: 'VIEW_BILLING', category: 'Facturation', description: 'Voir la facturation', defaultRoles: ['ADMIN'] },
   { key: 'MANAGE_SUBSCRIPTIONS', category: 'Facturation', description: 'Gérer les abonnements', defaultRoles: ['ADMIN'] },
   { key: 'ISSUE_REFUNDS', category: 'Facturation', description: 'Émettre des remboursements', defaultRoles: ['ADMIN'] },
+
+  // Redirections
+  { key: 'CREATE_REDIRECT', category: 'Redirections', description: 'Créer des liens de redirection', defaultRoles: ['USER','BETA','PARTNER','ADMIN','DEVELOPER'] },
+  { key: 'EXTENDED_REDIRECT_LIMIT', category: 'Redirections', description: 'Limite étendue de redirections', defaultRoles: ['PARTNER','ADMIN','DEVELOPER'] },
+  { key: 'MANAGE_REDIRECTS', category: 'Redirections', description: 'Gérer toutes les redirections (admin)', defaultRoles: ['ADMIN','DEVELOPER','MODERATOR'] },
+  { key: 'VIEW_REDIRECT_STATS', category: 'Redirections', description: 'Voir les statistiques de redirection globales', defaultRoles: ['ADMIN','DEVELOPER','MODERATOR'] },
+  { key: 'DELETE_ANY_REDIRECT', category: 'Redirections', description: 'Supprimer n\'importe quelle redirection', defaultRoles: ['ADMIN','MODERATOR'] },
 ];
