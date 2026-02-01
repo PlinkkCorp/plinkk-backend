@@ -8,3 +8,4 @@ dist
 /src/public/uploads
 **/migration_lock.toml
 pnpm-lock.yaml
+/.github

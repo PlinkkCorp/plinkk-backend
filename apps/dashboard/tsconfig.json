@@ -5,6 +5,7 @@
         "strict": false,
         "moduleResolution": "node16",
         "types": ["node"],
+        "typeRoots": ["./node_modules/@types", "./src/types"],
         "lib": ["ES2021"],
         "module": "node16",
         "target": "es2022",

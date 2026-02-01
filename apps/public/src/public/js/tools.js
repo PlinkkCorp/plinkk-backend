@@ -172,24 +172,6 @@ export function createUserName(profileData) {
         userName.appendChild(partnerBadge);
     }
 
-    // --- Flair Logic (Cosmetics) ---
-    const cosmetics = profileData.cosmetics || {};
-    if (cosmetics.flair) {
-        const flairSpan = document.createElement("span");
-        flairSpan.className = "user-flair";
-        flairSpan.textContent = cosmetics.flair;
-        flairSpan.style.fontSize = "0.5em";
-        flairSpan.style.marginLeft = "8px";
-        flairSpan.style.verticalAlign = "middle";
-        flairSpan.style.opacity = "0.8";
-        flairSpan.style.background = "rgba(255,255,255,0.1)";
-        flairSpan.style.padding = "2px 6px";
-        flairSpan.style.borderRadius = "6px";
-        flairSpan.style.border = "1px solid rgba(255,255,255,0.2)";
-        userName.appendChild(flairSpan);
-    }
-    // -------------------------------
-
     if (!profileData.userName.trim()) {
         userName.style.display = "none";
     }

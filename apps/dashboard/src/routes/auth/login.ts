@@ -40,6 +40,7 @@ export function loginRoutes(fastify: FastifyInstance) {
 
     return await replyView(reply, "connect.ejs", currentUser, {
       returnTo: returnToQuery,
+      googleClientId: process.env.ID_CLIENT
     });
   });
 

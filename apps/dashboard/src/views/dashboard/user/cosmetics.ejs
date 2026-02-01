@@ -70,7 +70,6 @@
                         <div class="flex items-center justify-between gap-2">
                             <h3 class="text-lg font-bold text-white tracking-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-slate-400 transition-all truncate">
                                 <%= user.userName %>
-                                <span id="previewFlair" class="hidden ml-2 inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] bg-white/10 text-white/80 align-middle transform -translate-y-0.5 border border-white/10"></span>
                             </h3>
                             
                             <!-- Fake Email -->
@@ -112,7 +111,6 @@
         <div class="flex gap-2 overflow-x-auto pb-2 border-b border-slate-800">
           <button type="button" class="tab-btn active px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap" data-tab="theme">Thème & Couleurs</button>
           <button type="button" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap" data-tab="decoration">Décorations</button>
-          <button type="button" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap" data-tab="badges">Badges</button>
           <button type="button" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap" data-tab="banner">Bannière</button>
         </div>
 
@@ -194,29 +192,6 @@
           </div>
         </div>
 
-        <!-- Tab: Badges -->
-        <div id="tab-badges" class="tab-content hidden space-y-8 animate-fade-in">
-          <div class="space-y-4">
-            <h3 class="text-lg font-semibold text-white">Badge (Flair)</h3>
-            <p class="text-sm text-slate-400">Sélectionnez un badge à afficher à côté de votre nom.</p>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <button type="button" class="flair-opt p-3 rounded-xl border border-slate-800 bg-slate-900 hover:border-violet-500 transition-all text-left flex items-center justify-between group" data-val="">
-                <span class="text-sm font-medium text-slate-400 group-hover:text-white">Aucun</span>
-              </button>
-              <% catalog.flairs.forEach(fl => { %>
-                <button type="button" class="flair-opt p-3 rounded-xl border border-slate-800 bg-slate-900 hover:border-violet-500 transition-all text-left flex items-center justify-between group <%= fl.locked ? 'opacity-50 cursor-not-allowed' : '' %>" data-val="<%= fl.key %>" <%= fl.locked ? 'disabled' : '' %>>
-                  <span class="text-sm font-medium text-slate-300 group-hover:text-white"><%= fl.label %></span>
-                  <% if (fl.locked) { %>
-                    <svg class="w-4 h-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                  <% } else { %>
-                    <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] bg-white/10 text-white/80 border border-white/10"><%= fl.label %></span>
-                  <% } %>
-                </button>
-              <% }) %>
-            </div>
-          </div>
-        </div>
-
         <!-- Tab: Banner -->
         <div id="tab-banner" class="tab-content hidden space-y-8 animate-fade-in">
           <div class="space-y-4">
@@ -290,8 +265,7 @@
         effect: data.effect || 'none',
         frame: cosmetics.frame || 'none',
         bannerUrl: cosmetics.bannerUrl || '',
-        banner: cosmetics.banner || 'none',
-        flair: cosmetics.flair || null
+        banner: cosmetics.banner || 'none'
       };
     %>
     <script id="initialData" type="application/json"><%- JSON.stringify(initial) %></script>
@@ -380,15 +354,6 @@
       els.previewBanner.style.background = `linear-gradient(to right, ${state.primaryColor}, ${state.accentColor})`;
     }
 
-    // Flair
-    const flairEl = document.getElementById('previewFlair');
-    if (state.flair) {
-      flairEl.textContent = state.flair;
-      flairEl.classList.remove('hidden');
-    } else {
-      flairEl.classList.add('hidden');
-    }
-
     // Update Inputs
     els.primaryColor.value = state.primaryColor;
     els.primaryColorText.value = state.primaryColor;
@@ -401,8 +366,7 @@
       const type = btn.classList.contains('gradient-opt') ? 'gradientType' : 
                    btn.classList.contains('effect-opt') ? 'effect' :
                    btn.classList.contains('frame-opt') ? 'frame' :
-                   btn.classList.contains('banner-opt') ? 'banner' : 
-                   btn.classList.contains('flair-opt') ? 'flair' : '';
+                   btn.classList.contains('banner-opt') ? 'banner' : '';
       if (type && state[type] === btn.dataset.val) {
         btn.classList.add('ring-2', 'ring-violet-500', 'border-transparent');
       } else {
@@ -423,7 +387,6 @@
   document.querySelectorAll('.effect-opt').forEach(b => b.addEventListener('click', () => { state.effect = b.dataset.val; render(); }));
   document.querySelectorAll('.frame-opt').forEach(b => b.addEventListener('click', () => { state.frame = b.dataset.val; render(); }));
   document.querySelectorAll('.banner-opt').forEach(b => b.addEventListener('click', () => { state.banner = b.dataset.val; render(); }));
-  document.querySelectorAll('.flair-opt').forEach(b => b.addEventListener('click', () => { if(!b.disabled) { state.flair = b.dataset.val; render(); } }));
 
   // Save
   document.getElementById('saveBtn').addEventListener('click', async () => {
@@ -434,7 +397,6 @@
         frame: state.frame,
         banner: state.banner,
         bannerUrl: state.bannerUrl,
-        flair: state.flair,
         data: {
           primaryColor: state.primaryColor,
           accentColor: state.accentColor,

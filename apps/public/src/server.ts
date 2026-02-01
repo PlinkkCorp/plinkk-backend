@@ -154,6 +154,9 @@ fastify.addHook("onRequest", async (request, reply) => {
         return reply.sendFile(`css/styles.css`);
       } else if (request.url === "/css/button.css") {
         return reply.sendFile(`css/button.css`);
+      } else if (request.url.startsWith("/js/")) {
+        const jsFile = request.url.replace("/js/", "");
+        return reply.sendFile(`js/${jsFile}`);
       } else if (request.url === "/umami_script.js") {
         return reply.sendFile(`https://analytics.plinkk.fr/script.js`);
       } else if (request.url.startsWith("/config.js")) {

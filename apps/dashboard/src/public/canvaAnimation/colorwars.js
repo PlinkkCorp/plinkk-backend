@@ -28,9 +28,7 @@ var Configs = {
 
 // Vars
 
-var canvas,
-    context,
-    screenWidth,
+var screenWidth,
     screenHeight,
     centerX,
     centerY,
@@ -44,6 +42,10 @@ var canvas,
 // Initialize
 
 function init() {
+    if (typeof SimplexNoise === 'undefined') {
+        console.warn("Color Wars: SimplexNoise is not loaded.");
+        return;
+    }
 
     window.addEventListener('resize', onWindowResize, false);
     onWindowResize(null);

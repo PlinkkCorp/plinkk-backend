@@ -77,24 +77,33 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
     const { currentPassword, newPassword, confirmPassword } =
       (request.body as {
-        currentPassword: string;
+        currentPassword?: string;
         newPassword: string;
         confirmPassword: string;
       }) || {};
-    if (!currentPassword || !newPassword || !confirmPassword)
+    
+    if (!newPassword || !confirmPassword)
       return reply.code(400).send({ error: "Champs manquants" });
+    
     if (newPassword !== confirmPassword)
       return reply
         .code(400)
         .send({ error: "Les mots de passe ne correspondent pas" });
+
     const user = await prisma.user.findUnique({
       where: { id: userId as string },
     });
     if (!user)
       return reply.code(404).send({ error: "Utilisateur introuvable" });
-    const ok = await bcrypt.compare(currentPassword, user.password);
-    if (!ok)
-      return reply.code(403).send({ error: "Mot de passe actuel incorrect" });
+
+    const hasPwd = user.hasPassword !== false; 
+
+    if (hasPwd) {
+       if (!currentPassword) return reply.code(400).send({ error: "Mot de passe actuel requis" });
+       const ok = await bcrypt.compare(currentPassword, user.password);
+       if (!ok) return reply.code(403).send({ error: "Mot de passe actuel incorrect" });
+    }
+
     if (await bcrypt.compare(newPassword, user.password))
       return reply
         .code(400)
@@ -102,7 +111,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const hashed = await bcrypt.hash(newPassword, 10);
     await prisma.user.update({
       where: { id: userId as string },
-      data: { password: hashed },
+      data: { password: hashed, hasPassword: true },
     });
     return reply.send({ ok: true });
   });
@@ -112,12 +121,19 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
     const { password, otp } =
       (request.body as { password: string; otp: string }) || {};
-    if (!password)
-      return reply.code(400).send({ error: "Mot de passe requis" });
+
     const me = await prisma.user.findUnique({
       where: { id: userId as string },
     });
     if (!me) return reply.code(404).send({ error: "Utilisateur introuvable" });
+
+    if (!me.hasPassword) {
+        return reply.code(403).send({ error: "ACCOUNT_DELETION_REQUIRES_PASSWORD" });
+    }
+
+    if (!password)
+      return reply.code(400).send({ error: "Mot de passe requis" });
+    
     const ok = await bcrypt.compare(password, me.password);
     if (!ok) return reply.code(403).send({ error: "Mot de passe incorrect" });
     if (me.twoFactorEnabled) {
@@ -363,7 +379,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       banner?: string;
       frame?: string;
       theme?: string;
-      flair?: string;
       data?: any;
     };
 
@@ -377,7 +392,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
               banner: body.banner ?? "",
               frame: body.frame ?? "none",
               theme: body.theme ?? "system",
-              flair: body.flair ?? "OG",
               data: body.data ?? {},
             },
             update: {
@@ -385,7 +399,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
               banner: body.banner,
               frame: body.frame,
               theme: body.theme,
-              flair: body.flair,
               data: body.data,
             },
           },
@@ -396,7 +409,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
         cosmetics: {
           select: {
             id: true,
-            flair: true,
             frame: true,
             theme: true,
             bannerUrl: true,

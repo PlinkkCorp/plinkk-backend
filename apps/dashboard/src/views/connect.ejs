@@ -22,6 +22,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     * { font-family: 'Inter', system-ui, sans-serif; }
     
@@ -169,7 +170,7 @@
   </div>
 
   <main class="relative min-h-screen flex items-center justify-center p-4 sm:p-6">
-    <div class="w-full max-w-md">
+    <div class="w-full max-w-lg">
     <a href="<%= frontendUrl %>" class="inline-flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium mb-6 transition-colors group animate-fade-up" style="animation-delay: 0.05s; opacity: 0;">
       <svg class="h-4 w-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -206,7 +207,7 @@
           <div id="tabIndicator" class="tab-indicator absolute bottom-0 left-0 w-1/2 h-0.5 bg-gradient-to-r from-violet-500 to-indigo-500"></div>
         </div>
 
-        <section id="loginForm" class="form-section p-6 sm:p-8">
+        <section id="loginForm" class="form-section p-6 sm:p-8 pt-2">
           <form action="/login" method="post" class="space-y-5">
             <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
             
@@ -261,11 +262,9 @@
             <p class="text-sm text-slate-400">
               Pas encore de compte ?
               <button id="switchToSignup" type="button" class="text-violet-400 hover:text-violet-300 font-medium ml-1 transition-colors">
-                Créer un compte
+                S'inscrire ici !
               </button>
-            </p>
-          </div>
-
+           
           <!-- <div class="mt-6 text-center">
             <p class="text-sm text-slate-400">
               <button onclick="document.location.replace('/login/github')" class="btn-primary w-full py-4 rounded-xl text-white font-semibold shadow-lg">Se connecter via Github</button>
@@ -395,6 +394,32 @@
           </div> -->
         </section>
 
+        <!-- Google Sign-In Section -->
+        <div class="px-6 sm:px-8 pb-8">
+          <div class="relative w-full flex items-center justify-center mb-6">
+              <div class="absolute w-full border-t border-slate-800"></div>
+              <span class="relative bg-slate-900 px-4 text-sm text-slate-500">Ou</span>
+          </div>
+
+          <div id="g_id_onload"
+               data-client_id="<%= googleClientId %>"
+               data-context="signin"
+               data-ux_mode="popup"
+               data-callback="handleGoogleCredentialResponse"
+               data-auto_prompt="false">
+          </div>
+
+          <div class="g_id_signin"
+               data-type="standard"
+               data-shape="rectangular"
+               data-theme="filled_black"
+               data-text="continue_with"
+               data-size="large"
+               data-logo_alignment="left"
+               data-width="100%">
+          </div>
+        </div>
+
         <!-- Loading Overlay -->
         <div id="loadingOverlay" class="hidden absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-50">
           <div class="relative">
@@ -500,6 +525,36 @@
         });
       });
     }
+
+    async function handleGoogleCredentialResponse(response) {
+      try {
+        const res = await fetch('/auth/google/callback', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ credential: response.credential })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          window.location.href = data.redirect || '/';
+        } else {
+          console.error('Erreur login:', data.error);
+          const errorEl = document.querySelector('.errorClass');
+          if (errorEl) {
+            errorEl.textContent = "Erreur lors de la connexion avec Google.";
+            errorEl.style.color = "#ef4444";
+            errorEl.style.textAlign = "center";
+            errorEl.style.marginTop = "1rem";
+          }
+        }
+      } catch (e) {
+        console.error('Erreur réseau:', e);
+      }
+    }
+
 
     document.addEventListener('DOMContentLoaded', () => {
       const err = getQueryVariable('error');

@@ -28,11 +28,60 @@ export function dashboardAccountRoutes(fastify: FastifyInstance) {
       orderBy: [{ isDefault: "desc" }, { index: "asc" }, { createdAt: "asc" }],
     });
 
+    const connections = await prisma.connection.findMany({
+      where: { userId: userInfo.id },
+      select: { provider: true, createdAt: true, name: true, email: true },
+    });
+
+    console.log("Serving Account Page with Client ID:", process.env.ID_CLIENT);
     return replyView(reply, "dashboard/user/account.ejs", userInfo, {
       isEmailPublic,
       publicPath: request.publicPath,
       pages,
       plinkks: pages,
+      connections,
+      googleClientId: process.env.ID_CLIENT,
     });
+  });
+
+  fastify.post("/connections/unlink", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
+    const { provider } = request.body as { provider: string };
+    const userId = request.userId!;
+
+    const connection = await prisma.connection.findFirst({
+      where: { userId, provider },
+    });
+
+    if (!connection) {
+      return reply.code(400).send({ success: false, error: "Connexion introuvable" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return reply.code(404).send({ success: false, error: "Utilisateur introuvable" });
+
+    // If this is an identity connection (allows login), ensure user has another way to login.
+    if (connection.isIdentity) {
+         const identityConnectionsCount = await prisma.connection.count({
+            where: { userId, isIdentity: true }
+         });
+         
+         // If this is the last identity provider...
+         if (identityConnectionsCount <= 1) {
+             // ...and the user has no password
+             if (!user.hasPassword) {
+                 return reply.code(400).send({ 
+                     success: false, 
+                     error: "LAST_IDENTITY_NO_PASSWORD",
+                     message: "Vous ne pouvez pas supprimer la dernière méthode de connexion sans définir un mot de passe." 
+                 });
+             }
+         }
+    }
+
+    await prisma.connection.delete({
+      where: { id: connection.id },
+    });
+
+    return reply.send({ success: true });
   });
 }
