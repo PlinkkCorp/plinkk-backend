@@ -1,15 +1,7 @@
 import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
-import { prisma, User, Role } from "@plinkk/prisma";
+import { prisma } from "@plinkk/prisma";
 import { verifyRoleIsStaff, verifyRoleAdmin } from "../lib/verifyRole";
 import { getPublicPath } from "../services/plinkkService";
-
-declare module "fastify" {
-  interface FastifyRequest {
-    userId?: string;
-    currentUser?: User & { role: Role | null };
-    publicPath?: string;
-  }
-}
 
 export function registerAuthDecorators(fastify: FastifyInstance) {
   fastify.decorateRequest("userId", null);
