@@ -15,7 +15,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
     if (!(await validatePlinkkOwnership(userId, id)))
       return reply.code(404).send({ error: "Plinkk introuvable" });
 
-    const body = request.body as { background: any[] };
+    const body = request.body as { background: (string | { color: string })[] };
     const list = Array.isArray(body?.background) ? body.background : [];
     const colors = list
       .map((item) =>
@@ -116,7 +116,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           icon: l.icon ?? undefined,
           url: l.url,
           text: l.text ?? undefined,
-          name: (l as any).name === null ? null : typeof (l as any).name === "string" ? (l as any).name : undefined,
+          name: l.name === null ? null : typeof l.name === "string" ? l.name : undefined,
           description: l.description ?? undefined,
           showDescriptionOnHover: l.showDescriptionOnHover ?? undefined,
           showDescription: l.showDescription ?? undefined,

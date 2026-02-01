@@ -18,7 +18,7 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 
 	fastify.post("/auth/google/callback", async (request, reply) => {
 		try {
-			const body = request.body as any;
+			const body = request.body as { credential?: string };
 			const idToken = body?.credential;
 			if (!idToken) {
 				return reply.code(400).send({ success: false, error: "missing_token" });
