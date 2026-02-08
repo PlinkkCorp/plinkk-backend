@@ -463,7 +463,7 @@ fastify.get("/", async function (request, reply) {
         if (toUser) msgs.push(a);
       }
     } else {
-      msgs = anns.filter((a: { global: string; }) => a.global);
+      msgs = anns.filter((a) => a.global);
     }
   } catch (e) {}
   return await replyView(reply, "index.ejs", currentUser, {
@@ -521,7 +521,7 @@ fastify.get("/users", async (request, reply) => {
         if (toUser) msgs.push(a);
       }
     } else {
-      msgs = anns.filter((a: { global: string; }) => a.global);
+      msgs = anns.filter((a) => a.global);
     }
   } catch (e) {}
   return await replyView(reply, "users.ejs", currentUser, {
