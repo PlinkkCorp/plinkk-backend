@@ -11,6 +11,9 @@ export const MAX_REDIRECTS_EXTENDED = 100;
  * Retourne le nombre maximum de redirections autorisées pour un rôle donné
  */
 export function getMaxRedirectsForRole(role?: Role | null): number {
+  if (role && typeof role.maxRedirects === 'number') {
+    return role.maxRedirects;
+  }
   if (verifyRoleAdmin(role) || verifyRoleDeveloper(role)) return MAX_REDIRECTS_EXTENDED;
   if (verifyRolePartner(role)) return MAX_REDIRECTS_PARTNER;
   return MAX_REDIRECTS_DEFAULT;

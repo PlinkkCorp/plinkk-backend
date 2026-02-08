@@ -38,6 +38,7 @@ export function adminRolesRoutes(fastify: FastifyInstance) {
       color: r.color ?? null,
       maxPlinkks: r.maxPlinkks ?? 1,
       maxThemes: r.maxThemes ?? 0,
+      maxRedirects: r.maxRedirects ?? 5,
       permissions: Array.isArray(r.permissions)
         ? r.permissions.map((rp: any) => rp.permissionKey || rp.permission?.key).filter(Boolean)
         : [],

@@ -22,6 +22,7 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
       color: r.color,
       maxPlinkks: r.maxPlinkks,
       maxThemes: r.maxThemes,
+      maxRedirects: r.maxRedirects,
       limits: r.limits,
       meta: r.meta,
       usersCount: r.users.length,
@@ -46,12 +47,12 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
     const userId = request.session.get("data");
-    const body = request.body as { name: string; isStaff?: boolean; priority?: number; color?: string; maxPlinkks?: number; maxThemes?: number; permissions?: string[] };
+    const body = request.body as { name: string; isStaff?: boolean; priority?: number; color?: string; maxPlinkks?: number; maxThemes?: number; maxRedirects?: number; permissions?: string[] };
     const name = (body.name || '').trim().toUpperCase();
     if (!name) return reply.code(400).send({ error: 'missing_name' });
     const existing = await prisma.role.findUnique({ where: { name } });
     if (existing) return reply.code(409).send({ error: 'role_exists' });
-    const role = await prisma.role.create({ data: { name, id: name, isStaff: !!body.isStaff, priority: body.priority || 0, color: body.color || null, maxPlinkks: body.maxPlinkks ?? 1, maxThemes: body.maxThemes ?? 0 } });
+    const role = await prisma.role.create({ data: { name, id: name, isStaff: !!body.isStaff, priority: body.priority || 0, color: body.color || null, maxPlinkks: body.maxPlinkks ?? 1, maxThemes: body.maxThemes ?? 0, maxRedirects: body.maxRedirects ?? 5 } });
 
     let permKeys = Array.isArray(body.permissions) ? body.permissions : [];
     if (!permKeys.length) {
@@ -90,7 +91,7 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
     if (!ok) return;
     const userId = request.session.get("data");
     const { id } = request.params as { id: string };
-    const body = request.body as { name?: string; isStaff?: boolean; priority?: number; color?: string | null; maxPlinkks?: number; maxThemes?: number; addPermissions?: string[]; removePermissions?: string[] };
+    const body = request.body as { name?: string; isStaff?: boolean; priority?: number; color?: string | null; maxPlinkks?: number; maxThemes?: number; maxRedirects?: number; addPermissions?: string[]; removePermissions?: string[] };
     const role = await prisma.role.findUnique({ where: { id } });
     if (!role) return reply.code(404).send({ error: 'not_found' });
     const update: any = {};
@@ -100,6 +101,7 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
     if (typeof body.color === 'string') update.color = body.color.trim() || null;
     if (typeof body.maxPlinkks === 'number') update.maxPlinkks = body.maxPlinkks;
     if (typeof body.maxThemes === 'number') update.maxThemes = body.maxThemes;
+    if (typeof body.maxRedirects === 'number') update.maxRedirects = body.maxRedirects;
     if (Object.keys(update).length) await prisma.role.update({ where: { id }, data: update });
     const add = Array.isArray(body.addPermissions) ? body.addPermissions : [];
     const remove = Array.isArray(body.removePermissions) ? body.removePermissions : [];
