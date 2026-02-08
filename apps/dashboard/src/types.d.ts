@@ -15,9 +15,20 @@ declare module "@fastify/secure-session" {
   }
 }
 
+interface OAuth2AccessTokenResult {
+  token: {
+    access_token: string;
+    [key: string]: any;
+  };
+}
+
+interface FastifyOAuth2Namespace {
+  getAccessTokenFromAuthorizationCodeFlow(request: unknown): Promise<OAuth2AccessTokenResult>;
+}
+
 declare module 'fastify' {
   interface FastifyInstance {
-    githubOAuth2: OAuth2Namespace;
-    discordOAuth2: OAuth2Namespace;
+    githubOAuth2: FastifyOAuth2Namespace;
+    discordOAuth2: FastifyOAuth2Namespace;
   }
 }

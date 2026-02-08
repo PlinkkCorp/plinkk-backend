@@ -53,7 +53,7 @@ async function getDiscordUserDetails(token: { access_token: string }) {
 export async function registerOAuth2(fastify: FastifyInstance) {
   fastify.get("/login/github/callback", async function (request, reply) {
     const { token } =
-      await this.githubOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
+      await this.githubOAuth2.getAccessTokenFromAuthorizationCodeFlow(request as unknown);
 
     const user = await getGitHubUserDetails(token);
 
@@ -105,7 +105,7 @@ export async function registerOAuth2(fastify: FastifyInstance) {
 
   fastify.get("/login/discord/callback", async function (request, reply) {
     const { token } =
-      await this.discordOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
+      await this.discordOAuth2.getAccessTokenFromAuthorizationCodeFlow(request as unknown);
 
     const user = await getDiscordUserDetails(token)
 

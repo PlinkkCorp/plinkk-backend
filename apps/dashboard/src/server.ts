@@ -3,6 +3,7 @@ import Fastify from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { registerPlugins } from "./config/fastify";
 import { registerCronJobs } from "./config/cron";
+import "./types";
 import { registerReservedRootsHook } from "./middleware/reservedRoots";
 import { registerSessionValidator } from "./middleware/sessionValidator";
 import { apiRoutes } from "./server/apiRoutes";

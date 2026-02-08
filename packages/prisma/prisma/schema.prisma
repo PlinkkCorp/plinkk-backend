@@ -60,6 +60,8 @@ model User {
   views     Int       @default(0)
   isVerified Boolean  @default(false)
   isPartner  Boolean  @default(false)
+  
+  hasPassword Boolean @default(true)
 
   themes       Theme[]
   announcement AnnouncementTarget[]
@@ -84,8 +86,30 @@ model User {
   
   // Relations pour les sessions
   sessions        Session[]
+  connections     Connection[]
 
   apiKey          String? @unique
+}
+
+model Connection {
+  id           String   @id @default(nanoid(16))
+  provider     String   // "google", "discord", "github", "spotify"
+  providerId   String
+  email        String?
+  name         String?
+  accessToken  String?  @db.Text
+  refreshToken String?  @db.Text
+  expiresAt    DateTime?
+  isIdentity   Boolean  @default(false) 
+
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+
+  @@unique([provider, providerId])
+  @@unique([provider, userId])
 }
 
 model Session {

@@ -17,25 +17,6 @@ export function dashboardCosmeticsRoutes(fastify: FastifyInstance) {
 
     const cosmetics = userInfo.cosmetics;
     const catalog = {
-      flairs: [
-        { key: "OG", label: "OG", locked: false },
-        { key: "PARTNER", label: "PARTNER", locked: false },
-        {
-          key: "ADMIN",
-          label: "ADMIN",
-          locked: !(verifyRoleAdmin(userInfo.role) || verifyRoleDeveloper(userInfo.role)),
-        },
-        {
-          key: "DEVELOPER",
-          label: "DEVELOPER",
-          locked: !(verifyRoleAdmin(userInfo.role) || verifyRoleDeveloper(userInfo.role)),
-        },
-        {
-          key: "FOUNDER",
-          label: "FOUNDER",
-          locked: !(verifyRoleAdmin(userInfo.role) || verifyRoleDeveloper(userInfo.role)),
-        },
-      ],
       frames: [
         { key: "none", label: "Aucun", locked: false },
         { key: "neon", label: "Néon", locked: false },
