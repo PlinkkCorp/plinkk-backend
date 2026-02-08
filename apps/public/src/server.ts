@@ -1,7 +1,7 @@
 import "dotenv/config";
 import fastifyStatic from "@fastify/static";
 import fastifyView from "@fastify/view";
-import Fastify from "fastify";
+import Fastify, { FastifyError } from "fastify";
 import path from "path";
 import ejs from "ejs";
 import { readFileSync } from "fs";
@@ -463,7 +463,7 @@ fastify.get("/", async function (request, reply) {
         if (toUser) msgs.push(a);
       }
     } else {
-      msgs = anns.filter((a) => a.global);
+      msgs = anns.filter((a: { global: string; }) => a.global);
     }
   } catch (e) {}
   return await replyView(reply, "index.ejs", currentUser, {
@@ -521,7 +521,7 @@ fastify.get("/users", async (request, reply) => {
         if (toUser) msgs.push(a);
       }
     } else {
-      msgs = anns.filter((a) => a.global);
+      msgs = anns.filter((a: { global: string; }) => a.global);
     }
   } catch (e) {}
   return await replyView(reply, "users.ejs", currentUser, {
@@ -615,7 +615,7 @@ fastify.setErrorHandler((error, request, reply) => {
   }
   const userId = request.session.get("data");
   return reply.code(500).view("erreurs/500.ejs", {
-    message: error.message ?? "",
+    message: error && typeof error === 'object' && 'message' in error ? (error as any).message ?? "" : "",
     currentUser: userId ? { id: userId } : null,
     dashboardUrl: process.env.DASHBOARD_URL,
   });
