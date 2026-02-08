@@ -140,10 +140,12 @@
                                     <td class="p-4 text-center">
                                         <% if (isExpired) { %>
                                             <span class="px-2 py-1 rounded-full bg-rose-500/10 text-rose-400 text-xs border border-rose-500/20">Expiré</span>
-                                        <% } else if (redirect.isActive) { %>
-                                            <span class="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs border border-emerald-500/20">Actif</span>
                                         <% } else { %>
-                                            <span class="px-2 py-1 rounded-full bg-slate-500/10 text-slate-400 text-xs border border-slate-500/20">Inactif</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" value="" class="sr-only peer" onchange="toggleRedirectStatus('<%= redirect.id %>', this.checked)" <%= redirect.isActive ? 'checked' : '' %>>
+                                                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-violet-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+                                                <span class="ml-2 text-xs font-medium text-slate-300 status-label-<%= redirect.id %>"><%= redirect.isActive ? 'Actif' : 'Inactif' %></span>
+                                            </label>
                                         <% } %>
                                     </td>
                                     <td class="p-4">
@@ -309,7 +311,7 @@ async function submitForm(e) {
     
     try {
         const url = isEdit ? `/api/me/redirects/${editId}` : '/api/me/redirects';
-        const method = isEdit ? 'PUT' : 'POST';
+        const method = isEdit ? 'PATCH' : 'POST';
         
         const res = await fetch(url, {
             method,
@@ -362,6 +364,31 @@ function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
         // Optionnel: afficher une notification
     });
+}
+
+async function toggleRedirectStatus(id, isActive) {
+    // Mettre à jour le label immédiatement
+    const label = document.querySelector(`.status-label-${id}`);
+    if (label) label.textContent = isActive ? 'Actif' : 'Inactif';
+
+    try {
+        const res = await fetch(`/api/me/redirects/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isActive })
+        });
+        
+        if (!res.ok) {
+            const result = await res.json();
+            alert(result.error || 'Une erreur est survenue');
+            // Revert state on error (reload page)
+            window.location.reload();
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Erreur de connexion au serveur');
+        window.location.reload();
+    }
 }
 </script>
 
