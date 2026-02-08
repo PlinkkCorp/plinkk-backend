@@ -3,17 +3,19 @@
     "prisma:migratedev": "prisma migrate dev",
     "prisma:dev": "prisma dev",
     "prisma:studio": "prisma studio",
-    "prisma:init": "prisma migrate deploy && prisma generate --schema=../../prisma/schema.prisma",
-    "postinstall": "prisma generate --schema=packages/prisma/prisma/schema.prisma || echo prisma-generate-skipped",
-    "set-admin": "node apps/dashboard/scripts/set-admin.cjs",
+    "prisma:init": "npx prisma migrate deploy --schema=packages/prisma/prisma/schema.prisma",
+    "postinstall": "pnpm --filter @plinkk/prisma prisma generate",
+    "set-admin": "node scripts/set-admin.cjs",
     "migrate:plinkks": "node scripts/migrate-plinkks.cjs",
-    "delete_inactive": "node scripts/delete_inactive_user.js ",
-    "seed:role": "ts-node prisma/seed.ts",
-    "prisma:generate": "prisma generate --generator=dashboard && prisma generate --generator=public",
-    "build": "tsc -p tsconfig.json || true && node scripts/copy-static.mjs",
+    "delete_inactive": "node scripts/delete_inactive_user.js",
+    "seed-permissions": "node scripts/seed-permissions.js",
+    "prisma:generate": "pnpm --filter @plinkk/prisma prisma generate",
+    "build": "pnpm -r build",
     "launch-all": "concurrently \"pnpm --filter @plinkk/dashboard dev\" \"pnpm --filter @plinkk/public dev\""
   },
   "devDependencies": {
+    "@prisma/adapter-pg": "^7.3.0",
+    "pg": "^8.16.3",
     "prisma": "^7.0.0"
   },
   "dependencies": {

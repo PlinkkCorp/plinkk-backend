@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { request } from "undici";
+import "../types/index";
 import { GithubUser } from "../types/githubUser";
 import { prisma } from "@plinkk/prisma";
 import { slugify } from "../lib/plinkkUtils";
@@ -53,7 +54,7 @@ async function getDiscordUserDetails(token: { access_token: string }) {
 export async function registerOAuth2(fastify: FastifyInstance) {
   fastify.get("/login/github/callback", async function (request, reply) {
     const { token } =
-      await this.githubOAuth2.getAccessTokenFromAuthorizationCodeFlow(request as unknown);
+      await this.githubOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
 
     const user = await getGitHubUserDetails(token);
 
@@ -105,7 +106,7 @@ export async function registerOAuth2(fastify: FastifyInstance) {
 
   fastify.get("/login/discord/callback", async function (request, reply) {
     const { token } =
-      await this.discordOAuth2.getAccessTokenFromAuthorizationCodeFlow(request as unknown);
+      await this.discordOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
 
     const user = await getDiscordUserDetails(token)
 

@@ -87,6 +87,7 @@ model User {
   // Relations pour les sessions
   sessions        Session[]
   connections     Connection[]
+  redirects       Redirect[]
 
   apiKey          String? @unique
 }
@@ -504,4 +505,40 @@ model AdminLog {
   details   Json?
   createdAt DateTime @default(now())
   ip        String?
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Redirections (plinkk.fr/r/slug)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Redirect {
+  id          String   @id @default(nanoid(16))
+  slug        String   @unique
+  targetUrl   String
+  title       String?
+  description String?
+  clicks      Int      @default(0)
+  isActive    Boolean  @default(true)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  expiresAt   DateTime?
+  
+  dailyStats  RedirectClickDaily[]
+  
+  @@index([userId])
+  @@index([slug])
+}
+
+model RedirectClickDaily {
+  redirectId String
+  redirect   Redirect @relation(fields: [redirectId], references: [id], onDelete: Cascade)
+  date       DateTime @default(now())
+  count      Int
+  
+  @@id([redirectId, date])
+  @@map("RedirectClickDaily")
 }

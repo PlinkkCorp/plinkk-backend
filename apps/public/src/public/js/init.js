@@ -32,7 +32,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     const username = (window.__PLINKK_USERNAME__ || (location.pathname.split('/').filter(Boolean)[0] || '')).trim();
     const identifier = (window.__PLINKK_IDENTIFIER__ || (location.pathname.split('/').filter(Boolean)[1] || '')).trim();
     const params = new URLSearchParams(location.search);
-    if (identifier) params.set('username', identifier);
+    if (identifier) {
+        params.set('username', identifier);
+    } else if (username) {
+        params.set('username', username);
+    }
     // Importer la config de la page (non-cachée côté serveur)
     const mod = await import(`/config.js?${params}`);
     const profileData = mod.profileData;

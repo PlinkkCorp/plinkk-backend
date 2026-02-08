@@ -8,6 +8,7 @@ import { PlinkkSettings, User } from "@plinkk/prisma";
 import { prisma } from "@plinkk/prisma";
 
 import { resolvePlinkkPage, parseIdentifier } from "../lib/resolvePlinkkPage";
+import { recordPlinkkView } from "../lib/plinkkUtils";
 import { coerceThemeData } from "../lib/theme";
 import { generateBundle } from "../lib/generateBundle";
 import { generateTheme } from "../lib/generateTheme";
@@ -28,34 +29,6 @@ async function ensureCanvas(): Promise<CanvasMod> {
 }
 
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
-  async function recordPlinkkView(plinkkId: string, userId: string, request: any) {
-    try {
-      await prisma.pageStat.create({
-        data: {
-          plinkkId,
-          eventType: "view",
-          ip: String(request.ip || request.headers?.["x-forwarded-for"] || ""),
-          meta: { userId },
-        },
-      });
-    } catch (e) {
-      request.log?.warn({ err: e }, "recordPlinkkView.pageStat failed");
-    }
-    try {
-      const now = new Date();
-      const y = now.getUTCFullYear();
-      const m = now.getUTCMonth();
-      const d = now.getUTCDate();
-      const dateObj = new Date(Date.UTC(y, m, d));
-      await prisma.plinkkViewDaily.upsert({
-        where: { plinkkId_date: { plinkkId, date: dateObj } },
-        create: { plinkkId, date: dateObj, count: 1 },
-        update: { count: { increment: 1 } },
-      });
-    } catch (e) {
-      request.log?.warn({ err: e }, "recordPlinkkView.daily failed");
-    }
-  }
   fastify.get(
     "/:username",
     { config: { rateLimit: false } },
@@ -149,7 +122,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
                 ? resolved.page.slug
                 : resolved.user.id;
             if (!isPreview) {
-              await recordPlinkkView(resolved.page.id, resolved.user.id, request);
+              await recordPlinkkView(prisma, resolved.page.id, resolved.user.id, request);
             }
             return reply.view("plinkk/show.ejs", {
               page: resolved.page,
@@ -169,12 +142,25 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         // ignore and fallback to username-based resolution below
       }
 
+      // Résoudre toujours la page par défaut Plinkk; ne plus faire de fallback vers l'ancien rendu
+      const resolved = await resolvePlinkkPage(
+        prisma,
+        username,
+        undefined,
+        request
+      );
+      if (resolved.status !== 200) {
+        return reply
+          .code(resolved.status)
+          .view("erreurs/404.ejs", { user: null });
+      }
+
       // En mode aperçu on n'incrémente pas les vues ni les agrégations journalières
       if (!isPreview) {
         // Incrément des vues utilisateur, robuste aux erreurs SQLite (code 14)
         try {
           await prisma.user.updateMany({
-            where: { id: username },
+            where: { id: resolved.user.id },
             data: { views: { increment: 1 } },
           });
         } catch (e) {
@@ -191,11 +177,11 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           await prisma.userViewDaily.upsert({
             where: {
               userId_date: {
-                userId: username,
+                userId: resolved.user.id,
                 date: dateStr,
               },
             },
-            create: { userId: username, date: dateStr, count: 1 },
+            create: { userId: resolved.user.id, date: dateStr, count: 1 },
             update: { count: { increment: 1 } },
           });
         } catch (e) {
@@ -203,18 +189,6 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         }
       }
 
-      // Résoudre toujours la page par défaut Plinkk; ne plus faire de fallback vers l'ancien rendu
-      const resolved = await resolvePlinkkPage(
-        prisma,
-        username,
-        undefined,
-        request
-      );
-      if (resolved.status !== 200) {
-        return reply
-          .code(resolved.status)
-          .view("erreurs/404.ejs", { user: null });
-      }
       // Si utilisateur banni -> afficher page bannie
       try {
         const u = await prisma.user.findUnique({
@@ -258,7 +232,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           ? resolved.page.slug
           : resolved.user.id;
       if (!isPreview) {
-        await recordPlinkkView(resolved.page.id, resolved.user.id, request);
+        await recordPlinkkView(prisma, resolved.page.id, resolved.user.id, request);
       }
       return reply.view("plinkk/show.ejs", {
         page: resolved.page,
@@ -309,21 +283,32 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     const { username } = request.params as {
       username: string;
     };
-    if (username === "") {
+    if (!username) {
       reply.code(404).send("// please specify a username");
       return;
     }
 
-    const userIcon = (await prisma.user.findUnique({
+    const resolved = await resolvePlinkkPage(prisma, username, undefined, request);
+    if (resolved.status !== 200) {
+      return reply.redirect("https://s3.marvideo.fr/plinkk-image/default_profile.png");
+    }
+
+    const user = await prisma.user.findUnique({
       where: {
-        id: username
+        id: resolved.user.id,
       },
       select: {
-        image: true
-      }
-    })).image
+        image: true,
+      },
+    });
 
-    return reply.sendFile(userIcon || "https://s3.marvideo.fr/plinkk-image/default_profile.png");
+    const userIcon = user?.image;
+
+    if (userIcon && (userIcon.startsWith("http://") || userIcon.startsWith("https://"))) {
+      return reply.redirect(userIcon);
+    }
+
+    return reply.sendFile(userIcon || "images/default_profile.png");
   });
 
   fastify.get(
@@ -356,18 +341,24 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     "/config.js",
     { config: { rateLimit: false } },
     async function (request, reply) {
-      const { username } = request.query as {
+      let { username } = request.query as {
         username: string;
       };
-      if (username === "") {
-        reply.code(404).send({ error: "please specify a username" });
+      if (!username) {
+        reply.code(400).send({ error: "please specify a username" });
         return;
       }
       // Eviter le cache pour garantir l'actualisation immédiate du preview
       reply.header("Cache-Control", "no-store, max-age=0, must-revalidate");
       reply.header("Vary", "Referer");
-      const page = await prisma.plinkk.findFirst({
-        where: { slug: username },
+
+      const resolved = await resolvePlinkkPage(prisma, username, undefined, request);
+      if (resolved.status !== 200) {
+        return reply.code(resolved.status).send({ error: "Page introuvable" });
+      }
+
+      const page = await prisma.plinkk.findUnique({
+        where: { id: resolved.page.id },
         include: {
           user: {
             include: {
@@ -700,7 +691,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         ? resolved.page.slug
         : resolved.user.id;
     if (!isPreview) {
-      await recordPlinkkView(resolved.page.id, resolved.user.id, request);
+      await recordPlinkkView(prisma, resolved.page.id, resolved.user.id, request);
     }
     return reply.view("plinkk/show.ejs", {
       page: resolved.page,
@@ -734,7 +725,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     const isOwner =
       (request.session.get("data") as string | undefined) === resolved.user.id;
     if (!isPreview) {
-      await recordPlinkkView(resolved.page.id, resolved.user.id, request);
+      await recordPlinkkView(prisma, resolved.page.id, resolved.user.id, request);
     }
     return reply.view("plinkk/show.ejs", {
       page: resolved.page,
@@ -818,8 +809,11 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     } catch {}
 
     const { id } = request.params as { id: string };
-    const page = await prisma.plinkk.findFirst({
-      where: { slug: id },
+    const resolved = await resolvePlinkkPage(prisma, id, undefined, request);
+    if (resolved.status !== 200) return reply.code(404).send({ error: "not_found" });
+
+    const page = await prisma.plinkk.findUnique({
+      where: { id: resolved.page.id },
       include: { user: true, settings: true },
     });
     if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });

@@ -159,7 +159,7 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
     const page = await prisma.plinkk.findFirst({ where: { id, userId: String(userId) } });
     if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
 
-    const body = request.body as { layoutOrder?: any };
+    const body = request.body as { layoutOrder?: string[] };
     if (body?.layoutOrder !== undefined) {
       await prisma.plinkkSettings.upsert({
         where: { plinkkId: id },

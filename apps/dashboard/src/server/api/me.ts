@@ -7,6 +7,7 @@ import QRCode from "qrcode";
 import { User, prisma } from "@plinkk/prisma";
 import { apiMeThemesRoutes } from "./me/theme";
 import { apiMePlinkksRoutes } from "./me/plinkks/index";
+import { apiMeRedirectsRoutes } from "./me/redirects";
 import crypto from "crypto";
 import { Upload } from "@aws-sdk/lib-storage";
 import { getS3Client } from "../../lib/fileUtils";
@@ -22,6 +23,7 @@ const pending2fa = new Map<
 export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.register(apiMeThemesRoutes, { prefix: "/themes" });
   fastify.register(apiMePlinkksRoutes, { prefix: "/plinkks" });
+  fastify.register(apiMeRedirectsRoutes, { prefix: "/redirects" });
 
   fastify.post("/apikey", async (request, reply) => {
     const userId = request.session.get("data");
