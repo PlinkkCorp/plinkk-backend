@@ -154,6 +154,7 @@ model Role {
   color       String?            // couleur d'accent éventuelle
   maxPlinkks  Int?    @default(1)
   maxThemes   Int?    @default(0)
+  maxRedirects Int?   @default(5)
   limits      Json?              // structure libre pour futures quotas
   meta        Json?              // infos supplémentaires (badges, etc.)
   createdAt   DateTime @default(now())
