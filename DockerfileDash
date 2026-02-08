@@ -25,6 +25,8 @@ RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" pnpm --filter @
 
 RUN pnpm --filter @plinkk/prisma run build
 
+RUN pnpm --filter @plinkk/shared run build
+
 RUN pnpx @fastify/secure-session > apps/dashboard/src/secret-key
 
 RUN pnpm --filter @plinkk/dashboard run build
