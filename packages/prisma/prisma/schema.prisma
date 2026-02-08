@@ -60,8 +60,14 @@ model User {
   views     Int       @default(0)
   isVerified Boolean  @default(false)
   isPartner  Boolean  @default(false)
+<<<<<<< Updated upstream
+=======
   isPremium  Boolean  @default(false)
   premiumUntil DateTime?
+  stripeCustomerId String? @unique
+  extraPlinkks     Int     @default(0)
+  extraRedirects   Int     @default(0)
+>>>>>>> Stashed changes
   
   hasPassword Boolean @default(true)
 
@@ -90,6 +96,7 @@ model User {
   sessions        Session[]
   connections     Connection[]
   redirects       Redirect[]
+  purchases       Purchase[]
 
   apiKey          String? @unique
 }
@@ -549,4 +556,22 @@ model RedirectClickDaily {
   
   @@id([redirectId, date])
   @@map("RedirectClickDaily")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Achats Stripe (plinkks et redirections supplémentaires)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Purchase {
+  id              String   @id @default(nanoid(16))
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            String   // "extra_plinkk", "extra_redirects"
+  amount          Int      @default(100) // montant en centimes
+  quantity        Int      @default(1)
+  stripeSessionId String?  @unique
+  stripePaymentId String?
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
 }

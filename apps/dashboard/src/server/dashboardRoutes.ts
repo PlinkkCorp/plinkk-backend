@@ -26,7 +26,13 @@ export function dashboardRoutes(fastify: FastifyInstance) {
 
   fastify.get("/premium", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
     const userInfo = request.currentUser!;
-    return replyView(reply, "dashboard/premium.ejs", userInfo, {});
+    return replyView(reply, "dashboard/premium.ejs", userInfo, { mode: 'preview' });
+  });
+
+  fastify.get("/premium/configure", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
+    // Page de configuration de l'abonnement
+    const userInfo = request.currentUser!;
+    return replyView(reply, "dashboard/premium.ejs", userInfo, { mode: 'configure' });
   });
 
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {

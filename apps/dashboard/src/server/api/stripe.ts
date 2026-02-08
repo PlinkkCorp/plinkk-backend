@@ -1,0 +1,141 @@
+import { FastifyInstance } from "fastify";
+import { requireAuth } from "../../middleware/auth";
+import {
+  stripe,
+  createCheckoutSession,
+  syncSubscription, // Nouvelle fonction importée
+  handleSuccessfulPayment,
+  getUserPurchases,
+  PRODUCTS,
+  ProductType,
+} from "../../services/stripeService";
+
+export function apiStripeRoutes(fastify: FastifyInstance) {
+  // ─── Liste des produits disponibles ───────────────────────────────────────
+  fastify.get("/products", async (_request, reply) => {
+    return reply.send({
+      products: Object.entries(PRODUCTS).map(([key, p]) => ({
+        id: key,
+        name: p.name,
+        description: p.description,
+        price: p.unitAmount / 100,
+        currency: "EUR",
+      })),
+    });
+  });
+
+  // ─── Mise à jour / Création de plan (Unified Subscription) ───────────────
+  fastify.post("/update-plan", { preHandler: requireAuth }, async (request, reply) => {
+    if (!stripe) return reply.code(503).send({ error: "Paiements non disponibles" });
+
+    const userId = request.userId!;
+    const body = request.body as { 
+      premium?: boolean; 
+      extraPlinkks?: number; 
+      extraRedirects?: number 
+    };
+
+    const dashboardUrl = process.env.DASHBOARD_URL || "http://127.0.0.1:3001";
+
+    try {
+      const result = await syncSubscription(
+        userId,
+        {
+          premium: body.premium || false,
+          extraPlinkks: Math.max(0, body.extraPlinkks || 0),
+          extraRedirects: Math.max(0, body.extraRedirects || 0),
+        },
+        dashboardUrl
+      );
+      
+      return reply.send(result);
+    } catch (e: any) {
+      request.log?.error(e, "Plan update failed");
+      return reply.code(500).send({ error: e.message || "Erreur de mise à jour du plan" });
+    }
+  });
+
+  // ─── (Legacy) Créer une session de paiement simple ───────────────────────
+  fastify.post("/checkout", { preHandler: requireAuth }, async (request, reply) => {
+    // Legacy endpoint, redirige vers update-plan idéalement, mais gardé pour compatibilité si besoin.
+    // Pour ce use case, on réimplémente une logique simplifiée ou on débranche.
+    return reply.code(400).send({ error: "Utilisez la nouvelle interface d'abonnement." });
+  });
+
+  // ─── Historique des achats ────────────────────────────────────────────────
+  fastify.get("/purchases", { preHandler: requireAuth }, async (request, reply) => {
+    const userId = request.userId!;
+    const purchases = await getUserPurchases(userId);
+
+    return reply.send({
+      purchases: purchases.map((p) => ({
+        id: p.id,
+        type: p.type,
+        amount: p.amount / 100,
+        currency: "EUR",
+        createdAt: p.createdAt,
+      })),
+    });
+  });
+
+  // ─── Webhook Stripe ──────────────────────────────────────────────────────
+  // Note: Ce endpoint doit recevoir le body brut pour vérifier la signature
+  fastify.post("/webhook", {
+    config: {
+      rawBody: true,
+      rateLimit: false,
+    },
+  }, async (request, reply) => {
+    if (!stripe) {
+      return reply.code(503).send({ error: "Stripe non configuré" });
+    }
+
+    const sig = request.headers["stripe-signature"] as string | undefined;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    // Si pas de webhook secret configuré, traiter directement (dev mode)
+    if (!webhookSecret) {
+      request.log?.warn("[Stripe] STRIPE_WEBHOOK_SECRET non configuré — vérification de signature ignorée");
+      const event = request.body as any;
+
+      if (event?.type === "checkout.session.completed") {
+        try {
+          await handleSuccessfulPayment(event.data.object);
+        } catch (e) {
+          request.log?.error(e, "handleSuccessfulPayment failed");
+        }
+      }
+      return reply.send({ received: true });
+    }
+
+    // En production, vérifier la signature
+    if (!sig) {
+      return reply.code(400).send({ error: "Signature Stripe manquante" });
+    }
+
+    let event: any;
+    try {
+      const rawBody = (request as any).rawBody || JSON.stringify(request.body);
+      event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+    } catch (e: any) {
+      request.log?.error(e, "Stripe webhook signature verification failed");
+      return reply.code(400).send({ error: "Signature invalide" });
+    }
+
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object;
+        try {
+          await handleSuccessfulPayment(session);
+        } catch (e) {
+          request.log?.error(e, "handleSuccessfulPayment failed");
+        }
+        break;
+      }
+      default:
+        request.log?.info(`[Stripe] Événement non géré: ${event.type}`);
+    }
+
+    return reply.send({ received: true });
+  });
+}

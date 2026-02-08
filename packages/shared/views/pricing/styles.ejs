@@ -11,4 +11,67 @@
   }
   .glow-ring { animation: glow-pulse 3s ease-in-out infinite; }
   .comparison-row:hover { background: rgba(139,92,246,.04); }
+
+  /* Hide spin buttons for input[type=number] */
+  input[type=number]::-webkit-inner-spin-button, 
+  input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+  }
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+
+  /* ── Pricing reveal animations (public) ── */
+  .pricing-reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    filter: blur(6px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 1s cubic-bezier(0.16, 1, 0.3, 1),
+                filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .pricing-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  .pricing-reveal-d1 { transition-delay: .12s; }
+  .pricing-reveal-d2 { transition-delay: .24s; }
+  .pricing-reveal-d3 { transition-delay: .36s; }
+
+  /* ── Card hover (public pricing) ── */
+  .pricing-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .pricing-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+    transition: left 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .pricing-card:hover::before { left: 100%; }
+  .pricing-card:hover {
+    border-color: rgba(255,255,255,0.12);
+    transform: translateY(-6px);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+  }
+
+  /* ── Gradient text ── */
+  .pricing-gradient {
+    background: linear-gradient(90deg, #818cf8, #c084fc, #f472b6, #818cf8);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 8s linear infinite;
+  }
 </style>

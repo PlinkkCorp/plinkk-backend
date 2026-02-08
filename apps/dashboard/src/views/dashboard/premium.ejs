@@ -9,14 +9,49 @@
 
         <main class="col-span-12 lg:col-span-10 space-y-8">
 
-            <%- include('pricing/hero', { pricingCtaHref: '#plans', pricingCtaText: 'Voir les offres' }) %>
+            <% if (locals.mode !== 'configure') { %>
+                <%- include('pricing/hero', { pricingCtaHref: '/premium/configure', pricingCtaText: 'Configurer mon offre' }) %>
+            <% } else { %>
+                <a href="/premium" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors group">
+                    <svg class="w-4 h-4 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    Retour aux offres
+                </a>
+            <% } %>
 
-            <%- include('pricing/plans', { pricingContext: 'dashboard' }) %>
+            <%- include('pricing/plans', { pricingContext: (locals.mode === 'configure' ? 'dashboard-config' : 'dashboard-preview') }) %>
 
-            <%- include('pricing/comparison') %>
+            <% if (locals.mode !== 'configure') { %>
+                <!-- Messages de succès/annulation pour les achats -->
+                <div id="payment-success" class="hidden mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm font-medium">
+                    ✅ Paiement réussi ! Vos limites ont été mises à jour.
+                </div>
+                <div id="payment-cancel" class="hidden mt-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-sm font-medium">
+                    ⚠️ Paiement annulé. Vous pouvez réessayer à tout moment.
+                </div>
 
-            <%- include('pricing/faq') %>
+                <%- include('pricing/comparison') %>
+
+                <%- include('pricing/extensions') %>
+
+                <%- include('pricing/faq') %>
+            <% } %>
 
         </main>
     </div>
+
+    <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('payment') === 'success') {
+        const el = document.getElementById('payment-success');
+        if (el) el.classList.remove('hidden');
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+      if (params.get('payment') === 'cancel') {
+        const el = document.getElementById('payment-cancel');
+        if (el) el.classList.remove('hidden');
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    })();
+    </script>
   <%- include('../partials/footer.ejs') %>

@@ -7,16 +7,31 @@
 
 <%- include('pricing/styles') %>
 
-<main class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 space-y-10">
+<main class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-20 space-y-16">
 
-    <%- include('pricing/hero', { pricingCtaHref: '#plans', pricingCtaText: 'Voir les offres' }) %>
+    <%- include('pricing/plans', { pricingContext: 'public' }) %>
 
-    <%- include('pricing/plans', { pricingContext: 'public', dashboardUrl: (typeof dashboardUrl !== 'undefined' ? dashboardUrl : '/dashboard') }) %>
+    <div class="pricing-reveal">
+        <%- include('pricing/comparison') %>
+    </div>
 
-    <%- include('pricing/comparison') %>
+    <div class="pricing-reveal">
+        <%- include('pricing/extensions') %>
+    </div>
 
-    <%- include('pricing/faq') %>
+    <div class="pricing-reveal">
+        <%- include('pricing/faq') %>
+    </div>
 
 </main>
+
+<script>
+(function() {
+    const obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+    document.querySelectorAll('.pricing-reveal').forEach(function(el) { obs.observe(el); });
+})();
+</script>
 
 <%- include('partials/footer') %>

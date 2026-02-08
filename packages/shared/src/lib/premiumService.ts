@@ -54,6 +54,8 @@ export interface PremiumCheckUser {
   premiumUntil?: Date | string | null;
   isPartner?: boolean;
   role?: Role | null;
+  extraPlinkks?: number;
+  extraRedirects?: number;
 }
 
 /**
@@ -100,6 +102,8 @@ export function getMaxPlinkks(user?: PremiumCheckUser | null): number {
   if (user.role?.maxPlinkks != null && user.role.maxPlinkks > 0) limit = Math.max(limit, user.role.maxPlinkks);
   if (verifyRoleIsStaff(user.role)) limit = Math.max(limit, STAFF_MAX_PLINKKS);
   if (isUserPremium(user)) limit = Math.max(limit, PREMIUM_MAX_PLINKKS);
+  // Ajout des plinkks achetées à l'unité
+  if (user.extraPlinkks && user.extraPlinkks > 0) limit += user.extraPlinkks;
   return limit;
 }
 
@@ -124,6 +128,8 @@ export function getMaxRedirects(user?: PremiumCheckUser | null): number {
   if (user.role?.maxRedirects != null && user.role.maxRedirects > 0) limit = Math.max(limit, user.role.maxRedirects);
   if (verifyRoleIsStaff(user.role)) limit = Math.max(limit, STAFF_MAX_REDIRECTS);
   if (isUserPremium(user)) limit = Math.max(limit, PREMIUM_MAX_REDIRECTS);
+  // Ajout des packs de redirections achetés (+5 par achat)
+  if (user.extraRedirects && user.extraRedirects > 0) limit += user.extraRedirects;
   return limit;
 }
 
@@ -208,5 +214,7 @@ export function getUserLimits(user?: PremiumCheckUser | null) {
     canUseVisualEffects: canUseVisualEffects(user),
     canUsePasswordProtectedPlinkk: canUsePasswordProtectedPlinkk(user),
     canUseScheduledLinks: canUseScheduledLinks(user),
+    extraPlinkks: user?.extraPlinkks ?? 0,
+    extraRedirects: user?.extraRedirects ?? 0,
   };
 }

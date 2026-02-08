@@ -26,29 +26,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.register(apiMePlinkksRoutes, { prefix: "/plinkks" });
   fastify.register(apiMeRedirectsRoutes, { prefix: "/redirects" });
 
-  // ─── Limites premium ────────────────────────────────────────────────────────
-  fastify.get("/premium", async (request, reply) => {
-    const userId = request.session.get("data");
-    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId as string },
-      select: {
-        isPremium: true,
-        premiumUntil: true,
-        isPartner: true,
-        role: true,
-      },
-    });
-    if (!user) return reply.code(404).send({ error: "Utilisateur introuvable" });
-
-    const limits = getUserLimits(user);
-    return reply.send({
-      ...limits,
-      premiumUntil: user.premiumUntil,
-    });
-  });
-
   fastify.post("/apikey", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
