@@ -6,9 +6,11 @@ import { minify } from "uglify-js";
 import { PlinkkSettings, User } from "@plinkk/prisma";
 // Utilise l'instance Prisma partagée pour éviter des ouvertures multiples du fichier SQLite
 import { prisma } from "@plinkk/prisma";
+import bcrypt from "bcrypt";
 
 import { resolvePlinkkPage, parseIdentifier } from "../lib/resolvePlinkkPage";
 import { recordPlinkkView } from "../lib/plinkkUtils";
+import { filterScheduledLinks } from "@plinkk/shared";
 import { coerceThemeData } from "../lib/theme";
 import { generateBundle } from "../lib/generateBundle";
 import { generateTheme } from "../lib/generateTheme";
@@ -29,6 +31,69 @@ async function ensureCanvas(): Promise<CanvasMod> {
 }
 
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
+  fastify.post(
+    "/plinkk/verify-password",
+    { config: { rateLimit: { max: 10, timeWindow: "1 minute" } } },
+    async function (request, reply) {
+      const { username, identifier, password } = request.body as {
+        username: string;
+        identifier?: string;
+        password?: string;
+      };
+      if (!username) return reply.redirect("/");
+
+      // On tente de résoudre la page
+      const resolved = await resolvePlinkkPage(prisma, username, identifier);
+
+      // Si page introuvable ou erreur
+      if (resolved.status !== 200 || !resolved.page || !resolved.user) {
+        return reply.redirect(`/${username}`);
+      }
+
+      // Si ce n'est pas protégé, redirect vers la page
+      // Note: identifier peut être vide, donc on reconstruit l'url
+      const targetUrl = identifier ? `/${username}/${identifier}` : `/${username}`;
+      
+      if (!resolved.isPasswordProtected) {
+        return reply.redirect(targetUrl);
+      }
+
+      // Si on est le propriétaire
+      const currentUserId = request.session.get("data") as string | undefined;
+      if (currentUserId === resolved.user.id) {
+        return reply.redirect(targetUrl);
+      }
+
+      // Vérification mot de passe
+      if (!password) {
+        return reply.view("plinkk/password.ejs", {
+          page: resolved.page,
+          username,
+          identifier,
+          error: "Mot de passe requis",
+        });
+      }
+
+      const isValid = await bcrypt.compare(
+        password,
+        resolved.page.passwordHash || ""
+      );
+
+      if (isValid) {
+        // Unlock pour cette page spécifique
+        request.session.set(`plinkk_unlocked_${resolved.page.id}`, true);
+        return reply.redirect(targetUrl);
+      } else {
+        return reply.view("plinkk/password.ejs", {
+          page: resolved.page,
+          username,
+          identifier,
+          error: "Mot de passe incorrect",
+        });
+      }
+    }
+  );
+
   fastify.get(
     "/:username",
     { config: { rateLimit: false } },
@@ -111,9 +176,25 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
               }
             } catch (e) {}
 
-            const links = await prisma.link.findMany({
+            // Plinkk protégé par mot de passe : afficher le formulaire
+            if (resolved.isPasswordProtected && !resolved.isOwner) {
+              const sessionKey = `plinkk_unlocked_${resolved.page.id}`;
+              const unlocked = request.session.get(sessionKey);
+              if (!unlocked) {
+                return reply.view("plinkk/password.ejs", {
+                  page: resolved.page,
+                  username,
+                  identifier: undefined,
+                  error: null,
+                });
+              }
+            }
+
+            const allLinks = await prisma.link.findMany({
               where: { plinkkId: resolved.page.id, userId: resolved.user.id },
             });
+            // Filtrer les liens schedulés (ne montrer que ceux actuellement actifs)
+            const links = filterScheduledLinks(allLinks);
             const isOwner =
               (request.session.get("data") as string | undefined) ===
               resolved.user.id;
@@ -221,9 +302,25 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         }
       } catch (e) {}
 
-      const links = await prisma.link.findMany({
+      // Plinkk protégé par mot de passe : afficher le formulaire
+      if (resolved.isPasswordProtected && !resolved.isOwner) {
+        const sessionKey = `plinkk_unlocked_${resolved.page.id}`;
+        const unlocked = request.session.get(sessionKey);
+        if (!unlocked) {
+          return reply.view("plinkk/password.ejs", {
+            page: resolved.page,
+            username,
+            identifier: undefined,
+            error: null,
+          });
+        }
+      }
+
+      const allLinks = await prisma.link.findMany({
         where: { plinkkId: resolved.page.id, userId: resolved.user.id },
       });
+      // Filtrer les liens schedulés (ne montrer que ceux actuellement actifs)
+      const links = filterScheduledLinks(allLinks);
       const isOwner =
         (request.session.get("data") as string | undefined) ===
         resolved.user.id;
@@ -681,9 +778,25 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       return reply
         .code(resolved.status)
         .view("erreurs/404.ejs", { user: null });
-    const links = await prisma.link.findMany({
+
+    // Plinkk protégé par mot de passe
+    if (resolved.isPasswordProtected && !resolved.isOwner) {
+      const sessionKey = `plinkk_unlocked_${resolved.page.id}`;
+      const unlocked = request.session.get(sessionKey);
+      if (!unlocked) {
+        return reply.view("plinkk/password.ejs", {
+          page: resolved.page,
+          username,
+          identifier,
+          error: null,
+        });
+      }
+    }
+
+    const allLinks = await prisma.link.findMany({
       where: { plinkkId: resolved.page.id, userId: resolved.user.id },
     });
+    const links = filterScheduledLinks(allLinks);
     const isOwner =
       (request.session.get("data") as string | undefined) === resolved.user.id;
     const publicPath =
@@ -719,9 +832,26 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       return reply
         .code(resolved.status)
         .view("erreurs/404.ejs", { user: null });
-    const links = await prisma.link.findMany({
+
+    // Plinkk protégé par mot de passe
+    if (resolved.isPasswordProtected && !resolved.isOwner) {
+      const sessionKey = `plinkk_unlocked_${resolved.page.id}`;
+      const unlocked = request.session.get(sessionKey);
+      if (!unlocked) {
+        return reply.view("plinkk/password.ejs", {
+          page: resolved.page,
+          username,
+          identifier: "0",
+          error: null,
+        });
+      }
+    }
+
+    const allLinks = await prisma.link.findMany({
       where: { plinkkId: resolved.page.id, userId: resolved.user.id },
     });
+    const links = filterScheduledLinks(allLinks);
+
     const isOwner =
       (request.session.get("data") as string | undefined) === resolved.user.id;
     if (!isPreview) {

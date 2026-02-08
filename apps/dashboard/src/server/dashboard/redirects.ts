@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { replyView } from "../../lib/replyView";
 import { requireAuthRedirect } from "../../middleware/auth";
-import { getMaxRedirectsForRole, countUserRedirects } from "../../services/redirectService";
+import { getMaxRedirects, countUserRedirects } from "../../services/redirectService";
 
 export function dashboardRedirectsRoutes(fastify: FastifyInstance) {
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
@@ -26,14 +26,14 @@ export function dashboardRedirectsRoutes(fastify: FastifyInstance) {
       })
     ]);
 
-    const maxRedirects = getMaxRedirectsForRole(userInfo.role);
+    const maxRedirects = getMaxRedirects(userInfo);
 
     return replyView(reply, "dashboard/user/redirects.ejs", userInfo, {
       redirects,
       redirectCount,
       maxRedirects,
       totalClicks: totalClicks._sum.clicks || 0,
-      publicPath: request.publicPath,
+       publicPath: request.publicPath,
     });
   });
 

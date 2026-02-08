@@ -12,6 +12,7 @@ import crypto from "crypto";
 import { Upload } from "@aws-sdk/lib-storage";
 import { getS3Client } from "../../lib/fileUtils";
 import sharp from "sharp"
+import { canUseGifBanner, getUserLimits, canUseVisualEffects } from "@plinkk/shared";
 
 const pending2fa = new Map<
   string,
@@ -24,6 +25,29 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.register(apiMeThemesRoutes, { prefix: "/themes" });
   fastify.register(apiMePlinkksRoutes, { prefix: "/plinkks" });
   fastify.register(apiMeRedirectsRoutes, { prefix: "/redirects" });
+
+  // ─── Limites premium ────────────────────────────────────────────────────────
+  fastify.get("/premium", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId as string },
+      select: {
+        isPremium: true,
+        premiumUntil: true,
+        isPartner: true,
+        role: true,
+      },
+    });
+    if (!user) return reply.code(404).send({ error: "Utilisateur introuvable" });
+
+    const limits = getUserLimits(user);
+    return reply.send({
+      ...limits,
+      premiumUntil: user.premiumUntil,
+    });
+  });
 
   fastify.post("/apikey", async (request, reply) => {
     const userId = request.session.get("data");
@@ -376,6 +400,13 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/cosmetics", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    
+    const user = await prisma.user.findUnique({
+      where: { id: userId as string },
+      include: { role: true },
+    });
+    if (!user) return reply.code(404).send({ error: "Utilisateur introuvable" });
+
     const body = request.body as {
       bannerUrl?: string;
       banner?: string;
@@ -383,6 +414,27 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       theme?: string;
       data?: any;
     };
+
+    // Vérifier premium pour bannières GIF/image
+    if (body.bannerUrl && body.bannerUrl.trim() !== "") {
+      if (!canUseGifBanner(user)) {
+        return reply.code(403).send({ error: "premium_required", feature: "gif_banner", message: "Les bannières personnalisées nécessitent un abonnement premium" });
+      }
+    }
+
+    // Vérifier les cadres (Néon est gratuit, les autres effets sont premium)
+    if (body.frame && body.frame !== "none" && body.frame !== "neon") {
+      if (!canUseVisualEffects(user)) {
+        return reply.code(403).send({ error: "premium_required", feature: "frame", message: "Ce cadre nécessite un abonnement premium" });
+      }
+    }
+
+    // Vérifier les effets visuels (Paillettes, Grain sont premium)
+    if (body.data?.effect && body.data.effect !== "none") {
+      if (!canUseVisualEffects(user)) {
+        return reply.code(403).send({ error: "premium_required", feature: "visual_effects", message: "Les effets visuels nécessitent un abonnement premium" });
+      }
+    }
 
     const updated = await prisma.user.update({
       where: { id: userId as string },

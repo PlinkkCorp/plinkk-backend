@@ -9,6 +9,7 @@ const STATIC_PAGES = [
   { path: "/cookies", template: "about/cookies.ejs" },
   { path: "/legal", template: "about/legal.ejs" },
   { path: "/docs", template: "docs.ejs" },
+  { path: "/pricing", template: "pricing.ejs" },
 ];
 
 async function getCurrentUser(request: FastifyRequest) {
@@ -39,7 +40,7 @@ const BLOCKED_BOTS = [
 ];
 
 const SITEMAP_STATIC_PATHS = [
-  "", "about", "contact", "privacy", "terms", "cookies", "legal", "users", "dashboard", "docs",
+  "", "about", "contact", "privacy", "terms", "cookies", "legal", "users", "dashboard", "docs", "pricing",
 ];
 
 export function staticPagesRoutes(fastify: FastifyInstance) {

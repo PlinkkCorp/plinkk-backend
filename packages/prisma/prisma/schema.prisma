@@ -60,6 +60,8 @@ model User {
   views     Int       @default(0)
   isVerified Boolean  @default(false)
   isPartner  Boolean  @default(false)
+  isPremium  Boolean  @default(false)
+  premiumUntil DateTime?
   
   hasPassword Boolean @default(true)
 
@@ -212,6 +214,10 @@ model Link {
   showDescriptionOnHover Boolean? @default(true)
   showDescription        Boolean? @default(true)
   clicks                 Int      @default(0)
+
+  // Scheduled links (premium) : programmation d'activation/désactivation
+  scheduledAt  DateTime?  // Date à partir de laquelle le lien est visible
+  expiresAt    DateTime?  // Date à laquelle le lien disparaît
 
   userId   String
   user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -367,16 +373,17 @@ model Plinkk {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  name       String
-  slug       String
-  index      Int        @default(0)
-  isDefault  Boolean    @default(false)
-  isPublic   Boolean    @default(true)
-  visibility Visibility @default(PUBLIC)
-  isActive   Boolean    @default(true)
-  views      Int        @default(0)
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @default(now()) @updatedAt
+  name         String
+  slug         String
+  index        Int        @default(0)
+  isDefault    Boolean    @default(false)
+  isPublic     Boolean    @default(true)
+  visibility   Visibility @default(PUBLIC)
+  isActive     Boolean    @default(true)
+  views        Int        @default(0)
+  passwordHash String?    // Mot de passe pour accès protégé (premium)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now()) @updatedAt
 
   links       Link[]
   categories  Category[]

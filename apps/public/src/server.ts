@@ -42,6 +42,7 @@ declare module "@fastify/secure-session" {
   interface SessionData {
     data?: string;
     returnTo?: string;
+    [key: string]: any;
   }
 }
 
@@ -52,11 +53,18 @@ fastify.register(fastifyRateLimit, {
 
 fastify.register(fastifyCompress);
 
+const sharedViewsRoot = path.join(__dirname, "..", "..", "..", "packages", "shared", "views");
 fastify.register(fastifyView, {
   engine: {
     ejs: ejs,
   },
   root: path.join(__dirname, "views"),
+  options: {
+    views: [
+      path.join(__dirname, "views"),
+      sharedViewsRoot,
+    ],
+  },
 });
 
 fastify.register(fastifyStatic, {
@@ -615,7 +623,7 @@ fastify.setErrorHandler((error, request, reply) => {
   }
   const userId = request.session.get("data");
   return reply.code(500).view("erreurs/500.ejs", {
-    message: error && typeof error === 'object' && 'message' in error ? (error as any).message ?? "" : "",
+    message: error && typeof error === 'object' && 'message' in error ? (error).message ?? "" : "",
     currentUser: userId ? { id: userId } : null,
     dashboardUrl: process.env.DASHBOARD_URL,
   });

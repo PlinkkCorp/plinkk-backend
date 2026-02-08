@@ -7,6 +7,7 @@ import {
   verifyRoleDeveloper,
   verifyRolePartner,
 } from "./verifyRole";
+import { getMaxPlinkks } from "./premiumService";
 
 export const MAX_PAGES_DEFAULT = 1;
 
@@ -177,11 +178,11 @@ export async function createPlinkkForUser(
 ) {
   const me = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, role: true },
+    include: { role: true },
   });
   if (!me) throw new Error("user_not_found");
   const count = await prisma.plinkk.count({ where: { userId } });
-  const maxPages = getMaxPagesForRole(me.role);
+  const maxPages = getMaxPlinkks(me);
   if (count >= maxPages) throw new Error("max_pages_reached");
   const name = (opts.name || "Page").trim() || "Page";
   const base = slugify(opts.slugBase || name);

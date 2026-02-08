@@ -475,24 +475,52 @@
                                             <h3 class="text-lg font-semibold text-white">Liens</h3>
                                             <p class="text-sm text-slate-400">Vos liens principaux.</p>
                                         </div>
-                                        <button id="addLink" type="button"
-                                            class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors flex items-center gap-2">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                                            </svg>
-                                            Ajouter un lien
-                                        </button>
+                                        <% if (typeof linksCount !== 'undefined' && typeof maxLinks !== 'undefined' && linksCount >= maxLinks) { %>
+                                            <a href="/premium" class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-700 transition-colors flex items-center gap-2 cursor-pointer">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
+                                                    <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                                </svg>
+                                                Limite atteinte (<%= maxLinks %>)
+                                            </a>
+                                        <% } else { %>
+                                            <button id="addLink" type="button"
+                                                class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors flex items-center gap-2">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
+                                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                </svg>
+                                                Ajouter un lien
+                                            </button>
+                                        <% } %>
                                     </div>
 
-                                    <div class="flex items-center gap-3 mt-3">
-                                        <input id="quickAddInput" type="text" placeholder="Titre | https://..." class="flex-1 px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 placeholder-slate-600" />
-                                        <span class="info-i" title="Format: 'Titre | https://...' ou uniquement l'URL">?</span>
-                                        <button id="quickAddBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-sm">Ajouter</button>
-                                        <button id="openAddModalBtn" type="button" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm">Avancé</button>
-                                    </div>
+                                    <% if (typeof linksCount !== 'undefined' && typeof maxLinks !== 'undefined' && linksCount >= maxLinks) { %>
+                                        <div class="bg-gradient-to-r from-violet-900/40 to-fuchsia-900/40 border border-violet-500/30 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 mb-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="p-2 bg-violet-600/20 rounded-lg text-violet-300">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                                </div>
+                                                <div>
+                                                    <h3 class="font-bold text-white text-sm">Débloquez plus de liens</h3>
+                                                    <p class="text-slate-300 text-xs">Passez Premium pour ajouter jusqu'à <%= typeof maxLinks !== 'undefined' ? maxLinks * 2 : 'plus' %> liens.</p>
+                                                </div>
+                                            </div>
+                                            <a href="/premium" class="px-4 py-2 bg-white text-violet-900 font-bold rounded-lg hover:bg-slate-200 transition-colors shadow-lg text-xs whitespace-nowrap">
+                                                Passer Premium
+                                            </a>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="flex items-center gap-3 mt-3">
+                                            <input id="quickAddInput" type="text" placeholder="Titre | https://..." class="flex-1 px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 placeholder-slate-600" />
+                                            <span class="info-i" title="Format: 'Titre | https://...' ou uniquement l'URL">?</span>
+                                            <button id="quickAddBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-sm">Ajouter</button>
+                                            <button id="openAddModalBtn" type="button" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm">Avancé</button>
+                                        </div>
+                                    <% } %>
 
                                     <div id="linksList" class="space-y-3 min-h-[50px]"></div>
                                 </div>

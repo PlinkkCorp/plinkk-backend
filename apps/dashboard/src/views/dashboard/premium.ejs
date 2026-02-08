@@ -1,0 +1,22 @@
+<%- include('../partials/head.ejs', { title: 'Tableau de bord - Premium' ,
+  description: 'Passez à la vitesse supérieure avec Plinkk Premium.' , robots: 'noindex,nofollow' }) %>
+  <%- include('../partials/header-dash.ejs') %>
+
+<%- include('pricing/styles') %>
+
+    <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+      <%- include('../partials/asside_dash.ejs', { active: 'premium' }) %>
+
+        <main class="col-span-12 lg:col-span-10 space-y-8">
+
+            <%- include('pricing/hero', { pricingCtaHref: '#plans', pricingCtaText: 'Voir les offres' }) %>
+
+            <%- include('pricing/plans', { pricingContext: 'dashboard' }) %>
+
+            <%- include('pricing/comparison') %>
+
+            <%- include('pricing/faq') %>
+
+        </main>
+    </div>
+  <%- include('../partials/footer.ejs') %>

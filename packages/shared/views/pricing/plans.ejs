@@ -1,0 +1,159 @@
+<%
+  const _ctx = (typeof pricingContext !== 'undefined') ? pricingContext : 'public';
+  const _dashUrl = (typeof dashboardUrl !== 'undefined' && dashboardUrl) ? dashboardUrl : '/dashboard';
+  const _freeBtn = _ctx === 'dashboard' ? 'Plan actuel' : 'Commencer gratuitement';
+  const _freeHref = _ctx === 'dashboard' ? '#' : _dashUrl + '/register';
+  const _freeDisabled = _ctx === 'dashboard';
+  const _premiumBtn = _ctx === 'dashboard' ? 'Devenir Premium' : 'Devenir Premium';
+  const _premiumHref = _ctx === 'dashboard' ? '#' : _dashUrl + '/register';
+%>
+<!-- Plans -->
+<div id="plans" class="grid md:grid-cols-2 gap-6">
+    <!-- Free Plan -->
+    <div class="group bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col transition-all duration-300 hover:border-slate-700">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 grid place-items-center">
+                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-white">Gratuit</h3>
+                <p class="text-xs text-slate-500">Pour démarrer avec Plinkk</p>
+            </div>
+        </div>
+        <div class="mb-8">
+            <span class="text-4xl font-extrabold text-white">0€</span>
+            <span class="text-sm text-slate-500 ml-1">pour toujours</span>
+        </div>
+        <ul class="space-y-3.5 flex-1 mb-8">
+            <li class="flex items-center gap-3 text-sm text-slate-400">
+                <div class="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 grid place-items-center flex-shrink-0">
+                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <span><strong class="text-slate-300">1</strong> Page Plinkk</span>
+            </li>
+            <li class="flex items-center gap-3 text-sm text-slate-400">
+                <div class="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 grid place-items-center flex-shrink-0">
+                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <span><strong class="text-slate-300">5</strong> Redirections</span>
+            </li>
+            <li class="flex items-center gap-3 text-sm text-slate-400">
+                <div class="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 grid place-items-center flex-shrink-0">
+                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <span><strong class="text-slate-300">30 jours</strong> de statistiques</span>
+            </li>
+            <li class="flex items-center gap-3 text-sm text-slate-400">
+                <div class="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 grid place-items-center flex-shrink-0">
+                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <span><strong class="text-slate-300">10</strong> Thèmes personnalisés</span>
+            </li>
+            <li class="flex items-center gap-3 text-sm text-slate-500">
+                <div class="w-5 h-5 rounded-full bg-slate-800/50 border border-slate-800 grid place-items-center flex-shrink-0">
+                    <svg class="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </div>
+                <span class="line-through opacity-60">Bannières GIF / Image</span>
+            </li>
+            <li class="flex items-center gap-3 text-sm text-slate-500">
+                <div class="w-5 h-5 rounded-full bg-slate-800/50 border border-slate-800 grid place-items-center flex-shrink-0">
+                    <svg class="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </div>
+                <span class="line-through opacity-60">Effets visuels premium</span>
+            </li>
+            <li class="flex items-center gap-3 text-sm text-slate-500">
+                <div class="w-5 h-5 rounded-full bg-slate-800/50 border border-slate-800 grid place-items-center flex-shrink-0">
+                    <svg class="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </div>
+                <span class="line-through opacity-60">Liens programmés</span>
+            </li>
+        </ul>
+        <% if (_freeDisabled) { %>
+            <button disabled class="w-full py-3 rounded-xl border border-slate-800 bg-slate-800/50 text-slate-500 font-semibold text-sm cursor-default">
+                <%= _freeBtn %>
+            </button>
+        <% } else { %>
+            <a href="<%= _freeHref %>" class="block w-full py-3 rounded-xl border border-slate-800 bg-slate-800/50 text-slate-300 font-semibold text-sm text-center hover:bg-slate-800 hover:text-white transition-colors">
+                <%= _freeBtn %>
+            </a>
+        <% } %>
+    </div>
+
+    <!-- Premium Plan -->
+    <div class="group relative bg-slate-900 rounded-3xl p-8 flex flex-col transition-all duration-300 hover:scale-[1.01]">
+        <!-- Glow border -->
+        <div class="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-violet-500 opacity-60 glow-ring"></div>
+        <div class="absolute inset-0 rounded-3xl bg-slate-900"></div>
+        <!-- Subtle gradient bg -->
+        <div class="absolute inset-0 rounded-3xl bg-gradient-to-br from-violet-500/[0.03] via-transparent to-fuchsia-500/[0.03]"></div>
+        
+        <div class="relative z-10 flex flex-col flex-1">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 grid place-items-center shadow-lg shadow-violet-900/30">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L9.19 8.62 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Premium</h3>
+                        <p class="text-xs text-violet-400">L'expérience complète</p>
+                    </div>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300">Recommandé</span>
+            </div>
+
+            <div class="mb-8">
+                <span class="text-4xl font-extrabold text-white">4.99€</span>
+                <span class="text-sm text-slate-500 ml-1">/mois</span>
+            </div>
+
+            <ul class="space-y-3.5 flex-1 mb-8">
+                <li class="flex items-center gap-3 text-sm text-slate-200">
+                    <div class="w-5 h-5 rounded-full bg-violet-500/20 border border-violet-500/30 grid place-items-center flex-shrink-0">
+                        <svg class="w-3 h-3 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <span><strong class="text-white">2</strong> Pages Plinkk</span>
+                </li>
+                <li class="flex items-center gap-3 text-sm text-slate-200">
+                    <div class="w-5 h-5 rounded-full bg-violet-500/20 border border-violet-500/30 grid place-items-center flex-shrink-0">
+                        <svg class="w-3 h-3 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <span><strong class="text-white">10</strong> Redirections</span>
+                </li>
+                <li class="flex items-center gap-3 text-sm text-slate-200">
+                    <div class="w-5 h-5 rounded-full bg-violet-500/20 border border-violet-500/30 grid place-items-center flex-shrink-0">
+                        <svg class="w-3 h-3 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <span><strong class="text-white">365 jours</strong> de statistiques</span>
+                </li>
+                <li class="flex items-center gap-3 text-sm text-slate-200">
+                    <div class="w-5 h-5 rounded-full bg-violet-500/20 border border-violet-500/30 grid place-items-center flex-shrink-0">
+                        <svg class="w-3 h-3 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <span><strong class="text-white">20</strong> Thèmes personnalisés</span>
+                </li>
+                <li class="flex items-center gap-3 text-sm text-slate-200">
+                    <div class="w-5 h-5 rounded-full bg-violet-500/20 border border-violet-500/30 grid place-items-center flex-shrink-0">
+                        <svg class="w-3 h-3 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <span>Bannières <strong class="text-white">GIF / Image</strong></span>
+                </li>
+                <li class="flex items-center gap-3 text-sm text-slate-200">
+                    <div class="w-5 h-5 rounded-full bg-violet-500/20 border border-violet-500/30 grid place-items-center flex-shrink-0">
+                        <svg class="w-3 h-3 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <span>Effets visuels <strong class="text-white">animations & néon</strong></span>
+                </li>
+                <li class="flex items-center gap-3 text-sm text-slate-200">
+                    <div class="w-5 h-5 rounded-full bg-violet-500/20 border border-violet-500/30 grid place-items-center flex-shrink-0">
+                        <svg class="w-3 h-3 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <span>Liens <strong class="text-white">programmés</strong></span>
+                </li>
+            </ul>
+
+            <a href="<%= _premiumHref %>" class="block w-full py-3.5 rounded-xl shimmer-btn text-white font-bold text-sm text-center shadow-lg shadow-violet-900/40 hover:shadow-violet-600/40 transition-shadow">
+                <%= _premiumBtn %>
+            </a>
+        </div>
+    </div>
+</div>

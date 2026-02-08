@@ -13,11 +13,35 @@
                 <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Mes Redirections</h1>
                 <p class="text-slate-400 text-lg">Créez des liens courts personnalisés vers vos ressources.</p>
             </div>
-            <button onclick="openCreateModal()" class="relative z-10 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-violet-500/25 transition-all duration-300 hover:-translate-y-0.5">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                Nouvelle Redirection
-            </button>
+            <% if (redirectCount >= maxRedirects) { %>
+                <a href="/premium" class="relative z-10 flex items-center gap-2 px-6 py-3 bg-slate-800 border border-slate-700 text-slate-400 font-semibold rounded-xl hover:text-white hover:border-slate-600 transition-all duration-300">
+                    <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    Limite atteinte (<%= maxRedirects %>)
+                </a>
+            <% } else { %>
+                <button onclick="openCreateModal()" class="relative z-10 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-violet-500/25 transition-all duration-300 hover:-translate-y-0.5">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Nouvelle Redirection
+                </button>
+            <% } %>
         </div>
+
+        <% if (redirectCount >= maxRedirects) { %>
+            <div class="bg-gradient-to-r from-violet-900/40 to-fuchsia-900/40 border border-violet-500/30 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-violet-600/20 rounded-xl text-violet-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-lg">Débloquez plus de redirections</h3>
+                        <p class="text-slate-300">Vous avez atteint la limite de votre plan gratuit. Passez Premium pour obtenir jusqu'à 10 redirections !</p>
+                    </div>
+                </div>
+                <a href="/premium" class="px-6 py-2.5 bg-white text-violet-900 font-bold rounded-xl hover:bg-slate-200 transition-colors shadow-lg shadow-black/20 whitespace-nowrap">
+                    Passer Premium
+                </a>
+            </div>
+        <% } %>
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -296,6 +320,12 @@ async function submitForm(e) {
         const result = await res.json();
         
         if (!res.ok) {
+            if (result.error === 'redirect_limit_reached' && result.canUpgrade) {
+                if (confirm(result.message + "\n\nVoulez-vous découvrir nos offres Premium ?")) {
+                    window.location.href = '/premium'; // Ou la page d'upgrade appropriée
+                }
+                return;
+            }
             alert(result.error || 'Une erreur est survenue');
             return;
         }

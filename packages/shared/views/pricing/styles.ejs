@@ -1,0 +1,14 @@
+<style>
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  @keyframes glow-pulse { 0%,100%{opacity:.4} 50%{opacity:.8} }
+  .float-anim { animation: float 4s ease-in-out infinite; }
+  .float-anim-delay { animation: float 4s ease-in-out infinite 1s; }
+  .shimmer-btn {
+    background: linear-gradient(90deg, #7c3aed 0%, #a78bfa 25%, #c084fc 50%, #a78bfa 75%, #7c3aed 100%);
+    background-size: 200% auto;
+    animation: shimmer 3s linear infinite;
+  }
+  .glow-ring { animation: glow-pulse 3s ease-in-out infinite; }
+  .comparison-row:hover { background: rgba(139,92,246,.04); }
+</style>

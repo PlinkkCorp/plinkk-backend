@@ -8,6 +8,7 @@ import {
   formatPlinkkForView,
   formatPagesForView,
 } from "../../services/plinkkService";
+import { getUserLimits } from "@plinkk/shared";
 
 export function dashboardEditRoutes(fastify: FastifyInstance) {
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
@@ -20,11 +21,18 @@ export function dashboardEditRoutes(fastify: FastifyInstance) {
     const selectedForView = formatPlinkkForView(selected);
     const autoOpenPlinkkModal = !q?.plinkkId && pages.length > 1;
 
+    const [linksCount] = await Promise.all([
+      prisma.link.count({ where: { userId } }),
+    ]);
+    const maxLinks = getUserLimits(userInfo).maxLinks;
+
     return replyView(reply, "dashboard/user/edit.ejs", userInfo, {
       plinkk: selectedForView,
       pages: formatPagesForView(pages),
       autoOpenPlinkkModal,
       publicPath: request.publicPath,
+      linksCount,
+      maxLinks,
     });
   });
 }
