@@ -19,6 +19,7 @@ import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
 import fastifyCors from "@fastify/cors";
 import fastifySecureSession from "@fastify/secure-session";
+import { redirectRoutes } from "./server/redirectRoutes";
 import { staticPagesRoutes } from "./server/staticPagesRoutes";
 import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
 import { replyView } from "./lib/replyView";
@@ -99,6 +100,7 @@ fastify.register(fastifyHttpProxy, {
   },
 });
 
+fastify.register(redirectRoutes);
 fastify.register(staticPagesRoutes);
 fastify.register(plinkkFrontUserRoutes);
 
