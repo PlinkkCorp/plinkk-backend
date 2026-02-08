@@ -23,7 +23,7 @@ function computeFrontendUrl(reply: FastifyReply) {
 }
 
 export async function replyView(
-  reply: FastifyReply<any, any, any, any, any, any, any, any>,
+  reply: FastifyReply,
   template: string,
   user: UserWithInclude,
   data: ejs.Data,
