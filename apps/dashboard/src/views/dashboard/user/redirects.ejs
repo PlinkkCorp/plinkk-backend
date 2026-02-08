@@ -73,7 +73,7 @@
                         <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                     </div>
                     <div>
-                        <p class="text-2xl font-bold text-white"><%= redirects.filter(r => r.isActive).length %></p>
+                        <p class="text-2xl font-bold text-white" id="active-redirects-count"><%= redirects.filter(r => r.isActive).length %></p>
                         <p class="text-sm text-slate-400">Redirections actives</p>
                     </div>
                 </div>
@@ -142,7 +142,7 @@
                                             <span class="px-2 py-1 rounded-full bg-rose-500/10 text-rose-400 text-xs border border-rose-500/20">Expiré</span>
                                         <% } else { %>
                                             <label class="relative inline-flex items-center cursor-pointer">
-                                                <input type="checkbox" value="" class="sr-only peer" onchange="toggleRedirectStatus('<%= redirect.id %>', this.checked)" <%= redirect.isActive ? 'checked' : '' %>>
+                                                <input type="checkbox" id="toggle-<%= redirect.id %>" value="" class="sr-only peer" onchange="toggleRedirectStatus('<%= redirect.id %>', this.checked)" <%= redirect.isActive ? 'checked' : '' %>>
                                                 <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-violet-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
                                                 <span class="ml-2 text-xs font-medium text-slate-300 status-label-<%= redirect.id %>"><%= redirect.isActive ? 'Actif' : 'Inactif' %></span>
                                             </label>
@@ -275,7 +275,15 @@ function openEditModal(id, slug, targetUrl, title, isActive, expiresAt) {
     document.getElementById('slug').value = slug;
     document.getElementById('targetUrl').value = targetUrl;
     document.getElementById('title').value = title;
-    document.getElementById('isActive').checked = isActive;
+    
+    // Check if there is a toggle on the page that might have a more current value
+    const pageToggle = document.getElementById(`toggle-${id}`);
+    if (pageToggle) {
+        document.getElementById('isActive').checked = pageToggle.checked;
+    } else {
+        document.getElementById('isActive').checked = isActive;
+    }
+    
     document.getElementById('expiresAt').value = expiresAt;
     document.getElementById('redirectModal').classList.remove('hidden');
 }
@@ -370,6 +378,19 @@ async function toggleRedirectStatus(id, isActive) {
     // Mettre à jour le label immédiatement
     const label = document.querySelector(`.status-label-${id}`);
     if (label) label.textContent = isActive ? 'Actif' : 'Inactif';
+
+    // Mettre à jour le compteur
+    const countEl = document.getElementById('active-redirects-count');
+    if (countEl) {
+        const currentText = countEl.innerText.replace(/\D/g, '');
+        let current = parseInt(currentText, 10);
+        
+        if (!isNaN(current)) {
+            // Si on active, on incrémente. Si on désactive, on décrémente.
+            const newCount = isActive ? current + 1 : current - 1;
+            countEl.innerText = Math.max(0, newCount);
+        }
+    }
 
     try {
         const res = await fetch(`/api/me/redirects/${id}`, {
