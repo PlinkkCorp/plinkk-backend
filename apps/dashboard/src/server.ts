@@ -13,6 +13,7 @@ import { linkTrackingRoutes } from "./server/linkTrackingRoutes";
 import { authRoutes } from "./routes/auth";
 import { generateTheme } from "./lib/generateTheme";
 import { registerOAuth2 } from "./config/fastifyOAuth2";
+import { AppError } from "@plinkk/shared";
 
 const fastify = Fastify({ logger: true });
 const PORT = 3001;
@@ -125,8 +126,24 @@ async function bootstrap() {
 
   fastify.setErrorHandler((error, request, reply) => {
     fastify.log.error(error);
+
+    if (error instanceof AppError) {
+      if (request.raw.url?.startsWith("/api")) {
+        return reply.code(error.statusCode).send({ 
+          error: error.code.toLowerCase(),
+          message: error.message 
+        });
+      }
+      const userId = request.session.get("data");
+      const template = error.statusCode === 404 ? "erreurs/404.ejs" : "erreurs/500.ejs";
+      return reply.code(error.statusCode).view(template, {
+        message: error.message,
+        currentUser: userId ? { id: userId } : null,
+      });
+    }
+
     if (request.raw.url?.startsWith("/api")) {
-      return reply.code(500).send({ error: "Internal Server Error" });
+      return reply.code(500).send({ error: "internal_server_error" });
     }
     const userId = request.session.get("data");
     return reply.code(500).view("erreurs/500.ejs", {

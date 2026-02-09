@@ -1,6 +1,6 @@
-<%- include('../../partials/head.ejs', { title: 'Tableau de bord - Édition' ,
+<%- include('partials/head.ejs', { title: 'Tableau de bord - Édition' ,
     description: 'Configure les sections, apparence et arrière‑plan de ta page.' , robots: 'noindex,nofollow' }) %>
-    <%- include('../../partials/header-dash.ejs', { user: user }) %>
+    <%- include('partials/header-dash.ejs', { user: user }) %>
 
         <div id="mobileEditNotice"
             class="md:hidden fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4" role="dialog"
@@ -41,7 +41,7 @@
         </script>
 
         <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-            <%- include('../../partials/asside_dash.ejs', { active: 'edit' }) %>
+            <%- include('partials/asside_dash.ejs', { active: 'edit' }) %>
 
                 <main class="col-span-12 lg:col-span-10 grid grid-cols-1 xl:grid-cols-12 gap-8">
                     <section class="xl:col-span-7 space-y-6">
@@ -65,7 +65,7 @@
 
                             <div class="flex items-center gap-3">
                                 <div class="flex items-center gap-3">
-                                    <%- include('../../partials/changePlinkkDropdown.ejs') %>
+                                    <%- include('partials/changePlinkkDropdown.ejs') %>
                                 </div>
                             </div>
                         </div>

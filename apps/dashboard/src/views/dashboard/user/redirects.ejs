@@ -1,9 +1,9 @@
-<%- include('../../partials/head.ejs', { title: 'Mes Redirections', description: 'Gérez vos liens de redirection courts.', robots: 'noindex,nofollow' }) %>
+<%- include('partials/head.ejs', { title: 'Mes Redirections', description: 'Gérez vos liens de redirection courts.', robots: 'noindex,nofollow' }) %>
 
-<%- include('../../partials/header-dash.ejs', { user: user }) %>
+<%- include('partials/header-dash.ejs', { user: user }) %>
 
 <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-    <%- include('../../partials/asside_dash.ejs', { user: user, active: 'redirects' }) %>
+    <%- include('partials/asside_dash.ejs', { user: user, active: 'redirects' }) %>
 
     <main class="col-span-12 lg:col-span-10 space-y-8">
         <!-- Header -->
@@ -413,4 +413,4 @@ async function toggleRedirectStatus(id, isActive) {
 }
 </script>
 
-<%- include('../../partials/footer.ejs') %>
+<%- include('partials/footer.ejs') %>

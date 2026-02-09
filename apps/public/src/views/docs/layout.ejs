@@ -1,4 +1,4 @@
-<%- include('../partials/head', { title: (__DOC__ ? `Documentation — ${__DOC__.title}` : 'Plinkk — Documentation' ),
+<%- include('partials/head', { title: (__DOC__ ? `Documentation — ${__DOC__.title}` : 'Plinkk — Documentation' ),
     description: (__DOC__ && __DOC__.excerpt) ? __DOC__.excerpt
     : 'Guide complet Plinkk: démarrage, thèmes, admin, auto-hébergement, sécurité et plus.' , extraHead: ` <meta
     name="robots" content="index,follow" />
@@ -243,7 +243,7 @@
 `
 }) %>
 
-<%- include('../partials/header', { user: (typeof user !=='undefined' ? user : null) }) %>
+<%- include('partials/header', { user: (typeof user !=='undefined' ? user : null) }) %>
 
     <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div class="grid grid-cols-12 gap-6">
@@ -550,4 +550,4 @@
         window.addEventListener('load', toggleBack);
     </script>
 
-    <%- include('../partials/footer') %>
+    <%- include('partials/footer') %>

@@ -1,6 +1,0 @@
-<%
-  var emailAddr = typeof email !== 'undefined' ? email : 'contact@plinkk.fr';
-  var cls = typeof linkClass !== 'undefined' ? linkClass : '';
-  var text = typeof linkText !== 'undefined' ? linkText : emailAddr;
-%>
-<a href="mailto:<%= emailAddr %>" <%= cls ? ('class="' + cls + '"') : '' %>><%= text %></a>

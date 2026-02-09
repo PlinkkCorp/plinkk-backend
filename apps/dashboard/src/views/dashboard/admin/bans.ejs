@@ -1,9 +1,9 @@
-<%- include('../../partials/head.ejs', { title: 'Bannissements - Administration', description: 'Gérez les bannissements de slugs et d\'emails.', robots: 'noindex,nofollow' }) %>
+<%- include('partials/head.ejs', { title: 'Bannissements - Administration', description: 'Gérez les bannissements de slugs et d\'emails.', robots: 'noindex,nofollow' }) %>
 
-<%- include('../../partials/header-dash.ejs', { user: user }) %>
+<%- include('partials/header-dash.ejs', { user: user }) %>
 
 <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-    <%- include('../../partials/admin-nav.ejs', { user: user, active: 'bans' }) %>
+    <%- include('partials/admin-nav.ejs', { user: user, active: 'bans' }) %>
 
     <main class="col-span-12 lg:col-span-10 space-y-8">
         <!-- Header -->
@@ -735,4 +735,4 @@
     })();
 </script>
 
-<%- include('../../partials/footer.ejs') %>
+<%- include('partials/footer.ejs') %>

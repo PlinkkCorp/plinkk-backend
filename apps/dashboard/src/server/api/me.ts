@@ -12,7 +12,7 @@ import crypto from "crypto";
 import { Upload } from "@aws-sdk/lib-storage";
 import { getS3Client } from "../../lib/fileUtils";
 import sharp from "sharp"
-import { canUseGifBanner, getUserLimits, canUseVisualEffects } from "@plinkk/shared";
+import { canUseGifBanner, getUserLimits, canUseVisualEffects, UnauthorizedError, BadRequestError, ConflictError, NotFoundError } from "@plinkk/shared";
 
 const pending2fa = new Map<
   string,
@@ -28,7 +28,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
 
   fastify.post("/apikey", async (request, reply) => {
     const userId = request.session.get("data");
-    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    if (!userId) throw new UnauthorizedError();
 
     const newKey = "plk_" + crypto.randomUUID().replace(/-/g, "");
 
@@ -43,7 +43,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
 
   fastify.post("/visibility", async (request, reply) => {
     const userId = request.session.get("data");
-    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    if (!userId) throw new UnauthorizedError();
     const { isPublic } = (request.body as { isPublic: string }) ?? {};
     const updated = await prisma.user.update({
       where: { id: userId as string },
@@ -55,18 +55,18 @@ export function apiMeRoutes(fastify: FastifyInstance) {
 
   fastify.post("/email", async (request, reply) => {
     const userId = request.session.get("data");
-    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    if (!userId) throw new UnauthorizedError();
     const { email } = (request.body as { email: string }) || {};
     try {
       z.email().parse(email);
     } catch (e) {
-      return reply.code(400).send({ error: "Email invalide" });
+      throw new BadRequestError("Email invalide");
     }
     const exists = await prisma.user.findFirst({
       where: { email, NOT: { id: userId as string } },
       select: { id: true },
     });
-    if (exists) return reply.code(409).send({ error: "Email déjà utilisé" });
+    if (exists) throw new ConflictError("Email déjà utilisé");
     const updated = await prisma.user.update({
       where: { id: userId as string },
       data: { email },
@@ -77,7 +77,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
 
   fastify.post("/password", async (request, reply) => {
     const userId = request.session.get("data");
-    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    if (!userId) throw new UnauthorizedError();
     const { currentPassword, newPassword, confirmPassword } =
       (request.body as {
         currentPassword?: string;
@@ -86,18 +86,16 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       }) || {};
     
     if (!newPassword || !confirmPassword)
-      return reply.code(400).send({ error: "Champs manquants" });
+      throw new BadRequestError("Champs manquants");
     
     if (newPassword !== confirmPassword)
-      return reply
-        .code(400)
-        .send({ error: "Les mots de passe ne correspondent pas" });
+      throw new BadRequestError("Les mots de passe ne correspondent pas");
 
     const user = await prisma.user.findUnique({
       where: { id: userId as string },
     });
     if (!user)
-      return reply.code(404).send({ error: "Utilisateur introuvable" });
+      throw new NotFoundError("Utilisateur introuvable");
 
     const hasPwd = user.hasPassword !== false; 
 

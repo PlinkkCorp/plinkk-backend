@@ -1,0 +1,2078 @@
+        <script>
+            window.__PLINKK_USER_ID__ = "<%= user.id %>";
+            (function () {
+                const btns = Array.from(document.querySelectorAll('.tab-btn'));
+                const sections = Array.from(document.querySelectorAll('[id^="section-"]'));
+                const selectTab = (target) => {
+                    sections.forEach(s => s.classList.toggle('hidden', `#${s.id}` !== target));
+                    btns.forEach(b => b.setAttribute('aria-selected', b.dataset.target === target ? 'true' : 'false'));
+                    if (history.replaceState) {
+                        history.replaceState(null, '', target);
+                    } else {
+                        location.hash = target;
+                    }
+                };
+                btns.forEach(b => b.addEventListener('click', () => selectTab(b.dataset.target)));
+                const initial = location.hash && sections.some(s => `#${s.id}` === location.hash) ? location.hash : '#section-profile';
+                selectTab(initial);
+            })();
+        </script>
+        <style>
+            .masked-field {
+                background-color: rgba(100, 100, 100, 0.12) !important;
+                opacity: 0.65;
+                cursor: not-allowed;
+            }
+
+            .masked-field:disabled {
+                color: inherit;
+            }
+
+            .masked-field[readonly] {
+                color: inherit;
+            }
+
+            .mask-toggle {
+                line-height: 1;
+            }
+
+            .info-i {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 14px;
+                height: 14px;
+                font-size: 10px;
+                line-height: 1;
+                border-radius: 9999px;
+                border: 1px solid rgba(148, 163, 184, 0.35);
+                color: #cbd5e1;
+                margin-left: 6px;
+                cursor: help;
+                background: rgba(15, 23, 42, 0.5);
+            }
+
+            .info-i:hover {
+                background: rgba(30, 41, 59, 0.6);
+                color: #e5e7eb;
+                border-color: rgba(148, 163, 184, 0.6);
+            }
+
+            .deg-dial {
+                position: relative;
+                width: 72px;
+                height: 72px;
+                border-radius: 100%;
+                border: 1px solid #334155;
+                background: radial-gradient(closest-side, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+                box-shadow: inset 0 0 0 2px rgba(148, 163, 184, 0.1);
+                outline: none;
+                user-select: none;
+                -webkit-user-select: none;
+                touch-action: none;
+                cursor: grab;
+            }
+
+            .deg-dial:focus {
+                box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.55), inset 0 0 0 2px rgba(148, 163, 184, 0.1);
+            }
+
+            .deg-dial.is-dragging {
+                cursor: grabbing;
+            }
+
+            .deg-dial-dot {
+                position: absolute;
+                width: 14px;
+                height: 14px;
+                border-radius: 100%;
+                background: #93c5fd;
+                border: 2px solid #1f2937;
+                top: 50%;
+                left: 50%;
+                box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.35);
+                pointer-events: auto;
+                cursor: grab;
+            }
+
+            .deg-dial:active .deg-dial-dot,
+            .deg-dial.is-dragging .deg-dial-dot {
+                background: #3b82f6;
+                cursor: grabbing;
+            }
+        </style>
+        <script>
+            (function () {
+                const USER_ID = window.__PLINKK_USER_ID__ || 'self';
+                const PLINKK_ID = window.__PLINKK_SELECTED_ID__ || 'default';
+                const LS_PREFIX = 'PLK_MASK:';
+
+                function lsGet(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } }
+                function lsSet(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch { } }
+                function lsDel(key) { try { localStorage.removeItem(key); } catch { } }
+                function getKey(inputId) { return `${LS_PREFIX}${USER_ID}:${PLINKK_ID}:${inputId}`; }
+
+                function applyMaskedState(input, btn, saved) {
+                    if (!input || !btn) return;
+                    const isMasked = !!(saved && saved.masked);
+
+                    btn.setAttribute('title', 'Masquer / afficher le champ');
+                    btn.setAttribute('aria-pressed', isMasked ? 'true' : 'false');
+
+                    if (isMasked) {
+                        if (saved && typeof saved.value !== 'undefined') {
+                            input.value = saved.value;
+                        }
+                        input.dataset._originalValue = input.value ?? '';
+                        input.readOnly = true;
+                        input.disabled = true;
+                        input.classList.add('masked-field');
+                        btn.innerHTML = '<svg class="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a20.81 20.81 0 0 1 5.06-6.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.82 20.82 0 0 1-4.87 6.82M1 1l22 22"/></svg>';
+                    } else {
+                        if (typeof input.dataset._originalValue !== 'undefined') {
+                            input.value = input.dataset._originalValue;
+                            delete input.dataset._originalValue;
+                        }
+                        input.readOnly = false;
+                        input.disabled = false;
+                        input.classList.remove('masked-field');
+                        btn.innerHTML = '<svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+                    }
+                }
+
+                const buttons = Array.from(document.querySelectorAll('.mask-toggle'));
+                buttons.forEach(btn => {
+                    const targetId = btn.getAttribute('data-target');
+                    if (!targetId) return;
+                    const input = document.getElementById(targetId);
+                    if (!input) return;
+
+                    const key = getKey(targetId);
+                    const saved = lsGet(key);
+                    applyMaskedState(input, btn, saved);
+
+                    btn.addEventListener('click', () => {
+                        const currentlyMasked = btn.getAttribute('aria-pressed') === 'true';
+                        if (!currentlyMasked) {
+                            const value = input.value ?? '';
+                            lsSet(key, { masked: true, value });
+                            applyMaskedState(input, btn, { masked: true, value });
+                        } else {
+                            lsDel(key);
+                            applyMaskedState(input, btn, { masked: false });
+                        }
+                        if (window.__DASH_TRIGGER_SAVE__) {
+                            window.__DASH_TRIGGER_SAVE__();
+                        }
+                    });
+                });
+
+                function clearMaskedValues() {
+                    document.querySelectorAll('[data-maskable]')
+                        .forEach(inp => {
+                            const key = getKey(inp.id);
+                            const saved = lsGet(key);
+                            const isMasked = (typeof inp.dataset._originalValue !== 'undefined') || inp.classList.contains('masked-field') || (saved && saved.masked);
+                            if (isMasked) {
+                                inp.value = '';
+                            }
+                        });
+                }
+
+                document.addEventListener('click', (e) => {
+                    const saveBtn = e.target.closest && e.target.closest('#saveBtn, #saveBtn--mobile, #saveBtn--fab');
+                    if (saveBtn) {
+                        clearMaskedValues();
+                    }
+                }, true);
+
+                (function attachFormInterceptor() {
+                    const sample = document.querySelector('[data-maskable]');
+                    if (!sample) return;
+                    const form = sample.closest('form');
+                    if (!form) return;
+                    form.addEventListener('submit', (ev) => {
+                        clearMaskedValues();
+                    });
+                })();
+            })();
+        </script>
+        <script type="module">
+            import canvaData from '/public/config/canvaConfig.js';
+            import { animations, animationBackground } from '/public/config/animationConfig.js';
+            import btnIconThemeConfig from '/public/config/btnIconThemeConfig.js';
+            import labelPresets from '/public/config/labelPresets.js';
+            try {
+                const res = await fetch(`/themes.json?userId=${encodeURIComponent("<%= user.id %>")}`);
+                let builtIns = [];
+                let community = [];
+                if (res.ok) {
+                    const payload = await res.json();
+                    builtIns = Array.isArray(payload.builtIns) ? payload.builtIns : [];
+                    community = Array.isArray(payload.theme) ? payload.theme : [];
+                }
+                const mergedThemes = builtIns.concat(community);
+                window.__PLINKK_CFG__ = { themes: mergedThemes, canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
+            } catch (e) {
+                window.__PLINKK_CFG__ = { themes: [], canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
+            }
+        </script>
+        <script>
+            (function () {
+                const input = document.getElementById('degBackgroundColor');
+                const dial = document.getElementById('degDial');
+                const dot = dial ? dial.querySelector('.deg-dial-dot') : null;
+                if (!input || !dial || !dot) return;
+
+                function clampDeg(n) { n = Math.round(Number(n) || 0); n %= 360; if (n < 0) n += 360; return n; }
+                function setAria(val) { dial.setAttribute('aria-valuenow', String(val)); }
+                function setDot(val) { dot.style.transform = `translate(-50%, -50%) rotate(${val - 90}deg) translate(26px, 0)`; }
+                function syncFromInput() { const v = clampDeg(input.value); setDot(v); setAria(v); }
+                function syncFromDeg(val) { const v = clampDeg(val); input.value = String(v); setDot(v); setAria(v); if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); }
+
+                setTimeout(syncFromInput, 0);
+
+                input.addEventListener('input', () => syncFromInput());
+                input.addEventListener('change', () => { if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); });
+
+                function posToDeg(clientX, clientY) {
+                    const rect = dial.getBoundingClientRect();
+                    const cx = rect.left + rect.width / 2; const cy = rect.top + rect.height / 2;
+                    const dx = clientX - cx; const dy = clientY - cy;
+                    let angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                    angle = (angle + 360) % 360;
+                    angle = (angle + 90) % 360;
+                    return Math.round(angle);
+                }
+
+                let dragging = false;
+                function onPointerMove(e) {
+                    if (!dragging) return;
+                    const pt = e.touches?.[0] || e;
+                    syncFromDeg(posToDeg(pt.clientX, pt.clientY));
+                    e.preventDefault();
+                }
+                function onPointerUp() {
+                    dragging = false;
+                    dial.classList.remove('is-dragging');
+                    window.removeEventListener('mousemove', onPointerMove, { passive: false });
+                    window.removeEventListener('mouseup', onPointerUp);
+                    window.removeEventListener('touchmove', onPointerMove);
+                    window.removeEventListener('touchend', onPointerUp);
+                }
+                function startDrag(e) {
+                    e.preventDefault();
+                    dragging = true;
+                    dial.classList.add('is-dragging');
+                    const pt = e.touches?.[0] || e;
+                    syncFromDeg(posToDeg(pt.clientX, pt.clientY));
+                    window.addEventListener('mousemove', onPointerMove, { passive: false });
+                    window.addEventListener('mouseup', onPointerUp);
+                    window.addEventListener('touchmove', onPointerMove, { passive: false });
+                    window.addEventListener('touchend', onPointerUp);
+                    dial.focus();
+                }
+
+                dial.addEventListener('mousedown', startDrag);
+                dial.addEventListener('touchstart', startDrag, { passive: false });
+
+                dial.addEventListener('wheel', (e) => {
+                    if (document.activeElement !== dial) return;
+                    e.preventDefault();
+                    const delta = e.deltaY || e.deltaX || 0;
+                    const step = e.shiftKey ? 10 : 1;
+                    const dir = delta > 0 ? -step : step;
+                    const val = clampDeg((Number(input.value) || 0) + dir);
+                    syncFromDeg(val);
+                }, { passive: false });
+
+                dial.addEventListener('keydown', (e) => {
+                    const step = (e.shiftKey ? 10 : 1);
+                    let val = clampDeg(input.value);
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { val = clampDeg(val + step); syncFromDeg(val); e.preventDefault(); }
+                    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { val = clampDeg(val - step); syncFromDeg(val); e.preventDefault(); }
+                    if (e.key === 'Home') { syncFromDeg(0); e.preventDefault(); }
+                    if (e.key === 'End') { syncFromDeg(359); e.preventDefault(); }
+                });
+            })();
+        </script>
+        <script type="application/json"
+            id="pages-data"><%- JSON.stringify(typeof pages !== 'undefined' ? pages : []) %></script>
+        <script type="application/json"
+            id="autoopen-data"><%= (typeof autoOpenPlinkkModal !== 'undefined' && autoOpenPlinkkModal) ? 'true' : 'false' %></script>
+        <% if (typeof plinkk !=='undefined' && plinkk) { %>
+            <script>window.__PLINKK_SELECTED_ID__ = "<%= plinkk.id %>";</script>
+            <% } %>
+                <script type="module" src="/public/js/dashboard-ui/index.js"></script>
+                <script>
+
+                    // ===== REFRESH PREVIEW =====
+                    (function() {
+                        const refreshBtn = document.getElementById('refreshPreview');
+                        const plinkkRenderer = document.getElementById('plinkkRenderer');
+                        
+                        if (!refreshBtn) return;
+                        
+                        refreshBtn.addEventListener('click', () => {
+                            const svg = refreshBtn.querySelector('svg');
+                            if (svg) svg.classList.add('animate-spin');
+                            
+                            // Reload editeur direct
+                            if (plinkkRenderer && window.__PLINKK_RENDERER_RELOAD__) {
+                                window.__PLINKK_RENDERER_RELOAD__();
+                            }
+                            
+                            setTimeout(() => {
+                                if (svg) svg.classList.remove('animate-spin');
+                            }, 2000);
+                        });
+                    })();
+                    
+                    // ===== ÉDITION DIRECTE - RENDU LIVE COMPLET =====
+                    (function() {
+                        const plinkkRenderer = document.getElementById('plinkkRenderer');
+                        if (!plinkkRenderer) return;
+                        
+                        const plinkkId = window.__PLINKK_SELECTED_ID__ || '';
+                        const userId = window.__PLINKK_USER_ID__ || '';
+                        
+                        // Stocker la config pour l'édition
+                        let currentConfig = null;
+                        let draggedElement = null;
+                        let editMode = { link: null, label: null, social: null };
+                        
+                        // Liste des Canvas disponibles
+                        const CANVAS_LIST = [
+                            { id: 'none', name: 'Aucun' },
+                            { id: 'particule', name: 'Particules' },
+                            { id: 'snow', name: 'Neige' },
+                            { id: 'rain', name: 'Pluie' },
+                            { id: 'galaxy', name: 'Galaxie' },
+                            { id: 'matrix-effect', name: 'Matrix' },
+                            { id: 'fireworks', name: 'Feux d\'artifice' },
+                            { id: 'confetti', name: 'Confettis' },
+                            { id: 'bubble', name: 'Bulles' },
+                            { id: 'neuronal', name: 'Neuronal' },
+                            { id: 'space', name: 'Espace' },
+                            { id: 'starsarray', name: 'Étoiles' },
+                            { id: 'storm', name: 'Tempête' },
+                            { id: 'hexagone', name: 'Hexagones' },
+                            { id: 'cloud', name: 'Nuages' },
+                            { id: 'liquidslights', name: 'Lumières' },
+                            { id: 'purpletree', name: 'Arbre violet' },
+                            { id: 'boomclick', name: 'Boom Click' },
+                            { id: 'colorwars', name: 'Color Wars' },
+                            { id: 'crowd', name: 'Foule' }
+                        ];
+                        
+                        // Liste des thèmes disponibles
+                        const THEMES_LIST = [
+                            { id: 0, name: 'Gris', colors: ['#7289DA', '#424f7e'] },
+                            { id: 1, name: 'Jaune doré', colors: ['#FFD700', '#FFA500'] },
+                            { id: 2, name: 'Vert', colors: ['#00FF00', '#006400'] },
+                            { id: 3, name: 'Bleu', colors: ['#00A0DC', '#0077B5'] },
+                            { id: 4, name: 'Rouge', colors: ['#FF0000', '#8B0000'] },
+                            { id: 5, name: 'Rose', colors: ['#FF69B4', '#FF1493'] },
+                            { id: 6, name: 'Violet', colors: ['#9B59B6', '#8E44AD'] },
+                            { id: 7, name: 'Cyan', colors: ['#00CED1', '#008B8B'] },
+                            { id: 8, name: 'Orange', colors: ['#FFA500', '#FF4500'] },
+                            { id: 9, name: 'Émeraude', colors: ['#50C878', '#228B22'] },
+                            { id: 10, name: 'Corail', colors: ['#FF7F50', '#FF6347'] },
+                            { id: 11, name: 'Lavande', colors: ['#E6E6FA', '#9370DB'] }
+                        ];
+                        
+                        async function loadPlinkkPage() {
+                            if (!plinkkId) {
+                                plinkkRenderer.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:400px;color:#64748b;"><svg style="width:64px;height:64px;margin-bottom:16px;opacity:0.5;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg><p style="font-size:1.25rem;font-weight:600;margin-bottom:8px;">Sélectionnez un Plinkk</p><p style="font-size:0.875rem;opacity:0.7;">pour commencer l\'édition</p></div>';
+                                return;
+                            }
+                            
+                            plinkkRenderer.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:400px;color:#64748b;"><div style="width:32px;height:32px;border:2px solid #7c3aed;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px;"></div><p>Chargement...</p></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+                            
+                            try {
+                                const response = await fetch('/api/me/plinkks/' + encodeURIComponent(plinkkId) + '/config');
+                                if (!response.ok) throw new Error('Failed to load config');
+                                currentConfig = await response.json();
+                                renderPlinkk(currentConfig);
+                            } catch (error) {
+                                console.error('Error loading plinkk:', error);
+                                plinkkRenderer.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:400px;color:#64748b;"><svg style="width:64px;height:64px;margin-bottom:16px;color:#ef4444;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><p style="font-size:1.25rem;font-weight:600;margin-bottom:8px;">Erreur de chargement</p><button style="margin-top:16px;padding:8px 16px;background:#7c3aed;color:white;border:none;border-radius:8px;cursor:pointer;" onclick="window.__PLINKK_RENDERER_RELOAD__()">Réessayer</button></div>';
+                            }
+                        }
+                        
+                        // ===== SAVE HELPERS =====
+                        async function saveConfig(endpoint, data) {
+                            const statusEl = document.getElementById('status');
+                            if (statusEl) statusEl.textContent = '⏳';
+                            try {
+                                const res = await fetch('/api/me/plinkks/' + encodeURIComponent(plinkkId) + '/config/' + endpoint, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(data)
+                                });
+                                if (!res.ok) throw new Error('Save failed');
+                                if (statusEl) { statusEl.textContent = '✓'; setTimeout(function() { statusEl.textContent = ''; }, 2000); }
+                                return await res.json();
+                            } catch (e) {
+                                console.error('Save error:', e);
+                                if (statusEl) { statusEl.textContent = '✗'; statusEl.style.color = '#ef4444'; setTimeout(function() { statusEl.textContent = ''; statusEl.style.color = ''; }, 2000); }
+                                return null;
+                            }
+                        }
+                        
+                        async function savePlinkk(data) { return saveConfig('plinkk', data); }
+                        async function saveLinks(links) { return saveConfig('links', { links: links }); }
+                        async function saveSocialIcons(socialIcon) { return saveConfig('socialIcon', { socialIcon: socialIcon }); }
+                        async function saveLabels(labels) { return saveConfig('labels', { labels: labels }); }
+                        async function saveStatusBar(statusbar) { return saveConfig('statusBar', { statusbar: statusbar }); }
+                        
+                        // Exposer les fonctions de sauvegarde globalement pour les handlers
+                        window.__PLINKK_SAVE_LINKS__ = saveLinks;
+                        window.__PLINKK_SAVE_SOCIAL__ = saveSocialIcons;
+                        window.__PLINKK_SAVE_LABELS__ = saveLabels;
+                        
+                        function renderPlinkk(config) {
+                            var plinkk = config || {};
+                            var links = config.links || [];
+                            var categories = config.categories || [];
+                            var socialIcon = config.socialIcon || [];
+                            var statusbar = config.statusbar || null;
+                            
+                            // Styles de base
+                            const bgColor = plinkk?.backgroundColor || '#0c0c0c';
+                            const bgColor2 = plinkk?.backgroundColor2 || bgColor;
+                            const bgDeg = plinkk?.backgroundDegree || 135;
+                            const bgType = plinkk?.bgType || 'solid';
+                            const textColor = plinkk?.textColor || '#f8fafc';
+                            const btnBg = plinkk?.buttonBackground || 'rgba(255,255,255,0.09)';
+                            const btnText = plinkk?.buttonTextColor || '#f8fafc';
+                            const pfp = plinkk?.profileImage || (plinkk?.pfp ? '/public/uploads/' + plinkk.pfp : null);
+                            const profileIcon = plinkk?.profileIcon || (plinkk?.icon ? '/public/uploads/' + plinkk.icon : null);
+                            const name = plinkk?.userName || plinkk?.name || plinkk?.slug || '';
+                            const description = plinkk?.description || '';
+                            const email = plinkk?.email || '';
+                            const profileLink = plinkk?.profileLink || '';
+                            const profileSiteText = plinkk?.profileSiteText || '';
+                            const neonEnable = plinkk?.neonEnable || false;
+                            const neonColor1 = plinkk?.neonColor1 || '#7c3aed';
+                            const neonColor2 = plinkk?.neonColor2 || '#f59e0b';
+                            
+                            // Canvas animé
+                            const canvaEnable = plinkk?.canvaEnable || false;
+                            const canvasIndexRaw = plinkk?.selectedCanvasIndex;
+                            // Convertir l'index numérique en nom de fichier via canvaConfig
+                            let canvasFileName = null;
+                            let canvasExtensions = [];
+                            if (canvaEnable && canvasIndexRaw !== undefined && canvasIndexRaw !== null) {
+                                const idx = parseInt(canvasIndexRaw);
+                                const canvaConfig = window.__PLINKK_CFG__?.canvaData || [];
+                                if (!isNaN(idx) && idx >= 0 && idx < canvaConfig.length) {
+                                    const cfg = canvaConfig[idx];
+                                    canvasFileName = cfg.fileNames;
+                                    // Gérer les extensions (peuvent être string, array, ou 'none')
+                                    if (cfg.extension && cfg.extension !== 'none') {
+                                        canvasExtensions = Array.isArray(cfg.extension) ? cfg.extension : [cfg.extension];
+                                    }
+                                }
+                            }
+
+                            // Background style - Ne pas appliquer si le canvas est activé (le canvas gère son propre fond)
+                            var bgStyle = '';
+                            if (!canvaEnable || !canvasFileName) {
+                                if (bgType === 'gradient') {
+                                    bgStyle = 'background: radial-gradient(circle at 20% 20%, rgba(120,119,198,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255,119,198,0.3) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(120,219,226,0.2) 0%, transparent 50%), linear-gradient(' + bgDeg + 'deg, ' + bgColor + ' 0%, ' + bgColor2 + ' 100%); background-attachment: fixed;';
+                                } else if (bgType === 'image' && plinkk?.backgroundImage) {
+                                    bgStyle = 'background: url(\'/public/uploads/' + plinkk.backgroundImage + '\') center/cover no-repeat fixed; background-color: ' + bgColor + ';';
+                                } else {
+                                    bgStyle = 'background: radial-gradient(circle at 20% 20%, rgba(120,119,198,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255,119,198,0.3) 0%, transparent 50%), radial-gradient(circle at 40% 40%, rgba(120,219,226,0.2) 0%, transparent 50%), linear-gradient(135deg, ' + bgColor + ' 0%, #1a1a1a 100%); background-attachment: fixed;';
+                                }
+                            } else {
+                                // Quand le canvas est activé, fond transparent pour voir le canvas
+                                bgStyle = 'background: transparent;';
+                            }
+                            
+                            // Liens par catégorie
+                            var categorizedLinks = {};
+                            var uncategorizedLinks = [];
+                            links.forEach(function(link) {
+                                if (link.categoryId) {
+                                    if (!categorizedLinks[link.categoryId]) categorizedLinks[link.categoryId] = [];
+                                    categorizedLinks[link.categoryId].push(link);
+                                } else {
+                                    uncategorizedLinks.push(link);
+                                }
+                            });
+                            
+                            // Icône link par défaut en SVG inline (évite les problèmes CORS)
+                            var DEFAULT_LINK_ICON = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>');
+                            
+                            // Render link - STYLE PLINKK EXACT (texte éditable + actions complètes)
+                            function renderLink(link) {
+                                var linkIcon = link.icon || DEFAULT_LINK_ICON;
+                                var linkText = link.text || link.name || link.url || 'Lien';
+                                var isHidden = link.hidden ? ' link-hidden' : '';
+                                var hiddenAttr = link.hidden ? 'true' : 'false';
+                                return '<div class="discord-box editable-item' + isHidden + '" data-type="link" data-link-id="' + link.id + '">' +
+                                    '<div class="link-content">' +
+                                        '<img src="' + linkIcon + '" alt="" class="link-icon" onerror="this.style.opacity=0.5"/>' +
+                                        '<span class="editable-text link-text" data-field="text" data-config="link" data-link-id="' + link.id + '" title="Cliquez pour modifier">' + linkText + '</span>' +
+                                    '</div>' +
+                                    '<div class="link-actions">' +
+                                        '<button class="edit-style-btn link-edit" data-type="link" data-link-id="' + link.id + '" title="Modifier"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
+                                        '<button class="link-hide-btn" data-link-id="' + link.id + '" data-hidden="' + hiddenAttr + '" title="' + (link.hidden ? 'Afficher' : 'Masquer') + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + (link.hidden ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>' : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>') + '</svg></button>' +
+                                        '<button class="link-delete-btn" data-link-id="' + link.id + '" title="Supprimer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' +
+                                    '</div>' +
+                                '</div>';
+                            }
+                            
+                            // Categories HTML (éditable au clic)
+                            var categoriesHTML = '';
+                            categories.sort(function(a, b) { return (a.order || 0) - (b.order || 0); }).forEach(function(cat) {
+                                var catLinks = categorizedLinks[cat.id] || [];
+                                if (catLinks.length > 0) {
+                                    categoriesHTML += '<h2 class="editable-text" data-field="name" data-config="category" data-category-id="' + cat.id + '" title="Cliquez pour modifier">' + cat.name + '</h2>' + catLinks.map(function(l) { return renderLink(l); }).join('');
+                                }
+                            });
+                            
+                            // Uncategorized links
+                            var linksHTML = uncategorizedLinks.length > 0 ? uncategorizedLinks.map(function(l) { return renderLink(l); }).join('') : '';
+                            
+                            // Social icons - STYLE PLINKK (avec boutons d'édition et suppression)
+                            var socialsHTML = '';
+                            socialsHTML = '<div class="icon-list-container">';
+                            if (socialIcon.length > 0) {
+                                socialsHTML += '<div class="icon-list">' + socialIcon.map(function(s, idx) {
+                                    return '<div class="icon-link-wrapper editable-item" data-type="social" data-index="' + idx + '">' +
+                                        '<div class="icon-link"><img src="' + (s.icon || DEFAULT_LINK_ICON) + '" alt="" class="icon" onerror="this.style.opacity=0.3"/></div>' +
+                                        '<button class="edit-style-btn social-edit" data-type="social" data-index="' + idx + '" title="Modifier"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
+                                        '<button class="social-delete-btn" data-index="' + idx + '" title="Supprimer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>' +
+                                    '</div>';
+                                }).join('') + '</div>';
+                            }
+                            socialsHTML += '</div>';
+                            
+                            // Label system - STYLE PLINKK (éditable)
+                            var labels = config.labels || [];
+                            var labelsHTML = '';
+                            
+                            labelsHTML = '<div class="label-buttons-container">';
+                            if (labels.length > 0) {
+                                labelsHTML += '<div class="label-buttons">' + labels.map(function(label) {
+                                    return '<div class="label-button" data-label-id="' + label.id + '" style="background:' + (label.color || '#7c3aed') + ';color:' + (label.fontColor || '#ffffff') + ';" data-color="' + (label.color || '#7c3aed') + '" data-font-color="' + (label.fontColor || '#ffffff') + '">' +
+                                        '<span class="editable-text" data-field="data" data-config="label" data-label-id="' + label.id + '" title="Cliquez pour modifier">' + (label.data || 'Label') + '</span>' +
+                                        '<button class="edit-style-btn label-edit" data-type="label" data-label-id="' + label.id + '" title="Modifier le style"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></button>' +
+                                        '<button class="label-delete-btn" data-label-id="' + label.id + '" title="Supprimer">' +
+                                            '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+                                        '</button>' +
+                                    '</div>';
+                                }).join('') + '</div>';
+                            }
+                            labelsHTML += '</div>';
+                            
+                            // Statusbar - STYLE PLINKK (éditable au clic)
+                            var statusbarHTML = '';
+                            if (statusbar && (statusbar.text || statusbar.statusText)) {
+                                var statusIcon = statusbar.statusText === '🟢' ? '<span class="statusbar-dot" style="background:#22c55e;"></span>' : 
+                                                 statusbar.statusText === '🔴' ? '<span class="statusbar-dot" style="background:#ef4444;"></span>' :
+                                                 statusbar.statusText === '🟡' ? '<span class="statusbar-dot" style="background:#eab308;"></span>' :
+                                                 '<span class="statusbar-dot"></span>';
+                                statusbarHTML = '<div class="statusbar editable-item" data-type="statusbar"><div class="statusBarText editable-text" data-field="text" data-config="statusbar" style="background:' + (statusbar.colorBg || '#1f2937') + ';color:' + (statusbar.fontTextColor || '#ffffff') + ';" title="Cliquez pour modifier">' + statusIcon + ' ' + (statusbar.text || 'Disponible') + '</div><button class="edit-style-btn statusbar-edit" data-type="statusbar" title="Modifier le statut"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v10"/></svg></button></div>';
+                            } else {
+                                // Afficher un placeholder pour ajouter un statut
+                                statusbarHTML = '<div class="statusbar add-statusbar" data-type="statusbar"><button class="add-statusbar-btn" id="addStatusbarBtn" title="Ajouter un statut"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> Ajouter statut</button></div>';
+                            }
+                            
+                            // Email section - STYLE PLINKK (éditable au clic)
+                            var emailHTML = '';
+                            if (email) {
+                                emailHTML = '<div class="email-description-container"><div class="email"><span class="editable-text" data-field="email" data-config="plinkk" title="Cliquez pour modifier">' + email + '</span><button class="copy-btn" type="button" onclick="navigator.clipboard.writeText(\'' + email + '\')"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>';
+                            }
+                            
+                            // Description - STYLE PLINKK (éditable au clic)
+                            var descHTML = '';
+                            if (description) {
+                                if (emailHTML) {
+                                    emailHTML += '<div class="profile-description"><p class="editable-text editable-multiline" data-field="description" data-config="plinkk" title="Cliquez pour modifier">' + description.replace(/\n/g, '<br>') + '</p></div></div>';
+                                } else {
+                                    descHTML = '<div class="email-description-container"><div class="profile-description"><p class="editable-text editable-multiline" data-field="description" data-config="plinkk" title="Cliquez pour modifier">' + description.replace(/\n/g, '<br>') + '</p></div></div>';
+                                }
+                            } else if (emailHTML) {
+                                emailHTML += '</div>';
+                            }
+                            
+                            // Profile container - STYLE PLINKK avec flip et ÉDITION
+                            var initial = name.charAt(0).toUpperCase() || 'P';
+                            var profileHTML = '<div class="profile-container" id="profileEditContainer">';
+                            
+                            // Face avant (image de profil)
+                            profileHTML += '<div class="profile-pic-wrapper profile-front">';
+                            if (pfp) {
+                                profileHTML += '<img src="' + pfp + '" alt="' + name + '" class="profile-pic" onerror="this.outerHTML=\'<span class=profile-pic-initial>' + initial + '</span>\'"/>';
+                            } else {
+                                profileHTML += '<span class="profile-pic-initial">' + initial + '</span>';
+                            }
+                            // Overlay d'upload pour l'image de profil
+                            profileHTML += '<div class="profile-edit-overlay profile-edit-front">';
+                            profileHTML += '<label class="profile-upload-btn" title="Changer l\'image de profil">';
+                            profileHTML += '<input type="file" id="pfpUpload" accept="image/*" style="display:none" />';
+                            profileHTML += '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>';
+                            profileHTML += '</label>';
+                            if (pfp) {
+                                profileHTML += '<button type="button" class="profile-delete-btn" id="deletePfpBtn" title="Supprimer l\'image de profil">';
+                                profileHTML += '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+                                profileHTML += '</button>';
+                            }
+                            profileHTML += '</div>';
+                            profileHTML += '</div>';
+                            
+                            // Face arrière (icône + texte du site)
+                            profileHTML += '<div class="profile-link profile-back">';
+                            profileHTML += '<div class="profile-back-content">';
+                            // Section icône
+                            profileHTML += '<div class="profile-icon-section">';
+                            if (profileIcon) {
+                                profileHTML += '<img src="' + profileIcon + '" alt="" class="profile-icon-preview"/>';
+                            } else {
+                                profileHTML += '<div class="profile-icon-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg></div>';
+                            }
+                            profileHTML += '<div class="profile-icon-actions">';
+                            profileHTML += '<label class="profile-icon-upload-btn" title="Changer l\'icône">';
+                            profileHTML += '<input type="file" id="iconUpload" accept="image/*" style="display:none" />';
+                            profileHTML += '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>';
+                            profileHTML += '</label>';
+                            if (profileIcon) {
+                                profileHTML += '<button type="button" class="profile-icon-delete-btn" id="deleteIconBtn" title="Supprimer l\'icône">';
+                                profileHTML += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+                                profileHTML += '</button>';
+                            }
+                            profileHTML += '</div>';
+                            profileHTML += '</div>';
+                            // Champ texte du site
+                            profileHTML += '<div class="profile-sitetext-section">';
+                            profileHTML += '<div class="profile-sitetext-input-wrap">';
+                            profileHTML += '<input type="text" id="profileSiteTextInput" class="profile-sitetext-input" placeholder="Texte du lien..." value="' + (profileSiteText || '').replace(/"/g, '&quot;') + '" />';
+                            if (profileSiteText) {
+                                profileHTML += '<button type="button" class="profile-sitetext-clear-btn" id="clearSiteTextBtn" title="Effacer le texte">';
+                                profileHTML += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+                                profileHTML += '</button>';
+                            }
+                            profileHTML += '</div>';
+                            profileHTML += '</div>';
+                            profileHTML += '</div>';
+                            profileHTML += '</div>';
+                            
+                            // Ajout du statut à la fin du container profil pour correspondre au rendu public
+                            profileHTML += statusbarHTML;
+
+                            profileHTML += '</div>';
+                            
+                            // Username - STYLE PLINKK (éditable au clic)
+                            var usernameHTML = '<h1 class="editable-text" data-field="name" data-config="plinkk" title="Cliquez pour modifier">' + name + '</h1>';
+                            
+                            // CSS PLINKK COMPLET
+                            var plinkkCSS = '* { margin: 0; padding: 0; box-sizing: border-box; transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); user-select: none; }';
+                            plinkkCSS += '#plinkkRenderer { font-family: "Inter", "Satoshi", -apple-system, BlinkMacSystemFont, sans-serif; display: flex; justify-content: center; align-items: flex-start; position: relative; min-height: 100%; color: ' + textColor + '; overflow: hidden; font-weight: 400; line-height: 1.6; ' + bgStyle + ' }';
+                            plinkkCSS += 'article { position: relative; text-align: center; background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%); padding: 24px 20px; border-radius: 24px; backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 24px 64px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15); overflow: hidden; min-width: 320px; max-width: 400px; z-index: 10; margin: 2em auto 1em auto; animation: fadeInUp 1.2s cubic-bezier(0.165, 0.84, 0.44, 1); }';
+                            plinkkCSS += 'article::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(120, 119, 198, 0.08) 0%, rgba(255, 119, 198, 0.08) 50%, rgba(120, 219, 226, 0.08) 100%); opacity: 0.6; pointer-events: none; border-radius: 32px; z-index: 1; }';
+                            plinkkCSS += '@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }';
+                            plinkkCSS += 'h1 { font-size: 2rem; font-weight: 700; margin-bottom: 4px; background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 30%, #7c3aed 60%, #f59e0b 100%); background-size: 300% 300%; background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientFlow 8s ease-in-out infinite; letter-spacing: -0.02em; line-height: 1.1; position: relative; z-index: 2; }';
+                            plinkkCSS += '@keyframes gradientFlow { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }';
+                            plinkkCSS += 'h2 { font-size: 1rem; font-weight: 400; margin: 20px 0 10px 0; color: rgba(248, 250, 252, 0.8); letter-spacing: 0.5px; line-height: 1.4; position: relative; z-index: 2; }';
+                            
+                            // Profile container CSS - NOUVEAU DESIGN AVEC HOVER ÉDITION
+                            plinkkCSS += '.profile-container { position: relative; width: 140px; height: 140px; min-width: 140px; min-height: 140px; margin: 0 auto 20px auto; perspective: 1000px; filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.4)); z-index: 2; }';
+                            plinkkCSS += '.profile-container:hover { width: 280px; min-width: 280px; }';
+                            plinkkCSS += '.profile-pic-wrapper.profile-front { width: 140px; height: 140px; border-radius: 50%; position: absolute; backface-visibility: visible; z-index: 2; top: 0; left: 0; transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }';
+                            plinkkCSS += '.profile-container:hover .profile-pic-wrapper.profile-front { left: 0; }';
+                            plinkkCSS += '.profile-pic { width: 100%; height: 100%; border-radius: 50%; border: 3px solid rgba(255, 255, 255, 0.15); object-fit: cover; cursor: pointer; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); position: relative; z-index: 3; }';
+                            plinkkCSS += '.profile-pic-initial { width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #f59e0b); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; font-weight: bold; color: white; border: 3px solid rgba(255, 255, 255, 0.15); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4); }';
+                            
+                            // Overlay d'édition pour l'image de profil
+                            plinkkCSS += '.profile-edit-overlay { position: absolute; inset: 0; border-radius: 50%; background: rgba(0,0,0,0.6); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; opacity: 0; transition: opacity 0.3s ease; z-index: 10; }';
+                            plinkkCSS += '.profile-pic-wrapper:hover .profile-edit-overlay { opacity: 1; }';
+                            plinkkCSS += '.profile-upload-btn { width: 48px; height: 48px; border-radius: 50%; background: rgba(124, 58, 237, 0.9); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; border: 2px solid rgba(255,255,255,0.3); }';
+                            plinkkCSS += '.profile-upload-btn:hover { background: rgba(124, 58, 237, 1); transform: scale(1.1); }';
+                            plinkkCSS += '.profile-upload-btn svg { color: white; }';
+                            plinkkCSS += '.profile-delete-btn { width: 36px; height: 36px; border-radius: 50%; background: rgba(239, 68, 68, 0.9); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; border: 2px solid rgba(255,255,255,0.3); }';
+                            plinkkCSS += '.profile-delete-btn:hover { background: rgba(239, 68, 68, 1); transform: scale(1.1); }';
+                            plinkkCSS += '.profile-delete-btn svg { color: white; }';
+                            
+                            // Face arrière (icône + texte) - toujours visible au hover
+                            plinkkCSS += '.profile-link.profile-back { width: 140px; height: 140px; border-radius: 50%; position: absolute; backface-visibility: visible; background: linear-gradient(135deg, rgba(15, 15, 15, 0.95) 0%, rgba(30, 30, 30, 0.9) 100%); display: flex; justify-content: center; align-items: center; backdrop-filter: blur(20px); border: 3px solid rgba(255, 255, 255, 0.1); z-index: 3; top: 0; left: 0; opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); }';
+                            plinkkCSS += '.profile-container:hover .profile-link.profile-back { left: 140px; opacity: 1; pointer-events: auto; }';
+                            
+                            // Contenu de la face arrière
+                            plinkkCSS += '.profile-back-content { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px; width: 100%; }';
+                            plinkkCSS += '.profile-icon-section { display: flex; align-items: center; gap: 8px; }';
+                            plinkkCSS += '.profile-icon-preview { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.2); }';
+                            plinkkCSS += '.profile-icon-placeholder { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; border: 2px dashed rgba(255,255,255,0.3); }';
+                            plinkkCSS += '.profile-icon-placeholder svg { color: rgba(255,255,255,0.5); }';
+                            plinkkCSS += '.profile-icon-actions { display: flex; gap: 4px; }';
+                            plinkkCSS += '.profile-icon-upload-btn { width: 28px; height: 28px; border-radius: 50%; background: rgba(124, 58, 237, 0.8); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.2); }';
+                            plinkkCSS += '.profile-icon-upload-btn:hover { background: rgba(124, 58, 237, 1); transform: scale(1.1); }';
+                            plinkkCSS += '.profile-icon-upload-btn svg { color: white; }';
+                            plinkkCSS += '.profile-icon-delete-btn { width: 24px; height: 24px; border-radius: 50%; background: rgba(239, 68, 68, 0.8); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.2); }';
+                            plinkkCSS += '.profile-icon-delete-btn:hover { background: rgba(239, 68, 68, 1); transform: scale(1.1); }';
+                            plinkkCSS += '.profile-icon-delete-btn svg { color: white; }';
+                            
+                            // Champ texte du site
+                            plinkkCSS += '.profile-sitetext-section { width: 100%; padding: 0 8px; }';
+                            plinkkCSS += '.profile-sitetext-input-wrap { display: flex; align-items: center; gap: 4px; background: rgba(255,255,255,0.08); border-radius: 8px; padding: 4px 8px; }';
+                            plinkkCSS += '.profile-sitetext-input { flex: 1; background: transparent; border: none; outline: none; color: #f8fafc; font-size: 0.7rem; padding: 4px; }';
+                            plinkkCSS += '.profile-sitetext-input::placeholder { color: rgba(255,255,255,0.4); }';
+                            plinkkCSS += '.profile-sitetext-clear-btn { width: 20px; height: 20px; border-radius: 50%; background: rgba(239, 68, 68, 0.7); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; border: none; }';
+                            plinkkCSS += '.profile-sitetext-clear-btn:hover { background: rgba(239, 68, 68, 1); }';
+                            plinkkCSS += '.profile-sitetext-clear-btn svg { color: white; }';
+                            
+                            // Neon effect
+                            if (neonEnable) {
+                                plinkkCSS += '.profile-pic-wrapper::after { content: ""; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px; border-radius: 50%; background: linear-gradient(45deg, ' + neonColor1 + ', ' + neonColor2 + ', #06b6d4, ' + neonColor1 + '); background-size: 400% 400%; z-index: -1; animation: neon 2s infinite alternate; opacity: 0.6; }';
+                                plinkkCSS += '.profile-pic-wrapper::before { content: ""; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px; border-radius: 50%; background: linear-gradient(45deg, ' + neonColor1 + ', ' + neonColor2 + ', #06b6d4, ' + neonColor1 + '); background-size: 500% 500%; z-index: -2; animation: neon-2 2s infinite alternate; opacity: 0.4; }';
+                                plinkkCSS += '@keyframes neon { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }';
+                                plinkkCSS += '@keyframes neon-2 { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }';
+                            }
+                            
+                            // Profile link - styles supplémentaires
+                            plinkkCSS += '.profile-link span { display: flex; flex-direction: column; align-items: center; gap: 4px; }';
+                            plinkkCSS += '.profile-link p { margin: 0; font-size: 0.8rem; color: #f8fafc; }';
+                            plinkkCSS += '.profile-icon { width: 24px; height: 24px; }';
+                            
+                            // Discord box (liens) - Pas de lien cliquable, juste édition
+                            plinkkCSS += '.discord-box { display: flex; align-items: center; margin-top: 12px; background: linear-gradient(135deg, ' + btnBg + ' 0%, rgba(255, 255, 255, 0.04) 100%); border-radius: 16px; color: ' + btnText + '; font-size: 15px; font-weight: 500; cursor: default; text-decoration: none; position: relative; border: 1px solid rgba(255, 255, 255, 0.12); backdrop-filter: blur(16px) saturate(180%); overflow: visible; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1); z-index: 2; padding: 0; }';
+                            plinkkCSS += '.discord-box.link-hidden { opacity: 0.5; }';
+                            plinkkCSS += '.discord-box .link-content { display: flex; align-items: center; gap: 12px; padding: 14px 20px; flex: 1; position: relative; }';
+                            plinkkCSS += '.discord-box .link-icon { width: 24px; height: 24px; object-fit: contain; flex-shrink: 0; filter: brightness(0) invert(1); }';
+                            plinkkCSS += '.discord-box .link-text { flex: 1; }';
+                            plinkkCSS += '.discord-box .link-actions { display: flex; gap: 6px; padding-right: 14px; opacity: 0; transition: opacity 0.2s; }';
+                            plinkkCSS += '.discord-box:hover .link-actions { opacity: 1; }';
+                            plinkkCSS += '.discord-box .link-actions button { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: rgba(255,255,255,0.1); }';
+                            plinkkCSS += '.discord-box .link-actions button svg { width: 16px; height: 16px; stroke: currentColor; }';
+                            plinkkCSS += '.discord-box .edit-style-btn.link-edit { background: rgba(124, 58, 237, 0.3); color: #a78bfa; position: static; opacity: 1; pointer-events: auto; padding: 0; border-radius: 8px; box-shadow: none; }';
+                            plinkkCSS += '.discord-box .edit-style-btn.link-edit:hover { background: rgba(124, 58, 237, 0.5); color: white; transform: scale(1.05); }';
+                            plinkkCSS += '.discord-box .link-hide-btn { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }';
+                            plinkkCSS += '.discord-box .link-hide-btn:hover { background: rgba(251, 191, 36, 0.4); color: #fef08a; }';
+                            plinkkCSS += '.discord-box .link-delete-btn { background: rgba(239, 68, 68, 0.2); color: #ef4444; }';
+                            plinkkCSS += '.discord-box .link-delete-btn:hover { background: rgba(239, 68, 68, 0.4); color: #fca5a5; }';
+                            plinkkCSS += '.discord-box:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25); }';
+                            
+                            // Icon list (socials) avec suppression - UI améliorée
+                            plinkkCSS += '.icon-list-container { margin: 16px 0; position: relative; z-index: 2; text-align: center; }';
+                            plinkkCSS += '.icon-list { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }';
+                            plinkkCSS += '.icon-link { width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, 0.12); backdrop-filter: blur(12px); cursor: default; transition: all 0.2s; }';
+                            plinkkCSS += '.icon-link:hover { background: rgba(255, 255, 255, 0.15); transform: scale(1.05); }';
+                            plinkkCSS += '.icon { width: 22px; height: 22px; filter: brightness(0) invert(1); }';
+                            plinkkCSS += '.icon-link-wrapper { position: relative; display: inline-flex; }';
+                            plinkkCSS += '.icon-link-wrapper .edit-style-btn.social-edit { position: absolute; top: -8px; left: -8px; width: 22px; height: 22px; border-radius: 50%; background: rgba(124, 58, 237, 0.9); display: flex; align-items: center; justify-content: center; opacity: 0; transition: all 0.2s; border: none; cursor: pointer; padding: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10; }';
+                            plinkkCSS += '.icon-link-wrapper .edit-style-btn.social-edit svg { width: 12px; height: 12px; color: white; }';
+                            plinkkCSS += '.icon-link-wrapper .social-delete-btn { position: absolute; top: -8px; right: -8px; width: 22px; height: 22px; border-radius: 50%; background: rgba(239, 68, 68, 0.9); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: all 0.2s; z-index: 10; }';
+                            plinkkCSS += '.icon-link-wrapper .social-delete-btn svg { width: 12px; height: 12px; color: white; }';
+                            plinkkCSS += '.icon-link-wrapper:hover .edit-style-btn.social-edit, .icon-link-wrapper:hover .social-delete-btn { opacity: 1; }';
+                            plinkkCSS += '.icon-link-wrapper .edit-style-btn.social-edit:hover { background: #7c3aed; transform: scale(1.15); }';
+                            plinkkCSS += '.icon-link-wrapper .social-delete-btn:hover { background: #ef4444; transform: scale(1.15); }';
+                            
+                            // Labels avec suppression - UI améliorée et style Plinkk
+                            plinkkCSS += '.label-buttons-container { margin: 12px 0; position: relative; z-index: 2; text-align: center; }';
+                            plinkkCSS += '.label-buttons { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }';
+                            plinkkCSS += '.label-button { position: relative; padding: 6px 40px 6px 14px; cursor: default; display: inline-flex; align-items: center; border-radius: 20px; font-size: 0.7em; font-weight: 600; backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.15); text-transform: uppercase; letter-spacing: 0.8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: all 0.3s ease; }';
+                            plinkkCSS += '.label-button:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.3); }';
+                            plinkkCSS += '.label-button .edit-style-btn.label-edit { position: absolute; top: 50%; right: 22px; transform: translateY(-50%); width: 18px; height: 18px; border-radius: 50%; background: rgba(124, 58, 237, 0.8); display: flex; align-items: center; justify-content: center; opacity: 0; transition: all 0.2s; padding: 0; border: none; cursor: pointer; box-shadow: none; }';
+                            plinkkCSS += '.label-button .edit-style-btn.label-edit svg { width: 10px; height: 10px; color: white; }';
+                            plinkkCSS += '.label-button .label-delete-btn { position: absolute; top: 50%; right: 4px; transform: translateY(-50%); width: 18px; height: 18px; border-radius: 50%; background: rgba(239, 68, 68, 0.8); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: all 0.2s; }';
+                            plinkkCSS += '.label-button .label-delete-btn svg { width: 10px; height: 10px; color: white; }';
+                            plinkkCSS += '.label-button:hover .edit-style-btn.label-edit, .label-button:hover .label-delete-btn { opacity: 1; }';
+                            plinkkCSS += '.label-button .edit-style-btn.label-edit:hover { background: #7c3aed; transform: translateY(-50%) scale(1.15); }';
+                            plinkkCSS += '.label-button .label-delete-btn:hover { background: #ef4444; transform: translateY(-50%) scale(1.15); }';
+                            
+                            // Statusbar avec édition
+                            plinkkCSS += '.statusbar.editable-item { position: relative; }';
+                            plinkkCSS += '.statusbar.editable-item .edit-style-btn.statusbar-edit { position: absolute; top: 50%; right: -36px; transform: translateY(-50%); width: 26px; height: 26px; border-radius: 50%; background: rgba(124, 58, 237, 0.9); display: flex; align-items: center; justify-content: center; opacity: 0; transition: all 0.2s; border: none; cursor: pointer; padding: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }';
+                            plinkkCSS += '.statusbar.editable-item .edit-style-btn.statusbar-edit svg { width: 14px; height: 14px; color: white; }';
+                            plinkkCSS += '.statusbar.editable-item:hover .edit-style-btn.statusbar-edit { opacity: 1; }';
+                            plinkkCSS += '.statusbar.editable-item .edit-style-btn.statusbar-edit:hover { background: #7c3aed; transform: translateY(-50%) scale(1.1); }';
+                            plinkkCSS += '.add-statusbar-btn { padding: 6px 16px; border-radius: 20px; background: rgba(255,255,255,0.08); border: 1px dashed rgba(255,255,255,0.3); color: rgba(255,255,255,0.6); font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }';
+                            plinkkCSS += '.add-statusbar-btn:hover { background: rgba(124, 58, 237, 0.2); border-color: rgba(124, 58, 237, 0.5); color: white; }';
+                            
+                            // Email & description
+                            plinkkCSS += '.email-description-container { font-size: 0.9em; color: white; font-weight: bold; background-color: rgba(44, 47, 51, 0.8); padding: 4px; border-radius: 8px; z-index: 2; position: relative; margin-top: 12px; }';
+                            plinkkCSS += '.email { position: relative; border-radius: 8px; padding: 0; }';
+                            plinkkCSS += '.email a { display: block; padding: 12px; text-align: center; color: inherit; text-decoration: none; }';
+                            plinkkCSS += '.copy-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: white; border: none; border-radius: 5px; padding: 7px 8px 6px 8px; cursor: pointer; font-size: 0.8em; background-color: rgba(255, 255, 255, 0.2); }';
+                            plinkkCSS += '.copy-btn:hover { background-color: rgba(255, 255, 255, 0.3); }';
+                            plinkkCSS += '.profile-description { padding: 8px 12px; }';
+                            plinkkCSS += '.profile-description p { font-size: 0.85rem; opacity: 0.9; margin: 0; font-weight: normal; }';
+                            
+                            // Statusbar - Style Plinkk authentique
+                            plinkkCSS += '.statusbar { margin: 8px 0; position: relative; z-index: 2; display: flex; justify-content: center; }';
+                            plinkkCSS += '.statusBarText { padding: 6px 16px; border-radius: 20px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 6px; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }';
+                            plinkkCSS += '.statusbar-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: pulse 2s ease-in-out infinite; }';
+                            plinkkCSS += '@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.9); } }';
+                            
+                            // ===== CSS POUR ÉLÉMENTS ÉDITABLES =====
+                            plinkkCSS += '.editable-text { cursor: text; position: relative; transition: all 0.2s ease; }';
+                            plinkkCSS += '.editable-text:hover { outline: 2px dashed rgba(124, 58, 237, 0.5); outline-offset: 4px; }';
+                            plinkkCSS += '.editable-text.editing { outline: 2px solid rgba(124, 58, 237, 0.8); outline-offset: 4px; background: rgba(124, 58, 237, 0.1); }';
+                            plinkkCSS += '.editable-input { background: transparent; border: none; outline: none; color: inherit; font: inherit; text-align: inherit; width: 100%; min-width: 50px; }';
+                            plinkkCSS += '.editable-textarea { background: transparent; border: none; outline: none; color: inherit; font: inherit; text-align: inherit; width: 100%; min-height: 60px; resize: vertical; }';
+                            plinkkCSS += 'h1.editable-text:hover, h2.editable-text:hover { cursor: text; }';
+                            plinkkCSS += '.email .editable-text { display: block; padding: 12px; text-align: center; }';
+                            
+                            // ===== CSS POUR BOUTONS D'ÉDITION DE STYLE =====
+                            plinkkCSS += '.editable-item { position: relative; }';
+                            plinkkCSS += '.edit-style-btn { position: absolute; opacity: 0; pointer-events: none; transition: all 0.2s ease; background: rgba(124, 58, 237, 0.9); border: none; border-radius: 50%; padding: 6px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 20; }';
+                            plinkkCSS += '.editable-item:hover .edit-style-btn { opacity: 1; pointer-events: auto; }';
+                            plinkkCSS += '.edit-style-btn:hover { background: rgba(124, 58, 237, 1); transform: scale(1.1); }';
+                            plinkkCSS += '.label-button .edit-style-btn { top: -8px; right: -8px; }';
+                            plinkkCSS += '.label-button { position: relative; padding-right: 24px; }';
+                            plinkkCSS += '.discord-box .edit-style-btn.link-edit { top: 50%; right: 12px; transform: translateY(-50%); }';
+                            plinkkCSS += '.discord-box:hover .edit-style-btn.link-edit { opacity: 1; }';
+                            plinkkCSS += '.icon-link-wrapper { position: relative; display: inline-flex; }';
+                            
+                            // ===== CSS POUR BOUTONS D'AJOUT INLINE =====
+                            plinkkCSS += '.add-section-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 20px; background: rgba(124, 58, 237, 0.15); border: 1px dashed rgba(124, 58, 237, 0.5); color: rgba(255,255,255,0.7); font-size: 0.75rem; cursor: pointer; transition: all 0.2s ease; margin: 8px 4px; }';
+                            plinkkCSS += '.add-section-btn:hover { background: rgba(124, 58, 237, 0.3); border-color: #7c3aed; color: white; transform: translateY(-1px); }';
+                            plinkkCSS += '.add-section-btn svg { width: 14px; height: 14px; }';
+                            
+                            // ===== CSS POUR MENU EN HAUT À GAUCHE =====
+                            plinkkCSS += '.edit-top-left { position: fixed; top: 76px; left: 16px; display: flex; align-items: center; gap: 8px; z-index: 100; background: rgba(15,15,15,0.95); padding: 6px 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }';
+                            plinkkCSS += '.edit-top-btn { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); position: relative; }';
+                            plinkkCSS += '.edit-top-btn:hover { background: rgba(255,255,255,0.15); color: white; transform: translateY(-1px); }';
+                            plinkkCSS += '.edit-top-btn svg { width: 16px; height: 16px; }';
+                            plinkkCSS += '.edit-top-btn:hover::after { content: attr(title); position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: white; font-size: 0.65rem; padding: 4px 8px; border-radius: 4px; white-space: nowrap; z-index: 101; }';
+                            
+                            // ===== CSS POUR HEADER ÉDITEUR (nom plinkk + thème/canvas) - EN HAUT À DROITE =====
+                            plinkkCSS += '.edit-header { position: fixed; top: 76px; right: 16px; display: flex; align-items: center; gap: 10px; z-index: 100; background: rgba(15,15,15,0.95); padding: 8px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }';
+                            plinkkCSS += '.edit-header-name { font-size: 0.8rem; font-weight: 600; color: #f8fafc; display: flex; align-items: center; gap: 6px; }';
+                            plinkkCSS += '.edit-header-name .slug { color: rgba(124, 58, 237, 0.9); font-weight: 500; }';
+                            plinkkCSS += '.edit-header-link { color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.2s; padding: 4px; border-radius: 4px; display: flex; align-items: center; }';
+                            plinkkCSS += '.edit-header-link:hover { color: #7c3aed; }';
+                            plinkkCSS += '.edit-header-link svg { width: 14px; height: 14px; }';
+                            plinkkCSS += '.edit-header-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.15); }';
+                            plinkkCSS += '.edit-header-btn { width: 34px; height: 34px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; position: relative; }';
+                            plinkkCSS += '.edit-header-btn:hover { transform: translateY(-2px); }';
+                            plinkkCSS += '.edit-header-btn.theme-btn { background: linear-gradient(135deg, #7c3aed, #6d28d9); }';
+                            plinkkCSS += '.edit-header-btn.canvas-btn { background: linear-gradient(135deg, #06b6d4, #0891b2); }';
+                            plinkkCSS += '.edit-header-btn svg { color: white; width: 16px; height: 16px; }';
+                            plinkkCSS += '.edit-header-btn:hover::after { content: attr(title); position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: white; font-size: 0.65rem; padding: 4px 8px; border-radius: 4px; white-space: nowrap; z-index: 101; }';
+                            
+                            // ===== CSS GLOBAL POUR L'INTERFACE ÉDITEUR (MODALS & POPOVERS) =====
+                            // Injecté dans le document principal pour être visible par dessus tout
+                            var editorUI_CSS = '';
+                            editorUI_CSS += '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");';
+                            editorUI_CSS += '.edit-picker-modal { font-family: "Inter", sans-serif; position: fixed; inset: 0; z-index: 99999; display: flex; align-items: center; justify-content: center; opacity: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }';
+                            editorUI_CSS += '.edit-picker-modal.visible { opacity: 1; pointer-events: auto; }';
+                            editorUI_CSS += '.edit-picker-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: all 0.3s; }';
+                            editorUI_CSS += '.edit-picker-content { position: relative; background: rgba(20, 20, 23, 0.85); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; width: 90%; max-width: 650px; max-height: 85vh; box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05); overflow: hidden; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); transform: scale(0.95) translateY(10px); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; flex-direction: column; }';
+                            editorUI_CSS += '.edit-picker-modal.visible .edit-picker-content { transform: scale(1) translateY(0); }';
+                            editorUI_CSS += '.edit-picker-header { padding: 20px 24px; background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; }';
+                            editorUI_CSS += '.edit-picker-header h3 { font-size: 1.1rem; font-weight: 600; color: #fff; margin: 0; letter-spacing: -0.01em; }';
+                            editorUI_CSS += '.edit-picker-header .close-picker { background: rgba(255,255,255,0.05); border: none; color: rgba(255,255,255,0.6); cursor: pointer; width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }';
+                            editorUI_CSS += '.edit-picker-header .close-picker:hover { color: white; background: rgba(255,255,255,0.1); transform: rotate(90deg); }';
+                            editorUI_CSS += '.edit-picker-grid { padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 16px; overflow-y: auto; max-height: calc(85vh - 80px); scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) transparent; }';
+                            editorUI_CSS += '.edit-picker-grid::-webkit-scrollbar { width: 6px; }';
+                            editorUI_CSS += '.edit-picker-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }';
+                            editorUI_CSS += '.edit-picker-item { aspect-ratio: 0.9; background: rgba(255,255,255,0.03); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; overflow: hidden; transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 10px; padding: 10px; }';
+                            editorUI_CSS += '.edit-picker-item:hover { background: rgba(255,255,255,0.06); transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1); }';
+                            editorUI_CSS += '.edit-picker-item.active { border-color: #7c3aed; background: rgba(124,58,237,0.15); box-shadow: 0 0 0 1px #7c3aed; }';
+                            editorUI_CSS += '.edit-picker-item .picker-preview { width: 100%; aspect-ratio: 16/10; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05); overflow: hidden; position: relative; }';
+                            editorUI_CSS += '.edit-picker-item .picker-preview::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.2) 100%); }';
+                            editorUI_CSS += '.edit-picker-item .picker-preview .canvas-icon { font-size: 2rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); z-index: 1; transition: transform 0.3s; }';
+                            editorUI_CSS += '.edit-picker-item:hover .picker-preview .canvas-icon { transform: scale(1.2) rotate(5deg); }';
+                            editorUI_CSS += '.edit-picker-item .picker-name { font-size: 0.75rem; font-weight: 500; color: rgba(255,255,255,0.8); text-align: center; line-height: 1.2; padding: 0 4px; }';
+                            editorUI_CSS += '.edit-picker-item.social-preset { aspect-ratio: 1; justify-content: center; }';
+                            editorUI_CSS += '.edit-picker-item.social-preset .picker-preview { width: 48px; height: 48px; border-radius: 12px; aspect-ratio: 1; background: transparent !important; box-shadow: none; }';
+                            
+                            // ===== POPOVER UI IMPROVED =====
+                            editorUI_CSS += '.edit-popover { font-family: "Inter", sans-serif; position: fixed; background: rgba(20, 20, 23, 0.9); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 0; min-width: 340px; max-width: 400px; box-shadow: 0 20px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05); z-index: 10000; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); overflow: hidden; animation: popoverIn 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }';
+                            editorUI_CSS += '@keyframes popoverIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }';
+                            editorUI_CSS += '.edit-popover-header { padding: 14px 20px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); cursor: move; display: flex; align-items: center; justify-content: space-between; user-select: none; }';
+                            editorUI_CSS += '.edit-popover-title { font-size: 0.9rem; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 10px; margin: 0; }';
+                            editorUI_CSS += '.edit-popover-title svg { opacity: 0.7; }';
+                            editorUI_CSS += '.edit-popover-body { padding: 20px; max-height: 400px; overflow-y: auto; }';
+                            editorUI_CSS += '.edit-popover-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }';
+                            editorUI_CSS += '.edit-popover-row:last-child { margin-bottom: 0; }';
+                            editorUI_CSS += '.edit-popover-label { font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.6); min-width: 80px; }';
+                            editorUI_CSS += '.edit-popover-input { flex: 1; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 14px; color: white; font-size: 0.9rem; outline: none; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }';
+                            editorUI_CSS += '.edit-popover-input:focus { border-color: #7c3aed; background: rgba(124, 58, 237, 0.1); box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2); }';
+                            editorUI_CSS += '.edit-popover-input:disabled { opacity: 0.5; cursor: not-allowed; }';
+                            editorUI_CSS += '.edit-popover-color { width: 42px; height: 42px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.1); cursor: pointer; padding: 0; transition: transform 0.2s; }';
+                            editorUI_CSS += '.edit-popover-color:hover { transform: scale(1.1); border-color: white; }';
+                            editorUI_CSS += '.edit-popover-close { background: transparent; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }';
+                            editorUI_CSS += '.edit-popover-close:hover { color: white; background: rgba(255,255,255,0.1); }';
+                            editorUI_CSS += '.edit-popover-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06); }';
+                            editorUI_CSS += '.edit-popover-btn { padding: 10px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; display: flex; align-items: center; gap: 8px; justify-content: center; }';
+                            editorUI_CSS += '.edit-popover-btn.save { background: #7c3aed; color: white; flex: 2; box-shadow: 0 4px 12px rgba(124,58,237,0.3); }';
+                            editorUI_CSS += '.edit-popover-btn.save:hover { background: #6d28d9; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(124,58,237,0.4); }';
+                            editorUI_CSS += '.edit-popover-btn.delete { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.2); flex: 1; }';
+                            editorUI_CSS += '.edit-popover-btn.delete:hover { background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.5); }';
+                            editorUI_CSS += '.edit-popover-btn.hide { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: rgba(251, 191, 36, 0.2); flex: 1; }';
+                            editorUI_CSS += '.edit-popover-btn.hide:hover { background: rgba(251, 191, 36, 0.2); }';
+                            editorUI_CSS += '.edit-popover-checkbox { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.2s; }';
+                            editorUI_CSS += '.edit-popover-checkbox:hover { background: rgba(255,255,255,0.06); }';
+                            editorUI_CSS += '.edit-popover-checkbox input { width: 20px; height: 20px; accent-color: #7c3aed; cursor: pointer; }';
+                            editorUI_CSS += '.edit-popover-checkbox label { font-size: 0.85rem; color: rgba(255,255,255,0.9); cursor: pointer; user-select: none; flex: 1; }';
+                            editorUI_CSS += '.edit-popover-select { flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 14px; color: white; font-size: 0.85rem; outline: none; cursor: pointer; transition: border 0.2s; }';
+                            editorUI_CSS += '.edit-popover-select:hover { border-color: rgba(255,255,255,0.3); }';
+                            editorUI_CSS += '.edit-popover-select option { background: #1a1a1a; color: white; padding: 10px; }';
+                            
+                            // Inject styles into the MAIN document head
+                            const styleId = 'plinkk-editor-ui-styles';
+                            var existingStyle = document.getElementById(styleId);
+                            if (!existingStyle) {
+                                var s = document.createElement('style');
+                                s.id = styleId;
+                                s.textContent = editorUI_CSS;
+                                document.head.appendChild(s);
+                            } else {
+                                existingStyle.textContent = editorUI_CSS;
+                            }
+
+                            // ===== CSS POUR LE CANVAS ANIMÉ =====
+                            plinkkCSS += '.canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: hidden; }';
+                            plinkkCSS += '.canvas-container canvas { width: 100%; height: 100%; display: block; }';
+                            
+                            // Header éditeur HTML (nom plinkk + boutons thème/canvas) - EN HAUT À DROITE
+                            var plinkkSlug = currentConfig.slug || 'mon-plinkk';
+                            var plinkkUrl = 'https://plinkk.fr/' + plinkkSlug;
+                            
+                            // Menu en haut à gauche (refresh + actions)
+                            var topLeftHTML = '<div class="edit-top-left" id="editTopLeft">';
+                            topLeftHTML += '<button class="edit-top-btn" id="refreshPreviewBtn" title="Actualiser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><polyline points="1,20 1,14 7,14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>';
+                            topLeftHTML += '</div>';
+                            
+                            // Header en haut à droite avec slug + lien externe + thème/canvas
+                            var headerHTML = '<div class="edit-header" id="editHeader">';
+                            headerHTML += '<div class="edit-header-name"><span class="slug">/' + plinkkSlug + '</span></div>';
+                            headerHTML += '<a href="' + plinkkUrl + '" target="_blank" class="edit-header-link" title="Voir mon plinkk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>';
+                            headerHTML += '<div class="edit-header-divider"></div>';
+                            headerHTML += '<button class="edit-header-btn theme-btn" id="openThemeEditor" title="Changer le thème"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20 10 10 0 0 1 0-20"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></button>';
+                            headerHTML += '<button class="edit-header-btn canvas-btn" id="openCanvasEditor" title="Changer le fond animé"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></button>';
+                            headerHTML += '</div>';
+                            
+                            // Boutons d'ajout inline pour les socials
+                            var addSocialBtn = '<button class="add-section-btn" id="addSocialBtn" title="Ajouter un réseau social"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Réseau social</button>';
+                            
+                            // Boutons d'ajout inline pour les liens
+                            var addLinkBtn = '<button class="add-section-btn" id="addLinkBtn" title="Ajouter un lien"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Lien</button>';
+                            
+                            // Boutons d'ajout inline pour les labels
+                            var addLabelBtn = '<button class="add-section-btn" id="addLabelBtn" title="Ajouter un label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Label</button>';
+                            
+                            // Modifier socialsHTML pour ajouter le bouton +
+                            if (socialsHTML) {
+                                socialsHTML = socialsHTML.replace('</div></div>', '</div>' + addSocialBtn + '</div>');
+                            } else {
+                                socialsHTML = '<div class="icon-list-container"><div class="icon-list"></div>' + addSocialBtn + '</div>';
+                            }
+                            
+                            // Modifier labelsHTML pour ajouter le bouton +
+                            if (labelsHTML) {
+                                labelsHTML = labelsHTML.replace('</div></div>', '</div>' + addLabelBtn + '</div>');
+                            } else {
+                                labelsHTML = '<div class="label-buttons-container"><div class="label-buttons"></div>' + addLabelBtn + '</div>';
+                            }
+                            
+                            // Canvas HTML (si activé)
+                            var canvasHTML = '';
+                            if (canvaEnable && canvasFileName) {
+                                canvasHTML = '<div class="canvas-container" id="canvasContainer"><canvas id="animatedCanvas"></canvas></div>';
+                            }
+                            
+                            // Ajouter le bouton d'ajout de lien à la fin des liens
+                            var linksWithAddBtn = linksHTML + '<div style="text-align:center;margin-top:12px;">' + addLinkBtn + '</div>';
+                            
+                            // Full render (avec menu en haut à gauche et header en haut à droite)
+                            plinkkRenderer.innerHTML = '<style>' + plinkkCSS + '</style>' + canvasHTML + topLeftHTML + headerHTML + '<article id="profile-article">' + profileHTML + usernameHTML + socialsHTML + labelsHTML + emailHTML + descHTML + linksWithAddBtn + categoriesHTML + '</article>';
+                            
+                            // ===== INITIALISER LE CANVAS ANIMÉ =====
+                            if (canvaEnable && canvasFileName) {
+                                initCanvasAnimation(canvasFileName, canvasExtensions);
+                            }
+                            
+                            // ===== GESTIONNAIRES D'ÉVÉNEMENTS POUR L'ÉDITION DU PROFIL =====
+                            setupProfileEditHandlers();
+                            
+                            // ===== GESTIONNAIRES POUR TEXTES ÉDITABLES =====
+                            setupEditableTextHandlers();
+                            
+                            // ===== GESTIONNAIRES POUR BOUTONS D'ÉDITION DE STYLE =====
+                            setupStyleEditHandlers();
+                            
+                            // ===== GESTIONNAIRES POUR BOUTONS FLOTTANTS =====
+                            setupFloatingButtons();
+                        }
+                        
+                        // Variable pour stocker l'ID de l'animation en cours
+                        var currentCanvasAnimationId = null;
+                        
+                        // Cache des dépendances déjà chargées
+                        const loadedDependencies = new Set();
+                        
+                        // Fonction pour charger un script et retourner une promesse
+                        function loadScript(src) {
+                            return new Promise((resolve, reject) => {
+                                if (loadedDependencies.has(src)) {
+                                    resolve();
+                                    return;
+                                }
+                                const script = document.createElement('script');
+                                script.src = src;
+                                script.onload = () => {
+                                    loadedDependencies.add(src);
+                                    resolve();
+                                };
+                                script.onerror = reject;
+                                document.head.appendChild(script);
+                            });
+                        }
+                        
+                        // Fonction pour initialiser l'animation canvas
+                        async function initCanvasAnimation(canvasFileName, extensions) {
+                            const canvas = document.getElementById('animatedCanvas');
+                            if (!canvas) {
+                                console.error('Canvas element not found');
+                                return;
+                            }
+                            
+                            const container = document.getElementById('plinkkRenderer');
+                            const ctx = canvas.getContext('2d');
+                            
+                            // Utiliser les dimensions du plinkkRenderer
+                            const rect = container ? container.getBoundingClientRect() : { width: 800, height: 600 };
+                            canvas.width = rect.width || 800;
+                            canvas.height = rect.height || 600;
+                            
+                            console.log('Canvas init:', canvasFileName, 'Size:', canvas.width, 'x', canvas.height);
+                            
+                            // Annuler l'animation précédente si elle existe
+                            if (currentCanvasAnimationId) {
+                                cancelAnimationFrame(currentCanvasAnimationId);
+                                currentCanvasAnimationId = null;
+                            }
+                            
+                            // Charger les dépendances si nécessaire (depuis canvaConfig)
+                            const deps = extensions || [];
+                            for (const dep of deps) {
+                                await loadScript(dep);
+                            }
+                            
+                            // Charger et exécuter le script d'animation
+                            const script = document.createElement('script');
+                            script.src = '/public/canvaAnimation/' + canvasFileName;
+                            script.onload = function() {
+                                console.log('Canvas script loaded:', canvasFileName);
+                                if (typeof runCanvasAnimation === 'function') {
+                                    runCanvasAnimation(ctx, canvas);
+                                } else {
+                                    console.error('runCanvasAnimation function not found');
+                                }
+                            };
+                            script.onerror = function(e) {
+                                console.error('Failed to load canvas script:', canvasFileName, e);
+                            };
+                            document.head.appendChild(script);
+                            
+                            // Redimensionner le canvas quand la fenêtre change
+                            window.addEventListener('resize', function() {
+                                if (container) {
+                                    const newRect = container.getBoundingClientRect();
+                                    canvas.width = newRect.width || 800;
+                                    canvas.height = newRect.height || 600;
+                                }
+                            });
+                        }
+                        
+                        // Fonction pour gérer les boutons flottants (thème et canvas) - STUB, les vrais handlers sont plus bas
+                        function setupFloatingButtons() {
+                            // Les handlers pour thème/canvas sont configurés dans le IIFE "TOOLBAR HANDLERS" plus bas
+                            // Cette fonction est appelée par renderPlinkk mais les handlers sont attachés globalement
+                        }
+                        
+                        // Fonction pour gérer les boutons d'édition de style (labels, liens, RS)
+                        function setupStyleEditHandlers() {
+                            // Fermer les popovers existants au clic extérieur
+                            document.addEventListener('click', (e) => {
+                                if (!e.target.closest('.edit-popover') && !e.target.closest('.edit-style-btn')) {
+                                    document.querySelectorAll('.edit-popover').forEach(p => p.remove());
+                                }
+                            });
+                            
+                            // Boutons d'édition de style
+                            document.querySelectorAll('#plinkkRenderer .edit-style-btn').forEach(btn => {
+                                btn.addEventListener('click', async (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    
+                                    // Fermer les autres popovers
+                                    document.querySelectorAll('.edit-popover').forEach(p => p.remove());
+                                    
+                                    const type = btn.dataset.type;
+                                    const rect = btn.getBoundingClientRect();
+                                    
+                                    let popover = document.createElement('div');
+                                    popover.className = 'edit-popover';
+                                    popover.style.position = 'fixed';
+                                    popover.style.top = (rect.bottom + 8) + 'px';
+                                    popover.style.left = Math.min(rect.left, window.innerWidth - 300) + 'px';
+                                    
+                                    if (type === 'label') {
+                                        const labelId = btn.dataset.labelId;
+                                        const labelEl = btn.closest('.label-button');
+                                        const currentColor = labelEl?.dataset.color || '#7c3aed';
+                                        const currentFontColor = labelEl?.dataset.fontColor || '#ffffff';
+                                        
+                                        popover.innerHTML = 
+                                            '<div class="edit-popover-header">' +
+                                                '<h3 class="edit-popover-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> Modifier le label</h3>' +
+                                                '<button class="edit-popover-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+                                            '</div>' +
+                                            '<div class="edit-popover-body">' +
+                                                '<div class="edit-popover-row">' +
+                                                    '<span class="edit-popover-label">Couleur fond</span>' +
+                                                    '<input type="color" class="edit-popover-color" id="labelBgColor" value="' + (currentColor.startsWith('rgba') ? '#7c3aed' : currentColor) + '">' +
+                                                '</div>' +
+                                                '<div class="edit-popover-row">' +
+                                                    '<span class="edit-popover-label">Couleur texte</span>' +
+                                                    '<input type="color" class="edit-popover-color" id="labelFontColor" value="' + currentFontColor + '">' +
+                                                '</div>' +
+                                                '<div class="edit-popover-actions">' +
+                                                    '<button class="edit-popover-btn delete" data-action="delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Supprimer</button>' +
+                                                    '<button class="edit-popover-btn save" data-action="save"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer</button>' +
+                                                '</div>' +
+                                            '</div>';
+                                        
+                                        popover.querySelector('.edit-popover-close').onclick = () => popover.remove();
+                                        popover.querySelector('[data-action="save"]').onclick = async () => {
+                                            const bgColor = popover.querySelector('#labelBgColor').value;
+                                            const fontColor = popover.querySelector('#labelFontColor').value;
+                                            await fetch('/api/me/plinkks/' + currentConfig.id + '/labels/' + labelId, {
+                                                method: 'PUT',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ color: bgColor, fontColor: fontColor })
+                                            });
+                                            popover.remove();
+                                            if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                        };
+                                        popover.querySelector('[data-action="delete"]').onclick = async () => {
+                                            if (confirm('Supprimer ce label ?')) {
+                                                await fetch('/api/me/plinkks/' + currentConfig.id + '/labels/' + labelId, { method: 'DELETE' });
+                                                popover.remove();
+                                                if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                            }
+                                        };
+                                        
+                                    } else if (type === 'link') {
+                                        const linkId = btn.dataset.linkId;
+                                        const link = currentConfig?.links?.find(l => l.id === linkId);
+                                        
+                                        popover.innerHTML = 
+                                            '<div class="edit-popover-header">' +
+                                                '<h3 class="edit-popover-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Modifier le lien</h3>' +
+                                                '<button class="edit-popover-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+                                            '</div>' +
+                                            '<div class="edit-popover-body">' +
+                                                '<div class="edit-popover-row">' +
+                                                    '<span class="edit-popover-label">URL</span>' +
+                                                    '<input type="url" class="edit-popover-input" id="linkUrl" value="' + (link?.url || '') + '" placeholder="https://...">' +
+                                                '</div>' +
+                                                '<div class="edit-popover-row">' +
+                                                    '<span class="edit-popover-label">Icône URL</span>' +
+                                                    '<input type="url" class="edit-popover-input" id="linkIcon" value="' + (link?.icon || '') + '" placeholder="URL de l\'icône...">' +
+                                                '</div>' +
+                                                '<div class="edit-popover-actions">' +
+                                                    '<button class="edit-popover-btn delete" data-action="delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Supprimer</button>' +
+                                                    '<button class="edit-popover-btn save" data-action="save"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer</button>' +
+                                                '</div>' +
+                                            '</div>';
+                                        
+                                        popover.querySelector('.edit-popover-close').onclick = () => popover.remove();
+                                        popover.querySelector('[data-action="save"]').onclick = async () => {
+                                            const url = popover.querySelector('#linkUrl').value;
+                                            const icon = popover.querySelector('#linkIcon').value;
+                                            await fetch('/api/me/plinkks/' + currentConfig.id + '/links/' + linkId, {
+                                                method: 'PUT',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ url, icon })
+                                            });
+                                            popover.remove();
+                                            if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                        };
+                                        popover.querySelector('[data-action="delete"]').onclick = async () => {
+                                            if (confirm('Supprimer ce lien ?')) {
+                                                await fetch('/api/me/plinkks/' + currentConfig.id + '/links/' + linkId, { method: 'DELETE' });
+                                                popover.remove();
+                                                if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                            }
+                                        };
+                                        
+                                    } else if (type === 'social') {
+                                        const socialId = btn.dataset.socialId;
+                                        const social = currentConfig?.socialIcon?.find(s => s.id === socialId);
+                                        
+                                        popover.innerHTML = 
+                                            '<div class="edit-popover-header">' +
+                                                '<h3 class="edit-popover-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Modifier le réseau social</h3>' +
+                                                '<button class="edit-popover-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+                                            '</div>' +
+                                            '<div class="edit-popover-body">' +
+                                                '<div class="edit-popover-row">' +
+                                                    '<span class="edit-popover-label">URL</span>' +
+                                                    '<input type="url" class="edit-popover-input" id="socialUrl" value="' + (social?.url || '') + '" placeholder="https://...">' +
+                                                '</div>' +
+                                                '<div class="edit-popover-row">' +
+                                                    '<span class="edit-popover-label">Icône URL</span>' +
+                                                    '<input type="url" class="edit-popover-input" id="socialIcon" value="' + (social?.icon || '') + '" placeholder="URL de l\'icône...">' +
+                                                '</div>' +
+                                                '<div class="edit-popover-actions">' +
+                                                    '<button class="edit-popover-btn delete" data-action="delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Supprimer</button>' +
+                                                    '<button class="edit-popover-btn save" data-action="save"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer</button>' +
+                                                '</div>' +
+                                            '</div>';
+                                        
+                                        popover.querySelector('.edit-popover-close').onclick = () => popover.remove();
+                                        popover.querySelector('[data-action="save"]').onclick = async () => {
+                                            const url = popover.querySelector('#socialUrl').value;
+                                            const icon = popover.querySelector('#socialIcon').value;
+                                            await fetch('/api/me/plinkks/' + currentConfig.id + '/socialIcon/' + socialId, {
+                                                method: 'PUT',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ url, icon })
+                                            });
+                                            popover.remove();
+                                            if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                        };
+                                        popover.querySelector('[data-action="delete"]').onclick = async () => {
+                                            if (confirm('Supprimer ce réseau social ?')) {
+                                                await fetch('/api/me/plinkks/' + currentConfig.id + '/socialIcon/' + socialId, { method: 'DELETE' });
+                                                popover.remove();
+                                                if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                            }
+                                        };
+                                    } else if (type === 'statusbar') {
+                                        var statusbar = currentConfig?.statusbar || {};
+                                        
+                                        popover.innerHTML = 
+                                            '<div class="edit-popover-header">' +
+                                                '<h3 class="edit-popover-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> Modifier le statut</h3>' +
+                                                '<button class="edit-popover-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+                                            '</div>' +
+                                            '<div class="edit-popover-body">' +
+                                                '<div class="edit-popover-row">' +
+                                                    '<span class="edit-popover-label">Texte</span>' +
+                                                    '<input type="text" class="edit-popover-input" id="statusText" value="' + (statusbar.text || 'Disponible') + '" placeholder="Votre statut...">' +
+                                                '</div>' +
+                                                '<div class="edit-popover-row">' +
+                                                    '<span class="edit-popover-label">Indicateur</span>' +
+                                                    '<select class="edit-popover-select" id="statusIcon">' +
+                                                        '<option value="🟢"' + (statusbar.statusText === '🟢' ? ' selected' : '') + '>🟢 Disponible</option>' +
+                                                        '<option value="🟡"' + (statusbar.statusText === '🟡' ? ' selected' : '') + '>🟡 Occupé</option>' +
+                                                        '<option value="🔴"' + (statusbar.statusText === '🔴' ? ' selected' : '') + '>🔴 Indisponible</option>' +
+                                                    '</select>' +
+                                                '</div>' +
+                                                '<div class="edit-popover-row">' +
+                                                    '<span class="edit-popover-label">Couleur fond</span>' +
+                                                    '<input type="color" class="edit-popover-color" id="statusBgColor" value="' + (statusbar.colorBg || '#1f2937') + '">' +
+                                                '</div>' +
+                                                '<div class="edit-popover-actions">' +
+                                                    '<button class="edit-popover-btn save" data-action="save"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer</button>' +
+                                                '</div>' +
+                                            '</div>';
+                                        
+                                        popover.querySelector('.edit-popover-close').onclick = () => popover.remove();
+                                        popover.querySelector('[data-action="save"]').onclick = async () => {
+                                            var text = popover.querySelector('#statusText').value;
+                                            var statusIcon = popover.querySelector('#statusIcon').value;
+                                            var bgColor = popover.querySelector('#statusBgColor').value;
+                                            await saveConfig('statusbar', { 
+                                                text: text, 
+                                                statusText: statusIcon, 
+                                                colorBg: bgColor 
+                                            });
+                                            popover.remove();
+                                            if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                        };
+                                    }
+                                    
+                                    document.body.appendChild(popover);
+                                });
+                            });
+                        }
+                        
+                        // Fonction pour gérer les textes éditables au clic
+                        function setupEditableTextHandlers() {
+                            const editables = document.querySelectorAll('#plinkkRenderer .editable-text');
+                            
+                            editables.forEach(el => {
+                                el.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    
+                                    // Éviter la double édition
+                                    if (el.classList.contains('editing')) return;
+                                    
+                                    const field = el.dataset.field;
+                                    const config = el.dataset.config;
+                                    const isMultiline = el.classList.contains('editable-multiline');
+                                    const originalText = el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
+                                    
+                                    el.classList.add('editing');
+                                    
+                                    // Créer l'input approprié
+                                    let input;
+                                    if (isMultiline) {
+                                        input = document.createElement('textarea');
+                                        input.className = 'editable-textarea';
+                                        input.value = originalText;
+                                    } else {
+                                        input = document.createElement('input');
+                                        input.type = 'text';
+                                        input.className = 'editable-input';
+                                        input.value = originalText;
+                                    }
+                                    
+                                    // Copier les styles importants
+                                    const computedStyle = window.getComputedStyle(el);
+                                    input.style.fontSize = computedStyle.fontSize;
+                                    input.style.fontWeight = computedStyle.fontWeight;
+                                    input.style.color = computedStyle.color;
+                                    input.style.textAlign = computedStyle.textAlign;
+                                    
+                                    // Remplacer le contenu
+                                    el.innerHTML = '';
+                                    el.appendChild(input);
+                                    input.focus();
+                                    input.select();
+                                    
+                                    // Fonction pour sauvegarder
+                                    const saveEdit = async () => {
+                                        const newValue = input.value.trim();
+                                        el.classList.remove('editing');
+                                        
+                                        // Restaurer le texte affiché
+                                        if (isMultiline) {
+                                            el.innerHTML = newValue.replace(/\n/g, '<br>') || originalText.replace(/\n/g, '<br>');
+                                        } else {
+                                            el.textContent = newValue || originalText;
+                                        }
+                                        
+                                        // Si la valeur a changé, sauvegarder
+                                        if (newValue !== originalText) {
+                                            try {
+                                                if (config === 'plinkk') {
+                                                    await saveConfig('plinkk', { [field]: newValue });
+                                                    // Mettre à jour le champ du panneau latéral s'il existe
+                                                    const sidebarField = document.getElementById(field === 'name' ? 'userName' : field);
+                                                    if (sidebarField) sidebarField.value = newValue;
+                                                } else if (config === 'statusbar') {
+                                                    await saveConfig('statusbar', { text: newValue });
+                                                    const sidebarField = document.getElementById('statusBarText');
+                                                    if (sidebarField) sidebarField.value = newValue;
+                                                } else if (config === 'label') {
+                                                    const labelId = el.dataset.labelId;
+                                                    // Sauvegarder le label via l'API
+                                                    const plinkkId = currentConfig?.id;
+                                                    if (plinkkId && labelId) {
+                                                        await fetch('/api/me/plinkks/' + plinkkId + '/labels/' + labelId, {
+                                                            method: 'PUT',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ data: newValue })
+                                                        });
+                                                    }
+                                                } else if (config === 'category') {
+                                                    const categoryId = el.dataset.categoryId;
+                                                    const plinkkId = currentConfig?.id;
+                                                    if (plinkkId && categoryId) {
+                                                        await fetch('/api/me/plinkks/' + plinkkId + '/categories/' + categoryId, {
+                                                            method: 'PUT',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ name: newValue })
+                                                        });
+                                                    }
+                                                } else if (config === 'link') {
+                                                    const linkId = el.dataset.linkId;
+                                                    const plinkkId = currentConfig?.id;
+                                                    if (plinkkId && linkId) {
+                                                        await fetch('/api/me/plinkks/' + plinkkId + '/links/' + linkId, {
+                                                            method: 'PUT',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ text: newValue })
+                                                        });
+                                                    }
+                                                }
+                                            } catch (err) {
+                                                console.error('Erreur sauvegarde:', err);
+                                            }
+                                        }
+                                    };
+                                    
+                                    // Événements de fin d'édition
+                                    input.addEventListener('blur', saveEdit);
+                                    input.addEventListener('keydown', (e) => {
+                                        if (e.key === 'Enter' && !isMultiline) {
+                                            e.preventDefault();
+                                            input.blur();
+                                        }
+                                        if (e.key === 'Escape') {
+                                            el.classList.remove('editing');
+                                            if (isMultiline) {
+                                                el.innerHTML = originalText.replace(/\n/g, '<br>');
+                                            } else {
+                                                el.textContent = originalText;
+                                            }
+                                        }
+                                    });
+                                });
+                            });
+                        }
+                        
+                        // Fonction pour configurer les gestionnaires d'upload et suppression
+                        function setupProfileEditHandlers() {
+                            // Upload image de profil (PFP)
+                            const pfpUpload = document.getElementById('pfpUpload');
+                            if (pfpUpload) {
+                                pfpUpload.addEventListener('change', async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    
+                                    // Convertir en base64 ou envoyer au serveur
+                                    const reader = new FileReader();
+                                    reader.onload = async () => {
+                                        const base64 = reader.result;
+                                        // Sauvegarder via l'API
+                                        await saveConfig('plinkk', { profileImage: base64 });
+                                        // Recharger le rendu
+                                        if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                    };
+                                    reader.readAsDataURL(file);
+                                });
+                            }
+                            
+                            // Supprimer image de profil
+                            const deletePfpBtn = document.getElementById('deletePfpBtn');
+                            if (deletePfpBtn) {
+                                deletePfpBtn.addEventListener('click', async () => {
+                                    await saveConfig('plinkk', { profileImage: '' });
+                                    if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                });
+                            }
+                            
+                            // Upload icône de profil
+                            const iconUpload = document.getElementById('iconUpload');
+                            if (iconUpload) {
+                                iconUpload.addEventListener('change', async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    
+                                    const reader = new FileReader();
+                                    reader.onload = async () => {
+                                        const base64 = reader.result;
+                                        await saveConfig('plinkk', { profileIcon: base64 });
+                                        if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                    };
+                                    reader.readAsDataURL(file);
+                                });
+                            }
+                            
+                            // Supprimer icône de profil
+                            const deleteIconBtn = document.getElementById('deleteIconBtn');
+                            if (deleteIconBtn) {
+                                deleteIconBtn.addEventListener('click', async () => {
+                                    await saveConfig('plinkk', { profileIcon: '' });
+                                    if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                });
+                            }
+                            
+                            // Input texte du site
+                            const siteTextInput = document.getElementById('profileSiteTextInput');
+                            if (siteTextInput) {
+                                let debounceTimer;
+                                siteTextInput.addEventListener('input', () => {
+                                    clearTimeout(debounceTimer);
+                                    debounceTimer = setTimeout(async () => {
+                                        await saveConfig('plinkk', { profileSiteText: siteTextInput.value });
+                                    }, 500);
+                                });
+                            }
+                            
+                            // Effacer texte du site
+                            const clearSiteTextBtn = document.getElementById('clearSiteTextBtn');
+                            if (clearSiteTextBtn) {
+                                clearSiteTextBtn.addEventListener('click', async () => {
+                                    const input = document.getElementById('profileSiteTextInput');
+                                    if (input) input.value = '';
+                                    await saveConfig('plinkk', { profileSiteText: '' });
+                                    if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                });
+                            }
+                        }
+                        
+                        // Expose reload function
+                        window.__PLINKK_RENDERER_RELOAD__ = loadPlinkkPage;
+                        window.__PLINKK_GET_CONFIG__ = function() { return currentConfig; };
+                        
+                        // Initial load
+                        loadPlinkkPage();
+                    })();
+                    
+                    // ===== NAME INPUT SYNC =====
+                    (function () {
+                        try {
+                            const nameInput = document.getElementById('userName');
+                            const headerName = document.getElementById('headerPlinkkName');
+                            if (nameInput && headerName) {
+                                nameInput.addEventListener('input', () => {
+                                    const v = nameInput.value || '';
+                                    headerName.textContent = v || headerName.getAttribute('data-original') || '';
+                                });
+                                headerName.setAttribute('data-original', headerName.textContent || '');
+                            }
+                        } catch (e) { }
+                    })();
+                    
+                    // ===== AUTO OPEN MODAL =====
+                    (function () {
+                        const autoOpenRaw = document.getElementById('autoopen-data')?.textContent || 'false';
+                        const autoOpen = String(autoOpenRaw).trim() === 'true';
+                        if (autoOpen) {
+                            const modal = document.getElementById('plinkkSelectorModal');
+                            if (modal) modal.classList.remove('hidden');
+                        }
+                    })();
+                    
+                    // ===== AUTO RELOAD APRÈS SAUVEGARDE =====
+                    (function() {
+                        // Écouter les sauvegardes réussies pour rafraîchir le preview
+                        document.addEventListener('plinkk:saved', () => {
+                            setTimeout(() => {
+                                if (window.__PLINKK_RENDERER_RELOAD__) {
+                                    window.__PLINKK_RENDERER_RELOAD__();
+                                }
+                            }, 500);
+                        });
+                        
+                        // Observer le status pour détecter les sauvegardes
+                        const statusEl = document.getElementById('status');
+                        if (statusEl) {
+                            const observer = new MutationObserver((mutations) => {
+                                mutations.forEach((mutation) => {
+                                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                                        const text = statusEl.textContent || '';
+                                        if (text.includes('Sauvegardé') || text.includes('✓')) {
+                                            setTimeout(() => {
+                                                if (window.__PLINKK_RENDERER_RELOAD__) {
+                                                    window.__PLINKK_RENDERER_RELOAD__();
+                                                }
+                                            }, 300);
+                                        }
+                                    }
+                                });
+                            });
+                            observer.observe(statusEl, { childList: true, characterData: true, subtree: true });
+                        }
+                    })();
+                    
+                    // ===== GESTIONNAIRES D'UPLOAD DANS LE PANNEAU LATÉRAL =====
+                    (function() {
+                        // Upload image de profil depuis le panneau
+                        const profileImageUpload = document.getElementById('profileImageUpload');
+                        const profileImageInput = document.getElementById('profileImage');
+                        const profileImagePreview = document.getElementById('profileImagePreview');
+                        const profileImagePreviewImg = document.getElementById('profileImagePreviewImg');
+                        const profileImageClear = document.getElementById('profileImageClear');
+                        
+                        if (profileImageUpload) {
+                            profileImageUpload.addEventListener('change', async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                
+                                const reader = new FileReader();
+                                reader.onload = () => {
+                                    const base64 = reader.result;
+                                    if (profileImageInput) profileImageInput.value = base64;
+                                    if (profileImagePreviewImg) profileImagePreviewImg.src = base64;
+                                    if (profileImagePreview) profileImagePreview.classList.remove('hidden');
+                                    // Déclencher la sauvegarde
+                                    if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__();
+                                };
+                                reader.readAsDataURL(file);
+                            });
+                        }
+                        
+                        if (profileImageClear) {
+                            profileImageClear.addEventListener('click', () => {
+                                if (profileImageInput) profileImageInput.value = '';
+                                if (profileImagePreview) profileImagePreview.classList.add('hidden');
+                                if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__();
+                            });
+                        }
+                        
+                        // Upload icône de profil depuis le panneau
+                        const profileIconUpload = document.getElementById('profileIconUpload');
+                        const profileIconInput = document.getElementById('profileIcon');
+                        const profileIconPreview = document.getElementById('profileIconPreview');
+                        const profileIconPreviewImg = document.getElementById('profileIconPreviewImg');
+                        const profileIconClear = document.getElementById('profileIconClear');
+                        
+                        if (profileIconUpload) {
+                            profileIconUpload.addEventListener('change', async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                
+                                const reader = new FileReader();
+                                reader.onload = () => {
+                                    const base64 = reader.result;
+                                    if (profileIconInput) profileIconInput.value = base64;
+                                    if (profileIconPreviewImg) profileIconPreviewImg.src = base64;
+                                    if (profileIconPreview) profileIconPreview.classList.remove('hidden');
+                                    if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__();
+                                };
+                                reader.readAsDataURL(file);
+                            });
+                        }
+                        
+                        if (profileIconClear) {
+                            profileIconClear.addEventListener('click', () => {
+                                if (profileIconInput) profileIconInput.value = '';
+                                if (profileIconPreview) profileIconPreview.classList.add('hidden');
+                                if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__();
+                            });
+                        }
+                        
+                        // Afficher l'aperçu si les champs ont déjà des valeurs
+                        function updatePreviews() {
+                            if (profileImageInput?.value && profileImageInput.value.startsWith('data:')) {
+                                if (profileImagePreviewImg) profileImagePreviewImg.src = profileImageInput.value;
+                                if (profileImagePreview) profileImagePreview.classList.remove('hidden');
+                            }
+                            if (profileIconInput?.value && profileIconInput.value.startsWith('data:')) {
+                                if (profileIconPreviewImg) profileIconPreviewImg.src = profileIconInput.value;
+                                if (profileIconPreview) profileIconPreview.classList.remove('hidden');
+                            }
+                        }
+                        
+                        // Mettre à jour après chargement initial
+                        setTimeout(updatePreviews, 1000);
+                    })();
+                    
+                    // ===== POPOVERS DÉPLAÇABLES =====
+                    (function() {
+                        function makeDraggable(popover) {
+                            const header = popover.querySelector('.edit-popover-header');
+                            if (!header) return;
+                            
+                            let isDragging = false;
+                            let startX, startY, startLeft, startTop;
+                            
+                            header.addEventListener('mousedown', (e) => {
+                                if (e.target.closest('.close-popover')) return;
+                                isDragging = true;
+                                const rect = popover.getBoundingClientRect();
+                                startX = e.clientX;
+                                startY = e.clientY;
+                                startLeft = rect.left;
+                                startTop = rect.top;
+                                popover.style.transition = 'none';
+                                document.body.style.userSelect = 'none';
+                            });
+                            
+                            document.addEventListener('mousemove', (e) => {
+                                if (!isDragging) return;
+                                const dx = e.clientX - startX;
+                                const dy = e.clientY - startY;
+                                let newLeft = startLeft + dx;
+                                let newTop = startTop + dy;
+                                
+                                // Contraintes pour ne pas sortir de l'écran
+                                const maxX = window.innerWidth - popover.offsetWidth;
+                                const maxY = window.innerHeight - popover.offsetHeight;
+                                newLeft = Math.max(0, Math.min(newLeft, maxX));
+                                newTop = Math.max(0, Math.min(newTop, maxY));
+                                
+                                popover.style.left = newLeft + 'px';
+                                popover.style.top = newTop + 'px';
+                                popover.style.transform = 'none';
+                            });
+                            
+                            document.addEventListener('mouseup', () => {
+                                if (isDragging) {
+                                    isDragging = false;
+                                    popover.style.transition = '';
+                                    document.body.style.userSelect = '';
+                                }
+                            });
+                        }
+                        
+                        // Initialiser les popovers existants
+                        document.querySelectorAll('.edit-popover').forEach(makeDraggable);
+                        
+                        // Observer les nouveaux popovers
+                        const popoverObserver = new MutationObserver((mutations) => {
+                            mutations.forEach((mutation) => {
+                                mutation.addedNodes.forEach((node) => {
+                                    if (node.classList?.contains('edit-popover')) {
+                                        makeDraggable(node);
+                                    }
+                                });
+                            });
+                        });
+                        popoverObserver.observe(document.body, { childList: true, subtree: true });
+                    })();
+                    
+                    // ===== TOOLBAR HANDLERS (THÈME, CANVAS, AJOUTS) - DÉLÉGATION D'ÉVÉNEMENTS =====
+                    (function() {
+                        const plinkkId = '<%= plinkk?.id || "" %>';
+                        
+                        // ===== VRAIS THÈMES depuis builtInThemes =====
+                        const THEMES_LIST = [
+                            { id: 0, name: 'Grey', background: '#29272E', preview: 'linear-gradient(135deg, #29272E, #1a1a1e)' },
+                            { id: 1, name: 'Dark Yellow', background: '#18170f', preview: 'linear-gradient(135deg, #18170f, #2a2714)' },
+                            { id: 2, name: 'Green', background: '#0e1711', preview: 'linear-gradient(135deg, #0e1711, #1a2e1f)' },
+                            { id: 3, name: 'Blue', background: '#0d1117', preview: 'linear-gradient(135deg, #0d1117, #1a2535)' },
+                            { id: 4, name: 'Red', background: '#170d0d', preview: 'linear-gradient(135deg, #170d0d, #2a1515)' },
+                            { id: 5, name: 'Light Blue', background: '#eaf4fb', preview: 'linear-gradient(135deg, #eaf4fb, #cde5f5)' },
+                            { id: 6, name: 'Dark', background: '#0d0d0d', preview: 'linear-gradient(135deg, #0d0d0d, #1a1a1a)' },
+                            { id: 7, name: 'Orange', background: '#171210', preview: 'linear-gradient(135deg, #171210, #2a1f18)' },
+                            { id: 8, name: 'Grey Light', background: '#f0f0f0', preview: 'linear-gradient(135deg, #f0f0f0, #e0e0e0)' },
+                            { id: 9, name: 'Green Grey', background: '#f0f4f1', preview: 'linear-gradient(135deg, #f0f4f1, #dce6de)' },
+                            { id: 10, name: 'Very Light Blue', background: '#f0f4f9', preview: 'linear-gradient(135deg, #f0f4f9, #dce6f5)' },
+                            { id: 11, name: 'Brown', background: '#17130e', preview: 'linear-gradient(135deg, #17130e, #2a2118)' },
+                            { id: 12, name: 'Pink', background: '#170d14', preview: 'linear-gradient(135deg, #170d14, #2a1525)' },
+                            { id: 13, name: 'Purple', background: '#120d17', preview: 'linear-gradient(135deg, #120d17, #1f152a)' },
+                            { id: 14, name: 'Neptune', background: '#0d1416', preview: 'linear-gradient(135deg, #0d1416, #152025)' }
+                        ];
+                        
+                        // ===== VRAIS CANVAS depuis canvaConfig =====
+                        const CANVAS_LIST = [
+                            { id: -1, name: 'Aucun' },
+                            { id: 0, name: 'Bubble' },
+                            { id: 1, name: 'Neuronal' },
+                            { id: 2, name: 'Particule' },
+                            { id: 3, name: 'Stars Array' },
+                            { id: 4, name: 'Snow' },
+                            { id: 5, name: 'Galaxy' },
+                            { id: 6, name: 'Hexagone' },
+                            { id: 7, name: 'Confetti' },
+                            { id: 8, name: 'Fireworks' },
+                            { id: 9, name: 'Boom Click' },
+                            { id: 10, name: 'Crowd' },
+                            { id: 11, name: 'Storm' },
+                            { id: 12, name: 'Color Wars' },
+                            { id: 13, name: 'Liquids Lights' },
+                            { id: 14, name: 'Rain' },
+                            { id: 15, name: 'Matrix Rain' },
+                            { id: 16, name: 'Purple Tree' },
+                            { id: 17, name: 'Cloud' },
+                            { id: 18, name: 'Space' }
+                        ];
+                        
+                        // ===== PRESETS RÉSEAUX SOCIAUX =====
+                        const SOCIAL_PRESETS = [
+                            { id: 'x', name: 'X (Twitter)', icon: 'x', url: 'https://x.com/' },
+                            { id: 'instagram', name: 'Instagram', icon: 'instagram', url: 'https://instagram.com/' },
+                            { id: 'tiktok', name: 'TikTok', icon: 'tiktok', url: 'https://tiktok.com/@' },
+                            { id: 'youtube', name: 'YouTube', icon: 'youtube-alt', url: 'https://youtube.com/@' },
+                            { id: 'discord', name: 'Discord', icon: 'discord', url: 'https://discord.gg/' },
+                            { id: 'twitch', name: 'Twitch', icon: 'twitch', url: 'https://twitch.tv/' },
+                            { id: 'github', name: 'GitHub', icon: 'github', url: 'https://github.com/' },
+                            { id: 'linkedin', name: 'LinkedIn', icon: 'linkedin', url: 'https://linkedin.com/in/' },
+                            { id: 'facebook', name: 'Facebook', icon: 'facebook', url: 'https://facebook.com/' },
+                            { id: 'snapchat', name: 'Snapchat', icon: 'snapchat', url: 'https://snapchat.com/add/' },
+                            { id: 'spotify', name: 'Spotify', icon: 'spotify', url: 'https://open.spotify.com/user/' },
+                            { id: 'threads', name: 'Threads', icon: 'threads', url: 'https://threads.net/@' },
+                            { id: 'telegram', name: 'Telegram', icon: 'telegram', url: 'https://t.me/' },
+                            { id: 'whatsapp', name: 'WhatsApp', icon: 'whatsapp', url: 'https://wa.me/' },
+                            { id: 'reddit', name: 'Reddit', icon: 'reddit', url: 'https://reddit.com/user/' },
+                            { id: 'pinterest', name: 'Pinterest', icon: 'pinterest', url: 'https://pinterest.com/' },
+                            { id: 'kick', name: 'Kick', icon: 'kick', url: 'https://kick.com/' },
+                            { id: 'bluesky', name: 'Bluesky', icon: 'bluesky', url: 'https://bsky.app/profile/' },
+                            { id: 'patreon', name: 'Patreon', icon: 'patreon', url: 'https://patreon.com/' },
+                            { id: 'kofi', name: 'Ko-fi', icon: 'ko-fi', url: 'https://ko-fi.com/' },
+                            { id: 'onlyfans', name: 'OnlyFans', icon: 'onlyfans', url: 'https://onlyfans.com/' },
+                            { id: 'custom', name: '+ Personnalisé', icon: 'link', url: '' }
+                        ];
+                        
+                        // Créer le modal de sélection pour thèmes/canvas
+                        function createPickerModal(type, items, currentValue, onSelect) {
+                            // Supprimer un modal existant
+                            document.querySelector('.edit-picker-modal')?.remove();
+                            
+                            const modal = document.createElement('div');
+                            modal.className = 'edit-picker-modal';
+                            
+                            var itemsHtml = items.map(function(item) {
+                                var isActive = item.id == currentValue ? 'active' : '';
+                                var previewStyle = type === 'theme' ? 'background:' + item.preview : 'background: #1a1a2e;';
+                                var canvasIcon = (type === 'canvas' && item.id >= 0) ? '<span class="canvas-icon">✨</span>' : '';
+                                if (type === 'canvas' && item.id === -1) canvasIcon = '<span class="canvas-icon" style="opacity:0.5">⛔</span>';
+                                return '<div class="edit-picker-item ' + isActive + '" data-id="' + item.id + '">' +
+                                    '<div class="picker-preview" style="' + previewStyle + '">' + canvasIcon + '</div>' +
+                                    '<span class="picker-name">' + item.name + '</span>' +
+                                '</div>';
+                            }).join('');
+                            
+                            modal.innerHTML = '<div class="edit-picker-overlay"></div>' +
+                                '<div class="edit-picker-content">' +
+                                    '<div class="edit-picker-header">' +
+                                        '<h3>Choisir un ' + (type === 'theme' ? 'thème' : 'fond animé') + '</h3>' +
+                                        '<button class="close-picker">' +
+                                            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                                                '<path d="M18 6L6 18M6 6l12 12"/>' +
+                                            '</svg>' +
+                                        '</button>' +
+                                    '</div>' +
+                                    '<div class="edit-picker-grid">' + itemsHtml + '</div>' +
+                                '</div>';
+                            
+                            document.body.appendChild(modal);
+                            
+                            // Animation d'entrée
+                            requestAnimationFrame(() => modal.classList.add('visible'));
+                            
+                            // Fermer le modal
+                            modal.querySelector('.edit-picker-overlay').addEventListener('click', () => modal.remove());
+                            modal.querySelector('.close-picker').addEventListener('click', () => modal.remove());
+                            
+                            // Sélectionner un item
+                            modal.querySelectorAll('.edit-picker-item').forEach(item => {
+                                item.addEventListener('click', () => {
+                                    const id = parseInt(item.dataset.id);
+                                    onSelect(id);
+                                    modal.remove();
+                                });
+                            });
+                        }
+                        
+                        // ===== MODAL SÉLECTION RÉSEAU SOCIAL (PRESETS) =====
+                        function createSocialPickerModal(onSelect) {
+                            document.querySelector('.edit-picker-modal')?.remove();
+                            
+                            const modal = document.createElement('div');
+                            modal.className = 'edit-picker-modal';
+                            
+                            var itemsHtml = SOCIAL_PRESETS.map(function(item) {
+                                var iconUrl = 'https://s3.marvideo.fr/plinkk-image/icons/' + item.icon + '.svg';
+                                return '<div class="edit-picker-item social-preset" data-id="' + item.id + '" data-url="' + item.url + '" data-icon="' + item.icon + '">' +
+                                    '<div class="picker-preview" style="background:#1a1a2e;display:flex;align-items:center;justify-content:center;">' +
+                                        '<img src="' + iconUrl + '" alt="' + item.name + '" style="width:28px;height:28px;filter:brightness(0.9);" onerror="this.style.display=\'none\'"/>' +
+                                    '</div>' +
+                                    '<span class="picker-name">' + item.name + '</span>' +
+                                '</div>';
+                            }).join('');
+                            
+                            modal.innerHTML = '<div class="edit-picker-overlay"></div>' +
+                                '<div class="edit-picker-content">' +
+                                    '<div class="edit-picker-header">' +
+                                        '<h3>Ajouter un réseau social</h3>' +
+                                        '<button class="close-picker">' +
+                                            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                                                '<path d="M18 6L6 18M6 6l12 12"/>' +
+                                            '</svg>' +
+                                        '</button>' +
+                                    '</div>' +
+                                    '<div class="edit-picker-grid">' + itemsHtml + '</div>' +
+                                '</div>';
+                            
+                            document.body.appendChild(modal);
+                            requestAnimationFrame(() => modal.classList.add('visible'));
+                            
+                            modal.querySelector('.edit-picker-overlay').addEventListener('click', () => modal.remove());
+                            modal.querySelector('.close-picker').addEventListener('click', () => modal.remove());
+                            
+                            modal.querySelectorAll('.edit-picker-item').forEach(item => {
+                                item.addEventListener('click', () => {
+                                    var preset = {
+                                        id: item.dataset.id,
+                                        url: item.dataset.url,
+                                        icon: item.dataset.icon
+                                    };
+                                    modal.remove();
+                                    onSelect(preset);
+                                });
+                            });
+                        }
+                        
+                        // DÉLÉGATION D'ÉVÉNEMENTS pour les boutons (car ils sont recréés à chaque render)
+                        document.addEventListener('click', function(e) {
+                            var target = e.target.closest('button');
+                            if (!target) return;
+                            
+                            // Handler bouton refresh
+                            if (target.id === 'refreshPreviewBtn') {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                            }
+                            
+                            // Handler bouton thème
+                            if (target.id === 'openThemeEditor') {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                var currentConfig = window.__PLINKK_GET_CONFIG__?.() || {};
+                                var currentTheme = typeof currentConfig.theme === 'number' ? currentConfig.theme : 0;
+                                
+                                createPickerModal('theme', THEMES_LIST, currentTheme, async function(themeId) {
+                                    await fetch('/api/me/plinkks/' + plinkkId + '/config', {
+                                        method: 'PUT',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ theme: themeId })
+                                    });
+                                    if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                });
+                            }
+                            
+                            // Handler bouton canvas
+                            if (target.id === 'openCanvasEditor') {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                var currentConfig = window.__PLINKK_GET_CONFIG__?.() || {};
+                                var currentCanvas = typeof currentConfig.selectedCanvasIndex === 'number' ? currentConfig.selectedCanvasIndex : -1;
+                                if (!currentConfig.canvaEnable) currentCanvas = -1;
+                                
+                                createPickerModal('canvas', CANVAS_LIST, currentCanvas, async function(canvasId) {
+                                    await fetch('/api/me/plinkks/' + plinkkId + '/config', {
+                                        method: 'PUT',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ 
+                                            canvaEnable: canvasId >= 0,
+                                            selectedCanvasIndex: canvasId >= 0 ? canvasId : 0
+                                        })
+                                    });
+                                    if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                });
+                            }
+                            
+                            // Handler ajouter lien
+                            if (target.id === 'addLinkBtn') {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                (async function() {
+                                    var currentConfig = window.__PLINKK_GET_CONFIG__?.() || {};
+                                    var links = currentConfig.links || [];
+                                    
+                                    links.push({
+                                        text: 'Nouveau lien',
+                                        url: 'https://example.com',
+                                        icon: ''
+                                    });
+                                    
+                                    if (window.__PLINKK_SAVE_LINKS__) await window.__PLINKK_SAVE_LINKS__(links);
+                                    if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                })();
+                            }
+                            
+                            // Handler ajouter réseau social - avec modal de presets
+                            if (target.id === 'addSocialBtn') {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                
+                                createSocialPickerModal(async function(preset) {
+                                    var currentConfig = window.__PLINKK_GET_CONFIG__?.() || {};
+                                    var socialIcon = currentConfig.socialIcon || [];
+                                    
+                                    // Utiliser le preset sélectionné
+                                    var iconUrl = 'https://s3.marvideo.fr/plinkk-image/icons/' + preset.icon + '.svg';
+                                    socialIcon.push({
+                                        url: preset.url || 'https://',
+                                        icon: iconUrl
+                                    });
+                                    
+                                    if (window.__PLINKK_SAVE_SOCIAL__) await window.__PLINKK_SAVE_SOCIAL__(socialIcon);
+                                    if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                });
+                            }
+                            
+                            // Handler ajouter label
+                            if (target.id === 'addLabelBtn' || target.id === 'addLabelToolbar') {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                (async function() {
+                                    var currentConfig = window.__PLINKK_GET_CONFIG__?.() || {};
+                                    var labels = currentConfig.labels || [];
+                                    
+                                    labels.push({
+                                        data: 'Nouveau label',
+                                        color: '#7c3aed',
+                                        fontColor: '#ffffff'
+                                    });
+                                    
+                                    if (window.__PLINKK_SAVE_LABELS__) await window.__PLINKK_SAVE_LABELS__(labels);
+                                    if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                })();
+                            }
+                        });
+                    })();
+                    
+                    // ===== HANDLERS DE SUPPRESSION/MASQUAGE DANS LE PREVIEW =====
+                    (function() {
+                        var previewContainer = document.getElementById('plinkkRenderer');
+                        
+                        if (!previewContainer) return;
+                        
+                        // Délégation d'événements pour les boutons d'action
+                        previewContainer.addEventListener('click', async function(e) {
+                            var target = e.target.closest('button');
+                            if (!target) return;
+                            
+                            // Supprimer un lien
+                            if (target.classList.contains('link-delete-btn')) {
+                                var linkId = target.dataset.linkId;
+                                if (!linkId) return;
+                                
+                                if (confirm('Supprimer ce lien ?')) {
+                                    var currentConfig = window.__PLINKK_GET_CONFIG__?.() || {};
+                                    var links = (currentConfig.links || []).filter(function(l) { return l.id !== linkId; });
+                                    if (window.__PLINKK_SAVE_LINKS__) await window.__PLINKK_SAVE_LINKS__(links);
+                                    if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                }
+                            }
+                            
+                            // Masquer/afficher un lien
+                            if (target.classList.contains('link-hide-btn')) {
+                                var linkId2 = target.dataset.linkId;
+                                var isHidden = target.dataset.hidden === 'true';
+                                if (!linkId2) return;
+                                
+                                var currentConfig = window.__PLINKK_GET_CONFIG__?.() || {};
+                                var links = (currentConfig.links || []).map(function(l) { 
+                                    if (l.id === linkId2) {
+                                        l.hidden = !isHidden;
+                                    }
+                                    return l; 
+                                });
+                                if (window.__PLINKK_SAVE_LINKS__) await window.__PLINKK_SAVE_LINKS__(links);
+                                if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                            }
+                            
+                            // Supprimer un réseau social
+                            if (target.classList.contains('social-delete-btn')) {
+                                var socialIndex = target.dataset.index;
+                                if (socialIndex === undefined || socialIndex === null) return;
+                                
+                                if (confirm('Supprimer ce réseau social ?')) {
+                                    var currentConfig = window.__PLINKK_GET_CONFIG__?.() || {};
+                                    var socialIcon = (currentConfig.socialIcon || []).filter(function(s, idx) { 
+                                        return idx !== parseInt(socialIndex); 
+                                    });
+                                    if (window.__PLINKK_SAVE_SOCIAL__) await window.__PLINKK_SAVE_SOCIAL__(socialIcon);
+                                    if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                }
+                            }
+                            
+                            // Supprimer un label
+                            if (target.classList.contains('label-delete-btn')) {
+                                var labelId = target.dataset.labelId;
+                                if (!labelId) return;
+                                
+                                if (confirm('Supprimer ce label ?')) {
+                                    var currentConfig = window.__PLINKK_GET_CONFIG__?.() || {};
+                                    var labels = (currentConfig.labels || []).filter(function(l) { 
+                                        return l.id !== labelId; 
+                                    });
+                                    if (window.__PLINKK_SAVE_LABELS__) await window.__PLINKK_SAVE_LABELS__(labels);
+                                    if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+                                }
+                            }
+                        });
+                    })();
+                </script>
+        -->
+                

@@ -1,5 +1,5 @@
-<%- include('../partials/head', { title: 'Mentions légales', description: 'Mentions légales de Plinkk.' }) %>
-<%- include('../partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
+<%- include('partials/head', { title: 'Mentions légales', description: 'Mentions légales de Plinkk.' }) %>
+<%- include('partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
 
 <main class="relative isolate overflow-hidden min-h-screen">
   <!-- Background Effects -->
@@ -38,7 +38,7 @@
         <p>
           <strong>Plinkk</strong> — Klaynight (Elouan Passereau)<br>
           Site : <a href="https://klaynight.fr" rel="external" target="_blank">klaynight.fr</a><br>
-          Contact : <%- include('../partials/contact-email', { linkClass: 'text-violet-400 hover:text-violet-300 transition-colors' }) %>
+          Contact : <%- include('partials/contact-email', { linkClass: 'text-violet-400 hover:text-violet-300 transition-colors' }) %>
         </p>
 
         <h2 id="hebergeur" class="flex items-center gap-3">
@@ -81,4 +81,4 @@
     </div>
   </div>
 </main>
-<%- include('../partials/footer') %>
+<%- include('partials/footer') %>

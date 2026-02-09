@@ -1,5 +1,5 @@
-<%- include('../../partials/head.ejs', { title: 'Admin - Thèmes', description: '', robots: 'noindex,nofollow' }) %>
-<%- include('../../partials/header-dash.ejs', { user: user }) %>
+<%- include('partials/head.ejs', { title: 'Admin - Thèmes', description: '', robots: 'noindex,nofollow' }) %>
+<%- include('partials/header-dash.ejs', { user: user }) %>
 
 <style>
   .stat-card {
@@ -47,7 +47,7 @@
 </style>
 
 <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-  <%- include('../../partials/admin-nav.ejs', { user: user, active: 'themes' }) %>
+  <%- include('partials/admin-nav.ejs', { user: user, active: 'themes' }) %>
 
   <main class="col-span-12 lg:col-span-10 space-y-6">
     <!-- Header -->

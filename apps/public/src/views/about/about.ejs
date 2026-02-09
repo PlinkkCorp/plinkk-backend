@@ -1,8 +1,8 @@
-<%- include('../partials/head', {
+<%- include('partials/head', {
   title: 'À propos',
   description: "En savoir plus sur Plinkk, le projet open‑source pour créer des pages de liens rapides et personnalisables."
 }) %>
-<%- include('../partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
+<%- include('partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
 
 <main class="relative isolate overflow-hidden">
   <!-- Background Effects -->
@@ -118,4 +118,4 @@
 
   </div>
 </main>
-<%- include('../partials/footer') %>
+<%- include('partials/footer') %>

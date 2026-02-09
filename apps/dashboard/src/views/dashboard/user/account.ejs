@@ -1,9 +1,9 @@
-<%- include('../../partials/head.ejs', { title: 'Tableau de bord - Mon compte' ,
+<%- include('partials/head.ejs', { title: 'Tableau de bord - Mon compte' ,
   description: 'Gère ton email, mot de passe et confidentialité du profil.' , robots: 'noindex,nofollow' }) %>
-  <%- include('../../partials/header-dash.ejs') %>
+  <%- include('partials/header-dash.ejs') %>
     
     <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-      <%- include('../../partials/asside_dash.ejs', { active: 'account' }) %>
+      <%- include('partials/asside_dash.ejs', { active: 'account' }) %>
 
         <main class="col-span-12 lg:col-span-10 space-y-6">
           <!-- Header -->
@@ -72,7 +72,7 @@
                 <div class="flex flex-col md:flex-row items-start gap-8">
                   <div class="flex-shrink-0">
                     <div class="h-32 w-32 rounded-full overflow-hidden border-4 border-slate-800 bg-slate-800 grid place-items-center text-3xl font-semibold text-slate-200 shadow-xl relative group" id="avatarPreview" data-avatar>
-                      <%- include('../../partials/avatar.ejs', { user: user }) %>
+                      <%- include('partials/avatar.ejs', { user: user }) %>
                       <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onclick="document.getElementById('avatarInput').click()">
                         <svg class="text-white size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                       </div>

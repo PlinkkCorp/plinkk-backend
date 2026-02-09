@@ -1,8 +1,8 @@
-<%- include('../../partials/head.ejs', { title: 'Tableau de bord - Cosmétiques', description: 'Personnalisez votre profil Plinkk.', robots: 'noindex,nofollow' }) %>
-<%- include('../../partials/header-dash.ejs', { user: user }) %>
+<%- include('partials/head.ejs', { title: 'Tableau de bord - Cosmétiques', description: 'Personnalisez votre profil Plinkk.', robots: 'noindex,nofollow' }) %>
+<%- include('partials/header-dash.ejs', { user: user }) %>
 
 <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-  <%- include('../../partials/asside_dash.ejs', { active: 'cosmetics' }) %>
+  <%- include('partials/asside_dash.ejs', { active: 'cosmetics' }) %>
 
   <main class="col-span-12 lg:col-span-10 space-y-6">
     
@@ -53,7 +53,7 @@
                         <!-- Avatar Container -->
                         <div class="relative h-14 w-14 rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
                             <div class="absolute inset-0 bg-slate-900 rounded-2xl flex items-center justify-center text-lg font-bold text-slate-400 overflow-hidden ring-2 ring-white/10">
-                                <%- include('../../partials/avatar.ejs', { user: user, className: "w-full h-full object-cover" }) %>
+                                <%- include('partials/avatar.ejs', { user: user, className: "w-full h-full object-cover" }) %>
                             </div>
                             <!-- Frame Overlay -->
                             <div id="previewFrame" class="absolute inset-0 pointer-events-none z-20 rounded-2xl"></div>
