@@ -60,15 +60,13 @@ model User {
   views     Int       @default(0)
   isVerified Boolean  @default(false)
   isPartner  Boolean  @default(false)
-<<<<<<< Updated upstream
-=======
+
   isPremium  Boolean  @default(false)
   premiumUntil DateTime?
   stripeCustomerId String? @unique
   extraPlinkks     Int     @default(0)
   extraRedirects   Int     @default(0)
->>>>>>> Stashed changes
-  
+
   hasPassword Boolean @default(true)
 
   themes       Theme[]
