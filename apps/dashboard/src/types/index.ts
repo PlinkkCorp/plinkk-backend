@@ -31,5 +31,6 @@ declare module "fastify" {
     userId?: string;
     currentUser?: User & { role: Role | null };
     publicPath?: string;
+    rawBody?: string | Buffer;
   }
 }

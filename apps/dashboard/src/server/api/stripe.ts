@@ -1,4 +1,5 @@
 import { FastifyInstance } from "fastify";
+import Stripe from "stripe";
 import { requireAuth } from "../../middleware/auth";
 import {
   stripe,
@@ -96,11 +97,11 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
     // Si pas de webhook secret configuré, traiter directement (dev mode)
     if (!webhookSecret) {
       request.log?.warn("[Stripe] STRIPE_WEBHOOK_SECRET non configuré — vérification de signature ignorée");
-      const event = request.body as any;
+      const event = request.body as Stripe.Event;
 
       if (event?.type === "checkout.session.completed") {
         try {
-          await handleSuccessfulPayment(event.data.object);
+          await handleSuccessfulPayment(event.data.object as Stripe.Checkout.Session);
         } catch (e) {
           request.log?.error(e, "handleSuccessfulPayment failed");
         }
@@ -113,9 +114,9 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
       return reply.code(400).send({ error: "Signature Stripe manquante" });
     }
 
-    let event: any;
+    let event: Stripe.Event;
     try {
-      const rawBody = (request as any).rawBody || JSON.stringify(request.body);
+      const rawBody = request.rawBody || JSON.stringify(request.body);
       event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
     } catch (e: any) {
       request.log?.error(e, "Stripe webhook signature verification failed");
