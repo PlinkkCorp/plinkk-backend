@@ -2,6 +2,8 @@
   @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
   @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
   @keyframes glow-pulse { 0%,100%{opacity:.4} 50%{opacity:.8} }
+  @keyframes border-spin { 0%{--angle:0deg} 100%{--angle:360deg} }
+  @keyframes subtle-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
   .float-anim { animation: float 4s ease-in-out infinite; }
   .float-anim-delay { animation: float 4s ease-in-out infinite 1s; }
   .shimmer-btn {
@@ -10,7 +12,7 @@
     animation: shimmer 3s linear infinite;
   }
   .glow-ring { animation: glow-pulse 3s ease-in-out infinite; }
-  .comparison-row:hover { background: rgba(139,92,246,.04); }
+  .comparison-row:hover { background: rgba(139,92,246,.06); }
 
   /* Hide spin buttons for input[type=number] */
   input[type=number]::-webkit-inner-spin-button, 
@@ -25,53 +27,182 @@
   /* ── Pricing reveal animations (public) ── */
   .pricing-reveal {
     opacity: 0;
-    transform: translateY(40px);
-    filter: blur(6px);
-    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-                transform 1s cubic-bezier(0.16, 1, 0.3, 1),
-                filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(30px);
+    filter: blur(4px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                filter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .pricing-reveal.visible {
     opacity: 1;
     transform: translateY(0);
     filter: blur(0);
   }
-  .pricing-reveal-d1 { transition-delay: .12s; }
-  .pricing-reveal-d2 { transition-delay: .24s; }
-  .pricing-reveal-d3 { transition-delay: .36s; }
+  .pricing-reveal-d1 { transition-delay: .1s; }
+  .pricing-reveal-d2 { transition-delay: .2s; }
+  .pricing-reveal-d3 { transition-delay: .3s; }
+  .pricing-reveal-d4 { transition-delay: .4s; }
 
-  /* ── Card hover (public pricing) ── */
-  .pricing-card {
-    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-    border: 1px solid rgba(255,255,255,0.06);
-    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  /* ── Free card (public pricing) ── */
+  .pricing-card-free {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.07);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
   }
-  .pricing-card::before {
+  .pricing-card-free:hover {
+    border-color: rgba(255,255,255,0.14);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+
+  /* ── Premium cards (public pricing) ── */
+  .pricing-card-premium {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .pricing-card-premium:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+  }
+  .pricing-card-premium::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
-    transition: left 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    inset: 0;
+    border-radius: 1.5rem;
+    padding: 1px;
+    background: var(--card-border-gradient);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.6;
+    transition: opacity 0.4s;
   }
-  .pricing-card:hover::before { left: 100%; }
-  .pricing-card:hover {
-    border-color: rgba(255,255,255,0.12);
-    transform: translateY(-6px);
-    box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+  .pricing-card-premium:hover::after {
+    opacity: 1;
+  }
+
+  /* ── Popular badge glow ── */
+  .popular-badge {
+    background: linear-gradient(135deg, #818cf8, #c084fc);
+    box-shadow: 0 0 20px rgba(139,92,246,0.3), 0 0 40px rgba(139,92,246,0.1);
   }
 
   /* ── Gradient text ── */
   .pricing-gradient {
-    background: linear-gradient(90deg, #818cf8, #c084fc, #f472b6, #818cf8);
+    background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: shimmer 8s linear infinite;
+    animation: shimmer 6s linear infinite;
+  }
+
+  /* ── Feature check icon ── */
+  .feat-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  .feat-check svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* ── CTA buttons ── */
+  .pricing-cta {
+    display: block;
+    width: 100%;
+    padding: 14px 0;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+  }
+  .pricing-cta:hover {
+    transform: translateY(-1px);
+  }
+  .pricing-cta:active {
+    transform: scale(0.98);
+  }
+  .pricing-cta-outline {
+    color: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+  }
+  .pricing-cta-outline:hover {
+    color: #fff;
+    border-color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.03);
+  }
+  .pricing-cta-primary {
+    color: #000;
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(255,255,255,0.1);
+  }
+  .pricing-cta-primary:hover {
+    box-shadow: 0 8px 25px rgba(255,255,255,0.15);
+  }
+  .pricing-cta-emerald {
+    color: #fff;
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 4px 15px rgba(16,185,129,0.2);
+  }
+  .pricing-cta-emerald:hover {
+    box-shadow: 0 8px 25px rgba(16,185,129,0.3);
+  }
+  .pricing-cta-amber {
+    color: #fff;
+    background: linear-gradient(135deg, #f59e0b, #ea580c);
+    box-shadow: 0 4px 15px rgba(245,158,11,0.2);
+  }
+  .pricing-cta-amber:hover {
+    box-shadow: 0 8px 25px rgba(245,158,11,0.3);
+  }
+
+  /* ── FAQ styles ── */
+  .faq-item {
+    border-radius: 16px;
+    transition: all 0.3s ease;
+  }
+  .faq-item:hover {
+    background: rgba(255,255,255,0.02);
+  }
+  .faq-item[open] {
+    background: rgba(139,92,246,0.03);
+    border-color: rgba(139,92,246,0.1);
+  }
+  .faq-item summary {
+    list-style: none;
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+
+  /* ── Responsive grids ── */
+  .pricing-plans-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  @media (min-width: 768px) {
+    .pricing-plans-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1024px) {
+    .pricing-plans-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  .pricing-ext-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 640px) {
+    .pricing-ext-grid { grid-template-columns: repeat(2, 1fr); }
   }
 </style>

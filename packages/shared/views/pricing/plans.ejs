@@ -8,194 +8,201 @@
 
 <% if (isPublic) { %>
 <!-- ═══════════════════ PUBLIC : Style page d'accueil ═══════════════════ -->
-<section id="plans" class="relative py-4">
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] pointer-events-none" style="background: radial-gradient(ellipse at 50% 50%, rgba(139,92,246,0.08), transparent 70%);"></div>
+<section id="plans" class="relative py-8">
+    <!-- Ambient glow -->
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:600px;pointer-events:none;background:radial-gradient(ellipse at 50% 50%, rgba(139,92,246,0.06), transparent 70%);"></div>
 
-    <div class="text-center mb-14 pricing-reveal">
-        <h2 style="font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.1; letter-spacing: -0.03em; font-weight: 600;" class="text-white mb-4">
+    <!-- Section header -->
+    <div style="text-align:center;margin-bottom:3.5rem;" class="pricing-reveal">
+        <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.15);margin-bottom:1.5rem;">
+            <svg style="width:14px;height:14px;color:#a78bfa;" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L9.19 8.62 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2z"/></svg>
+            <span style="font-size:12px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:#a78bfa;">Tarifs</span>
+        </div>
+        <h2 style="font-size:clamp(2rem, 5vw, 3rem);line-height:1.15;letter-spacing:-0.03em;font-weight:700;color:#fff;margin-bottom:1rem;">
             Simple, <span class="pricing-gradient">transparent</span>.
         </h2>
-        <p class="text-white/50 text-lg max-w-md mx-auto">Un plan gratuit, trois formules Premium.<br>Payez uniquement ce que vous utilisez.</p>
+        <p style="color:rgba(255,255,255,0.45);font-size:1.05rem;max-width:28rem;margin:0 auto;line-height:1.6;">
+            Un plan gratuit pour démarrer, trois formules Premium pour aller plus loin.
+        </p>
     </div>
 
-    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5 relative z-10">
-        <!-- Free -->
-        <div class="pricing-card rounded-3xl p-8 md:p-10 flex flex-col pricing-reveal pricing-reveal-d1">
-            <div class="flex items-center gap-3 mb-8">
-                <div class="w-11 h-11 rounded-2xl bg-white/[0.05] border border-white/[0.08] grid place-items-center">
-                    <svg class="w-5 h-5 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+    <!-- Cards grid -->
+    <div class="pricing-plans-grid" style="position:relative;z-index:10;">
+
+        <!-- ─── Free ─── -->
+        <div class="pricing-card-free pricing-reveal pricing-reveal-d1" style="border-radius:24px;padding:36px 32px;display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
+                <div style="width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:grid;place-items:center;">
+                    <svg style="width:20px;height:20px;color:rgba(255,255,255,0.35);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-semibold text-white">Gratuit</h3>
-                    <p class="text-xs text-white/40">Pour démarrer</p>
+                    <h3 style="font-size:17px;font-weight:600;color:#fff;">Gratuit</h3>
+                    <p style="font-size:12px;color:rgba(255,255,255,0.35);">Pour démarrer</p>
                 </div>
             </div>
-            <div class="mb-8">
-                <span class="text-5xl font-semibold tracking-tight text-white">0€</span>
-                <span class="text-white/40 ml-1 text-sm">/mois</span>
+
+            <div style="margin-bottom:32px;">
+                <span style="font-size:3rem;font-weight:700;letter-spacing:-0.03em;color:#fff;">0€</span>
+                <span style="color:rgba(255,255,255,0.35);font-size:14px;margin-left:4px;">/mois</span>
             </div>
-            <ul class="space-y-3.5 mb-10 text-[15px] text-white/50 flex-1">
-                <li class="flex items-center gap-3">
-                    <svg class="w-[18px] h-[18px] text-white/20 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+
+            <ul style="list-style:none;padding:0;margin:0 0 auto;display:flex;flex-direction:column;gap:14px;margin-bottom:32px;">
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.5);">
+                    <div class="feat-check" style="background:rgba(255,255,255,0.05);"><svg style="color:rgba(255,255,255,0.25);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
                     1 Page Plinkk
                 </li>
-                <li class="flex items-center gap-3">
-                    <svg class="w-[18px] h-[18px] text-white/20 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.5);">
+                    <div class="feat-check" style="background:rgba(255,255,255,0.05);"><svg style="color:rgba(255,255,255,0.25);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
                     5 Redirections
                 </li>
-                <li class="flex items-center gap-3">
-                    <svg class="w-[18px] h-[18px] text-white/20 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.5);">
+                    <div class="feat-check" style="background:rgba(255,255,255,0.05);"><svg style="color:rgba(255,255,255,0.25);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
                     30 jours de statistiques
                 </li>
-                <li class="flex items-center gap-3">
-                    <svg class="w-[18px] h-[18px] text-white/20 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.5);">
+                    <div class="feat-check" style="background:rgba(255,255,255,0.05);"><svg style="color:rgba(255,255,255,0.25);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
                     10 thèmes personnalisés
                 </li>
             </ul>
-            <a href="<%= _dashUrl %>/login#signup" class="block w-full py-3.5 rounded-xl text-center font-medium text-white/60 border border-white/[0.1] hover:border-white/[0.25] hover:text-white transition-all duration-300">
-                Commencer gratuitement
-            </a>
+
+            <a href="<%= _dashUrl %>/login#signup" class="pricing-cta pricing-cta-outline">Commencer gratuitement</a>
         </div>
 
-        <!-- Premium Mensuel -->
-        <div class="rounded-3xl p-7 md:p-8 flex flex-col relative overflow-hidden pricing-reveal pricing-reveal-d2">
-            <div class="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-indigo-500/30 via-purple-500/15 to-pink-500/25 pointer-events-none"></div>
-            <div class="absolute inset-0 rounded-3xl bg-[#0c0c14] pointer-events-none"></div>
-            <div class="relative z-10 flex flex-col flex-1">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 grid place-items-center shadow-lg shadow-purple-500/20">
-                            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L9 9l-7 1 5 4-2 7 7-4 7 4-2-7 5-4-7-1z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-semibold text-white">Mensuel</h3>
-                            <p class="text-xs pricing-gradient font-medium">Flexible</p>
-                        </div>
+        <!-- ─── Premium Mensuel ─── -->
+        <div class="pricing-card-premium pricing-reveal pricing-reveal-d2" style="--card-border-gradient:linear-gradient(135deg, #818cf8, #a855f7, #ec4899);border-radius:24px;background:#0c0c14;padding:36px 32px;display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg, #6366f1, #a855f7);display:grid;place-items:center;box-shadow:0 8px 20px rgba(99,102,241,0.25);">
+                        <svg style="width:20px;height:20px;color:#fff;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L9 9l-7 1 5 4-2 7 7-4 7 4-2-7 5-4-7-1z"/></svg>
+                    </div>
+                    <div>
+                        <h3 style="font-size:17px;font-weight:600;color:#fff;">Mensuel</h3>
+                        <p style="font-size:12px;" class="pricing-gradient" >Flexible</p>
                     </div>
                 </div>
-                <div class="mb-6">
-                    <span class="text-4xl font-semibold tracking-tight text-white">4.99€</span>
-                    <span class="text-white/40 ml-1 text-sm">/mois</span>
-                </div>
-                <ul class="space-y-3 mb-8 text-[14px] text-white/60 flex-1">
-                    <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>2 Pages Plinkk</span>
-                    </li>
-                    <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>10 Redirections</span>
-                    </li>
-                    <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        Toutes les fonctionnalités
-                    </li>
-                    <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        Sans engagement
-                    </li>
-                </ul>
-                <a href="<%= _dashUrl %>/login#signup" class="block w-full py-3 rounded-xl bg-white text-black font-medium text-center text-sm transition-all duration-300 hover:shadow-xl hover:shadow-white/10 hover:scale-[1.02] active:scale-[0.98]">
-                    S'inscrire
-                </a>
             </div>
+
+            <div style="margin-bottom:28px;">
+                <span style="font-size:2.75rem;font-weight:700;letter-spacing:-0.03em;color:#fff;">4.99€</span>
+                <span style="color:rgba(255,255,255,0.35);font-size:14px;margin-left:4px;">/mois</span>
+            </div>
+
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;margin-bottom:32px;flex:1;">
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(129,140,248,0.12);"><svg style="color:#818cf8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    2 Pages Plinkk
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(129,140,248,0.12);"><svg style="color:#818cf8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    10 Redirections
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(129,140,248,0.12);"><svg style="color:#818cf8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    Toutes les fonctionnalités
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(129,140,248,0.12);"><svg style="color:#818cf8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    Sans engagement
+                </li>
+            </ul>
+
+            <a href="<%= _dashUrl %>/login#signup" class="pricing-cta pricing-cta-primary">S'inscrire</a>
         </div>
 
-        <!-- Premium Annuel -->
-        <div class="rounded-3xl p-7 md:p-8 flex flex-col relative overflow-hidden pricing-reveal pricing-reveal-d2">
-            <div class="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-emerald-500/30 via-teal-500/15 to-cyan-500/25 pointer-events-none"></div>
-            <div class="absolute inset-0 rounded-3xl bg-[#0c0c14] pointer-events-none"></div>
-            <div class="relative z-10 flex flex-col flex-1">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 grid place-items-center shadow-lg shadow-emerald-500/20">
-                            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L9 9l-7 1 5 4-2 7 7-4 7 4-2-7 5-4-7-1z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-semibold text-white">Annuel</h3>
-                            <p class="text-xs text-emerald-400 font-medium">2 mois offerts</p>
-                        </div>
-                    </div>
-                    <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-semibold uppercase tracking-wider">-17%</span>
-                </div>
-                <div class="mb-6">
-                    <span class="text-4xl font-semibold tracking-tight text-white">49.90€</span>
-                    <span class="text-white/40 ml-1 text-sm">/an</span>
-                    <div class="mt-1">
-                        <span class="text-xs text-white/30 line-through">59.88€/an</span>
-                        <span class="text-xs text-emerald-400 ml-1.5">soit 4.16€/mois</span>
-                    </div>
-                </div>
-                <ul class="space-y-3 mb-8 text-[14px] text-white/60 flex-1">
-                    <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>2 Pages Plinkk</span>
-                    </li>
-                    <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>10 Redirections</span>
-                    </li>
-                    <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        Toutes les fonctionnalités
-                    </li>
-                    <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        Économisez 9.98€/an
-                    </li>
-                </ul>
-                <a href="<%= _dashUrl %>/login#signup" class="block w-full py-3 rounded-xl bg-emerald-500 text-white font-medium text-center text-sm transition-all duration-300 hover:bg-emerald-600 hover:shadow-xl hover:shadow-emerald-500/10 hover:scale-[1.02] active:scale-[0.98]">
-                    S'inscrire
-                </a>
+        <!-- ─── Premium Annuel (populaire) ─── -->
+        <div class="pricing-card-premium pricing-reveal pricing-reveal-d3" style="--card-border-gradient:linear-gradient(135deg, #34d399, #10b981, #06b6d4);border-radius:24px;background:#0c0c14;padding:36px 32px;display:flex;flex-direction:column;position:relative;">
+            <!-- Popular badge -->
+            <div class="popular-badge" style="position:absolute;top:-1px;left:50%;transform:translateX(-50%);padding:6px 20px;border-radius:0 0 12px 12px;z-index:20;">
+                <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#fff;">Populaire</span>
             </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;margin-top:8px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg, #10b981, #0d9488);display:grid;place-items:center;box-shadow:0 8px 20px rgba(16,185,129,0.25);">
+                        <svg style="width:20px;height:20px;color:#fff;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L9 9l-7 1 5 4-2 7 7-4 7 4-2-7 5-4-7-1z"/></svg>
+                    </div>
+                    <div>
+                        <h3 style="font-size:17px;font-weight:600;color:#fff;">Annuel</h3>
+                        <p style="font-size:12px;color:#34d399;font-weight:600;">2 mois offerts</p>
+                    </div>
+                </div>
+                <span style="padding:5px 12px;border-radius:999px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:#34d399;font-size:11px;font-weight:700;letter-spacing:0.05em;">-17%</span>
+            </div>
+
+            <div style="margin-bottom:28px;">
+                <span style="font-size:2.75rem;font-weight:700;letter-spacing:-0.03em;color:#fff;">49.90€</span>
+                <span style="color:rgba(255,255,255,0.35);font-size:14px;margin-left:4px;">/an</span>
+                <div style="margin-top:6px;">
+                    <span style="font-size:12px;color:rgba(255,255,255,0.25);text-decoration:line-through;">59.88€/an</span>
+                    <span style="font-size:12px;color:#34d399;margin-left:8px;font-weight:500;">soit 4.16€/mois</span>
+                </div>
+            </div>
+
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;margin-bottom:32px;flex:1;">
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(52,211,153,0.12);"><svg style="color:#34d399;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    2 Pages Plinkk
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(52,211,153,0.12);"><svg style="color:#34d399;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    10 Redirections
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(52,211,153,0.12);"><svg style="color:#34d399;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    Toutes les fonctionnalités
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(52,211,153,0.12);"><svg style="color:#34d399;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    Économisez 9.98€/an
+                </li>
+            </ul>
+
+            <a href="<%= _dashUrl %>/login#signup" class="pricing-cta pricing-cta-emerald">S'inscrire</a>
         </div>
 
-        <!-- Lifetime -->
-        <div class="rounded-3xl p-7 md:p-8 flex flex-col relative overflow-hidden pricing-reveal pricing-reveal-d2">
-            <div class="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-amber-500/30 via-orange-500/15 to-rose-500/25 pointer-events-none"></div>
-            <div class="absolute inset-0 rounded-3xl bg-[#0c0c14] pointer-events-none"></div>
-            <div class="relative z-10 flex flex-col flex-1">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 grid place-items-center shadow-lg shadow-amber-500/20">
-                            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L9 9l-7 1 5 4-2 7 7-4 7 4-2-7 5-4-7-1z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-semibold text-white">Lifetime</h3>
-                            <p class="text-xs text-amber-400 font-medium">Paiement unique</p>
-                        </div>
+        <!-- ─── Lifetime ─── -->
+        <div class="pricing-card-premium pricing-reveal pricing-reveal-d4" style="--card-border-gradient:linear-gradient(135deg, #f59e0b, #ea580c, #ef4444);border-radius:24px;background:#0c0c14;padding:36px 32px;display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg, #f59e0b, #ea580c);display:grid;place-items:center;box-shadow:0 8px 20px rgba(245,158,11,0.25);">
+                        <svg style="width:20px;height:20px;color:#fff;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L9 9l-7 1 5 4-2 7 7-4 7 4-2-7 5-4-7-1z"/></svg>
                     </div>
-                    <span class="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[11px] font-semibold uppercase tracking-wider">À vie</span>
-                </div>
-                <div class="mb-6">
-                    <span class="text-4xl font-semibold tracking-tight text-white">75€</span>
-                    <span class="text-white/40 ml-1 text-sm">une fois</span>
-                    <div class="mt-1">
-                        <span class="text-xs text-amber-400">Rentabilisé en ~15 mois</span>
+                    <div>
+                        <h3 style="font-size:17px;font-weight:600;color:#fff;">Lifetime</h3>
+                        <p style="font-size:12px;color:#fbbf24;font-weight:600;">Paiement unique</p>
                     </div>
                 </div>
-                <ul class="space-y-3 mb-8 text-[14px] text-white/60 flex-1">
-                    <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>2 Pages Plinkk</span>
-                    </li>
-                    <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        <span>10 Redirections</span>
-                    </li>
-                    <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        Toutes les fonctionnalités
-                    </li>
-                    <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        Plus jamais de facture
-                    </li>
-                </ul>
-                <a href="<%= _dashUrl %>/login#signup" class="block w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium text-center text-sm transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/10 hover:scale-[1.02] active:scale-[0.98]">
-                    S'inscrire
-                </a>
+                <span style="padding:5px 12px;border-radius:999px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);color:#fbbf24;font-size:11px;font-weight:700;letter-spacing:0.05em;">À VIE</span>
             </div>
+
+            <div style="margin-bottom:28px;">
+                <span style="font-size:2.75rem;font-weight:700;letter-spacing:-0.03em;color:#fff;">75€</span>
+                <span style="color:rgba(255,255,255,0.35);font-size:14px;margin-left:4px;">une fois</span>
+                <div style="margin-top:6px;">
+                    <span style="font-size:12px;color:#fbbf24;font-weight:500;">Rentabilisé en ~15 mois</span>
+                </div>
+            </div>
+
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;margin-bottom:32px;flex:1;">
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(251,191,36,0.12);"><svg style="color:#fbbf24;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    2 Pages Plinkk
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(251,191,36,0.12);"><svg style="color:#fbbf24;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    10 Redirections
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(251,191,36,0.12);"><svg style="color:#fbbf24;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    Toutes les fonctionnalités
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(251,191,36,0.12);"><svg style="color:#fbbf24;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    Plus jamais de facture
+                </li>
+            </ul>
+
+            <a href="<%= _dashUrl %>/login#signup" class="pricing-cta pricing-cta-amber">S'inscrire</a>
         </div>
     </div>
 </section>
