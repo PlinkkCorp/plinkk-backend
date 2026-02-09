@@ -1,9 +1,9 @@
-<%- include('../../partials/head.ejs', { title: 'Mes Redirections', description: 'Gérez vos liens de redirection courts.', robots: 'noindex,nofollow' }) %>
+<%- include('partials/head.ejs', { title: 'Mes Redirections', description: 'Gérez vos liens de redirection courts.', robots: 'noindex,nofollow' }) %>
 
-<%- include('../../partials/header-dash.ejs', { user: user }) %>
+<%- include('partials/header-dash.ejs', { user: user }) %>
 
 <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-    <%- include('../../partials/asside_dash.ejs', { user: user, active: 'redirects' }) %>
+    <%- include('partials/asside_dash.ejs', { user: user, active: 'redirects' }) %>
 
     <main class="col-span-12 lg:col-span-10 space-y-8">
         <!-- Header -->
@@ -13,11 +13,35 @@
                 <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Mes Redirections</h1>
                 <p class="text-slate-400 text-lg">Créez des liens courts personnalisés vers vos ressources.</p>
             </div>
-            <button onclick="openCreateModal()" class="relative z-10 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-violet-500/25 transition-all duration-300 hover:-translate-y-0.5">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                Nouvelle Redirection
-            </button>
+            <% if (redirectCount >= maxRedirects) { %>
+                <a href="/premium" class="relative z-10 flex items-center gap-2 px-6 py-3 bg-slate-800 border border-slate-700 text-slate-400 font-semibold rounded-xl hover:text-white hover:border-slate-600 transition-all duration-300">
+                    <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    Limite atteinte (<%= maxRedirects %>)
+                </a>
+            <% } else { %>
+                <button onclick="openCreateModal()" class="relative z-10 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-violet-500/25 transition-all duration-300 hover:-translate-y-0.5">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Nouvelle Redirection
+                </button>
+            <% } %>
         </div>
+
+        <% if (redirectCount >= maxRedirects) { %>
+            <div class="bg-gradient-to-r from-violet-900/40 to-fuchsia-900/40 border border-violet-500/30 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 bg-violet-600/20 rounded-xl text-violet-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-lg">Débloquez plus de redirections</h3>
+                        <p class="text-slate-300">Vous avez atteint la limite de votre plan gratuit. Passez Premium pour obtenir jusqu'à 10 redirections !</p>
+                    </div>
+                </div>
+                <a href="/premium" class="px-6 py-2.5 bg-white text-violet-900 font-bold rounded-xl hover:bg-slate-200 transition-colors shadow-lg shadow-black/20 whitespace-nowrap">
+                    Passer Premium
+                </a>
+            </div>
+        <% } %>
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -49,7 +73,7 @@
                         <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                     </div>
                     <div>
-                        <p class="text-2xl font-bold text-white"><%= redirects.filter(r => r.isActive).length %></p>
+                        <p class="text-2xl font-bold text-white" id="active-redirects-count"><%= redirects.filter(r => r.isActive).length %></p>
                         <p class="text-sm text-slate-400">Redirections actives</p>
                     </div>
                 </div>
@@ -116,10 +140,12 @@
                                     <td class="p-4 text-center">
                                         <% if (isExpired) { %>
                                             <span class="px-2 py-1 rounded-full bg-rose-500/10 text-rose-400 text-xs border border-rose-500/20">Expiré</span>
-                                        <% } else if (redirect.isActive) { %>
-                                            <span class="px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs border border-emerald-500/20">Actif</span>
                                         <% } else { %>
-                                            <span class="px-2 py-1 rounded-full bg-slate-500/10 text-slate-400 text-xs border border-slate-500/20">Inactif</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" id="toggle-<%= redirect.id %>" value="" class="sr-only peer" onchange="toggleRedirectStatus('<%= redirect.id %>', this.checked)" <%= redirect.isActive ? 'checked' : '' %>>
+                                                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-violet-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+                                                <span class="ml-2 text-xs font-medium text-slate-300 status-label-<%= redirect.id %>"><%= redirect.isActive ? 'Actif' : 'Inactif' %></span>
+                                            </label>
                                         <% } %>
                                     </td>
                                     <td class="p-4">
@@ -249,7 +275,15 @@ function openEditModal(id, slug, targetUrl, title, isActive, expiresAt) {
     document.getElementById('slug').value = slug;
     document.getElementById('targetUrl').value = targetUrl;
     document.getElementById('title').value = title;
-    document.getElementById('isActive').checked = isActive;
+    
+    // Check if there is a toggle on the page that might have a more current value
+    const pageToggle = document.getElementById(`toggle-${id}`);
+    if (pageToggle) {
+        document.getElementById('isActive').checked = pageToggle.checked;
+    } else {
+        document.getElementById('isActive').checked = isActive;
+    }
+    
     document.getElementById('expiresAt').value = expiresAt;
     document.getElementById('redirectModal').classList.remove('hidden');
 }
@@ -285,7 +319,7 @@ async function submitForm(e) {
     
     try {
         const url = isEdit ? `/api/me/redirects/${editId}` : '/api/me/redirects';
-        const method = isEdit ? 'PUT' : 'POST';
+        const method = isEdit ? 'PATCH' : 'POST';
         
         const res = await fetch(url, {
             method,
@@ -296,6 +330,12 @@ async function submitForm(e) {
         const result = await res.json();
         
         if (!res.ok) {
+            if (result.error === 'redirect_limit_reached' && result.canUpgrade) {
+                if (confirm(result.message + "\n\nVoulez-vous découvrir nos offres Premium ?")) {
+                    window.location.href = '/premium'; // Ou la page d'upgrade appropriée
+                }
+                return;
+            }
             alert(result.error || 'Une erreur est survenue');
             return;
         }
@@ -333,6 +373,44 @@ function copyToClipboard(text) {
         // Optionnel: afficher une notification
     });
 }
+
+async function toggleRedirectStatus(id, isActive) {
+    // Mettre à jour le label immédiatement
+    const label = document.querySelector(`.status-label-${id}`);
+    if (label) label.textContent = isActive ? 'Actif' : 'Inactif';
+
+    // Mettre à jour le compteur
+    const countEl = document.getElementById('active-redirects-count');
+    if (countEl) {
+        const currentText = countEl.innerText.replace(/\D/g, '');
+        let current = parseInt(currentText, 10);
+        
+        if (!isNaN(current)) {
+            // Si on active, on incrémente. Si on désactive, on décrémente.
+            const newCount = isActive ? current + 1 : current - 1;
+            countEl.innerText = Math.max(0, newCount);
+        }
+    }
+
+    try {
+        const res = await fetch(`/api/me/redirects/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isActive })
+        });
+        
+        if (!res.ok) {
+            const result = await res.json();
+            alert(result.error || 'Une erreur est survenue');
+            // Revert state on error (reload page)
+            window.location.reload();
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Erreur de connexion au serveur');
+        window.location.reload();
+    }
+}
 </script>
 
-<%- include('../../partials/footer.ejs') %>
+<%- include('partials/footer.ejs') %>

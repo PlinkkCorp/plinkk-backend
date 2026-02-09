@@ -1,8 +1,8 @@
-<%- include('../../partials/head.ejs', { title: 'Tableau de bord - Cosmétiques', description: 'Personnalisez votre profil Plinkk.', robots: 'noindex,nofollow' }) %>
-<%- include('../../partials/header-dash.ejs', { user: user }) %>
+<%- include('partials/head.ejs', { title: 'Tableau de bord - Cosmétiques', description: 'Personnalisez votre profil Plinkk.', robots: 'noindex,nofollow' }) %>
+<%- include('partials/header-dash.ejs', { user: user }) %>
 
 <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-  <%- include('../../partials/asside_dash.ejs', { active: 'cosmetics' }) %>
+  <%- include('partials/asside_dash.ejs', { active: 'cosmetics' }) %>
 
   <main class="col-span-12 lg:col-span-10 space-y-6">
     
@@ -53,7 +53,7 @@
                         <!-- Avatar Container -->
                         <div class="relative h-14 w-14 rounded-2xl shadow-lg group-hover:scale-105 transition-transform duration-300">
                             <div class="absolute inset-0 bg-slate-900 rounded-2xl flex items-center justify-center text-lg font-bold text-slate-400 overflow-hidden ring-2 ring-white/10">
-                                <%- include('../../partials/avatar.ejs', { user: user, className: "w-full h-full object-cover" }) %>
+                                <%- include('partials/avatar.ejs', { user: user, className: "w-full h-full object-cover" }) %>
                             </div>
                             <!-- Frame Overlay -->
                             <div id="previewFrame" class="absolute inset-0 pointer-events-none z-20 rounded-2xl"></div>
@@ -161,15 +161,16 @@
           <div class="space-y-4">
             <h3 class="text-lg font-semibold text-white">Effets Visuels</h3>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <button type="button" class="effect-opt p-4 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 transition-all text-left" data-val="none">
-                <span class="block text-sm font-medium text-white">Aucun</span>
-              </button>
-              <button type="button" class="effect-opt p-4 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 transition-all text-left" data-val="sparkles">
-                <span class="block text-sm font-medium text-white">✨ Paillettes</span>
-              </button>
-              <button type="button" class="effect-opt p-4 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 transition-all text-left" data-val="noise">
-                <span class="block text-sm font-medium text-white">📺 Grain</span>
-              </button>
+              <% catalog.effects.forEach(eff => { %>
+                <button type="button" class="effect-opt p-4 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 transition-all text-left relative overflow-hidden group <%= eff.locked ? 'opacity-75 cursor-not-allowed' : '' %>" data-val="<%= eff.key %>" <%= eff.locked ? 'disabled' : '' %>>
+                  <span class="block text-sm font-medium text-white"><%= eff.label %></span>
+                  <% if (eff.locked) { %>
+                    <div class="absolute top-1/2 right-4 -translate-y-1/2 text-violet-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    </div>
+                  <% } %>
+                </button>
+              <% }) %>
             </div>
           </div>
         </div>
@@ -180,12 +181,17 @@
             <h3 class="text-lg font-semibold text-white">Cadre d'Avatar</h3>
             <div class="grid grid-cols-3 sm:grid-cols-4 gap-4">
               <% catalog.frames.forEach(fr => { %>
-                <button type="button" class="frame-opt group relative aspect-square rounded-2xl border border-slate-800 bg-slate-900 hover:border-violet-500 transition-all flex flex-col items-center justify-center gap-2" data-val="<%= fr.key %>">
+                <button type="button" class="frame-opt group relative aspect-square rounded-2xl border border-slate-800 bg-slate-900 hover:border-violet-500 transition-all flex flex-col items-center justify-center gap-2 <%= fr.locked ? 'opacity-75 cursor-not-allowed' : '' %>" data-val="<%= fr.key %>" <%= fr.locked ? 'disabled' : '' %>>
                   <div class="h-12 w-12 rounded-full bg-slate-800 relative">
                     <!-- Frame Preview Logic -->
                     <div class="absolute inset-0 rounded-full border-2 border-transparent group-hover:border-violet-500/50 transition-colors"></div>
                   </div>
                   <span class="text-xs text-slate-400 group-hover:text-white"><%= fr.label %></span>
+                  <% if (fr.locked) { %>
+                    <div class="absolute top-2 right-2 text-violet-400">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    </div>
+                  <% } %>
                 </button>
               <% }) %>
             </div>
@@ -204,10 +210,15 @@
             <h4 class="text-sm font-medium text-slate-400 mt-6 mb-3">Prédéfinis</h4>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <% catalog.banners.forEach(b => { %>
-                <button type="button" class="banner-opt h-20 rounded-xl bg-slate-900 border border-slate-800 hover:border-violet-500 overflow-hidden relative" data-val="<%= b.key %>">
+                <button type="button" class="banner-opt h-20 rounded-xl bg-slate-900 border border-slate-800 hover:border-violet-500 overflow-hidden relative <%= b.locked ? 'opacity-75 cursor-not-allowed' : '' %>" data-val="<%= b.key %>" <%= b.locked ? 'disabled' : '' %>>
                   <div class="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/20 transition-colors">
-                    <span class="text-xs font-medium text-white"><%= b.label %></span>
+                    <span class="text-xs font-medium text-white text-center px-2"><%= b.label %></span>
                   </div>
+                  <% if (b.locked) { %>
+                    <div class="absolute top-2 right-2 text-violet-400">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    </div>
+                  <% } %>
                 </button>
               <% }) %>
             </div>

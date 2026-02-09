@@ -45,7 +45,10 @@ export async function resolvePlinkkPage(prisma: PrismaClient, username: string, 
   const isOwner = !!sessionUserId && sessionUserId === user.id;
   if (isPrivate && !isOwner) return { status: 403 as const, error: 'forbidden' };
 
+  // Plinkk protégé par mot de passe (premium feature)
+  const isPasswordProtected = !!page.passwordHash;
+
   const isPreview = (request?.query as { preview: string })?.preview === '1';
 
-  return { status: 200 as const, user, page };
+  return { status: 200 as const, user, page, isOwner, isPasswordProtected };
 }

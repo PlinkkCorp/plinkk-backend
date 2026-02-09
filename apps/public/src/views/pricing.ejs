@@ -1,0 +1,41 @@
+<%- include('partials/head', {
+  title: 'Tarifs',
+  description: 'Découvrez les offres Plinkk : un plan gratuit pour démarrer et un plan Premium pour aller plus loin.',
+  robots: 'index,follow'
+}) %>
+<%- include('partials/header') %>
+
+<%- include('pricing/styles') %>
+
+<main style="max-width:72rem;margin:0 auto;padding:5rem 1rem 4rem;" class="sm:px-6 lg:px-8">
+
+    <div style="display:flex;flex-direction:column;gap:4rem;">
+
+        <%- include('pricing/plans', { pricingContext: 'public' }) %>
+
+        <div class="pricing-reveal">
+            <%- include('pricing/comparison') %>
+        </div>
+
+        <div class="pricing-reveal">
+            <%- include('pricing/extensions') %>
+        </div>
+
+        <div class="pricing-reveal">
+            <%- include('pricing/faq') %>
+        </div>
+
+    </div>
+
+</main>
+
+<script>
+(function() {
+    const obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+    document.querySelectorAll('.pricing-reveal').forEach(function(el) { obs.observe(el); });
+})();
+</script>
+
+<%- include('partials/footer') %>

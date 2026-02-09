@@ -1,5 +1,5 @@
-<%- include('../partials/head', { title: 'Confidentialité', description: 'Politique de confidentialité de Plinkk.' }) %>
-<%- include('../partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
+<%- include('partials/head', { title: 'Confidentialité', description: 'Politique de confidentialité de Plinkk.' }) %>
+<%- include('partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
 
 <main class="relative isolate overflow-hidden min-h-screen">
   <!-- Background Effects -->
@@ -35,7 +35,7 @@
           <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">1</span>
           Responsable de traitement
         </h2>
-        <p>Plinkk — Klaynight (Elouan Passereau). <br>Contact : <%- include('../partials/contact-email', { linkClass: 'text-violet-400 hover:text-violet-300 transition-colors' }) %>.</p>
+        <p>Plinkk — Klaynight (Elouan Passereau). <br>Contact : <%- include('partials/contact-email', { linkClass: 'text-violet-400 hover:text-violet-300 transition-colors' }) %>.</p>
 
         <h2 id="donnees" class="flex items-center gap-3">
           <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">2</span>
@@ -88,7 +88,7 @@
         <ul>
           <li>Droit d’accès, de rectification, d’effacement, de limitation et d’opposition.</li>
           <li>Droit à la portabilité des données.</li>
-          <li>Exercer vos droits : <%- include('../partials/contact-email', { linkClass: 'text-violet-400 hover:text-violet-300 transition-colors' }) %>.</li>
+          <li>Exercer vos droits : <%- include('partials/contact-email', { linkClass: 'text-violet-400 hover:text-violet-300 transition-colors' }) %>.</li>
         </ul>
 
         <h3 id="consentement">Consentement</h3>
@@ -122,4 +122,4 @@
     </div>
   </div>
 </main>
-<%- include('../partials/footer') %>
+<%- include('partials/footer') %>

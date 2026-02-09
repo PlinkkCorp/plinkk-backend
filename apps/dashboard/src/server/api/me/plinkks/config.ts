@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { PlinkkSettings, prisma } from "@plinkk/prisma";
 import { pickDefined } from "../../../../lib/plinkkUtils";
+// import { canUseVisualEffects } from "@plinkk/shared";
 
 export function plinkksConfigRoutes(fastify: FastifyInstance) {
   fastify.get("/:id/config", async (request, reply) => {
@@ -101,6 +102,38 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
     if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
 
     const body = request.body as PlinkkSettings;
+
+    // Suppression de la vérification premium pour les effets visuels (Néon, Canva, Animations)
+    // Selon la demande utilisateur ces éléments doivent être gratuits.
+
+    /*
+    // Vérification premium pour les effets visuels
+    const hasVisualEffectFields = (
+      body.EnableAnimationArticle != null ||
+      body.EnableAnimationButton != null ||
+      body.EnableAnimationBackground != null ||
+      body.selectedAnimationIndex != null ||
+      body.selectedAnimationButtonIndex != null ||
+      body.selectedAnimationBackgroundIndex != null ||
+      body.canvaEnable != null ||
+      body.selectedCanvasIndex != null ||
+      body.neonEnable != null
+    );
+
+    if (hasVisualEffectFields) {
+      const user = await prisma.user.findUnique({
+        where: { id: String(userId) },
+        include: { role: true },
+      });
+      if (!canUseVisualEffects(user)) {
+        return reply.code(403).send({
+          error: "premium_required",
+          feature: "visual_effects",
+          message: "Les effets visuels nécessitent un abonnement premium",
+        });
+      }
+    }
+    */
 
     const data = pickDefined({
       profileLink: body.profileLink,

@@ -1,5 +1,9 @@
-<% if (typeof dashboardUrl === 'undefined' || !dashboardUrl) { dashboardUrl = '/dashboard'; } %>
-<header class="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#0B1020]/80 backdrop-blur-md transition-all duration-300" id="mainHeader">
+<% 
+  if (typeof dashboardUrl === 'undefined' || !dashboardUrl) { dashboardUrl = '/dashboard'; } 
+  // Détecter si on est sur le dashboard (via path ou variable)
+  const _isDash = (typeof isDashboard !== 'undefined' && isDashboard) || (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin'));
+%>
+<header class="sticky top-0 z-50 border-b border-white/5 bg-[#0B1020]/80 backdrop-blur-md transition-all duration-300" id="mainHeader">
   <style>
     #spaTopLoader { position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 10000; pointer-events: none; opacity: 0; transition: opacity .2s ease; }
     #spaTopLoader.active { opacity: 1; }
@@ -15,9 +19,17 @@
         </a>
         
         <nav class="hidden md:flex items-center gap-1">
-          <a href="/about" class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">À propos</a>
-          <a href="/users" class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">Utilisateurs</a>
-          <a href="<%= dashboardUrl %>" class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">Dashboard</a>
+          <% if (_isDash) { %>
+            <a href="/" class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">Dashboard</a>
+            <a href="/edit" class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">Éditeur</a>
+            <a href="/stats" class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">Stats</a>
+            <a href="/users" class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">Liste des Utilisateurs</a>
+          <% } else { %>
+            <a href="/about" class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">À propos</a>
+            <a href="/pricing" class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">Tarifs</a>
+            <a href="/users" class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">Utilisateurs</a>
+            <a href="<%= dashboardUrl %>" class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">Dashboard</a>
+          <% } %>
         </nav>
       </div>
 
@@ -43,7 +55,7 @@
 
         <div class="hidden md:flex items-center gap-3">
           <% if (typeof user !== 'undefined' && user) { %>
-            <% if (isAdmin) { %>
+            <% if ((typeof isAdmin !== 'undefined' && isAdmin) || (user.role && (user.role.id === 'ADMIN' || user.role.id === 'DEVELOPER' || user.role.id === 'MODERATOR'))) { %>
               <a href="<%= dashboardUrl %>/admin" class="inline-flex items-center justify-center rounded-full bg-rose-500/10 px-4 py-1.5 text-sm font-medium text-rose-400 ring-1 ring-inset ring-rose-500/20 transition-colors hover:bg-rose-500/20 hover:text-rose-300">Admin</a>
             <% } %>
             
@@ -64,6 +76,7 @@
                   <% } %>
                 </div>
                 <div class="h-px bg-white/5 my-1"></div>
+                
                 <a href="<%= dashboardUrl %>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/5 hover:text-white">
                   <svg class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                   Dashboard
@@ -71,6 +84,14 @@
                 <a href="/<%= user.id %>" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/5 hover:text-white">
                   <svg class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                   Mon profil
+                </a>
+                <a href="<%= dashboardUrl %>/edit" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/5 hover:text-white">
+                    <svg class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    Éditer ma page
+                </a>
+                <a href="<%= dashboardUrl %>/stats" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/5 hover:text-white">
+                    <svg class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                    Statistiques
                 </a>
                 <a href="<%= dashboardUrl %>/account" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/5 hover:text-white">
                   <svg class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
@@ -98,9 +119,17 @@
 
   <div id="mobileMenu" class="hidden border-t border-white/5 bg-[#0B1020]/95 backdrop-blur-xl md:hidden">
     <div class="space-y-1 px-4 py-4">
-      <a href="/about" class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">À propos</a>
-      <a href="/users" class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Utilisateurs</a>
-      <a href="<%= dashboardUrl %>" class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Dashboard</a>
+        <% if (_isDash) { %>
+            <a href="/" class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Dashboard</a>
+            <a href="/edit" class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Éditeur</a>
+            <a href="/stats" class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Stats</a>
+            <a href="/cosmetics" class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Cosmétiques</a>
+        <% } else { %>
+            <a href="/about" class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">À propos</a>
+            <a href="/pricing" class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Tarifs</a>
+            <a href="/users" class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Utilisateurs</a>
+            <a href="<%= dashboardUrl %>" class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Dashboard</a>
+        <% } %>
     </div>
     
     <div class="border-t border-white/5 px-4 py-4">
@@ -152,17 +181,10 @@
     function isSameOrigin(url){ try { const u=new URL(url, location.href); return u.origin===location.origin; } catch { return false; } }
     function looksLikeHtmlRequest(url){ return isSameOrigin(url) && !/\.(?:png|jpe?g|webp|gif|svg|ico|css|js|map|json|txt|woff2?|ttf|otf)(?:[?#].*)?$/i.test(url); }
     document.addEventListener('click', (e)=>{ const a = e.target && (e.target.closest ? e.target.closest('a') : null); if (!a) return; const href = a.getAttribute('href') || ''; if (!href || href.startsWith('#')) return; if (a.target === '_blank' || a.download != null) return; if (isModifiedClick(e)) return; if (!looksLikeHtmlRequest(href)) return; try { window.dispatchEvent(new Event('spa:loading-start')); } catch {} setTimeout(()=>{ try { window.dispatchEvent(new Event('spa:loading-end')); } catch {} }, 8000); }, true);
-    try { const origFetch = window.fetch.bind(window); let inflight = 0; const onBegin=()=>{ if (inflight++===0) window.dispatchEvent(new Event('spa:loading-start')); }; const onEnd=()=>{ if (inflight>0 && --inflight===0) window.dispatchEvent(new Event('spa:loading-end')); }; window.fetch = function(input, init){ try { const url = typeof input === 'string' ? input : (input && input.url) || ''; const method = (init && (init.method||'GET')) || (typeof input!=='string' && input && input.method) || 'GET'; const headers = new Headers((init && init.headers) || (typeof input!=='string' && input && input.headers) || undefined); const accept = (headers.get('Accept') || headers.get('accept') || '').toLowerCase(); const isHtmlAccept = accept.includes('text/html') || accept === ''; const qualifies = method.toUpperCase()==='GET' && looksLikeHtmlRequest(url) && !url.startsWith('/api'); if (qualifies && isHtmlAccept) onBegin(); const p = origFetch(input, init); if (qualifies && isHtmlAccept) { p.finally(()=>{ setTimeout(onEnd, 80); }); } return p; } catch { return origFetch(input, init); } }; } catch {}
   })();
 </script>
 <script>
   (function(){
-    const postVisibility = (on) => fetch('/api/me/visibility', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ isPublic: !!on })});
-    const t = document.getElementById('visibilityToggle');
-    const tm = document.getElementById('visibilityToggleMobile');
-    if (t) t.addEventListener('change', () => postVisibility(t.checked).catch(()=>{ t.checked=!t.checked; }));
-    if (tm) tm.addEventListener('change', () => postVisibility(tm.checked).catch(()=>{ tm.checked=!tm.checked; }));
-    
     const accountBtn = document.getElementById('accountBtn');
     const accountPanel = document.getElementById('accountPanel');
     const root = document.getElementById('accountMenuRoot');
@@ -173,23 +195,5 @@
       document.addEventListener('click', (e)=>{ if (!root.contains(e.target)) closeMenu(); });
       document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeMenu(); });
     }
-  })();
-</script>
-<script>
-  (function(){
-    try {
-      const nodes = Array.from(document.querySelectorAll('[id^="siteMessageWrap_"], #siteMessageWrap'));
-      nodes.forEach((wrap) => {
-        const raw = wrap.getAttribute('data-msg');
-        if (!raw) return;
-        const safe = raw.replace(/&#39;/g, "'");
-        let msg = null; try { msg = JSON.parse(safe); } catch(e) {}
-        if (!msg || !msg.id) return;
-        const key = 'dismissed_site_message_' + msg.id;
-        if (localStorage.getItem(key)) { wrap.style.display = 'none'; return; }
-        const btn = wrap.querySelector('button[id^="dismissSiteMessage"]');
-        if (btn) btn.addEventListener('click', ()=>{ localStorage.setItem(key,'1'); wrap.style.display='none'; });
-      });
-    } catch(e){}
   })();
 </script>

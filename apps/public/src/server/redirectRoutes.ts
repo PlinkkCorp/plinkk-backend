@@ -21,6 +21,10 @@ export function redirectRoutes(fastify: FastifyInstance) {
     if (!redirect) {
       return reply.code(404).send({ error: "not_found" });
     }
+
+    if (!redirect.isActive) {
+       return reply.code(410).send({ error: "inactive" });
+    }
     
     if (redirect.expiresAt && redirect.expiresAt < new Date()) {
        return reply.code(410).send({ error: "expired" });

@@ -340,4 +340,111 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
     const agg = await prisma.plinkk.aggregate({ _sum: { views: true } });
     return reply.send({ total: agg._sum.views || 0 });
   });
+
+  // ─── Premium & Paiements ──────────────────────────────────────────────────
+
+  fastify.get("/premium/summary", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_STATS");
+    if (!ok) return;
+
+    const now = new Date();
+
+    const [totalPremium, activePremium, allPurchases] = await Promise.all([
+      prisma.user.count({ where: { isPremium: true } }),
+      prisma.user.count({ where: { isPremium: true, premiumUntil: { gt: now } } }),
+      prisma.purchase.findMany({ select: { type: true, amount: true, quantity: true } }),
+    ]);
+
+    const expiredPremium = totalPremium - activePremium;
+    const totalRevenue = allPurchases.reduce((sum, p) => sum + p.amount * p.quantity, 0);
+    const purchasesByType: Record<string, { count: number; revenue: number }> = {};
+    for (const p of allPurchases) {
+      if (!purchasesByType[p.type]) purchasesByType[p.type] = { count: 0, revenue: 0 };
+      purchasesByType[p.type].count += p.quantity;
+      purchasesByType[p.type].revenue += p.amount * p.quantity;
+    }
+
+    return reply.send({
+      totalPremium,
+      activePremium,
+      expiredPremium,
+      totalRevenue,
+      totalPurchases: allPurchases.length,
+      purchasesByType,
+    });
+  });
+
+  fastify.get<{ Querystring: StatsQuery }>("/premium/series", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_STATS");
+    if (!ok) return;
+
+    const { from, to } = request.query;
+    const { start, end } = getDateRange(from, to);
+
+    const purchases = await prisma.purchase.findMany({
+      where: { createdAt: { gte: start, lte: end } },
+      select: { createdAt: true, type: true, amount: true, quantity: true },
+    });
+
+    const byDate = initDateMap(start, end, () => ({ count: 0, revenue: 0, extra_plinkk: 0, extra_redirects: 0 }));
+    for (const p of purchases) {
+      const key = formatDate(new Date(p.createdAt));
+      const bucket = byDate.get(key);
+      if (bucket) {
+        bucket.count += 1;
+        bucket.revenue += p.amount * p.quantity;
+        if (p.type === "extra_plinkk") bucket.extra_plinkk += p.quantity;
+        if (p.type === "extra_redirects") bucket.extra_redirects += p.quantity;
+      }
+    }
+
+    const series = Array.from(byDate.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, v]) => ({ date, ...v }));
+
+    return reply.send({ from: formatDate(start), to: formatDate(end), series });
+  });
+
+  // ─── Comptes & Connexions OAuth ───────────────────────────────────────────
+
+  fastify.get("/connections/summary", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_STATS");
+    if (!ok) return;
+
+    const [connections, withPassword, withoutPassword, totalUsers, with2FA, without2FA] = await Promise.all([
+      prisma.connection.groupBy({
+        by: ["provider"],
+        _count: { provider: true },
+      }),
+      prisma.user.count({ where: { hasPassword: true } }),
+      prisma.user.count({ where: { hasPassword: false } }),
+      prisma.user.count(),
+      prisma.user.count({ where: { twoFactorEnabled: true } }),
+      prisma.user.count({ where: { twoFactorEnabled: false } }),
+    ]);
+
+    const identityConnections = await prisma.connection.groupBy({
+      by: ["provider"],
+      where: { isIdentity: true },
+      _count: { provider: true },
+    });
+
+    const byProvider: Record<string, { total: number; identity: number }> = {};
+    for (const c of connections) {
+      byProvider[c.provider] = { total: c._count.provider, identity: 0 };
+    }
+    for (const c of identityConnections) {
+      if (byProvider[c.provider]) byProvider[c.provider].identity = c._count.provider;
+      else byProvider[c.provider] = { total: c._count.provider, identity: c._count.provider };
+    }
+
+    return reply.send({
+      byProvider,
+      withPassword,
+      withoutPassword,
+      totalUsers,
+      with2FA,
+      without2FA,
+    });
+  });
 }

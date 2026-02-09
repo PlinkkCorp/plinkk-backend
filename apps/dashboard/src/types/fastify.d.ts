@@ -26,6 +26,7 @@ declare module "fastify" {
     userId?: string;
     currentUser?: import("@plinkk/prisma").User & { role: import("@plinkk/prisma").Role | null };
     publicPath?: string;
+    rawBody?: string | Buffer;
   }
 }
 

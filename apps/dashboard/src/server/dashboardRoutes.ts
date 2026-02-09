@@ -24,6 +24,17 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.register(dashboardVersionsRoutes, { prefix: "/versions" });
   fastify.register(dashboardRedirectsRoutes, { prefix: "/redirects" });
 
+  fastify.get("/premium", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
+    const userInfo = request.currentUser!;
+    return replyView(reply, "dashboard/premium.ejs", userInfo, { mode: 'preview' });
+  });
+
+  fastify.get("/premium/configure", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
+    // Page de configuration de l'abonnement
+    const userInfo = request.currentUser!;
+    return replyView(reply, "dashboard/premium.ejs", userInfo, { mode: 'configure' });
+  });
+
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
     const userInfo = request.currentUser!;
     const userId = request.userId!;

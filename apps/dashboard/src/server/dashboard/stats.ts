@@ -9,6 +9,7 @@ import {
   formatPlinkkForView,
   formatPagesForView,
 } from "../../services/plinkkService";
+import { isUserPremium, getMaxStatsDays, getUserLimits, FREE_MAX_STATS_DAYS } from "@plinkk/shared";
 
 export function dashboardStatsRoutes(fastify: FastifyInstance) {
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
@@ -26,8 +27,10 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
     const start = new Date(end.getTime() - 29 * 86400000);
 
     let preSeries: { date: Date; count: number }[] = [];
+    let redirectSeries: { date: Date; count: number }[] = [];
     let totalViews = 0;
     let totalClicks = 0;
+    let totalRedirectClicks = 0;
 
     try {
       if (selected) {
@@ -43,13 +46,45 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
         totalViews = await prisma.pageStat.count({ where: { plinkkId: selected.id, eventType: "view" } });
         totalClicks = await prisma.pageStat.count({ where: { plinkkId: selected.id, eventType: "click" } });
       }
-    } catch {}
+
+      // REDIRECT STATS
+      const redirectStats = await prisma.redirectClickDaily.groupBy({
+        by: ['date'],
+        where: {
+          redirect: { userId },
+          date: { gte: start, lte: end }
+        },
+        _sum: { count: true }
+      });
+
+      const redirectByDate = new Map(redirectStats.map((r) => [r.date, Number(r._sum.count || 0)]));
+      for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
+        redirectSeries.push({ date: t, count: redirectByDate.get(t) || 0 });
+      }
+
+      const rawTotalRedirectClicks = await prisma.redirect.aggregate({
+        where: { userId },
+        _sum: { clicks: true }
+      });
+      totalRedirectClicks = rawTotalRedirectClicks._sum.clicks || 0;
+
+    } catch (e) {
+      request.log.error(e);
+    }
 
     const links = await prisma.link.findMany({
       where: { userId },
       orderBy: { id: "desc" },
       take: 100,
     });
+
+    const redirects = await prisma.redirect.findMany({
+      where: { userId },
+      orderBy: { clicks: "desc" },
+      take: 100
+    });
+
+    const premiumInfo = getUserLimits(userInfo);
 
     return replyView(reply, "dashboard/user/stats.ejs", userInfo, {
       plinkk: selectedForView,
@@ -59,7 +94,15 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
       totalViews,
       totalClicks,
       links,
+      // Add redirection data
+      redirects,
+      totalRedirectClicks,
+      redirectReturns: redirectSeries,
       publicPath: request.publicPath,
+      // Premium info
+      isPremium: premiumInfo.isPremium,
+      maxStatsDays: premiumInfo.maxStatsDays,
+      premiumLimits: premiumInfo,
     });
   });
 
@@ -67,9 +110,17 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
     const userId = request.userId!;
     const { from, to } = request.query as { from?: string; to?: string };
 
+    // Charger l'utilisateur pour vérifier les limites premium
+    const user = await prisma.user.findUnique({ where: { id: userId }, include: { role: true } });
+    const maxDays = getMaxStatsDays(user);
+
     const now = new Date();
     const end = to ? new Date(to) : now;
-    const start = from ? new Date(from) : new Date(end.getTime() - 29 * 86400000);
+    let start = from ? new Date(from) : new Date(end.getTime() - 29 * 86400000);
+
+    // Limiter la plage de dates selon le statut premium
+    const maxStart = new Date(end.getTime() - (maxDays - 1) * 86400000);
+    if (start < maxStart) start = maxStart;
 
     const fmt = (dt: Date) => {
       const y = dt.getUTCFullYear();
@@ -108,9 +159,17 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
     const userId = request.userId!;
     const { from, to } = request.query as { from?: string; to?: string };
 
+    // Charger l'utilisateur pour vérifier les limites premium
+    const user = await prisma.user.findUnique({ where: { id: userId }, include: { role: true } });
+    const maxDays = getMaxStatsDays(user);
+
     const now = new Date();
     const end = to ? new Date(to) : now;
-    const start = from ? new Date(from) : new Date(end.getTime() - 29 * 86400000);
+    let start = from ? new Date(from) : new Date(end.getTime() - 29 * 86400000);
+
+    // Limiter la plage de dates selon le statut premium
+    const maxStart = new Date(end.getTime() - (maxDays - 1) * 86400000);
+    if (start < maxStart) start = maxStart;
 
     const fmt = (dt: Date) => {
       const y = dt.getUTCFullYear();

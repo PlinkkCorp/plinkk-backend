@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { Plinkk, prisma } from "@plinkk/prisma";
 import {
-  getMaxPagesForRole,
+  getMaxPlinkks,
   reindexNonDefault,
   slugify,
   suggestUniqueSlug,
@@ -33,7 +33,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
       include: { settings: true },
       orderBy: [{ isDefault: "desc" }, { index: "asc" }, { createdAt: "asc" }],
     });
-    const maxPages = getMaxPagesForRole(me.role);
+    const maxPages = getMaxPlinkks(me);
     const pagesForView = pages.map((p) => ({
       ...p,
       affichageEmail: p.settings?.affichageEmail ?? null,

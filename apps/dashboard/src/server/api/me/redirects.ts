@@ -10,9 +10,13 @@ import {
   getUserRedirects,
   getRedirectStats,
   countUserRedirects,
-  getMaxRedirectsForRole,
 } from "../../../services/redirectService";
 import { slugify } from "../../../lib/plinkkUtils";
+import {
+  getMaxRedirects,
+  isUserPremium,
+  PREMIUM_MAX_REDIRECTS,
+} from "@plinkk/shared";
 import z from "zod";
 
 const createRedirectSchema = z.object({
@@ -72,13 +76,21 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
     
     // Vérifier la limite de redirections
     const currentCount = await countUserRedirects(userId);
-    const maxRedirects = getMaxRedirectsForRole(user.role);
+    const maxRedirects = getMaxRedirects(user);
     
     if (currentCount >= maxRedirects) {
+      const isPremium = isUserPremium(user);
+      const canUpgrade = !isPremium && PREMIUM_MAX_REDIRECTS > maxRedirects;
+
       return reply.code(403).send({
         error: "redirect_limit_reached",
         current: currentCount,
         max: maxRedirects,
+        canUpgrade,
+        premiumLimit: canUpgrade ? PREMIUM_MAX_REDIRECTS : undefined,
+        message: canUpgrade
+          ? `Limite atteinte. Passez Premium pour obtenir jusqu'à ${PREMIUM_MAX_REDIRECTS} redirections.`
+          : "Limite de redirections atteinte.",
       });
     }
     
@@ -233,7 +245,7 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
     const user = request.currentUser!;
     
     const currentCount = await countUserRedirects(userId);
-    const maxRedirects = getMaxRedirectsForRole(user.role);
+    const maxRedirects = getMaxRedirects(user);
     
     return reply.send({
       current: currentCount,

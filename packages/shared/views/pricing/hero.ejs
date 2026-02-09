@@ -1,0 +1,50 @@
+<%
+  const _ctaHref = (typeof pricingCtaHref !== 'undefined' && pricingCtaHref) ? pricingCtaHref : '#plans';
+  const _ctaText = (typeof pricingCtaText !== 'undefined' && pricingCtaText) ? pricingCtaText : 'Voir les offres';
+%>
+<!-- Hero Premium -->
+<div class="relative rounded-3xl overflow-hidden">
+    <!-- BG layers -->
+    <div class="absolute inset-0 bg-gradient-to-br from-violet-950 via-slate-900 to-fuchsia-950"></div>
+    <div class="absolute inset-0 opacity-30" style="background-image: radial-gradient(circle at 20% 50%, rgba(139,92,246,.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(192,132,252,.2) 0%, transparent 50%), radial-gradient(circle at 60% 80%, rgba(217,70,239,.15) 0%, transparent 50%);"></div>
+    <!-- Grid texture -->
+    <div class="absolute inset-0 opacity-[0.03]" style="background-image: linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px); background-size: 40px 40px;"></div>
+
+    <div class="relative z-10 px-8 py-12 md:px-12 md:py-16 flex flex-col md:flex-row items-center gap-10">
+        <div class="flex-1 space-y-5">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-semibold tracking-wide uppercase">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L9.19 8.62 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2z"/></svg>
+                Plinkk Premium
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white leading-tight">
+                Faites passer votre <span class="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">Plinkk</span> au niveau supérieur
+            </h1>
+            <p class="text-slate-300 text-base md:text-lg max-w-lg leading-relaxed">Plus de pages, plus de redirections, des statistiques avancées et une personnalisation complète pour vous démarquer.</p>
+            <a href="<%= _ctaHref %>" class="inline-flex items-center gap-2 shimmer-btn text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-violet-900/40 hover:shadow-violet-600/50 transition-shadow">
+                <%= _ctaText %>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </a>
+        </div>
+        <!-- Decorative floating cards -->
+        <div class="hidden md:flex flex-col items-center gap-4 flex-shrink-0">
+            <div class="float-anim w-48 bg-slate-900/80 backdrop-blur border border-slate-700/50 rounded-2xl p-4 shadow-2xl shadow-violet-900/20">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-violet-500/20 grid place-items-center">
+                        <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <span class="text-xs font-bold text-white">10 Redirections</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 rounded-full" style="width:100%"></div></div>
+            </div>
+            <div class="float-anim-delay w-48 bg-slate-900/80 backdrop-blur border border-slate-700/50 rounded-2xl p-4 shadow-2xl shadow-fuchsia-900/20 -translate-x-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-fuchsia-500/20 grid place-items-center">
+                        <svg class="w-4 h-4 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 17V9M13 17V5M8 17v-3"/></svg>
+                    </div>
+                    <span class="text-xs font-bold text-white">365j de stats</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="bg-gradient-to-r from-fuchsia-500 to-pink-500 h-1.5 rounded-full" style="width:75%"></div></div>
+            </div>
+        </div>
+    </div>
+</div>

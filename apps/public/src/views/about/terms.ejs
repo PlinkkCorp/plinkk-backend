@@ -1,5 +1,5 @@
-<%- include('../partials/head', { title: 'Conditions d’utilisation', description: 'Conditions générales d’utilisation de Plinkk.' }) %>
-<%- include('../partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
+<%- include('partials/head', { title: 'Conditions d’utilisation', description: 'Conditions générales d’utilisation de Plinkk.' }) %>
+<%- include('partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
 
 <main class="relative isolate overflow-hidden min-h-screen">
   <!-- Background Effects -->
@@ -63,7 +63,7 @@
         <p>Nous nous engageons à respecter vos droits et à ne pas utiliser vos contenus à d’autres fins que celles prévues par le service.</p>
         <p>Le code source de Plinkk est sous licence MIT (voir la <a href="#" class="openLicenseModal">licence</a>).</p>
         <p>Les autres éléments du site (textes, images, logos, icônes) sont la propriété de Plinkk ou de ses partenaires et sont protégés. Toute reproduction non autorisée est interdite.</p>
-        <p>Pour toute demande de licence ou de réutilisation, contactez-nous à <%- include('../partials/contact-email', { linkClass: 'text-violet-400 hover:text-violet-300 transition-colors' }) %>.</p>
+        <p>Pour toute demande de licence ou de réutilisation, contactez-nous à <%- include('partials/contact-email', { linkClass: 'text-violet-400 hover:text-violet-300 transition-colors' }) %>.</p>
         <p>L'utilisateur s'engage à respecter les droits de propriété intellectuelle (droit d'auteur, droit voisin, droit des marques et des logos), et à n'utiliser que des images ou autres éléments dont il détient légalement les droits ou pour lesquels il dispose d'une autorisation expresse des titulaires.</p>
 
         <h2 id="resiliation" class="flex items-center gap-3">
@@ -100,4 +100,4 @@
     </div>
   </div>
 </main>
-<%- include('../partials/footer') %>
+<%- include('partials/footer') %>

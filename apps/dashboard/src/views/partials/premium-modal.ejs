@@ -1,0 +1,86 @@
+<div id="premiumModal" class="fixed inset-0 z-[60] hidden items-center justify-center px-4" role="dialog" aria-modal="true">
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" onclick="closePremiumModal()"></div>
+  
+  <!-- Content -->
+  <div class="relative w-full max-w-lg transform overflow-hidden rounded-2xl bg-slate-900 border border-violet-500/30 text-left shadow-2xl shadow-violet-900/20 transition-all animate-scale-in">
+    <!-- Decorative background elements -->
+    <div class="absolute top-0 right-0 w-64 h-64 bg-violet-600/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 w-40 h-40 bg-fuchsia-600/10 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none"></div>
+    
+    <div class="relative z-10 px-6 py-8 sm:px-10 text-center">
+      <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 border border-violet-500/30">
+        <svg class="h-10 w-10 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+      
+      <h3 class="text-2xl font-bold text-white mb-2">Passez au niveau supérieur</h3>
+      <p class="text-slate-300 mb-8" id="premiumModalMessage">
+        Débloquez toutes les fonctionnalités et repoussez vos limites avec Plinkk Premium.
+      </p>
+
+      <div class="grid gap-3 text-left mb-8">
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
+          <div class="flex-shrink-0 h-8 w-8 rounded-lg bg-violet-500/20 flex items-center justify-center text-violet-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          </div>
+          <div>
+            <p class="font-medium text-white">Plus de créations</p>
+            <p class="text-xs text-slate-400">Jusqu'à <%= typeof PREMIUM_MAX_PLINKKS !== 'undefined' ? PREMIUM_MAX_PLINKKS : 2 %> pages et <%= typeof PREMIUM_MAX_REDIRECTS !== 'undefined' ? PREMIUM_MAX_REDIRECTS : 10 %> redirections</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
+          <div class="flex-shrink-0 h-8 w-8 rounded-lg bg-violet-500/20 flex items-center justify-center text-violet-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          </div>
+          <div>
+            <p class="font-medium text-white">Statistiques étendues</p>
+            <p class="text-xs text-slate-400">Historique complet sur 365 jours</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
+          <div class="flex-shrink-0 h-8 w-8 rounded-lg bg-violet-500/20 flex items-center justify-center text-violet-400">
+             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+          </div>
+          <div>
+            <p class="font-medium text-white">Personnalisation avancée</p>
+            <p class="text-xs text-slate-400">Thèmes exclusifs, bannières GIF et effets</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <button type="button" onclick="closePremiumModal()" class="w-full sm:w-auto px-6 py-3 rounded-xl border border-slate-600 text-slate-300 font-medium hover:bg-slate-800 hover:text-white transition-colors">
+          Peut-être plus tard
+        </button>
+        <a href="/premium" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold shadow-lg shadow-violet-900/40 hover:shadow-violet-900/60 hover:-translate-y-0.5 transition-all text-center">
+          Découvrir Premium
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openPremiumModal(message) {
+    const modal = document.getElementById('premiumModal');
+    if (message) {
+      document.getElementById('premiumModalMessage').textContent = message;
+    }
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+  }
+
+  function closePremiumModal() {
+    const modal = document.getElementById('premiumModal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  }
+</script>

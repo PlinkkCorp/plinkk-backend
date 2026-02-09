@@ -1,8 +1,8 @@
-<%- include('../../partials/head.ejs', { title: 'Logs Admin - Administration', description: 'Historique des actions administratives.', robots: 'noindex,nofollow' }) %>
-<%- include('../../partials/header-dash.ejs', { user: user }) %>
+<%- include('partials/head.ejs', { title: 'Logs Admin - Administration', description: 'Historique des actions administratives.', robots: 'noindex,nofollow' }) %>
+<%- include('partials/header-dash.ejs', { user: user }) %>
 
 <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-    <%- include('../../partials/admin-nav.ejs', { user: user, active: 'logs' }) %>
+    <%- include('partials/admin-nav.ejs', { user: user, active: 'logs' }) %>
 
     <main class="col-span-12 lg:col-span-10 space-y-8">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">

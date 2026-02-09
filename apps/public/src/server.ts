@@ -32,6 +32,7 @@ import { generateProfileConfig } from "./lib/generateConfig";
 import { minify } from "uglify-js";
 import { coerceThemeData } from "./lib/theme";
 import { generateTheme } from "./lib/generateTheme";
+import { AppError } from "@plinkk/shared";
 
 const fastify = Fastify({
   logger: true,
@@ -42,6 +43,7 @@ declare module "@fastify/secure-session" {
   interface SessionData {
     data?: string;
     returnTo?: string;
+    [key: string]: any;
   }
 }
 
@@ -52,11 +54,18 @@ fastify.register(fastifyRateLimit, {
 
 fastify.register(fastifyCompress);
 
+const sharedViewsRoot = path.join(__dirname, "..", "..", "..", "packages", "shared", "views");
 fastify.register(fastifyView, {
   engine: {
     ejs: ejs,
   },
   root: path.join(__dirname, "views"),
+  options: {
+    views: [
+      path.join(__dirname, "views"),
+      sharedViewsRoot,
+    ],
+  },
 });
 
 fastify.register(fastifyStatic, {
@@ -610,12 +619,29 @@ fastify.addHook('onSend', async (request, reply, payload) => {
 
 fastify.setErrorHandler((error, request, reply) => {
   fastify.log.error(error);
+
+  if (error instanceof AppError) {
+    if (request.raw.url?.startsWith("/api")) {
+      return reply.code(error.statusCode).send({ 
+        error: error.code.toLowerCase(),
+        message: error.message 
+      });
+    }
+    const userId = request.session.get("data");
+    const template = error.statusCode === 404 ? "erreurs/404.ejs" : "erreurs/500.ejs";
+    return reply.code(error.statusCode).view(template, {
+      message: error.message,
+      currentUser: userId ? { id: userId } : null,
+      dashboardUrl: process.env.DASHBOARD_URL,
+    });
+  }
+
   if (request.raw.url?.startsWith("/api")) {
-    return reply.code(500).send({ error: "Internal Server Error" });
+    return reply.code(500).send({ error: "internal_server_error" });
   }
   const userId = request.session.get("data");
   return reply.code(500).view("erreurs/500.ejs", {
-    message: error && typeof error === 'object' && 'message' in error ? (error as any).message ?? "" : "",
+    message: error && typeof error === 'object' && 'message' in error ? (error).message ?? "" : "",
     currentUser: userId ? { id: userId } : null,
     dashboardUrl: process.env.DASHBOARD_URL,
   });

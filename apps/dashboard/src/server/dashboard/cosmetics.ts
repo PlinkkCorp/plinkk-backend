@@ -3,6 +3,7 @@ import { prisma } from "@plinkk/prisma";
 import { replyView } from "../../lib/replyView";
 import { verifyRoleAdmin, verifyRoleDeveloper } from "../../lib/verifyRole";
 import { requireAuthRedirect } from "../../middleware/auth";
+import { canUseGifBanner, canUseVisualEffects, getUserLimits } from "@plinkk/shared";
 
 export function dashboardCosmeticsRoutes(fastify: FastifyInstance) {
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
@@ -16,12 +17,16 @@ export function dashboardCosmeticsRoutes(fastify: FastifyInstance) {
     }
 
     const cosmetics = userInfo.cosmetics;
+    const premium = getUserLimits(userInfo);
+    const bannerLocked = !canUseGifBanner(userInfo);
+    const effectsLocked = !canUseVisualEffects(userInfo);
+
     const catalog = {
       frames: [
         { key: "none", label: "Aucun", locked: false },
         { key: "neon", label: "Néon", locked: false },
-        { key: "glow", label: "Glow", locked: false },
-        { key: "gold", label: "Gold", locked: false },
+        { key: "glow", label: "Glow", locked: effectsLocked },
+        { key: "gold", label: "Gold", locked: effectsLocked },
       ],
       themes: [
         { key: "system", label: "Système", locked: false },
@@ -29,10 +34,16 @@ export function dashboardCosmeticsRoutes(fastify: FastifyInstance) {
         { key: "midnight", label: "Midnight", locked: false },
         { key: "plasma", label: "Plasma", locked: false },
       ],
+      effects: [
+        { key: "none", label: "Aucun", locked: false },
+        { key: "sparkles", label: "✨ Paillettes", locked: effectsLocked },
+        { key: "noise", label: "📺 Grain", locked: effectsLocked },
+      ],
       banners: [
         { key: "none", label: "Aucune", url: "", locked: false },
         { key: "gradient-emerald", label: "Dégradé Émeraude", url: "", locked: false },
         { key: "gradient-fuchsia", label: "Dégradé Fuchsia", url: "", locked: false },
+        { key: "custom-gif", label: "GIF / Image personnalisée", url: "", locked: bannerLocked, premium: true },
       ],
     };
 
@@ -40,6 +51,7 @@ export function dashboardCosmeticsRoutes(fastify: FastifyInstance) {
       cosmetics,
       catalog,
       publicPath: request.publicPath,
+      premiumLimits: premium,
     });
   });
 }

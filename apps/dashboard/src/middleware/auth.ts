@@ -2,6 +2,7 @@ import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { verifyRoleIsStaff, verifyRoleAdmin } from "../lib/verifyRole";
 import { getPublicPath } from "../services/plinkkService";
+import { UnauthorizedError, ForbiddenError } from "@plinkk/shared";
 
 export function registerAuthDecorators(fastify: FastifyInstance) {
   fastify.decorateRequest("userId", null);
@@ -12,7 +13,7 @@ export function registerAuthDecorators(fastify: FastifyInstance) {
 export async function requireAuth(request: FastifyRequest, reply: FastifyReply) {
   const userId = request.session.get("data");
   if (!userId || String(userId).includes("__totp")) {
-    return reply.code(401).send({ error: "unauthorized" });
+    throw new UnauthorizedError();
   }
   request.userId = userId as string;
 }
@@ -20,7 +21,7 @@ export async function requireAuth(request: FastifyRequest, reply: FastifyReply) 
 export async function requireAuthWithUser(request: FastifyRequest, reply: FastifyReply) {
   const userId = request.session.get("data");
   if (!userId || String(userId).includes("__totp")) {
-    return reply.code(401).send({ error: "unauthorized" });
+    throw new UnauthorizedError();
   }
 
   const user = await prisma.user.findUnique({
@@ -29,7 +30,7 @@ export async function requireAuthWithUser(request: FastifyRequest, reply: Fastif
   });
 
   if (!user) {
-    return reply.code(401).send({ error: "unauthorized" });
+    throw new UnauthorizedError();
   }
 
   request.userId = userId as string;
@@ -62,7 +63,7 @@ export async function requireAuthRedirect(request: FastifyRequest, reply: Fastif
 export async function requireStaff(request: FastifyRequest, reply: FastifyReply) {
   const userId = request.session.get("data");
   if (!userId) {
-    return reply.code(401).send({ error: "unauthorized" });
+    throw new UnauthorizedError();
   }
 
   const user = await prisma.user.findFirst({
@@ -71,7 +72,7 @@ export async function requireStaff(request: FastifyRequest, reply: FastifyReply)
   });
 
   if (!user || !verifyRoleIsStaff(user.role)) {
-    return reply.code(403).send({ error: "forbidden" });
+    throw new ForbiddenError();
   }
 
   request.userId = userId as string;

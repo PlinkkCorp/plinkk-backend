@@ -1,6 +1,16 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
-import { reindexNonDefault, slugify, isReservedSlug, createPlinkkForUser } from "../../../../lib/plinkkUtils";
+import {
+  reindexNonDefault,
+  slugify,
+  isReservedSlug,
+  createPlinkkForUser,
+} from "../../../../lib/plinkkUtils";
+import {
+  getMaxPlinkks,
+  isUserPremium,
+  PREMIUM_MAX_PLINKKS,
+} from "@plinkk/shared";
 
 export function plinkksCrudRoutes(fastify: FastifyInstance) {
   fastify.patch("/:id", async (request, reply) => {
@@ -77,6 +87,31 @@ export function plinkksCrudRoutes(fastify: FastifyInstance) {
       });
       if (userConflict)
         return reply.code(409).send({ error: "slug_conflicts_with_user" });
+
+      // Vérification préventive de la limite pour un message personnalisé
+      const me = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { role: true },
+      });
+      if (me) {
+        const count = await prisma.plinkk.count({ where: { userId } });
+        const maxPages = getMaxPlinkks(me);
+        if (count >= maxPages) {
+          const isPremium = isUserPremium(me);
+          const canUpgrade = !isPremium && PREMIUM_MAX_PLINKKS > maxPages;
+          return reply.code(403).send({
+            error: "max_pages_reached",
+            current: count,
+            max: maxPages,
+            canUpgrade,
+            premiumLimit: canUpgrade ? PREMIUM_MAX_PLINKKS : undefined,
+            message: canUpgrade
+              ? `Limite atteinte. Passez Premium pour créer jusqu'à ${PREMIUM_MAX_PLINKKS} pages.`
+              : "Limite de pages Plinkk atteinte.",
+          });
+        }
+      }
+
       const created = await createPlinkkForUser(prisma, userId, {
         name: rawName,
         slugBase: base,

@@ -1,5 +1,6 @@
 import { prisma } from "@plinkk/prisma";
 import { FastifyReply, FastifyRequest } from "fastify";
+import { UnauthorizedError, ForbiddenError } from "@plinkk/shared";
 
 // const prisma = new PrismaClient();
 
@@ -41,18 +42,21 @@ export async function ensurePermission(
     if (mode === "redirect") {
       const ret = request.url || "/";
       reply.redirect(`/login?returnTo=${encodeURIComponent(ret)}`);
+      return false;
     } else {
-      reply.code(401).send({ error: "unauthorized" });
+      throw new UnauthorizedError();
     }
-    return false;
   }
   const ok = Array.isArray(keyOrKeys)
     ? (all ? await userHasAllPermissions(meId, keyOrKeys) : await userHasAnyPermission(meId, keyOrKeys))
     : await userHasPermission(meId, keyOrKeys);
   if (!ok) {
-    if (mode === "redirect") reply.redirect("/");
-    else reply.code(403).send({ error: "forbidden" });
-    return false;
+    if (mode === "redirect") {
+      reply.redirect(options?.redirectTo || "/");
+      return false;
+    } else {
+      throw new ForbiddenError();
+    }
   }
   return true;
 }

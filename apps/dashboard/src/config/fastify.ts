@@ -21,9 +21,16 @@ export async function registerPlugins(fastify: FastifyInstance) {
 
   await fastify.register(fastifyCompress);
 
+  const sharedViewsRoot = path.join(__dirname, "..", "..", "..", "..", "packages", "shared", "views");
   await fastify.register(fastifyView, {
     engine: { ejs },
     root: path.join(__dirname, "..", "views"),
+    options: {
+      views: [
+        path.join(__dirname, "..", "views"),
+        sharedViewsRoot,
+      ],
+    },
   });
 
   await fastify.register(fastifyStatic, {

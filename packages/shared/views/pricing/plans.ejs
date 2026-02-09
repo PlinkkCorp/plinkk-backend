@@ -1,0 +1,568 @@
+<%
+  const _ctx = (typeof pricingContext !== 'undefined') ? pricingContext : 'public';
+  const isConfig = _ctx === 'dashboard-config';
+  const isDashPreview = _ctx === 'dashboard-preview';
+  const isPublic = !isConfig && !isDashPreview;
+  const _dashUrl = (typeof dashboardUrl !== 'undefined' && dashboardUrl) ? dashboardUrl : '';
+%>
+
+<% if (isPublic) { %>
+<!-- ═══════════════════ PUBLIC : Style page d'accueil ═══════════════════ -->
+<section id="plans" class="relative py-8">
+    <!-- Ambient glow -->
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:600px;pointer-events:none;background:radial-gradient(ellipse at 50% 50%, rgba(139,92,246,0.06), transparent 70%);"></div>
+
+    <!-- Section header -->
+    <div style="text-align:center;margin-bottom:3.5rem;" class="pricing-reveal">
+        <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.15);margin-bottom:1.5rem;">
+            <svg style="width:14px;height:14px;color:#a78bfa;" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L9.19 8.62 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2z"/></svg>
+            <span style="font-size:12px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:#a78bfa;">Tarifs</span>
+        </div>
+        <h2 style="font-size:clamp(2rem, 5vw, 3rem);line-height:1.15;letter-spacing:-0.03em;font-weight:700;color:#fff;margin-bottom:1rem;">
+            Simple, <span class="pricing-gradient">transparent</span>.
+        </h2>
+        <p style="color:rgba(255,255,255,0.45);font-size:1.05rem;max-width:28rem;margin:0 auto;line-height:1.6;">
+            Un plan gratuit pour démarrer, trois formules Premium pour aller plus loin.
+        </p>
+    </div>
+
+    <!-- Cards grid -->
+    <div class="pricing-plans-grid" style="position:relative;z-index:10;">
+
+        <!-- ─── Free ─── -->
+        <div class="pricing-card-free pricing-reveal pricing-reveal-d1" style="border-radius:24px;padding:36px 32px;display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
+                <div style="width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);display:grid;place-items:center;">
+                    <svg style="width:20px;height:20px;color:rgba(255,255,255,0.35);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </div>
+                <div>
+                    <h3 style="font-size:17px;font-weight:600;color:#fff;">Gratuit</h3>
+                    <p style="font-size:12px;color:rgba(255,255,255,0.35);">Pour démarrer</p>
+                </div>
+            </div>
+
+            <div style="margin-bottom:32px;">
+                <span style="font-size:3rem;font-weight:700;letter-spacing:-0.03em;color:#fff;">0€</span>
+                <span style="color:rgba(255,255,255,0.35);font-size:14px;margin-left:4px;">/mois</span>
+            </div>
+
+            <ul style="list-style:none;padding:0;margin:0 0 auto;display:flex;flex-direction:column;gap:14px;margin-bottom:32px;">
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.5);">
+                    <div class="feat-check" style="background:rgba(255,255,255,0.05);"><svg style="color:rgba(255,255,255,0.25);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    1 Page Plinkk
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.5);">
+                    <div class="feat-check" style="background:rgba(255,255,255,0.05);"><svg style="color:rgba(255,255,255,0.25);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    5 Redirections
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.5);">
+                    <div class="feat-check" style="background:rgba(255,255,255,0.05);"><svg style="color:rgba(255,255,255,0.25);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    30 jours de statistiques
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.5);">
+                    <div class="feat-check" style="background:rgba(255,255,255,0.05);"><svg style="color:rgba(255,255,255,0.25);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    10 thèmes personnalisés
+                </li>
+            </ul>
+
+            <a href="<%= _dashUrl %>/login#signup" class="pricing-cta pricing-cta-outline">Commencer gratuitement</a>
+        </div>
+
+        <!-- ─── Premium Mensuel ─── -->
+        <div class="pricing-card-premium pricing-reveal pricing-reveal-d2" style="--card-border-gradient:linear-gradient(135deg, #818cf8, #a855f7, #ec4899);border-radius:24px;background:#0c0c14;padding:36px 32px;display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg, #6366f1, #a855f7);display:grid;place-items:center;box-shadow:0 8px 20px rgba(99,102,241,0.25);">
+                        <svg style="width:20px;height:20px;color:#fff;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L9 9l-7 1 5 4-2 7 7-4 7 4-2-7 5-4-7-1z"/></svg>
+                    </div>
+                    <div>
+                        <h3 style="font-size:17px;font-weight:600;color:#fff;">Mensuel</h3>
+                        <p style="font-size:12px;" class="pricing-gradient" >Flexible</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom:28px;">
+                <span style="font-size:2.75rem;font-weight:700;letter-spacing:-0.03em;color:#fff;">4.99€</span>
+                <span style="color:rgba(255,255,255,0.35);font-size:14px;margin-left:4px;">/mois</span>
+            </div>
+
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;margin-bottom:32px;flex:1;">
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(129,140,248,0.12);"><svg style="color:#818cf8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    2 Pages Plinkk
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(129,140,248,0.12);"><svg style="color:#818cf8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    10 Redirections
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(129,140,248,0.12);"><svg style="color:#818cf8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    Toutes les fonctionnalités
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(129,140,248,0.12);"><svg style="color:#818cf8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    Sans engagement
+                </li>
+            </ul>
+
+            <a href="<%= _dashUrl %>/login#signup" class="pricing-cta pricing-cta-primary">S'inscrire</a>
+        </div>
+
+        <!-- ─── Premium Annuel (populaire) ─── -->
+        <div class="pricing-card-premium pricing-reveal pricing-reveal-d3" style="--card-border-gradient:linear-gradient(135deg, #34d399, #10b981, #06b6d4);border-radius:24px;background:#0c0c14;padding:36px 32px;display:flex;flex-direction:column;position:relative;">
+            <!-- Popular badge -->
+            <div class="popular-badge" style="position:absolute;top:-1px;left:50%;transform:translateX(-50%);padding:6px 20px;border-radius:0 0 12px 12px;z-index:20;">
+                <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#fff;">Populaire</span>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;margin-top:8px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg, #10b981, #0d9488);display:grid;place-items:center;box-shadow:0 8px 20px rgba(16,185,129,0.25);">
+                        <svg style="width:20px;height:20px;color:#fff;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L9 9l-7 1 5 4-2 7 7-4 7 4-2-7 5-4-7-1z"/></svg>
+                    </div>
+                    <div>
+                        <h3 style="font-size:17px;font-weight:600;color:#fff;">Annuel</h3>
+                        <p style="font-size:12px;color:#34d399;font-weight:600;">2 mois offerts</p>
+                    </div>
+                </div>
+                <span style="padding:5px 12px;border-radius:999px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:#34d399;font-size:11px;font-weight:700;letter-spacing:0.05em;">-17%</span>
+            </div>
+
+            <div style="margin-bottom:28px;">
+                <span style="font-size:2.75rem;font-weight:700;letter-spacing:-0.03em;color:#fff;">49.90€</span>
+                <span style="color:rgba(255,255,255,0.35);font-size:14px;margin-left:4px;">/an</span>
+                <div style="margin-top:6px;">
+                    <span style="font-size:12px;color:rgba(255,255,255,0.25);text-decoration:line-through;">59.88€/an</span>
+                    <span style="font-size:12px;color:#34d399;margin-left:8px;font-weight:500;">soit 4.16€/mois</span>
+                </div>
+            </div>
+
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;margin-bottom:32px;flex:1;">
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(52,211,153,0.12);"><svg style="color:#34d399;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    2 Pages Plinkk
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(52,211,153,0.12);"><svg style="color:#34d399;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    10 Redirections
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(52,211,153,0.12);"><svg style="color:#34d399;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    Toutes les fonctionnalités
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(52,211,153,0.12);"><svg style="color:#34d399;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    Économisez 9.98€/an
+                </li>
+            </ul>
+
+            <a href="<%= _dashUrl %>/login#signup" class="pricing-cta pricing-cta-emerald">S'inscrire</a>
+        </div>
+
+        <!-- ─── Lifetime ─── -->
+        <div class="pricing-card-premium pricing-reveal pricing-reveal-d4" style="--card-border-gradient:linear-gradient(135deg, #f59e0b, #ea580c, #ef4444);border-radius:24px;background:#0c0c14;padding:36px 32px;display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg, #f59e0b, #ea580c);display:grid;place-items:center;box-shadow:0 8px 20px rgba(245,158,11,0.25);">
+                        <svg style="width:20px;height:20px;color:#fff;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L9 9l-7 1 5 4-2 7 7-4 7 4-2-7 5-4-7-1z"/></svg>
+                    </div>
+                    <div>
+                        <h3 style="font-size:17px;font-weight:600;color:#fff;">Lifetime</h3>
+                        <p style="font-size:12px;color:#fbbf24;font-weight:600;">Paiement unique</p>
+                    </div>
+                </div>
+                <span style="padding:5px 12px;border-radius:999px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);color:#fbbf24;font-size:11px;font-weight:700;letter-spacing:0.05em;">À VIE</span>
+            </div>
+
+            <div style="margin-bottom:28px;">
+                <span style="font-size:2.75rem;font-weight:700;letter-spacing:-0.03em;color:#fff;">75€</span>
+                <span style="color:rgba(255,255,255,0.35);font-size:14px;margin-left:4px;">une fois</span>
+                <div style="margin-top:6px;">
+                    <span style="font-size:12px;color:#fbbf24;font-weight:500;">Rentabilisé en ~15 mois</span>
+                </div>
+            </div>
+
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;margin-bottom:32px;flex:1;">
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(251,191,36,0.12);"><svg style="color:#fbbf24;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    2 Pages Plinkk
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(251,191,36,0.12);"><svg style="color:#fbbf24;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    10 Redirections
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(251,191,36,0.12);"><svg style="color:#fbbf24;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    Toutes les fonctionnalités
+                </li>
+                <li style="display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,0.6);">
+                    <div class="feat-check" style="background:rgba(251,191,36,0.12);"><svg style="color:#fbbf24;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>
+                    Plus jamais de facture
+                </li>
+            </ul>
+
+            <a href="<%= _dashUrl %>/login#signup" class="pricing-cta pricing-cta-amber">S'inscrire</a>
+        </div>
+    </div>
+</section>
+
+<% } else if (isDashPreview) { %>
+<!-- ═══════════════════ DASHBOARD PREVIEW ═══════════════════ -->
+<div id="plans" class="grid md:grid-cols-2 gap-5">
+    <!-- Plan actuel : Gratuit -->
+    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 flex flex-col">
+        <div class="flex items-center gap-3 mb-5">
+            <div class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 grid place-items-center">
+                <svg class="w-[18px] h-[18px] text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            </div>
+            <div>
+                <h3 class="font-semibold text-white">Gratuit</h3>
+                <p class="text-xs text-slate-500">Plan actuel</p>
+            </div>
+        </div>
+        <div class="mb-5">
+            <span class="text-3xl font-bold text-white">0€</span>
+            <span class="text-sm text-slate-500 ml-1">/mois</span>
+        </div>
+        <ul class="space-y-2.5 mb-6 text-sm text-slate-400 flex-1">
+            <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                1 Page Plinkk
+            </li>
+            <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                5 Redirections
+            </li>
+            <li class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                30j de statistiques
+            </li>
+        </ul>
+        <div class="py-2.5 rounded-xl bg-slate-800/50 text-slate-500 text-sm font-medium text-center">Plan actuel</div>
+    </div>
+
+    <!-- Premium Mensuel -->
+    <div class="border border-violet-500/20 rounded-2xl p-6 flex flex-col relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-violet-500/[0.04] to-fuchsia-500/[0.04] pointer-events-none rounded-2xl"></div>
+        <div class="relative z-10 flex flex-col flex-1">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 grid place-items-center">
+                        <svg class="w-[18px] h-[18px] text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L9 9l-7 1 5 4-2 7 7-4 7 4-2-7 5-4-7-1z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-white">Premium Mensuel</h3>
+                        <p class="text-xs text-violet-400">Flexible</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-5">
+                <span class="text-3xl font-bold text-white">4.99€</span>
+                <span class="text-sm text-slate-500 ml-1">/mois</span>
+            </div>
+            <ul class="space-y-2.5 mb-6 text-sm text-slate-300 flex-1">
+                <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-violet-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    2 Pages Plinkk (+1€/supp.)
+                </li>
+                <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-violet-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    10 Redirections (+1€/5 supp.)
+                </li>
+                <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-violet-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    365j de stats, thèmes, effets
+                </li>
+                <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-violet-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    Support prioritaire
+                </li>
+            </ul>
+            <a href="/premium/configure" class="block w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold text-center transition-colors active:scale-[0.97]">
+                Configurer
+            </a>
+        </div>
+    </div>
+
+    <!-- Premium Annuel -->
+    <div class="border border-emerald-500/20 rounded-2xl p-6 flex flex-col relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.04] to-teal-500/[0.04] pointer-events-none rounded-2xl"></div>
+        <div class="relative z-10 flex flex-col flex-1">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 grid place-items-center">
+                        <svg class="w-[18px] h-[18px] text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L9 9l-7 1 5 4-2 7 7-4 7 4-2-7 5-4-7-1z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-white">Premium Annuel</h3>
+                        <p class="text-xs text-emerald-400">2 mois offerts</p>
+                    </div>
+                </div>
+                <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">-17%</span>
+            </div>
+            <div class="mb-5">
+                <span class="text-3xl font-bold text-white">49.90€</span>
+                <span class="text-sm text-slate-500 ml-1">/an</span>
+                <div class="mt-0.5">
+                    <span class="text-xs text-slate-500 line-through">59.88€</span>
+                    <span class="text-xs text-emerald-400 ml-1">soit 4.16€/mois</span>
+                </div>
+            </div>
+            <ul class="space-y-2.5 mb-6 text-sm text-slate-300 flex-1">
+                <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    Tout le Premium inclus
+                </li>
+                <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    Économisez 9.98€/an
+                </li>
+            </ul>
+            <a href="/premium/configure" class="block w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-center transition-colors active:scale-[0.97]">
+                Configurer
+            </a>
+        </div>
+    </div>
+
+    <!-- Lifetime -->
+    <div class="border border-amber-500/20 rounded-2xl p-6 flex flex-col relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-amber-500/[0.04] to-orange-500/[0.04] pointer-events-none rounded-2xl"></div>
+        <div class="relative z-10 flex flex-col flex-1">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 grid place-items-center">
+                        <svg class="w-[18px] h-[18px] text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L9 9l-7 1 5 4-2 7 7-4 7 4-2-7 5-4-7-1z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-white">Lifetime</h3>
+                        <p class="text-xs text-amber-400">Paiement unique</p>
+                    </div>
+                </div>
+                <span class="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold uppercase tracking-wider">À vie</span>
+            </div>
+            <div class="mb-5">
+                <span class="text-3xl font-bold text-white">75€</span>
+                <span class="text-sm text-slate-500 ml-1">une fois</span>
+                <div class="mt-0.5">
+                    <span class="text-xs text-amber-400">Rentabilisé en ~15 mois</span>
+                </div>
+            </div>
+            <ul class="space-y-2.5 mb-6 text-sm text-slate-300 flex-1">
+                <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    Tout le Premium inclus
+                </li>
+                <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    Plus jamais de facture
+                </li>
+            </ul>
+            <a href="/premium/configure" class="block w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold text-center transition-colors active:scale-[0.97]">
+                Configurer
+            </a>
+        </div>
+    </div>
+</div>
+<% } else { %>
+<!-- ═══════════════════ DASHBOARD CONFIG ═══════════════════ -->
+<div class="max-w-3xl mx-auto">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-xl font-bold text-white">Configurer votre abonnement</h2>
+            <div class="px-3 py-1 bg-violet-500/10 border border-violet-500/20 text-violet-400 rounded-lg text-xs font-bold uppercase tracking-wide">
+                Modulable
+            </div>
+        </div>
+
+        <!-- Choix de la formule -->
+        <div class="mb-6">
+            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Formule</h3>
+            <div class="grid grid-cols-3 gap-3">
+                <button type="button" onclick="selectPlan('monthly')" id="plan_monthly" class="plan-btn relative p-4 rounded-xl border-2 border-violet-500/50 bg-violet-500/5 text-center transition-all">
+                    <span class="block text-sm font-bold text-white">Mensuel</span>
+                    <span class="block text-lg font-extrabold text-violet-400 mt-1">4.99€<span class="text-xs font-normal text-slate-500">/mois</span></span>
+                    <span class="block text-[11px] text-slate-500 mt-0.5">Sans engagement</span>
+                </button>
+                <button type="button" onclick="selectPlan('yearly')" id="plan_yearly" class="plan-btn relative p-4 rounded-xl border-2 border-slate-700 bg-slate-800/30 text-center transition-all hover:border-emerald-500/30">
+                    <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-bold rounded-full uppercase">-17%</span>
+                    <span class="block text-sm font-bold text-white">Annuel</span>
+                    <span class="block text-lg font-extrabold text-emerald-400 mt-1">49.90€<span class="text-xs font-normal text-slate-500">/an</span></span>
+                    <span class="block text-[11px] text-slate-500 mt-0.5">2 mois offerts</span>
+                </button>
+                <button type="button" onclick="selectPlan('lifetime')" id="plan_lifetime" class="plan-btn relative p-4 rounded-xl border-2 border-slate-700 bg-slate-800/30 text-center transition-all hover:border-amber-500/30">
+                    <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full uppercase">À vie</span>
+                    <span class="block text-sm font-bold text-white">Lifetime</span>
+                    <span class="block text-lg font-extrabold text-amber-400 mt-1">75€<span class="text-xs font-normal text-slate-500"> une fois</span></span>
+                    <span class="block text-[11px] text-slate-500 mt-0.5">Paiement unique</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Extensions -->
+        <div id="extensions_section" class="space-y-5 mb-8 border-t border-slate-800 pt-6 transition-opacity">
+            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Extensions (payez ce que vous utilisez)</h3>
+
+            <!-- Plinkks -->
+            <div class="bg-slate-800/30 rounded-xl p-5 border border-slate-800">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 grid place-items-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke-width="2" stroke-linecap="round"/></svg>
+                        </div>
+                        <span class="font-medium text-white">Pages Plinkk supplémentaires</span>
+                    </div>
+                    <span class="font-bold text-indigo-400" id="price_plinkk">0.00€</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="changeVal('input_plinkk', -1)" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors">−</button>
+                    <input type="number" id="input_plinkk" value="0" min="0" max="50" class="bg-transparent text-center text-white font-bold w-12" readonly>
+                    <button onclick="changeVal('input_plinkk', 1)" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors">+</button>
+                    <span class="text-sm text-slate-500 ml-auto">1.00€ / page / mois</span>
+                </div>
+            </div>
+
+            <!-- Redirects -->
+            <div class="bg-slate-800/30 rounded-xl p-5 border border-slate-800">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 grid place-items-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7l5 5m0 0l-5 5m5-5H6" stroke-width="2" stroke-linecap="round"/></svg>
+                        </div>
+                        <span class="font-medium text-white">Packs de 5 Redirections</span>
+                    </div>
+                    <span class="font-bold text-emerald-400" id="price_redirect">0.00€</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="changeVal('input_redirect', -1)" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors">−</button>
+                    <input type="number" id="input_redirect" value="0" min="0" max="50" class="bg-transparent text-center text-white font-bold w-12" readonly>
+                    <button onclick="changeVal('input_redirect', 1)" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold transition-colors">+</button>
+                    <span class="text-sm text-slate-500 ml-auto">1.00€ / pack / mois</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total & Action -->
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6 p-5 bg-slate-800 rounded-2xl border border-slate-700">
+            <div>
+                <span class="block text-sm text-slate-400" id="total_label">Total mensuel estimé</span>
+                <div class="flex items-baseline gap-1">
+                    <span class="text-3xl font-extrabold text-white" id="total_price">4.99€</span>
+                    <span class="text-sm text-slate-500" id="total_suffix">/mois</span>
+                </div>
+            </div>
+            <button onclick="updateSubscription()" id="btn_update" class="w-full md:w-auto px-8 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold shadow-lg shadow-violet-900/40 transition-all active:scale-[0.97]">
+                Mettre à jour mon abonnement
+            </button>
+        </div>
+        <p class="text-center text-xs text-slate-500 mt-4">
+            Le montant sera ajusté automatiquement au prorata.
+            En cliquant sur "Mettre à jour", vous acceptez les nouvelles conditions de facturation.
+        </p>
+    </div>
+</div>
+
+<script>
+    const PLAN_PRICES = { monthly: 4.99, yearly: 49.90, lifetime: 75.00 };
+    const EXT_PRICES = { plinkk: 1.00, redirect: 1.00 };
+    let selectedPlan = 'monthly';
+
+    function selectPlan(plan) {
+        selectedPlan = plan;
+        document.querySelectorAll('.plan-btn').forEach(function(btn) {
+            btn.classList.remove('border-violet-500/50', 'bg-violet-500/5', 'border-emerald-500/50', 'bg-emerald-500/5', 'border-amber-500/50', 'bg-amber-500/5');
+            btn.classList.add('border-slate-700', 'bg-slate-800/30');
+        });
+        var el = document.getElementById('plan_' + plan);
+        el.classList.remove('border-slate-700', 'bg-slate-800/30');
+        if (plan === 'monthly') { el.classList.add('border-violet-500/50', 'bg-violet-500/5'); }
+        else if (plan === 'yearly') { el.classList.add('border-emerald-500/50', 'bg-emerald-500/5'); }
+        else { el.classList.add('border-amber-500/50', 'bg-amber-500/5'); }
+
+        var extSection = document.getElementById('extensions_section');
+        if (plan === 'lifetime' || plan === 'yearly') {
+            extSection.style.opacity = '0.4';
+            extSection.style.pointerEvents = 'none';
+        } else {
+            extSection.style.opacity = '1';
+            extSection.style.pointerEvents = 'auto';
+        }
+        updateTotal();
+    }
+
+    function changeVal(id, delta) {
+        var el = document.getElementById(id);
+        var val = parseInt(el.value) || 0;
+        val = Math.max(0, Math.min(50, val + delta));
+        el.value = val;
+        updateTotal();
+    }
+
+    function updateTotal() {
+        var nbPlinkk = parseInt(document.getElementById('input_plinkk').value) || 0;
+        var nbRedirect = parseInt(document.getElementById('input_redirect').value) || 0;
+
+        var baseCost = PLAN_PRICES[selectedPlan];
+        var extCost = (selectedPlan === 'lifetime' || selectedPlan === 'yearly') ? 0 : (nbPlinkk * EXT_PRICES.plinkk) + (nbRedirect * EXT_PRICES.redirect);
+        var total = baseCost + extCost;
+
+        document.getElementById('total_price').innerText = total.toFixed(2) + '€';
+        document.getElementById('price_plinkk').innerText = (nbPlinkk * EXT_PRICES.plinkk).toFixed(2) + '€';
+        document.getElementById('price_redirect').innerText = (nbRedirect * EXT_PRICES.redirect).toFixed(2) + '€';
+
+        var suffix = document.getElementById('total_suffix');
+        var label = document.getElementById('total_label');
+        if (selectedPlan === 'monthly') {
+            suffix.innerText = '/mois';
+            label.innerText = 'Total mensuel estimé';
+        } else if (selectedPlan === 'yearly') {
+            suffix.innerText = '/an' + (extCost > 0 ? ' + ' + extCost.toFixed(2) + '€/mois (extensions)' : '');
+            label.innerText = 'Total annuel estimé';
+        } else {
+            suffix.innerText = ' (paiement unique)';
+            label.innerText = 'Total lifetime';
+        }
+    }
+
+    async function updateSubscription() {
+        var btn = document.getElementById('btn_update');
+        var originalText = btn.innerText;
+        btn.innerText = "Traitement...";
+        btn.disabled = true;
+
+        var payload = {
+            plan: selectedPlan,
+            premium: true,
+            extraPlinkks: (selectedPlan === 'lifetime' || selectedPlan === 'yearly') ? 0 : (parseInt(document.getElementById('input_plinkk').value) || 0),
+            extraRedirects: (selectedPlan === 'lifetime' || selectedPlan === 'yearly') ? 0 : (parseInt(document.getElementById('input_redirect').value) || 0)
+        };
+
+        try {
+            var res = await fetch('/api/stripe/update-plan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            var data = await res.json();
+            
+            if (data.url) {
+                window.location.href = data.url;
+            } else if (data.updated) {
+                alert(data.message || "Abonnement mis à jour !");
+                window.location.href = '/premium';
+            } else {
+                alert("Erreur: " + (data.error || "Inconnue"));
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        } catch (e) {
+            alert("Erreur de connexion");
+            console.error(e);
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+    
+    updateTotal();
+</script>
+<% } %>

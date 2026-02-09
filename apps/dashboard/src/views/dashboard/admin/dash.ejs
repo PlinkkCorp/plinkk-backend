@@ -1,12 +1,12 @@
-<%- include('../../partials/head.ejs', 
+<%- include('partials/head.ejs', 
 {   title: 'Tableau de bord - Administration' , 
     description: 'Tableau de bord d\'administration — actions rapides, statistiques et modération.' ,
     robots: 'noindex,nofollow' }) %>
 
-<%- include('../../partials/header-dash.ejs', { user: user }) %>
+<%- include('partials/header-dash.ejs', { user: user }) %>
 
 <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-    <%- include('../../partials/admin-nav.ejs', { user: user, active: 'dashboard' }) %>
+    <%- include('partials/admin-nav.ejs', { user: user, active: 'dashboard' }) %>
 
     <%
     pendingCount=(typeof totals !=='undefined' && totals && totals.pendingThemes !=null) ?

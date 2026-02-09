@@ -14,6 +14,7 @@ export * from "./lib/userUtils.js";
 export * from "./lib/reservedSlugs.js";
 export * from "./lib/bannedSlugs.js";
 export * from "./lib/redirectService.js";
+export * from "./lib/premiumService.js";
 export * from "./types/user.js";
 
 declare module "@fastify/secure-session" {

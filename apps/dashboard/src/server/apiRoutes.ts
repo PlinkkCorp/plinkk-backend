@@ -15,6 +15,8 @@ import { apiUsersRoutes } from "./api/users";
 import { apiAdminPlinkksRoutes } from "./api/admin/plinkks";
 import { apiAdminRolesRoutes } from "./api/admin/roles";
 import { apiAdminRedirectsRoutes } from "./api/admin/redirects";
+import { apiStripeRoutes } from "./api/stripe";
+import { UnauthorizedError, ForbiddenError, BadRequestError, ConflictError } from "@plinkk/shared";
 
 // const prisma = new PrismaClient();
 
@@ -25,16 +27,17 @@ export function apiRoutes(fastify: FastifyInstance) {
   fastify.register(apiAdminPlinkksRoutes, { prefix: "/admin/plinkks" });
   fastify.register(apiAdminRolesRoutes, { prefix: "/admin/roles" });
   fastify.register(apiAdminRedirectsRoutes, { prefix: "/admin/redirects" });
+  fastify.register(apiStripeRoutes, { prefix: "/stripe" });
 
   fastify.get("/roles", async (request, reply) => {
     const userId = request.session.get("data");
-    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    if (!userId) throw new UnauthorizedError();
     const me = await prisma.user.findFirst({
       where: { id: userId },
       select: { role: true },
     });
     if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "forbidden" });
+      throw new ForbiddenError();
     const roles = await prisma.role.findMany({
       select: { id: true, name: true },
       orderBy: { name: "asc" },
@@ -44,29 +47,29 @@ export function apiRoutes(fastify: FastifyInstance) {
 
   fastify.get("/bans", async (request, reply) => {
     const userId = request.session.get("data");
-    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    if (!userId) throw new UnauthorizedError();
     const me = await prisma.user.findFirst({
       where: { id: userId },
       select: { role: true },
     });
     if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "forbidden" });
+      throw new ForbiddenError();
     const list = await listBannedSlugs();
     return reply.send({ bans: list });
   });
 
   fastify.post("/bans", async (request, reply) => {
     const userId = request.session.get("data");
-    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    if (!userId) throw new UnauthorizedError();
     const me = await prisma.user.findFirst({
       where: { id: userId },
       select: { role: true },
     });
     if (!(me && verifyRoleIsStaff(me.role)))
-      return reply.code(403).send({ error: "forbidden" });
+      throw new ForbiddenError();
     const body = request.body as { slug: string; reason: string };
     const slug = (body.slug || "").trim();
-    if (!slug) return reply.code(400).send({ error: "missing_slug" });
+    if (!slug) throw new BadRequestError("missing_slug");
     try {
       const created = await createBannedSlug(slug, body.reason);
       await logAdminAction(userId, 'BAN_SLUG', slug, { reason: body.reason }, request.ip);
@@ -84,9 +87,8 @@ export function apiRoutes(fastify: FastifyInstance) {
         String(e?.message).includes("Unique") ||
         String(e?.message).includes("UNIQUE")
       )
-        return reply.code(409).send({ error: "already_banned" });
-      request.log?.error(e, "createBannedSlug failed");
-      return reply.code(500).send({ error: "internal_error" });
+        throw new ConflictError("already_banned");
+      throw e;
     }
   });
 
