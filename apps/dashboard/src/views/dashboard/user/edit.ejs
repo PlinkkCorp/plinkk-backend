@@ -216,23 +216,53 @@
                                         <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Image
                                             de profil (URL) <span class="info-i"
                                                 title="URL d’une image carrée">i</span></span>
-                                        <input id="profileImage" type="url"
-                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                                        <div class="flex items-center gap-2">
+                                            <input id="profileImage" type="url"
+                                                class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                                            <input type="file" id="uploadProfileImage" accept="image/*"
+                                                class="hidden" />
+                                            <button type="button" data-upload-for="profileImage"
+                                                data-field="profileImage"
+                                                class="upload-btn shrink-0 px-3 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-colors"
+                                                title="Uploader une image">
+                                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                                    <polyline points="17 8 12 3 7 8" />
+                                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </label>
                                     <label class="block space-y-2">
                                         <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Icône
                                             de profil (URL) <span class="info-i"
                                                 title="Petite icône affichée près de ton nom">i</span></span>
-                                        <div class="relative">
-                                            <input id="profileIcon" data-maskable="true" type="url"
-                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
-                                            <button type="button" data-target="profileIcon"
-                                                class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-                                                <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24"
-                                                    fill="none" stroke="currentColor" stroke-width="2"
-                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
-                                                    <circle cx="12" cy="12" r="3"></circle>
+                                        <div class="flex items-center gap-2">
+                                            <div class="relative flex-1">
+                                                <input id="profileIcon" data-maskable="true" type="url"
+                                                    class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                                                <button type="button" data-target="profileIcon"
+                                                    class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                                                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24"
+                                                        fill="none" stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <input type="file" id="uploadProfileIcon" accept="image/*" class="hidden" />
+                                            <button type="button" data-upload-for="profileIcon" data-field="profileIcon"
+                                                class="upload-btn shrink-0 px-3 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-colors"
+                                                title="Uploader une image">
+                                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                                    <polyline points="17 8 12 3 7 8" />
+                                                    <line x1="12" y1="3" x2="12" y2="15" />
                                                 </svg>
                                             </button>
                                         </div>
@@ -241,16 +271,30 @@
                                         <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Icône
                                             d’onglet (URL) <span class="info-i"
                                                 title="Favicon affichée dans l’onglet">i</span></span>
-                                        <div class="relative">
-                                            <input id="iconUrl" data-maskable="true" type="url"
-                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
-                                            <button type="button" data-target="iconUrl"
-                                                class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-                                                <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24"
-                                                    fill="none" stroke="currentColor" stroke-width="2"
-                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
-                                                    <circle cx="12" cy="12" r="3"></circle>
+                                        <div class="flex items-center gap-2">
+                                            <div class="relative flex-1">
+                                                <input id="iconUrl" data-maskable="true" type="url"
+                                                    class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                                                <button type="button" data-target="iconUrl"
+                                                    class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                                                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24"
+                                                        fill="none" stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <input type="file" id="uploadIconUrl" accept="image/*" class="hidden" />
+                                            <button type="button" data-upload-for="iconUrl" data-field="iconUrl"
+                                                class="upload-btn shrink-0 px-3 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-colors"
+                                                title="Uploader une image">
+                                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                                    <polyline points="17 8 12 3 7 8" />
+                                                    <line x1="12" y1="3" x2="12" y2="15" />
                                                 </svg>
                                             </button>
                                         </div>
@@ -475,54 +519,71 @@
                                             <h3 class="text-lg font-semibold text-white">Liens</h3>
                                             <p class="text-sm text-slate-400">Vos liens principaux.</p>
                                         </div>
-                                        <% if (typeof linksCount !== 'undefined' && typeof maxLinks !== 'undefined' && linksCount >= maxLinks) { %>
-                                            <a href="/premium" class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-700 transition-colors flex items-center gap-2 cursor-pointer">
+                                        <% if (typeof linksCount !=='undefined' && typeof maxLinks !=='undefined' &&
+                                            linksCount>= maxLinks) { %>
+                                            <a href="/premium"
+                                                class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-700 transition-colors flex items-center gap-2 cursor-pointer">
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                                     stroke-linejoin="round">
-                                                    <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                                    <path
+                                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                                 </svg>
                                                 Limite atteinte (<%= maxLinks %>)
                                             </a>
-                                        <% } else { %>
-                                            <button id="addLink" type="button"
-                                                class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors flex items-center gap-2">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round">
-                                                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                                                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                                                </svg>
-                                                Ajouter un lien
-                                            </button>
-                                        <% } %>
+                                            <% } else { %>
+                                                <button id="addLink" type="button"
+                                                    class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors flex items-center gap-2">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round">
+                                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                    </svg>
+                                                    Ajouter un lien
+                                                </button>
+                                                <% } %>
                                     </div>
 
-                                    <% if (typeof linksCount !== 'undefined' && typeof maxLinks !== 'undefined' && linksCount >= maxLinks) { %>
-                                        <div class="bg-gradient-to-r from-violet-900/40 to-fuchsia-900/40 border border-violet-500/30 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 mb-4">
+                                    <% if (typeof linksCount !=='undefined' && typeof maxLinks !=='undefined' &&
+                                        linksCount>= maxLinks) { %>
+                                        <div
+                                            class="bg-gradient-to-r from-violet-900/40 to-fuchsia-900/40 border border-violet-500/30 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 mb-4">
                                             <div class="flex items-center gap-3">
                                                 <div class="p-2 bg-violet-600/20 rounded-lg text-violet-300">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                                    </svg>
                                                 </div>
                                                 <div>
-                                                    <h3 class="font-bold text-white text-sm">Débloquez plus de liens</h3>
-                                                    <p class="text-slate-300 text-xs">Passez Premium pour ajouter jusqu'à <%= typeof maxLinks !== 'undefined' ? maxLinks * 2 : 'plus' %> liens.</p>
+                                                    <h3 class="font-bold text-white text-sm">Débloquez plus de liens
+                                                    </h3>
+                                                    <p class="text-slate-300 text-xs">Passez Premium pour ajouter
+                                                        jusqu'à <%= typeof maxLinks !=='undefined' ? maxLinks * 2
+                                                            : 'plus' %> liens.</p>
                                                 </div>
                                             </div>
-                                            <a href="/premium" class="px-4 py-2 bg-white text-violet-900 font-bold rounded-lg hover:bg-slate-200 transition-colors shadow-lg text-xs whitespace-nowrap">
+                                            <a href="/premium"
+                                                class="px-4 py-2 bg-white text-violet-900 font-bold rounded-lg hover:bg-slate-200 transition-colors shadow-lg text-xs whitespace-nowrap">
                                                 Passer Premium
                                             </a>
                                         </div>
-                                    <% } else { %>
-                                        <div class="flex items-center gap-3 mt-3">
-                                            <input id="quickAddInput" type="text" placeholder="Titre | https://..." class="flex-1 px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 placeholder-slate-600" />
-                                            <span class="info-i" title="Format: 'Titre | https://...' ou uniquement l'URL">?</span>
-                                            <button id="quickAddBtn" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-sm">Ajouter</button>
-                                            <button id="openAddModalBtn" type="button" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm">Avancé</button>
-                                        </div>
-                                    <% } %>
+                                        <% } else { %>
+                                            <div class="flex items-center gap-3 mt-3">
+                                                <input id="quickAddInput" type="text" placeholder="Titre | https://..."
+                                                    class="flex-1 px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 placeholder-slate-600" />
+                                                <span class="info-i"
+                                                    title="Format: 'Titre | https://...' ou uniquement l'URL">?</span>
+                                                <button id="quickAddBtn" type="button"
+                                                    class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-sm">Ajouter</button>
+                                                <button id="openAddModalBtn" type="button"
+                                                    class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm">Avancé</button>
+                                            </div>
+                                            <% } %>
 
-                                    <div id="linksList" class="space-y-3 min-h-[50px]"></div>
+                                                <div id="linksList" class="space-y-3 min-h-[50px]"></div>
                                 </div>
                             </div>
 
@@ -803,376 +864,450 @@
                 </main>
         </div>
         <%- include('./edit/link-modal.ejs') %>
-        <%- include('./edit/icon-modal.ejs') %>
-        <%- include('./edit/picker-modal.ejs') %>
+            <%- include('./edit/icon-modal.ejs') %>
+                <%- include('./edit/picker-modal.ejs') %>
 
-        <script>
-            window.__PLINKK_USER_ID__ = "<%= user.id %>";
-            (function () {
-                const btns = Array.from(document.querySelectorAll('.tab-btn'));
-                const sections = Array.from(document.querySelectorAll('[id^="section-"]'));
-                const selectTab = (target) => {
-                    sections.forEach(s => s.classList.toggle('hidden', `#${s.id}` !== target));
-                    btns.forEach(b => b.setAttribute('aria-selected', b.dataset.target === target ? 'true' : 'false'));
-                    if (history.replaceState) {
-                        history.replaceState(null, '', target);
-                    } else {
-                        location.hash = target;
-                    }
-                };
-                btns.forEach(b => b.addEventListener('click', () => selectTab(b.dataset.target)));
-                const initial = location.hash && sections.some(s => `#${s.id}` === location.hash) ? location.hash : '#section-profile';
-                selectTab(initial);
-            })();
-        </script>
-        <style>
-            .masked-field {
-                background-color: rgba(100, 100, 100, 0.12) !important;
-                opacity: 0.65;
-                cursor: not-allowed;
-            }
-
-            .masked-field:disabled {
-                color: inherit;
-            }
-
-            .masked-field[readonly] {
-                color: inherit;
-            }
-
-            .mask-toggle {
-                line-height: 1;
-            }
-
-            .info-i {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                width: 14px;
-                height: 14px;
-                font-size: 10px;
-                line-height: 1;
-                border-radius: 9999px;
-                border: 1px solid rgba(148, 163, 184, 0.35);
-                color: #cbd5e1;
-                margin-left: 6px;
-                cursor: help;
-                background: rgba(15, 23, 42, 0.5);
-            }
-
-            .info-i:hover {
-                background: rgba(30, 41, 59, 0.6);
-                color: #e5e7eb;
-                border-color: rgba(148, 163, 184, 0.6);
-            }
-
-            .deg-dial {
-                position: relative;
-                width: 72px;
-                height: 72px;
-                border-radius: 100%;
-                border: 1px solid #334155;
-                background: radial-gradient(closest-side, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
-                box-shadow: inset 0 0 0 2px rgba(148, 163, 184, 0.1);
-                outline: none;
-                user-select: none;
-                -webkit-user-select: none;
-                touch-action: none;
-                cursor: grab;
-            }
-
-            .deg-dial:focus {
-                box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.55), inset 0 0 0 2px rgba(148, 163, 184, 0.1);
-            }
-
-            .deg-dial.is-dragging {
-                cursor: grabbing;
-            }
-
-            .deg-dial-dot {
-                position: absolute;
-                width: 14px;
-                height: 14px;
-                border-radius: 100%;
-                background: #93c5fd;
-                border: 2px solid #1f2937;
-                top: 50%;
-                left: 50%;
-                box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.35);
-                pointer-events: auto;
-                cursor: grab;
-            }
-
-            .deg-dial:active .deg-dial-dot,
-            .deg-dial.is-dragging .deg-dial-dot {
-                background: #3b82f6;
-                cursor: grabbing;
-            }
-        </style>
-        <script>
-            (function () {
-                const USER_ID = window.__PLINKK_USER_ID__ || 'self';
-                const PLINKK_ID = window.__PLINKK_SELECTED_ID__ || 'default';
-                const LS_PREFIX = 'PLK_MASK:';
-
-                function lsGet(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } }
-                function lsSet(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch { } }
-                function lsDel(key) { try { localStorage.removeItem(key); } catch { } }
-                function getKey(inputId) { return `${LS_PREFIX}${USER_ID}:${PLINKK_ID}:${inputId}`; }
-
-                function applyMaskedState(input, btn, saved) {
-                    if (!input || !btn) return;
-                    const isMasked = !!(saved && saved.masked);
-
-                    btn.setAttribute('title', 'Masquer / afficher le champ');
-                    btn.setAttribute('aria-pressed', isMasked ? 'true' : 'false');
-
-                    if (isMasked) {
-                        if (saved && typeof saved.value !== 'undefined') {
-                            input.value = saved.value;
-                        }
-                        input.dataset._originalValue = input.value ?? '';
-                        input.readOnly = true;
-                        input.disabled = true;
-                        input.classList.add('masked-field');
-                        btn.innerHTML = '<svg class="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a20.81 20.81 0 0 1 5.06-6.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.82 20.82 0 0 1-4.87 6.82M1 1l22 22"/></svg>';
-                    } else {
-                        if (typeof input.dataset._originalValue !== 'undefined') {
-                            input.value = input.dataset._originalValue;
-                            delete input.dataset._originalValue;
-                        }
-                        input.readOnly = false;
-                        input.disabled = false;
-                        input.classList.remove('masked-field');
-                        btn.innerHTML = '<svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
-                    }
-                }
-
-                const buttons = Array.from(document.querySelectorAll('.mask-toggle'));
-                buttons.forEach(btn => {
-                    const targetId = btn.getAttribute('data-target');
-                    if (!targetId) return;
-                    const input = document.getElementById(targetId);
-                    if (!input) return;
-
-                    const key = getKey(targetId);
-                    const saved = lsGet(key);
-                    applyMaskedState(input, btn, saved);
-
-                    btn.addEventListener('click', () => {
-                        const currentlyMasked = btn.getAttribute('aria-pressed') === 'true';
-                        if (!currentlyMasked) {
-                            const value = input.value ?? '';
-                            lsSet(key, { masked: true, value });
-                            applyMaskedState(input, btn, { masked: true, value });
-                        } else {
-                            lsDel(key);
-                            applyMaskedState(input, btn, { masked: false });
-                        }
-                        if (window.__DASH_TRIGGER_SAVE__) {
-                            window.__DASH_TRIGGER_SAVE__();
-                        }
-                    });
-                });
-
-                function clearMaskedValues() {
-                    document.querySelectorAll('[data-maskable]')
-                        .forEach(inp => {
-                            const key = getKey(inp.id);
-                            const saved = lsGet(key);
-                            const isMasked = (typeof inp.dataset._originalValue !== 'undefined') || inp.classList.contains('masked-field') || (saved && saved.masked);
-                            if (isMasked) {
-                                inp.value = '';
-                            }
-                        });
-                }
-
-                document.addEventListener('click', (e) => {
-                    const saveBtn = e.target.closest && e.target.closest('#saveBtn, #saveBtn--mobile, #saveBtn--fab');
-                    if (saveBtn) {
-                        clearMaskedValues();
-                    }
-                }, true);
-
-                (function attachFormInterceptor() {
-                    const sample = document.querySelector('[data-maskable]');
-                    if (!sample) return;
-                    const form = sample.closest('form');
-                    if (!form) return;
-                    form.addEventListener('submit', (ev) => {
-                        clearMaskedValues();
-                    });
-                })();
-            })();
-        </script>
-        <script type="module">
-            import canvaData from '/public/config/canvaConfig.js';
-            import { animations, animationBackground } from '/public/config/animationConfig.js';
-            import btnIconThemeConfig from '/public/config/btnIconThemeConfig.js';
-            import labelPresets from '/public/config/labelPresets.js';
-            try {
-                const res = await fetch(`/themes.json?userId=${encodeURIComponent("<%= user.id %>")}`);
-                let builtIns = [];
-                let community = [];
-                if (res.ok) {
-                    const payload = await res.json();
-                    builtIns = Array.isArray(payload.builtIns) ? payload.builtIns : [];
-                    community = Array.isArray(payload.theme) ? payload.theme : [];
-                }
-                const mergedThemes = builtIns.concat(community);
-                window.__PLINKK_CFG__ = { themes: mergedThemes, canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
-            } catch (e) {
-                window.__PLINKK_CFG__ = { themes: [], canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
-            }
-        </script>
-        <script>
-            (function () {
-                const input = document.getElementById('degBackgroundColor');
-                const dial = document.getElementById('degDial');
-                const dot = dial ? dial.querySelector('.deg-dial-dot') : null;
-                if (!input || !dial || !dot) return;
-
-                function clampDeg(n) { n = Math.round(Number(n) || 0); n %= 360; if (n < 0) n += 360; return n; }
-                function setAria(val) { dial.setAttribute('aria-valuenow', String(val)); }
-                function setDot(val) { dot.style.transform = `translate(-50%, -50%) rotate(${val - 90}deg) translate(26px, 0)`; }
-                function syncFromInput() { const v = clampDeg(input.value); setDot(v); setAria(v); }
-                function syncFromDeg(val) { const v = clampDeg(val); input.value = String(v); setDot(v); setAria(v); if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); }
-
-                setTimeout(syncFromInput, 0);
-
-                input.addEventListener('input', () => syncFromInput());
-                input.addEventListener('change', () => { if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); });
-
-                function posToDeg(clientX, clientY) {
-                    const rect = dial.getBoundingClientRect();
-                    const cx = rect.left + rect.width / 2; const cy = rect.top + rect.height / 2;
-                    const dx = clientX - cx; const dy = clientY - cy;
-                    let angle = Math.atan2(dy, dx) * 180 / Math.PI;
-                    angle = (angle + 360) % 360;
-                    angle = (angle + 90) % 360;
-                    return Math.round(angle);
-                }
-
-                let dragging = false;
-                function onPointerMove(e) {
-                    if (!dragging) return;
-                    const pt = e.touches?.[0] || e;
-                    syncFromDeg(posToDeg(pt.clientX, pt.clientY));
-                    e.preventDefault();
-                }
-                function onPointerUp() {
-                    dragging = false;
-                    dial.classList.remove('is-dragging');
-                    window.removeEventListener('mousemove', onPointerMove, { passive: false });
-                    window.removeEventListener('mouseup', onPointerUp);
-                    window.removeEventListener('touchmove', onPointerMove);
-                    window.removeEventListener('touchend', onPointerUp);
-                }
-                function startDrag(e) {
-                    e.preventDefault();
-                    dragging = true;
-                    dial.classList.add('is-dragging');
-                    const pt = e.touches?.[0] || e;
-                    syncFromDeg(posToDeg(pt.clientX, pt.clientY));
-                    window.addEventListener('mousemove', onPointerMove, { passive: false });
-                    window.addEventListener('mouseup', onPointerUp);
-                    window.addEventListener('touchmove', onPointerMove, { passive: false });
-                    window.addEventListener('touchend', onPointerUp);
-                    dial.focus();
-                }
-
-                dial.addEventListener('mousedown', startDrag);
-                dial.addEventListener('touchstart', startDrag, { passive: false });
-
-                dial.addEventListener('wheel', (e) => {
-                    if (document.activeElement !== dial) return;
-                    e.preventDefault();
-                    const delta = e.deltaY || e.deltaX || 0;
-                    const step = e.shiftKey ? 10 : 1;
-                    const dir = delta > 0 ? -step : step;
-                    const val = clampDeg((Number(input.value) || 0) + dir);
-                    syncFromDeg(val);
-                }, { passive: false });
-
-                dial.addEventListener('keydown', (e) => {
-                    const step = (e.shiftKey ? 10 : 1);
-                    let val = clampDeg(input.value);
-                    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { val = clampDeg(val + step); syncFromDeg(val); e.preventDefault(); }
-                    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { val = clampDeg(val - step); syncFromDeg(val); e.preventDefault(); }
-                    if (e.key === 'Home') { syncFromDeg(0); e.preventDefault(); }
-                    if (e.key === 'End') { syncFromDeg(359); e.preventDefault(); }
-                });
-            })();
-        </script>
-        <script type="application/json"
-            id="pages-data"><%- JSON.stringify(typeof pages !== 'undefined' ? pages : []) %></script>
-        <script type="application/json"
-            id="autoopen-data"><%= (typeof autoOpenPlinkkModal !== 'undefined' && autoOpenPlinkkModal) ? 'true' : 'false' %></script>
-        <% if (typeof plinkk !=='undefined' && plinkk) { %>
-            <script>window.__PLINKK_SELECTED_ID__ = "<%= plinkk.id %>";</script>
-            <% } %>
-                <script type="module" src="/public/js/dashboard-ui/index.js"></script>
-                <script>
-                    (function () {
-                        const frame = document.getElementById('preview');
-                        const wrap = frame && frame.parentElement;
-                        if (!frame || !wrap) return;
-                        const setMobile = (on) => {
-                            if (on) { frame.style.width = '390px'; frame.style.margin = '0 auto'; }
-                            else { frame.style.width = '100%'; frame.style.margin = '0'; }
-                        };
-                        document.querySelectorAll('[data-view]')?.forEach(btn => {
-                            btn.addEventListener('click', () => setMobile(btn.getAttribute('data-view') === 'mobile'));
-                        });
-                    })();
-                    (function () {
-                        try {
-                            const nameInput = document.getElementById('userName');
-                            const headerName = document.getElementById('headerPlinkkName');
-                            if (nameInput && headerName) {
-                                nameInput.addEventListener('input', () => {
-                                    const v = nameInput.value || '';
-                                    headerName.textContent = v || headerName.getAttribute('data-original') || '';
-                                });
-                                headerName.setAttribute('data-original', headerName.textContent || '');
-                            }
-                        } catch (e) { }
-                    })();
-                    (function () {
-                        const autoOpenRaw = document.getElementById('autoopen-data')?.textContent || 'false';
-                        const autoOpen = String(autoOpenRaw).trim() === 'true';
-                        if (autoOpen) {
-                            const modal = document.getElementById('plinkkSelectorModal');
-                            if (modal) modal.classList.remove('hidden');
-                        }
-                    })();
-                    (function () {
-                        const refreshBtn = document.getElementById('refreshPreview');
-                        const frame = document.getElementById('preview');
-                        if (!refreshBtn || !frame) return;
-
-                        refreshBtn.addEventListener('click', () => {
-                            const svg = refreshBtn.querySelector('svg');
-                            if (svg) svg.classList.add('animate-spin');
-
-                            // Reload iframe
-                            try {
-                                const url = new URL(frame.src);
-                                url.searchParams.set('t', Date.now());
-                                frame.src = url.toString();
-                            } catch (e) {
-                                frame.src = frame.src;
-                            }
-
-                            const stopSpin = () => {
-                                if (svg) svg.classList.remove('animate-spin');
+                    <script>
+                        window.__PLINKK_USER_ID__ = "<%= user.id %>";
+                        (function () {
+                            const btns = Array.from(document.querySelectorAll('.tab-btn'));
+                            const sections = Array.from(document.querySelectorAll('[id^="section-"]'));
+                            const selectTab = (target) => {
+                                sections.forEach(s => s.classList.toggle('hidden', `#${s.id}` !== target));
+                                btns.forEach(b => b.setAttribute('aria-selected', b.dataset.target === target ? 'true' : 'false'));
+                                if (history.replaceState) {
+                                    history.replaceState(null, '', target);
+                                } else {
+                                    location.hash = target;
+                                }
                             };
+                            btns.forEach(b => b.addEventListener('click', () => selectTab(b.dataset.target)));
+                            const initial = location.hash && sections.some(s => `#${s.id}` === location.hash) ? location.hash : '#section-profile';
+                            selectTab(initial);
+                        })();
+                    </script>
+                    <style>
+                        .masked-field {
+                            background-color: rgba(100, 100, 100, 0.12) !important;
+                            opacity: 0.65;
+                            cursor: not-allowed;
+                        }
 
-                            frame.onload = stopSpin;
-                            setTimeout(stopSpin, 2000);
-                        });
-                    })();
-                </script>
-                </body>
+                        .masked-field:disabled {
+                            color: inherit;
+                        }
 
-                </html>
+                        .masked-field[readonly] {
+                            color: inherit;
+                        }
+
+                        .mask-toggle {
+                            line-height: 1;
+                        }
+
+                        .info-i {
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 14px;
+                            height: 14px;
+                            font-size: 10px;
+                            line-height: 1;
+                            border-radius: 9999px;
+                            border: 1px solid rgba(148, 163, 184, 0.35);
+                            color: #cbd5e1;
+                            margin-left: 6px;
+                            cursor: help;
+                            background: rgba(15, 23, 42, 0.5);
+                        }
+
+                        .info-i:hover {
+                            background: rgba(30, 41, 59, 0.6);
+                            color: #e5e7eb;
+                            border-color: rgba(148, 163, 184, 0.6);
+                        }
+
+                        .deg-dial {
+                            position: relative;
+                            width: 72px;
+                            height: 72px;
+                            border-radius: 100%;
+                            border: 1px solid #334155;
+                            background: radial-gradient(closest-side, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+                            box-shadow: inset 0 0 0 2px rgba(148, 163, 184, 0.1);
+                            outline: none;
+                            user-select: none;
+                            -webkit-user-select: none;
+                            touch-action: none;
+                            cursor: grab;
+                        }
+
+                        .deg-dial:focus {
+                            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.55), inset 0 0 0 2px rgba(148, 163, 184, 0.1);
+                        }
+
+                        .deg-dial.is-dragging {
+                            cursor: grabbing;
+                        }
+
+                        .deg-dial-dot {
+                            position: absolute;
+                            width: 14px;
+                            height: 14px;
+                            border-radius: 100%;
+                            background: #93c5fd;
+                            border: 2px solid #1f2937;
+                            top: 50%;
+                            left: 50%;
+                            box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.35);
+                            pointer-events: auto;
+                            cursor: grab;
+                        }
+
+                        .deg-dial:active .deg-dial-dot,
+                        .deg-dial.is-dragging .deg-dial-dot {
+                            background: #3b82f6;
+                            cursor: grabbing;
+                        }
+                    </style>
+                    <script>
+                        (function () {
+                            const USER_ID = window.__PLINKK_USER_ID__ || 'self';
+                            const PLINKK_ID = window.__PLINKK_SELECTED_ID__ || 'default';
+                            const LS_PREFIX = 'PLK_MASK:';
+
+                            function lsGet(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } }
+                            function lsSet(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch { } }
+                            function lsDel(key) { try { localStorage.removeItem(key); } catch { } }
+                            function getKey(inputId) { return `${LS_PREFIX}${USER_ID}:${PLINKK_ID}:${inputId}`; }
+
+                            function applyMaskedState(input, btn, saved) {
+                                if (!input || !btn) return;
+                                const isMasked = !!(saved && saved.masked);
+
+                                btn.setAttribute('title', 'Masquer / afficher le champ');
+                                btn.setAttribute('aria-pressed', isMasked ? 'true' : 'false');
+
+                                if (isMasked) {
+                                    if (saved && typeof saved.value !== 'undefined') {
+                                        input.value = saved.value;
+                                    }
+                                    input.dataset._originalValue = input.value ?? '';
+                                    input.readOnly = true;
+                                    input.disabled = true;
+                                    input.classList.add('masked-field');
+                                    btn.innerHTML = '<svg class="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a20.81 20.81 0 0 1 5.06-6.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.82 20.82 0 0 1-4.87 6.82M1 1l22 22"/></svg>';
+                                } else {
+                                    if (typeof input.dataset._originalValue !== 'undefined') {
+                                        input.value = input.dataset._originalValue;
+                                        delete input.dataset._originalValue;
+                                    }
+                                    input.readOnly = false;
+                                    input.disabled = false;
+                                    input.classList.remove('masked-field');
+                                    btn.innerHTML = '<svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+                                }
+                            }
+
+                            const buttons = Array.from(document.querySelectorAll('.mask-toggle'));
+                            buttons.forEach(btn => {
+                                const targetId = btn.getAttribute('data-target');
+                                if (!targetId) return;
+                                const input = document.getElementById(targetId);
+                                if (!input) return;
+
+                                const key = getKey(targetId);
+                                const saved = lsGet(key);
+                                applyMaskedState(input, btn, saved);
+
+                                btn.addEventListener('click', () => {
+                                    const currentlyMasked = btn.getAttribute('aria-pressed') === 'true';
+                                    if (!currentlyMasked) {
+                                        const value = input.value ?? '';
+                                        lsSet(key, { masked: true, value });
+                                        applyMaskedState(input, btn, { masked: true, value });
+                                    } else {
+                                        lsDel(key);
+                                        applyMaskedState(input, btn, { masked: false });
+                                    }
+                                    if (window.__DASH_TRIGGER_SAVE__) {
+                                        window.__DASH_TRIGGER_SAVE__();
+                                    }
+                                });
+                            });
+
+                            function clearMaskedValues() {
+                                document.querySelectorAll('[data-maskable]')
+                                    .forEach(inp => {
+                                        const key = getKey(inp.id);
+                                        const saved = lsGet(key);
+                                        const isMasked = (typeof inp.dataset._originalValue !== 'undefined') || inp.classList.contains('masked-field') || (saved && saved.masked);
+                                        if (isMasked) {
+                                            inp.value = '';
+                                        }
+                                    });
+                            }
+
+                            document.addEventListener('click', (e) => {
+                                const saveBtn = e.target.closest && e.target.closest('#saveBtn, #saveBtn--mobile, #saveBtn--fab');
+                                if (saveBtn) {
+                                    clearMaskedValues();
+                                }
+                            }, true);
+
+                            (function attachFormInterceptor() {
+                                const sample = document.querySelector('[data-maskable]');
+                                if (!sample) return;
+                                const form = sample.closest('form');
+                                if (!form) return;
+                                form.addEventListener('submit', (ev) => {
+                                    clearMaskedValues();
+                                });
+                            })();
+                        })();
+                    </script>
+                    <script type="module">
+                        import canvaData from '/public/config/canvaConfig.js';
+                        import { animations, animationBackground } from '/public/config/animationConfig.js';
+                        import btnIconThemeConfig from '/public/config/btnIconThemeConfig.js';
+                        import labelPresets from '/public/config/labelPresets.js';
+                        try {
+                            const res = await fetch(`/themes.json?userId=${encodeURIComponent("<%= user.id %>")}`);
+                            let builtIns = [];
+                            let community = [];
+                            if (res.ok) {
+                                const payload = await res.json();
+                                builtIns = Array.isArray(payload.builtIns) ? payload.builtIns : [];
+                                community = Array.isArray(payload.theme) ? payload.theme : [];
+                            }
+                            const mergedThemes = builtIns.concat(community);
+                            window.__PLINKK_CFG__ = { themes: mergedThemes, canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
+                        } catch (e) {
+                            window.__PLINKK_CFG__ = { themes: [], canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
+                        }
+                    </script>
+                    <script>
+                        (function () {
+                            const input = document.getElementById('degBackgroundColor');
+                            const dial = document.getElementById('degDial');
+                            const dot = dial ? dial.querySelector('.deg-dial-dot') : null;
+                            if (!input || !dial || !dot) return;
+
+                            function clampDeg(n) { n = Math.round(Number(n) || 0); n %= 360; if (n < 0) n += 360; return n; }
+                            function setAria(val) { dial.setAttribute('aria-valuenow', String(val)); }
+                            function setDot(val) { dot.style.transform = `translate(-50%, -50%) rotate(${val - 90}deg) translate(26px, 0)`; }
+                            function syncFromInput() { const v = clampDeg(input.value); setDot(v); setAria(v); }
+                            function syncFromDeg(val) { const v = clampDeg(val); input.value = String(v); setDot(v); setAria(v); if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); }
+
+                            setTimeout(syncFromInput, 0);
+
+                            input.addEventListener('input', () => syncFromInput());
+                            input.addEventListener('change', () => { if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); });
+
+                            function posToDeg(clientX, clientY) {
+                                const rect = dial.getBoundingClientRect();
+                                const cx = rect.left + rect.width / 2; const cy = rect.top + rect.height / 2;
+                                const dx = clientX - cx; const dy = clientY - cy;
+                                let angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                                angle = (angle + 360) % 360;
+                                angle = (angle + 90) % 360;
+                                return Math.round(angle);
+                            }
+
+                            let dragging = false;
+                            function onPointerMove(e) {
+                                if (!dragging) return;
+                                const pt = e.touches?.[0] || e;
+                                syncFromDeg(posToDeg(pt.clientX, pt.clientY));
+                                e.preventDefault();
+                            }
+                            function onPointerUp() {
+                                dragging = false;
+                                dial.classList.remove('is-dragging');
+                                window.removeEventListener('mousemove', onPointerMove, { passive: false });
+                                window.removeEventListener('mouseup', onPointerUp);
+                                window.removeEventListener('touchmove', onPointerMove);
+                                window.removeEventListener('touchend', onPointerUp);
+                            }
+                            function startDrag(e) {
+                                e.preventDefault();
+                                dragging = true;
+                                dial.classList.add('is-dragging');
+                                const pt = e.touches?.[0] || e;
+                                syncFromDeg(posToDeg(pt.clientX, pt.clientY));
+                                window.addEventListener('mousemove', onPointerMove, { passive: false });
+                                window.addEventListener('mouseup', onPointerUp);
+                                window.addEventListener('touchmove', onPointerMove, { passive: false });
+                                window.addEventListener('touchend', onPointerUp);
+                                dial.focus();
+                            }
+
+                            dial.addEventListener('mousedown', startDrag);
+                            dial.addEventListener('touchstart', startDrag, { passive: false });
+
+                            dial.addEventListener('wheel', (e) => {
+                                if (document.activeElement !== dial) return;
+                                e.preventDefault();
+                                const delta = e.deltaY || e.deltaX || 0;
+                                const step = e.shiftKey ? 10 : 1;
+                                const dir = delta > 0 ? -step : step;
+                                const val = clampDeg((Number(input.value) || 0) + dir);
+                                syncFromDeg(val);
+                            }, { passive: false });
+
+                            dial.addEventListener('keydown', (e) => {
+                                const step = (e.shiftKey ? 10 : 1);
+                                let val = clampDeg(input.value);
+                                if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { val = clampDeg(val + step); syncFromDeg(val); e.preventDefault(); }
+                                if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { val = clampDeg(val - step); syncFromDeg(val); e.preventDefault(); }
+                                if (e.key === 'Home') { syncFromDeg(0); e.preventDefault(); }
+                                if (e.key === 'End') { syncFromDeg(359); e.preventDefault(); }
+                            });
+                        })();
+                    </script>
+                    <script type="application/json"
+                        id="pages-data"><%- JSON.stringify(typeof pages !== 'undefined' ? pages : []) %></script>
+                    <script type="application/json"
+                        id="autoopen-data"><%= (typeof autoOpenPlinkkModal !== 'undefined' && autoOpenPlinkkModal) ? 'true' : 'false' %></script>
+                    <% if (typeof plinkk !=='undefined' && plinkk) { %>
+                        <script>window.__PLINKK_SELECTED_ID__ = "<%= plinkk.id %>";</script>
+                        <% } %>
+                            <script type="module" src="/public/js/dashboard-ui/index.js"></script>
+                            <script>
+                                (function () {
+                                    const frame = document.getElementById('preview');
+                                    const wrap = frame && frame.parentElement;
+                                    if (!frame || !wrap) return;
+                                    const setMobile = (on) => {
+                                        if (on) { frame.style.width = '390px'; frame.style.margin = '0 auto'; }
+                                        else { frame.style.width = '100%'; frame.style.margin = '0'; }
+                                    };
+                                    document.querySelectorAll('[data-view]')?.forEach(btn => {
+                                        btn.addEventListener('click', () => setMobile(btn.getAttribute('data-view') === 'mobile'));
+                                    });
+                                })();
+                                (function () {
+                                    try {
+                                        const nameInput = document.getElementById('userName');
+                                        const headerName = document.getElementById('headerPlinkkName');
+                                        if (nameInput && headerName) {
+                                            nameInput.addEventListener('input', () => {
+                                                const v = nameInput.value || '';
+                                                headerName.textContent = v || headerName.getAttribute('data-original') || '';
+                                            });
+                                            headerName.setAttribute('data-original', headerName.textContent || '');
+                                        }
+                                    } catch (e) { }
+                                })();
+                                (function () {
+                                    const autoOpenRaw = document.getElementById('autoopen-data')?.textContent || 'false';
+                                    const autoOpen = String(autoOpenRaw).trim() === 'true';
+                                    if (autoOpen) {
+                                        const modal = document.getElementById('plinkkSelectorModal');
+                                        if (modal) modal.classList.remove('hidden');
+                                    }
+                                })();
+                                (function () {
+                                    const refreshBtn = document.getElementById('refreshPreview');
+                                    const frame = document.getElementById('preview');
+                                    if (!refreshBtn || !frame) return;
+
+                                    refreshBtn.addEventListener('click', () => {
+                                        const svg = refreshBtn.querySelector('svg');
+                                        if (svg) svg.classList.add('animate-spin');
+
+                                        // Reload iframe
+                                        try {
+                                            const url = new URL(frame.src);
+                                            url.searchParams.set('t', Date.now());
+                                            frame.src = url.toString();
+                                        } catch (e) {
+                                            frame.src = frame.src;
+                                        }
+
+                                        const stopSpin = () => {
+                                            if (svg) svg.classList.remove('animate-spin');
+                                        };
+
+                                        frame.onload = stopSpin;
+                                        setTimeout(stopSpin, 2000);
+                                    });
+                                })();
+                                // ─── Upload button handlers ───
+                                (function () {
+                                    document.querySelectorAll('.upload-btn[data-upload-for]').forEach(function (btn) {
+                                        var targetId = btn.getAttribute('data-upload-for');
+                                        var field = btn.getAttribute('data-field');
+                                        var fileInput = document.getElementById('upload' + targetId.charAt(0).toUpperCase() + targetId.slice(1));
+                                        var urlInput = document.getElementById(targetId);
+                                        if (!fileInput || !urlInput) return;
+
+                                        btn.addEventListener('click', function () { fileInput.click(); });
+
+                                        fileInput.addEventListener('change', function () {
+                                            var file = fileInput.files[0];
+                                            if (!file) return;
+
+                                            var originalHTML = btn.innerHTML;
+                                            btn.disabled = true;
+                                            btn.classList.add('opacity-60');
+                                            btn.innerHTML = '<svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="15"/></svg>';
+
+                                            var formData = new FormData();
+                                            formData.append('file', file);
+
+                                            function resetBtn() {
+                                                btn.disabled = false;
+                                                btn.classList.remove('opacity-60');
+                                                fileInput.value = '';
+                                            }
+
+                                            function showSuccess() {
+                                                btn.innerHTML = '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+                                                btn.classList.remove('bg-violet-600', 'hover:bg-violet-500');
+                                                btn.classList.add('bg-emerald-600');
+                                                setTimeout(function () {
+                                                    btn.innerHTML = originalHTML;
+                                                    btn.classList.remove('bg-emerald-600');
+                                                    btn.classList.add('bg-violet-600', 'hover:bg-violet-500');
+                                                }, 1500);
+                                            }
+
+                                            function showError(err) {
+                                                btn.innerHTML = '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+                                                btn.classList.remove('bg-violet-600', 'hover:bg-violet-500');
+                                                btn.classList.add('bg-red-600');
+                                                setTimeout(function () {
+                                                    btn.innerHTML = originalHTML;
+                                                    btn.classList.remove('bg-red-600');
+                                                    btn.classList.add('bg-violet-600', 'hover:bg-violet-500');
+                                                }, 2000);
+                                                console.error('Upload error:', err);
+                                            }
+
+                                            fetch('/api/me/upload?field=' + encodeURIComponent(field), {
+                                                method: 'POST',
+                                                body: formData,
+                                            })
+                                                .then(function (res) { return res.json(); })
+                                                .then(function (data) {
+                                                    if (data.ok && data.url) {
+                                                        urlInput.value = data.url;
+                                                        urlInput.dispatchEvent(new Event('input', { bubbles: true }));
+                                                        showSuccess();
+                                                    } else {
+                                                        showError(data.error || 'Erreur');
+                                                    }
+                                                    resetBtn();
+                                                })
+                                                .catch(function (err) {
+                                                    showError(err);
+                                                    resetBtn();
+                                                });
+                                        });
+                                    });
+                                })();
+                            </script>
+                            </body>
+
+                            </html>

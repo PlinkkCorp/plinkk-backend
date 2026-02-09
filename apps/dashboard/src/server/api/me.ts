@@ -84,10 +84,10 @@ export function apiMeRoutes(fastify: FastifyInstance) {
         newPassword: string;
         confirmPassword: string;
       }) || {};
-    
+
     if (!newPassword || !confirmPassword)
       throw new BadRequestError("Champs manquants");
-    
+
     if (newPassword !== confirmPassword)
       throw new BadRequestError("Les mots de passe ne correspondent pas");
 
@@ -97,12 +97,12 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     if (!user)
       throw new NotFoundError("Utilisateur introuvable");
 
-    const hasPwd = user.hasPassword !== false; 
+    const hasPwd = user.hasPassword !== false;
 
     if (hasPwd) {
-       if (!currentPassword) return reply.code(400).send({ error: "Mot de passe actuel requis" });
-       const ok = await bcrypt.compare(currentPassword, user.password);
-       if (!ok) return reply.code(403).send({ error: "Mot de passe actuel incorrect" });
+      if (!currentPassword) return reply.code(400).send({ error: "Mot de passe actuel requis" });
+      const ok = await bcrypt.compare(currentPassword, user.password);
+      if (!ok) return reply.code(403).send({ error: "Mot de passe actuel incorrect" });
     }
 
     if (await bcrypt.compare(newPassword, user.password))
@@ -129,12 +129,12 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     if (!me) return reply.code(404).send({ error: "Utilisateur introuvable" });
 
     if (!me.hasPassword) {
-        return reply.code(403).send({ error: "ACCOUNT_DELETION_REQUIRES_PASSWORD" });
+      return reply.code(403).send({ error: "ACCOUNT_DELETION_REQUIRES_PASSWORD" });
     }
 
     if (!password)
       return reply.code(400).send({ error: "Mot de passe requis" });
-    
+
     const ok = await bcrypt.compare(password, me.password);
     if (!ok) return reply.code(403).send({ error: "Mot de passe incorrect" });
     if (me.twoFactorEnabled) {
@@ -375,7 +375,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.post("/cosmetics", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    
+
     const user = await prisma.user.findUnique({
       where: { id: userId as string },
       include: { role: true },
@@ -470,8 +470,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const ext = mime.endsWith("png")
       ? "png"
       : mime.endsWith("webp")
-      ? "webp"
-      : "jpg"; // plinkk-image
+        ? "webp"
+        : "jpg"; // plinkk-image
 
     /* const dir = path.join(
       __dirname,
@@ -514,5 +514,60 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     });
 
     return reply.send({ ok: true, file: dedupName, url: up.Location });
+  });
+
+  // ─── Generic image upload (profileImage, profileIcon, iconUrl, etc.) ───
+  fastify.post<{ Querystring: { field?: string } }>("/upload", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+
+    const field = (request.query as { field?: string }).field || "misc";
+    const allowedFields = ["profileImage", "profileIcon", "iconUrl", "bannerUrl"];
+    if (!allowedFields.includes(field))
+      return reply.code(400).send({ error: "Champ non supporté" });
+
+    const file = await request.file();
+    if (!file) return reply.code(400).send({ error: "Aucun fichier reçu" });
+    if (!file.mimetype.startsWith("image/"))
+      return reply.code(400).send({ error: "Format non supporté" });
+
+    const buf = await file.toBuffer();
+    if (buf.byteLength > 5 * 1024 * 1024)
+      return reply.code(413).send({ error: "Image trop lourde (max 5 Mo)" });
+
+    const me = await prisma.user.findUnique({ where: { id: userId as string } });
+    if (!me) return reply.code(404).send({ error: "Utilisateur introuvable" });
+
+    const isGif = file.mimetype === "image/gif";
+    let processed: Buffer;
+    let ext: string;
+
+    if (isGif) {
+      processed = buf;
+      ext = "gif";
+    } else {
+      const size = field === "iconUrl" ? 64 : field === "profileIcon" ? 128 : 512;
+      processed = await sharp(buf)
+        .resize({ width: size, height: size, fit: "cover" })
+        .webp()
+        .toBuffer();
+      ext = "webp";
+    }
+
+    const hash = crypto.randomBytes(8).toString("hex");
+    const key = `uploads/${field}/${me.id}-${hash}.${ext}`;
+
+    const upload = new Upload({
+      client: getS3Client(),
+      params: {
+        Bucket: "plinkk-image",
+        Key: key,
+        Body: processed,
+      },
+      partSize: 5 * 1024 * 1024,
+    });
+
+    const up = await upload.done();
+    return reply.send({ ok: true, url: up.Location });
   });
 }
