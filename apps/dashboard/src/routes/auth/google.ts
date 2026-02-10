@@ -34,7 +34,8 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 
 			const payload = (await res.body.json()) as GoogleTokenPayload;
 
-			if (process.env.ID_CLIENT && payload.aud && payload.aud !== process.env.ID_CLIENT) {
+			const googleClientId = process.env.GOOGLE_OAUTH2_ID || process.env.ID_CLIENT;
+			if (googleClientId && payload.aud && payload.aud !== googleClientId) {
 				return reply.code(400).send({ success: false, error: "invalid_audience" });
 			}
 

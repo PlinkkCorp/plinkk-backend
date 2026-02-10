@@ -33,14 +33,15 @@ export function dashboardAccountRoutes(fastify: FastifyInstance) {
       select: { provider: true, createdAt: true, name: true, email: true },
     });
 
-    console.log("Serving Account Page with Client ID:", process.env.ID_CLIENT);
+    const googleClientId = process.env.GOOGLE_OAUTH2_ID || process.env.ID_CLIENT;
+    console.log("Serving Account Page with Client ID:", googleClientId);
     return replyView(reply, "dashboard/user/account.ejs", userInfo, {
       isEmailPublic,
       publicPath: request.publicPath,
       pages,
       plinkks: pages,
       connections,
-      googleClientId: process.env.ID_CLIENT,
+      googleClientId,
     });
   });
 

@@ -38,9 +38,10 @@ export function loginRoutes(fastify: FastifyInstance) {
     const returnToQuery =
       (request.query as { returnTo: string })?.returnTo || "";
 
+    const googleClientId = process.env.GOOGLE_OAUTH2_ID || process.env.ID_CLIENT;
     return await replyView(reply, "connect.ejs", currentUser, {
       returnTo: returnToQuery,
-      googleClientId: process.env.ID_CLIENT
+      googleClientId,
     });
   });
 
