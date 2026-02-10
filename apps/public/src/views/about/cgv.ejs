@@ -1,0 +1,125 @@
+<%- include('partials/head', { title: 'Conditions de vente', description: 'Conditions générales de vente de Plinkk.' }) %>
+<%- include('partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
+
+<main class="relative isolate overflow-hidden min-h-screen">
+  <!-- Background Effects -->
+  <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div class="absolute left-[50%] top-0 -translate-x-1/2 blur-3xl opacity-20" aria-hidden="true">
+      <div class="aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc]" style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"></div>
+    </div>
+  </div>
+
+  <div class="mx-auto max-w-4xl px-6 py-24 sm:py-32">
+
+    <div class="text-center mb-16 animate-slide-up">
+      <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl">Conditions générales de vente</h1>
+      <div class="mt-4 flex items-center justify-center gap-2 text-slate-400">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <span>Dernière mise à jour : <time datetime="2026-02-10" class="text-slate-200 font-medium">10 février 2026</time></span>
+      </div>
+    </div>
+
+    <div class="bg-slate-900/40 backdrop-blur-md rounded-3xl border border-white/5 p-8 sm:p-12 shadow-2xl animate-slide-up" style="animation-delay: 100ms;">
+
+      <!-- Navigation -->
+      <nav class="flex flex-wrap gap-2 mb-12 border-b border-white/5 pb-8">
+        <a href="/terms" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">Conditions d'utilisation</a>
+        <a href="/cgv" class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-white/10">Conditions de vente</a>
+        <a href="/privacy" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">Confidentialité</a>
+        <a href="/cookies" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">Cookies</a>
+        <a href="/legal" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">Mentions légales</a>
+      </nav>
+
+      <div class="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-a:text-violet-400 prose-a:no-underline hover:prose-a:text-violet-300 prose-strong:text-white prose-li:text-slate-300">
+
+        <h2 id="objet" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">1</span>
+          Objet
+        </h2>
+        <p>Les présentes conditions générales de vente (CGV) définissent les modalités de vente des offres payantes Plinkk (abonnements et options). Elles s'appliquent à toute commande effectuée via le site.</p>
+
+        <h2 id="champ" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">2</span>
+          Champ d'application
+        </h2>
+        <p>Les CGV s'appliquent aux utilisateurs agissant en tant que consommateurs ou professionnels. En achetant une offre payante, vous acceptez les CGV en vigueur à la date de la commande.</p>
+
+        <h2 id="offres" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">3</span>
+          Offres et services
+        </h2>
+        <ul>
+          <li><strong>Abonnements premium</strong> : mensuel ou annuel, avec reconduction automatique.</li>
+          <li><strong>Lifetime</strong> : paiement unique pour l'accès à vie aux fonctionnalités premium de l'offre mentionnée lors de l'achat.</li>
+          <li><strong>Extensions</strong> : options facturables selon l'usage, précisément indiquées lors de la configuration.</li>
+        </ul>
+
+        <h2 id="prix" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">4</span>
+          Prix
+        </h2>
+        <p>Les prix sont exprimés en euros TTC et affichés avant validation du paiement. Plinkk peut modifier ses tarifs ; les prix appliqués sont ceux affichés au moment de la commande.</p>
+
+        <h2 id="paiement" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">5</span>
+          Paiement
+        </h2>
+        <p>Le paiement est effectué via un prestataire sécurisé (Stripe). Les moyens de paiement acceptés sont indiqués au moment du checkout. La transaction est considérée comme définitive à la validation du paiement.</p>
+
+        <h2 id="abonnement" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">6</span>
+          Abonnements, reconduction et resiliation
+        </h2>
+        <ul>
+          <li>Les abonnements sont reconduits automatiquement à chaque échéance.</li>
+          <li>Vous pouvez modifier ou résilier votre abonnement à tout moment depuis le tableau de bord.</li>
+          <li>La résiliation prend effet à la fin de la période en cours ; aucun remboursement prorata n'est effectué pour la période engagée.</li>
+        </ul>
+
+        <h2 id="lifetime" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">7</span>
+          Offre lifetime
+        </h2>
+        <p>L'offre lifetime correspond à un paiement unique pour l'accès aux fonctionnalités premium indiquées lors de l'achat. Les évolutions majeures ou futures options payantes peuvent faire l'objet d'offres distinctes.</p>
+
+        <h2 id="retractation" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">8</span>
+          Droit de retractation
+        </h2>
+        <p>Conformément à l'article L221-28 du Code de la consommation, le droit de rétractation peut ne pas s'appliquer si l'exécution du service numérique a commencé avec votre accord préalable. En validant la commande, vous demandez l'exécution immédiate du service.</p>
+
+        <h2 id="support" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">9</span>
+          Support et reclamations
+        </h2>
+        <p>Pour toute question relative à votre abonnement ou à une facturation, contactez-nous à <%- include('partials/contact-email', { linkClass: 'text-violet-400 hover:text-violet-300 transition-colors' }) %>. Nous répondons dans les meilleurs délais.</p>
+
+        <h2 id="responsabilite" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">10</span>
+          Responsabilite
+        </h2>
+        <p>La responsabilité de Plinkk est limitée au montant effectivement payé pour la période concernée, sauf disposition légale contraire. Plinkk ne peut être tenu responsable des dommages indirects.</p>
+
+        <h2 id="donnees" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">11</span>
+          Donnees personnelles
+        </h2>
+        <p>Le traitement des données est détaillé dans la <a href="/privacy">Politique de confidentialité</a> et la <a href="/cookies">Politique des cookies</a>.</p>
+
+        <h2 id="modifications" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">12</span>
+          Modifications des CGV
+        </h2>
+        <p>Plinkk peut modifier les CGV à tout moment. Les nouvelles conditions s'appliquent aux commandes passées après leur mise à jour.</p>
+
+        <h2 id="droit" class="flex items-center gap-3">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">13</span>
+          Droit applicable
+        </h2>
+        <p>Droit français. En cas de litige, compétence des tribunaux du ressort du siège de l'éditeur.</p>
+
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('partials/footer') %>

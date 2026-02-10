@@ -6,6 +6,7 @@ const STATIC_PAGES = [
   { path: "/about", template: "about/about.ejs" },
   { path: "/privacy", template: "about/privacy.ejs" },
   { path: "/terms", template: "about/terms.ejs" },
+  { path: "/cgv", template: "about/cgv.ejs" },
   { path: "/cookies", template: "about/cookies.ejs" },
   { path: "/legal", template: "about/legal.ejs" },
   { path: "/docs", template: "docs.ejs" },
@@ -40,7 +41,7 @@ const BLOCKED_BOTS = [
 ];
 
 const SITEMAP_STATIC_PATHS = [
-  "", "about", "contact", "privacy", "terms", "cookies", "legal", "users", "dashboard", "docs", "pricing",
+  "", "about", "contact", "privacy", "terms", "cgv", "cookies", "legal", "users", "dashboard", "docs", "pricing",
 ];
 
 export function staticPagesRoutes(fastify: FastifyInstance) {
