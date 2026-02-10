@@ -30,6 +30,7 @@ export async function replyView(
   statusCode: number = 200
 ): Promise<string> {
   return sharedReplyView(reply, template, user, data, {
-    frontendUrl: computeFrontendUrl(reply)
+    frontendUrl: computeFrontendUrl(reply),
+    __platform: 'dashboard'
   }, statusCode);
 }

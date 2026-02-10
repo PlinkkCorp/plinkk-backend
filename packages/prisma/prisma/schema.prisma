@@ -330,6 +330,8 @@ model Announcement {
   endAt       DateTime?
   createdAt   DateTime  @default(now())
   global      Boolean   @default(false)
+  displayType String    @default("banner") // banner | notification | popup
+  platform    String    @default("all")    // dashboard | public | all
 
   targets     AnnouncementTarget[]
   roleTargets AnnouncementRoleTarget[]

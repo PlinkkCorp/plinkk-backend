@@ -23,9 +23,9 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
     const users = await prisma.user.findMany({
       where: {
         OR: [
-          { id: { contains: q } },
-          { userName: { contains: q } },
-          { email: { contains: q } },
+          { id: { contains: q, mode: "insensitive" } },
+          { userName: { contains: q, mode: "insensitive" } },
+          { email: { contains: q, mode: "insensitive" } },
         ],
       },
       select: {

@@ -13,6 +13,7 @@ export async function replyView(
   statusCode: number = 200
 ): Promise<string> {
   return sharedReplyView(reply, template, user, data, {
-    dashboardUrl: process.env.DASHBOARD_URL
+    dashboardUrl: process.env.DASHBOARD_URL,
+    __platform: 'public'
   }, statusCode);
 }
