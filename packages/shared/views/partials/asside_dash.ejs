@@ -1,20 +1,29 @@
+<%
+    const _roleName = user && user.role ? (user.role.id || user.role.name) : null;
+    const _isPremiumUser = !!(user && (user.isPremium || user.isPartner || (_roleName && ['ADMIN','DEVELOPER','MODERATOR'].includes(_roleName))));
+    const _showPremiumUi = !!(user && user.showPremiumUi !== false);
+%>
 <aside id="dashboardSidebar" class="hidden lg:flex flex-col col-span-2 sticky top-[68px] h-[calc(100vh-80px)]">
     <!-- Unified Container -->
     <div class="flex-1 flex flex-col bg-slate-900/50 backdrop-blur-xl border border-slate-800/50 rounded-3xl p-4 shadow-xl overflow-y-auto no-scrollbar">
         
         <!-- Profile Section -->
         <div class="flex flex-col items-center text-center mb-6 pb-6 border-b border-slate-800/50">
-            <div class="relative group cursor-pointer">
-                <div class="h-20 w-20 rounded-full p-1 bg-gradient-to-br from-violet-500 to-fuchsia-500 mb-3">
-                    <div class="h-full w-full rounded-full overflow-hidden bg-slate-900 grid place-items-center" data-avatar>
-                        <%- include('avatar.ejs', { user: user }) %>
-                    </div>
+            <div class="relative group cursor-pointer mb-3">
+                <div class="relative h-20 w-20">
+                    <%- include('avatar.ejs', { user: user }) %>
                 </div>
-                <a href="/edit" class="absolute bottom-0 right-0 bg-slate-800 text-white p-1.5 rounded-full border border-slate-700 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                <a href="/settings" class="absolute bottom-0 right-0 z-10 bg-slate-800 text-white p-1.5 rounded-full border border-slate-700 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                 </a>
             </div>
             <h3 class="font-bold text-white text-lg"><%= user && (user.userName || user.id) %></h3>
+            <% if (_isPremiumUser && _showPremiumUi) { %>
+                <div class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.7 5.48 6.05.88-4.38 4.27 1.03 6.02L12 15.9 6.6 18.65l1.03-6.02L3.25 8.36l6.05-.88L12 2z"/></svg>
+                    Premium
+                </div>
+            <% } %>
             <% 
                 let displayEmail = null;
                 if (typeof plinkk !== 'undefined' && plinkk) {

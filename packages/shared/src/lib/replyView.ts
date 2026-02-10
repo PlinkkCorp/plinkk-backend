@@ -31,6 +31,10 @@ export async function replyView(
 ): Promise<string> {
   if (user === null) {
     return reply.code(statusCode).view(template, {
+      __SITE_MESSAGES__: await getActiveAnnouncementsForUser(null, extraData.__platform),
+      user: null,
+      isAdmin: false,
+      isStaff: false,
       ...extraData,
       ...data,
     });

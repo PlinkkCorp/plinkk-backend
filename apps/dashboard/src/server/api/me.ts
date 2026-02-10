@@ -182,6 +182,19 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     });
   });
 
+  fastify.post("/premium-ui", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) throw new UnauthorizedError();
+    const { enabled } = (request.body as { enabled?: boolean }) || {};
+    if (typeof enabled !== "boolean") throw new BadRequestError("Valeur invalide");
+    const updated = await prisma.user.update({
+      where: { id: userId as string },
+      data: { showPremiumUi: enabled },
+      select: { showPremiumUi: true },
+    });
+    return reply.send(updated);
+  });
+
   fastify.post("/2fa", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });

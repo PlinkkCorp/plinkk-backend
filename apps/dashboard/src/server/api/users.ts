@@ -28,6 +28,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
         views: true,
         isVerified: true,
         isPartner: true,
+        isPremium: true,
+        premiumUntil: true,
         role: { select: { id: true, name: true } },
         plinkks: {
           select: {
@@ -534,11 +536,15 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     if (!ok) return;
 
     const { id } = request.params as { id: string };
-    const { type, value } = request.body as { type: 'VERIFIED' | 'PARTNER', value: boolean };
+    const { type, value } = request.body as { type: 'VERIFIED' | 'PARTNER' | 'PREMIUM', value: boolean };
 
     const data: any = {};
     if (type === 'VERIFIED') data.isVerified = value;
     if (type === 'PARTNER') data.isPartner = value;
+    if (type === 'PREMIUM') {
+      data.isPremium = value;
+      data.premiumUntil = value ? null : null;
+    }
 
     if (Object.keys(data).length === 0) return reply.send({ ok: true }); // Nothing to update
 

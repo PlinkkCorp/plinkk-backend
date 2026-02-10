@@ -62,6 +62,7 @@ model User {
   isPartner  Boolean  @default(false)
 
   isPremium  Boolean  @default(false)
+  showPremiumUi Boolean @default(true)
   premiumUntil DateTime?
   stripeCustomerId String? @unique
   extraPlinkks     Int     @default(0)

@@ -188,6 +188,8 @@
               <!-- Settings Panel -->
               <div id="panel-settings" class="tab-panel hidden animate-slide-up">
                 <div class="space-y-8">
+                  <% const roleName = user && user.role ? (user.role.id || user.role.name) : null; %>
+                  <% const isPremiumUser = !!(user && (user.isPremium || user.isPartner || (roleName && ['ADMIN','DEVELOPER','MODERATOR'].includes(roleName)))); %>
                   <form id="formEmail">
                     <div class="mb-4 pb-4 border-b border-slate-800">
                       <h4 class="text-lg font-semibold text-white">Email</h4>
@@ -247,14 +249,37 @@
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-slate-950 border border-slate-800">
                       <div>
                         <p class="text-sm font-medium text-white">Plinkk Premium</p>
-                        <p class="text-xs text-slate-400">Modifiez votre offre ou résiliez à tout moment.</p>
+                        <p class="text-xs text-slate-400"><%= isPremiumUser ? 'Modifiez votre offre ou résiliez a tout moment.' : 'Decouvrez les avantages Premium.' %></p>
                       </div>
                       <div class="flex flex-wrap items-center gap-2">
-                        <a href="/premium" class="px-4 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">Gérer l'offre</a>
-                        <button id="btnCancelSubscription" class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">Résilier</button>
+                        <% if (isPremiumUser) { %>
+                          <a href="/premium" class="px-4 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">Gerer l'offre</a>
+                          <button id="btnCancelSubscription" class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">Resilier</button>
+                        <% } else { %>
+                          <a href="/premium" class="px-4 py-2 text-xs font-medium rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-900/20 transition-colors">Passer a Premium</a>
+                        <% } %>
                       </div>
                     </div>
                   </div>
+
+                  <% if (isPremiumUser) { %>
+                    <div class="pt-8 border-t border-slate-800">
+                      <div class="mb-4">
+                        <h4 class="text-lg font-semibold text-white">Experience Premium</h4>
+                        <p class="text-sm text-slate-400">Affiche les effets et badges Premium dans le dashboard.</p>
+                      </div>
+                      <div class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
+                        <div>
+                          <p class="text-sm font-medium text-white">UI Premium</p>
+                          <p class="text-xs text-slate-400">Active ou desactive les elements visuels Premium.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input id="togglePremiumUi" type="checkbox" class="sr-only peer" <%= user.showPremiumUi !== false ? 'checked' : '' %> />
+                          <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
+                      </div>
+                    </div>
+                  <% } %>
                 </div>
               </div>
 
@@ -887,6 +912,7 @@
         const select = document.getElementById('privacyPlinkkSelect');
         const chkPublic = document.getElementById('togglePublic');
         const chkEmail = document.getElementById('toggleEmailPublic');
+        const chkPremiumUi = document.getElementById('togglePremiumUi');
 
         let plinkkList = [];
         try {
@@ -960,6 +986,16 @@
             body: JSON.stringify(payload)
           });
           if (!res.ok) showAlert('Erreur lors du changement visibilité email', 'error');
+        });
+
+        chkPremiumUi?.addEventListener('change', async (e) => {
+          const checked = e.currentTarget.checked;
+          const res = await fetch('/api/me/premium-ui', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ enabled: !!checked })
+          });
+          if (!res.ok) showAlert('Erreur lors de la mise a jour UI Premium', 'error');
         });
       });
 

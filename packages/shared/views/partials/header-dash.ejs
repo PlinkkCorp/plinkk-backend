@@ -27,18 +27,26 @@
 
             <div class="flex items-center gap-3">
                 <div class="hidden md:flex items-center gap-3">
-                    <% const isPremiumUser = !!(user && user.isPremium); %>
+                    <%
+                      const roleName = user && user.role ? (user.role.id || user.role.name) : null;
+                      const isStaff = !!(roleName && ['ADMIN','DEVELOPER','MODERATOR'].includes(roleName));
+                      const premiumUntil = user && user.premiumUntil ? new Date(user.premiumUntil) : null;
+                      const hasActivePremium = !!(user && user.isPremium && (!premiumUntil || premiumUntil.getTime() > Date.now()));
+                      const isPremiumUser = !!(user && (isStaff || user.isPartner || hasActivePremium));
+                    %>
+                    <% if (!isPremiumUser) { %>
                     <a href="/premium" class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold text-white bg-gradient-to-r from-violet-600 to-fuchsia-600 shadow-lg shadow-violet-900/30 hover:shadow-violet-900/50 hover:-translate-y-0.5 transition-all">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L9 9l-7 1 5 4-2 7 7-4 7 4-2-7 5-4-7-1z"/></svg>
-                        <span><%= isPremiumUser ? 'Gérer Premium' : 'Passer Premium' %></span>
+                        <span>Passer Premium</span>
                     </a>
+                    <% } %>
                     <% if (user && user.role && (user.role.id === 'ADMIN' || user.role.id === 'DEVELOPER' || user.role.id === 'MODERATOR')) { %>
                         <a href="/admin" class="inline-flex items-center justify-center rounded-full bg-rose-500/10 px-4 py-1.5 text-sm font-medium text-rose-400 ring-1 ring-inset ring-rose-500/20 transition-colors hover:bg-rose-500/20 hover:text-rose-300">Admin</a>
                     <% } %>
                     
                     <div class="relative" id="profileMenu">
-                        <button id="profileMenuBtn" class="group flex items-center gap-2 rounded-full bg-white/5 pl-1 pr-3 py-1 ring-1 ring-white/10 transition-all hover:bg-white/10 hover:ring-white/20 focus:outline-none">
-                            <div class="h-7 w-7 overflow-hidden rounded-full bg-indigo-600 ring-2 ring-[#0B1020]">
+                        <button id="profileMenuBtn" class="group flex items-center gap-2 rounded-full bg-white/5 pl-1.5 pr-3 py-1 ring-1 ring-white/10 transition-all hover:bg-white/10 hover:ring-white/20 focus:outline-none">
+                            <div class="relative h-8 w-8 shrink-0">
                                 <%- include('avatar.ejs', { user }) %>
                             </div>
                             <span class="max-w-[100px] truncate text-sm font-medium text-slate-200 group-hover:text-white"><%= user && user.userName %></span>
@@ -46,9 +54,19 @@
                         </button>
 
                         <div id="profileMenuPanel" class="absolute right-0 top-full mt-2 w-64 origin-top-right rounded-xl border border-white/10 bg-[#161b2e] p-1 shadow-2xl hidden">
-                            <div class="px-3 py-3">
-                                <p class="truncate text-sm font-medium text-white"><%= user && user.userName %></p>
-                                <p class="truncate text-xs text-slate-500"><%= user && user.email %></p>
+                            <div class="px-3 py-3 flex items-center gap-3">
+                                <div class="relative h-9 w-9 shrink-0">
+                                    <%- include('avatar.ejs', { user }) %>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-1.5">
+                                        <p class="truncate text-sm font-medium text-white"><%= user && user.userName %></p>
+                                        <% if (isPremiumUser) { %>
+                                            <span class="inline-flex items-center gap-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/25 px-1.5 py-px text-[9px] font-bold uppercase tracking-wider leading-none">PRO</span>
+                                        <% } %>
+                                    </div>
+                                    <p class="truncate text-xs text-slate-500"><%= user && user.email %></p>
+                                </div>
                             </div>
                             <div class="h-px bg-white/5 my-1"></div>
                             
@@ -101,7 +119,7 @@
         
         <div class="border-t border-white/5 px-4 py-4">
             <div class="flex items-center gap-3 mb-4">
-                <div class="h-10 w-10 overflow-hidden rounded-full bg-indigo-600">
+                <div class="relative h-11 w-11 shrink-0">
                     <%- include('avatar.ejs', { user }) %>
                 </div>
                 <div>
@@ -248,13 +266,13 @@
         if (!window.__spaLoadingEnd) window.__spaLoadingEnd = end;
         window.addEventListener('spa:loading-start', start);
         window.addEventListener('spa:loading-end', end);
-        window.addEventListener('beforeunload', ()=>{ try { sessionStorage.setItem('spa_nav','1'); start(); } catch{} });
-        try { if (sessionStorage.getItem('spa_nav') === '1') { sessionStorage.removeItem('spa_nav'); start(); const fin = ()=> setTimeout(end, 120); if (document.readyState === 'complete') fin(); else window.addEventListener('load', fin, { once: true }); } } catch {}
+        window.addEventListener('beforeunload', ()=>{ try { sessionStorage.setItem('spa_nav','1'); start(); } catch(e){} });
+        try { if (sessionStorage.getItem('spa_nav') === '1') { sessionStorage.removeItem('spa_nav'); start(); const fin = ()=> setTimeout(end, 120); if (document.readyState === 'complete') fin(); else window.addEventListener('load', fin, { once: true }); } } catch (e) {}
         function isModifiedClick(e){ return e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0; }
-        function isSameOrigin(url){ try { const u=new URL(url, location.href); return u.origin===location.origin; } catch { return false; } }
+        function isSameOrigin(url){ try { const u=new URL(url, location.href); return u.origin===location.origin; } catch (e) { return false; } }
         function looksLikeHtmlRequest(url){ return isSameOrigin(url) && !/\.(?:png|jpe?g|webp|gif|svg|ico|css|js|map|json|txt|woff2?|ttf|otf)(?:[?#].*)?$/i.test(url); }
-        document.addEventListener('click', (e)=>{ const a = e.target && (e.target.closest ? e.target.closest('a') : null); if (!a) return; const href = a.getAttribute('href') || ''; if (!href || href.startsWith('#')) return; if (a.target === '_blank' || a.download != null) return; if (isModifiedClick(e)) return; if (!looksLikeHtmlRequest(href)) return; try { window.dispatchEvent(new Event('spa:loading-start')); } catch {} setTimeout(()=>{ try { window.dispatchEvent(new Event('spa:loading-end')); } catch {} }, 8000); }, true);
-        try { const origFetch = window.fetch.bind(window); let inflight = 0; const onBegin=()=>{ if (inflight++===0) window.dispatchEvent(new Event('spa:loading-start')); }; const onEnd=()=>{ if (inflight>0 && --inflight===0) window.dispatchEvent(new Event('spa:loading-end')); }; window.fetch = function(input, init){ try { const url = typeof input === 'string' ? input : (input && input.url) || ''; const method = (init && (init.method||'GET')) || (typeof input!=='string' && input && input.method) || 'GET'; const headers = new Headers((init && init.headers) || (typeof input!=='string' && input && input.headers) || undefined); const accept = (headers.get('Accept') || headers.get('accept') || '').toLowerCase(); const isHtmlAccept = accept.includes('text/html') || accept === ''; const qualifies = method.toUpperCase()==='GET' && looksLikeHtmlRequest(url) && !url.startsWith('/api'); if (qualifies && isHtmlAccept) onBegin(); const p = origFetch(input, init); if (qualifies && isHtmlAccept) { p.finally(()=>{ setTimeout(onEnd, 80); }); } return p; } catch { return origFetch(input, init); } }; } catch {}
+        document.addEventListener('click', (e)=>{ const a = e.target && (e.target.closest ? e.target.closest('a') : null); if (!a) return; const href = a.getAttribute('href') || ''; if (!href || href.startsWith('#')) return; if (a.target === '_blank' || a.download != null) return; if (isModifiedClick(e)) return; if (!looksLikeHtmlRequest(href)) return; try { window.dispatchEvent(new Event('spa:loading-start')); } catch (e) {} setTimeout(()=>{ try { window.dispatchEvent(new Event('spa:loading-end')); } catch (e) {} }, 8000); }, true);
+        try { const origFetch = window.fetch.bind(window); let inflight = 0; const onBegin=()=>{ if (inflight++===0) window.dispatchEvent(new Event('spa:loading-start')); }; const onEnd=()=>{ if (inflight>0 && --inflight===0) window.dispatchEvent(new Event('spa:loading-end')); }; window.fetch = function(input, init){ try { const url = typeof input === 'string' ? input : (input && input.url) || ''; const method = (init && (init.method||'GET')) || (typeof input!=='string' && input && input.method) || 'GET'; const headers = new Headers((init && init.headers) || (typeof input!=='string' && input && input.headers) || undefined); const accept = (headers.get('Accept') || headers.get('accept') || '').toLowerCase(); const isHtmlAccept = accept.includes('text/html') || accept === ''; const qualifies = method.toUpperCase()==='GET' && looksLikeHtmlRequest(url) && !url.startsWith('/api'); if (qualifies && isHtmlAccept) onBegin(); const p = origFetch(input, init); if (qualifies && isHtmlAccept) { p.finally(()=>{ setTimeout(onEnd, 80); }); } return p; } catch (e) { return origFetch(input, init); } }; } catch (e) {}
     })();
 </script>
 <script>

@@ -122,6 +122,7 @@
                                 const plActive = Array.isArray(u.plinkks) ? u.plinkks.filter(p=>p.isActive).length : 0;
                                 const uViews = typeof u.views === 'number' ? u.views : 0;
                                 const mustChange = !!u.mustChangePassword;
+                                const premiumActive = !!(u.isPremium && (!u.premiumUntil || new Date(u.premiumUntil).getTime() > Date.now()));
                             %>
                                 <li class="relative rounded-2xl border border-slate-800 p-3.5 bg-slate-950/50 hover:border-violet-500/30 transition-all group"
                                     data-name="<%- (u.userName||'').toLowerCase() %>"
@@ -152,6 +153,9 @@
                                                     <% } %>
                                                     <% if (u.isPartner) { %>
                                                         <svg class="w-3.5 h-3.5 text-violet-400" viewBox="0 0 24 24" fill="currentColor" title="Partenaire"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                                    <% } %>
+                                                    <% if (premiumActive) { %>
+                                                        <svg class="w-3.5 h-3.5 text-amber-400" viewBox="0 0 24 24" fill="currentColor" title="Premium"><path d="M12 2l2.7 5.48 6.05.88-4.38 4.27 1.03 6.02L12 15.9 6.6 18.65l1.03-6.02L3.25 8.36l6.05-.88L12 2z"/></svg>
                                                     <% } %>
                                                 </div>
                                                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 uppercase tracking-wider">
@@ -376,6 +380,14 @@
                                     <svg class="w-4 h-4 text-violet-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                                 </span>
                                 <svg id="umBadgePartnerSpin" class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                                <input id="umBadgePremium" type="checkbox" class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500 focus:ring-offset-0">
+                                <span class="text-sm text-slate-300 flex items-center gap-2">
+                                    Premium
+                                    <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.7 5.48 6.05.88-4.38 4.27 1.03 6.02L12 15.9 6.6 18.65l1.03-6.02L3.25 8.36l6.05-.88L12 2z"/></svg>
+                                </span>
+                                <svg id="umBadgePremiumSpin" class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
                             </label>
                         </div>
                     </div>
@@ -959,7 +971,8 @@
             del: document.getElementById('umDelete'),
             impersonate: document.getElementById('umImpersonate'),
             badgeVerified: document.getElementById('umBadgeVerified'),
-            badgePartner: document.getElementById('umBadgePartner')
+            badgePartner: document.getElementById('umBadgePartner'),
+            badgePremium: document.getElementById('umBadgePremium')
         };
         let currentLI = null;
         let currentUserDetails = null;
@@ -996,6 +1009,11 @@
             // Badges
             if (um.badgeVerified) um.badgeVerified.checked = !!currentUserDetails?.isVerified;
             if (um.badgePartner) um.badgePartner.checked = !!currentUserDetails?.isPartner;
+            if (um.badgePremium) {
+                const until = currentUserDetails?.premiumUntil ? new Date(currentUserDetails.premiumUntil) : null;
+                const active = !!currentUserDetails?.isPremium && (!until || until.getTime() > Date.now());
+                um.badgePremium.checked = active;
+            }
 
             const plSelect = document.getElementById('umPlSelect');
             const plSlug = document.getElementById('umPlSlug');
@@ -1195,8 +1213,13 @@
                 if (currentUserDetails) {
                     if (type === 'VERIFIED') currentUserDetails.isVerified = checked;
                     if (type === 'PARTNER') currentUserDetails.isPartner = checked;
+                    if (type === 'PREMIUM') {
+                        currentUserDetails.isPremium = checked;
+                        currentUserDetails.premiumUntil = checked ? null : null;
+                    }
                 }
-                showToast(`Badge ${type === 'VERIFIED' ? 'Vérifié' : 'Partenaire'} ${checked ? 'activé' : 'désactivé'}`);
+                const label = type === 'VERIFIED' ? 'Verifie' : type === 'PARTNER' ? 'Partenaire' : 'Premium';
+                showToast(`Badge ${label} ${checked ? 'active' : 'desactive'}`);
             } catch (err) {
                 console.error(err);
                 showToast('Erreur lors de la mise à jour du badge');
@@ -1209,6 +1232,7 @@
 
         um.badgeVerified?.addEventListener('change', () => handleBadgeChange('VERIFIED', um.badgeVerified, 'umBadgeVerifiedSpin'));
         um.badgePartner?.addEventListener('change', () => handleBadgeChange('PARTNER', um.badgePartner, 'umBadgePartnerSpin'));
+        um.badgePremium?.addEventListener('change', () => handleBadgeChange('PREMIUM', um.badgePremium, 'umBadgePremiumSpin'));
 
         (function(){
                 const plSelect = document.getElementById('umPlSelect');
