@@ -49,6 +49,18 @@
                     <button class="range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20" data-days="30">30j</button>
                     <button class="range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition-all" data-days="90">90j</button>
                 </div>
+                
+                <!-- EXPORT ACTIONS -->
+                <div class="flex items-center gap-2 border-t lg:border-t-0 lg:border-l border-slate-800 pt-4 lg:pt-0 lg:pl-6">
+                    <button id="btnExportGraph" class="px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-violet-500 hover:bg-violet-500/10 transition-all flex items-center gap-2" title="Exporter le graphique">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                        <span class="hidden sm:inline">Graph</span>
+                    </button>
+                    <button id="btnExportCSV" class="px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-emerald-500 hover:bg-emerald-500/10 transition-all flex items-center gap-2" title="Exporter les données (CSV)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
+                        <span class="hidden sm:inline">CSV</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -292,6 +304,20 @@
     };
 
     const charts = {};
+    let activeTab = 'signups';
+    let currentData = null;
+
+    function downloadCSV(filename, rows) {
+        const csvContent = "data:text/csv;charset=utf-8," 
+            + rows.map(e => e.join(";")).join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 
     function setupDates() {
         const fromIn = qs('#fFrom');
@@ -366,6 +392,7 @@
     const loaders = {
         signups: async () => {
             const d = await fetchAPI('/admin/stats/signups');
+            currentData = { type: 'signups', data: d };
             qs('#statTotal').textContent = fmt(d.stats.total);
             qs('#statPub').textContent = fmt(d.stats.visible);
             qs('#statPriv').textContent = fmt(d.stats.invisible);
@@ -375,6 +402,7 @@
         },
         logins: async () => {
             const d = await fetchAPI('/admin/stats/logins');
+            currentData = { type: 'logins', data: d };
             qs('#statLoginTotal').textContent = fmt(d.total);
             qs('#statLoginAvg').textContent = fmt(d.average);
             drawLine('chartLogins', d.series.map(x => x.date), [{
@@ -387,6 +415,7 @@
                 fetchAPI('/admin/stats/plinkks'),
                 fetchAPI('/admin/stats/plinkks/top')
             ]);
+            currentData = { type: 'plinkks', data: d, top: top };
             qs('#plinkkTotalViews').textContent = fmt(d.totalViews);
             qs('#plinkkTotalCount').textContent = fmt(d.totalPlinkks);
             qs('#plinkkTopDay').textContent = fmt(d.topViewInPeriod);
@@ -413,6 +442,7 @@
         },
         premium: async () => {
             const d = await fetchAPI('/admin/stats/premium');
+            currentData = { type: 'premium', data: d };
             qs('#kpiTotalPremium').textContent = fmt(d.totalHistory);
             qs('#kpiActivePremium').textContent = fmt(d.activeNow);
             qs('#kpiTotalPurchases').textContent = fmt(d.periodPurchases);
@@ -424,6 +454,7 @@
         },
         bans: async () => {
             const d = await fetchAPI('/admin/stats/bans');
+            currentData = { type: 'bans', data: d };
             qs('#statBanTotal').textContent = fmt(d.totalActions);
             qs('#statBanRevokeRate').textContent = d.revokeRate + '%';
             drawLine('chartBans', d.series.map(x => x.date), [
@@ -433,6 +464,7 @@
         },
         accounts: async () => {
             const d = await fetchAPI('/admin/stats/accounts');
+            currentData = { type: 'accounts', data: d };
             qs('#kpiTotalUsersAcc').textContent = fmt(d.summary.totalUsers);
             qs('#kpiWithPassword').textContent = fmt(d.summary.withPassword);
             qs('#kpiOAuthOnly').textContent = fmt(d.summary.oauthOnly);
@@ -475,6 +507,7 @@
     }
 
     function setTab(key) {
+        activeTab = key;
         qsa('.tab-btn').forEach(btn => {
             const t = btn.dataset.tab;
             const sel = t === key;
@@ -539,6 +572,111 @@
 
     qs('#fFrom')?.addEventListener('change', () => loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab));
     qs('#fTo')?.addEventListener('change', () => loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab));
+
+    // Export Logic
+    function exportGraph() {
+        // Map tab to its main chart ID
+        const chartIdMap = {
+            'signups': 'chartSignups',
+            'logins': 'chartLogins',
+            'plinkks': 'chartPlinkks',
+            'premium': 'chartPremium',
+            'bans': 'chartBans',
+            'accounts': 'chartDoughnut'
+        };
+        const chartId = chartIdMap[activeTab];
+        
+        if (chartId && charts[chartId]) {
+            const link = document.createElement('a');
+            link.download = `plinkk-stats-${activeTab}-${new Date().toISOString().slice(0,10)}.png`;
+            link.href = charts[chartId].toBase64Image();
+            link.click();
+        } else {
+            alert('Aucun graphique disponible pour cet onglet ou pas encore chargé.');
+        }
+    }
+
+    function exportCSV() {
+        if (!currentData || !currentData.data) {
+            alert('Aucune donnée chargée à exporter.');
+            return;
+        }
+        
+        let rows = [];
+        const today = new Date().toISOString().slice(0, 10);
+        const type = currentData.type;
+        const d = currentData.data;
+
+        if (type === 'signups') {
+            rows = [['Date', 'Total Cumule', 'Nouveaux', 'Staff', 'Public', 'Prive']];
+            if(d.series) {
+                d.series.forEach(x => {
+                    rows.push([x.date, x.cumul, x.count, x.staff, x.pub, x.priv]);
+                });
+            }
+        }
+        else if (type === 'logins') {
+            rows = [['Date', 'Connexions']];
+            if(d.series) {
+                d.series.forEach(x => {
+                    rows.push([x.date, x.count]);
+                });
+            }
+        }
+        else if (type === 'plinkks') {
+            rows = [['Date', 'Vues']];
+            if(d.series) {
+                d.series.forEach(x => {
+                    rows.push([x.date, x.count]);
+                });
+            }
+            // Add top plinkks if available (as a separate block below)
+            if(currentData.top && currentData.top.plinkks) {
+                rows.push([]);
+                rows.push(['TOP PLINKKS (PERIODE)']);
+                rows.push(['Nom', 'Slug', 'Vues', 'Date Creation']);
+                currentData.top.plinkks.forEach(p => {
+                    rows.push([p.name || 'Sans titre', p.slug, p.views, p.createdAt]);
+                });
+            }
+        }
+        else if (type === 'premium') {
+            rows = [['Date', 'Achats']];
+            if(d.series) {
+                d.series.forEach(x => {
+                    rows.push([x.date, x.count]);
+                });
+            }
+        }
+        else if (type === 'bans') {
+            rows = [['Date', 'Bans', 'Revocations']];
+            if(d.series) {
+                d.series.forEach(x => {
+                    rows.push([x.date, x.bans, x.revokes]);
+                });
+            }
+        }
+        else if (type === 'accounts') {
+            rows = [['Provider', 'Count']];
+            if(d.providers) {
+                d.providers.forEach(p => {
+                    rows.push([p.provider, p.count]);
+                });
+            }
+            rows.push([]);
+            rows.push(['KPI']);
+            rows.push(['Total Users', d.summary.totalUsers]);
+            rows.push(['With Password', d.summary.withPassword]);
+            rows.push(['OAuth Only', d.summary.oauthOnly]);
+        }
+        
+        if (rows.length > 0) {
+            downloadCSV(`plinkk-data-${type}-${today}.csv`, rows);
+        }
+    }
+
+    qs('#btnExportGraph')?.addEventListener('click', exportGraph);
+    qs('#btnExportCSV')?.addEventListener('click', exportCSV);
 
     function init() { setupDates(); setTab('signups'); }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

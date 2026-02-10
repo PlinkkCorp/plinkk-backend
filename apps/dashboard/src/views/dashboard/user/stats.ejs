@@ -25,7 +25,11 @@
                 </p>
             </div>
             <div class="relative z-10 flex items-center gap-3">
-                <button id="exportCsv" class="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white font-medium rounded-xl hover:bg-slate-700 border border-slate-700 transition-colors">
+                <button id="btnExportGraph" class="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white font-medium rounded-xl hover:bg-slate-700 border border-slate-700 transition-colors" title="Exporter le graphique">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                    Graph
+                </button>
+                <button id="btnExportCSV" class="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white font-medium rounded-xl hover:bg-slate-700 border border-slate-700 transition-colors" title="Exporter les données (CSV)">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     CSV
                 </button>
@@ -125,17 +129,19 @@
         <!--  TRENDS  -->
         <section id="panel-trends" class="tab-panel hidden space-y-6">
             <% if (!_isPremium) { %>
-            <div class="relative bg-gradient-to-r from-violet-600/10 to-fuchsia-600/10 border border-violet-500/30 rounded-2xl p-5 flex items-center gap-4">
-                <div class="p-3 bg-violet-500/20 rounded-xl">
-                    <svg class="w-6 h-6 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+            <div class="flex flex-col items-center justify-center p-12 bg-slate-900/50 rounded-3xl border border-slate-800 text-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-b from-violet-500/5 to-transparent pointer-events-none"></div>
+                <div class="p-4 bg-slate-800/50 rounded-2xl mb-6 relative z-10 blur-xl opacity-50 absolute scale-150"></div>
+                <div class="p-4 bg-violet-500/10 rounded-2xl mb-6 relative z-10">
+                    <svg class="w-8 h-8 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                 </div>
-                <div class="flex-1">
-                    <p class="text-white font-semibold text-sm">Passez en Premium pour débloquer les statistiques au-delà de 30 jours</p>
-                    <p class="text-slate-400 text-xs mt-0.5">Accédez aux tendances sur 60, 90, 180 ou 365 jours.</p>
-                </div>
-                <a href="/pricing" class="px-3 py-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-[10px] font-bold rounded-lg uppercase tracking-wider">Upgrade</a>
+                <h3 class="text-xl font-bold text-white mb-2 relative z-10">Statistiques avancées</h3>
+                <p class="text-slate-400 max-w-md mb-8 relative z-10">Passez en Premium pour accéder aux tendances journalières détaillées et exporter vos données en CSV et images.</p>
+                <a href="/pricing" class="px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-xl shadow-lg shadow-violet-900/20 hover:shadow-violet-900/40 hover:-translate-y-0.5 transition-all relative z-10">
+                    Débloquer avec Premium
+                </a>
             </div>
-            <% } %>
+            <% } else { %>
             <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                     <h2 class="font-bold text-white text-xl">Tendances journalières</h2>
@@ -176,6 +182,7 @@
                     </div>
                 </div>
             </div>
+            <% } %>
         </section>
 
         <!--  LINKS  -->
@@ -306,6 +313,7 @@
                                 <th class="p-4 font-bold">URL cible</th>
                                 <th class="p-4 font-bold text-center">Statut</th>
                                 <th class="p-4 font-bold text-right">Clics</th>
+                                <th class="p-4 font-bold text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-800/50">
@@ -327,11 +335,16 @@
                                             </span>
                                         </td>
                                         <td class="p-4 text-right font-bold text-white"><%= r.clicks %></td>
+                                        <td class="p-4 text-right">
+                                            <a href="/redirects/<%= r.id %>/stats" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors inline-flex items-center justify-center group" title="Voir les statistiques détaillées">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-violet-400 transition-colors"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+                                            </a>
+                                        </td>
                                     </tr>
                                 <% }) %>
                             <% } else { %>
                                 <tr>
-                                    <td colspan="4" class="p-12 text-center text-slate-600 font-medium italic">Aucune redirection créée pour le moment.</td>
+                                    <td colspan="5" class="p-12 text-center text-slate-600 font-medium italic">Aucune redirection créée pour le moment.</td>
                                 </tr>
                             <% } %>
                         </tbody>
@@ -389,6 +402,13 @@
             ticks: { color: '#64748b', precision: 0, font: { size: 10 } }
         }
     };
+    
+    // Global Access to charts for export
+    const charts = {};
+    let activeTab = 'overview';
+    
+    // Trends Data Cache
+    let trendsData = { views: [], clicks: [] };
 
     function makeLineChart(ctxEx, labels, data, label, color) {
         if (!ctxEx) return null;
@@ -479,6 +499,7 @@
     const tabButtons = qsa('.tab-btn');
     const allPanels = qsa('.tab-panel');
     function setTab(key) {
+        activeTab = key;
         const panels = { 
             overview: qs('#panel-overview'), 
             trends: qs('#panel-trends'), 
@@ -514,7 +535,8 @@
             // Petit délai pour simuler le chargement et s'assurer que le DOM est prêt
             await new Promise(r => setTimeout(r, 300));
             
-            makeLineChart(
+            if (charts.overview) charts.overview.destroy();
+            charts.overview = makeLineChart(
                 overCtx,
                 viewsDaily.map(d => fmtDateLabel(d.date)),
                 viewsDaily.map(d => d.count),
@@ -527,8 +549,7 @@
     initOverview();
 
     /*  TRENDS CHARTS  */
-    let trendsViewsInstance = null;
-    let trendsClicksInstance = null;
+    // removed local instances tracking
 
     async function fetchSeries(endpoint, days) {
         const now = new Date();
@@ -540,6 +561,7 @@
     }
 
     async function refreshTrends() {
+        if (!isPremiumUser) return;
         const rangeEl = qs('#fRange');
         const panel = qs('#panel-trends');
         const chartLoaders = qsa('.chart-loader', panel);
@@ -551,13 +573,16 @@
         chartLoaders.forEach(l => l.classList.remove('hidden'));
         try {
             const vData = await fetchSeries('views', days);
+            trendsData.views = Array.isArray(vData) ? vData : (vData.series || []); // Handle both formats just in case
+            const vArray = trendsData.views;
+
             const vCtx = qs('#trendsViewsChart')?.getContext('2d');
-            if (trendsViewsInstance) trendsViewsInstance.destroy();
+            if (charts.trendsViews) charts.trendsViews.destroy();
             if (vCtx) {
-                trendsViewsInstance = makeLineChart(
+                charts.trendsViews = makeLineChart(
                     vCtx,
-                    (vData.series || []).map(d => fmtDateLabel(d.date)),
-                    (vData.series || []).map(d => d.count),
+                    vArray.map(d => fmtDateLabel(d.date)),
+                    vArray.map(d => d.count),
                     'Vues', 'rgb(139, 92, 246)'
                 );
             }
@@ -566,13 +591,16 @@
         }
         try {
             const cData = await fetchSeries('clicks', days);
+            trendsData.clicks = Array.isArray(cData) ? cData : (cData.series || []); // Handle both formats just in case
+            const cArray = trendsData.clicks;
+            
             const cCtx = qs('#trendsClicksChart')?.getContext('2d');
-            if (trendsClicksInstance) trendsClicksInstance.destroy();
+            if (charts.trendsClicks) charts.trendsClicks.destroy();
             if (cCtx) {
-                trendsClicksInstance = makeLineChart(
+                charts.trendsClicks = makeLineChart(
                     cCtx,
-                    (cData.series || []).map(d => fmtDateLabel(d.date)),
-                    (cData.series || []).map(d => d.count),
+                    cArray.map(d => fmtDateLabel(d.date)),
+                    cArray.map(d => d.count),
                     'Clics', 'rgb(16, 185, 129)'
                 );
             }
@@ -581,6 +609,7 @@
         }
         chartLoaders.forEach(l => l.classList.add('hidden'));
     }
+
     qs('#fRange')?.addEventListener('change', refreshTrends);
     refreshTrends();
 
@@ -618,10 +647,10 @@
         }
 
         const barRows = rows.slice(0, top);
-        if (linksChartInstance) linksChartInstance.destroy();
         const ctx = qs('#linksChart');
+        if (charts.links) charts.links.destroy();
         if (ctx && barRows.length) {
-            linksChartInstance = new Chart(ctx.getContext('2d'), {
+            charts.links = new Chart(ctx.getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: barRows.map(r => r.label.length > 20 ? r.label.slice(0, 20) + '...' : r.label),
@@ -651,16 +680,6 @@
     ['#fSearch', '#fMin', '#fTop'].forEach(sel => qs(sel)?.addEventListener('input', applyLinksFilter));
     applyLinksFilter();
 
-    qs('#exportCsv').onclick = () => {
-        const rows = links.map(l => ({
-            id: l.id,
-            label: l.text || l.name || l.url || 'Sans titre',
-            url: l.url || '',
-            clicks: Number(l.clicks || 0)
-        }));
-        downloadBlob(makeCSV(rows), 'statistiques-liens-plinkk.csv');
-    };
-
     /*  CATEGORIES CHART  */
     const catMap = new Map();
     links.forEach(l => {
@@ -671,7 +690,8 @@
 
     const catCanvas = qs('#categoriesDoughnut');
     if (catCanvas && catEntries.length) {
-        new Chart(catCanvas.getContext('2d'), {
+        if(charts.categories) charts.categories.destroy();
+        charts.categories = new Chart(catCanvas.getContext('2d'), {
             type: 'doughnut',
             data: {
                 labels: catEntries.map(e => e[0]),
@@ -717,13 +737,92 @@
     /*  REDIRECTS CHART  */
     const redCtx = qs('#redirectsChart')?.getContext('2d');
     if (redCtx && redirectReturns.length) {
-        makeLineChart(
+        if(charts.redirects) charts.redirects.destroy();
+        charts.redirects = makeLineChart(
             redCtx,
             redirectReturns.map(d => fmtDateLabel(d.date)),
             redirectReturns.map(d => d.count),
             'Clics Redirections', 'rgb(139, 92, 246)'
         );
     }
+    
+    /* EXPORT LOGIC */
+    function exportGraph() {
+        if (activeTab === 'trends' && !isPremiumUser) return alert('Fonctionnalité réservée aux membres Premium');
+        const chartMap = {
+            'overview': charts.overview,
+            'trends': charts.trendsViews, // Default to views
+            'links': charts.links,
+            'categories': charts.categories,
+            'redirects': charts.redirects
+        };
+        const chart = chartMap[activeTab];
+        
+        if (chart) {
+            const link = document.createElement('a');
+            link.download = `plinkk-stats-${activeTab}-${new Date().toISOString().slice(0,10)}.png`;
+            link.href = chart.toBase64Image();
+            link.click();
+        } else {
+            alert('Aucun graphique disponible pour cet onglet ou chargement en cours.');
+        }
+    }
+
+    function exportCSV() {
+        if (activeTab === 'trends' && !isPremiumUser) return alert('Fonctionnalité réservée aux membres Premium');
+        const today = new Date().toISOString().slice(0, 10);
+        let content = '';
+        let filename = `plinkk-data-${activeTab}-${today}.csv`;
+        const esc = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+
+        if (activeTab === 'overview') {
+            const rows = [['Date', 'Vues']];
+            viewsDaily.forEach(d => rows.push([d.date, d.count]));
+            content = rows.map(r => r.map(esc).join(',')).join('\n');
+        }
+        else if (activeTab === 'trends') {
+            const rows = [['Date', 'Vues', 'Clics']];
+            // Merge maps
+            const vMap = new Map();
+            (trendsData.views || []).forEach(d => vMap.set(d.date.split('T')[0], d.count));
+            const cMap = new Map();
+            (trendsData.clicks || []).forEach(d => cMap.set(d.date.split('T')[0], d.count));
+            
+            const dates = new Set([...vMap.keys(), ...cMap.keys()]);
+            Array.from(dates).sort().forEach(date => {
+                rows.push([date, vMap.get(date) || 0, cMap.get(date) || 0]);
+            });
+            content = rows.map(r => r.map(esc).join(',')).join('\n');
+        }
+        else if (activeTab === 'links') {
+            const rows = [['ID', 'Label', 'URL', 'Clicks']];
+            links.forEach(l => rows.push([l.id, l.text || l.name || 'Sans titre', l.url || '', l.clicks || 0]));
+            content = rows.map(r => r.map(esc).join(',')).join('\n');
+        }
+        else if (activeTab === 'categories') {
+            const rows = [['Categorie', 'Clics']];
+            catEntries.forEach(e => rows.push([e[0], e[1]]));
+            content = rows.map(r => r.map(esc).join(',')).join('\n');
+        }
+        else if (activeTab === 'redirects') {
+            const rows = [['Slug', 'Target URL', 'Active', 'Clicks']];
+            (D.redirects || []).forEach(r => rows.push([r.slug, r.targetUrl, r.isActive ? 'Oui' : 'Non', r.clicks]));
+            rows.push([]);
+            rows.push(['Date', 'Clics (30j)']);
+            redirectReturns.forEach(d => rows.push([d.date, d.count]));
+            content = rows.map(r => r.map(esc).join(',')).join('\n');
+        }
+
+        if (content) {
+            downloadBlob(content, filename);
+        } else {
+             alert('Aucune donnée à exporter.');
+        }
+    }
+
+    qs('#btnExportGraph')?.addEventListener('click', exportGraph);
+    qs('#btnExportCSV')?.addEventListener('click', exportCSV);
+
 })();
 </script>
 
