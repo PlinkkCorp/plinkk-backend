@@ -238,6 +238,23 @@
                       </div>
                     </div>
                   </form>
+
+                  <div class="pt-8 border-t border-slate-800">
+                    <div class="mb-4">
+                      <h4 class="text-lg font-semibold text-white">Abonnement</h4>
+                      <p class="text-sm text-slate-400">Gérez votre abonnement premium et vos options.</p>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-slate-950 border border-slate-800">
+                      <div>
+                        <p class="text-sm font-medium text-white">Plinkk Premium</p>
+                        <p class="text-xs text-slate-400">Modifiez votre offre ou résiliez à tout moment.</p>
+                      </div>
+                      <div class="flex flex-wrap items-center gap-2">
+                        <a href="/premium" class="px-4 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">Gérer l'offre</a>
+                        <button id="btnCancelSubscription" class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">Résilier</button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -953,6 +970,38 @@
         const res = await fetch('/api/me/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         const j = await res.json().catch(() => ({}));
         if (res.ok) showAlert('Mot de passe mis à jour', 'success'); else showAlert(j.error || 'Erreur', 'error');
+      });
+
+      document.getElementById('btnCancelSubscription')?.addEventListener('click', async () => {
+        const ok = await showConfirm("Confirmer la résiliation de l'abonnement ? L'accès Premium restera actif jusqu'à la fin de la période en cours.", 'Résilier');
+        if (!ok) return;
+
+        const btn = document.getElementById('btnCancelSubscription');
+        const originalText = btn?.textContent || 'Résilier';
+        if (btn) {
+          btn.textContent = 'Résiliation...';
+          btn.setAttribute('disabled', 'disabled');
+          btn.classList.add('opacity-70', 'cursor-not-allowed');
+        }
+
+        try {
+          const res = await fetch('/api/stripe/cancel-subscription', { method: 'POST' });
+          const j = await res.json().catch(() => ({}));
+          if (res.ok) {
+            showAlert(j.message || 'Abonnement résilié.', 'success');
+          } else {
+            showAlert(j.error || 'Erreur lors de la résiliation', 'error');
+          }
+        } catch (err) {
+          console.error(err);
+          showAlert('Erreur réseau', 'error');
+        } finally {
+          if (btn) {
+            btn.textContent = originalText;
+            btn.removeAttribute('disabled');
+            btn.classList.remove('opacity-70', 'cursor-not-allowed');
+          }
+        }
       });
 
       (function () {

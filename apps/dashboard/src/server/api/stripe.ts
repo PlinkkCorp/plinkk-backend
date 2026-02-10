@@ -7,6 +7,7 @@ import {
   syncSubscription, // Nouvelle fonction importée
   handleSuccessfulPayment,
   getUserPurchases,
+  getOrCreateStripeCustomer,
   PRODUCTS,
   ProductType,
 } from "../../services/stripeService";
@@ -53,6 +54,33 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
     } catch (e: any) {
       request.log?.error(e, "Plan update failed");
       return reply.code(500).send({ error: e.message || "Erreur de mise à jour du plan" });
+    }
+  });
+
+  // ─── Résiliation abonnement ───────────────────────────────────────────────
+  fastify.post("/cancel-subscription", { preHandler: requireAuth }, async (request, reply) => {
+    if (!stripe) return reply.code(503).send({ error: "Paiements non disponibles" });
+
+    const userId = request.userId!;
+
+    try {
+      const customerId = await getOrCreateStripeCustomer(userId);
+      const subs = await stripe.subscriptions.list({ customer: customerId, status: "active", limit: 1 });
+      const sub = subs.data[0];
+
+      if (!sub) {
+        return reply.send({ updated: true, message: "Aucun abonnement actif à résilier." });
+      }
+
+      if (sub.cancel_at_period_end) {
+        return reply.send({ updated: true, message: "La résiliation est déjà programmée." });
+      }
+
+      await stripe.subscriptions.update(sub.id, { cancel_at_period_end: true });
+      return reply.send({ updated: true, message: "Résiliation programmée à la fin de la période." });
+    } catch (e: any) {
+      request.log?.error(e, "Subscription cancel failed");
+      return reply.code(500).send({ error: e.message || "Erreur lors de la résiliation" });
     }
   });
 
