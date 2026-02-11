@@ -232,6 +232,7 @@
                                 <th class="px-6 py-4 font-medium">Utilisateur</th>
                                 <th class="px-6 py-4 font-medium text-right">Clics</th>
                                 <th class="px-6 py-4 font-medium text-right">Créé le</th>
+                                <th class="px-6 py-4 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="redirectsTopBody" class="text-sm"></tbody>
@@ -524,6 +525,11 @@
                         </td>
                         <td class="px-6 py-4 text-right font-bold text-white">${fmt(r.clicks)}</td>
                         <td class="px-6 py-4 text-right text-slate-500 text-xs">${new Date(r.createdAt).toLocaleDateString('fr-FR')}</td>
+                        <td class="px-6 py-4 text-right">
+                             <button onclick="window.deleteRedirect('${r.id}')" class="text-rose-400 hover:text-rose-300 p-2 rounded-lg hover:bg-rose-400/10 transition-colors" title="Supprimer">
+                                <i class="ph-duotone ph-trash text-lg"></i>
+                            </button>
+                        </td>
                     </tr>`).join('');
             }
         },
@@ -781,6 +787,26 @@
 
     qs('#btnExportGraph')?.addEventListener('click', exportGraph);
     qs('#btnExportCSV')?.addEventListener('click', exportCSV);
+
+    window.deleteRedirect = async (id) => {
+        if(!confirm('Voulez-vous vraiment supprimer cette redirection ? Cette action est irréversible.')) return;
+        try {
+            const res = await fetch('/api/admin/redirects/' + id, { 
+                method: 'DELETE', 
+                headers: { 'Content-Type': 'application/json' }  // CSRF if needed?
+            });
+            if(res.ok) {
+                // Refresh the list by reloading the tab
+                loadTab('redirections');
+            } else {
+                const err = await res.json();
+                alert('Erreur: ' + (err.error || 'Impossible de supprimer'));
+            }
+        } catch(e) {
+            console.error(e);
+            alert('Erreur serveur lors de la suppression');
+        }
+    };
 
     function init() { setupDates(); setTab('signups'); }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
