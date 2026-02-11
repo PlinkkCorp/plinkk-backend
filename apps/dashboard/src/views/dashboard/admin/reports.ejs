@@ -2,7 +2,7 @@
 <%- include('partials/header-dash.ejs', { user: user }) %>
 
 <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-  <%- include('partials/admin-nav.ejs', { active: 'admin-reports' }) %>
+  <%- include('partials/admin-nav.ejs', { user: user, active: 'admin-reports' }) %>
 
   <main class="col-span-12 lg:col-span-10 space-y-6">
     

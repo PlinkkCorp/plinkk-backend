@@ -53,6 +53,23 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     return reply.send(updated);
   });
 
+  fastify.post("/username", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) throw new UnauthorizedError();
+    const { username } = (request.body as { username: string }) || {};
+
+    if (!username || username.trim().length < 3) {
+      throw new BadRequestError("Le nom d'utilisateur doit contenir au moins 3 caractères");
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: userId as string },
+      data: { userName: username.trim() },
+      select: { id: true, userName: true },
+    });
+    return reply.send(updated);
+  });
+
   fastify.post("/email", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) throw new UnauthorizedError();
@@ -180,6 +197,19 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       id: updated.id,
       isEmailPublic: Boolean(updated.publicEmail),
     });
+  });
+
+  fastify.post("/premium-ui", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) throw new UnauthorizedError();
+    const { enabled } = (request.body as { enabled?: boolean }) || {};
+    if (typeof enabled !== "boolean") throw new BadRequestError("Valeur invalide");
+    const updated = await prisma.user.update({
+      where: { id: userId as string },
+      data: { showPremiumUi: enabled },
+      select: { showPremiumUi: true },
+    });
+    return reply.send(updated);
   });
 
   fastify.post("/2fa", async (request, reply) => {

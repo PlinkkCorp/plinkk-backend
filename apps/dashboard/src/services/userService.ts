@@ -9,6 +9,8 @@ export interface UserBasicInfo {
   isPublic: boolean;
   isVerified: boolean;
   isPartner: boolean;
+  isPremium: boolean;
+  premiumUntil: Date | null;
   createdAt: Date;
   role: {
     id: string;
@@ -36,6 +38,8 @@ const USER_SAFE_SELECT = {
   isPublic: true,
   isVerified: true,
   isPartner: true,
+  isPremium: true,
+  premiumUntil: true,
   createdAt: true,
   twoFactorEnabled: true,
   role: {

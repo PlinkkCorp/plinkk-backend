@@ -15,6 +15,7 @@ import { adminRolesRoutes } from "./roles";
 import { adminSystemRoutes } from "./system";
 import { adminUsersRoutes } from "./users";
 import { adminBansRoutes } from "./bans";
+import { adminPlinkksRoutes } from "./plinkks";
 
 export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.register(dashboardAdminReportsRoutes, { prefix: "/reports" });
@@ -27,15 +28,17 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.register(adminSystemRoutes, { prefix: "/system" });
   fastify.register(adminUsersRoutes, { prefix: "/users" });
   fastify.register(adminBansRoutes, { prefix: "/bans" });
+  fastify.register(adminPlinkksRoutes, { prefix: "/plinkks" });
 
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_ADMIN", { mode: "redirect" });
     if (!ok) return;
 
-    const [usersRaw, totals, pendingThemes] = await Promise.all([
+    const [usersRaw, totals, pendingThemes, roles] = await Promise.all([
       findAllUsersForAdmin(),
       getUserStats(),
       getPendingThemesPreview(10),
+      prisma.role.findMany({ orderBy: [{ priority: "desc" }, { name: "asc" }] }),
     ]);
 
     let users = usersRaw;
@@ -59,6 +62,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       users,
       totals,
       pendingThemes,
+      roles,
       publicPath: request.publicPath,
     });
   });

@@ -39,9 +39,18 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
           select: { date: true, count: true },
           orderBy: { date: "asc" },
         });
-        const byDate = new Map(rows.map((r) => [r.date, Number(r.count)]));
+
+        const byDate = new Map<string, number>();
+        for (const r of rows) {
+          try {
+            const key = new Date(r.date).toISOString().slice(0, 10);
+            byDate.set(key, Number(r.count));
+          } catch(e) {}
+        }
+
         for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
-          preSeries.push({ date: t, count: byDate.get(t) || 0 });
+          const key = t.toISOString().slice(0, 10);
+          preSeries.push({ date: t, count: byDate.get(key) || 0 });
         }
         totalViews = await prisma.pageStat.count({ where: { plinkkId: selected.id, eventType: "view" } });
         totalClicks = await prisma.pageStat.count({ where: { plinkkId: selected.id, eventType: "click" } });
@@ -57,9 +66,17 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
         _sum: { count: true }
       });
 
-      const redirectByDate = new Map(redirectStats.map((r) => [r.date, Number(r._sum.count || 0)]));
+      const redirectByDate = new Map<string, number>();
+      for (const r of redirectStats) {
+        try {
+          const key = new Date(r.date).toISOString().slice(0, 10);
+          redirectByDate.set(key, Number(r._sum.count || 0));
+        } catch(e) {}
+      }
+
       for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
-        redirectSeries.push({ date: t, count: redirectByDate.get(t) || 0 });
+        const key = t.toISOString().slice(0, 10);
+        redirectSeries.push({ date: t, count: redirectByDate.get(key) || 0 });
       }
 
       const rawTotalRedirectClicks = await prisma.redirect.aggregate({
@@ -142,7 +159,11 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
         ORDER BY "date" ASC
       `;
 
-      const byDate = new Map(rows.map((r) => [r.date, r.count]));
+      const byDate = new Map<string, number>();
+      for (const r of rows) {
+        byDate.set(fmt(new Date(r.date)), Number(r.count));
+      }
+
       const series: { date: string; count: number }[] = [];
       for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
         const key = fmt(t);
@@ -193,10 +214,15 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
         })
       ).map((r) => ({ date: r.date, count: r._sum.count ?? 0 }));
 
-      const byDate = new Map(rows.map((r) => [r.date, Number(r.count)]));
-      const series: { date: Date; count: number }[] = [];
+      const byDate = new Map<string, number>();
+      for (const r of rows) {
+        byDate.set(fmt(new Date(r.date)), Number(r.count));
+      }
+
+      const series: { date: string; count: number }[] = [];
       for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
-        series.push({ date: t, count: byDate.get(t) || 0 });
+        const key = fmt(t);
+        series.push({ date: key, count: byDate.get(key) || 0 });
       }
       return reply.send({ from: s, to: e, series });
     } catch (err) {

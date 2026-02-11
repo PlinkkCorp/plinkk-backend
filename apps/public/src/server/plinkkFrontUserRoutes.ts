@@ -251,10 +251,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             data: { views: { increment: 1 } },
           });
         } catch (e) {
-          request.log?.warn(
-            { err: e },
-            "user.updateMany failed (views increment) - skipping",
-          );
+          request.log?.warn({ err: e }, "user.updateMany failed (views increment) - skipping");
         }
 
         // Agrégation quotidienne des vues (UserViewDaily)
@@ -275,10 +272,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             update: { count: { increment: 1 } },
           });
         } catch (e) {
-          request.log?.warn(
-            { err: e },
-            "Failed to record daily view (userViewDaily upsert)",
-          );
+          request.log?.warn({ err: e }, "Failed to record daily view (userViewDaily upsert)");
         }
       }
 

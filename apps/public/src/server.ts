@@ -36,6 +36,7 @@ import { AppError } from "@plinkk/shared";
 
 const fastify = Fastify({
   logger: true,
+  trustProxy: true,
 });
 const PORT = 3002;
 

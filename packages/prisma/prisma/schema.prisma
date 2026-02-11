@@ -62,6 +62,7 @@ model User {
   isPartner  Boolean  @default(false)
 
   isPremium  Boolean  @default(false)
+  showPremiumUi Boolean @default(true)
   premiumUntil DateTime?
   stripeCustomerId String? @unique
   extraPlinkks     Int     @default(0)
@@ -118,6 +119,13 @@ model Connection {
 
   @@unique([provider, providerId])
   @@unique([provider, userId])
+}
+
+model MagicLink {
+  token     String   @id
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 model Session {
@@ -330,6 +338,8 @@ model Announcement {
   endAt       DateTime?
   createdAt   DateTime  @default(now())
   global      Boolean   @default(false)
+  displayType String    @default("banner") // banner | notification | popup
+  platform    String    @default("all")    // dashboard | public | all
 
   targets     AnnouncementTarget[]
   roleTargets AnnouncementRoleTarget[]

@@ -24,10 +24,16 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
         userName: true,
         email: true,
         publicEmail: true,
+        createdAt: true,
+        lastLogin: true,
+        _count: { select: { sessions: true } },
         isPublic: true,
         views: true,
         isVerified: true,
         isPartner: true,
+        isPremium: true,
+        premiumUntil: true,
+        links: { select: { clicks: true } },
         role: { select: { id: true, name: true } },
         plinkks: {
           select: {
@@ -42,11 +48,55 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
           },
           orderBy: { index: "asc" },
         },
+        redirects: {
+          select: {
+            id: true,
+            slug: true,
+            targetUrl: true,
+            clicks: true,
+            createdAt: true
+          },
+          orderBy: { updatedAt: 'desc' }
+        }
       },
     });
     if (!user)
       return reply.code(404).send({ error: "Utilisateur introuvable" });
     return reply.send(user);
+  });
+
+  fastify.put("/:id/profile", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+    const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
+    if (!ok) return;
+
+    const { id } = request.params as { id: string };
+    const { userName, email } = request.body as { userName?: string, email?: string };
+
+    const data: any = {};
+    if (typeof userName === 'string') {
+        const uName = userName.trim();
+        if (uName.length < 3 || uName.length > 50) return reply.code(400).send({ error: 'Username invalid length' });
+        const exists = await prisma.user.findFirst({ where: { userName: { equals: uName, mode: 'insensitive' }, id: { not: id } } });
+        if (exists) return reply.code(409).send({ error: 'Username taken' });
+        data.userName = uName;
+    }
+    if (typeof email === 'string') {
+        const mail = email.trim();
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!re.test(mail)) return reply.code(400).send({ error: 'Email invalid' });
+        const exists = await prisma.user.findFirst({ where: { email: { equals: mail, mode: 'insensitive' }, id: { not: id } } });
+        if (exists) return reply.code(409).send({ error: 'Email taken' });
+        data.email = mail;
+    }
+
+    if (Object.keys(data).length > 0) {
+        const u = await prisma.user.update({ where: { id }, data });
+        await logAdminAction(meId, 'UPDATE_USER_PROFILE', id, data, request.ip);
+        return reply.send({ id: u.id, userName: u.userName, email: u.email });
+    }
+    return reply.send({ ok: true });
   });
 
   fastify.get("/:id/ban-email", async (request, reply) => {
@@ -534,11 +584,15 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     if (!ok) return;
 
     const { id } = request.params as { id: string };
-    const { type, value } = request.body as { type: 'VERIFIED' | 'PARTNER', value: boolean };
+    const { type, value } = request.body as { type: 'VERIFIED' | 'PARTNER' | 'PREMIUM', value: boolean };
 
     const data: any = {};
     if (type === 'VERIFIED') data.isVerified = value;
     if (type === 'PARTNER') data.isPartner = value;
+    if (type === 'PREMIUM') {
+      data.isPremium = value;
+      data.premiumUntil = value ? null : null;
+    }
 
     if (Object.keys(data).length === 0) return reply.send({ ok: true }); // Nothing to update
 

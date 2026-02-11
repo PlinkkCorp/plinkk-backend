@@ -1,38 +1,40 @@
-<%- include('partials/head.ejs', { title: 'Statistiques - ' + redirect.slug, description: 'Statistiques détaillées de votre redirection.', robots: 'noindex,nofollow' }) %>
-
+﻿<%- include('partials/head.ejs', { title: 'Statistiques - ' + redirect.slug, description: 'Statistiques détaillées de votre redirection.', robots: 'noindex,nofollow' }) %>
 <%- include('partials/header-dash.ejs', { user: user }) %>
 
 <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
     <%- include('partials/asside_dash.ejs', { user: user, active: 'redirects' }) %>
 
     <main class="col-span-12 lg:col-span-10 space-y-8">
-        <!-- Header -->
+        
+        <!--  HEADER GRADIENT  -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
             <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
             <div class="relative z-10">
-                <a href="/redirects" class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-4">
+                <a href="/redirects" class="inline-flex items-center gap-2 text-slate-500 hover:text-white transition-colors mb-4 text-sm font-medium">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                     Retour aux redirections
                 </a>
-                <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">
-                    Statistiques
-                    <code class="ml-2 px-3 py-1 bg-violet-500/20 text-violet-300 rounded-lg text-2xl">/r/<%= redirect.slug %></code>
-                </h1>
+                <div class="flex items-center gap-3 mb-2">
+                    <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Statistiques Redirection</h1>
+                    <code class="px-2.5 py-1 bg-violet-500/10 text-violet-400 rounded-lg text-sm font-mono border border-violet-500/20">/r/<%= redirect.slug %></code>
+                </div>
                 <% if (redirect.title) { %>
-                    <p class="text-slate-400 text-lg"><%= redirect.title %></p>
+                    <p class="text-slate-400 text-lg italic opacity-80"><%= redirect.title %></p>
+                <% } else { %>
+                    <p class="text-slate-400 text-lg">Analyse détaillée du trafic de votre lien court.</p>
                 <% } %>
             </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!--  KPI CARDS  -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
                 <div class="flex items-center gap-4">
                     <div class="p-3 bg-violet-500/10 rounded-xl">
                         <svg class="w-6 h-6 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
                     </div>
                     <div>
-                        <p class="text-3xl font-bold text-white"><%= redirect.clicks %></p>
+                        <p class="text-3xl font-bold text-white tracking-tight"><%= redirect.clicks %></p>
                         <p class="text-sm text-slate-400">Clics totaux</p>
                     </div>
                 </div>
@@ -43,7 +45,7 @@
                         <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     </div>
                     <div>
-                        <p class="text-3xl font-bold text-white"><%= Math.round(chartData.reduce((a, b) => a + b.count, 0) / 30) %></p>
+                        <p class="text-3xl font-bold text-white tracking-tight"><%= Math.round(chartData.reduce((a, b) => a + b.count, 0) / 30) %></p>
                         <p class="text-sm text-slate-400">Clics/jour (moy.)</p>
                     </div>
                 </div>
@@ -54,7 +56,7 @@
                         <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                     <div>
-                        <p class="text-lg font-bold text-white"><%= new Date(redirect.createdAt).toLocaleDateString('fr-FR') %></p>
+                        <p class="text-3xl font-bold text-white tracking-tight"><%= new Date(redirect.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) %></p>
                         <p class="text-sm text-slate-400">Créé le</p>
                     </div>
                 </div>
@@ -69,50 +71,62 @@
                         <% } %>
                     </div>
                     <div>
-                        <p class="text-lg font-bold <%= redirect.isActive ? 'text-emerald-400' : 'text-rose-400' %>"><%= redirect.isActive ? 'Actif' : 'Inactif' %></p>
+                        <p class="text-xl font-bold <%= redirect.isActive ? 'text-emerald-400' : 'text-rose-400' %> uppercase tracking-wider"><%= redirect.isActive ? 'Actif' : 'Inactif' %></p>
                         <p class="text-sm text-slate-400">Statut</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Chart -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+        <!--  CHART  -->
+        <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
             <h2 class="font-bold text-white text-xl mb-6">Clics des 30 derniers jours</h2>
-            <div class="h-64">
+            <div class="h-80 w-full">
                 <canvas id="clicksChart"></canvas>
             </div>
         </div>
 
-        <!-- URL Info -->
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
-            <h2 class="font-bold text-white text-xl mb-4">Informations</h2>
-            <div class="space-y-4">
-                <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                    <span class="text-slate-400 w-32 flex-shrink-0">Lien court :</span>
-                    <div class="flex items-center gap-2">
-                        <code class="px-3 py-2 bg-slate-800 rounded-lg text-violet-300 font-mono"><%= process.env.FRONTEND_URL || 'https://plinkk.fr' %>/r/<%= redirect.slug %></code>
-                        <button onclick="copyToClipboard('<%= process.env.FRONTEND_URL || 'https://plinkk.fr' %>/r/<%= redirect.slug %>')" class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+        <!--  INFORMATIONS  -->
+        <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+            <h2 class="font-bold text-white text-xl mb-6">Informations & Cible</h2>
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                    <span class="text-slate-500 text-sm font-medium md:col-span-3 lg:col-span-2 pt-2 uppercase tracking-widest text-[10px]">Lien court</span>
+                    <div class="md:col-span-9 lg:col-span-10 flex items-center gap-3">
+                        <div class="flex-1 bg-slate-900 border border-slate-800 px-4 py-3 rounded-xl font-mono text-violet-300 overflow-hidden text-ellipsis whitespace-nowrap">
+                            <%= process.env.FRONTEND_URL || 'https://plinkk.fr' %>/r/<%= redirect.slug %>
+                        </div>
+                        <button onclick="copyToClipboard('<%= process.env.FRONTEND_URL || 'https://plinkk.fr' %>/r/<%= redirect.slug %>')" class="p-3 bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl border border-slate-700 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
                         </button>
                     </div>
                 </div>
-                <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                    <span class="text-slate-400 w-32 flex-shrink-0">URL cible :</span>
-                    <a href="<%= redirect.targetUrl %>" target="_blank" class="text-slate-300 hover:text-white transition-colors flex items-center gap-2 break-all">
-                        <%= redirect.targetUrl %>
-                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                    </a>
+                
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start border-t border-slate-800/50 pt-6">
+                    <span class="text-slate-500 text-sm font-medium md:col-span-3 lg:col-span-2 pt-2 uppercase tracking-widest text-[10px]">URL cible</span>
+                    <div class="md:col-span-9 lg:col-span-10">
+                        <a href="<%= redirect.targetUrl %>" target="_blank" class="flex items-center gap-3 group">
+                            <div class="flex-1 bg-slate-900 border border-slate-800 px-4 py-3 rounded-xl text-slate-300 group-hover:text-white group-hover:border-violet-500/50 transition-all break-all">
+                                <%= redirect.targetUrl %>
+                            </div>
+                            <div class="p-3 bg-slate-800 text-slate-400 group-hover:text-white rounded-xl border border-slate-700 flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            </div>
+                        </a>
+                    </div>
                 </div>
+
                 <% if (redirect.expiresAt) { %>
-                    <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                        <span class="text-slate-400 w-32 flex-shrink-0">Expiration :</span>
-                        <span class="<%= new Date(redirect.expiresAt) < new Date() ? 'text-rose-400' : 'text-slate-300' %>">
-                            <%= new Date(redirect.expiresAt).toLocaleDateString('fr-FR') %>
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center border-t border-slate-800/50 pt-6">
+                        <span class="text-slate-500 text-sm font-medium md:col-span-3 lg:col-span-2 uppercase tracking-widest text-[10px]">Expiration</span>
+                        <div class="md:col-span-9 lg:col-span-10 flex items-center gap-3">
+                            <span class="px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl <%= new Date(redirect.expiresAt) < new Date() ? 'text-rose-400' : 'text-slate-300' %> font-medium">
+                                <%= new Date(redirect.expiresAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                            </span>
                             <% if (new Date(redirect.expiresAt) < new Date()) { %>
-                                <span class="ml-2 px-2 py-0.5 bg-rose-500/10 text-rose-400 text-xs rounded-full border border-rose-500/20">Expiré</span>
+                                <span class="px-3 py-1 bg-rose-500/10 text-rose-400 text-[10px] font-bold uppercase rounded-lg border border-rose-500/20 tracking-wider">Lien Expiré</span>
                             <% } %>
-                        </span>
+                        </div>
                     </div>
                 <% } %>
             </div>
@@ -122,74 +136,69 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const chartData = <%- JSON.stringify(chartData) %>;
-
-const ctx = document.getElementById('clicksChart').getContext('2d');
-new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: chartData.map(d => {
-            const date = new Date(d.date);
-            return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-        }),
-        datasets: [{
-            label: 'Clics',
-            data: chartData.map(d => d.count),
-            borderColor: 'rgb(139, 92, 246)',
-            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-            fill: true,
-            tension: 0.4,
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            pointBackgroundColor: 'rgb(139, 92, 246)',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            },
-            tooltip: {
-                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                titleColor: '#fff',
-                bodyColor: '#cbd5e1',
-                borderColor: 'rgba(71, 85, 105, 0.5)',
-                borderWidth: 1,
-                cornerRadius: 8,
-                padding: 12
-            }
+(function() {
+    const chartData = <%- JSON.stringify(chartData) %>;
+    const ctx = document.getElementById('clicksChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.map(d => {
+                const date = new Date(d.date);
+                return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+            }),
+            datasets: [{
+                label: 'Clics',
+                data: chartData.map(d => d.count),
+                borderColor: 'rgb(139, 92, 246)',
+                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                pointBackgroundColor: 'rgb(139, 92, 246)',
+                pointBorderColor: '#0f172a',
+                pointBorderWidth: 2,
+                borderWidth: 2.5
+            }]
         },
-        scales: {
-            x: {
-                grid: {
-                    color: 'rgba(71, 85, 105, 0.2)'
-                },
-                ticks: {
-                    color: '#64748b',
-                    maxTicksLimit: 10
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    titleColor: '#fff',
+                    bodyColor: '#94a3b8',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    padding: 12,
+                    displayColors: false
                 }
             },
-            y: {
-                beginAtZero: true,
-                grid: {
-                    color: 'rgba(71, 85, 105, 0.2)'
+            scales: {
+                x: {
+                    grid: { display: false },
+                    border: { display: false },
+                    ticks: { color: '#64748b', maxTicksLimit: 10, font: { size: 10 } }
                 },
-                ticks: {
-                    color: '#64748b',
-                    stepSize: 1
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                    border: { display: false },
+                    ticks: { color: '#64748b', precision: 0, font: { size: 10 } }
                 }
             }
         }
-    }
-});
+    });
 
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text);
-}
+    window.copyToClipboard = function(text) {
+        navigator.clipboard.writeText(text);
+        // On pourrait ajouter un toast ici
+    };
+})();
 </script>
 
 <%- include('partials/footer.ejs') %>

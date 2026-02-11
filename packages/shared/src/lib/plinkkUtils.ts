@@ -50,12 +50,14 @@ export async function recordPlinkkView(prisma: any, plinkkId: string, userId: st
   } catch (e) {
     request.log?.warn({ err: e }, "recordPlinkkView.pageStat failed");
   }
+
+  const now = new Date();
+  const y = now.getUTCFullYear();
+  const m = now.getUTCMonth();
+  const d = now.getUTCDate();
+  const dateObj = new Date(Date.UTC(y, m, d));
+
   try {
-    const now = new Date();
-    const y = now.getUTCFullYear();
-    const m = now.getUTCMonth();
-    const d = now.getUTCDate();
-    const dateObj = new Date(Date.UTC(y, m, d));
     await prisma.plinkkViewDaily.upsert({
       where: { plinkkId_date: { plinkkId, date: dateObj } },
       create: { plinkkId, date: dateObj, count: 1 },
@@ -64,6 +66,30 @@ export async function recordPlinkkView(prisma: any, plinkkId: string, userId: st
   } catch (e) {
     request.log?.warn({ err: e }, "recordPlinkkView.daily failed");
   }
+
+  try {
+    await prisma.userViewDaily.upsert({
+      where: { userId_date: { userId, date: dateObj } },
+      create: { userId, date: dateObj, count: 1 },
+      update: { count: { increment: 1 } },
+    });
+  } catch (e) {
+    // Silent fail or log
+  }
+
+  try {
+    await prisma.plinkk.update({
+      where: { id: plinkkId },
+      data: { views: { increment: 1 } }
+    });
+  } catch(e) {}
+
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { views: { increment: 1 } }
+    });
+  } catch(e) {}
 }
 
 export async function isReservedSlug(

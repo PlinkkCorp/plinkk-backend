@@ -7,7 +7,7 @@ import {
 } from "fastify";
 import "@fastify/view";
 import ejs from "ejs";
-import { Announcement, AnnouncementRoleTarget, AnnouncementTarget, Role, prisma } from "@plinkk/prisma";
+import { Announcement, AnnouncementRoleTarget, AnnouncementTarget, prisma } from "@plinkk/prisma";
 import { IncomingMessage, ServerResponse } from "http";
 import { toSafeUser, UserWithInclude } from "../types/user.js";
 import "dotenv/config"
@@ -31,6 +31,10 @@ export async function replyView(
 ): Promise<string> {
   if (user === null) {
     return reply.code(statusCode).view(template, {
+      __SITE_MESSAGES__: await getActiveAnnouncementsForUser(null, extraData.__platform),
+      user: null,
+      isAdmin: false,
+      isStaff: false,
       ...extraData,
       ...data,
     });
@@ -45,7 +49,7 @@ export async function replyView(
   }
 
   return reply.code(statusCode).view(template, {
-    __SITE_MESSAGES__: await getActiveAnnouncementsForUser(user.id),
+    __SITE_MESSAGES__: await getActiveAnnouncementsForUser(user.id, extraData.__platform),
     user: toSafeUser(user),
     isAdmin: isAdmin,
     isStaff: isStaff,
@@ -54,7 +58,7 @@ export async function replyView(
   });
 }
 
-export async function getActiveAnnouncementsForUser(userId: string | null) {
+export async function getActiveAnnouncementsForUser(userId: string | null, platform?: string) {
   const list: Announcement[] = [];
   try {
     const now = new Date();
@@ -75,10 +79,13 @@ export async function getActiveAnnouncementsForUser(userId: string | null) {
       orderBy: { createdAt: "desc" },
     });
     for (const a of anns) {
+      // Filter by platform
+      if (platform && a.platform && a.platform !== 'all' && a.platform !== platform) continue;
+
       const toUser =
         a.global ||
         (!!me && a.targets.some((t: AnnouncementTarget) => t.userId === me.id)) ||
-        (!!me && a.roleTargets.some((rt: AnnouncementRoleTarget & { role: Role }) => rt.role.name === me.role.name));
+        (!!me && me.role && a.roleTargets.some((rt: AnnouncementRoleTarget) => rt.roleId === me.role.id));
       if (!toUser) continue;
       list.push(a);
     }

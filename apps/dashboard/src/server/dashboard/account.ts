@@ -24,6 +24,7 @@ export function dashboardAccountRoutes(fastify: FastifyInstance) {
         isDefault: true,
         index: true,
         createdAt: true,
+        views: true,
       },
       orderBy: [{ isDefault: "desc" }, { index: "asc" }, { createdAt: "asc" }],
     });
@@ -32,6 +33,40 @@ export function dashboardAccountRoutes(fastify: FastifyInstance) {
       where: { userId: userInfo.id },
       select: { provider: true, createdAt: true, name: true, email: true },
     });
+
+    // Stats calculations
+    const rank = await prisma.user.count({
+      where: { createdAt: { lt: userInfo.createdAt } }
+    }) + 1;
+
+    const sessionCount = await prisma.session.count({
+      where: { userId: userInfo.id }
+    });
+
+    const totalViews = pages.reduce((acc, p) => acc + (p.views || 0), 0);
+
+    const [linkClicksAgg, redirectClicksAgg] = await Promise.all([
+      prisma.link.aggregate({
+        where: { userId: userInfo.id },
+        _sum: { clicks: true }
+      }),
+      prisma.redirect.aggregate({
+        where: { userId: userInfo.id },
+        _sum: { clicks: true }
+      })
+    ]);
+
+    const totalLinkClicks = linkClicksAgg._sum.clicks || 0;
+    const totalRedirectClicks = redirectClicksAgg._sum.clicks || 0;
+    
+    const stats = {
+      rank,
+      sessionCount,
+      totalViews,
+      totalLinkClicks,
+      totalRedirectClicks,
+      ctr: totalViews > 0 ? ((totalLinkClicks / totalViews) * 100).toFixed(2) : "0.00"
+    };
 
     const googleClientId = process.env.GOOGLE_OAUTH2_ID || process.env.ID_CLIENT;
     console.log("Serving Account Page with Client ID:", googleClientId);
@@ -42,6 +77,7 @@ export function dashboardAccountRoutes(fastify: FastifyInstance) {
       plinkks: pages,
       connections,
       googleClientId,
+      stats,
     });
   });
 

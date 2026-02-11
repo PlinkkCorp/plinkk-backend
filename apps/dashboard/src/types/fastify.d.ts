@@ -6,6 +6,7 @@ declare module "@fastify/secure-session" {
     data?: string;
     sessionId?: string;
     returnTo?: string;
+    original_admin?: string;
   }
 }
 

@@ -447,4 +447,299 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       without2FA,
     });
   });
+
+  // ─── Aggregated Endpoints for Dashboard ──────────────────────────────────
+
+  fastify.get<{ Querystring: StatsQuery }>("/signups", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_STATS");
+    if (!ok) return;
+    const { from, to } = request.query;
+    const { start, end } = getDateRange(from, to);
+
+    const [totalCount, visibleCount, staffCount, seriesData] = await Promise.all([
+      prisma.user.count(),
+      prisma.user.count({ where: { isPublic: true } }),
+      prisma.user.count({
+        where: {
+          role: {
+            OR: [
+              { isStaff: true },
+              { name: { in: ["ADMIN", "DEVELOPER", "MODERATOR"] } }
+            ]
+          }
+        }
+      }),
+      prisma.user.findMany({
+        where: { createdAt: { gte: start, lte: end } },
+        include: { role: true }
+      })
+    ]);
+
+    const visible = visibleCount;
+    const staff = staffCount;
+
+    const byDate = initDateMap(start, end, () => ({ count: 0, pub: 0, priv: 0, user: 0, staff: 0, cumul: 0 }));
+    let runningTotal = await prisma.user.count({ where: { createdAt: { lt: start } } });
+
+    for (const u of seriesData) {
+      const key = formatDate(new Date(u.createdAt));
+      const b = byDate.get(key);
+      if (b) {
+        b.count++;
+        if (u.isPublic) b.pub++; else b.priv++;
+        if (verifyRoleIsStaff(u.role)) b.staff++; else b.user++;
+      }
+    }
+
+    const series = Array.from(byDate.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([date, b]) => {
+      runningTotal += b.count;
+      return { date, ...b, cumul: runningTotal };
+    });
+
+    return reply.send({
+      stats: {
+        total: totalCount,
+        visible,
+        invisible: totalCount - visible,
+        staff
+      },
+      series
+    });
+  });
+
+  fastify.get<{ Querystring: StatsQuery }>("/logins", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_STATS");
+    if (!ok) return;
+    const { from, to } = request.query;
+    const { start, end } = getDateRange(from, to);
+
+    const rows = await prisma.user.findMany({
+      where: { lastLogin: { gte: start, lte: end } },
+      select: { lastLogin: true },
+    });
+
+    const byDate = initDateMap(start, end, () => 0);
+    for (const r of rows) {
+      if (!r.lastLogin) continue;
+      const key = formatDate(new Date(r.lastLogin));
+      if (byDate.has(key)) byDate.set(key, (byDate.get(key) || 0) + 1);
+    }
+
+    const series = Array.from(byDate.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, count]) => ({ date, count }));
+
+    const total = rows.length;
+    const days = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / 86400000));
+    const average = Math.round(total / days);
+
+    return reply.send({ total, average, series });
+  });
+
+  fastify.get<{ Querystring: StatsQuery }>("/plinkks", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_STATS");
+    if (!ok) return;
+    const { from, to } = request.query;
+    const { start, end } = getDateRange(from, to);
+
+    const [totalViewsAgg, totalPlinkks, dailyViews] = await Promise.all([
+      prisma.plinkk.aggregate({ _sum: { views: true } }),
+      prisma.plinkk.count(),
+      prisma.plinkkViewDaily.findMany({
+        where: { date: { gte: start, lte: end } }
+      })
+    ]);
+
+    const byDate = initDateMap(start, end, () => 0);
+    for (const r of dailyViews) {
+      const key = formatDate(new Date(r.date));
+      if (byDate.has(key)) {
+        byDate.set(key, (byDate.get(key) || 0) + r.count);
+      }
+    }
+
+    let topVal = 0;
+    const series = Array.from(byDate.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, count]) => {
+        if (count > topVal) topVal = count;
+        return { date, count };
+      });
+
+    return reply.send({
+      totalViews: totalViewsAgg._sum.views || 0,
+      totalPlinkks,
+      topViewInPeriod: topVal,
+      series
+    });
+  });
+
+  fastify.get<{ Querystring: StatsQuery }>("/redirections", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_STATS");
+    if (!ok) return;
+    const { from, to } = request.query;
+    const { start, end } = getDateRange(from, to);
+
+    const [totalClicksAgg, totalRedirects, dailyClicks] = await Promise.all([
+      prisma.redirect.aggregate({ _sum: { clicks: true } }),
+      prisma.redirect.count(),
+      prisma.redirectClickDaily.findMany({
+        where: { date: { gte: start, lte: end } }
+      })
+    ]);
+
+    const byDate = initDateMap(start, end, () => 0);
+    for (const r of dailyClicks) {
+      const key = formatDate(new Date(r.date));
+      if (byDate.has(key)) {
+        byDate.set(key, (byDate.get(key) || 0) + r.count);
+      }
+    }
+
+    let topVal = 0;
+    const series = Array.from(byDate.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, count]) => {
+        if (count > topVal) topVal = count;
+        return { date, count };
+      });
+
+    return reply.send({
+      totalClicks: totalClicksAgg._sum.clicks || 0,
+      totalRedirects,
+      topViewInPeriod: topVal,
+      series
+    });
+  });
+
+  fastify.get<{ Querystring: TopPlinkksQuery }>("/redirections/top", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_STATS");
+    if (!ok) return;
+
+    const { page = 1, limit = 20, sort = "clicks", order = "desc", search = "" } = request.query;
+    const skip = (Number(page) - 1) * Number(limit);
+    const take = Number(limit);
+
+    const where: Prisma.RedirectWhereInput = {};
+    if (search) {
+      where.OR = [
+        { slug: { contains: search } },
+        { targetUrl: { contains: search } },
+        { user: { userName: { contains: search } } },
+      ];
+    }
+
+    const [redirects, total] = await Promise.all([
+      prisma.redirect.findMany({
+        where,
+        select: {
+          id: true,
+          slug: true,
+          targetUrl: true,
+          clicks: true,
+          createdAt: true,
+          user: { select: { userName: true, image: true } },
+        },
+        orderBy: { [sort]: order },
+        skip,
+        take,
+      }),
+      prisma.redirect.count({ where }),
+    ]);
+
+    return reply.send({ redirects, total });
+  });
+
+  fastify.get<{ Querystring: StatsQuery }>("/premium", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_STATS");
+    if (!ok) return;
+    const { from, to } = request.query;
+    const { start, end } = getDateRange(from, to);
+
+    const [totalHistory, activeNow, purchases] = await Promise.all([
+      prisma.user.count({ where: { isPremium: true } }),
+      prisma.user.count({ where: { isPremium: true, premiumUntil: { gt: new Date() } } }),
+      prisma.purchase.findMany({
+        where: { createdAt: { gte: start, lte: end } }
+      })
+    ]);
+
+    const periodPurchases = purchases.length;
+    const revenue = purchases.reduce((a, b) => a + (b.amount * b.quantity), 0);
+
+    const byDate = initDateMap(start, end, () => 0);
+    for (const p of purchases) {
+      const key = formatDate(new Date(p.createdAt));
+      if (byDate.has(key)) byDate.set(key, (byDate.get(key) || 0) + 1);
+    }
+
+    const series = Array.from(byDate.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, count]) => ({ date, count }));
+
+    return reply.send({
+      totalHistory,
+      activeNow,
+      periodPurchases,
+      estimatedTotalRevenue: revenue,
+      series
+    });
+  });
+
+  fastify.get<{ Querystring: StatsQuery }>("/bans", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_STATS");
+    if (!ok) return;
+    const { from, to } = request.query;
+    const { start, end } = getDateRange(from, to);
+
+    const [created, revoked] = await Promise.all([
+      prisma.bannedEmail.findMany({ where: { createdAt: { gte: start, lte: end } } }),
+      prisma.bannedEmail.findMany({ where: { revoquedAt: { not: null, gte: start, lte: end } } })
+    ]);
+
+    const byDate = initDateMap(start, end, () => ({ bans: 0, revokes: 0 }));
+    for (const b of created) {
+      const key = formatDate(new Date(b.createdAt));
+      const bucket = byDate.get(key);
+      if (bucket) bucket.bans++;
+    }
+    for (const b of revoked) {
+      const key = formatDate(new Date(b.revoquedAt as Date));
+      const bucket = byDate.get(key);
+      if (bucket) bucket.revokes++;
+    }
+
+    const series = Array.from(byDate.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, v]) => ({ date, ...v }));
+
+    const totalActions = created.length + revoked.length;
+    const revokeRate = totalActions > 0 ? Math.round((revoked.length / totalActions) * 100) : 0;
+
+    return reply.send({ totalActions, revokeRate, series });
+  });
+
+  fastify.get("/accounts", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_STATS");
+    if (!ok) return;
+
+    const [connections, withPassword, totalUsers] = await Promise.all([
+      prisma.connection.groupBy({ by: ["provider"], _count: { provider: true } }),
+      prisma.user.count({ where: { hasPassword: true } }),
+      prisma.user.count()
+    ]);
+
+    const totalConnections = connections.reduce((a, b) => a + b._count.provider, 0);
+    const oauthOnly = totalUsers - withPassword;
+
+    return reply.send({
+      summary: {
+        totalUsers,
+        withPassword,
+        oauthOnly,
+        totalConnections
+      },
+      providers: connections.map(c => ({ provider: c.provider, count: c._count.provider }))
+    });
+  });
 }
