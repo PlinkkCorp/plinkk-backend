@@ -15,7 +15,7 @@ import { generateTheme } from "./lib/generateTheme";
 import { registerOAuth2 } from "./config/fastifyOAuth2";
 import { AppError } from "@plinkk/shared";
 
-const fastify = Fastify({ logger: true });
+const fastify = Fastify({ logger: true, trustProxy: true });
 const PORT = 3001;
 
 async function bootstrap() {
