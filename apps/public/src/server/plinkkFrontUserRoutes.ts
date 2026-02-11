@@ -1043,11 +1043,11 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           request.host +
             "https://s3.marvideo.fr/plinkk-image/default_profile.png";
 
-      const image = page.settings.profileImage.startsWith("/public/")
+      /* const image = page.settings.profileImage.startsWith("/public/")
         ? request.protocol + "://" + request.host + page.settings.profileImage
         : "https://plinkk.fr/" + page.settings.slug + ".png" ||
           request.host +
-            "https://s3.marvideo.fr/plinkk-image/default_profile.png";
+            "https://s3.marvideo.fr/plinkk-image/default_profile.png"; */
 
       const avatar = await loadImage(image);
 
