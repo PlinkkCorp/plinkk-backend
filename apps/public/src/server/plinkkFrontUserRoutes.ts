@@ -4,10 +4,8 @@ import path from "path";
 import { generateProfileConfig } from "../lib/generateConfig";
 import { minify } from "uglify-js";
 import { PlinkkSettings, User } from "@plinkk/prisma";
-// Utilise l'instance Prisma partagée pour éviter des ouvertures multiples du fichier SQLite
 import { prisma } from "@plinkk/prisma";
 import bcrypt from "bcrypt";
-
 import { resolvePlinkkPage, parseIdentifier } from "../lib/resolvePlinkkPage";
 import { recordPlinkkView } from "../lib/plinkkUtils";
 import { filterScheduledLinks } from "@plinkk/shared";
@@ -52,8 +50,10 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
       // Si ce n'est pas protégé, redirect vers la page
       // Note: identifier peut être vide, donc on reconstruit l'url
-      const targetUrl = identifier ? `/${username}/${identifier}` : `/${username}`;
-      
+      const targetUrl = identifier
+        ? `/${username}/${identifier}`
+        : `/${username}`;
+
       if (!resolved.isPasswordProtected) {
         return reply.redirect(targetUrl);
       }
@@ -76,7 +76,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
       const isValid = await bcrypt.compare(
         password,
-        resolved.page.passwordHash || ""
+        resolved.page.passwordHash || "",
       );
 
       if (isValid) {
@@ -91,7 +91,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           error: "Mot de passe incorrect",
         });
       }
-    }
+    },
   );
 
   fastify.get(
@@ -140,7 +140,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             prisma,
             pageBySlug.userId,
             pageBySlug.slug,
-            request
+            request,
           );
           if (resolved.status === 200) {
             // Vérifier si l'utilisateur est banni par email
@@ -163,7 +163,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
                     const until =
                       typeof ban.time === "number" && ban.time > 0
                         ? new Date(
-                            new Date(ban.createdAt).getTime() + ban.time * 60000
+                            new Date(ban.createdAt).getTime() +
+                              ban.time * 60000,
                           ).toISOString()
                         : null;
                     return reply.view("erreurs/banned.ejs", {
@@ -203,7 +204,12 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
                 ? resolved.page.slug
                 : resolved.user.id;
             if (!isPreview) {
-              await recordPlinkkView(prisma, resolved.page.id, resolved.user.id, request);
+              await recordPlinkkView(
+                prisma,
+                resolved.page.id,
+                resolved.user.id,
+                request,
+              );
             }
             return reply.view("plinkk/show.ejs", {
               page: resolved.page,
@@ -228,7 +234,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         prisma,
         username,
         undefined,
-        request
+        request,
       );
       if (resolved.status !== 200) {
         return reply
@@ -245,7 +251,10 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             data: { views: { increment: 1 } },
           });
         } catch (e) {
-          request.log?.warn({ err: e }, "user.updateMany failed (views increment) - skipping");
+          request.log?.warn(
+            { err: e },
+            "user.updateMany failed (views increment) - skipping",
+          );
         }
 
         // Agrégation quotidienne des vues (UserViewDaily)
@@ -266,7 +275,10 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             update: { count: { increment: 1 } },
           });
         } catch (e) {
-          request.log?.warn({ err: e }, "Failed to record daily view (userViewDaily upsert)");
+          request.log?.warn(
+            { err: e },
+            "Failed to record daily view (userViewDaily upsert)",
+          );
         }
       }
 
@@ -289,7 +301,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
               const until =
                 typeof ban.time === "number" && ban.time > 0
                   ? new Date(
-                      new Date(ban.createdAt).getTime() + ban.time * 60000
+                      new Date(ban.createdAt).getTime() + ban.time * 60000,
                     ).toISOString()
                   : null;
               return reply.view("erreurs/banned.ejs", {
@@ -329,7 +341,12 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           ? resolved.page.slug
           : resolved.user.id;
       if (!isPreview) {
-        await recordPlinkkView(prisma, resolved.page.id, resolved.user.id, request);
+        await recordPlinkkView(
+          prisma,
+          resolved.page.id,
+          resolved.user.id,
+          request,
+        );
       }
       return reply.view("plinkk/show.ejs", {
         page: resolved.page,
@@ -339,7 +356,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         links,
         publicPath,
       });
-    }
+    },
   );
 
   fastify.get(
@@ -359,22 +376,26 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         return reply.sendFile(`css/${cssFileName}`);
       }
       return reply.code(404).send({ error: "non existant file" });
-    }
+    },
   );
 
-  fastify.get("/:username.js", { config: { compress: false } }, async function (request, reply) {
-    const { username } = request.params as {
-      username: string;
-    };
-    if (username === "") {
-      reply.code(404).send("// please specify a username");
-      return;
-    }
+  fastify.get(
+    "/:username.js",
+    { config: { compress: false } },
+    async function (request, reply) {
+      const { username } = request.params as {
+        username: string;
+      };
+      if (username === "") {
+        reply.code(404).send("// please specify a username");
+        return;
+      }
 
-    const js = await generateBundle();
+      const js = await generateBundle();
 
-    reply.type("application/javascript").send(js);
-  });
+      reply.type("application/javascript").send(js);
+    },
+  );
 
   fastify.get("/:username.png", async function (request, reply) {
     const { username } = request.params as {
@@ -385,9 +406,16 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       return;
     }
 
-    const resolved = await resolvePlinkkPage(prisma, username, undefined, request);
+    const resolved = await resolvePlinkkPage(
+      prisma,
+      username,
+      undefined,
+      request,
+    );
     if (resolved.status !== 200) {
-      return reply.redirect("https://s3.marvideo.fr/plinkk-image/default_profile.png");
+      return reply.redirect(
+        "https://cdn.plinkk.fr/default_profile.png",
+      );
     }
 
     const user = await prisma.user.findUnique({
@@ -401,11 +429,14 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
     const userIcon = user?.image;
 
-    if (userIcon && (userIcon.startsWith("http://") || userIcon.startsWith("https://"))) {
+    if (
+      userIcon &&
+      (userIcon.startsWith("http://") || userIcon.startsWith("https://"))
+    ) {
       return reply.redirect(userIcon);
     }
 
-    return reply.sendFile(userIcon || "images/default_profile.png");
+    return reply.sendFile(userIcon || "https://cdn.plinkk.fr/default_profile.png");
   });
 
   fastify.get(
@@ -424,14 +455,14 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             "..",
             "public",
             "canvaAnimation",
-            animationFileName
-          )
+            animationFileName,
+          ),
         )
       ) {
         return reply.sendFile(`canvaAnimation/${animationFileName}`);
       }
       return reply.code(404).send({ error: "non existant file" });
-    }
+    },
   );
 
   fastify.get(
@@ -449,7 +480,12 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       reply.header("Cache-Control", "no-store, max-age=0, must-revalidate");
       reply.header("Vary", "Referer");
 
-      const resolved = await resolvePlinkkPage(prisma, username, undefined, request);
+      const resolved = await resolvePlinkkPage(
+        prisma,
+        username,
+        undefined,
+        request,
+      );
       if (resolved.status !== 200) {
         return reply.code(resolved.status).send({ error: "Page introuvable" });
       }
@@ -497,7 +533,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         prisma.plinkkStatusbar.findUnique({ where: { plinkkId: page.id } }),
         prisma.category.findMany({
           where: { plinkkId: page.id },
-          orderBy: { order: 'asc' }
+          orderBy: { order: "asc" },
         }),
       ]);
       // Si un thème privé est sélectionné, récupérer ses données, les normaliser en "full shape"
@@ -528,7 +564,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           const g = parseInt(h.slice(2, 4), 16) / 255;
           const b = parseInt(h.slice(4, 6), 16) / 255;
           const a = [r, g, b].map((v) =>
-            v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
+            v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4),
           );
           return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
         };
@@ -540,7 +576,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           const c = (i: number) =>
             Math.round(
               parseInt(a.slice(i, i + 2), 16) * (1 - ratio) +
-                parseInt(b.slice(i, i + 2), 16) * ratio
+                parseInt(b.slice(i, i + 2), 16) * ratio,
             );
           const r = c(0),
             g = c(2),
@@ -560,7 +596,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         };
         const toFullTheme = (
           light: SimplifiedVariant,
-          dark: SimplifiedVariant
+          dark: SimplifiedVariant,
         ) => {
           const L = {
             background: normalizeHex(light.bg),
@@ -676,7 +712,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           settings &&
           Object.prototype.hasOwnProperty.call(settings, "affichageEmail")
             ? settings.affichageEmail
-            : page.user.publicEmail ?? null,
+            : (page.user.publicEmail ?? null),
         canvaEnable: settings?.canvaEnable ?? 1,
         selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
         layoutOrder: settings?.layoutOrder ?? null,
@@ -696,7 +732,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         socialIcons,
         pageStatusbar,
         injectedObj,
-        categories
+        categories,
       ).replaceAll("{{username}}", username);
 
       // If debug=1 in query, return the non-minified generated code for inspection
@@ -709,7 +745,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       }
       const mini = minify(generated);
       return reply.type("text/javascript").send(mini.code || "");
-    }
+    },
   );
 
   fastify.get(
@@ -720,7 +756,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
       // Return built-ins first, then community and mine
       return reply.send(await generateTheme(userId));
-    }
+    },
   );
 
   fastify.get("/images/*", function (request, reply) {
@@ -772,7 +808,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       prisma,
       username,
       identifier,
-      request
+      request,
     );
     if (resolved.status !== 200)
       return reply
@@ -804,7 +840,12 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         ? resolved.page.slug
         : resolved.user.id;
     if (!isPreview) {
-      await recordPlinkkView(prisma, resolved.page.id, resolved.user.id, request);
+      await recordPlinkkView(
+        prisma,
+        resolved.page.id,
+        resolved.user.id,
+        request,
+      );
     }
     return reply.view("plinkk/show.ejs", {
       page: resolved.page,
@@ -826,7 +867,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       prisma,
       username,
       undefined,
-      request
+      request,
     );
     if (resolved.status !== 200)
       return reply
@@ -855,7 +896,12 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     const isOwner =
       (request.session.get("data") as string | undefined) === resolved.user.id;
     if (!isPreview) {
-      await recordPlinkkView(prisma, resolved.page.id, resolved.user.id, request);
+      await recordPlinkkView(
+        prisma,
+        resolved.page.id,
+        resolved.user.id,
+        request,
+      );
     }
     return reply.view("plinkk/show.ejs", {
       page: resolved.page,
@@ -880,7 +926,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     // Enregistrer le clic daté (agrégation quotidienne)
     try {
       await prisma.$executeRawUnsafe(
-        'CREATE TABLE IF NOT EXISTS "LinkClickDaily" ("linkId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("linkId","date"))'
+        'CREATE TABLE IF NOT EXISTS "LinkClickDaily" ("linkId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("linkId","date"))',
       );
       const now = new Date();
       const y = now.getUTCFullYear();
@@ -890,7 +936,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       await prisma.$executeRawUnsafe(
         'INSERT INTO "LinkClickDaily" ("linkId","date","count") VALUES (?,?,1) ON CONFLICT("linkId","date") DO UPDATE SET "count" = "count" + 1',
         linkId,
-        dateStr
+        dateStr,
       );
     } catch (e) {}
 
@@ -917,12 +963,13 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       // Si canvas indisponible (ex: Node 22 sous Windows sans précompilé),
       // on renvoie une image statique par défaut pour débloquer le dev.
       try {
-        return reply.sendFile("images/default_profile.png");
+        return reply.sendFile(
+          "https://s3.marvideo.fr/plinkk-image/default_profile.png",
+        );
       } catch {
         return reply.code(501).send({
           error: "canvas_unavailable",
-          hint:
-            "Le module 'canvas' n'est pas chargé. Utilisez Node 20 LTS ou installez une version compatible de canvas.",
+          hint: "Le module 'canvas' n'est pas chargé. Utilisez Node 20 LTS ou installez une version compatible de canvas.",
         });
       }
     }
@@ -940,7 +987,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
     const { id } = request.params as { id: string };
     const resolved = await resolvePlinkkPage(prisma, id, undefined, request);
-    if (resolved.status !== 200) return reply.code(404).send({ error: "not_found" });
+    if (resolved.status !== 200)
+      return reply.code(404).send({ error: "not_found" });
 
     const page = await prisma.plinkk.findUnique({
       where: { id: resolved.page.id },
@@ -983,7 +1031,15 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       const image = page.settings.profileImage.startsWith("/public/")
         ? request.protocol + "://" + request.host + page.settings.profileImage
         : page.settings.profileImage ||
-          request.host + "https://s3.marvideo.fr/plinkk-image/default_profile.png";
+          request.host +
+            "https://s3.marvideo.fr/plinkk-image/default_profile.png";
+
+      const image = page.settings.profileImage.startsWith("/public/")
+        ? request.protocol + "://" + request.host + page.settings.profileImage
+        : "https://plinkk.fr/" + page.settings.slug + ".png" ||
+          request.host +
+            "https://s3.marvideo.fr/plinkk-image/default_profile.png";
+
       const avatar = await loadImage(image);
 
       // Halo néon violet autour de l'avatar
@@ -994,7 +1050,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         glowRadius * 0.4,
         centerX,
         centerY,
-        glowRadius
+        glowRadius,
       );
       gradientGlow.addColorStop(0, "rgba(140, 82, 255, 0.9)");
       gradientGlow.addColorStop(1, "rgba(140, 82, 255, 0)");
@@ -1014,7 +1070,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         centerX - avatarSize / 2,
         centerY - avatarSize / 2,
         avatarSize,
-        avatarSize
+        avatarSize,
       );
       ctx.restore();
     } catch (err) {
