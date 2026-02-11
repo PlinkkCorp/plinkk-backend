@@ -24,6 +24,7 @@
                 <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="signups" aria-selected="true">Inscriptions</button>
                 <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="logins" aria-selected="false">Connexions</button>
                 <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="plinkks" aria-selected="false">Plinkks</button>
+                <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="redirections" aria-selected="false">Redirections</button>
                 <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="premium" aria-selected="false">Premium</button>
                 <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="bans" aria-selected="false">Modération</button>
                 <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="accounts" aria-selected="false">Comptes</button>
@@ -178,6 +179,62 @@
                         <tbody id="plinkksTopBody" class="divide-y divide-slate-800/50">
                             <!-- Injected -->
                         </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!--  PANEL: REDIRECTIONS  -->
+        <section id="panel-redirections" class="tab-panel hidden space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-2 text-slate-400">
+                        <i class="ph-duotone ph-mouse-left text-xl"></i>
+                        <span class="text-sm font-medium">Total Clics</span>
+                    </div>
+                    <div class="text-3xl font-bold text-white" id="redirectTotalClicks">--</div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-2 text-slate-400">
+                        <i class="ph-duotone ph-arrows-merge text-xl"></i>
+                        <span class="text-sm font-medium">Total Redirections</span>
+                    </div>
+                    <div class="text-3xl font-bold text-white" id="redirectTotalCount">--</div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-2 text-slate-400">
+                        <i class="ph-duotone ph-trend-up text-xl"></i>
+                        <span class="text-sm font-medium">Record Journée</span>
+                    </div>
+                    <div class="text-3xl font-bold text-white" id="redirectTopDay">--</div>
+                </div>
+            </div>
+            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+                <h3 class="text-lg font-bold text-white mb-6">Clics journaliers (Redirections)</h3>
+                <div class="h-[400px] relative">
+                    <div class="chart-loader absolute inset-0 flex items-center justify-center bg-slate-950/50 backdrop-blur-sm z-10 transition-opacity duration-300">
+                        <div class="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                    <canvas id="chartRedirections"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl overflow-hidden">
+                <div class="p-6 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-white">Top Redirections</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-xs text-slate-400 uppercase border-b border-slate-800">
+                                <th class="px-6 py-4 font-medium">Slug</th>
+                                <th class="px-6 py-4 font-medium">Cible</th>
+                                <th class="px-6 py-4 font-medium">Utilisateur</th>
+                                <th class="px-6 py-4 font-medium text-right">Clics</th>
+                                <th class="px-6 py-4 font-medium text-right">Créé le</th>
+                            </tr>
+                        </thead>
+                        <tbody id="redirectsTopBody" class="text-sm"></tbody>
                     </table>
                 </div>
             </div>
@@ -440,6 +497,36 @@
                     </tr>`).join('');
             }
         },
+        redirections: async () => {
+             const [d, top] = await Promise.all([
+                fetchAPI('/admin/stats/redirections'),
+                fetchAPI('/admin/stats/redirections/top')
+            ]);
+            currentData = { type: 'redirections', data: d, top: top };
+            qs('#redirectTotalClicks').textContent = fmt(d.totalClicks);
+            qs('#redirectTotalCount').textContent = fmt(d.totalRedirects);
+            qs('#redirectTopDay').textContent = fmt(d.topViewInPeriod);
+            drawLine('chartRedirections', d.series.map(x => x.date), [{
+                label: 'Clics', data: d.series.map(x => x.count),
+                borderColor: '#ec4899', backgroundColor: 'rgba(236, 72, 153, 0.1)'
+            }]);
+            const body = qs('#redirectsTopBody');
+            if (body && top.redirects) {
+                 body.innerHTML = top.redirects.map(r => `
+                    <tr class="hover:bg-slate-800/30 transition-colors group">
+                        <td class="px-6 py-4"><code class="text-[11px] text-pink-400 bg-pink-400/5 px-2 py-1 rounded-lg border border-pink-500/10">${r.slug}</code></td>
+                        <td class="px-6 py-4"><a href="${r.targetUrl}" target="_blank" class="text-xs text-slate-400 hover:text-white hover:underline truncate max-w-[200px] block">${r.targetUrl}</a></td>
+                        <td class="px-6 py-4">
+                             <div class="flex items-center gap-2">
+                                <img src="${r.user?.image || '/images/default-avatar.png'}" class="w-5 h-5 rounded-full border border-slate-700 object-cover" />
+                                <span class="text-slate-400 text-sm font-medium">@${r.user?.userName || 'inconnu'}</span>
+                             </div>
+                        </td>
+                        <td class="px-6 py-4 text-right font-bold text-white">${fmt(r.clicks)}</td>
+                        <td class="px-6 py-4 text-right text-slate-500 text-xs">${new Date(r.createdAt).toLocaleDateString('fr-FR')}</td>
+                    </tr>`).join('');
+            }
+        },
         premium: async () => {
             const d = await fetchAPI('/admin/stats/premium');
             currentData = { type: 'premium', data: d };
@@ -580,6 +667,7 @@
             'signups': 'chartSignups',
             'logins': 'chartLogins',
             'plinkks': 'chartPlinkks',
+            'redirections': 'chartRedirections',
             'premium': 'chartPremium',
             'bans': 'chartBans',
             'accounts': 'chartDoughnut'
@@ -637,6 +725,22 @@
                 rows.push(['Nom', 'Slug', 'Vues', 'Date Creation']);
                 currentData.top.plinkks.forEach(p => {
                     rows.push([p.name || 'Sans titre', p.slug, p.views, p.createdAt]);
+                });
+            }
+        }
+        else if (type === 'redirections') {
+            rows = [['Date', 'Clics']];
+            if(d.series) {
+                d.series.forEach(x => {
+                    rows.push([x.date, x.count]);
+                });
+            }
+            if(currentData.top && currentData.top.redirects) {
+                rows.push([]);
+                rows.push(['TOP REDIRECTIONS (PERIODE)']);
+                rows.push(['Slug', 'Cible', 'Clics', 'Date Creation']);
+                currentData.top.redirects.forEach(r => {
+                    rows.push([r.slug, r.targetUrl, r.clicks, r.createdAt]);
                 });
             }
         }

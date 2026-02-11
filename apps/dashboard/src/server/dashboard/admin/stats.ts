@@ -574,6 +574,82 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
     });
   });
 
+  fastify.get<{ Querystring: StatsQuery }>("/redirections", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_STATS");
+    if (!ok) return;
+    const { from, to } = request.query;
+    const { start, end } = getDateRange(from, to);
+
+    const [totalClicksAgg, totalRedirects, dailyClicks] = await Promise.all([
+      prisma.redirect.aggregate({ _sum: { clicks: true } }),
+      prisma.redirect.count(),
+      prisma.redirectClickDaily.findMany({
+        where: { date: { gte: start, lte: end } }
+      })
+    ]);
+
+    const byDate = initDateMap(start, end, () => 0);
+    for (const r of dailyClicks) {
+      const key = formatDate(new Date(r.date));
+      if (byDate.has(key)) {
+        byDate.set(key, (byDate.get(key) || 0) + r.count);
+      }
+    }
+
+    let topVal = 0;
+    const series = Array.from(byDate.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, count]) => {
+        if (count > topVal) topVal = count;
+        return { date, count };
+      });
+
+    return reply.send({
+      totalClicks: totalClicksAgg._sum.clicks || 0,
+      totalRedirects,
+      topViewInPeriod: topVal,
+      series
+    });
+  });
+
+  fastify.get<{ Querystring: TopPlinkksQuery }>("/redirections/top", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_STATS");
+    if (!ok) return;
+
+    const { page = 1, limit = 20, sort = "clicks", order = "desc", search = "" } = request.query;
+    const skip = (Number(page) - 1) * Number(limit);
+    const take = Number(limit);
+
+    const where: Prisma.RedirectWhereInput = {};
+    if (search) {
+      where.OR = [
+        { slug: { contains: search } },
+        { targetUrl: { contains: search } },
+        { user: { userName: { contains: search } } },
+      ];
+    }
+
+    const [redirects, total] = await Promise.all([
+      prisma.redirect.findMany({
+        where,
+        select: {
+          id: true,
+          slug: true,
+          targetUrl: true,
+          clicks: true,
+          createdAt: true,
+          user: { select: { userName: true, image: true } },
+        },
+        orderBy: { [sort]: order },
+        skip,
+        take,
+      }),
+      prisma.redirect.count({ where }),
+    ]);
+
+    return reply.send({ redirects, total });
+  });
+
   fastify.get<{ Querystring: StatsQuery }>("/premium", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_STATS");
     if (!ok) return;
