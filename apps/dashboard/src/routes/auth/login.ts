@@ -1,4 +1,5 @@
 import { FastifyInstance } from "fastify";
+import { randomBytes } from "crypto";
 import bcrypt from "bcrypt";
 import z from "zod";
 import { prisma } from "@plinkk/prisma";
@@ -133,6 +134,67 @@ export function loginRoutes(fastify: FastifyInstance) {
     await createUserSession(user.id, request);
 
     return reply.redirect(returnTo || "/");
+  });
+
+  fastify.post("/impersonate/:id", async (request, reply) => {
+    const meId = request.session.get("data");
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+
+    // Check if requester is Admin
+    const me = await prisma.user.findUnique({
+      where: { id: String(meId) },
+      include: { role: true },
+    });
+
+    if (!me || me.role?.name !== "ADMIN") {
+      return reply.code(403).send({ error: "Forbidden" });
+    }
+
+    const { id } = request.params as { id: string };
+    const target = await prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!target) return reply.code(404).send({ error: "Target not found" });
+
+    // Store original admin ID in session to allow "returning" if needed
+    (request.session as any).set("original_admin", meId);
+    
+    // Switch session to target user
+    await createUserSession(target.id, request);
+    return reply.send({ success: true });
+  });
+
+  fastify.post("/impersonate-link/:id", async (request, reply) => {
+    const meId = request.session.get("data");
+    const me = await prisma.user.findUnique({
+      where: { id: String(meId) },
+      include: { role: true },
+    });
+    if (!me || me.role?.name !== "ADMIN") return reply.code(403).send({ error: "Forbidden" });
+
+    const { id } = request.params as { id: string };
+    const token = randomBytes(32).toString("hex");
+    await prisma.magicLink.create({
+      data: {
+        token,
+        userId: id,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 min
+      },
+    });
+    return reply.send({ url: `/login/magic?token=${token}` });
+  });
+
+  fastify.get("/login/magic", async (request, reply) => {
+    const { token } = request.query as { token?: string };
+    if (!token) return reply.redirect("/login?error=invalid_token");
+    const magic = await prisma.magicLink.findUnique({ where: { token } });
+    if (!magic || magic.expiresAt < new Date()) {
+      return reply.redirect("/login?error=expired_token");
+    }
+    await prisma.magicLink.delete({ where: { token } });
+    await createUserSession(magic.userId, request);
+    return reply.redirect("/");
   });
 }
 

@@ -237,37 +237,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       }
 
       // En mode aperçu on n'incrémente pas les vues ni les agrégations journalières
-      if (!isPreview) {
-        // Incrément des vues utilisateur, robuste aux erreurs SQLite (code 14)
-        try {
-          await prisma.user.updateMany({
-            where: { id: resolved.user.id },
-            data: { views: { increment: 1 } },
-          });
-        } catch (e) {
-          request.log?.warn({ err: e }, "user.updateMany failed (views increment) - skipping");
-        }
-
-        // Agrégation quotidienne des vues (UserViewDaily)
-        try {
-          const now = new Date();
-          const y = now.getUTCFullYear();
-          const m = String(now.getUTCMonth() + 1).padStart(2, "0");
-          const d = String(now.getUTCDate()).padStart(2, "0");
-          const dateStr = `${y}-${m}-${d}`; // YYYY-MM-DD (UTC)
-          await prisma.userViewDaily.upsert({
-            where: {
-              userId_date: {
-                userId: resolved.user.id,
-                date: dateStr,
-              },
-            },
-            create: { userId: resolved.user.id, date: dateStr, count: 1 },
-            update: { count: { increment: 1 } },
-          });
-        } catch (e) {
-          request.log?.warn({ err: e }, "Failed to record daily view (userViewDaily upsert)");
-        }
+      if (!isPreview && resolved.page) {
+        await recordPlinkkView(prisma, resolved.page.id, resolved.user.id, request);
       }
 
       // Si utilisateur banni -> afficher page bannie

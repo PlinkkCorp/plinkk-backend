@@ -68,32 +68,144 @@
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg">
               
               <!-- Profile Panel -->
-              <div id="panel-profile" class="tab-panel animate-slide-up">
-                <div class="flex flex-col md:flex-row items-start gap-8">
-                  <div class="flex-shrink-0">
-                    <div class="h-32 w-32 rounded-full overflow-hidden border-4 border-slate-800 bg-slate-800 grid place-items-center text-3xl font-semibold text-slate-200 shadow-xl relative group" id="avatarPreview" data-avatar>
-                      <%- include('partials/avatar.ejs', { user: user }) %>
-                      <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onclick="document.getElementById('avatarInput').click()">
-                        <svg class="text-white size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              <div id="panel-profile" class="tab-panel animate-slide-up space-y-6">
+                <% 
+                  const _u_role = user.role ? (user.role.name || user.role.id) : null;
+                  const _u_isStaff = ['ADMIN','DEVELOPER','MODERATOR'].includes(_u_role);
+                  const _u_pu = user.premiumUntil ? new Date(user.premiumUntil) : null;
+                  const _u_activePrem = user.isPremium && (!_u_pu || _u_pu > new Date());
+                  const _u_showPrem = (_u_isStaff || user.isPartner || _u_activePrem) && user.showPremiumUi !== false;
+                %>
+                
+                <!-- Discord-style Banner & Header -->
+                <div class="rounded-2xl overflow-hidden bg-slate-950 border border-slate-800">
+                  <div class="h-32 bg-gradient-to-r from-violet-600 to-indigo-600 relative"></div>
+                  <div class="px-6 pb-6 relative">
+                    <div class="flex flex-col sm:flex-row items-end -mt-12 mb-4 gap-4">
+                      <div class="relative group">
+                        <div class="h-24 w-24 rounded-full <%= _u_showPrem ? '' : 'border-4 border-slate-950 overflow-hidden' %> bg-slate-800 shadow-xl" id="avatarPreview" data-avatar>
+                           <%- include('partials/avatar.ejs', { user: user }) %>
+                        </div>
+                        <div class="absolute inset-0 rounded-full border-4 border-transparent bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10" onclick="document.getElementById('avatarInput').click()">
+                            <svg class="text-white size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        </div>
+                        <input id="avatarInput" type="file" accept="image/*" class="hidden" />
+                      </div>
+                      <div class="flex-1 pt-2">
+                        <div class="flex items-center gap-2">
+                           <h2 class="text-2xl font-bold text-white"><%= user.userName %></h2>
+                           <span class="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20">#<%= stats.rank %></span>
+                        </div>
+                        <p class="text-slate-400 text-sm">Membre depuis le <%= new Date(user.createdAt).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                      </div>
+                      <div class="flex gap-2">
+                         <button onclick="document.getElementById('modal-edit-profile').classList.remove('hidden')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-xl transition-colors shadow-lg shadow-indigo-900/20">
+                            Modifier le profil
+                         </button>
                       </div>
                     </div>
-                  </div>
-                  <div class="flex-1 space-y-4">
-                    <div>
-                      <h4 class="text-lg font-semibold text-white mb-1">Photo de profil</h4>
-                      <p class="text-sm text-slate-400">Cette image sera affichée sur votre profil et dans les commentaires. Formats acceptés : PNG, JPG ou WebP (max 2 Mo).</p>
-                    </div>
-                    
-                    <div class="flex items-center gap-4">
-                      <label class="cursor-pointer px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium shadow-lg shadow-violet-900/20 transition-colors">
-                        Choisir une image
-                        <input id="avatarInput" type="file" accept="image/*" class="hidden" />
-                      </label>
-                      <p id="avatarMsg" class="text-sm font-medium"></p>
+
+                    <!-- Detailed Stats Grid -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-800/50">
+                        <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                            <p class="text-xs text-slate-400 uppercase font-bold mb-1">Vues Totales</p>
+                            <div class="text-2xl font-bold text-white"><%= stats.totalViews %></div>
+                            <p class="text-xs text-slate-500 mt-1">Cumulé sur tous les plinkks</p>
+                        </div>
+                        <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                             <p class="text-xs text-slate-400 uppercase font-bold mb-1">Total Clics</p>
+                             <div class="text-2xl font-bold text-white"><%= stats.totalLinkClicks %></div>
+                             <p class="text-xs text-slate-500 mt-1">Liens & Redirections: <%= stats.totalRedirectClicks %></p>
+                        </div>
+                        <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                             <p class="text-xs text-slate-400 uppercase font-bold mb-1">Taux de clic (CTR)</p>
+                             <div class="text-2xl font-bold text-white"><%= stats.ctr %>%</div>
+                             <p class="text-xs text-slate-500 mt-1">Performances moyennes</p>
+                        </div>
+                        <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                             <p class="text-xs text-slate-400 uppercase font-bold mb-1">Sessions Actives</p>
+                             <div class="text-2xl font-bold text-white"><%= stats.sessionCount %></div>
+                             <p class="text-xs text-slate-500 mt-1">Dernière: <%= new Date(user.lastLogin).toLocaleDateString('fr-FR') %></p>
+                        </div>
                     </div>
                   </div>
                 </div>
+
+                <!-- Per-Plinkk Stats Quick View -->
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6">
+                    <h3 class="text-lg font-bold text-white mb-4">Mes Plinkks</h3>
+                    <div class="space-y-3">
+                        <% plinkks.forEach(plinkk => { %>
+                        <div class="flex items-center justify-between p-4 bg-slate-900 rounded-xl border border-slate-800 hover:border-slate-700 transition-colors">
+                            <div class="flex items-center gap-4">
+                                <div class="h-10 w-10 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 font-bold">
+                                    <%= plinkk.name.charAt(0).toUpperCase() %>
+                                </div>
+                                <div>
+                                    <div class="text-white font-medium flex items-center gap-2">
+                                        <%= plinkk.name %>
+                                        <% if(plinkk.isDefault) { %>
+                                            <span class="text-xs bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20">Principal</span>
+                                        <% } %>
+                                    </div>
+                                    <div class="text-xs text-slate-500">/<%= plinkk.slug %> • <%= plinkk.views || 0 %> vues</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <a href="/edit?plinkkId=<%= plinkk.id %>" class="px-3 py-1.5 text-xs font-medium bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors">Modifier</a>
+                            </div>
+                        </div>
+                        <% }) %>
+                    </div>
+                </div>
               </div>
+
+              <!-- Edit Profile Modal -->
+              <div id="modal-edit-profile" class="hidden fixed inset-0 z-50 rounded-none">
+                 <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="this.parentElement.classList.add('hidden')"></div>
+                 <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+                    <h3 class="text-xl font-bold text-white mb-4">Modifier mon profil</h3>
+                    <form id="formUpdateProfile" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-1">Pseudo (Username)</label>
+                            <input type="text" name="username" value="<%= user.userName %>" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-indigo-500" required minlength="3">
+                        </div>
+                        <!-- Provide instruction for Name vs Username if needed -->
+                        <div>
+                             <label class="block text-sm font-medium text-slate-400 mb-1">Nom d'affichage</label>
+                             <input type="text" name="name" value="<%= user.name %>" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-indigo-500" disabled title="Modification via Plinkk principal pour l'instant">
+                             <p class="text-xs text-slate-500 mt-1">Le nom d'affichage est géré via vos Plinkks.</p>
+                        </div>
+                        <div class="flex justify-end gap-2 mt-6">
+                            <button type="button" onclick="document.getElementById('modal-edit-profile').classList.add('hidden')" class="px-4 py-2 text-slate-300 hover:text-white">Annuler</button>
+                            <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl">Enregistrer</button>
+                        </div>
+                    </form>
+                    <script>
+                        document.getElementById('formUpdateProfile').addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            const username = e.target.username.value;
+                            try {
+                                const res = await fetch('/api/me/username', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({ username })
+                                });
+                                if(res.ok) {
+                                    window.location.reload();
+                                } else {
+                                    const err = await res.json();
+                                    alert(err.error || 'Erreur lors de la mise à jour');
+                                }
+                            } catch(err) {
+                                alert('Erreur réseau');
+                            }
+                        });
+                    </script>
+                 </div>
+              </div>
+
+
 
               <!-- Security Panel -->
               <div id="panel-security" class="tab-panel hidden animate-slide-up">

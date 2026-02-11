@@ -126,6 +126,7 @@
                             %>
                                 <li class="relative rounded-2xl border border-slate-800 p-3.5 bg-slate-950/50 hover:border-violet-500/30 transition-all group"
                                     data-name="<%- (u.userName||'').toLowerCase() %>"
+                                    data-username="<%- u.userName %>"
                                     data-id="<%- (u.id||'').toLowerCase() %>"
                                     data-role="<%- (u.role && (u.role.id || u.role.name)) ? (u.role.id || u.role.name) : 'USER' %>"
                                     data-role-name="<%- (u.role && (u.role.name || u.role.id)) ? (u.role.name || u.role.id) : 'USER' %>"
@@ -324,215 +325,285 @@
     </div>
 </div>
 
-<!-- User Management Modal -->
-<div id="userManageModal" class="fixed inset-0 hidden z-[2147483600] items-center justify-center backdrop-blur-sm">
-    <div class="absolute inset-0 bg-black/60 transition-opacity duration-200" data-close></div>
-    <div class="relative w-full max-w-3xl bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl shadow-black/50 animate-scale-in mx-4 max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 z-10 flex items-center justify-between p-6 border-b border-slate-800 bg-slate-900/95 backdrop-blur">
-            <div class="min-w-0 flex-1">
-                <div id="umUserName" class="text-xl font-bold text-white truncate">Utilisateur</div>
-                <div class="text-sm text-slate-400 truncate">@<span id="umUserId">id</span></div>
-            </div>
-            <button id="umClose" class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-        </div>
+<!-- User Management Modal (Re-designed) -->
+<div id="userManageModal" class="fixed inset-0 hidden z-[2147483600] items-center justify-center backdrop-blur-md">
+    <div class="absolute inset-0 bg-black/70 animate-fade-in" data-close></div>
+    
+    <div class="relative w-full max-w-5xl h-[85vh] bg-slate-900 flex overflow-hidden rounded-2xl shadow-2xl animate-scale-in mx-4 font-sans text-slate-200 border border-slate-800">
         
-        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-6">
-                <!-- Role & Stats -->
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Rôle</label>
-                        <select id="umRole" class="w-full rounded-xl bg-slate-950 border border-slate-800 px-4 py-3 text-sm text-white focus:border-violet-500 outline-none transition-colors"></select>
-                    </div>
+        <!-- Sidebar -->
+        <div class="w-64 bg-slate-950 flex-shrink-0 flex flex-col border-r border-slate-800">
+            <div class="p-5 pb-2">
+                 <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">UTILISATEUR</div>
+                 <div id="umSidebarName" class="font-bold text-white truncate text-base">User</div>
+                 <div id="umSidebarId" class="text-xs text-slate-500 truncate font-mono mt-0.5">@id</div>
+            </div>
+            
+            <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scrollbar" id="umTabsNav">
+                <button data-tab="overview" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-slate-800 text-white ring-1 ring-slate-700">
+                    <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Vue d'ensemble
+                </button>
+                <button data-tab="profile" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium">
+                    <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    Profil
+                </button>
+                <button data-tab="plinkks" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium">
+                    <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                    Plinkks
+                </button>
+                <button data-tab="moderation" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium">
+                    <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    Modération
+                </button>
+                <div class="my-2 border-t border-slate-800 mx-2"></div>
+                <button data-tab="security" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium">
+                    <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    Sécurité
+                </button>
+                <button data-tab="danger" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-sm font-medium">
+                    <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    Zone Rouge
+                </button>
+            </nav>
+            
+            <div class="p-4 border-t border-slate-800 text-[10px] text-slate-600 font-mono text-center">
+                User ID: <span id="umFooterId" class="select-all"></span>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 flex flex-col min-w-0 bg-slate-900 relative">
+            <div class="absolute right-6 top-6 z-10">
+                <button id="umClose" class="flex flex-col items-center justify-center w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white transition-all ring-1 ring-slate-700">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-10 custom-scrollbar scroll-smooth" id="umContentArea">
+                
+                <!-- CONTENT: OVERVIEW -->
+                <div data-content="overview" class="space-y-8 animate-fade-in block">
+                    <h2 class="text-2xl font-bold text-white mb-6">Vue d'ensemble</h2>
                     
-                    <div class="bg-slate-950/50 border border-slate-800 rounded-2xl p-4">
-                        <div class="text-xs font-medium text-slate-400 mb-3 uppercase tracking-wider">Statistiques</div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-slate-900 rounded-xl p-3 text-center border border-slate-800">
-                                <div class="text-[10px] text-slate-500 uppercase">Plinkks</div>
-                                <div id="umStatPlCount" class="text-xl font-bold text-white">0</div>
-                            </div>
-                            <div class="bg-slate-900 rounded-xl p-3 text-center border border-slate-800">
-                                <div class="text-[10px] text-slate-500 uppercase">Actifs</div>
-                                <div id="umStatPlActive" class="text-xl font-bold text-emerald-400">0</div>
-                            </div>
-                        </div>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                         <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800">
+                            <div class="text-[11px] font-bold text-slate-500 uppercase mb-1">Ancienneté</div>
+                            <div id="umStatAge" class="text-lg font-bold text-white truncate">-</div>
+                         </div>
+                         <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800">
+                            <div class="text-[11px] font-bold text-slate-500 uppercase mb-1">Sessions</div>
+                            <div id="umStatSessions" class="text-lg font-bold text-violet-400">-</div>
+                         </div>
+                         <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800">
+                            <div class="text-[11px] font-bold text-slate-500 uppercase mb-1">Vues Cumulées</div>
+                            <div id="umStatViewsTotal" class="text-lg font-bold text-emerald-400">-</div>
+                         </div>
+                         <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800" data-tip="Total clics / Total vues">
+                            <div class="text-[11px] font-bold text-slate-500 uppercase mb-1">Taux de clic (CTR)</div>
+                            <div id="umStatCTR" class="text-lg font-bold text-amber-400">-</div>
+                         </div>
                     </div>
 
-                    <!-- Badges -->
-                    <div class="bg-slate-950/50 border border-slate-800 rounded-2xl p-4">
-                        <div class="text-xs font-medium text-slate-400 mb-3 uppercase tracking-wider">Badges</div>
-                        <div class="space-y-3">
-                            <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                                <input id="umBadgeVerified" type="checkbox" class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-blue-500 focus:ring-blue-500 focus:ring-offset-0">
-                                <span class="text-sm text-slate-300 flex items-center gap-2">
-                                    Vérifié
-                                    <svg class="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-                                </span>
-                                <svg id="umBadgeVerifiedSpin" class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                            </label>
-                            <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                                <input id="umBadgePartner" type="checkbox" class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-violet-500 focus:ring-violet-500 focus:ring-offset-0">
-                                <span class="text-sm text-slate-300 flex items-center gap-2">
-                                    Partenaire
-                                    <svg class="w-4 h-4 text-violet-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                                </span>
-                                <svg id="umBadgePartnerSpin" class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                            </label>
-                            <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                                <input id="umBadgePremium" type="checkbox" class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500 focus:ring-offset-0">
-                                <span class="text-sm text-slate-300 flex items-center gap-2">
-                                    Premium
-                                    <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.7 5.48 6.05.88-4.38 4.27 1.03 6.02L12 15.9 6.6 18.65l1.03-6.02L3.25 8.36l6.05-.88L12 2z"/></svg>
-                                </span>
-                                <svg id="umBadgePremiumSpin" class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Security -->
-                <div class="bg-slate-950/50 border border-slate-800 rounded-2xl p-4">
-                    <div class="text-xs font-medium text-slate-400 mb-3 uppercase tracking-wider">Sécurité</div>
-                    <div class="space-y-3">
-                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                            <input id="umForcePwd" type="checkbox" class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-violet-600 focus:ring-violet-500 focus:ring-offset-0">
-                            <span class="text-sm text-slate-300">Forcer le reset du mot de passe</span>
-                            <svg id="umForcePwdSpin" class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                        </label>
-                        
-                        <button id="umDisable2fa" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border border-amber-500/20 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed has-spinner">
-                            <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                            <span>Désactiver la 2FA</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Moderation -->
-                <div class="bg-slate-950/50 border border-slate-800 rounded-2xl p-4">
-                    <div class="text-xs font-medium text-slate-400 mb-3 uppercase tracking-wider">Modération</div>
-                    
-                    <div id="umBanState" class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm mb-3 hidden"></div>
-                    
-                    <div id="umBanForm" class="space-y-3">
-                        <div>
-                            <label class="block text-xs text-slate-500 mb-1">Raison</label>
-                            <input id="umBanReason" type="text" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-3 py-2 text-sm text-white focus:border-rose-500 outline-none" placeholder="ex: spam massif" />
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs text-slate-500 mb-1">Durée (min)</label>
-                                <input id="umBanMinutes" type="number" step="1" min="-1" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-3 py-2 text-sm text-white focus:border-rose-500 outline-none" placeholder="-1 (perm)" />
-                            </div>
-                            <div class="flex items-end">
-                                <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-                                    <input id="umBanDeletePlinkk" type="checkbox" class="rounded border-slate-700 bg-slate-900 text-rose-600"> Supprimer Plinkks
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Rôles -->
+                        <div class="bg-slate-950/30 border border-slate-800 rounded-2xl p-5">
+                            <div class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Rôle & Permissions</div>
+                            <select id="umRole" class="w-full rounded-xl bg-slate-900 border border-slate-700 px-4 py-3 text-sm text-white focus:border-violet-500 outline-none transition-colors mb-4"></select>
+                            
+                            <div class="space-y-3">
+                                <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                                    <input id="umBadgeVerified" type="checkbox" class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-blue-500 focus:ring-blue-500 focus:ring-offset-0">
+                                    <span class="text-sm text-slate-300 flex items-center gap-2">Vérifié <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></span>
+                                    <svg id="umBadgeVerifiedSpin" class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                                    <input id="umBadgePartner" type="checkbox" class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-violet-500 focus:ring-violet-500 focus:ring-offset-0">
+                                    <span class="text-sm text-slate-300 flex items-center gap-2">Partenaire <svg class="w-4 h-4 text-violet-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
+                                    <svg id="umBadgePartnerSpin" class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                                    <input id="umBadgePremium" type="checkbox" class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500 focus:ring-offset-0">
+                                    <span class="text-sm text-slate-300 flex items-center gap-2">Premium <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.7 5.48 6.05.88-4.38 4.27 1.03 6.02L12 15.9 6.6 18.65l1.03-6.02L3.25 8.36l6.05-.88L12 2z"/></svg></span>
+                                    <svg id="umBadgePremiumSpin" class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
                                 </label>
                             </div>
                         </div>
-                        <div class="flex gap-2 pt-2">
-                            <button id="umBanApply" class="flex-1 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-medium shadow-lg shadow-rose-900/20 transition-colors has-spinner">
-                                <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                                <span>Bannir</span>
-                            </button>
-                            <button id="umBanRevoke" class="flex-1 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium border border-slate-700 transition-colors hidden has-spinner">
-                                <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                                <span>Révoquer</span>
-                            </button>
+
+                        <!-- Actions Rapides -->
+                        <div class="bg-slate-950/30 border border-slate-800 rounded-2xl p-5">
+                             <div class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Actions Rapides</div>
+                             <div class="grid grid-cols-2 gap-3">
+                                <a id="umViewProfile" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all text-center gap-2 group cursor-pointer">
+                                    <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <svg class="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </div>
+                                    <span class="text-xs font-medium text-slate-300">Voir Profil</span>
+                                </a>
+                                <button id="umCopyLink" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all text-center gap-2 group">
+                                    <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <svg class="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                    </div>
+                                    <span class="text-xs font-medium text-slate-300">Copier lien</span>
+                                </button>
+                                <button id="umImpersonate" class="col-span-2 flex items-center justify-center p-3 gap-3 rounded-xl bg-slate-800 hover:bg-violet-600/20 border border-slate-700 hover:border-violet-500/50 transition-all text-center group">
+                                     <svg class="w-5 h-5 text-slate-400 group-hover:text-violet-400 plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"></circle><path d="M22 12a10 10 0 0 1-10 10"></path></svg>
+                                     <svg class="w-5 h-5 text-slate-400 group-hover:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                     <span class="text-sm font-medium text-slate-300 group-hover:text-violet-200">Se connecter en tant que</span>
+                                </button>
+                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Danger Zone -->
-                <div class="bg-rose-950/10 border border-rose-900/20 rounded-2xl p-4">
-                    <div class="text-xs font-medium text-rose-400 mb-3 uppercase tracking-wider">Zone dangereuse</div>
-                    <button id="umImpersonate" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 transition-colors text-sm font-medium mb-3 has-spinner">
-                        <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        <span>Se connecter en tant que</span>
-                    </button>
-                    <button id="umDelete" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-medium shadow-lg shadow-rose-900/20 transition-colors has-spinner">
-                        <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                        <span>Supprimer le compte</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Plinkk Management -->
-            <div class="space-y-6">
-                <div class="bg-slate-950/50 border border-slate-800 rounded-2xl p-4 h-full flex flex-col">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Gestion des Plinkks</div>
-                        <div id="umPlMeta" class="text-[10px] font-mono text-slate-500 bg-slate-900 px-2 py-1 rounded-lg border border-slate-800"></div>
-                    </div>
+                <!-- CONTENT: PROFILE -->
+                <div data-content="profile" class="hidden space-y-8 animate-fade-in block">
+                    <h2 class="text-2xl font-bold text-white mb-6">Profil & Identifiants</h2>
                     
-                    <div class="space-y-4 flex-1">
-                        <div>
-                            <label class="block text-xs text-slate-500 mb-1">Sélectionner une page</label>
-                            <select id="umPlSelect" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-3 py-2.5 text-sm text-white focus:border-violet-500 outline-none"></select>
+                    <div class="bg-slate-950/30 border border-slate-800 rounded-2xl p-6 space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Nom d'utilisateur</label>
+                                <input id="umEditUsername" type="text" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:border-violet-500 outline-none transition-colors" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Email</label>
+                                <input id="umEditEmail" type="email" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:border-violet-500 outline-none transition-colors" />
+                            </div>
                         </div>
-                        
-                        <div>
-                            <label class="block text-xs text-slate-500 mb-1">Slug (URL)</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs">/</span>
-                                <input id="umPlSlug" type="text" class="w-full pl-6 pr-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:border-violet-500 outline-none" placeholder="slug" />
+                        <div class="flex justify-end pt-2">
+                             <button id="umSaveProfile" class="px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium shadow-lg shadow-violet-900/20 transition-colors has-spinner flex items-center gap-2">
+                                <svg class="plinkk-spinner hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                                <span>Enregistrer les modifications</span>
+                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTENT: PLINKKS -->
+                <div data-content="plinkks" class="hidden space-y-8 animate-fade-in block">
+                     <div class="flex items-center justify-between mb-6">
+                         <h2 class="text-2xl font-bold text-white">Contenus de l'utilisateur</h2>
+                         <div class="flex gap-2">
+                             <div class="px-3 py-1 rounded-full bg-slate-800 text-slate-400 text-xs font-bold uppercase ring-1 ring-slate-700">
+                                 <span id="umPlCount">0</span> Plinkks
+                             </div>
+                             <div class="px-3 py-1 rounded-full bg-slate-800 text-slate-400 text-xs font-bold uppercase ring-1 ring-slate-700">
+                                 <span id="umRdCount">0</span> Redirs
+                             </div>
+                         </div>
+                     </div>
+
+                     <!-- PLINKKS LIST -->
+                     <section>
+                         <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                             Pages Plinkk
+                         </h3>
+                         <div id="umPlList" class="grid grid-cols-1 gap-3">
+                             <!-- Dynamic Plinkks -->
+                         </div>
+                     </section>
+
+                     <!-- REDIRECTS LIST -->
+                     <section class="mt-8">
+                         <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.826a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                             Redirections
+                         </h3>
+                         <div id="umRdList" class="grid grid-cols-1 gap-3">
+                             <!-- Dynamic Redirects -->
+                         </div>
+                     </section>
+                </div>
+
+                <!-- CONTENT: MODERATION -->
+                <div data-content="moderation" class="hidden space-y-8 animate-fade-in block">
+                     <h2 class="text-2xl font-bold text-white mb-6">Modération & Bans</h2>
+                     
+                     <div class="bg-slate-950/30 border border-slate-800 rounded-2xl p-6">
+                        <div id="umBanState" class="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-sm mb-6 hidden flex gap-3 items-start">
+                            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <div>
+                                <div class="font-bold">Utilisateur banni</div>
+                                <div class="text-orange-300/80 mt-1 banned-details"></div>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3">
-                            <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700">
-                                <input id="umPlPublic" type="checkbox" class="rounded border-slate-700 bg-slate-950 text-violet-600">
-                                <span class="text-xs text-slate-300">Public</span>
-                            </label>
-                            <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700">
-                                <input id="umPlActive" type="checkbox" class="rounded border-slate-700 bg-slate-950 text-violet-600">
-                                <span class="text-xs text-slate-300">Actif</span>
-                            </label>
-                            <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700">
-                                <input id="umPlDefault" type="checkbox" class="rounded border-slate-700 bg-slate-950 text-violet-600">
-                                <span class="text-xs text-slate-300">Par défaut</span>
-                            </label>
-                            <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700">
-                                <input id="umPlEmailVisible" type="checkbox" class="rounded border-slate-700 bg-slate-950 text-violet-600">
-                                <span class="text-xs text-slate-300">Email visible</span>
-                            </label>
+                        <div id="umBanForm" class="space-y-5">
+                             <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Raison du bannissement</label>
+                                <textarea id="umBanReason" rows="3" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:border-rose-500 outline-none resize-none" placeholder="Motif visible par l'administration uniquement"></textarea>
+                             </div>
+                             <div class="grid grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Durée (minutes)</label>
+                                    <input id="umBanMinutes" type="number" step="1" min="-1" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:border-rose-500 outline-none" placeholder="-1 pour permanent" value="-1" />
+                                </div>
+                                <div class="flex items-end pb-3">
+                                    <label class="flex items-center gap-3 cursor-pointer">
+                                        <input id="umBanDeletePlinkk" type="checkbox" class="rounded border-slate-700 bg-slate-900 text-rose-600 focus:ring-0">
+                                        <span class="text-sm text-slate-300">Supprimer toutes ses pages Plinkk</span>
+                                    </label>
+                                </div>
+                             </div>
+                             <div class="pt-2">
+                                 <button id="umBanApply" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold shadow-lg shadow-rose-900/20 transition-colors has-spinner flex items-center justify-center gap-2">
+                                     <svg class="plinkk-spinner hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                                     <span>Appliquer le bannissement</span>
+                                 </button>
+                             </div>
                         </div>
-
-                        <div class="bg-slate-900 rounded-xl p-3 text-center border border-slate-800">
-                            <div class="text-[10px] text-slate-500 uppercase">Vues totales</div>
-                            <div id="umPlViews" class="text-xl font-bold text-white">0</div>
+                        
+                        <div id="umBanRevokeContainer" class="hidden pt-2">
+                             <button id="umBanRevoke" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold border border-slate-700 transition-colors has-spinner flex items-center justify-center gap-2">
+                                 <svg class="plinkk-spinner hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                                 <span>Révoquer le bannissement</span>
+                             </button>
                         </div>
-
-                        <div class="grid grid-cols-2 gap-2 pt-2">
-                            <a id="umPlPreview" target="_blank" class="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium transition-colors">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                                Aperçu
-                            </a>
-                            <a id="umViewProfile" target="_blank" class="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium transition-colors">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                                Profil
-                            </a>
-                            <button id="umCopyLink" class="col-span-2 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium transition-colors">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
-                                Copier le lien
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="pt-4 mt-4 border-t border-slate-800 flex gap-2">
-                        <button id="umPlDelete" class="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-xs font-medium transition-colors has-spinner">
-                            <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                            <span>Supprimer</span>
-                        </button>
-                        <button id="umPlSave" class="flex-1 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium shadow-lg shadow-violet-900/20 transition-colors has-spinner">
-                            <svg class="plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                            <span>Enregistrer</span>
-                        </button>
-                    </div>
+                     </div>
                 </div>
+                
+                <!-- CONTENT: SECURITY -->
+                <div data-content="security" class="hidden space-y-8 animate-fade-in block">
+                     <h2 class="text-2xl font-bold text-white mb-6">Sécurité</h2>
+                     <div class="bg-slate-950/30 border border-slate-800 rounded-2xl p-6 space-y-4">
+                        <label class="flex items-center justify-between p-4 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                            <span class="text-sm font-medium text-slate-300">Forcer le reset du mot de passe à la prochaine connexion</span>
+                            <div class="relative inline-flex items-center cursor-pointer">
+                                <input id="umForcePwd" type="checkbox" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+                            </div>
+                        </label>
+                        
+                        <div class="flex items-center justify-between p-4 rounded-xl bg-slate-900 border border-slate-800">
+                             <div>
+                                 <div class="text-sm font-medium text-slate-300">Authentification à deux facteurs</div>
+                                 <div class="text-xs text-slate-500 mt-1">Désactive la 2FA si l'utilisateur a perdu son accès.</div>
+                             </div>
+                             <button id="umDisable2fa" class="px-4 py-2 rounded-lg bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 text-xs font-bold uppercase tracking-wide border border-amber-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed has-spinner flex items-center gap-2">
+                                <svg class="plinkk-spinner hidden" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                                <span>Désactiver</span>
+                             </button>
+                        </div>
+                     </div>
+                </div>
+
+                <!-- CONTENT: DANGER -->
+                <div data-content="danger" class="hidden space-y-8 animate-fade-in block">
+                     <h2 class="text-2xl font-bold text-rose-500 mb-6">Zone Dangereuse</h2>
+                     <div class="bg-rose-950/10 border border-rose-900/20 rounded-2xl p-6">
+                         <div class="mb-6">
+                             <h3 class="font-bold text-rose-400 text-lg">Suppression du compte</h3>
+                             <p class="text-rose-300/60 text-sm mt-1">Cette action est irréversible. Toutes les données, pages et liens seront définitivement effacés.</p>
+                         </div>
+                         <button id="umDelete" class="w-full py-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold shadow-lg shadow-rose-900/20 transition-colors has-spinner flex items-center justify-center gap-2">
+                             <svg class="plinkk-spinner hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
+                             <span>Supprimer définitivement ce compte</span>
+                         </button>
+                     </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -962,8 +1033,9 @@
         const um = {
             root: document.getElementById('userManageModal'),
             close: document.getElementById('umClose'),
-            name: document.getElementById('umUserName'),
-            id: document.getElementById('umUserId'),
+            sidebarName: document.getElementById('umSidebarName'),
+            sidebarId: document.getElementById('umSidebarId'),
+            footerId: document.getElementById('umFooterId'),
             role: document.getElementById('umRole'),
             view: document.getElementById('umViewProfile'),
             copy: document.getElementById('umCopyLink'),
@@ -972,8 +1044,87 @@
             impersonate: document.getElementById('umImpersonate'),
             badgeVerified: document.getElementById('umBadgeVerified'),
             badgePartner: document.getElementById('umBadgePartner'),
-            badgePremium: document.getElementById('umBadgePremium')
+            badgePremium: document.getElementById('umBadgePremium'),
+            tabsNav: document.getElementById('umTabsNav'),
+            contentArea: document.getElementById('umContentArea'),
+            statAge: document.getElementById('umStatAge'),
+            statSessions: document.getElementById('umStatSessions'),
+            statViews: document.getElementById('umStatViewsTotal'),
+            statCTR: document.getElementById('umStatCTR'),
+            editUsername: document.getElementById('umEditUsername'),
+            editEmail: document.getElementById('umEditEmail'),
+            saveProfile: document.getElementById('umSaveProfile')
         };
+        
+        // Tab Switching Logic
+        um.tabsNav?.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-tab]');
+            if (!btn) return;
+            // Reset buttons
+            um.tabsNav.querySelectorAll('button').forEach(b => {
+                b.classList.remove('bg-slate-800', 'text-white', 'ring-1', 'ring-slate-700');
+                if(!b.dataset.tab.includes('danger')) b.classList.add('text-slate-400', 'hover:text-slate-200');
+            });
+            // Active state
+            btn.classList.remove('text-slate-400', 'hover:text-slate-200');
+            btn.classList.add('bg-slate-800', 'text-white', 'ring-1', 'ring-slate-700');
+            
+            const tabName = btn.dataset.tab;
+            um.contentArea?.querySelectorAll('[data-content]').forEach(div => {
+                if (div.dataset.content === tabName) div.classList.remove('hidden');
+                else div.classList.add('hidden');
+            });
+        });
+
+        // Profile Save Logic
+        um.saveProfile?.addEventListener('click', async () => {
+             if (!currentLI || !currentUserDetails) return;
+             const id = currentLI.dataset.id;
+             const userName = um.editUsername.value.trim();
+             const email = um.editEmail.value.trim();
+             
+             if (!userName || !email) return showToast('Champs requis');
+             
+             const btn = um.saveProfile;
+             const spinner = btn.querySelector('.plinkk-spinner');
+             const label = btn.querySelector('span');
+             const prevText = label ? label.textContent : '';
+             
+             btn.disabled = true;
+             if (spinner) spinner.classList.remove('hidden');
+             if (label) label.textContent = 'Enregistrement...';
+             
+             try {
+                const res = await fetch('/api/users/' + encodeURIComponent(id) + '/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userName, email })
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error || 'Erreur inconnue');
+                }
+                const data = await res.json();
+                
+                // Update UI data
+                if (um.sidebarName) um.sidebarName.textContent = data.userName;
+                currentUserDetails.userName = data.userName;
+                currentUserDetails.email = data.email;
+                
+                // Update List Item roughly
+                currentLI.querySelector('.font-bold').childNodes[0].textContent = data.userName + ' ';
+                
+                showToast('Profil mis à jour avec succès', 'success');
+             } catch (e) {
+                console.error(e);
+                showToast('Erreur: ' + e.message, 'error');
+             } finally {
+                btn.disabled = false;
+                if (spinner) spinner.classList.add('hidden');
+                if (label) label.textContent = prevText || 'Enregistrer';
+             }
+        });
+
         let currentLI = null;
         let currentUserDetails = null;
         let currentPlinkks = [];
@@ -984,7 +1135,7 @@
 
         async function openUserModal(li){
             currentLI = li;
-            const displayName = li.querySelector('.font-bold')?.textContent?.trim() || li.dataset.id;
+            const displayName = li.dataset.username || li.dataset.id;
             const id = li.dataset.id;
             const role = li.dataset.role || 'USER';
             const twofa = (li.dataset.twofa === '1');
@@ -992,59 +1143,81 @@
             const plCount = Number(li.dataset.plinkksCount || 0) || 0;
             const plActiveCount = Number(li.dataset.plinkksActive || 0) || 0;
             const mustChange = (li.dataset.mustChange === '1');
+            const createdAt = Number(li.dataset.created || 0);
 
-            um.name.textContent = displayName || id;
-            um.id.textContent = id;
+            // Populate Sidebar
+            if (um.sidebarName) um.sidebarName.textContent = displayName;
+            if (um.sidebarId) um.sidebarId.textContent = '@' + id;
+            if (um.footerId) um.footerId.textContent = id;
+
             um.role.value = role;
             um.view.href = "<%= frontendUrl %>" + '/' + id;
             um.disable2fa.disabled = !twofa;
-            // Stats
-            const v = document.getElementById('umStatViews'); if (v) v.textContent = String(views);
-            const pc = document.getElementById('umStatPlCount'); if (pc) pc.textContent = String(plCount);
-            const pa = document.getElementById('umStatPlActive'); if (pa) pa.textContent = String(plActiveCount);
+            
+            // Stats (Basic from LI)
+            if (um.statViews) um.statViews.textContent = views.toLocaleString();
+            if (um.statAge) {
+                 const days = Math.floor((Date.now() - createdAt) / (1000 * 60 * 60 * 24));
+                 um.statAge.textContent = days + " jours";
+            }
+            if (um.statSessions) um.statSessions.textContent = '...';
+            if (um.statCTR) um.statCTR.textContent = '...';
+
             const fp = document.getElementById('umForcePwd'); if (fp) fp.checked = !!mustChange;
 
             currentUserDetails = await fetchUserDetails(id);
+            const d = currentUserDetails;
             
-            // Badges
-            if (um.badgeVerified) um.badgeVerified.checked = !!currentUserDetails?.isVerified;
-            if (um.badgePartner) um.badgePartner.checked = !!currentUserDetails?.isPartner;
-            if (um.badgePremium) {
+            if (d) {
+                // Populate Edit Fields
+                if (um.editUsername) um.editUsername.value = d.userName || '';
+                if (um.editEmail) um.editEmail.value = d.email || '';
+
+                // Extended Stats
+                if (d.createdAt) {
+                    const diff = Date.now() - new Date(d.createdAt).getTime();
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    um.statAge.textContent = days + " jours";
+                }
+                
+                if (d._count && typeof d._count.sessions === 'number') {
+                    um.statSessions.textContent = d._count.sessions.toLocaleString();
+                } else {
+                    um.statSessions.textContent = '0';
+                }
+
+                // CTR Calc
+                let totalViews = 0;
+                if (Array.isArray(d.plinkks)) {
+                    totalViews = d.plinkks.reduce((acc, p) => acc + (p.views || 0), 0);
+                }
+                
+                let totalClicks = 0;
+                if (Array.isArray(d.links)) {
+                    totalClicks = d.links.reduce((acc, l) => acc + (l.clicks||0), 0);
+                }
+                
+                if (um.statCTR) {
+                    const ctr = totalViews > 0 ? ((totalClicks / totalViews) * 100).toFixed(1) + '%' : '0%';
+                    um.statCTR.textContent = ctr;
+                }
+                if (um.statViews) um.statViews.textContent = totalViews.toLocaleString();
+                
+                // Badges
+                if (um.badgeVerified) um.badgeVerified.checked = !!d.isVerified;
+                if (um.badgePartner) um.badgePartner.checked = !!d.isPartner;
+                if (um.badgePremium) {
                 const until = currentUserDetails?.premiumUntil ? new Date(currentUserDetails.premiumUntil) : null;
                 const active = !!currentUserDetails?.isPremium && (!until || until.getTime() > Date.now());
                 um.badgePremium.checked = active;
-            }
+                }
 
-            const plSelect = document.getElementById('umPlSelect');
-            const plSlug = document.getElementById('umPlSlug');
-            const plPublic = document.getElementById('umPlPublic');
-            const plActiveChk = document.getElementById('umPlActive');
-            const plDefault = document.getElementById('umPlDefault');
-            const plMeta = document.getElementById('umPlMeta');
-            const plPreview = document.getElementById('umPlPreview');
-            const plEmailVisible = document.getElementById('umPlEmailVisible');
-            const plViews = document.getElementById('umPlViews');
-            currentPlinkks = Array.isArray(currentUserDetails?.plinkks) ? currentUserDetails.plinkks : [];
-            const opts = currentPlinkks.map(p => ({
-                id: p.id, slug: (p.slug||''), label: (p.isDefault ? (p.name||p.slug||'Par défaut')+ ' (Par défaut)' : (p.name||p.slug||'Sans nom')),
-                isDefault: !!p.isDefault, isPublic: !!p.isPublic, isActive: !!p.isActive,
-                url: p.isDefault ? ('/'+id) : ('/'+p.slug), views: (p.views||0), emailVisible: !!(p.settings && p.settings.affichageEmail)
-            }));
-            if (plSelect){ plSelect.innerHTML = opts.map((o,i)=>`<option value="${i}">${o.label}${o.slug?` (${o.slug})`:''}</option>`).join(''); }
-            function applyPl(i){
-                const o = opts[i|0]||opts[0]; if (!o) return;
-                if (plSlug) plSlug.value = o.slug || '';
-                if (plPublic) plPublic.checked = !!o.isPublic;
-                if (plActiveChk) plActiveChk.checked = !!o.isActive;
-                if (plDefault) plDefault.checked = !!o.isDefault;
-                if (plEmailVisible) plEmailVisible.checked = !!o.emailVisible;
-                if (plPreview) plPreview.href = "<%= frontendUrl %>" + o.url;
-                if (plViews) plViews.textContent = String(o.views||0);
-                if (plMeta) plMeta.textContent = o.slug ? `/${id}/${o.slug}` : `/${id}`;
-                if (um.view) um.view.href = "<%= frontendUrl %>" + o.url;
-                um.copy?.setAttribute('data-url', "<%= frontendUrl %>" + o.url);
+                currentPlinkks = Array.isArray(currentUserDetails?.plinkks) ? currentUserDetails.plinkks : [];
+                populateContent(d);
+            } else {
+                 // Fallback if fetch fails?
+                 currentPlinkks = [];
             }
-            if (plSelect){ plSelect.value = '0'; applyPl(0); plSelect.onchange = ()=> applyPl(Number(plSelect.value||0)); }
 
             const baseRanks = { USER:0, MODERATOR:1, DEVELOPER:2, ADMIN:3 };
             const ranks = { ...baseRanks };
@@ -1059,17 +1232,91 @@
                 else disabled = (ranks[target] ?? 0) >= (ranks[myRole]||0);
                 opt.disabled = !!disabled;
             });
-
+            
+            // Switch to first tab
+            um.tabsNav?.querySelector('[data-tab="overview"]')?.click();
+            
+            // Animate In
             um.root.classList.remove('hidden');
             um.root.classList.add('flex');
             document.body.style.overflow = 'hidden';
             requestAnimationFrame(()=>{
-                const overlay = um.root.querySelector('[data-close]');
-                const panel = um.root.querySelector('.relative.w-full.max-w-3xl');
-                overlay && overlay.classList.add('opacity-100');
-                if (panel){ panel.classList.remove('translate-y-2','opacity-0'); panel.classList.add('translate-y-0','opacity-100'); }
+                 // Overlay opacity if needed, but CSS handles it via animate-scale-in class on modal
             });
         }
+        
+        function populateContent(d) {
+             const plList = document.getElementById('umPlList');
+             const rdList = document.getElementById('umRdList');
+             const plCount = document.getElementById('umPlCount');
+             const rdCount = document.getElementById('umRdCount');
+             
+             if (plCount) plCount.textContent = (d.plinkks || []).length;
+             if (rdCount) rdCount.textContent = (d.redirects || []).length;
+
+             if (plList) {
+                 if (!d.plinkks || d.plinkks.length === 0) {
+                     plList.innerHTML = '<div class="text-slate-600 text-sm italic p-4 text-center border border-dashed border-slate-800 rounded-xl">Aucune page Plinkk</div>';
+                 } else {
+                     plList.innerHTML = d.plinkks.map(p => {
+                         const urlPath = p.isDefault ? `${d.id}` : `${p.slug}`;
+                         const fullUrl = "<%= frontendUrl %>" + urlPath;
+                         return `
+                            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-3 flex items-center justify-between group/item hover:border-slate-700 transition-colors">
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-white text-sm truncate">${p.name || p.slug || 'Sans nom'}</span>
+                                        ${p.isDefault ? '<span class="px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase ring-1 ring-amber-500/20">Défaut</span>' : ''}
+                                        ${!p.isActive ? '<span class="px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-500 text-[10px] font-bold uppercase">Inactif</span>' : ''}
+                                    </div>
+                                    <div class="text-[11px] text-slate-500 truncate mt-1">${urlPath}</div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <div class="text-right hidden sm:block">
+                                        <div class="text-[10px] font-bold text-slate-600 uppercase">Vues</div>
+                                        <div class="text-xs font-bold text-slate-300">${(p.views||0).toLocaleString()}</div>
+                                    </div>
+                                    <a href="${fullUrl}" target="_blank" class="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-all border border-slate-700">
+                                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </a>
+                                </div>
+                            </div>
+                         `;
+                     }).join('');
+                 }
+             }
+
+             if (rdList) {
+                 if (!d.redirects || d.redirects.length === 0) {
+                     rdList.innerHTML = '<div class="text-slate-600 text-sm italic p-4 text-center border border-dashed border-slate-800 rounded-xl">Aucune redirection</div>';
+                 } else {
+                     rdList.innerHTML = d.redirects.map(r => {
+                         const fullUrl = "<%= frontendUrl %>" + '/r/' + r.slug;
+                         return `
+                            <div class="bg-slate-950/40 border border-slate-800/80 rounded-xl p-3 flex items-center justify-between hover:border-slate-700 transition-colors">
+                                <div class="min-w-0">
+                                    <div class="font-bold text-slate-300 text-sm truncate">/r/${r.slug}</div>
+                                    <div class="text-[10px] text-slate-600 truncate mt-0.5 flex items-center gap-1">
+                                        <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                        ${r.targetUrl}
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <div class="text-right hidden sm:block">
+                                        <div class="text-[10px] font-bold text-slate-600 uppercase">Redirs</div>
+                                        <div class="text-xs font-bold text-slate-300">${(r.clicks||0).toLocaleString()}</div>
+                                    </div>
+                                    <button onclick="navigator.clipboard.writeText('${fullUrl}'); showToast('Lien de redirection copié');" class="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-500 hover:text-white transition-colors">
+                                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                         `;
+                     }).join('');
+                 }
+             }
+        }
+
         function closeUserModal(){
             const overlay = um.root.querySelector('[data-close]');
             const panel = um.root.querySelector('.relative.w-full.max-w-3xl');
@@ -1154,12 +1401,74 @@
             finally { if (spinner) spinner.classList.add('hidden'); }
         });
 
+        function showMagicLinkModal(url) {
+            return new Promise(resolve => {
+                const overlay = document.createElement('div');
+                overlay.className = 'fixed inset-0 z-[2147483810] flex items-center justify-center bg-black/80 backdrop-blur-sm px-4';
+                overlay.style.cssText = 'animation: fadeIn 0.15s ease-out';
+                
+                const safeUrl = url.replace(/"/g, '&quot;');
+                
+                overlay.innerHTML = `
+                    <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-2xl space-y-4 animate-scale-in">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center flex-shrink-0 text-violet-400">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg text-white">Lien de connexion généré</h3>
+                                <div class="text-sm text-slate-400">Ouvrez ce lien en <strong>Navigation Privée</strong> pour ne pas perdre votre session Admin.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                             <div class="relative">
+                                <input type="text" id="magicLinkInput" readonly value="${safeUrl}" class="w-full pl-4 pr-12 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 font-mono text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none transition-all">
+                                <button id="copyMagicBtn" class="absolute right-2 top-2 bottom-2 p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" title="Copier">
+                                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                </button>
+                             </div>
+                             <p class="text-xs text-slate-500 text-center">Ce lien expire dans 5 minutes.</p>
+                        </div>
+                        
+                        <div class="flex justify-end pt-2">
+                            <button class="closeBtn w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium transition-colors">Fermer</button>
+                        </div>
+                    </div>`;
+
+                document.body.appendChild(overlay);
+                
+                const input = document.getElementById('magicLinkInput');
+                const copyBtn = document.getElementById('copyMagicBtn');
+                const closeBtn = overlay.querySelector('.closeBtn');
+                
+                input.select();
+                
+                copyBtn.onclick = async () => {
+                    try {
+                        await navigator.clipboard.writeText(url);
+                        copyBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500"><polyline points="20 6 9 17 4 12"/></svg>';
+                        setTimeout(() => {
+                             copyBtn.innerHTML = '<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>';
+                        }, 2000);
+                        showToast('Copié !');
+                    } catch(e) { showToast('Erreur copie'); }
+                };
+                
+                function cleanup() { overlay.remove(); resolve(); }
+                closeBtn.onclick = cleanup;
+                overlay.onclick = (e) => { if (e.target === overlay) cleanup(); };
+            });
+        }
+
         um.impersonate?.addEventListener('click', async () => {
             if (!currentLI) return;
             const id = currentLI.dataset.id;
-            const ok = await confirmSimple(`Se connecter en tant que @${id} ?`, { confirmText: 'Se connecter', cancelText: 'Annuler' });
-            if (!ok) return;
             
+            // Use existing confirmSimple
+            const ok = await confirmSimple(`Se connecter en tant que @${id} ?\nCela générera un lien à ouvrir en navigation privée.`, { confirmText: 'Générer le lien', cancelText: 'Annuler' });
+            if (!ok) return;
+
             const btn = um.impersonate;
             const spinner = btn.querySelector('.plinkk-spinner');
             const icon = btn.querySelector('svg:not(.plinkk-spinner)');
@@ -1169,21 +1478,23 @@
             btn.disabled = true;
             if (spinner) spinner.classList.remove('hidden');
             if (icon) icon.classList.add('hidden');
-            if (label) label.textContent = 'Connexion...';
+            if (label) label.textContent = 'Génération...';
 
             try {
-                const res = await fetch(`/api/admin/users/${encodeURIComponent(id)}/impersonate`, { method: 'POST' });
+                // Use new endpoint that returns a URL instead of setting cookie
+                const res = await fetch(`/impersonate-link/${encodeURIComponent(id)}`, { method: 'POST' });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 const data = await res.json();
-                if (data.redirectUrl) {
-                    window.location.href = data.redirectUrl;
-                } else {
-                    showToast('Erreur: pas de redirection');
-                    btn.disabled = false;
-                }
+                
+                const fullUrl = window.location.origin + data.url;
+                
+                // Show custom modal instead of system alert
+                await showMagicLinkModal(fullUrl);
+
             } catch (err) {
                 console.error(err);
                 showToast('Erreur lors de l\'impersonation');
+            } finally {
                 btn.disabled = false;
                 if (spinner) spinner.classList.add('hidden');
                 if (icon) icon.classList.remove('hidden');

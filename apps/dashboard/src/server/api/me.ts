@@ -53,6 +53,23 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     return reply.send(updated);
   });
 
+  fastify.post("/username", async (request, reply) => {
+    const userId = request.session.get("data");
+    if (!userId) throw new UnauthorizedError();
+    const { username } = (request.body as { username: string }) || {};
+
+    if (!username || username.trim().length < 3) {
+      throw new BadRequestError("Le nom d'utilisateur doit contenir au moins 3 caractères");
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: userId as string },
+      data: { userName: username.trim() },
+      select: { id: true, userName: true },
+    });
+    return reply.send(updated);
+  });
+
   fastify.post("/email", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) throw new UnauthorizedError();

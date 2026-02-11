@@ -121,6 +121,13 @@ model Connection {
   @@unique([provider, userId])
 }
 
+model MagicLink {
+  token     String   @id
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
 model Session {
   id        String   @id @default(nanoid(16))
   userId    String
