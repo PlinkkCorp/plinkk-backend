@@ -244,120 +244,127 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
       // En mode aperçu on n'incrémente pas les vues ni les agrégations journalières
       if (!isPreview && resolved.page) {
-        await recordPlinkkView(prisma, resolved.page.id, resolved.user.id, request);
-      if (!isPreview) {
-        // Incrément des vues utilisateur, robuste aux erreurs SQLite (code 14)
-        try {
-          await prisma.user.updateMany({
-            where: { id: resolved.user.id },
-            data: { views: { increment: 1 } },
-          });
-        } catch (e) {
-          request.log?.warn(
-            { err: e },
-            "user.updateMany failed (views increment) - skipping",
-          );
-        }
-
-        // Agrégation quotidienne des vues (UserViewDaily)
-        try {
-          const now = new Date();
-          const y = now.getUTCFullYear();
-          const m = String(now.getUTCMonth() + 1).padStart(2, "0");
-          const d = String(now.getUTCDate()).padStart(2, "0");
-          const dateStr = `${y}-${m}-${d}`; // YYYY-MM-DD (UTC)
-          await prisma.userViewDaily.upsert({
-            where: {
-              userId_date: {
-                userId: resolved.user.id,
-                date: dateStr,
-              },
-            },
-            create: { userId: resolved.user.id, date: dateStr, count: 1 },
-            update: { count: { increment: 1 } },
-          });
-        } catch (e) {
-          request.log?.warn(
-            { err: e },
-            "Failed to record daily view (userViewDaily upsert)",
-          );
-        }
-      }
-
-      // Si utilisateur banni -> afficher page bannie
-      try {
-        const u = await prisma.user.findUnique({
-          where: { id: resolved.user.id },
-          select: { email: true },
-        });
-        if (u?.email) {
-          const ban = await prisma.bannedEmail.findFirst({
-            where: { email: u.email, revoquedAt: null },
-          });
-          if (ban) {
-            const isActive =
-              ban.time == null ||
-              ban.time < 0 ||
-              new Date(ban.createdAt).getTime() + ban.time * 60000 > Date.now();
-            if (isActive) {
-              const until =
-                typeof ban.time === "number" && ban.time > 0
-                  ? new Date(
-                      new Date(ban.createdAt).getTime() + ban.time * 60000,
-                    ).toISOString()
-                  : null;
-              return reply.view("erreurs/banned.ejs", {
-                reason: ban.reason || "Violation des règles",
-                email: u.email,
-                until,
-              });
-            }
-          }
-        }
-      } catch (e) {}
-
-      // Plinkk protégé par mot de passe : afficher le formulaire
-      if (resolved.isPasswordProtected && !resolved.isOwner) {
-        const sessionKey = `plinkk_unlocked_${resolved.page.id}`;
-        const unlocked = request.session.get(sessionKey);
-        if (!unlocked) {
-          return reply.view("plinkk/password.ejs", {
-            page: resolved.page,
-            username,
-            identifier: undefined,
-            error: null,
-          });
-        }
-      }
-
-      const allLinks = await prisma.link.findMany({
-        where: { plinkkId: resolved.page.id, userId: resolved.user.id },
-      });
-      // Filtrer les liens schedulés (ne montrer que ceux actuellement actifs)
-      const links = filterScheduledLinks(allLinks);
-      const isOwner =
-        (request.session.get("data") as string | undefined) ===
-        resolved.user.id;
-      const publicPath =
-        resolved.page && resolved.page.slug
-          ? resolved.page.slug
-          : resolved.user.id;
-      if (!isPreview) {
         await recordPlinkkView(
           prisma,
           resolved.page.id,
           resolved.user.id,
           request,
         );
+        if (!isPreview) {
+          // Incrément des vues utilisateur, robuste aux erreurs SQLite (code 14)
+          try {
+            await prisma.user.updateMany({
+              where: { id: resolved.user.id },
+              data: { views: { increment: 1 } },
+            });
+          } catch (e) {
+            request.log?.warn(
+              { err: e },
+              "user.updateMany failed (views increment) - skipping",
+            );
+          }
+
+          // Agrégation quotidienne des vues (UserViewDaily)
+          try {
+            const now = new Date();
+            const y = now.getUTCFullYear();
+            const m = String(now.getUTCMonth() + 1).padStart(2, "0");
+            const d = String(now.getUTCDate()).padStart(2, "0");
+            const dateStr = `${y}-${m}-${d}`; // YYYY-MM-DD (UTC)
+            await prisma.userViewDaily.upsert({
+              where: {
+                userId_date: {
+                  userId: resolved.user.id,
+                  date: dateStr,
+                },
+              },
+              create: { userId: resolved.user.id, date: dateStr, count: 1 },
+              update: { count: { increment: 1 } },
+            });
+          } catch (e) {
+            request.log?.warn(
+              { err: e },
+              "Failed to record daily view (userViewDaily upsert)",
+            );
+          }
+        }
+
+        // Si utilisateur banni -> afficher page bannie
+        try {
+          const u = await prisma.user.findUnique({
+            where: { id: resolved.user.id },
+            select: { email: true },
+          });
+          if (u?.email) {
+            const ban = await prisma.bannedEmail.findFirst({
+              where: { email: u.email, revoquedAt: null },
+            });
+            if (ban) {
+              const isActive =
+                ban.time == null ||
+                ban.time < 0 ||
+                new Date(ban.createdAt).getTime() + ban.time * 60000 >
+                  Date.now();
+              if (isActive) {
+                const until =
+                  typeof ban.time === "number" && ban.time > 0
+                    ? new Date(
+                        new Date(ban.createdAt).getTime() + ban.time * 60000,
+                      ).toISOString()
+                    : null;
+                return reply.view("erreurs/banned.ejs", {
+                  reason: ban.reason || "Violation des règles",
+                  email: u.email,
+                  until,
+                });
+              }
+            }
+          }
+        } catch (e) {}
+
+        // Plinkk protégé par mot de passe : afficher le formulaire
+        if (resolved.isPasswordProtected && !resolved.isOwner) {
+          const sessionKey = `plinkk_unlocked_${resolved.page.id}`;
+          const unlocked = request.session.get(sessionKey);
+          if (!unlocked) {
+            return reply.view("plinkk/password.ejs", {
+              page: resolved.page,
+              username,
+              identifier: undefined,
+              error: null,
+            });
+          }
+        }
+
+        const allLinks = await prisma.link.findMany({
+          where: { plinkkId: resolved.page.id, userId: resolved.user.id },
+        });
+        // Filtrer les liens schedulés (ne montrer que ceux actuellement actifs)
+        const links = filterScheduledLinks(allLinks);
+        const isOwner =
+          (request.session.get("data") as string | undefined) ===
+          resolved.user.id;
+        const publicPath =
+          resolved.page && resolved.page.slug
+            ? resolved.page.slug
+            : resolved.user.id;
+        if (!isPreview) {
+          await recordPlinkkView(
+            prisma,
+            resolved.page.id,
+            resolved.user.id,
+            request,
+          );
+        }
+        return reply.view("plinkk/show.ejs", {
+          page: resolved.page,
+          userId: resolved.user.id,
+          username: resolved.user.id,
+          isOwner,
+          links,
+          publicPath,
+        });
       }
-      return reply.view("plinkk/show.ejs", {
-        page: resolved.page,
-        userId: resolved.user.id,
-        username: resolved.user.id,
-        isOwner,
-        links,
-        publicPath,
-      });
     },
   );
 
@@ -415,9 +422,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       request,
     );
     if (resolved.status !== 200) {
-      return reply.redirect(
-        "https://cdn.plinkk.fr/default_profile.png",
-      );
+      return reply.redirect("https://cdn.plinkk.fr/default_profile.png");
     }
 
     const user = await prisma.user.findUnique({
@@ -438,7 +443,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       return reply.redirect(userIcon);
     }
 
-    return reply.sendFile(userIcon || "https://cdn.plinkk.fr/default_profile.png");
+    return reply.sendFile(
+      userIcon || "https://cdn.plinkk.fr/default_profile.png",
+    );
   });
 
   fastify.get(
