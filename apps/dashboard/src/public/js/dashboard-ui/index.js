@@ -605,7 +605,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
                 </div>
                 <div class="text-sm text-slate-300"><b>${theme?.name || ''}</b></div>
                 ${theme?.description ? `<div class="text-xs text-slate-400">${theme.description}</div>` : ''}
-                ${theme?.author && theme.author.id ? `<div class="text-xs">Créateur: <a class="text-indigo-400 hover:underline" href="/${theme.author.id}" target="_blank">@${theme.author.userName || theme.author.id}</a></div>` : '<div class="text-xs text-slate-400">Créateur: original</div>'}
+                ${theme?.author && theme.author.id ? `<div class="text-xs">Créateur: <a class="text-indigo-400 hover:underline" href="${window.__PLINKK_FRONTEND_URL__}/${theme.author.id}" target="_blank">@${theme.author.userName || theme.author.id}</a></div>` : '<div class="text-xs text-slate-400">Créateur: original</div>'}
               </div>`;
             document.body.appendChild(d);
             const close = () => d.remove();
