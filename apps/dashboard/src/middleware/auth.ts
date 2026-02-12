@@ -11,21 +11,33 @@ export function registerAuthDecorators(fastify: FastifyInstance) {
 }
 
 export async function requireAuth(request: FastifyRequest, reply: FastifyReply) {
-  const userId = request.session.get("data");
-  if (!userId || String(userId).includes("__totp")) {
-    throw new UnauthorizedError();
+  const sessionData = request.session.get("data");
+  if (!sessionData) throw new UnauthorizedError();
+
+  let userId: string;
+  if (typeof sessionData === "object") {
+    userId = sessionData.id;
+  } else {
+    if (sessionData.includes("__totp")) throw new UnauthorizedError();
+    userId = sessionData;
   }
-  request.userId = userId as string;
+  request.userId = userId;
 }
 
 export async function requireAuthWithUser(request: FastifyRequest, reply: FastifyReply) {
-  const userId = request.session.get("data");
-  if (!userId || String(userId).includes("__totp")) {
-    throw new UnauthorizedError();
+  const sessionData = request.session.get("data");
+  if (!sessionData) throw new UnauthorizedError();
+
+  let userId: string;
+  if (typeof sessionData === "object") {
+    userId = sessionData.id;
+  } else {
+    if (sessionData.includes("__totp")) throw new UnauthorizedError();
+    userId = sessionData;
   }
 
   const user = await prisma.user.findUnique({
-    where: { id: userId as string },
+    where: { id: userId },
     include: { role: true },
   });
 
@@ -33,41 +45,57 @@ export async function requireAuthWithUser(request: FastifyRequest, reply: Fastif
     throw new UnauthorizedError();
   }
 
-  request.userId = userId as string;
+  request.userId = userId;
   request.currentUser = user;
   request.publicPath = await getPublicPath(user.id);
 }
 
 export async function requireAuthRedirect(request: FastifyRequest, reply: FastifyReply) {
-  const userId = request.session.get("data");
-  if (!userId || String(userId).includes("__totp")) {
-    const returnTo = request.url || "/";
+  const sessionData = request.session.get("data");
+  const returnTo = request.url || "/";
+  
+  if (!sessionData) {
     return reply.redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
 
+  let userId: string;
+  if (typeof sessionData === "object") {
+    userId = sessionData.id;
+  } else {
+    if (sessionData.includes("__totp")) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
+    }
+    userId = sessionData;
+  }
+
   const user = await prisma.user.findUnique({
-    where: { id: userId as string },
+    where: { id: userId },
     include: { role: true },
   });
 
   if (!user) {
-    const returnTo = request.url || "/";
     return reply.redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
 
-  request.userId = userId as string;
+  request.userId = userId;
   request.currentUser = user;
   request.publicPath = await getPublicPath(user.id);
 }
 
 export async function requireStaff(request: FastifyRequest, reply: FastifyReply) {
-  const userId = request.session.get("data");
-  if (!userId) {
-    throw new UnauthorizedError();
+  const sessionData = request.session.get("data");
+  if (!sessionData) throw new UnauthorizedError();
+
+  let userId: string;
+  if (typeof sessionData === "object") {
+    userId = sessionData.id;
+  } else {
+    if (sessionData.includes("__totp")) throw new UnauthorizedError();
+    userId = sessionData;
   }
 
   const user = await prisma.user.findFirst({
-    where: { id: userId as string },
+    where: { id: userId },
     include: { role: true },
   });
 
@@ -81,15 +109,25 @@ export async function requireStaff(request: FastifyRequest, reply: FastifyReply)
 }
 
 export async function requireStaffRedirect(request: FastifyRequest, reply: FastifyReply) {
-  const userId = request.session.get("data");
+  const sessionData = request.session.get("data");
   const returnTo = request.url || "/";
 
-  if (!userId) {
+  if (!sessionData) {
     return reply.redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
 
+  let userId: string;
+  if (typeof sessionData === "object") {
+    userId = sessionData.id;
+  } else {
+    if (sessionData.includes("__totp")) {
+      return reply.redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
+    }
+    userId = sessionData;
+  }
+
   const user = await prisma.user.findFirst({
-    where: { id: userId as string },
+    where: { id: userId },
     include: { role: true },
   });
 

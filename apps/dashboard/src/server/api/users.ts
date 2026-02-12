@@ -12,7 +12,8 @@ import { logAdminAction } from "../../lib/adminLogger";
 
 export function apiUsersRoutes(fastify: FastifyInstance) {
   fastify.get("/:id", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
     if (!ok) return;
@@ -66,7 +67,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.put("/:id/profile", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
     if (!ok) return;
@@ -100,7 +102,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.get("/:id/ban-email", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'BAN_USER');
     if (!ok) return;
@@ -127,7 +130,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/:id/ban-email", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'BAN_USER');
     if (!ok) return;
@@ -193,7 +197,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.delete("/:id/ban-email", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'UNBAN_USER');
     if (!ok) return;
@@ -217,7 +222,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/:id/role", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
@@ -262,7 +268,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/:id/cosmetics", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
     if (!ok) return;
@@ -278,7 +285,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.delete("/:id", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
     if (!ok) return;
@@ -289,7 +297,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/:id/2fa/disable", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'RESET_2FA_USER');
     if (!ok) return;
@@ -313,7 +322,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/:id/visibility", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
     if (!ok) return;
@@ -334,7 +344,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/:id/email-visibility", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
     if (!ok) return;
@@ -362,7 +373,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/:id/force-password-reset", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const me = await prisma.user.findUnique({
       where: { id: meId as string },
@@ -387,7 +399,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.get("/bans/emails", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_BANNED_EMAILS');
     if (!ok) return;
@@ -400,7 +413,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/bans/emails", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_BANNED_EMAILS');
     if (!ok) return;
@@ -465,7 +479,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.delete("/bans/emails", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_BANNED_EMAILS');
     if (!ok) return;
@@ -484,7 +499,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/bans/emails/bulk", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_BANNED_EMAILS');
     if (!ok) return;
@@ -578,7 +594,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/:id/badges", async function (request, reply) {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
     if (!ok) return;
@@ -641,7 +658,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
 
   // Admin subscription management endpoint
   fastify.post("/:id/subscription-admin", async function (request, reply) {
-    const adminId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const adminId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!adminId) return reply.code(401).send({ error: "unauthorized" });
 
     const ok = await ensurePermission(request, reply, 'MANAGE_SUBSCRIPTIONS');

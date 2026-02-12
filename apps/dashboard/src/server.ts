@@ -67,7 +67,18 @@ async function bootstrap() {
       return reply.callNotFound();
     }
 
-    const currentUserId = request.session.get("data") as string | undefined;
+    const sessionData = request.session.get("data");
+    let currentUserId: string | undefined;
+    
+    if (typeof sessionData === "object") {
+      currentUserId = sessionData?.id;
+    } else {
+      currentUserId = sessionData;
+      if (currentUserId && currentUserId.includes("__totp")) {
+        currentUserId = undefined;
+      }
+    }
+
     const currentUser = currentUserId
       ? await prisma.user.findUnique({
           where: { id: currentUserId },
@@ -118,7 +129,8 @@ async function bootstrap() {
     if (request.raw.url?.startsWith("/api")) {
       return reply.code(404).send({ error: "Not Found" });
     }
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     return reply
       .code(404)
       .view("erreurs/404.ejs", { currentUser: userId ? { id: userId } : null });
@@ -134,7 +146,8 @@ async function bootstrap() {
           message: error.message 
         });
       }
-      const userId = request.session.get("data");
+      const sessionData = request.session.get("data");
+      const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
       const template = error.statusCode === 404 ? "erreurs/404.ejs" : "erreurs/500.ejs";
       return reply.code(error.statusCode).view(template, {
         message: error.message,
@@ -145,7 +158,8 @@ async function bootstrap() {
     if (request.raw.url?.startsWith("/api")) {
       return reply.code(500).send({ error: "internal_server_error" });
     }
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     return reply.code(500).view("erreurs/500.ejs", {
       message: error instanceof Error ? error.message : "",
       currentUser: userId ? { id: userId } : null,

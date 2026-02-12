@@ -59,7 +59,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       }
 
       // Si on est le propriétaire
-      const currentUserId = request.session.get("data") as string | undefined;
+      const sessionData = request.session.get("data");
+      const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
       if (currentUserId === resolved.user.id) {
         return reply.redirect(targetUrl);
       }
@@ -196,8 +197,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             });
             // Filtrer les liens schedulés (ne montrer que ceux actuellement actifs)
             const links = filterScheduledLinks(allLinks);
+            const sessionData = request.session.get("data");
             const isOwner =
-              (request.session.get("data") as string | undefined) ===
+              ((typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined) ===
               resolved.user.id;
             const publicPath =
               resolved.page && resolved.page.slug
@@ -341,8 +343,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         });
         // Filtrer les liens schedulés (ne montrer que ceux actuellement actifs)
         const links = filterScheduledLinks(allLinks);
+        const sessionData = request.session.get("data");
         const isOwner =
-          (request.session.get("data") as string | undefined) ===
+          ((typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined) ===
           resolved.user.id;
         const publicPath =
           resolved.page && resolved.page.slug
@@ -842,8 +845,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       where: { plinkkId: resolved.page.id, userId: resolved.user.id },
     });
     const links = filterScheduledLinks(allLinks);
+    const sessionData = request.session.get("data");
     const isOwner =
-      (request.session.get("data") as string | undefined) === resolved.user.id;
+      ((typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined) === resolved.user.id;
     const publicPath =
       resolved.page && resolved.page.slug
         ? resolved.page.slug
@@ -902,8 +906,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     });
     const links = filterScheduledLinks(allLinks);
 
+    const sessionData = request.session.get("data"); 
     const isOwner =
-      (request.session.get("data") as string | undefined) === resolved.user.id;
+      ((typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined) === resolved.user.id;
     if (!isPreview) {
       await recordPlinkkView(
         prisma,

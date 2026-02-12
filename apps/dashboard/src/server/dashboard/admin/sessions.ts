@@ -17,7 +17,8 @@ export function dashboardAdminSessionsRoutes(fastify: FastifyInstance) {
   
   // View: Sessions List
   fastify.get("/", async function (request, reply) {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin/sessions")}`);
     
     const userInfo = await prisma.user.findFirst({ where: { id: userId }, include: { role: true } });
@@ -37,7 +38,8 @@ export function dashboardAdminSessionsRoutes(fastify: FastifyInstance) {
 
 
   fastify.get<{ Querystring: SessionsQuery }>("/api", async function (request, reply) {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     
     const ok = await ensurePermission(request, reply, 'VIEW_ADMIN');
@@ -75,7 +77,8 @@ export function dashboardAdminSessionsRoutes(fastify: FastifyInstance) {
   });
 
   fastify.delete("/:id", async function (request, reply) {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     
     const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
@@ -93,7 +96,8 @@ export function dashboardAdminSessionsRoutes(fastify: FastifyInstance) {
   });
   
   fastify.delete("/user/:userId", async function (request, reply) {
-    const adminId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const adminId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!adminId) return reply.code(401).send({ error: "unauthorized" });
     
     const ok = await ensurePermission(request, reply, 'MANAGE_USERS');

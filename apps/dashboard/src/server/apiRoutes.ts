@@ -32,8 +32,9 @@ export function apiRoutes(fastify: FastifyInstance) {
   fastify.register(apiStripeRoutes, { prefix: "/stripe" });
 
   fastify.get("/roles", async (request, reply) => {
-    const userId = request.session.get("data");
-    if (!userId) throw new UnauthorizedError();
+    const sessionData = request.session.get("data");
+    if (!sessionData) throw new UnauthorizedError();
+    const userId = typeof sessionData === "object" ? sessionData.id : sessionData;
     const me = await prisma.user.findFirst({
       where: { id: userId },
       select: { role: true },
@@ -48,8 +49,9 @@ export function apiRoutes(fastify: FastifyInstance) {
   });
 
   fastify.get("/bans", async (request, reply) => {
-    const userId = request.session.get("data");
-    if (!userId) throw new UnauthorizedError();
+    const sessionData = request.session.get("data");
+    if (!sessionData) throw new UnauthorizedError();
+    const userId = typeof sessionData === "object" ? sessionData.id : sessionData;
     const me = await prisma.user.findFirst({
       where: { id: userId },
       select: { role: true },
@@ -61,7 +63,9 @@ export function apiRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/bans", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    if (!sessionData) throw new UnauthorizedError();
+    const userId = typeof sessionData === "object" ? sessionData.id : sessionData;
     if (!userId) throw new UnauthorizedError();
     const me = await prisma.user.findFirst({
       where: { id: userId },
@@ -95,8 +99,9 @@ export function apiRoutes(fastify: FastifyInstance) {
   });
 
   fastify.delete("/bans", async (request, reply) => {
-    const userId = request.session.get("data");
-    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const sessionData = request.session.get("data");
+    if (!sessionData) return reply.code(401).send({ error: "unauthorized" });
+    const userId = typeof sessionData === "object" ? sessionData.id : sessionData;
     const me = await prisma.user.findFirst({
       where: { id: userId },
       select: { role: true },

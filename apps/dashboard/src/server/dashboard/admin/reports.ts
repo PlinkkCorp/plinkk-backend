@@ -16,7 +16,8 @@ interface ReportsQuery {
 export function dashboardAdminReportsRoutes(fastify: FastifyInstance) {
   
   fastify.get("/", async function (request, reply) {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin/reports")}`);
     
     const userInfo = await prisma.user.findFirst({ where: { id: userId }, include: { role: true } });
@@ -67,7 +68,8 @@ export function dashboardAdminReportsRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/:id/status", async function (request, reply) {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
     
     const ok = await ensurePermission(request, reply, 'MANAGE_USERS'); // Or MANAGE_REPORTS if exists

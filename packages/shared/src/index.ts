@@ -23,6 +23,7 @@ declare module "@fastify/secure-session" {
     sessionId?: string;
     returnTo?: string;
     original_admin?: string;
+    [key: string]: any;
   }
 }
 

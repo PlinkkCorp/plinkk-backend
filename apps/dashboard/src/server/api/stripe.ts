@@ -201,7 +201,7 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
       }
 
       case "customer.subscription.updated": {
-        const subscription = event.data.object as Stripe.Subscription;
+        const subscription = event.data.object as Stripe.Subscription & { current_period_end: number };
         const customerId = (typeof subscription.customer === 'string')
           ? subscription.customer
           : subscription.customer.id;

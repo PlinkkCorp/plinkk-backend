@@ -40,6 +40,7 @@ const fastify = Fastify({
 });
 const PORT = 3002;
 
+/*
 declare module "@fastify/secure-session" {
   interface SessionData {
     data?: string;
@@ -47,6 +48,7 @@ declare module "@fastify/secure-session" {
     [key: string]: any;
   }
 }
+*/
 
 fastify.register(fastifyRateLimit, {
   max: 500,
@@ -427,7 +429,8 @@ fastify.addHook("onRequest", async (request, reply) => {
 });
 
 fastify.get("/", async function (request, reply) {
-  const currentUserId = request.session.get("data") as string | undefined;
+  const sessionData = request.session.get("data");
+  const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
   const currentUser = currentUserId
     ? await prisma.user.findUnique({
         where: { id: currentUserId },
@@ -484,7 +487,8 @@ fastify.get("/", async function (request, reply) {
 });
 
 fastify.get("/users", async (request, reply) => {
-  const currentUserId = request.session.get("data") as string | undefined;
+  const sessionData = request.session.get("data");
+  const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
   const currentUser = currentUserId
     ? await prisma.user.findUnique({
         where: { id: currentUserId },
@@ -560,7 +564,8 @@ fastify.get("/*", async (request, reply) => {
   if (!accept.includes("text/html")) {
     return reply.callNotFound();
   }
-  const currentUserId = request.session.get("data") as string | undefined;
+  const sessionData = request.session.get("data");
+  const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
   const currentUser = currentUserId
     ? await prisma.user.findUnique({
         where: { id: currentUserId },
@@ -590,7 +595,8 @@ fastify.setNotFoundHandler((request, reply) => {
   if (request.raw.url?.startsWith("/api")) {
     return reply.code(404).send({ error: "Not Found" });
   }
-  const userId = request.session.get("data");
+  const sessionData = request.session.get("data");
+  const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
   return reply.code(404).view("erreurs/404.ejs", {
     currentUser: userId ? { id: userId } : null,
     dashboardUrl: process.env.DASHBOARD_URL,
@@ -605,7 +611,8 @@ fastify.addHook('onSend', async (request, reply, payload) => {
     const contentType = reply.getHeader('content-type');
     if (contentType && typeof contentType === 'string' && contentType.includes('application/json')) {
       // Remplacer par la vue d'erreur
-      const userId = request.session.get("data");
+      const sessionData = request.session.get("data");
+      const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
       const viewData = {
         currentUser: userId ? { id: userId } : null,
         dashboardUrl: process.env.DASHBOARD_URL,
@@ -628,7 +635,8 @@ fastify.setErrorHandler((error, request, reply) => {
         message: error.message 
       });
     }
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     const template = error.statusCode === 404 ? "erreurs/404.ejs" : "erreurs/500.ejs";
     return reply.code(error.statusCode).view(template, {
       message: error.message,
@@ -640,7 +648,8 @@ fastify.setErrorHandler((error, request, reply) => {
   if (request.raw.url?.startsWith("/api")) {
     return reply.code(500).send({ error: "internal_server_error" });
   }
-  const userId = request.session.get("data");
+  const sessionData = request.session.get("data");
+  const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
   return reply.code(500).view("erreurs/500.ejs", {
     message: error && typeof error === 'object' && 'message' in error ? (error).message ?? "" : "",
     currentUser: userId ? { id: userId } : null,

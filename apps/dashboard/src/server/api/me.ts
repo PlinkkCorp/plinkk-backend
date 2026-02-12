@@ -10,9 +10,13 @@ import { apiMePlinkksRoutes } from "./me/plinkks/index";
 import { apiMeRedirectsRoutes } from "./me/redirects";
 import crypto from "crypto";
 import { Upload } from "@aws-sdk/lib-storage";
-import { ListObjectsV2Command, ListObjectsV2CommandOutput, S3Client } from "@aws-sdk/client-s3";
+import { ListObjectsV2Command, ListObjectsV2CommandOutput, S3Client, _Object } from "@aws-sdk/client-s3";
 import { getS3Client } from "../../lib/fileUtils";
 import sharp from "sharp"
+
+interface S3ClientWithSend {
+  send(command: ListObjectsV2Command): Promise<ListObjectsV2CommandOutput>;
+}
 import { canUseGifBanner, getUserLimits, canUseVisualEffects, UnauthorizedError, BadRequestError, ConflictError, NotFoundError } from "@plinkk/shared";
 
 const pending2fa = new Map<
@@ -28,8 +32,15 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.register(apiMeRedirectsRoutes, { prefix: "/redirects" });
 
   fastify.get("/dashboard-summary", async (request, reply) => {
-    const userId = request.session.get("data");
-    const id = (userId && typeof userId === "object") ? userId.id : (typeof userId === "string" ? userId : undefined);
+    const userId = request.session.get("data") as string | { id: string } | null | undefined;
+    let id: string | undefined;
+    
+    if (typeof userId === "string") {
+      id = userId;
+    } else if (userId && typeof userId === "object" && "id" in userId) {
+      id = (userId as { id: string }).id;
+    }
+
     if (!id) throw new UnauthorizedError();
 
     const [linksCount, socialsCount, labelsCount, recentLinks, userViews, totalClicks] =
@@ -70,7 +81,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/apikey", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) throw new UnauthorizedError();
 
     const newKey = "plk_" + crypto.randomUUID().replace(/-/g, "");
@@ -85,7 +97,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/visibility", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) throw new UnauthorizedError();
     const { isPublic } = (request.body as { isPublic: string }) ?? {};
     const updated = await prisma.user.update({
@@ -97,7 +110,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/username", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) throw new UnauthorizedError();
     const { username } = (request.body as { username: string }) || {};
 
@@ -114,7 +128,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/email", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) throw new UnauthorizedError();
     const { email } = (request.body as { email: string }) || {};
     try {
@@ -136,7 +151,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/password", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) throw new UnauthorizedError();
     const { currentPassword, newPassword, confirmPassword } =
       (request.body as {
@@ -178,7 +194,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/delete", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
     const { password, otp } =
       (request.body as { password: string; otp: string }) || {};
@@ -220,7 +237,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/email-visibility", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
     const { isEmailPublic } = (request.body as { isEmailPublic: string }) ?? {};
     const me = await prisma.user.findUnique({
@@ -243,7 +261,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/premium-ui", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) throw new UnauthorizedError();
     const { enabled } = (request.body as { enabled?: boolean }) || {};
     if (typeof enabled !== "boolean") throw new BadRequestError("Valeur invalide");
@@ -256,7 +275,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/2fa", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -300,7 +320,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/2fa/confirm", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
     const { otp } = (request.body as { otp: string }) || {};
     if (!otp || typeof otp !== "string")
@@ -330,7 +351,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/profile", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
     const body = request.body as {
       userName: string;
@@ -371,7 +393,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/host", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
 
     const body = request.body as { hostname: string; plinkkId: string };
@@ -426,7 +449,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/host/verify", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
     const body = request.body as { plinkkId: string };
     const plinkkId = body.plinkkId;
@@ -435,7 +459,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.delete("/host", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
     const body = request.body as { plinkkId: string };
     const plinkkId = body.plinkkId;
@@ -446,7 +471,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/cosmetics", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
 
     const user = await prisma.user.findUnique({
@@ -524,7 +550,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/avatar", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
 
     const file = await request.file();
@@ -591,12 +618,19 @@ export function apiMeRoutes(fastify: FastifyInstance) {
 
   // ─── List user uploads ───
   fastify.get("/uploads", async (request, reply) => {
-    const userId = request.session.get("data");
-    const id = (userId && typeof userId === "object") ? userId.id : (typeof userId === "string" ? userId : undefined);
+    const userId = request.session.get("data") as string | { id: string } | null | undefined;
+    let id: string | undefined;
+
+    if (typeof userId === "string") {
+      id = userId;
+    } else if (userId && typeof userId === "object" && "id" in userId) {
+      id = (userId as { id: string }).id;
+    }
     
     if (!id) return reply.code(401).send({ error: "Unauthorized" });
 
-    const client = getS3Client();
+    // Use local interface to ensure access to .send() without using 'any'
+    const client = getS3Client() as unknown as S3ClientWithSend;
     const Bucket = "plinkk-image";
     // Check known locations for this user
     const prefixes = [
@@ -610,7 +644,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const promises = prefixes.map(async (prefix) => {
       try {
         const command = new ListObjectsV2Command({ Bucket, Prefix: prefix });
-        const response = await (client as any).send(command);
+        const response = await client.send(command);
         return response.Contents || [];
       } catch (e) {
         return [];
@@ -618,7 +652,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     });
 
     const results = await Promise.all(promises);
-    const allFiles = results.flat();
+    const allFiles: _Object[] = results.flat();
     
     const uniqueFiles = Array.from(new Map(allFiles.map((item) => [item.Key, item])).values());
     
@@ -636,7 +670,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
 
   // ─── Generic image upload (profileImage, profileIcon, iconUrl, etc.) ───
   fastify.post<{ Querystring: { field?: string } }>("/upload", async (request, reply) => {
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
 
     const field = (request.query as { field?: string }).field || "misc";

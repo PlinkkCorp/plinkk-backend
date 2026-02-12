@@ -14,7 +14,8 @@ import { replyView } from "../lib/replyView";
 
 export function plinkkPagesRoutes(fastify: FastifyInstance) {
   fastify.get("/plinkks", async (request, reply) => {
-    const userId = request.session.get("data") as string | undefined;
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) {
       return reply.redirect(`/login?returnTo=${encodeURIComponent("/plinkks")}`);
     }
@@ -55,7 +56,8 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
       isActive?: string;
     };
   }>("/plinkks", async (request, reply) => {
-    const userId = request.session.get("data") as string | undefined;
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId)
       return reply.redirect(
         `/login?returnTo=${encodeURIComponent("/plinkks")}`
@@ -88,7 +90,8 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
   fastify.get<{ Params: { id: string } }>(
     "/plinkks/:id/edit",
     async (request, reply) => {
-      const userId = request.session.get("data") as string | undefined;
+      const sessionData = request.session.get("data");
+      const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
       if (!userId)
         return reply.redirect(
           `/login?returnTo=${encodeURIComponent("/edit")}`

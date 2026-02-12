@@ -2,13 +2,6 @@ import "fastify";
 import "@fastify/secure-session";
 import { User, Role } from "@plinkk/prisma";
 
-declare module "@fastify/secure-session" {
-  interface SessionData {
-    data?: string;
-    sessionId?: string;
-    returnTo?: string;
-  }
-}
 
 export interface OAuth2AccessTokenResult {
   token: {

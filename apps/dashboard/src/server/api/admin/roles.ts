@@ -46,7 +46,8 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
   fastify.post('/', async (request, reply) => {
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     const body = request.body as { name: string; isStaff?: boolean; priority?: number; color?: string; maxPlinkks?: number; maxThemes?: number; maxRedirects?: number; permissions?: string[] };
     const name = (body.name || '').trim().toUpperCase();
     if (!name) return reply.code(400).send({ error: 'missing_name' });
@@ -75,7 +76,8 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
   fastify.post('/reorder', async (request, reply) => {
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     const body = request.body as { ids: string[] };
     const ids = Array.isArray(body?.ids) ? body.ids.filter(Boolean) : [];
     if (!ids.length) return reply.code(400).send({ error: 'missing_ids' });
@@ -89,7 +91,8 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
   fastify.patch('/:id', async (request, reply) => {
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     const { id } = request.params as { id: string };
     const body = request.body as { name?: string; isStaff?: boolean; priority?: number; color?: string | null; maxPlinkks?: number; maxThemes?: number; maxRedirects?: number; addPermissions?: string[]; removePermissions?: string[] };
     const role = await prisma.role.findUnique({ where: { id } });
@@ -122,7 +125,8 @@ export function apiAdminRolesRoutes(fastify: FastifyInstance) {
   fastify.delete('/:id', async (request, reply) => {
     const ok = await ensurePermission(request, reply, 'MANAGE_ROLES');
     if (!ok) return;
-    const userId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     const { id } = request.params as { id: string };
     const role = await prisma.role.findUnique({ where: { id }, include: { users: true } });
     if (!role) return reply.code(404).send({ error: 'not_found' });

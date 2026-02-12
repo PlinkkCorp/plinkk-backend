@@ -14,8 +14,10 @@ const STATIC_PAGES = [
 ];
 
 async function getCurrentUser(request: FastifyRequest) {
-  const userId = request.session.get("data");
-  return userId ? await prisma.user.findUnique({ where: { id: userId } }) : null;
+  const sessionData = request.session.get("data");
+  if (!sessionData) return null;
+  const userId = typeof sessionData === "object" ? sessionData.id : sessionData;
+  return await prisma.user.findUnique({ where: { id: userId } });
 }
 
 function getBaseUrl(request: FastifyRequest): string {

@@ -137,7 +137,8 @@ export function loginRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/impersonate/:id", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
 
     // Check if requester is Admin
@@ -166,7 +167,8 @@ export function loginRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/impersonate-link/:id", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     const me = await prisma.user.findUnique({
       where: { id: String(meId) },
       include: { role: true },
