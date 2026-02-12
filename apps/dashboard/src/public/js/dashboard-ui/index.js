@@ -1,6 +1,6 @@
-import { qs, attachAutoSave, fillSelect, vOrNull, numOrNull } from './utils.js';
+import { el, qs, attachAutoSave, fillSelect, vOrNull, numOrNull } from './utils.js';
 import { openIconModal, openPicker, renderPickerGrid, renderBtnThemeCard, closePicker, ensurePlatformEntryModal, pickerSelect } from './pickers.js';
-import { renderBackground, renderNeon, renderLabels, renderSocial, renderLinks, renderLayout, renderCategories } from './renderers.js';
+import { renderBackground, renderNeon, renderLabels, renderSocial, renderLinks, renderLayout, renderCategories, renderSkeletons } from './renderers.js';
 import { ensureCanvasPreviewModal, openCanvasInlinePreview, buildCanvasPreviewUrl, refreshSelectedCanvasPreview, renderCanvasCard } from './canvas.js';
 import { setupStatusDropdown, updateStatusControlsDisabled, updateStatusPreview } from './status.js';
 
@@ -781,10 +781,14 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
           targetInput.value = replaced;
           targetInput.dispatchEvent(new Event('input', { bubbles: true }));
           scheduleAutoSave();
-      });
+      }, targetId);
     });
   });
 
   setStatus('Chargement...');
+  renderSkeletons(f.socialList, 2);
+  renderSkeletons(f.linksList, 4);
+  renderSkeletons(f.layoutList, 5);
+  
   fetchConfig().then((cfg) => { fillForm(cfg); setStatus('Prêt — sauvegarde auto activée', 'success'); }).catch((e) => { setStatus('Impossible de charger: ' + (e?.message || ''), 'error'); });
 })();

@@ -1,6 +1,30 @@
 import { el, srOnly, trashButton, createGripSVG, enableDragHandle, isUrlish } from './utils.js';
 import { openIconModal } from './pickers.js';
 
+export function renderSkeletons(container, count = 3) {
+  if (!container) return;
+  container.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const row = el('div', { class: 'flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-800 bg-slate-900 animate-pulse' });
+    const left = el('div', { class: 'flex items-center gap-3 min-w-0 flex-1' });
+    const grip = el('div', { class: 'h-8 w-8 rounded bg-slate-800 border border-slate-700' });
+    const icon = el('div', { class: 'h-10 w-10 rounded bg-slate-800 border border-slate-700' });
+    const content = el('div', { class: 'flex-1 space-y-2' });
+    content.append(
+      el('div', { class: 'h-4 bg-slate-800 rounded w-1/3' }),
+      el('div', { class: 'h-3 bg-slate-800 rounded w-1/2' })
+    );
+    left.append(grip, icon, content);
+    const actions = el('div', { class: 'flex gap-2' });
+    actions.append(
+      el('div', { class: 'h-6 w-16 bg-slate-800 rounded' }),
+      el('div', { class: 'h-6 w-16 bg-slate-800 rounded' })
+    );
+    row.append(left, actions);
+    container.appendChild(row);
+  }
+}
+
 export function emptyState({ title, description, actionLabel, onAction }) {
   const box = el('div', { class: 'rounded border border-dashed border-slate-700 bg-slate-900/40 p-4 text-center text-sm text-slate-300' });
   if (title) box.append(el('div', { class: 'font-medium mb-1', text: title }));
@@ -246,14 +270,21 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
       const grip = el('button', { type: 'button', class: 'h-8 w-8 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-400 cursor-grab', title: 'Déplacer' });
       grip.appendChild(createGripSVG(16));
 
-      const iconImg = el('img', { class: 'h-10 w-10 rounded bg-slate-800 border border-slate-700 object-cover' });
+      const iconContainer = el('div', { class: 'h-10 w-10 rounded bg-slate-800 animate-pulse shrink-0 overflow-hidden border border-slate-700 flex items-center justify-center' });
+      const isBootstrap = s.icon && s.icon.startsWith('bi-');
+      const iconImg = el('img', { 
+        class: 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + (isBootstrap ? ' filter-white' : '')
+      });
+      iconImg.onload = () => { iconImg.classList.remove('opacity-0'); iconContainer.classList.remove('animate-pulse'); };
+      iconImg.onerror = () => { iconContainer.classList.remove('animate-pulse'); };
+      iconContainer.appendChild(iconImg);
       if (s.icon) { iconImg.src = isUrlish(s.icon) ? s.icon : `https://s3.marvideo.fr/plinkk-image/icons/${s.icon}.svg`; }
       const textWrap = el('div', { class: 'min-w-0' });
       const title = el('div', { class: 'text-sm font-medium text-slate-200 truncate' }); title.textContent = s.name || s.title || (s.url || '').replace(/^https?:\/\//, '');
       const small = el('div', { class: 'text-xs text-slate-400 truncate' }); small.textContent = s.url || '';
       textWrap.append(title, small);
 
-      left.append(grip, iconImg, textWrap);
+      left.append(grip, iconContainer, textWrap);
 
       const actions = el('div', { class: 'flex items-center gap-2' });
 
@@ -286,7 +317,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
         function updateFromCatalog() { s.icon = iconName.value; setPreviewByValue(s.icon); }
         function updateFromUrl() { s.icon = iconUrlInput.value; setPreviewByValue(s.icon); }
         function updateFromUpload(file) { if (!file) return; const reader = new FileReader(); reader.onload = () => { s.icon = String(reader.result || ''); setPreviewByValue(s.icon); }; reader.readAsDataURL(file); }
-        function openPickerForIcon() { openIconModal((slug) => { iconName.value = slug; updateFromCatalog(); }); }
+        function openPickerForIcon() { openIconModal((slug) => { iconName.value = slug; updateFromCatalog(); }, 'linkModalIconInput'); }
 
         const initialSource = s.icon ? (s.icon.startsWith('data:') ? 'upload' : (isUrlish(s.icon) ? 'url' : 'catalog')) : 'catalog';
         sourceSel.value = initialSource; if (initialSource === 'catalog') { catalogWrap.classList.remove('hidden'); iconName.value = s.icon || ''; }
@@ -495,7 +526,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
             ? slug 
             : `https://s3.marvideo.fr/plinkk-image/icons/${slug}.svg`;
           if (iconInput) iconInput.value = replaced;
-        });
+        }, 'linkModalIconInput');
       });
       pickBtn._bound = true;
     }
@@ -595,7 +626,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
             const btn = el('button', { type: 'button', class: 'flex flex-col items-center gap-1 p-2 rounded border border-slate-700 bg-gradient-to-b from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-center text-xs transition', title: plat.name });
             const img = el('img', { src: `https://s3.marvideo.fr/plinkk-image/icons/${plat.iconSlug}.svg`, class: 'h-7 w-7' });
             const label = el('div', { class: 'text-xs text-slate-300 truncate w-full', text: plat.name });
-            btn.append(img, label);
+            btn.append(imgContainer, label);
             btn.addEventListener('click', () => {
               try {
                 window.__OPEN_PLATFORM_MODAL__(plat, ({ handle, country, path }) => {
@@ -797,7 +828,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
                 const btn = el('button', { type: 'button', class: 'flex flex-col items-center gap-1 p-2 rounded border border-slate-700 bg-gradient-to-b from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-center text-xs transition', title: plat.name, 'data-name': plat.name.toLowerCase() });
                 const img = el('img', { src: `https://s3.marvideo.fr/plinkk-image/icons/${plat.iconSlug}.svg`, class: 'h-7 w-7' });
                 const label = el('div', { class: 'text-xs text-slate-300 truncate w-full', text: plat.name });
-                btn.append(img, label);
+                btn.append(imgContainer, label);
                 btn.addEventListener('click', () => {
                   modal.remove();
                   try { window.__OPEN_PLATFORM_MODAL__(plat, ({ handle, country, path }) => {
@@ -1040,14 +1071,22 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
     const grip = el('button', { type: 'button', class: 'h-8 w-8 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-400 cursor-grab', title: 'Déplacer' });
     grip.appendChild(createGripSVG(16));
 
-    const iconImg = el('img', { class: 'h-10 w-10 rounded bg-slate-800 border border-slate-700 object-cover' });
+    const iconContainer = el('div', { class: 'h-10 w-10 rounded bg-slate-800 animate-pulse shrink-0 overflow-hidden border border-slate-700 flex items-center justify-center' });
+    const isBootstrap = l.icon && l.icon.includes('bi-');
+    const iconImg = el('img', { 
+      class: 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + (isBootstrap ? ' filter-white' : '')
+    });
+    iconImg.onload = () => { iconImg.classList.remove('opacity-0'); iconContainer.classList.remove('animate-pulse'); };
+    iconImg.onerror = () => { iconContainer.classList.remove('animate-pulse'); };
+    iconContainer.appendChild(iconImg);
     if (l.icon) iconImg.src = l.icon;
+
     const textWrap = el('div', { class: 'min-w-0' });
     const title = el('div', { class: 'text-sm font-medium text-slate-200 truncate' }); title.textContent = l.text || l.name || '';
     const small = el('div', { class: 'text-xs text-slate-400 truncate' }); small.textContent = l.url || '';
     textWrap.append(title, small);
 
-    left.append(grip, iconImg, textWrap);
+    left.append(grip, iconContainer, textWrap);
 
     const actions = el('div', { class: 'flex items-center gap-2' });
 
@@ -1139,3 +1178,4 @@ export function renderLayout({ container, order, scheduleAutoSave }) {
     container.appendChild(row);
   });
 }
+

@@ -18,7 +18,7 @@ export function createProfileContainer(profileData) {
     }
     profileLink.tabIndex = 0;
     const profilePicWrapper = document.createElement("div");
-    profilePicWrapper.className = "profile-pic-wrapper";
+    profilePicWrapper.className = "profile-pic-wrapper animate-pulse bg-white/10";
 
     // --- Frame Logic (Cosmetics) ---
     const cosmetics = profileData.cosmetics || {};
@@ -68,6 +68,7 @@ export function createProfileContainer(profileData) {
         try {
             this.onerror = null;
             this.style.display = 'none';
+            profilePicWrapper.classList.remove('animate-pulse', 'bg-white/10');
             const span = document.createElement('span');
             span.className = 'profile-pic-initial';
             span.textContent = (profileData.userName || '').trim().charAt(0).toUpperCase() || '';
@@ -78,11 +79,15 @@ export function createProfileContainer(profileData) {
         }
         catch (e) {
             // final fallback: hide the element
-            try { this.style.display = 'none'; } catch (e) { }
+            try { this.style.display = 'none'; profilePicWrapper.classList.remove('animate-pulse', 'bg-white/10'); } catch (e) { }
         }
     };
     profilePic.alt = "Profile Picture";
-    profilePic.className = "profile-pic";
+    profilePic.className = "profile-pic opacity-0 transition-opacity duration-300";
+    profilePic.onload = function () {
+        this.classList.remove('opacity-0');
+        profilePicWrapper.classList.remove('animate-pulse', 'bg-white/10');
+    };
     profilePic.loading = "lazy";
     disableDrag(profilePic);
     disableContextMenuOnImage(profilePic);
@@ -90,6 +95,19 @@ export function createProfileContainer(profileData) {
     const profileLinkDiv = document.createElement("div");
     profileLinkDiv.className = "profile-link";
     const profileLinkSpan = document.createElement("span");
+    
+    // Icon wrapper for skeleton
+    const profileIconWrapper = document.createElement("span");
+    profileIconWrapper.className = "profile-icon-wrapper animate-pulse bg-white/10";
+    profileIconWrapper.style.display = "inline-flex";
+    profileIconWrapper.style.alignItems = "center";
+    profileIconWrapper.style.justifyContent = "center";
+    profileIconWrapper.style.borderRadius = "50%";
+    profileIconWrapper.style.width = "18px";
+    profileIconWrapper.style.height = "18px";
+    profileIconWrapper.style.marginRight = "6px";
+    profileIconWrapper.style.overflow = "hidden";
+
     const profileIcon = document.createElement("img");
     if (isSafeUrl(profileData.profileIcon)) {
         profileIcon.src = profileData.profileIcon;
@@ -99,6 +117,7 @@ export function createProfileContainer(profileData) {
     }
     // Single-attempt fallback for the icon, then stop retrying
     profileIcon.onerror = function () {
+        profileIconWrapper.classList.remove('animate-pulse', 'bg-white/10');
         try {
             if (!this._triedFallback) {
                 this._triedFallback = true;
@@ -111,17 +130,26 @@ export function createProfileContainer(profileData) {
         try {
             this.onerror = null;
             this.style.display = 'none';
+            profileIconWrapper.style.display = 'none';
         }
         catch (e) { }
     };
+    profileIcon.onload = function() {
+        this.classList.remove('opacity-0');
+        profileIconWrapper.classList.remove('animate-pulse', 'bg-white/10');
+    };
     profileIcon.alt = "globe";
-    profileIcon.className = "profile-icon";
+    profileIcon.className = "profile-icon opacity-0 transition-opacity duration-300";
+    profileIcon.style.width = "100%";
+    profileIcon.style.height = "100%";
+    profileIcon.style.objectFit = "contain";
     profileIcon.loading = "lazy";
     disableDrag(profileIcon);
     disableContextMenuOnImage(profileIcon);
     const profileSiteText = document.createElement("p");
     setSafeText(profileSiteText, profileData.profileSiteText);
-    profileLinkSpan.appendChild(profileIcon);
+    profileIconWrapper.appendChild(profileIcon);
+    profileLinkSpan.appendChild(profileIconWrapper);
     profileLinkSpan.appendChild(profileSiteText);
     profileLinkDiv.appendChild(profileLinkSpan);
     profileLink.appendChild(profilePicWrapper);
@@ -462,7 +490,22 @@ export function createLinkBoxes(profileData) {
     // Helper to create a single link box
     const createBox = (link) => {
         const discordBox = document.createElement("div");
+        const iconWrapper = document.createElement("div");
+        iconWrapper.className = "link-icon-wrapper animate-pulse bg-white/5 rounded flex items-center justify-center shrink-0";
+        iconWrapper.style.width = "32px";
+        iconWrapper.style.height = "32px";
+        iconWrapper.style.overflow = "hidden";
+
         const discordIcon = document.createElement("img");
+        discordIcon.className = "opacity-0 transition-opacity duration-300";
+        discordIcon.onload = () => {
+            discordIcon.classList.remove('opacity-0');
+            iconWrapper.classList.remove('animate-pulse', 'bg-white/5');
+        };
+        discordIcon.onerror = () => {
+            iconWrapper.classList.remove('animate-pulse', 'bg-white/5');
+        };
+
         // Créer le lien principal qui englobe tout le contenu
         const discordLink = document.createElement("a");
         if (isSafeUrl(link.url)) {
@@ -480,33 +523,40 @@ export function createLinkBoxes(profileData) {
             if (themeConfig) {
                 const themeClass = themeConfig.themeClass;
                 discordBox.className = `button ${themeClass}`;
-                discordIcon.className = "link-icon";
                 discordIcon.src = themeConfig.icon;
                 discordIcon.loading = "lazy";
-                discordIcon.className = "icon";
+                discordIcon.classList.add("icon");
             }
             else {
                 discordBox.className = "discord-box";
-                discordIcon.className = "link-icon";
                 discordIcon.src = String(link.icon || '').trim();
                 discordIcon.alt = link.text;
                 discordIcon.loading = "lazy";
+                discordIcon.classList.add("link-icon");
             }
         }
         else {
             discordBox.className = "discord-box";
-            discordIcon.className = "link-icon";
             discordIcon.src = String(link.icon || '').trim();
             discordIcon.alt = link.text;
             discordIcon.loading = "lazy";
+            discordIcon.classList.add("link-icon");
         }
+        
+        // Selective filter white for link icons
+        const iconVal = String(discordIcon.src || '');
+        if (iconVal.includes('bi-') || iconVal.includes('/icons/')) {
+             discordIcon.classList.add('filter-white');
+        }
+
         // Créer un conteneur pour le contenu principal (icône + texte)
         const mainContent = document.createElement("div");
         mainContent.style.display = "flex";
         mainContent.style.alignItems = "center";
         mainContent.style.gap = "12px";
         // Ajouter l'icône au conteneur principal
-        mainContent.appendChild(discordIcon);
+        iconWrapper.appendChild(discordIcon);
+        mainContent.appendChild(iconWrapper);
         // Créer un span pour le texte
         const textSpan = document.createElement("span");
         textSpan.style.position = "relative";
@@ -795,17 +845,26 @@ export function createIconList(profileData) {
     }
         profileData.socialIcon.slice(0, maxIconNumber).forEach(iconData => {
         const iconItem = document.createElement("div");
-        iconItem.className = "icon-item";
+        iconItem.className = "icon-item animate-pulse";
         const iconImg = document.createElement("img");
             // Supporte slug (catalogue), URL absolue et data URI
             const iconVal = String(iconData.icon || '').trim();
+            const isBootstrap = iconVal.startsWith('bi-');
             if (/^(https?:\/\/|\/|data:)/i.test(iconVal)) {
                 iconImg.src = iconVal;
             } else {
                 iconImg.src = `https://s3.marvideo.fr/plinkk-image/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
             }
+        iconImg.onload = () => {
+            iconImg.classList.remove('opacity-0');
+            iconItem.classList.remove('animate-pulse');
+        };
+        iconImg.onerror = () => {
+            iconItem.classList.remove('animate-pulse');
+        };
         setSafeText(iconImg, iconData.icon);
         iconImg.alt = iconData.icon;
+        iconImg.className = "opacity-0 transition-opacity duration-300" + (isBootstrap ? " filter-white" : "");
         iconImg.loading = "lazy";
         disableDrag(iconImg);
         disableContextMenuOnImage(iconImg);
@@ -819,6 +878,7 @@ export function createIconList(profileData) {
             iconLink.href = "#";
             iconLink.title = "Lien non valide";
         }
+        iconLink.className = "flex items-center justify-center w-full h-full";
         iconLink.appendChild(iconImg);
         iconItem.appendChild(iconLink);
         iconList.appendChild(iconItem);

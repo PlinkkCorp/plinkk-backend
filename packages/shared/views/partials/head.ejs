@@ -188,6 +188,18 @@
                 }
                 .animate-tab-switch { animation: fade-in .22s var(--ease-out-quad) both }
 
+                @keyframes pulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: .5; }
+                }
+                .animate-pulse {
+                    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+                }
+
+                .filter-white {
+                    filter: invert(1) brightness(2) grayscale(1) !important;
+                }
+
                 .glass {
                   background: linear-gradient(to bottom right, rgba(8, 8, 20, .6), rgba(15, 15, 40, .55));
                   backdrop-filter: blur(10px)

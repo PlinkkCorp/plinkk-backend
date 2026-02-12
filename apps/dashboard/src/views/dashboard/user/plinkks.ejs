@@ -49,10 +49,11 @@
                 <div class="group relative bg-slate-900 border border-slate-800 rounded-3xl p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-900/10">
                   <div class="flex items-start justify-between mb-6">
                     <div class="flex items-center gap-4">
-                      <div class="h-14 w-14 rounded-2xl bg-slate-800 border border-slate-700 overflow-hidden grid place-items-center text-2xl font-bold text-slate-400 group-hover:border-violet-500/30 transition-colors">
+                      <div class="h-14 w-14 rounded-2xl bg-slate-800 border border-slate-700 overflow-hidden grid place-items-center text-2xl font-bold text-slate-400 group-hover:border-violet-500/30 transition-colors animate-pulse">
                         <% if (plinkk.pfp) { %>
-                          <img src="/public/uploads/<%= plinkk.pfp %>" alt="<%= plinkk.slug %>" class="h-full w-full object-cover" />
+                          <img src="/public/uploads/<%= plinkk.pfp %>" alt="<%= plinkk.slug %>" class="h-full w-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.parentElement.classList.remove('animate-pulse');" />
                         <% } else { %>
+                          <script>document.currentScript.parentElement.classList.remove('animate-pulse');</script>
                           <%= plinkk.slug.substring(0, 1).toUpperCase() %>
                         <% } %>
                       </div>

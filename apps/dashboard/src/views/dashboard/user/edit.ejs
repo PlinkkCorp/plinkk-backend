@@ -1205,6 +1205,7 @@
                         id="pages-data"><%- JSON.stringify(typeof pages !== 'undefined' ? pages : []) %></script>
                     <script type="application/json"
                         id="autoopen-data"><%= (typeof autoOpenPlinkkModal !== 'undefined' && autoOpenPlinkkModal) ? 'true' : 'false' %></script>
+                    <script>window.__USER_EMAIL__ = "<%= user.email %>";</script>
                     <% if (typeof plinkk !=='undefined' && plinkk) { %>
                         <script>window.__PLINKK_SELECTED_ID__ = "<%= plinkk.id %>";</script>
                         <% } %>

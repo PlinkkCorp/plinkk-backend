@@ -23,6 +23,7 @@ const useGravatarBtn = qs('#useGravatarBtn');
 let iconCatalog = [];
 let iconSelectCallback = null;
 let currentTargetField = null;
+let userUploadsCache = null;
 
 // Expose a small helper to allow server-rendered upload buttons to trigger selection
 try {
@@ -31,6 +32,9 @@ try {
     window.__DASH_PICKERS__.iconSelect = (v) => {
       try { if (iconSelectCallback) iconSelectCallback(v); } catch (e) {}
       try { closeIconModal(); } catch (e) {}
+    };
+    window.__DASH_PICKERS__.refreshUploads = () => {
+      userUploadsCache = null;
     };
   }
 } catch (e) {}
@@ -81,12 +85,14 @@ async function updateGravatar() {
     }
 }
 
-async function ensureUserUploads() {
+async function ensureUserUploads(force = false) {
+    if (userUploadsCache && !force) return userUploadsCache;
     try {
-        const res = await fetch('/api/me/uploads' + (currentTargetField ? `?field=${currentTargetField}` : ''));
+        const res = await fetch('/api/me/uploads');
         if (!res.ok) return [];
         const data = await res.json();
-        return data.uploads || [];
+        userUploadsCache = data.uploads || [];
+        return userUploadsCache;
     } catch (e) {
         return [];
     }
@@ -94,13 +100,23 @@ async function ensureUserUploads() {
 
 async function populateUploadsGrid(filter) {
     if (!uploadsGrid) return;
-    uploadsGrid.innerHTML = '<div class="col-span-full py-12 text-center text-slate-500 flex flex-col items-center justify-center gap-3"><svg class="size-8 animate-spin text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="40"/></svg>Chargement...</div>';
+    
+    // Si on a déjà du cache, on vide la grille (mais on ne montre pas "Chargement")
+    // Si on n'a PAS de cache, on montre des skeletons
+    if (!userUploadsCache) {
+        uploadsGrid.innerHTML = Array(12).fill(0).map(() => `
+            <div class="p-4 rounded-2xl border border-slate-800 bg-slate-950/50 flex flex-col items-center justify-center gap-3 animate-pulse">
+                <div class="size-16 rounded-xl bg-slate-800"></div>
+                <div class="h-3 w-20 rounded bg-slate-800"></div>
+            </div>
+        `).join('');
+    }
     
     const uploads = await ensureUserUploads();
     uploadsGrid.innerHTML = '';
     
     if (!uploads.length) {
-        uploadsGrid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-8">Aucune image importée reçemment.</div>';
+        uploadsGrid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-12 flex flex-col items-center gap-3"><svg class="size-12 text-slate-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg><span>Aucune image importée.</span></div>';
         return;
     }
     
@@ -111,7 +127,7 @@ async function populateUploadsGrid(filter) {
     });
     
     if (!filtered.length && term) {
-        uploadsGrid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-8">Aucun résultat.</div>';
+        uploadsGrid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-12">Aucun résultat pour "' + filter + '".</div>';
         return;
     }
 
@@ -120,18 +136,27 @@ async function populateUploadsGrid(filter) {
         
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'p-3 rounded-xl border border-slate-800 bg-slate-950 hover:bg-slate-800 hover:border-violet-500/50 transition-all flex flex-col items-center justify-center gap-3 group relative';
+        btn.className = 'p-3 rounded-2xl border border-slate-800 bg-slate-950/40 hover:bg-slate-800 hover:border-violet-500/50 hover:shadow-lg hover:shadow-violet-500/5 transition-all flex flex-col items-center justify-center gap-3 group relative';
+        
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'size-20 rounded-xl bg-slate-800/50 animate-pulse shrink-0 flex items-center justify-center overflow-hidden border border-slate-800/50';
         
         const img = document.createElement('img');
         img.src = u.url;
         img.alt = name;
-        img.className = 'h-16 w-16 object-contain rounded-lg bg-slate-900/50';
+        img.loading = 'lazy';
+        img.className = 'h-full w-full object-contain opacity-0 transition-opacity duration-300';
+        img.onload = () => { 
+            img.classList.remove('opacity-0'); 
+            imgContainer.classList.remove('animate-pulse', 'bg-slate-800/50'); 
+        };
+        imgContainer.appendChild(img);
         
         const span = document.createElement('span');
-        span.className = 'text-xs text-slate-400 group-hover:text-white truncate max-w-full block text-center opacity-80 group-hover:opacity-100 transition-opacity px-2';
+        span.className = 'text-[11px] font-medium text-slate-400 group-hover:text-slate-200 truncate max-w-full block text-center transition-colors px-1';
         span.textContent = name;
         
-        btn.append(img, span);
+        btn.append(imgContainer, span);
         btn.onclick = () => {
             if (iconSelectCallback) iconSelectCallback(u.url);
             closeIconModal();
@@ -167,15 +192,24 @@ export function openIconModal(onSelect, targetId) {
     
     if (triggerUploadBtn) {
         triggerUploadBtn.onclick = () => {
-             // Try to find the input relative to targetId
-            if (!targetId) return;
-            const cap = targetId.charAt(0).toUpperCase() + targetId.slice(1);
-            const fileInput = document.getElementById(`upload${cap}`);
+            if (!currentTargetField) return;
+            
+            // Map targetId to file input ID
+            let inputId = `upload${currentTargetField.charAt(0).toUpperCase()}${currentTargetField.slice(1)}`;
+            
+            // Specific overrides
+            if (currentTargetField === 'linkModalIconInput') inputId = 'linkModalIconUpload';
+            if (currentTargetField === 'avatar') inputId = 'avatarInput';
+            
+            const fileInput = document.getElementById(inputId);
             if (fileInput) {
                 fileInput.click();
-                const urlInput = document.getElementById(targetId);
+                
+                // When the corresponding text field is updated, we force refresh the uploads grid
+                const urlInput = document.getElementById(currentTargetField);
                 if (urlInput) {
                     const onUpdate = () => {
+                        userUploadsCache = null; // Invalidate cache
                         const t = document.getElementById('tab-uploads');
                         if (t && !t.classList.contains('hidden')) {
                             populateUploadsGrid(); 
@@ -199,7 +233,17 @@ export function closeIconModal() {
 
 export async function populateIconGrid(filterText) {
   if (!iconGrid) return;
-  iconGrid.innerHTML = '<div class="col-span-full py-12 text-center text-slate-500 flex flex-col items-center justify-center gap-3"><svg class="size-8 animate-spin text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="40"/></svg>Chargement...</div>';
+  
+  // Show skeletons while loading
+  if (!iconCatalog.length) {
+    iconGrid.innerHTML = Array(20).fill(0).map(() => `
+      <div class="p-3 rounded-xl border border-slate-800 bg-slate-950 flex flex-col items-center justify-center gap-3 animate-pulse">
+        <div class="h-10 w-10 rounded-lg bg-slate-800"></div>
+        <div class="h-3 w-16 rounded bg-slate-800"></div>
+      </div>
+    `).join('');
+  }
+
   const catalog = await ensureIconCatalog();
   const term = (filterText || '').toLowerCase();
   iconGrid.innerHTML = '';
@@ -221,14 +265,27 @@ export async function populateIconGrid(filterText) {
       const card = document.createElement('button');
       card.setAttribute('type', 'button');
       card.className = 'p-3 rounded-xl border border-slate-800 bg-slate-950 hover:bg-slate-800 hover:border-violet-500/50 transition-all flex flex-col items-center justify-center gap-3';
+      
+      const isBootstrap = i.slug && i.slug.startsWith('bi-');
+      
+      const imgContainer = document.createElement('div');
+      imgContainer.className = 'h-10 w-10 rounded-lg bg-slate-800 animate-pulse shrink-0 flex items-center justify-center overflow-hidden';
+      
       const img = document.createElement('img');
       img.src = i.url || `https://s3.marvideo.fr/plinkk-image/icons/${i.slug}.svg`;
       img.alt = i.displayName;
-      img.className = 'h-10 w-10 object-contain drop-shadow-sm';
+      img.className = 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + (isBootstrap ? ' filter-white' : '');
+      img.onload = () => { 
+        img.classList.remove('opacity-0'); 
+        imgContainer.classList.remove('animate-pulse', 'bg-slate-800'); 
+      };
+      imgContainer.appendChild(img);
+
       const label = document.createElement('div');
       label.className = 'text-xs text-slate-400 group-hover:text-white text-center truncate max-w-full';
       label.textContent = i.displayName;
-      card.append(img, label);
+      
+      card.append(imgContainer, label);
       card.addEventListener('click', () => {
         if (iconSelectCallback) iconSelectCallback(i.url || i.slug);
         closeIconModal();
@@ -316,11 +373,24 @@ export function renderBtnThemeCard(item, idx) {
   const card = document.createElement('button');
   card.setAttribute('type', 'button');
   card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left flex items-center gap-3';
+  
+  const imgContainer = document.createElement('div');
+  imgContainer.className = 'h-8 w-8 rounded bg-slate-800 animate-pulse shrink-0 flex items-center justify-center overflow-hidden';
+
   const img = document.createElement('img');
   const iconUrl = (item.icon || '') //.replace('{{username}}', `/${window.__PLINKK_USER_ID__}`);
   img.src = iconUrl;
   img.alt = item.name || '';
-  img.className = 'h-8 w-8 object-contain rounded bg-slate-800 border border-slate-700';
+  img.className = 'h-full w-full object-contain opacity-0 transition-opacity duration-300';
+  
+  img.onload = () => {
+    img.classList.remove('opacity-0');
+    imgContainer.classList.remove('animate-pulse');
+  };
+  img.onerror = () => {
+    imgContainer.classList.remove('animate-pulse');
+  };
+
   const col = document.createElement('div');
   const title = document.createElement('div');
   title.className = 'font-medium';
@@ -329,7 +399,8 @@ export function renderBtnThemeCard(item, idx) {
   small.className = 'text-xs text-slate-400';
   small.textContent = item.themeClass || '';
   col.append(title, small);
-  card.append(img, col);
+  imgContainer.appendChild(img);
+  card.append(imgContainer, col);
   card.addEventListener('click', () => { if (pickerOnSelect) pickerOnSelect(idx); closePicker(); });
   return card;
 }
@@ -448,3 +519,4 @@ export function openPlatformEntryModal(platform, cb) {
 export function getPickerContext() {
   return { pickerGrid, openPicker, closePicker };
 }
+

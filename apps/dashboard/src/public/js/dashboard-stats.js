@@ -27,8 +27,20 @@ function downloadBlob(content, filename, type = 'text/csv;charset=utf-8') {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
-function buildBarChart(container, data, { maxBars = 10 } = {}) {
+function buildBarChart(container, data, { maxBars = 10, isLoading = false } = {}) {
   container.innerHTML = '';
+  
+  if (isLoading) {
+    const barsCount = 5;
+    const barH = 28;
+    const gap = 8;
+    const height = barsCount * (barH + gap) + 10;
+    container.innerHTML = `<div class="animate-pulse space-y-2">
+      ${Array(barsCount).fill(0).map(() => `<div class="h-[28px] bg-slate-800 rounded-lg w-full"></div>`).join('')}
+    </div>`;
+    return;
+  }
+
   if (!data.length) {
     container.innerHTML = '<div class="text-xs text-slate-400">Aucune donnée à afficher.</div>';
     return;
@@ -91,8 +103,16 @@ function buildBarChart(container, data, { maxBars = 10 } = {}) {
   container.appendChild(svg);
 }
 
-function drawLineChart(container, series) {
+function drawLineChart(container, series, isLoading = false) {
   container.innerHTML = '';
+
+  if (isLoading) {
+    container.innerHTML = `<div class="animate-pulse w-full h-full bg-slate-800/50 rounded-2xl flex items-center justify-center">
+      <div class="w-full h-full bg-gradient-to-t from-slate-800/80 to-transparent rounded-2xl"></div>
+    </div>`;
+    return;
+  }
+
   if (!series.length) {
     container.innerHTML = '<div class="text-xs text-slate-400">Aucune donnée à afficher.</div>';
     return;
@@ -226,9 +246,25 @@ function applyFilters(allLinks) {
   return { rows: list, top };
 }
 
-function renderTable(rows) {
+function renderTable(rows, isLoading = false) {
   const tbody = qs('#tblBody');
   tbody.innerHTML = '';
+  
+  if (isLoading) {
+    for (let i = 0; i < 5; i++) {
+      const tr = document.createElement('tr');
+      tr.className = 'border-t border-slate-800 animate-pulse';
+      tr.innerHTML = `
+        <td class="px-3 py-4"><div class="h-4 bg-slate-800 rounded w-8"></div></td>
+        <td class="px-3 py-4"><div class="h-4 bg-slate-800 rounded w-32"></div></td>
+        <td class="px-3 py-4"><div class="h-4 bg-slate-800 rounded w-48"></div></td>
+        <td class="px-3 py-4 text-right"><div class="h-4 bg-slate-800 rounded w-12 ml-auto"></div></td>
+      `;
+      tbody.appendChild(tr);
+    }
+    return;
+  }
+
   rows.forEach((r) => {
     const tr = document.createElement('tr');
     tr.className = 'border-t border-slate-800 hover:bg-slate-800/40';
@@ -261,6 +297,10 @@ async function fetchDailyViews(days) {
 async function main() {
   const root = qs('#statsRoot');
   let data = { views: 0, links: [] };
+
+  // Show skeleton table while initializing
+  renderTable(null, true);
+
   if (root) {
     const views = Number(root.getAttribute('data-views') || '0') || 0;
     const linksRaw = root.getAttribute('data-links') || '[]';
@@ -268,24 +308,25 @@ async function main() {
     data.views = views;
   }
   updateKPIs(data);
-  const apply = () => {
+  const apply = (isLoading = false) => {
     const { rows, top } = applyFilters(data.links || []);
-    renderTable(rows);
-    buildBarChart(qs('#chartTop'), rows, { maxBars: top });
+    renderTable(rows, isLoading);
+    buildBarChart(qs('#chartTop'), rows, { maxBars: top, isLoading });
     const catData = aggregateCategories(rows);
-    buildBarChart(qs('#chartCategories'), catData, { maxBars: 8 });
+    buildBarChart(qs('#chartCategories'), catData, { maxBars: 8, isLoading });
     qs('#exportCsv').onclick = () => downloadBlob(makeCSV(rows), 'stats-links.csv');
   };
-  ['#fSearch', '#fMin', '#fTop'].forEach((sel) => qs(sel)?.addEventListener('input', apply));
-  apply();
+  ['#fSearch', '#fMin', '#fTop'].forEach((sel) => qs(sel)?.addEventListener('input', () => apply(false)));
+  apply(true); // Initial call with skeleton if data is not yet fully ready (though it's synchronous here mostly)
 
   const chartContainer = qs('#chartViews');
   const fRange = qs('#fRange');
   async function refreshViews() {
     const days = Number(fRange?.value || '30') || 30;
+    drawLineChart(chartContainer, [], true); // Show skeleton
     try {
-  const { series } = await fetchDailyViews(days);
-  drawLineChart(chartContainer, series);
+      const { series } = await fetchDailyViews(days);
+      drawLineChart(chartContainer, series);
     } catch (e) {
 
       const preloadRaw = root?.getAttribute('data-views-daily') || '[]';

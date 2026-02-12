@@ -71,6 +71,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         console.error("Element with id 'profile-article' not found.");
         return;
     }
+
+    // Clear skeleton loading if present
+    const skeleton = document.getElementById('skeleton-loading');
+    if (skeleton) skeleton.remove();
+
     // Rendu des sections selon l'ordre choisi (layoutOrder) si présent
     try {
         const DEFAULT_LAYOUT = ['profile','username','statusbar','labels','social','email','links'];

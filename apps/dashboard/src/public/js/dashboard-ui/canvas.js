@@ -13,7 +13,10 @@ function loadScript(src) {
 
 async function renderCanvasInto(container, item) {
   if (!container || !item) return;
-  container.innerHTML = '';
+  
+  // Show skeleton while loading scripts
+  container.innerHTML = '<div class="absolute inset-0 bg-slate-900 animate-pulse flex items-center justify-center"><div class="text-slate-500 text-xs font-medium">Chargement du canvas...</div></div>';
+  
   container.style.position = 'relative';
   container.style.background = '#0b1220';
   container.style.overflow = 'hidden';
@@ -22,13 +25,12 @@ async function renderCanvasInto(container, item) {
   canvas.style.inset = '0';
   canvas.style.width = '100%';
   canvas.style.height = '100%';
-  container.appendChild(canvas);
+  
   const ctx = canvas.getContext('2d');
   function resize() {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
   }
-  const ro = new ResizeObserver(resize); ro.observe(canvas); resize();
 
   try {
     const ext = item?.extension;
@@ -42,12 +44,19 @@ async function renderCanvasInto(container, item) {
       await loadScript('/public/canvaAnimation/matrix-effect/symbol.js');
     }
     await loadScript(`/public/canvaAnimation/${item?.fileNames}`);
+    
+    // Clear skeleton and add canvas
+    container.innerHTML = '';
+    container.appendChild(canvas);
+    const ro = new ResizeObserver(resize); ro.observe(canvas); resize();
+
     if (typeof window.runCanvasAnimation === 'function') {
       window.runCanvasAnimation(ctx, canvas);
     } else {
       console.error('runCanvasAnimation not found');
     }
   } catch (err) {
+    container.innerHTML = '<div class="absolute inset-0 flex items-center justify-center text-red-500 text-xs">Erreur de chargement</div>';
     console.error('Inline canvas preview error', err);
   }
 }
