@@ -13,8 +13,8 @@ export function adminPlinkksRoutes(fastify: FastifyInstance) {
         if (!ok) return;
 
         const { id } = request.params as { id: string };
-        const data = request.body as any;
-        const payload: any = {};
+        const data = request.body as { slug?: string; isPublic?: boolean; isDefault?: boolean };
+        const payload: typeof data = {};
 
         if (data.slug !== undefined) payload.slug = data.slug;
         if (data.isPublic !== undefined) payload.isPublic = data.isPublic;

@@ -766,6 +766,25 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     }
   })();
 
+  document.querySelectorAll('.picker-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.pickerFor;
+      if (!targetId) return;
+      const targetInput = document.getElementById(targetId);
+      if (!targetInput) return;
+      
+      openIconModal((val) => {
+          const replaced = (val.startsWith('http://') || val.startsWith('https://')) 
+            ? val 
+            : `https://s3.marvideo.fr/plinkk-image/icons/${val}.svg`;
+            
+          targetInput.value = replaced;
+          targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+          scheduleAutoSave();
+      });
+    });
+  });
+
   setStatus('Chargement...');
   fetchConfig().then((cfg) => { fillForm(cfg); setStatus('Prêt — sauvegarde auto activée', 'success'); }).catch((e) => { setStatus('Impossible de charger: ' + (e?.message || ''), 'error'); });
 })();

@@ -158,8 +158,8 @@ export function loginRoutes(fastify: FastifyInstance) {
     if (!target) return reply.code(404).send({ error: "Target not found" });
 
     // Store original admin ID in session to allow "returning" if needed
-    (request.session as any).set("original_admin", meId);
-    
+    request.session.set("original_admin", meId);
+
     // Switch session to target user
     await createUserSession(target.id, request);
     return reply.send({ success: true });

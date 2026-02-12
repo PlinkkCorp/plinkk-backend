@@ -1,54 +1,113 @@
-<div id="iconModal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black/60 animate-fade-in"></div>
-    <div class="relative mx-auto mt-16 w-[92vw] max-w-3xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in">
-        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800">
-            <h3 class="font-semibold">Choisir une icône</h3>
-            <button id="iconModalClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
+<div id="iconModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+    <div id="iconModalOverlay" class="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in transition-opacity"></div>
+    <div class="relative mx-auto mt-20 w-[92vw] max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl animate-pop-in flex flex-col max-h-[85vh]">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800 flex-shrink-0">
+            <h3 class="text-lg font-semibold text-white">Sélectionner une image</h3>
+            <button id="iconModalClose" type="button" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
         </div>
-        <div class="p-4 space-y-3">
-            <input id="iconSearch" type="text" placeholder="Rechercher..." class="w-full px-3 py-2 rounded bg-slate-800 border border-slate-700" />
-            <% function __imgUrl(u){ if(!u) return null; try { if (/^https?:\/\//i.test(u) || String(u).startsWith('/')) return u; return '/public/uploads/' + u; } catch(e){ return u; } } %>
-            <div id="userUploadsSection" class="space-y-2">
-                <div class="text-sm text-slate-300">Mes importations</div>
-                <% 
-                    const __groups = {};
-                    if (typeof user !== 'undefined' && user && user.image) {
-                        (__groups['Profil'] = __groups['Profil'] || []).push(user.image);
-                    }
-                    if (typeof pages !== 'undefined' && Array.isArray(pages)) {
-                        pages.forEach(p => {
-                            if (p && p.pfp) {
-                                const g = 'Plinkks';
-                                (__groups[g] = __groups[g] || []).push(p.pfp);
-                            }
-                        });
-                    }
-                    // categorize by path fragments if present
-                    const otherUploads = [];
-                    // convert to array of groups
-                    const __groupKeys = Object.keys(__groups);
-                %>
-                <div id="userUploadsGrid" class="space-y-3 max-h-36 overflow-auto">
-                    <% if (__groupKeys.length === 0) { %>
-                        <div class="text-xs text-slate-500">Aucun fichier importé.</div>
-                    <% } %>
-                    <% __groupKeys.forEach(function(k){ %>
-                        <div class="space-y-1">
-                            <div class="text-xs font-medium text-slate-300"><%= k %></div>
-                            <div class="grid grid-cols-4 gap-3">
-                                <% (__groups[k] || []).forEach(function(u){ const __u = __imgUrl(u); if (!__u) return; const fileName = String(u).split('/').pop(); %>
-                                    <button type="button" class="p-2 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 flex flex-col items-center justify-center" onclick="(window.__DASH_PICKERS__ && window.__DASH_PICKERS__.iconSelect) ? window.__DASH_PICKERS__.iconSelect(<%= JSON.stringify(__u) %>) : null">
-                                        <img src="<%= __u %>" class="h-10 w-10 object-contain" alt="upload" />
-                                        <span class="text-xs text-slate-300 mt-2 block truncate max-w-[80px]"><%= fileName %></span>
-                                    </button>
-                                <% }) %>
-                            </div>
-                        </div>
-                    <% }) %>
-                </div>
+
+        <!-- Content with Sidebar/Tabs -->
+        <div class="flex flex-1 overflow-hidden">
+            <!-- Sidebar -->
+            <div class="w-48 bg-slate-950/50 border-r border-slate-800 p-3 space-y-1 flex-shrink-0 flex flex-col">
+                <button type="button" data-tab="library" class="icon-tab-btn active w-full px-3 py-2.5 rounded-lg text-left text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors flex items-center gap-3">
+                    <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    Bibliothèque
+                </button>
+                <button type="button" data-tab="uploads" class="icon-tab-btn w-full px-3 py-2.5 rounded-lg text-left text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors flex items-center gap-3">
+                    <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Mes images
+                </button>
+                <button type="button" data-tab="gravatar" class="icon-tab-btn w-full px-3 py-2.5 rounded-lg text-left text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors flex items-center gap-3">
+                    <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M16 12v1a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/></svg>
+                    Gravatar
+                </button>
             </div>
-            <div class="text-sm text-slate-300">Bibliothèque d'icônes</div>
-            <div id="iconGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-auto"></div>
+
+            <!-- Main Area -->
+            <div class="flex-1 flex flex-col min-h-0 bg-slate-900 relative">
+                
+                <!-- Library Tab -->
+                <div id="tab-library" class="tab-content flex flex-col h-full bg-slate-900">
+                    <div class="p-4 border-b border-slate-800 shrink-0">
+                        <div class="relative">
+                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input id="iconSearch" type="text" placeholder="Rechercher une icône..." class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none transition-colors shadow-inner" />
+                        </div>
+                    </div>
+                    <div id="iconGrid" class="flex-1 overflow-y-auto p-5 grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-4 content-start">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Uploads Tab -->
+                <div id="tab-uploads" class="tab-content hidden flex flex-col h-full bg-slate-900">
+                    <div class="p-4 border-b border-slate-800 flex items-center gap-3 shrink-0 bg-slate-900/50">
+                        <div class="relative flex-1">
+                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input id="uploadSearch" type="text" placeholder="Rechercher..." class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none transition-colors shadow-inner" />
+                        </div>
+                        <button id="triggerUploadBtn" class="px-4 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-sm font-medium transition-colors flex items-center gap-2 shadow-lg shadow-violet-900/20">
+                            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Importer
+                        </button>
+                    </div>
+                    <div id="uploadsGrid" class="flex-1 overflow-y-auto p-5 grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-4 content-start">
+                        <div class="col-span-full py-12 text-center text-slate-500 flex flex-col items-center justify-center gap-3">
+                             <svg class="size-8 animate-spin text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="40"/></svg>
+                             Chargement de vos images...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gravatar Tab -->
+                <div id="tab-gravatar" class="tab-content hidden flex flex-col h-full p-8 items-center justify-center text-center bg-slate-900">
+                    <div id="gravatarPreview" class="size-32 rounded-full bg-slate-800 border-4 border-slate-700 overflow-hidden mb-6 shadow-xl relative group">
+                        <!-- IMG -->
+                        <div class="absolute inset-0 flex items-center justify-center bg-slate-900/10 text-slate-500 text-xs">?</div>
+                    </div>
+                    <h4 class="text-xl font-semibold text-white mb-2">Votre Gravatar</h4>
+                    <p class="text-sm text-slate-400 max-w-sm mb-8 leading-relaxed">
+                        Généré automatiquement à partir de votre adresse email <br>
+                        (<code id="gravatarEmail" class="text-violet-400 select-all">@</code>)
+                    </p>
+                    <button id="useGravatarBtn" class="px-8 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-all hover:scale-105 shadow-xl shadow-violet-900/20 active:scale-95">
+                        Utiliser cette image
+                    </button>
+                    <a href="https://gravatar.com/" target="_blank" class="mt-8 text-xs text-slate-500 hover:text-slate-400 hover:underline flex items-center gap-1">
+                        Gérer mon Gravatar sur Gravatar.com <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+                    </a>
+                </div>
+
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+/* Custom Scrollbar for Grids */
+#iconGrid::-webkit-scrollbar, #uploadsGrid::-webkit-scrollbar {
+    width: 6px;
+}
+#iconGrid::-webkit-scrollbar-track, #uploadsGrid::-webkit-scrollbar-track {
+    background: transparent;
+}
+#iconGrid::-webkit-scrollbar-thumb, #uploadsGrid::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
+}
+#iconGrid::-webkit-scrollbar-thumb:hover, #uploadsGrid::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.icon-tab-btn.active {
+    background-color: rgba(30, 41, 59, 0.5);
+    color: white;
+    box-shadow: inset 3px 0 0 0 #7c3aed;
+    border-radius: 4px 8px 8px 4px;
+}
+</style>

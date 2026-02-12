@@ -35,7 +35,8 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
     const body = request.body as { 
       premium?: boolean; 
       extraPlinkks?: number; 
-      extraRedirects?: number 
+      extraRedirects?: number;
+      plan?: 'monthly' | 'yearly' | 'lifetime';
     };
 
     const dashboardUrl = process.env.DASHBOARD_URL || "http://127.0.0.1:3001";
@@ -47,6 +48,7 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
           premium: body.premium || false,
           extraPlinkks: Math.max(0, body.extraPlinkks || 0),
           extraRedirects: Math.max(0, body.extraRedirects || 0),
+          plan: body.plan,
         },
         dashboardUrl
       );
@@ -210,8 +212,7 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
 
         if (user && subscription.status === 'active') {
           // current_period_end is a Unix timestamp in seconds
-          const subscriptionData = subscription as any;
-          const currentPeriodEnd = new Date(subscriptionData.current_period_end * 1000);
+          const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
           await prisma.user.update({
             where: { id: user.id },
             data: {

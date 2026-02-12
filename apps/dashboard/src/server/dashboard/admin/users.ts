@@ -98,7 +98,7 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
     const roles = await prisma.role.findMany({ orderBy: { priority: 'desc' } });
 
     // API / Modal Response (JSON)
-    const isModal = (request.query as any).modal === 'true';
+    const isModal = (request.query as { modal?: string }).modal === 'true';
     
     if (isModal || request.headers.accept?.includes('application/json')) {
         return reply.send({

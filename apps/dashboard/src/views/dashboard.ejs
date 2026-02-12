@@ -35,7 +35,8 @@
                             </div>
                         </div>
                         <p class="text-slate-400 text-sm font-medium">Vues totales</p>
-                        <h3 class="text-3xl font-bold text-white mt-1"><%= new Intl.NumberFormat('fr-FR').format((typeof stats !== 'undefined' && stats.views) ? stats.views : 0) %></h3>
+                        <div id="stat-views-skeleton" class="h-9 w-24 bg-slate-800 rounded-lg animate-pulse mt-1"></div>
+                        <h3 id="stat-views-value" class="text-3xl font-bold text-white mt-1 hidden"></h3>
                     </div>
                     <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
                         <div class="flex items-center justify-between mb-4">
@@ -44,7 +45,8 @@
                             </div>
                         </div>
                         <p class="text-slate-400 text-sm font-medium">Clics totaux</p>
-                        <h3 class="text-3xl font-bold text-white mt-1"><%= new Intl.NumberFormat('fr-FR').format((typeof stats !== 'undefined' && stats.clicks) ? stats.clicks : 0) %></h3>
+                        <div id="stat-clicks-skeleton" class="h-9 w-24 bg-slate-800 rounded-lg animate-pulse mt-1"></div>
+                        <h3 id="stat-clicks-value" class="text-3xl font-bold text-white mt-1 hidden"></h3>
                     </div>
                     <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
                         <div class="flex items-center justify-between mb-4">
@@ -53,7 +55,8 @@
                             </div>
                         </div>
                         <p class="text-slate-400 text-sm font-medium">Taux de clic (CTR)</p>
-                        <h3 class="text-3xl font-bold text-white mt-1"><%= (typeof stats !== 'undefined' && stats.ctr) ? stats.ctr : '0%' %></h3>
+                        <div id="stat-ctr-skeleton" class="h-9 w-24 bg-slate-800 rounded-lg animate-pulse mt-1"></div>
+                        <h3 id="stat-ctr-value" class="text-3xl font-bold text-white mt-1 hidden"></h3>
                     </div>
                 </div>
                 <div>
@@ -101,36 +104,29 @@
                                     <th class="px-6 py-4 text-right">Statut</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-800 text-sm">
-                                <% if (typeof links !== 'undefined' && links.length > 0) { %>
-                                    <% links.slice(0, 5).forEach(link => { %>
-
-                                    <!--<script>console.log(<%- JSON.stringify(link) %>);</script>-->
-
-                                    <tr class="hover:bg-slate-800/30 transition-colors">
-                                        <td class="px-6 py-4 font-medium text-slate-200"><%= link.text || 'Sans titre' %></td>
-                                        <td class="px-6 py-4 text-slate-400 truncate max-w-[200px]"><%= link.url %></td>
-                                        <td class="px-6 py-4 text-right text-slate-300"><%= link.clicks || 0 %></td>
-                                        <td class="px-6 py-4 text-right">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400">Actif</span>
-                                        </td>
-                                    </tr>
-                                    
-                                    <% }) %>
-                                <% } else { %>
-                                    <tr>
-                                        <td colspan="4" class="px-6 py-12 text-center text-slate-500">
-                                            <div class="flex flex-col items-center justify-center">
-                                                <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-3 text-slate-600">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                                                </div>
-                                                <p>Aucun lien pour le moment.</p>
-                                                <a href="/edit#add-link" class="mt-2 text-violet-400 hover:underline">Ajouter votre premier lien</a>
-                                            </div>
-                                        </td>
-                                    </tr>
+                            <tbody id="links-tbody" class="divide-y divide-slate-800 text-sm">
+                                <% for(let i=0; i<3; i++) { %>
+                                <tr class="animate-pulse">
+                                    <td class="px-6 py-4"><div class="h-5 w-32 bg-slate-800 rounded"></div></td>
+                                    <td class="px-6 py-4"><div class="h-5 w-48 bg-slate-800/50 rounded"></div></td>
+                                    <td class="px-6 py-4"><div class="h-5 w-12 bg-slate-800 rounded ml-auto"></div></td>
+                                    <td class="px-6 py-4 text-right"><span class="inline-block h-5 w-16 bg-emerald-900/20 rounded"></span></td>
+                                </tr>
                                 <% } %>
                             </tbody>
+                            <template id="links-empty-template">
+                                <tr>
+                                    <td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-3 text-slate-600">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                                            </div>
+                                            <p>Aucun lien pour le moment.</p>
+                                            <a href="/edit#add-link" class="mt-2 text-violet-400 hover:underline">Ajouter votre premier lien</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
                         </table>
                     </div>
                 </div>
@@ -168,5 +164,60 @@
                 </div>
             </div>
         </div>
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const res = await fetch('/api/me/dashboard-summary');
+            if (!res.ok) throw new Error('Failed to fetch dashboard stats');
+            const data = await res.json();
+
+            // Helpers
+            const updateStat = (id, val) => {
+                const skel = document.getElementById(id + '-skeleton');
+                const el = document.getElementById(id + '-value');
+                if (skel && el) {
+                    skel.classList.add('hidden');
+                    el.classList.remove('hidden');
+                    el.textContent = val;
+                }
+            };
+            const escapeHtml = (unsafe) => {
+                return (unsafe || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            }
+
+            // Stats
+            const fmt = new Intl.NumberFormat('fr-FR');
+            updateStat('stat-views', fmt.format(data.stats.views));
+            updateStat('stat-clicks', fmt.format(data.stats.clicks));
+            updateStat('stat-ctr', data.stats.ctr);
+
+            // Links Table
+            const tbody = document.getElementById('links-tbody');
+            const template = document.getElementById('links-empty-template');
+            
+            if (tbody) {
+                if (!data.links || data.links.length === 0) {
+                    if (template) {
+                        tbody.innerHTML = template.innerHTML;
+                    }
+                } else {
+                    tbody.innerHTML = data.links.slice(0, 5).map(link => `
+                        <tr class="hover:bg-slate-800/30 transition-colors">
+                            <td class="px-6 py-4 font-medium text-slate-200">${escapeHtml(link.text || 'Sans titre')}</td>
+                            <td class="px-6 py-4 text-slate-400 truncate max-w-[200px]">${escapeHtml(link.url)}</td>
+                            <td class="px-6 py-4 text-right text-slate-300">${link.clicks || 0}</td>
+                            <td class="px-6 py-4 text-right">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400">Actif</span>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            }
+
+        } catch (e) {
+            console.error('Dashboard stats error:', e);
+        }
+    });
+</script>
     </main>
 </div>

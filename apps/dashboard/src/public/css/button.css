@@ -14,8 +14,8 @@
     text-decoration: none;
     position: relative;
     transition: 0.3s;
-      
-  }
+    z-index: 1;
+}
 
 .button a {
     display: block;
@@ -36,6 +36,7 @@
   .button:hover {
       filter:brightness(90%);
       transform:scale(1.05);
+      z-index: 10;
   }         
 
   /* Button Icons

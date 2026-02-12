@@ -9,6 +9,7 @@ import {
   formatPagesForView,
 } from "../../services/plinkkService";
 import { getUserLimits } from "@plinkk/shared";
+import crypto from "crypto";
 
 export function dashboardEditRoutes(fastify: FastifyInstance) {
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
@@ -26,6 +27,12 @@ export function dashboardEditRoutes(fastify: FastifyInstance) {
     ]);
     const maxLinks = getUserLimits(userInfo).maxLinks;
 
+    const emailHash = crypto
+      .createHash("md5")
+      .update((userInfo.email || "").trim().toLowerCase())
+      .digest("hex");
+    const gravatarUrl = `https://www.gravatar.com/avatar/${emailHash}?d=404`;
+
     return replyView(reply, "dashboard/user/edit.ejs", userInfo, {
       plinkk: selectedForView,
       pages: formatPagesForView(pages),
@@ -33,6 +40,7 @@ export function dashboardEditRoutes(fastify: FastifyInstance) {
       publicPath: request.publicPath,
       linksCount,
       maxLinks,
+      gravatarUrl,
     });
   });
 }

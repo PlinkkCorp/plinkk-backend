@@ -20,6 +20,8 @@ import { UnauthorizedError, ForbiddenError, BadRequestError, ConflictError } fro
 
 // const prisma = new PrismaClient();
 
+let bootstrapIconsCache: { slug: string; displayName: string; url: string }[] | null = null;
+
 export function apiRoutes(fastify: FastifyInstance) {
   fastify.register(apiMeRoutes, { prefix: "/me" });
   fastify.register(apiThemeRoutes, { prefix: "/themes" });
@@ -122,20 +124,45 @@ export function apiRoutes(fastify: FastifyInstance) {
 
   fastify.get("/icons", async (request, reply) => {
     const iconsDir = path.join(__dirname, "..", "public", "images", "icons");
-    if (!existsSync(iconsDir)) return reply.send([]);
-    const entries = readdirSync(iconsDir, { withFileTypes: true });
     const toTitle = (s: string) =>
       s
         .replace(/[-_]+/g, " ")
         .replace(/\s+/g, " ")
         .trim()
         .replace(/\b(\w)/g, (_, c: string) => c.toUpperCase());
-    const list = entries
-      .filter((e) => e.isFile() && e.name.toLowerCase().endsWith(".svg"))
-      .map((e) => {
-        const slug = e.name.replace(/\.svg$/i, "");
-        return { slug, displayName: toTitle(slug) };
-      });
-    return reply.send(list);
+
+    let list: { slug: string; displayName: string; url?: string }[] = [];
+    if (existsSync(iconsDir)) {
+      const entries = readdirSync(iconsDir, { withFileTypes: true });
+      list = entries
+        .filter((e) => e.isFile() && e.name.toLowerCase().endsWith(".svg"))
+        .map((e) => {
+          const slug = e.name.replace(/\.svg$/i, "");
+          return { slug, displayName: toTitle(slug) };
+        });
+    }
+
+    if (!bootstrapIconsCache) {
+      try {
+        const res = await fetch(
+          "https://raw.githubusercontent.com/twbs/icons/main/font/bootstrap-icons.json"
+        );
+        if (res.ok) {
+          const data = (await res.json()) as Record<string, number>;
+          bootstrapIconsCache = Object.keys(data).map((slug) => ({
+            slug: `bi-${slug}`,
+            displayName: toTitle(slug),
+            url: `https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/${slug}.svg`,
+            }));
+        }
+      } catch (e) {
+        console.error("Failed to fetch bootstrap icons", e);
+      }
+    }
+
+    const combined = [...list, ...(bootstrapIconsCache || [])];
+    combined.sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+    return reply.send(combined);
   });
 }

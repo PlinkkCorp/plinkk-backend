@@ -304,9 +304,13 @@
     }
     const mBtn = document.getElementById('menuBtn');
     const mMenu = document.getElementById('mobileMenu');
-    if (mBtn && mMenu) {
-      mBtn.addEventListener('click', (e)=>{ e.stopPropagation(); mMenu.classList.toggle('hidden'); });
-      document.addEventListener('click', (e)=>{ if (!mMenu.contains(e.target) && e.target !== mBtn) mMenu.classList.add('hidden'); });
+    if (mBtn && mMenu && mBtn.dataset.bound !== '1') {
+      mBtn.dataset.bound = '1';
+      const open = () => { mMenu.classList.remove('hidden'); mBtn.setAttribute('aria-expanded','true'); };
+      const close = () => { mMenu.classList.add('hidden'); mBtn.setAttribute('aria-expanded','false'); };
+      mBtn.addEventListener('click', (e)=>{ e.stopPropagation(); if (mMenu.classList.contains('hidden')) open(); else close(); });
+      document.addEventListener('click', (e)=>{ if (!mMenu.contains(e.target) && e.target !== mBtn) close(); });
+      document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') close(); });
     }
     try {
       /* ── Dismiss logic for all message types (banner, notification, popup) ── */

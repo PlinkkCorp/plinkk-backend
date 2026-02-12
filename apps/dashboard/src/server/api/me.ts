@@ -10,6 +10,7 @@ import { apiMePlinkksRoutes } from "./me/plinkks/index";
 import { apiMeRedirectsRoutes } from "./me/redirects";
 import crypto from "crypto";
 import { Upload } from "@aws-sdk/lib-storage";
+import { ListObjectsV2Command, ListObjectsV2CommandOutput, S3Client } from "@aws-sdk/client-s3";
 import { getS3Client } from "../../lib/fileUtils";
 import sharp from "sharp"
 import { canUseGifBanner, getUserLimits, canUseVisualEffects, UnauthorizedError, BadRequestError, ConflictError, NotFoundError } from "@plinkk/shared";
@@ -25,6 +26,48 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.register(apiMeThemesRoutes, { prefix: "/themes" });
   fastify.register(apiMePlinkksRoutes, { prefix: "/plinkks" });
   fastify.register(apiMeRedirectsRoutes, { prefix: "/redirects" });
+
+  fastify.get("/dashboard-summary", async (request, reply) => {
+    const userId = request.session.get("data");
+    const id = typeof userId === "string" ? userId : (userId)?.id;
+    if (!id) throw new UnauthorizedError();
+
+    const [linksCount, socialsCount, labelsCount, recentLinks, userViews, totalClicks] =
+      await Promise.all([
+        prisma.link.count({ where: { userId: id } }),
+        prisma.socialIcon.count({ where: { userId: id } }),
+        prisma.label.count({ where: { userId: id } }),
+        prisma.link.findMany({
+          where: { userId: id },
+          orderBy: { id: "desc" },
+          take: 10,
+        }),
+        prisma.plinkk.aggregate({
+          where: { userId: id },
+          _sum: { views: true },
+        }),
+        prisma.link.aggregate({
+          where: { userId: id },
+          _sum: { clicks: true },
+        }),
+      ]);
+
+    const views = userViews._sum.views || 0;
+    const clicks = totalClicks._sum.clicks || 0;
+    const ctr = views > 0 ? ((clicks / views) * 100).toFixed(1) + "%" : "0%";
+
+    return {
+      stats: {
+        links: linksCount,
+        socials: socialsCount,
+        labels: labelsCount,
+        views,
+        clicks,
+        ctr,
+      },
+      links: recentLinks,
+    };
+  });
 
   fastify.post("/apikey", async (request, reply) => {
     const userId = request.session.get("data");
@@ -544,6 +587,53 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     });
 
     return reply.send({ ok: true, file: dedupName, url: up.Location });
+  });
+
+  // ─── List user uploads ───
+  fastify.get("/uploads", async (request, reply) => {
+    const userId = request.session.get("data");
+    // Ensure userId is a string. If it was an object in legacy sessions, we ignore/handle it safely.
+    // Assuming new session is string based on login.ts
+    const id = typeof userId === "string" ? userId : undefined;
+    
+    if (!id) return reply.code(401).send({ error: "Unauthorized" });
+
+    const client = getS3Client();
+    const Bucket = "plinkk-image";
+    // Check known locations for this user
+    const prefixes = [
+      `uploads/profileImage/${id}-`,
+      `uploads/profileIcon/${id}-`,
+      `uploads/iconUrl/${id}-`,
+      `uploads/bannerUrl/${id}-`,
+      `profiles/${id}.webp`
+    ];
+
+    const promises = prefixes.map(async (prefix) => {
+      try {
+        const command = new ListObjectsV2Command({ Bucket, Prefix: prefix });
+        const response: ListObjectsV2CommandOutput = await client.send(command);
+        return response.Contents || [];
+      } catch (e) {
+        return [];
+      }
+    });
+
+    const results = await Promise.all(promises);
+    const allFiles = results.flat();
+    
+    const uniqueFiles = Array.from(new Map(allFiles.map((item) => [item.Key, item])).values());
+    
+    const uploads = uniqueFiles.map((o) => ({
+      url: `https://s3.marvideo.fr/plinkk-image/${o.Key}`,
+      key: o.Key,
+      name: o.Key?.split('/').pop(),
+      lastModified: o.LastModified
+    }));
+
+    uploads.sort((a,b) => (b.lastModified?.getTime() || 0) - (a.lastModified?.getTime() || 0));
+
+    return { uploads };
   });
 
   // ─── Generic image upload (profileImage, profileIcon, iconUrl, etc.) ───

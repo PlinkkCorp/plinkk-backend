@@ -491,7 +491,9 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
     if (pickBtn && !pickBtn._bound) {
       pickBtn.addEventListener('click', () => {
         openIconModal((slug) => {
-          const replaced = `https://s3.marvideo.fr/plinkk-image/icons/${slug}.svg`;
+          const replaced = (slug.startsWith('http://') || slug.startsWith('https://')) 
+            ? slug 
+            : `https://s3.marvideo.fr/plinkk-image/icons/${slug}.svg`;
           if (iconInput) iconInput.value = replaced;
         });
       });

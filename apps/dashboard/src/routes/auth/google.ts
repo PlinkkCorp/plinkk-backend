@@ -10,6 +10,7 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 		aud?: string;
 		email?: string;
 		name?: string;
+        picture?: string;
 		[key: string]: unknown;
 	}
 	fastify.get("/auth/google", async (request, reply) => {
@@ -41,6 +42,7 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 
 			const email = payload.email as string | undefined;
 			const name = (payload.name as string) || (payload.email as string) || "user";
+            const picture = payload.picture as string | undefined;
 			const googleId = payload.sub as string | undefined;
 
 			if (!email || !googleId) {
@@ -93,10 +95,17 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
                 // If the connection is not marked as identity but should be (migration), update it?
                 // For now, assume Google is always identity.
 				user = await prisma.user.findUnique({ where: { id: connection.userId }, include: { role: true } });
+                if (user && !user.image && picture) {
+                    await prisma.user.update({ where: { id: user.id }, data: { image: picture } });
+                    user.image = picture;
+                }
 			} else {
 				user = await prisma.user.findFirst({ where: { email }, include: { role: true } });
 
 				if (user) {
+                    if (!user.image && picture) {
+                        await prisma.user.update({ where: { id: user.id }, data: { image: picture } });
+                    }
 					await prisma.connection.create({
 						data: {
 							provider: 'google',
@@ -115,6 +124,7 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 							userName: name,
 							name: name,
 							email: email,
+                            image: picture || undefined,
 							password: idToken,
                             hasPassword: false, // User created via Google has no real password
 							role: {

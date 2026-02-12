@@ -20,6 +20,12 @@ export const PRODUCTS = {
     unitAmount: 499, // 4.99€
     type: "subscription" as const,
   },
+  premium_lifetime: {
+    name: "Plinkk Premium (À vie)",
+    description: "Accès Premium à vie, paiement unique.",
+    unitAmount: 7500, // 75.00€
+    type: "payment" as const,
+  },
   extra_plinkk: {
     name: "+1 Page Plinkk supplémentaire",
     description: "Ajoutez une page Plinkk supplémentaire à votre compte.",
@@ -79,12 +85,26 @@ export async function getOrCreateStripeCustomer(userId: string): Promise<string>
  */
 export async function syncSubscription(
   userId: string,
-  config: { premium: boolean; extraPlinkks: number; extraRedirects: number },
+  config: { premium: boolean; extraPlinkks: number; extraRedirects: number; plan?: 'monthly' | 'yearly' | 'lifetime' },
   dashboardUrl: string
 ): Promise<{ url?: string; updated?: boolean; message?: string }> {
   if (!stripe) throw new Error("Stripe non configuré");
 
   const customerId = await getOrCreateStripeCustomer(userId);
+
+  const plan = config.plan || 'monthly';
+
+  if (config.premium && plan === 'lifetime') {
+    const activeSubs = await stripe.subscriptions.list({ customer: customerId, status: "active" });
+    for (const s of activeSubs.data) {
+        try { await stripe.subscriptions.cancel(s.id); } catch(e) {}
+    }
+    const session = await createCheckoutSession(userId, 'premium_lifetime', 1, 
+        `${dashboardUrl}/premium?payment=success`, 
+        `${dashboardUrl}/premium?payment=cancel`
+    );
+    return { url: session.url as string };
+  }
 
   // 1. Chercher un abonnement actif
   const subs = await stripe.subscriptions.list({
@@ -103,11 +123,14 @@ export async function syncSubscription(
   }
 
   // Définition des produits (Metadonnées pour identification fiable)
+  const premiumPrice = plan === 'yearly' ? 4990 : PRODUCTS.premium_subscription.unitAmount;
+  const premiumInterval = plan === 'yearly' ? 'year' : 'month';
+
   const PREMIUM_PRICE_DATA = {
     currency: "eur",
-    product_data: { name: PRODUCTS.premium_subscription.name, metadata: { type: "premium_subscription" } },
-    unit_amount: PRODUCTS.premium_subscription.unitAmount,
-    recurring: { interval: "month" as const },
+    product_data: { name: `Plinkk Premium (${plan === 'yearly' ? 'Annuel' : 'Mensuel'})`, metadata: { type: "premium_subscription" } },
+    unit_amount: premiumPrice,
+    recurring: { interval: premiumInterval as 'month' | 'year' },
   };
 
   const PLINKK_PRICE_DATA = {
@@ -166,8 +189,16 @@ export async function syncSubscription(
 
   // Gestion Premium
   const premiumItem = findItem("premium_subscription");
-  if (config.premium && !premiumItem) {
-    itemsToUpdate.push({ price_data: PREMIUM_PRICE_DATA, quantity: 1 });
+  const currentInterval = premiumItem?.price?.recurring?.interval;
+  const desiredInterval = premiumInterval;
+
+  if (config.premium) {
+    if (!premiumItem) {
+        itemsToUpdate.push({ price_data: PREMIUM_PRICE_DATA, quantity: 1 });
+    } else if (currentInterval && currentInterval !== desiredInterval) {
+        itemsToUpdate.push({ id: premiumItem.id, deleted: true });
+        itemsToUpdate.push({ price_data: PREMIUM_PRICE_DATA, quantity: 1 });
+    }
   } else if (!config.premium && premiumItem) {
     itemsToUpdate.push({ id: premiumItem.id, deleted: true });
   }
@@ -317,6 +348,16 @@ export async function handleSuccessfulPayment(session: Stripe.Checkout.Session):
       data: { extraRedirects: { increment: 5 * quantity } },
     });
     console.log(`[Stripe] +${5 * quantity} redirections pour l'utilisateur ${userId}`);
+  } else if (productType === "premium_lifetime") {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        isPremium: true,
+        premiumUntil: new Date("2099-12-31T23:59:59Z"),
+        premiumSource: "LIFETIME",
+      },
+    });
+    console.log(`[Stripe] Premium Lifetime activé pour l'utilisateur ${userId}`);
   } else if (productType === "premium_subscription") {
     // Activer le premium
     // Note: Pour une gestion robuste, écouter aussi 'customer.subscription.updated' / 'deleted'
