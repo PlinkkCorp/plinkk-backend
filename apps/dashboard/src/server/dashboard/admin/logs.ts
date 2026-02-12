@@ -53,16 +53,38 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
     ]);
 
     const adminIds = [...new Set(logs.map((l) => l.adminId))];
-    const admins = await prisma.user.findMany({
-      where: { id: { in: adminIds } },
-      select: { id: true, userName: true },
-    });
-    const adminMap = new Map(admins.map((a) => [a.id, a.userName]));
+    const targetIds = [...new Set(logs.filter(l => l.targetId).map(l => l.targetId!))];
 
-    const enriched = logs.map((l) => ({
-      ...l,
-      adminName: adminMap.get(l.adminId) || l.adminId,
-    }));
+    const [admins, targetUsers] = await Promise.all([
+      prisma.user.findMany({
+        where: { id: { in: adminIds } },
+        select: { id: true, userName: true, image: true },
+      }),
+      prisma.user.findMany({
+        where: { id: { in: targetIds } },
+        select: { id: true, userName: true, email: true, image: true }
+      })
+    ]);
+
+    const adminMap = new Map(admins.map((a) => [a.id, a]));
+    const targetMap = new Map(targetUsers.map((u) => [u.id, u]));
+
+    const enriched = logs.map((l) => {
+      const admin = adminMap.get(l.adminId);
+      const targetUser = targetMap.get(l.targetId!);
+      
+      return {
+        ...l,
+        adminName: admin?.userName || l.adminId,
+        adminImage: admin?.image,
+        targetUser: targetUser ? {
+          id: targetUser.id,
+          userName: targetUser.userName,
+          email: targetUser.email,
+          image: targetUser.image
+        } : (l.details as any)?.targetUser || null
+      };
+    });
 
     return reply.send({ logs: enriched, total });
   });

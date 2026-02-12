@@ -28,7 +28,7 @@ export function dashboardEditRoutes(fastify: FastifyInstance) {
     const maxLinks = getUserLimits(userInfo).maxLinks;
 
     const emailHash = crypto
-      .createHash("md5")
+      .createHash("sha256")
       .update((userInfo.email || "").trim().toLowerCase())
       .digest("hex");
     const gravatarUrl = `https://www.gravatar.com/avatar/${emailHash}?d=404`;

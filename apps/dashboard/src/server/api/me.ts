@@ -274,6 +274,25 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     return reply.send(updated);
   });
 
+  fastify.post("/gravatar-source", async (request, reply) => {
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+    if (!userId) throw new UnauthorizedError();
+    
+    const { source } = (request.body as { source?: string }) || {};
+    if (source !== "PRIMARY" && source !== "PUBLIC") {
+      throw new BadRequestError("Source Gravatar invalide");
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: userId as string },
+      data: { gravatarEmailSource: source },
+      select: { gravatarEmailSource: true },
+    });
+    
+    return reply.send(updated);
+  });
+
   fastify.post("/2fa", async (request, reply) => {
     const sessionData = request.session.get("data");
     const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;

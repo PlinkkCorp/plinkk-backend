@@ -1,7 +1,11 @@
 import { qs, el } from './utils.js';
 
-/* --- MD5 Helper (Compact) --- */
-const md5=function(d){var r = M(V(Y(X(d),8*d.length)));return r.toLowerCase()};function M(d){for(var _,m="0123456789ABCDEF",f="",r=0;r<d.length;r++)_=d.charCodeAt(r),f+=m.charAt(_>>>4&15)+m.charAt(15&_);return f}function X(d){for(var _=Array(d.length>>2),m=0;m<_.length;m++)_[m]=0;for(m=0;m<8*d.length;m+=8)_[m>>5]|=(255&d.charCodeAt(m))<<m%32;return _}function V(d){for(var _="",m=0;m<32*d.length;m+=8)_+=String.fromCharCode(d[m>>5]>>>m%32&255);return _}function Y(d,_){d[_>>5]|=128<<_%32,d[14+(_+64>>>9<<4)]=_;for(var m=1732584193,f=-271733879,r=-1732584194,i=271733878,n=0;n<d.length;n+=16){var h=m,t=f,g=r,e=i;m=md5_ii(m=md5_ii(m=md5_ii(m=md5_ii(m=md5_hh(m=md5_hh(m=md5_hh(m=md5_hh(m=md5_gg(m=md5_gg(m=md5_gg(m=md5_gg(m=md5_ff(m=md5_ff(m=md5_ff(m=md5_ff(m,f,r,i,d[n+0],7,-680876936),f,r,i,d[n+1],12,-389564586),f,r,i,d[n+2],17,606105819),f,r,i,d[n+3],22,-1044525330),f,r,i,d[n+4],7,-176418897),f,r,i,d[n+5],12,1200080426),f,r,i,d[n+6],17,-1473231341),f,r,i,d[n+7],22,-45705983),f,r,i,d[n+8],7,1770035416),f,r,i,d[n+9],12,-1958414417),f,r,i,d[n+10],17,-42063),f,r,i,d[n+11],22,-1990404162),f,r,i,d[n+12],7,1804112418),f,r,i,d[n+13],12,-40341101),f,r,i,d[n+14],17,-1502002290),f,r,i,d[n+15],22,1236535329),f=md5_ii(f=md5_ii(f=md5_ii(f=md5_ii(f=md5_hh(f=md5_hh(f=md5_hh(f=md5_hh(f=md5_gg(f=md5_gg(f=md5_gg(f=md5_gg(f=md5_ff(f=md5_ff(f=md5_ff(f=md5_ff(f,r,i,m,d[n+1],5,-165796510),r,i,m,d[n+6],9,-1069501632),r,i,m,d[n+11],14,643717713),r,i,m,d[n+0],20,-378558),r,i,m,d[n+5],5,-2015044628),r,i,m,d[n+10],9,-849768060),r,i,m,d[n+15],14,-1019803690),r,i,m,d[n+4],20,-16711735),r,i,m,d[n+9],5,-155497632),r,i,m,d[n+14],9,-153205933),r,i,m,d[n+3],14,-1094766093),r,i,m,d[n+8],20,1126891415),r,i,m,d[n+5],4,-378558),r,i,m,d[n+8],11,-2022574463),r,i,m,d[n+11],16,1839030562),r,i,m,d[n+14],23,-35309556),i=md5_ii(i=md5_ii(i=md5_ii(i=md5_ii(i=md5_hh(i=md5_hh(i=md5_hh(i=md5_hh(i=md5_gg(i=md5_gg(i=md5_gg(i=md5_gg(i=md5_ff(i=md5_ff(i=md5_ff(i=md5_ff(i,m,f,r,d[n+0],6,-198630844),m,f,r,d[n+7],10,1126891415),m,f,r,d[n+14],15,-1416354905),m,f,r,d[n+5],21,-57434055),m,f,r,d[n+12],6,1700485571),m,f,r,d[n+3],10,-1894986606),m,f,r,d[n+10],15,-1051523),m,f,r,d[n+1],21,-2054922799),m,f,r,d[n+8],6,1873313359),m,f,r,d[n+15],10,-30611744),m,f,r,d[n+6],15,-1560198380),m,f,r,d[n+13],21,1309151649),m,f,r,d[n+4],6,-145523070),m,f,r,d[n+11],10,-1120210379),m,f,r,d[n+2],15,718787259),m,f,r,d[n+9],21,-343485551),m=AddUnsigned(m,h),f=AddUnsigned(f,t),r=AddUnsigned(r,g),i=AddUnsigned(i,e)}return M(m)+M(f)+M(r)+M(i)}function md5_cmn(d,_,m,f,r,i){return AddUnsigned(BitRotateLeft(AddUnsigned(AddUnsigned(_,d),AddUnsigned(f,i)),m),r)}function md5_ff(d,_,m,f,r,i,n){return md5_cmn(_&m|~_&f,d,_,r,i,n)}function md5_gg(d,_,m,f,r,i,n){return md5_cmn(_&f|m&~f,d,_,r,i,n)}function md5_hh(d,_,m,f,r,i,n){return md5_cmn(_^m^f,d,_,r,i,n)}function md5_ii(d,_,m,f,r,i,n){return md5_cmn(m^(_|~f),d,_,r,i,n)}function BitRotateLeft(d,_){return d<<_|d>>>32-_}function AddUnsigned(lX,lY){var lX4,lY4,lX8,lY8,lResult;lX8=(lX&0x80000000);lY8=(lY&0x80000000);lX4=(lX&0x40000000);lY4=(lY&0x40000000);lResult=(lX&0x3FFFFFFF)+(lY&0x3FFFFFFF);if(lX4&lY4)return(lResult^0x80000000^lX8^lY8);if(lX4|lY4){if(lResult&0x40000000)return(lResult^0xC0000000^lX8^lY8);else return(lResult^0x40000000^lX8^lY8)}else return(lResult^lX8^lY8)}
+/* --- SHA256 Helper (Async) --- */
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 const iconModal = qs('#iconModal');
 const iconModalClose = qs('#iconModalClose');
@@ -31,7 +35,7 @@ try {
   }
 } catch (e) {}
 
-function switchTab(tabName) {
+async function switchTab(tabName) {
     document.querySelectorAll('.icon-tab-btn').forEach(btn => {
         if (btn.dataset.tab === tabName) btn.classList.add('active');
         else btn.classList.remove('active');
@@ -43,7 +47,7 @@ function switchTab(tabName) {
     if (t) t.classList.remove('hidden');
 
     if (tabName === 'uploads') populateUploadsGrid(uploadSearch ? uploadSearch.value : '');
-    if (tabName === 'gravatar') updateGravatar();
+    if (tabName === 'gravatar') await updateGravatar();
 }
 
 function setupTabs() {
@@ -52,13 +56,13 @@ function setupTabs() {
     });
 }
 
-function updateGravatar() {
+async function updateGravatar() {
     const emailInput = document.getElementById('email');
     const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
     if (gravatarEmail) gravatarEmail.textContent = email || 'aucun email';
     
     if (email) {
-        const hash = md5(email);
+        const hash = await sha256(email);
         const url = `https://www.gravatar.com/avatar/${hash}?d=mp&s=400`;
         const img = document.createElement('img');
         img.src = url;

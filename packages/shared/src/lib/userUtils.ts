@@ -1,4 +1,11 @@
 import { PrismaClient, User, Role, Cosmetic } from "@plinkk/prisma";
+import crypto from "crypto";
+
+export function getGravatarUrl(email: string) {
+  if (!email) return null;
+  const hash = crypto.createHash("sha256").update(email.trim().toLowerCase()).digest("hex");
+  return `https://www.gravatar.com/avatar/${hash}`;
+}
 
 export async function getUserWithRole(prisma: PrismaClient, userId: string): Promise<(User & { role: Role | null }) | null> {
   return prisma.user.findUnique({

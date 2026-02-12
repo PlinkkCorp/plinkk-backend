@@ -833,6 +833,14 @@ canvas {
     filter: brightness(0.8);
 }
 
+/* Icons in selection menus / modals */
+#iconGrid img, 
+#uploadsGrid img,
+#pickerGrid img,
+.plinkk-item div.h-10.w-10 {
+    filter: invert(1) brightness(2);
+}
+
 /* Barre de statut style Discord */
 .status-bar-container {
     position: absolute;

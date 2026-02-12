@@ -10,6 +10,7 @@ import ejs from "ejs";
 import { Announcement, AnnouncementRoleTarget, AnnouncementTarget, prisma } from "@plinkk/prisma";
 import { IncomingMessage, ServerResponse } from "http";
 import { toSafeUser, UserWithInclude } from "../types/user.js";
+import { getGravatarUrl } from "./userUtils.js";
 import "dotenv/config"
 
 export async function replyView(
@@ -35,6 +36,7 @@ export async function replyView(
       user: null,
       isAdmin: false,
       isStaff: false,
+      getGravatarUrl,
       ...extraData,
       ...data,
     });
@@ -53,6 +55,7 @@ export async function replyView(
     user: toSafeUser(user),
     isAdmin: isAdmin,
     isStaff: isStaff,
+    getGravatarUrl,
     ...extraData,
     ...data,
   });

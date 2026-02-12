@@ -6,6 +6,13 @@
     if (!/^https?:\/\//i.test(_av_imgUrl) && _av_imgUrl[0] !== '/' && !/^data:/i.test(_av_imgUrl)) {
       _av_imgUrl = '/public/uploads/avatars/' + _av_imgUrl;
     }
+  } else if (_av_entity) {
+    // Gravatar logic
+    const _av_source = _av_entity.gravatarEmailSource || 'PRIMARY';
+    const _av_email = _av_source === 'PUBLIC' ? (_av_entity.publicEmail || _av_entity.email) : _av_entity.email;
+    if (_av_email && typeof getGravatarUrl === 'function') {
+      _av_imgUrl = getGravatarUrl(_av_email);
+    }
   }
   const _av_initial = _av_entity && (_av_entity.userName || _av_entity.id) ? String(_av_entity.userName || _av_entity.id).charAt(0).toUpperCase() : 'U';
 

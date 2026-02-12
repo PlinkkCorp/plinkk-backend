@@ -31,12 +31,18 @@ enum PlinkkEventType {
   DELETED
 }
 
+enum GravatarSource {
+  PRIMARY
+  PUBLIC
+}
+
 model User {
   id                 String  @id @unique
   userName           String
   password           String
   email              String  @unique
   publicEmail        String?
+  gravatarEmailSource GravatarSource @default(PRIMARY)
   mustChangePassword Boolean @default(false)
   twoFactorEnabled   Boolean @default(false)
   twoFactorSecret    String?

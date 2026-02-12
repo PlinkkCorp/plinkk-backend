@@ -24,8 +24,16 @@
                     <option value="">Toutes</option>
                     <option value="LOGIN">Connexion</option>
                     <option value="IMPERSONATE">Impersonnification</option>
-                    <option value="UPDATE_USER">Modif. Utilisateur</option>
+                    <option value="UPDATE_PROFILE">Modif. Profil</option>
+                    <option value="UPDATE_USER_PROFILE">Modif. Profil (API)</option>
                     <option value="BAN_USER">Bannissement</option>
+                    <option value="UNBAN_USER">Débannissement</option>
+                    <option value="REVOKE_SESSION">Révocation Session</option>
+                    <option value="REVOKE_ALL_SESSIONS">Révocation (Toutes)</option>
+                    <option value="UPDATE_USER_ROLE">Modif. Rôle (API)</option>
+                    <option value="UPDATE_ROLE">Modif. Rôle</option>
+                    <option value="UPDATE_BADGES">Modif. Badges</option>
+                    <option value="DISABLE_2FA">Désactiver 2FA</option>
                     <option value="CREATE_ROLE">Création Rôle</option>
                     <option value="UPDATE_ROLE">Modif. Rôle</option>
                     <option value="DELETE_ROLE">Suppr. Rôle</option>
@@ -121,7 +129,26 @@
                 <div class="flex items-center gap-3 mb-2">
                     <span id="modalAction" class="px-2 py-1 rounded-lg bg-violet-500/20 text-violet-300 border border-violet-500/30 text-xs font-mono font-bold"></span>
                     <span class="text-slate-600">sur</span>
-                    <span id="modalTarget" class="text-white font-mono text-sm"></span>
+                    <div id="modalTargetContainer">
+                        <span id="modalTarget" class="text-white font-mono text-sm"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modalTargetUserInfo" class="hidden bg-slate-950 rounded-xl p-4 border border-slate-800">
+                <label class="text-xs text-slate-500 uppercase font-bold block mb-2">Utilisateur Cible</label>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <img id="modalTargetAvatar" src="" class="w-10 h-10 rounded-full border border-slate-700 hidden">
+                        <div id="modalTargetAvatarPlaceholder" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-sm font-bold text-white"></div>
+                        <div>
+                            <div id="modalTargetName" class="text-white font-medium"></div>
+                            <div id="modalTargetEmail" class="text-slate-500 text-xs"></div>
+                        </div>
+                    </div>
+                    <a id="modalTargetLink" href="" class="px-4 py-2 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 text-xs rounded-lg transition-colors border border-blue-500/20">
+                        Voir le Profil
+                    </a>
                 </div>
             </div>
 
@@ -152,6 +179,29 @@
         
         document.getElementById('modalAction').textContent = log.action;
         document.getElementById('modalTarget').textContent = log.targetId || 'N/A';
+
+        const targetInfo = document.getElementById('modalTargetUserInfo');
+        if (log.targetUser) {
+            targetInfo.classList.remove('hidden');
+            const u = log.targetUser;
+            document.getElementById('modalTargetName').textContent = u.userName || u.name || 'Inconnu';
+            document.getElementById('modalTargetEmail').textContent = u.email || 'Pas d\'email';
+            document.getElementById('modalTargetLink').href = `/admin?openUser=${u.id}`;
+            
+            const avatar = document.getElementById('modalTargetAvatar');
+            const placeholder = document.getElementById('modalTargetAvatarPlaceholder');
+            if (u.image) {
+                avatar.src = u.image;
+                avatar.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                avatar.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+                placeholder.textContent = (u.userName || u.name || '?').charAt(0).toUpperCase();
+            }
+        } else {
+            targetInfo.classList.add('hidden');
+        }
         
         const jsonStr = log.details ? JSON.stringify(log.details, null, 2) : '{}';
         document.getElementById('modalJson').textContent = jsonStr;
@@ -195,21 +245,47 @@
                 return;
             }
 
-            tbody.innerHTML = data.logs.map((log, index) => `
+            tbody.innerHTML = data.logs.map((log, index) => {
+                let targetDisplay = log.targetId || '-';
+                if (log.targetUser) {
+                    const name = log.targetUser.userName || log.targetUser.name;
+                    targetDisplay = `
+                        <a href="/admin?openUser=${log.targetUser.id}" class="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors">
+                            <div class="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-[8px] font-bold overflow-hidden">
+                                ${log.targetUser.image ? `<img src="${log.targetUser.image}" class="w-full h-full object-cover">` : name.charAt(0).toUpperCase()}
+                            </div>
+                            <span class="max-w-[120px] truncate">${name}</span>
+                        </a>
+                    `;
+                }
+
+                let detailsDisplay = '-';
+                if (log.details) {
+                    const keys = Object.keys(log.details).filter(k => k !== 'targetUser');
+                    if (keys.length > 0) {
+                        detailsDisplay = keys.map(k => `<span class="text-slate-400">${k}:</span> ${JSON.stringify(log.details[k])}`).join(', ');
+                    } else if (log.action === 'REVOKE_SESSION' || log.action === 'REVOKE_ALL_SESSIONS') {
+                        detailsDisplay = '<span class="text-amber-400/80 italic text-[10px]">Session révoquée</span>';
+                    }
+                }
+
+                return `
                 <tr class="hover:bg-slate-800/50 transition-colors">
                     <td class="px-6 py-4 whitespace-nowrap text-slate-400 font-mono text-xs">${new Date(log.createdAt).toLocaleString()}</td>
                     <td class="px-6 py-4 font-medium text-white">
                         <div class="flex items-center gap-2">
-                            <div class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold">${log.adminName.charAt(0).toUpperCase()}</div>
-                            ${log.adminName}
+                            <div class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold overflow-hidden">
+                                ${log.adminImage ? `<img src="${log.adminImage}" class="w-full h-full object-cover">` : log.adminName.charAt(0).toUpperCase()}
+                            </div>
+                            <span class="max-w-[150px] truncate">${log.adminName}</span>
                         </div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="px-2 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono text-violet-300">${log.action}</span>
                     </td>
-                    <td class="px-6 py-4 text-slate-400 font-mono text-xs">${log.targetId || '-'}</td>
-                    <td class="px-6 py-4 text-slate-500 text-xs max-w-xs truncate">
-                        ${log.details ? JSON.stringify(log.details) : '-'}
+                    <td class="px-6 py-4 text-slate-400 font-mono text-xs">${targetDisplay}</td>
+                    <td class="px-6 py-4 text-slate-500 text-[11px] max-w-xs truncate">
+                        ${detailsDisplay}
                     </td>
                     <td class="px-6 py-4 text-slate-500 font-mono text-xs">${log.ip || '-'}</td>
                     <td class="px-6 py-4 text-right">
@@ -218,7 +294,7 @@
                         </button>
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
 
             document.getElementById('pageInfo').textContent = `Page ${currentPage} / ${Math.ceil(data.total / limit)}`;
             document.getElementById('prevPage').disabled = currentPage <= 1;

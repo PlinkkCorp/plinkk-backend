@@ -87,8 +87,17 @@ export function dashboardAdminSessionsRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
 
     try {
+      const session = await prisma.session.findUnique({
+        where: { id },
+        include: { user: { select: { id: true, userName: true, email: true } } }
+      });
+      if (!session) return reply.code(404).send({ error: "not_found" });
+
       await prisma.session.delete({ where: { id } });
-      await logAdminAction(userId, 'REVOKE_SESSION', id, {}, request.ip);
+      await logAdminAction(userId, 'REVOKE_SESSION', session.user.id, { 
+        sessionId: id, 
+        targetUser: { id: session.user.id, name: session.user.userName, email: session.user.email } 
+      }, request.ip);
       return reply.send({ ok: true });
     } catch (e) {
       return reply.code(404).send({ error: "not_found" });
@@ -103,11 +112,20 @@ export function dashboardAdminSessionsRoutes(fastify: FastifyInstance) {
     const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
     if (!ok) return;
 
-    const { userId } = request.params as { userId: string };
+    const { userId: targetUserId } = request.params as { userId: string };
 
     try {
-      const count = await prisma.session.deleteMany({ where: { userId } });
-      await logAdminAction(adminId, 'REVOKE_ALL_SESSIONS', userId, { count: count.count }, request.ip);
+      const targetUser = await prisma.user.findUnique({
+        where: { id: targetUserId },
+        select: { id: true, userName: true, email: true }
+      });
+      if (!targetUser) return reply.code(404).send({ error: "user_not_found" });
+
+      const count = await prisma.session.deleteMany({ where: { userId: targetUserId } });
+      await logAdminAction(adminId, 'REVOKE_ALL_SESSIONS', targetUserId, { 
+        count: count.count,
+        targetUser: { id: targetUser.id, name: targetUser.userName, email: targetUser.email }
+      }, request.ip);
       return reply.send({ ok: true, count: count.count });
     } catch (e) {
       return reply.code(500).send({ error: "internal_error" });
