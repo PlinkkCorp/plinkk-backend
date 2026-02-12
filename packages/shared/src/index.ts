@@ -19,7 +19,7 @@ export * from "./types/user.js";
 
 declare module "@fastify/secure-session" {
   interface SessionData {
-    data?: string;
+    data?: string | { id: string };
     sessionId?: string;
     returnTo?: string;
     original_admin?: string;

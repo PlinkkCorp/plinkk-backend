@@ -29,7 +29,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
 
   fastify.get("/dashboard-summary", async (request, reply) => {
     const userId = request.session.get("data");
-    const id = typeof userId === "string" ? userId : (userId)?.id;
+    const id = typeof userId === "object" ? userId?.id : userId;
     if (!id) throw new UnauthorizedError();
 
     const [linksCount, socialsCount, labelsCount, recentLinks, userViews, totalClicks] =
@@ -592,9 +592,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   // ─── List user uploads ───
   fastify.get("/uploads", async (request, reply) => {
     const userId = request.session.get("data");
-    // Ensure userId is a string. If it was an object in legacy sessions, we ignore/handle it safely.
-    // Assuming new session is string based on login.ts
-    const id = typeof userId === "string" ? userId : undefined;
+    const id = typeof userId === "object" ? userId?.id : userId;
     
     if (!id) return reply.code(401).send({ error: "Unauthorized" });
 
@@ -612,7 +610,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const promises = prefixes.map(async (prefix) => {
       try {
         const command = new ListObjectsV2Command({ Bucket, Prefix: prefix });
-        const response: ListObjectsV2CommandOutput = await client.send(command);
+        const response = await (client as unknown as S3Client).send(command) as ListObjectsV2CommandOutput;
         return response.Contents || [];
       } catch (e) {
         return [];
