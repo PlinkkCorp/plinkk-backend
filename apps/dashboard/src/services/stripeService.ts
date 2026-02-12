@@ -323,12 +323,13 @@ export async function handleSuccessfulPayment(session: Stripe.Checkout.Session):
     // Ici on donne 32 jours de premium suite au paiement réussi
     const now = new Date();
     const premiumUntil = new Date(now.setDate(now.getDate() + 32));
-    
+
     await prisma.user.update({
       where: { id: userId },
-      data: { 
+      data: {
         isPremium: true,
         premiumUntil: premiumUntil,
+        premiumSource: 'STRIPE', // Mark as Stripe-managed subscription
       },
     });
     console.log(`[Stripe] Premium activé pour l'utilisateur ${userId}`);

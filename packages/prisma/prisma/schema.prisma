@@ -64,6 +64,7 @@ model User {
   isPremium  Boolean  @default(false)
   showPremiumUi Boolean @default(true)
   premiumUntil DateTime?
+  premiumSource String? // "STRIPE" | "MANUAL" | null
   stripeCustomerId String? @unique
   extraPlinkks     Int     @default(0)
   extraRedirects   Int     @default(0)

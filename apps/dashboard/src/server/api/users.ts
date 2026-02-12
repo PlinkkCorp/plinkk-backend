@@ -587,18 +587,113 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     const { type, value } = request.body as { type: 'VERIFIED' | 'PARTNER' | 'PREMIUM', value: boolean };
 
     const data: any = {};
-    if (type === 'VERIFIED') data.isVerified = value;
-    if (type === 'PARTNER') data.isPartner = value;
-    if (type === 'PREMIUM') {
-      data.isPremium = value;
-      data.premiumUntil = value ? null : null;
+
+    if (type === 'VERIFIED') {
+      data.isVerified = value;
+    }
+    else if (type === 'PARTNER') {
+      data.isPartner = value;
+    }
+    else if (type === 'PREMIUM') {
+      // Get current user to check for Stripe subscription
+      const currentUser = await prisma.user.findUnique({
+        where: { id },
+        select: { isPremium: true, premiumSource: true, premiumUntil: true, stripeCustomerId: true }
+      });
+
+      if (!currentUser) {
+        return reply.code(404).send({ error: "User not found" });
+      }
+
+      // Prevent modifying Stripe-managed premium
+      if (currentUser.premiumSource === 'STRIPE') {
+        return reply.code(403).send({
+          error: "Cannot toggle premium badge for Stripe subscribers",
+          details: "This user has an active Stripe subscription. Premium status is managed automatically."
+        });
+      }
+
+      if (value) {
+        // Granting premium manually
+        data.isPremium = true;
+        data.premiumSource = 'MANUAL';
+        // Set 1 year expiry for manual grants
+        const oneYearFromNow = new Date();
+        oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+        data.premiumUntil = oneYearFromNow;
+      } else {
+        // Revoking premium (only if manual)
+        data.isPremium = false;
+        data.premiumSource = null;
+        data.premiumUntil = null;
+      }
     }
 
-    if (Object.keys(data).length === 0) return reply.send({ ok: true }); // Nothing to update
+    if (Object.keys(data).length === 0) {
+      return reply.send({ ok: true });
+    }
 
     await prisma.user.update({ where: { id }, data });
     await logAdminAction(userId, 'UPDATE_BADGES', id, { ...data, type }, request.ip);
 
     return reply.send({ ok: true });
+  });
+
+  // Admin subscription management endpoint
+  fastify.post("/:id/subscription-admin", async function (request, reply) {
+    const adminId = request.session.get("data");
+    if (!adminId) return reply.code(401).send({ error: "unauthorized" });
+
+    const ok = await ensurePermission(request, reply, 'MANAGE_SUBSCRIPTIONS');
+    if (!ok) return;
+
+    const { id } = request.params as { id: string };
+    const { action, premiumUntil, reason } = request.body as {
+      action: 'GRANT' | 'REVOKE' | 'EXTEND',
+      premiumUntil?: string,
+      reason?: string
+    };
+
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, isPremium: true, premiumSource: true, premiumUntil: true, userName: true }
+    });
+
+    if (!user) return reply.code(404).send({ error: "User not found" });
+
+    // Prevent modifying Stripe subscriptions
+    if (user.premiumSource === 'STRIPE') {
+      return reply.code(403).send({
+        error: "Cannot modify Stripe subscription through admin panel",
+        details: "User must cancel via their account settings. Stripe subscriptions are managed automatically."
+      });
+    }
+
+    const data: any = {};
+
+    if (action === 'GRANT') {
+      data.isPremium = true;
+      data.premiumSource = 'MANUAL';
+      data.premiumUntil = premiumUntil ? new Date(premiumUntil) : null;
+    } else if (action === 'REVOKE') {
+      data.isPremium = false;
+      data.premiumSource = null;
+      data.premiumUntil = null;
+    } else if (action === 'EXTEND') {
+      if (!user.isPremium || user.premiumSource !== 'MANUAL') {
+        return reply.code(400).send({ error: "Can only extend manual premium grants" });
+      }
+      data.premiumUntil = premiumUntil ? new Date(premiumUntil) : null;
+    }
+
+    await prisma.user.update({ where: { id }, data });
+
+    await logAdminAction(adminId, `SUBSCRIPTION_${action}`, id, {
+      ...data,
+      reason: reason || 'No reason provided',
+      affectedUser: user.userName
+    }, request.ip);
+
+    return reply.send({ ok: true, data });
   });
 }

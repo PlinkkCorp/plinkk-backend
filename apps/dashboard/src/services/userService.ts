@@ -11,6 +11,7 @@ export interface UserBasicInfo {
   isPartner: boolean;
   isPremium: boolean;
   premiumUntil: Date | null;
+  premiumSource: string | null;
   createdAt: Date;
   role: {
     id: string;
@@ -40,6 +41,7 @@ const USER_SAFE_SELECT = {
   isPartner: true,
   isPremium: true,
   premiumUntil: true,
+  premiumSource: true,
   createdAt: true,
   twoFactorEnabled: true,
   role: {

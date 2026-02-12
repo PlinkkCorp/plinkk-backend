@@ -194,10 +194,46 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
     const { type, value } = request.body as { type: string, value: boolean };
 
     const data: any = {};
-    if (type === 'VERIFIED') data.isVerified = value;
-    if (type === 'PARTNER') data.isPartner = value;
-    if (type === 'PREMIUM') {
-        data.isPremium = value;
+
+    if (type === 'VERIFIED') {
+      data.isVerified = value;
+    }
+    else if (type === 'PARTNER') {
+      data.isPartner = value;
+    }
+    else if (type === 'PREMIUM') {
+      // Get current user to check for Stripe subscription
+      const currentUser = await prisma.user.findUnique({
+        where: { id },
+        select: { isPremium: true, premiumSource: true, premiumUntil: true, stripeCustomerId: true }
+      });
+
+      if (!currentUser) {
+        return reply.code(404).send({ error: "User not found" });
+      }
+
+      // Prevent modifying Stripe-managed premium
+      if (currentUser.premiumSource === 'STRIPE') {
+        return reply.code(403).send({
+          error: "Cannot toggle premium badge for Stripe subscribers",
+          details: "This user has an active Stripe subscription. Premium status is managed automatically."
+        });
+      }
+
+      if (value) {
+        // Granting premium manually
+        data.isPremium = true;
+        data.premiumSource = 'MANUAL';
+        // Set 1 year expiry for manual grants
+        const oneYearFromNow = new Date();
+        oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+        data.premiumUntil = oneYearFromNow;
+      } else {
+        // Revoking premium (only if manual)
+        data.isPremium = false;
+        data.premiumSource = null;
+        data.premiumUntil = null;
+      }
     }
 
     await prisma.user.update({ where: { id }, data });

@@ -24,7 +24,7 @@ CREATE TABLE "User" (
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "isPartner" BOOLEAN NOT NULL DEFAULT false,
     "selectedCustomThemeId" TEXT,
-    "slags" JSONB NOT NULL DEFAULT [],
+    "slags" JSONB NOT NULL DEFAULT '[]',
     "apiKey" TEXT,
     CONSTRAINT "User_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
@@ -312,7 +312,7 @@ CREATE TABLE "PlinkkSettings" (
     "delayAnimationButton" REAL,
     "canvaEnable" INTEGER,
     "selectedCanvasIndex" INTEGER,
-    "layoutOrder" JSONB DEFAULT ["profile","username","statusbar","labels","social","email","links"],
+    "layoutOrder" JSONB DEFAULT '["profile","username","statusbar","labels","social","email","links"]',
     CONSTRAINT "PlinkkSettings_plinkkId_fkey" FOREIGN KEY ("plinkkId") REFERENCES "Plinkk" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 

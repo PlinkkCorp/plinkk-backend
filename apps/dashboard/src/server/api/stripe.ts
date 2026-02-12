@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import Stripe from "stripe";
 import { requireAuth } from "../../middleware/auth";
+import { prisma } from "@plinkk/prisma";
 import {
   stripe,
   createCheckoutSession,
@@ -62,6 +63,15 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
     if (!stripe) return reply.code(503).send({ error: "Paiements non disponibles" });
 
     const userId = request.userId!;
+
+    // Prevent cancellation during impersonation
+    const impersonatedUserId = request.session.get('impersonatedUserId');
+    if (impersonatedUserId) {
+      return reply.code(403).send({
+        error: "Impossible d'annuler un abonnement en mode impersonation.",
+        details: "Pour des raisons de sécurité, veuillez quitter le mode impersonation avant de gérer les abonnements."
+      });
+    }
 
     try {
       const customerId = await getOrCreateStripeCustomer(userId);
@@ -161,6 +171,60 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
         }
         break;
       }
+
+      case "customer.subscription.deleted": {
+        const subscription = event.data.object as Stripe.Subscription;
+        const customerId = (typeof subscription.customer === 'string')
+          ? subscription.customer
+          : subscription.customer.id;
+
+        const user = await prisma.user.findUnique({
+          where: { stripeCustomerId: customerId },
+          select: { id: true, premiumSource: true }
+        });
+
+        // Only revoke premium if it was managed by Stripe
+        if (user && user.premiumSource === 'STRIPE') {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              isPremium: false,
+              premiumSource: null,
+              premiumUntil: null,
+            }
+          });
+          request.log?.info(`[Stripe] Premium revoked for user ${user.id}`);
+        }
+        break;
+      }
+
+      case "customer.subscription.updated": {
+        const subscription = event.data.object as Stripe.Subscription;
+        const customerId = (typeof subscription.customer === 'string')
+          ? subscription.customer
+          : subscription.customer.id;
+
+        const user = await prisma.user.findUnique({
+          where: { stripeCustomerId: customerId }
+        });
+
+        if (user && subscription.status === 'active') {
+          // current_period_end is a Unix timestamp in seconds
+          const subscriptionData = subscription as any;
+          const currentPeriodEnd = new Date(subscriptionData.current_period_end * 1000);
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              isPremium: true,
+              premiumSource: 'STRIPE',
+              premiumUntil: currentPeriodEnd,
+            }
+          });
+          request.log?.info(`[Stripe] Premium updated for user ${user.id}, expires: ${currentPeriodEnd}`);
+        }
+        break;
+      }
+
       default:
         request.log?.info(`[Stripe] Événement non géré: ${event.type}`);
     }

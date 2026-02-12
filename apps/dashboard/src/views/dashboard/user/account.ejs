@@ -49,9 +49,23 @@
                 </li>
                 <li>
                   <button class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
+                    data-tab="preferences" aria-selected="false">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                    Préférences
+                  </button>
+                </li>
+                <li>
+                  <button class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
                     data-tab="developer" aria-selected="false">
                     <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                     Développeur
+                  </button>
+                </li>
+                <li>
+                  <button class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
+                    data-tab="subscription" aria-selected="false">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                    Abonnement
                   </button>
                 </li>
                                 <li>
@@ -354,42 +368,69 @@
                   </form>
 
                   <div class="pt-8 border-t border-slate-800">
-                    <div class="mb-4">
-                      <h4 class="text-lg font-semibold text-white">Abonnement</h4>
-                      <p class="text-sm text-slate-400">Gérez votre abonnement premium et vos options.</p>
-                    </div>
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-slate-950 border border-slate-800">
-                      <div>
-                        <p class="text-sm font-medium text-white">Plinkk Premium</p>
-                        <p class="text-xs text-slate-400"><%= isPremiumUser ? 'Modifiez votre offre ou résiliez a tout moment.' : 'Decouvrez les avantages Premium.' %></p>
-                      </div>
-                      <div class="flex flex-wrap items-center gap-2">
-                        <% if (isPremiumUser) { %>
-                          <a href="/premium" class="px-4 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">Gerer l'offre</a>
-                          <button id="btnCancelSubscription" class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">Resilier</button>
-                        <% } else { %>
-                          <a href="/premium" class="px-4 py-2 text-xs font-medium rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-900/20 transition-colors">Passer a Premium</a>
-                        <% } %>
+                    <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+                      <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-violet-400" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2z"/>
+                        </svg>
+                        <div class="flex-1">
+                          <p class="text-sm font-medium text-white">Gestion de l'abonnement</p>
+                          <p class="text-xs text-slate-400 mt-0.5">
+                            La gestion de votre abonnement a été déplacée vers l'onglet
+                            <button onclick="document.querySelector('[data-tab=subscription]').click()" class="text-violet-400 hover:text-violet-300 font-medium underline">
+                              Abonnement
+                            </button>
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <% if (isPremiumUser) { %>
-                    <div class="pt-8 border-t border-slate-800">
+
+
+                </div>
+              </div>
+
+              <!-- Preferences Panel -->
+              <div id="panel-preferences" class="tab-panel hidden animate-slide-up">
+                <div class="space-y-8">
+                  <div class="mb-4 pb-4 border-b border-slate-800">
+                      <h4 class="text-lg font-semibold text-white">Préférences</h4>
+                      <p class="text-sm text-slate-400">Personnalisez votre expérience du tableau de bord.</p>
+                  </div>
+
+                  <% 
+                    const roleNamePref = user && user.role ? (user.role.id || user.role.name) : null; 
+                    const isPremiumUserPref = !!(user && (user.isPremium || user.isPartner || (roleNamePref && ['ADMIN','DEVELOPER','MODERATOR'].includes(roleNamePref))));
+                  %>
+
+                  <% if (isPremiumUserPref) { %>
+                    <div class="">
                       <div class="mb-4">
                         <h4 class="text-lg font-semibold text-white">Experience Premium</h4>
-                        <p class="text-sm text-slate-400">Affiche les effets et badges Premium dans le dashboard.</p>
+                        <p class="text-sm text-slate-400">Options visuelles exclusives aux membres Premium.</p>
                       </div>
                       <div class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
                         <div>
                           <p class="text-sm font-medium text-white">UI Premium</p>
-                          <p class="text-xs text-slate-400">Active ou desactive les elements visuels Premium.</p>
+                          <p class="text-xs text-slate-400">Active les effets, badges et le cadre de profil (le rond autour de l'avatar).</p>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                           <input id="togglePremiumUi" type="checkbox" class="sr-only peer" <%= user.showPremiumUi !== false ? 'checked' : '' %> />
                           <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
                         </label>
                       </div>
+                    </div>
+                  <% } else { %>
+                    <div class="p-6 rounded-xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 text-center">
+                        <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mx-auto mb-4 text-slate-500">
+                             <svg class="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">Fonctionnalités Premium</h3>
+                        <p class="text-slate-400 mb-6 max-w-md mx-auto">Débloquez les options de personnalisation avancées, le cadre de profil et bien plus encore avec Plinkk Premium.</p>
+                        <a href="/premium" class="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold shadow-lg shadow-violet-900/20 hover:scale-[1.02] transition-transform">
+                            Découvrir Premium
+                        </a>
                     </div>
                   <% } %>
                 </div>
@@ -466,6 +507,131 @@
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                         </a>
                     </div>
+                </div>
+              </div>
+
+              <!-- Subscription Panel -->
+              <div id="panel-subscription" class="tab-panel hidden animate-slide-up">
+                <%
+                  const userRole = (user.role?.name || user.role?.id);
+                  const isStaff = ['ADMIN','DEVELOPER','MODERATOR'].includes(userRole);
+                  const hasStripeSub = user.premiumSource === 'STRIPE';
+                  const hasManualPremium = user.premiumSource === 'MANUAL';
+                  const showCancelButton = hasStripeSub && !isStaff;
+                  const premiumActive = user.isPremium && (!user.premiumUntil || new Date(user.premiumUntil) > new Date());
+                %>
+
+                <div class="space-y-8">
+                  <!-- Header -->
+                  <div class="mb-4 pb-4 border-b border-slate-800">
+                    <h4 class="text-lg font-semibold text-white">Abonnement</h4>
+                    <p class="text-sm text-slate-400">Gérez votre abonnement Premium et vos options.</p>
+                  </div>
+
+                  <!-- Status Card -->
+                  <div class="p-6 rounded-2xl <%= premiumActive ? 'bg-gradient-to-br from-violet-900/20 to-fuchsia-900/20 border-violet-500/30' : 'bg-slate-950' %> border border-slate-800">
+                    <div class="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                          <% if (premiumActive) { %>
+                            <svg class="w-6 h-6 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 2l2.7 5.48 6.05.88-4.38 4.27 1.03 6.02L12 15.9 6.6 18.65l1.03-6.02L3.25 8.36l6.05-.88L12 2z"/>
+                            </svg>
+                            Plinkk Premium
+                          <% } else { %>
+                            Plan Gratuit
+                          <% } %>
+                        </h3>
+                        <% if (premiumActive && user.premiumSource) { %>
+                          <div class="flex items-center gap-2 mt-1">
+                            <span class="text-xs px-2 py-0.5 rounded-full <%= hasStripeSub ? 'bg-violet-500/20 text-violet-300' : 'bg-amber-500/20 text-amber-300' %> border <%= hasStripeSub ? 'border-violet-500/30' : 'border-amber-500/30' %>">
+                              <%= hasStripeSub ? 'Abonnement Stripe' : 'Accordé manuellement' %>
+                            </span>
+                          </div>
+                        <% } %>
+                      </div>
+                      <% if (premiumActive) { %>
+                        <div class="text-right">
+                          <p class="text-xs text-slate-400">Statut</p>
+                          <p class="text-sm font-medium text-emerald-400">Actif</p>
+                        </div>
+                      <% } %>
+                    </div>
+
+                    <% if (premiumActive && user.premiumUntil) { %>
+                      <div class="pt-4 border-t border-slate-700/50">
+                        <div class="flex items-center justify-between">
+                          <span class="text-sm text-slate-300">
+                            <%= hasStripeSub ? 'Prochaine facturation' : 'Valide jusqu\'au' %>
+                          </span>
+                          <span class="text-sm font-medium text-white">
+                            <%= new Date(user.premiumUntil).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+                          </span>
+                        </div>
+                      </div>
+                    <% } %>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-slate-950 border border-slate-800">
+                    <div>
+                      <p class="text-sm font-medium text-white">Gestion de l'abonnement</p>
+                      <p class="text-xs text-slate-400">
+                        <%= premiumActive ? 'Modifiez votre offre ou résiliez à tout moment.' : 'Découvrez les avantages Premium.' %>
+                      </p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <% if (premiumActive) { %>
+                        <a href="/premium" class="px-4 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
+                          Gérer l'offre
+                        </a>
+
+                        <% if (showCancelButton) { %>
+                          <button id="btnCancelSubscriptionTab" class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">
+                            Résilier
+                          </button>
+                        <% } %>
+                      <% } else { %>
+                        <a href="/premium" class="px-4 py-2 text-xs font-medium rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-900/20 transition-colors">
+                          Passer à Premium
+                        </a>
+                      <% } %>
+                    </div>
+                  </div>
+
+                  <!-- Staff Notice -->
+                  <% if (isStaff && hasStripeSub) { %>
+                    <div class="p-4 rounded-xl bg-violet-500/10 border border-violet-500/20">
+                      <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-violet-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        <div>
+                          <p class="text-sm font-medium text-violet-300">Information pour le personnel</p>
+                          <p class="text-xs text-violet-400 mt-1">
+                            En tant que membre de l'équipe, veuillez gérer votre abonnement via le panneau d'administration.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
+
+                  <!-- Manual Premium Notice -->
+                  <% if (hasManualPremium) { %>
+                    <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                      <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-amber-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        <div>
+                          <p class="text-sm font-medium text-amber-300">Premium accordé par l'équipe</p>
+                          <p class="text-xs text-amber-400 mt-1">
+                            Votre accès Premium a été accordé manuellement. Pour toute modification, veuillez contacter l'équipe via le support.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  <% } %>
                 </div>
               </div>
 
@@ -956,7 +1122,9 @@
           profile: document.getElementById('panel-profile'),
           security: document.getElementById('panel-security'),
           settings: document.getElementById('panel-settings'),
+          preferences: document.getElementById('panel-preferences'),
           developer: document.getElementById('panel-developer'),
+          subscription: document.getElementById('panel-subscription'),
           connections: document.getElementById('panel-connections')
         };
 
@@ -1125,6 +1293,39 @@
         if (!ok) return;
 
         const btn = document.getElementById('btnCancelSubscription');
+        const originalText = btn?.textContent || 'Résilier';
+        if (btn) {
+          btn.textContent = 'Résiliation...';
+          btn.setAttribute('disabled', 'disabled');
+          btn.classList.add('opacity-70', 'cursor-not-allowed');
+        }
+
+        try {
+          const res = await fetch('/api/stripe/cancel-subscription', { method: 'POST' });
+          const j = await res.json().catch(() => ({}));
+          if (res.ok) {
+            showAlert(j.message || 'Abonnement résilié.', 'success');
+          } else {
+            showAlert(j.error || 'Erreur lors de la résiliation', 'error');
+          }
+        } catch (err) {
+          console.error(err);
+          showAlert('Erreur réseau', 'error');
+        } finally {
+          if (btn) {
+            btn.textContent = originalText;
+            btn.removeAttribute('disabled');
+            btn.classList.remove('opacity-70', 'cursor-not-allowed');
+          }
+        }
+      });
+
+      // Handler for the new Subscription tab cancel button
+      document.getElementById('btnCancelSubscriptionTab')?.addEventListener('click', async () => {
+        const ok = await showConfirm("Confirmer la résiliation de l'abonnement ? L'accès Premium restera actif jusqu'à la fin de la période en cours.", 'Résilier');
+        if (!ok) return;
+
+        const btn = document.getElementById('btnCancelSubscriptionTab');
         const originalText = btn?.textContent || 'Résilier';
         if (btn) {
           btn.textContent = 'Résiliation...';
