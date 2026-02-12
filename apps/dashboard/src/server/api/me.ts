@@ -29,7 +29,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
 
   fastify.get("/dashboard-summary", async (request, reply) => {
     const userId = request.session.get("data");
-    const id = typeof userId === "object" ? userId?.id : userId;
+    const id = (userId && typeof userId === "object") ? userId.id : (typeof userId === "string" ? userId : undefined);
     if (!id) throw new UnauthorizedError();
 
     const [linksCount, socialsCount, labelsCount, recentLinks, userViews, totalClicks] =
@@ -592,7 +592,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   // ─── List user uploads ───
   fastify.get("/uploads", async (request, reply) => {
     const userId = request.session.get("data");
-    const id = typeof userId === "object" ? userId?.id : userId;
+    const id = (userId && typeof userId === "object") ? userId.id : (typeof userId === "string" ? userId : undefined);
     
     if (!id) return reply.code(401).send({ error: "Unauthorized" });
 
@@ -610,7 +610,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const promises = prefixes.map(async (prefix) => {
       try {
         const command = new ListObjectsV2Command({ Bucket, Prefix: prefix });
-        const response = await (client as unknown as S3Client).send(command) as ListObjectsV2CommandOutput;
+        const response = await (client as any).send(command);
         return response.Contents || [];
       } catch (e) {
         return [];
