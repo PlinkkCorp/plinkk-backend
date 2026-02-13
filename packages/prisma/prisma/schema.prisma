@@ -103,6 +103,7 @@ model User {
   connections     Connection[]
   redirects       Redirect[]
   purchases       Purchase[]
+  userLogs        UserLog[]
 
   apiKey          String? @unique
 }
@@ -535,6 +536,19 @@ model AdminLog {
   details   Json?
   createdAt DateTime @default(now())
   ip        String?
+}
+
+model UserLog {
+  id        String   @id @default(nanoid(16))
+  userId    String
+  action    String
+  targetId  String?
+  details   Json?
+  createdAt DateTime @default(now())
+  ip        String?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

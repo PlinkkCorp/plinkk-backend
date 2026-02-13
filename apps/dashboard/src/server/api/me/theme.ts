@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { Theme, prisma } from "@plinkk/prisma";
 import { coerceThemeData, readBuiltInThemes } from "../../../lib/theme";
+import { logUserAction } from "../../../lib/userLogger";
 
 // const prisma = new PrismaClient();
 
@@ -19,6 +20,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
       where: { id },
       data: { status: "ARCHIVED" },
     });
+    await logUserAction(userId as string, "ARCHIVE_THEME", id, {}, request.ip);
     return reply.send({ ok: true });
   });
 
@@ -52,6 +54,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
       },
       select: { id: true, name: true, status: true },
     });
+    await logUserAction(userId as string, "CREATE_THEME", created.id, { name }, request.ip);
     return reply.send(created);
   });
 
@@ -91,6 +94,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
       data: patch,
       select: { id: true, name: true, status: true },
     });
+    await logUserAction(userId as string, "UPDATE_THEME", id, patch, request.ip);
     return reply.send(updated);
   });
 
@@ -105,6 +109,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
     if (!t || t.authorId !== userId)
       return reply.code(404).send({ error: "Thème introuvable" });
     await prisma.theme.delete({ where: { id } });
+    await logUserAction(userId as string, "DELETE_THEME", id, {}, request.ip);
     return reply.send({ ok: true });
   });
 

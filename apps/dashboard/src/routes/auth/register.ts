@@ -6,6 +6,7 @@ import { slugify, isReservedSlug, createPlinkkForUser } from "../../lib/plinkkUt
 import profileConfig from "../../public/config/profileConfig";
 import { createUserSession } from "../../services/sessionService";
 import { redirectWithErrorToLogin } from "../../utils/errorRedirect";
+import { logUserAction } from "../../lib/userLogger";
 
 const USERNAME_MIN = 3;
 const USERNAME_MAX = 30;
@@ -161,6 +162,7 @@ export function registerRoutes(fastify: FastifyInstance) {
       }
 
       await createDefaultPlinkk(req, user.id, username);
+      await logUserAction(user.id, "REGISTER", null, { method: "PASSWORD" }, req.ip);
 
       const returnTo =
         (req.body as { returnTo: string })?.returnTo ||

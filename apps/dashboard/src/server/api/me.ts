@@ -4,7 +4,7 @@ import z from "zod";
 import { verifyDomain } from "../../lib/verifyDNS";
 import bcrypt from "bcrypt";
 import QRCode from "qrcode";
-import { User, prisma } from "@plinkk/prisma";
+import { User, prisma, Prisma } from "@plinkk/prisma";
 import { apiMeThemesRoutes } from "./me/theme";
 import { apiMePlinkksRoutes } from "./me/plinkks/index";
 import { apiMeRedirectsRoutes } from "./me/redirects";
@@ -13,6 +13,7 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { ListObjectsV2Command, ListObjectsV2CommandOutput, S3Client, _Object } from "@aws-sdk/client-s3";
 import { getS3Client } from "../../lib/fileUtils";
 import sharp from "sharp"
+import { logUserAction } from "../../lib/userLogger";
 
 interface S3ClientWithSend {
   send(command: ListObjectsV2Command): Promise<ListObjectsV2CommandOutput>;
@@ -93,6 +94,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       select: { apiKey: true },
     });
 
+    await logUserAction(userId, "CREATE_API_KEY", null, {}, request.ip);
+
     return reply.send({ apiKey: updated.apiKey });
   });
 
@@ -106,6 +109,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       data: { isPublic: Boolean(isPublic) },
       select: { id: true, isPublic: true },
     });
+    await logUserAction(userId as string, "UPDATE_VISIBILITY", null, { isPublic: Boolean(isPublic) }, request.ip);
     return reply.send(updated);
   });
 
@@ -124,6 +128,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       data: { userName: username.trim() },
       select: { id: true, userName: true },
     });
+    await logUserAction(userId as string, "UPDATE_USERNAME", null, { username: username.trim() }, request.ip);
     return reply.send(updated);
   });
 
@@ -147,6 +152,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       data: { email },
       select: { id: true, email: true },
     });
+    await logUserAction(userId as string, "UPDATE_EMAIL", null, { email }, request.ip);
     return reply.send(updated);
   });
 
@@ -189,8 +195,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     await prisma.user.update({
       where: { id: userId as string },
       data: { password: hashed, hasPassword: true },
-    });
-    return reply.send({ ok: true });
+    });    await logUserAction(userId as string, "UPDATE_PASSWORD", null, {}, request.ip);    return reply.send({ ok: true });
   });
 
   fastify.post("/delete", async (request, reply) => {
@@ -335,6 +340,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       where: { id: userId },
       data: { twoFactorSecret: "", twoFactorEnabled: false },
     });
+    await logUserAction(userId, "DISABLE_2FA", null, {}, request.ip);
     return { successful: true };
   });
 
@@ -366,6 +372,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       data: { twoFactorSecret: pending.secret, twoFactorEnabled: true },
     });
     pending2fa.delete(userId as string);
+    await logUserAction(userId, "ENABLE_2FA", null, {}, request.ip);
     return reply.send({ successful: true });
   });
 
@@ -408,6 +415,9 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     } catch (e) {
       request.log?.warn({ e }, "sync default plinkk name failed");
     }
+
+    await logUserAction(userId as string, "UPDATE_PROFILE", null, { name: updated.name, userName: updated.userName }, request.ip);
+
     return reply.send(updated);
   });
 
@@ -455,6 +465,9 @@ export function apiMeRoutes(fastify: FastifyInstance) {
           verifyToken: token,
         },
       });
+
+      await logUserAction(userId, "LINK_DOMAIN", plinkkId, { hostname }, request.ip);
+
       return reply.send({
         token: updated.verifyToken,
         verified: updated.verified,
@@ -474,6 +487,11 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const body = request.body as { plinkkId: string };
     const plinkkId = body.plinkkId;
     const verified = await verifyDomain(plinkkId);
+
+    if (verified) {
+      await logUserAction(userId, "VERIFY_DOMAIN", plinkkId, {}, request.ip);
+    }
+
     return reply.send({ verified: verified });
   });
 
@@ -486,6 +504,9 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const deleted = await prisma.host.delete({
       where: { plinkkId: plinkkId },
     });
+
+    await logUserAction(userId, "UNLINK_DOMAIN", plinkkId, { hostname: deleted.id }, request.ip);
+
     return reply.send({ successful: true });
   });
 
@@ -505,7 +526,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       banner?: string;
       frame?: string;
       theme?: string;
-      data?: any;
+      data?: Prisma.InputJsonObject;
     };
 
     // Vérifier premium pour bannières GIF/image

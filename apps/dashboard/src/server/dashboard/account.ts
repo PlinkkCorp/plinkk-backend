@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { prisma, User } from "@plinkk/prisma";
 import { replyView } from "../../lib/replyView";
 import { requireAuthRedirect } from "../../middleware/auth";
+import { logUserAction } from "../../lib/userLogger";
 
 export function dashboardAccountRoutes(fastify: FastifyInstance) {
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
@@ -118,6 +119,8 @@ export function dashboardAccountRoutes(fastify: FastifyInstance) {
     await prisma.connection.delete({
       where: { id: connection.id },
     });
+
+    await logUserAction(userId, "UNLINK_ACCOUNT", connection.id, { provider }, request.ip);
 
     return reply.send({ success: true });
   });

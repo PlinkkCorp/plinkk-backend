@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from "@plinkk/prisma";
 import { replyView } from "../../../lib/replyView";
+import { logUserAction } from "../../../lib/userLogger";
 
 // const prisma = new PrismaClient();
 
@@ -47,6 +48,7 @@ export default async function dashboardUserSessionsRoutes(fastify: FastifyInstan
         }
 
         await prisma.session.delete({ where: { id } });
+        await logUserAction(String(userId), "REVOKE_SESSION", id, { ip: session.ip, userAgent: session.userAgent }, req.ip);
         return { success: true };
     });
 }

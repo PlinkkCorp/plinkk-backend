@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { prisma } from "@plinkk/prisma";
+import { prisma, Prisma } from "@plinkk/prisma";
 import {
   verifyRoleIsStaff,
   verifyRoleAdmin,
@@ -76,7 +76,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
     const { userName, email } = request.body as { userName?: string, email?: string };
 
-    const data: any = {};
+    const data: Prisma.UserUpdateInput = {};
     if (typeof userName === 'string') {
         const uName = userName.trim();
         if (uName.length < 3 || uName.length > 50) return reply.code(400).send({ error: 'Username invalid length' });
@@ -603,7 +603,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
     const { type, value } = request.body as { type: 'VERIFIED' | 'PARTNER' | 'PREMIUM', value: boolean };
 
-    const data: any = {};
+    const data: Prisma.UserUpdateInput = {};
 
     if (type === 'VERIFIED') {
       data.isVerified = value;
@@ -687,7 +687,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       });
     }
 
-    const data: any = {};
+    const data: Prisma.UserUpdateInput = {};
 
     if (action === 'GRANT') {
       data.isPremium = true;

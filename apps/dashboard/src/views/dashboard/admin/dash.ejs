@@ -1714,6 +1714,30 @@
                 finally{ btn.disabled=false; s?.classList.add('hidden'); if(l) l.textContent = prev || 'Révoquer le ban'; }
             });
         })();
+
+        // Handle openUser param
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const userId = params.get('openUser');
+            if (userId) {
+                const targetId = userId.toLowerCase();
+                const all = paginator.getAll();
+                const targetLi = all.find(li => 
+                    (li.dataset.id || '').toLowerCase() === targetId || 
+                    (li.dataset.username || '').toLowerCase() === targetId
+                );
+                if (targetLi) {
+                    setTimeout(() => {
+                        openUserModal(targetLi);
+                        // Clean URL without refresh
+                        const newParams = new URLSearchParams(window.location.search);
+                        newParams.delete('openUser');
+                        const newUrl = window.location.pathname + (newParams.toString() ? '?' + newParams.toString() : '');
+                        window.history.replaceState({}, '', newUrl);
+                    }, 500);
+                }
+            }
+        })();
     })();
 </script>
 

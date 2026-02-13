@@ -11,6 +11,7 @@ import {
   isUserPremium,
   PREMIUM_MAX_PLINKKS,
 } from "@plinkk/shared";
+import { logUserAction } from "../../../../lib/userLogger";
 
 export function plinkksCrudRoutes(fastify: FastifyInstance) {
   fastify.patch("/:id", async (request, reply) => {
@@ -49,6 +50,7 @@ export function plinkksCrudRoutes(fastify: FastifyInstance) {
     if (Object.keys(patch).length) {
       await prisma.plinkk.update({ where: { id }, data: patch });
     }
+    await logUserAction(userId, "UPDATE_PLINKK", id, patch, request.ip);
     return reply.send({ ok: true });
   });
 
@@ -68,6 +70,7 @@ export function plinkksCrudRoutes(fastify: FastifyInstance) {
     }
     await prisma.plinkk.delete({ where: { id } });
     await reindexNonDefault(prisma, userId);
+    await logUserAction(userId, "DELETE_PLINKK", id, {}, request.ip);
     return reply.send({ ok: true });
   });
 
@@ -116,13 +119,15 @@ export function plinkksCrudRoutes(fastify: FastifyInstance) {
         name: rawName,
         slugBase: base,
       });
+      await logUserAction(userId, "CREATE_PLINKK", created.id, { slug: created.slug, name: created.name }, request.ip);
       return reply
         .code(201)
         .send({ id: created.id, slug: created.slug, name: created.name });
-    } catch (e: any) {
-      if (e?.message === "max_pages_reached")
+    } catch (e: unknown) {
+      const error = e as { message?: string };
+      if (error.message === "max_pages_reached")
         return reply.code(400).send({ error: "max_pages_reached" });
-      if (e?.message === "user_not_found")
+      if (error.message === "user_not_found")
         return reply.code(401).send({ error: "unauthorized" });
       return reply.code(500).send({ error: "internal_error" });
     }

@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { Label, Link, NeonColor, PlinkkStatusbar, SocialIcon, prisma } from "@plinkk/prisma";
 import { pickDefined } from "../../../../lib/plinkkUtils";
+import { logUserAction } from "../../../../lib/userLogger";
 
 async function validatePlinkkOwnership(userId: string | undefined, plinkkId: string) {
   if (!userId) return null;
@@ -34,6 +35,8 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
       });
     }
 
+    await logUserAction(userId, "UPDATE_PLINKK_BACKGROUND", id, { count: colors.length }, request.ip);
+
     return reply.send({ ok: true });
   });
 
@@ -59,6 +62,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           })),
         });
       }
+      await logUserAction(userId, "UPDATE_PLINKK_LABELS", id, { count: body.labels.length }, request.ip);
     }
 
     return reply.send({ ok: true });
@@ -85,6 +89,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           })),
         });
       }
+      await logUserAction(userId, "UPDATE_PLINKK_SOCIALS", id, { count: body.socialIcon.length }, request.ip);
     }
 
     return reply.send({ ok: true });
@@ -131,6 +136,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           });
         }
       }
+      await logUserAction(userId, "UPDATE_PLINKK_LINKS", id, { count: body.links.length }, request.ip);
     }
 
     const updatedLinks = await prisma.link.findMany({ where: { userId, plinkkId: id } });
@@ -184,6 +190,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           });
         }
       }
+      await logUserAction(userId, "UPDATE_PLINKK_CATEGORIES", id, { count: body.categories.length }, request.ip);
     }
 
     const updatedCategories = await prisma.category.findMany({
@@ -228,6 +235,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           }),
         });
       }
+      await logUserAction(userId, "UPDATE_PLINKK_STATUSBAR", id, {}, request.ip);
     }
 
     return reply.send({ ok: true });
@@ -253,6 +261,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           })),
         });
       }
+      await logUserAction(userId, "UPDATE_PLINKK_NEON", id, { count: body.neonColors.length }, request.ip);
     }
 
     return reply.send({ ok: true });

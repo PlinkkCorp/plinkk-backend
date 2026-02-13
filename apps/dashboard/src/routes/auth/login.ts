@@ -7,6 +7,7 @@ import { slugify } from "../../lib/plinkkUtils";
 import { replyView } from "../../lib/replyView";
 import { createUserSession } from "../../services/sessionService";
 import { redirectWithError } from "../../utils/errorRedirect";
+import { logUserAction } from "../../lib/userLogger";
 
 export function loginRoutes(fastify: FastifyInstance) {
   fastify.get("/login", async (request, reply) => {
@@ -132,6 +133,7 @@ export function loginRoutes(fastify: FastifyInstance) {
       (request.query as { returnTo: string })?.returnTo;
 
     await createUserSession(user.id, request);
+    await logUserAction(user.id, "LOGIN", null, { method: "PASSWORD" }, request.ip);
 
     return reply.redirect(returnTo || "/");
   });

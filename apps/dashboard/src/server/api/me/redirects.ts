@@ -18,6 +18,7 @@ import {
   PREMIUM_MAX_REDIRECTS,
 } from "@plinkk/shared";
 import z from "zod";
+import { logUserAction } from "../../../lib/userLogger";
 
 const createRedirectSchema = z.object({
   slug: z.string().min(2).max(50),
@@ -111,7 +112,7 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
         title: data.title,
         description: data.description,
       });
-      
+      await logUserAction(userId, "CREATE_REDIRECT", redirect.id, { slug: normalizedSlug, targetUrl: data.targetUrl }, request.ip);
       return reply.code(201).send({ redirect });
     } catch (e) {
       request.log?.error(e, "createRedirect failed");
@@ -182,6 +183,7 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
     
     try {
       const redirect = await updateRedirect(redirectId, data);
+      await logUserAction(userId, "UPDATE_REDIRECT", redirectId, data, request.ip);
       return reply.send({ redirect });
     } catch (e) {
       request.log?.error(e, "updateRedirect failed");
@@ -209,6 +211,7 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
     
     try {
       await deleteRedirect(redirectId);
+      await logUserAction(userId, "DELETE_REDIRECT", redirectId, {}, request.ip);
       return reply.send({ ok: true });
     } catch (e) {
       request.log?.error(e, "deleteRedirect failed");

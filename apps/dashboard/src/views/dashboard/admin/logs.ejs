@@ -9,18 +9,30 @@
             <div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
             <div class="relative z-10">
                 <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Logs d'Audit</h1>
-                <p class="text-slate-400 text-lg">Historique des actions effectuées par les administrateurs.</p>
+                <p class="text-slate-400 text-lg">Historique des actions effectuées par les administrateurs et les utilisateurs.</p>
             </div>
+        </div>
+
+        <div class="flex items-center gap-2 p-1 bg-slate-900 border border-slate-800 rounded-2xl w-fit">
+            <button onclick="switchTab('admin')" id="tab-admin" class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-blue-600 text-white shadow-lg shadow-blue-900/20">
+                Logs Staff
+            </button>
+            <button onclick="switchTab('user')" id="tab-user" class="px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
+                Logs Utilisateurs
+            </button>
         </div>
 
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 mb-6 flex flex-wrap gap-4 items-end">
             <div class="flex flex-col gap-1">
-                <label class="text-xs text-slate-400 uppercase font-bold">Admin (ID)</label>
-                <input type="text" id="filterAdmin" placeholder="ID Admin..." class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
+                <label id="labelAdmin" class="text-xs text-slate-400 uppercase font-bold">Admin (ID)</label>
+                <input type="text" id="filterAdmin" placeholder="ID..." class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
             </div>
             <div class="flex flex-col gap-1">
                 <label class="text-xs text-slate-400 uppercase font-bold">Action</label>
                 <select id="filterAction" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
+                    <option value="">Toutes</option>
+                </select>
+                <select id="filterActionAdmin" class="hidden">
                     <option value="">Toutes</option>
                     <option value="LOGIN">Connexion</option>
                     <option value="IMPERSONATE">Impersonnification</option>
@@ -39,6 +51,28 @@
                     <option value="DELETE_ROLE">Suppr. Rôle</option>
                     <option value="MANAGE_THEME">Thèmes</option>
                     <option value="RUN_TASK">Tâches Système</option>
+                </select>
+                <select id="filterActionUser" class="hidden">
+                    <option value="">Toutes</option>
+                    <option value="LOGIN">Connexion</option>
+                    <option value="REGISTER">Inscription</option>
+                    <option value="UPDATE_PROFILE">Modif. Profil</option>
+                    <option value="CHANGE_PASSWORD">Modif. Password</option>
+                    <option value="CHANGE_EMAIL">Modif. Email</option>
+                    <option value="UPDATE_AVATAR">Modif. Photo Profil</option>
+                    <option value="CREATE_PLINKK">Création Plinkk</option>
+                    <option value="UPDATE_PLINKK">Modif. Plinkk</option>
+                    <option value="DELETE_PLINKK">Suppr. Plinkk</option>
+                    <option value="CREATE_REDIRECT">Création Redirection</option>
+                    <option value="UPDATE_REDIRECT">Modif. Redirection</option>
+                    <option value="DELETE_REDIRECT">Suppr. Redirection</option>
+                    <option value="CREATE_THEME">Création Thème</option>
+                    <option value="UPDATE_THEME">Modif. Thème</option>
+                    <option value="DELETE_THEME">Suppr. Thème</option>
+                    <option value="CREATE_API_KEY">Création Clé API</option>
+                    <option value="LINK_DNS">Liaison DNS</option>
+                    <option value="REVOKE_SESSION">Révocation Session</option>
+                    <option value="CONNECT_ACCOUNT">Liaison Compte</option>
                 </select>
             </div>
             <div class="flex flex-col gap-1">
@@ -65,7 +99,7 @@
                     <thead>
                         <tr class="border-b border-slate-800 bg-slate-950/50 text-xs uppercase tracking-wider text-slate-400">
                             <th class="px-6 py-4 font-medium">Date</th>
-                            <th class="px-6 py-4 font-medium">Admin</th>
+                            <th id="headerUser" class="px-6 py-4 font-medium">Admin</th>
                             <th class="px-6 py-4 font-medium">Action</th>
                             <th class="px-6 py-4 font-medium">Cible</th>
                             <th class="px-6 py-4 font-medium">Détails</th>
@@ -153,8 +187,8 @@
             </div>
 
             <div class="bg-slate-950 rounded-xl p-4 border border-slate-800">
-                <label class="text-xs text-slate-500 uppercase font-bold block mb-2">Données JSON</label>
-                <pre id="modalJson" class="text-xs font-mono text-emerald-400 overflow-x-auto whitespace-pre-wrap break-all"></pre>
+                <label class="text-xs text-slate-500 uppercase font-bold block mb-3">Métadonnées / Détails</label>
+                <div id="modalJson" class="space-y-3"></div>
             </div>
         </div>
     </div>
@@ -164,6 +198,37 @@
     let currentPage = 1;
     const limit = 50;
     let currentLogs = [];
+    let currentTab = 'admin';
+
+    function switchTab(tab) {
+        currentTab = tab;
+        currentPage = 1;
+        
+        const btnAdmin = document.getElementById('tab-admin');
+        const btnUser = document.getElementById('tab-user');
+        const labelAdmin = document.getElementById('labelAdmin');
+        const headerUser = document.getElementById('headerUser');
+        const filterAction = document.getElementById('filterAction');
+        const sourceSelect = document.getElementById(tab === 'admin' ? 'filterActionAdmin' : 'filterActionUser');
+
+        // Styles des boutons
+        if (tab === 'admin') {
+            btnAdmin.className = 'px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-blue-600 text-white shadow-lg shadow-blue-900/20';
+            btnUser.className = 'px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800';
+            labelAdmin.textContent = 'Admin (ID)';
+            headerUser.textContent = 'Admin';
+        } else {
+            btnUser.className = 'px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-blue-600 text-white shadow-lg shadow-blue-900/20';
+            btnAdmin.className = 'px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800';
+            labelAdmin.textContent = 'Utilisateur (ID)';
+            headerUser.textContent = 'Utilisateur';
+        }
+
+        // Mise à jour des options de filtrage
+        filterAction.innerHTML = sourceSelect.innerHTML;
+        
+        loadLogs();
+    }
 
     function openLogDetails(index) {
         const log = currentLogs[index];
@@ -173,9 +238,13 @@
         document.getElementById('modalDate').textContent = new Date(log.createdAt).toLocaleString();
         document.getElementById('modalIp').textContent = log.ip || 'N/A';
         
-        document.getElementById('modalAdminName').textContent = log.adminName;
-        document.getElementById('modalAdminId').textContent = log.adminId;
-        document.getElementById('modalAdminAvatar').textContent = log.adminName.charAt(0).toUpperCase();
+        const userName = currentTab === 'admin' ? log.adminName : (log.userName || log.userId);
+        const userId = currentTab === 'admin' ? log.adminId : log.userId;
+        const userImage = currentTab === 'admin' ? log.adminImage : log.userImage;
+
+        document.getElementById('modalAdminName').textContent = userName;
+        document.getElementById('modalAdminId').textContent = userId;
+        document.getElementById('modalAdminAvatar').textContent = (userName || '?').charAt(0).toUpperCase();
         
         document.getElementById('modalAction').textContent = log.action;
         document.getElementById('modalTarget').textContent = log.targetId || 'N/A';
@@ -203,8 +272,34 @@
             targetInfo.classList.add('hidden');
         }
         
-        const jsonStr = log.details ? JSON.stringify(log.details, null, 2) : '{}';
-        document.getElementById('modalJson').textContent = jsonStr;
+        const jsonContainer = document.getElementById('modalJson');
+        jsonContainer.innerHTML = '';
+        
+        if (log.details && typeof log.details === 'object' && Object.keys(log.details).length > 0) {
+            Object.entries(log.details).forEach(([key, value]) => {
+                const item = document.createElement('div');
+                item.className = 'bg-slate-900/50 rounded-xl p-3 border border-slate-800/50';
+                
+                const label = document.createElement('div');
+                label.className = 'text-[10px] text-slate-500 uppercase font-bold mb-1 font-mono';
+                label.textContent = key;
+                
+                const val = document.createElement('div');
+                val.className = 'text-emerald-400 font-mono text-xs break-all';
+                
+                if (typeof value === 'object' && value !== null) {
+                    val.textContent = JSON.stringify(value, null, 2);
+                    val.className += ' whitespace-pre';
+                } else {
+                    val.textContent = value;
+                }
+                
+                item.append(label, val);
+                jsonContainer.appendChild(item);
+            });
+        } else {
+            jsonContainer.innerHTML = '<div class="text-slate-600 text-xs italic py-2 text-center">Aucune donnée supplémentaire</div>';
+        }
 
         document.getElementById('logDetailsModal').classList.remove('hidden');
     }
@@ -234,7 +329,8 @@
         if (to) params.append('to', to);
 
         try {
-            const res = await fetch(`/admin/logs/api?${params.toString()}`);
+            const endpoint = currentTab === 'admin' ? '/admin/logs/api' : '/admin/logs/user-api';
+            const res = await fetch(`${endpoint}?${params.toString()}`);
             if (!res.ok) throw new Error('Erreur chargement');
             const data = await res.json();
             
@@ -246,45 +342,73 @@
             }
 
             tbody.innerHTML = data.logs.map((log, index) => {
-                let targetDisplay = log.targetId || '-';
+                let targetDisplay = '-';
                 if (log.targetUser) {
-                    const name = log.targetUser.userName || log.targetUser.name;
+                    const name = log.targetUser.userName || log.targetUser.name || 'Inconnu';
                     targetDisplay = `
                         <a href="/admin?openUser=${log.targetUser.id}" class="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors">
-                            <div class="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-[8px] font-bold overflow-hidden">
+                            <div class="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-[8px] font-bold overflow-hidden border border-slate-700/50">
                                 ${log.targetUser.image ? `<img src="${log.targetUser.image}" class="w-full h-full object-cover">` : name.charAt(0).toUpperCase()}
                             </div>
                             <span class="max-w-[120px] truncate">${name}</span>
                         </a>
                     `;
+                } else if (log.targetId) {
+                    targetDisplay = `<span class="text-slate-500 font-mono text-[10px] italic">${log.targetId}</span>`;
                 }
 
                 let detailsDisplay = '-';
-                if (log.details) {
+                if (log.details && typeof log.details === 'object') {
                     const keys = Object.keys(log.details).filter(k => k !== 'targetUser');
-                    if (keys.length > 0) {
-                        detailsDisplay = keys.map(k => `<span class="text-slate-400">${k}:</span> ${JSON.stringify(log.details[k])}`).join(', ');
-                    } else if (log.action === 'REVOKE_SESSION' || log.action === 'REVOKE_ALL_SESSIONS') {
-                        detailsDisplay = '<span class="text-amber-400/80 italic text-[10px]">Session révoquée</span>';
+                    
+                    if (log.action === 'REVOKE_SESSION' || log.action === 'REVOKE_ALL_SESSIONS') {
+                        const count = log.details.count || 1;
+                        const targetName = log.targetUser ? (log.targetUser.userName || log.targetUser.name) : (log.details.targetUser?.name || 'Inconnu');
+                        detailsDisplay = `
+                            <div class="flex flex-col gap-1">
+                                <span class="text-rose-400/90 font-medium text-[10px] flex items-center gap-1">
+                                    <span>🛡️</span>
+                                    ${log.action === 'REVOKE_SESSION' ? 'Session révoquée' : `${count} sessions révoquées`}
+                                </span>
+                                <div class="text-[9px] text-slate-400 flex items-center gap-1 bg-slate-800/50 px-1.5 py-0.5 rounded border border-slate-700/50 w-fit">
+                                    <span>👤</span>
+                                    User : ${targetName}
+                                </div>
+                            </div>
+                        `;
+                    } else if (keys.length > 0) {
+                        detailsDisplay = `<div class="flex flex-wrap gap-1 max-w-sm">` + 
+                            keys.map(k => {
+                                let val = log.details[k];
+                                let valStr = typeof val === 'object' ? JSON.stringify(val) : val;
+                                return `<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-slate-800/40 border border-slate-700/50">
+                                    <span class="text-slate-500 mr-1 font-bold text-[9px] uppercase">${k}:</span>
+                                    <span class="text-slate-300 font-mono text-[10px] truncate max-w-[100px]">${valStr}</span>
+                                </span>`;
+                            }).join('') + 
+                        `</div>`;
                     }
                 }
+
+                const uName = currentTab === 'admin' ? log.adminName : (log.userName || log.userId);
+                const uImage = currentTab === 'admin' ? log.adminImage : log.userImage;
 
                 return `
                 <tr class="hover:bg-slate-800/50 transition-colors">
                     <td class="px-6 py-4 whitespace-nowrap text-slate-400 font-mono text-xs">${new Date(log.createdAt).toLocaleString()}</td>
                     <td class="px-6 py-4 font-medium text-white">
                         <div class="flex items-center gap-2">
-                            <div class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold overflow-hidden">
-                                ${log.adminImage ? `<img src="${log.adminImage}" class="w-full h-full object-cover">` : log.adminName.charAt(0).toUpperCase()}
+                            <div class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold overflow-hidden border border-slate-700">
+                                ${uImage ? `<img src="${uImage}" class="w-full h-full object-cover">` : (uName || '?').charAt(0).toUpperCase()}
                             </div>
-                            <span class="max-w-[150px] truncate">${log.adminName}</span>
+                            <span class="max-w-[150px] truncate">${uName}</span>
                         </div>
                     </td>
                     <td class="px-6 py-4">
                         <span class="px-2 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-mono text-violet-300">${log.action}</span>
                     </td>
                     <td class="px-6 py-4 text-slate-400 font-mono text-xs">${targetDisplay}</td>
-                    <td class="px-6 py-4 text-slate-500 text-[11px] max-w-xs truncate">
+                    <td class="px-6 py-4 text-slate-500 text-[11px]">
                         ${detailsDisplay}
                     </td>
                     <td class="px-6 py-4 text-slate-500 font-mono text-xs">${log.ip || '-'}</td>
@@ -296,9 +420,10 @@
                 </tr>
             `}).join('');
 
-            document.getElementById('pageInfo').textContent = `Page ${currentPage} / ${Math.ceil(data.total / limit)}`;
+            const totalPages = Math.ceil(data.total / limit);
+            document.getElementById('pageInfo').textContent = `Page ${currentPage} / ${totalPages || 1}`;
             document.getElementById('prevPage').disabled = currentPage <= 1;
-            document.getElementById('nextPage').disabled = currentPage >= Math.ceil(data.total / limit);
+            document.getElementById('nextPage').disabled = currentPage >= totalPages;
 
         } catch (e) {
             tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-rose-500">Erreur lors du chargement des logs.</td></tr>';
@@ -312,7 +437,9 @@
         currentPage++; loadLogs();
     });
 
-    loadLogs();
+    window.addEventListener('DOMContentLoaded', () => {
+        switchTab('admin');
+    });
 </script>
 </body>
 </html>

@@ -4,6 +4,7 @@ import { prisma } from "@plinkk/prisma";
 import { slugify } from "../../lib/plinkkUtils";
 import { createUserSession } from "../../services/sessionService";
 import { createDefaultPlinkk } from "./register";
+import { logUserAction } from "../../lib/userLogger";
 
 export function googleAuthRoutes(fastify: FastifyInstance) {
 	interface GoogleTokenPayload {
@@ -76,6 +77,7 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
                              isIdentity: true
 						 }
 					 });
+					 await logUserAction(currentUserId as string, "LINK_ACCOUNT", googleId, { provider: "google", email }, request.ip);
 				 }
 				 return reply.code(200).send({ success: true, redirect: "/account" });
 			}

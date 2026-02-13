@@ -54,9 +54,10 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
       );
       
       return reply.send(result);
-    } catch (e: any) {
+    } catch (e: unknown) {
       request.log?.error(e, "Plan update failed");
-      return reply.code(500).send({ error: e.message || "Erreur de mise à jour du plan" });
+      const message = e instanceof Error ? e.message : "Erreur de mise à jour du plan";
+      return reply.code(500).send({ error: message });
     }
   });
 
@@ -90,9 +91,10 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
 
       await stripe.subscriptions.update(sub.id, { cancel_at_period_end: true });
       return reply.send({ updated: true, message: "Résiliation programmée à la fin de la période." });
-    } catch (e: any) {
+    } catch (e: unknown) {
       request.log?.error(e, "Subscription cancel failed");
-      return reply.code(500).send({ error: e.message || "Erreur lors de la résiliation" });
+      const message = e instanceof Error ? e.message : "Erreur lors de la résiliation";
+      return reply.code(500).send({ error: message });
     }
   });
 
@@ -158,7 +160,7 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
     try {
       const rawBody = request.rawBody || JSON.stringify(request.body);
       event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
-    } catch (e: any) {
+    } catch (e: unknown) {
       request.log?.error(e, "Stripe webhook signature verification failed");
       return reply.code(400).send({ error: "Signature invalide" });
     }
