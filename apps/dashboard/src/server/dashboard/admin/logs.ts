@@ -9,6 +9,7 @@ interface LogsQuery {
   page?: number;
   limit?: number;
   adminId?: string;
+  targetId?: string;
   action?: string;
   from?: string;
   to?: string;
@@ -65,17 +66,24 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
     const ok = await ensurePermission(request, reply, "VIEW_ADMIN_LOGS");
     if (!ok) return;
 
-    const { page = 1, limit = 50, adminId, action, from, to, sort = "desc" } = request.query;
+    const { page = 1, limit = 50, adminId, targetId, action, from, to, sort = "desc" } = request.query;
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
     const where: Prisma.AdminLogWhereInput = {};
     if (adminId) where.adminId = adminId;
+    if (targetId) where.targetId = targetId;
     if (action) where.action = action;
     if (from || to) {
       where.createdAt = {};
-      if (from) where.createdAt.gte = new Date(from);
-      if (to) where.createdAt.lte = new Date(to);
+      if (from) {
+        const d = new Date(from);
+        if (!isNaN(d.getTime())) where.createdAt.gte = d;
+      }
+      if (to) {
+        const d = new Date(to);
+        if (!isNaN(d.getTime())) where.createdAt.lte = d;
+      }
     }
 
     const [logs, total] = await Promise.all([
@@ -107,7 +115,7 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
 
     const enriched: EnrichedAdminLog[] = logs.map((l) => {
       const admin = adminMap.get(l.adminId);
-      const targetUser = targetMap.get(l.targetId!);
+      const targetUser = l.targetId ? targetMap.get(l.targetId) : null;
       
       return {
         ...l,
@@ -129,17 +137,24 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
     const ok = await ensurePermission(request, reply, "VIEW_ADMIN_LOGS");
     if (!ok) return;
 
-    const { page = 1, limit = 50, adminId: userId, action, from, to, sort = "desc" } = request.query;
+    const { page = 1, limit = 50, adminId: userId, targetId, action, from, to, sort = "desc" } = request.query;
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
     const where: Prisma.UserLogWhereInput = {};
     if (userId) where.userId = userId;
+    if (targetId) where.targetId = targetId;
     if (action) where.action = action;
     if (from || to) {
       where.createdAt = {};
-      if (from) where.createdAt.gte = new Date(from);
-      if (to) where.createdAt.lte = new Date(to);
+      if (from) {
+        const d = new Date(from);
+        if (!isNaN(d.getTime())) where.createdAt.gte = d;
+      }
+      if (to) {
+        const d = new Date(to);
+        if (!isNaN(d.getTime())) where.createdAt.lte = d;
+      }
     }
 
     const [logs, total] = await Promise.all([
@@ -171,7 +186,7 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
 
     const enriched: EnrichedUserLog[] = logs.map((l) => {
       const user = userMap.get(l.userId);
-      const targetUser = targetMap.get(l.targetId!);
+      const targetUser = l.targetId ? targetMap.get(l.targetId) : null;
       
       return {
         ...l,
