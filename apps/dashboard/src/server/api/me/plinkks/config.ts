@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { PlinkkSettings, prisma } from "@plinkk/prisma";
 import { pickDefined } from "../../../../lib/plinkkUtils";
 import { logUserAction, logDetailedAction } from "../../../../lib/userLogger";
+// import { themeNames, themeColors } from "../../../../lib/themeNames";
 // import { canUseVisualEffects } from "@plinkk/shared";
 
 export function plinkksConfigRoutes(fastify: FastifyInstance) {
@@ -218,6 +219,43 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
     const changedKeys = Object.keys(data); // data contains only fields that were sent/picked
     if (changedKeys.some(k => themeFields.includes(k))) {
       logAction = "UPDATE_PLINKK_THEME";
+
+      // Enhance theme logging with details if index changed
+      // Handle both number and string (if coming from relaxed JSON parsing)
+      if (data.selectedThemeIndex !== undefined && data.selectedThemeIndex !== null) {
+        try {
+          // Import built-in themes (dynamic import or use what's available)
+          // Since we can't easily import from shared in this context without build step issues sometimes,
+          // we'll use a local mapping for names based on the shared file structure we saw.
+
+          // Simple built-in theme colors mapping for preview
+          const themeColors = [
+            { bg: "rgba(255, 255, 255, 0.6)", btn: "#7289DA", text: "black" }, // 0
+            { bg: "rgba(255, 223, 0, 0.6)", btn: "#FFA500", text: "black" }, // 1
+            { bg: "rgba(255, 255, 255, 0.6)", btn: "#00FF00", text: "black" }, // 2
+            { bg: "rgba(255, 255, 255, 0.8)", btn: "#00A0DC", text: "black" }, // 3
+            { bg: "rgba(255, 0, 0, 0.6)", btn: "#FF0000", text: "black" }, // 4
+            { bg: "rgba(173, 216, 230, 0.6)", btn: "#87CEFA", text: "black" }, // 5
+            { bg: "rgba(255, 255, 255, 0.9)", btn: "#FF4500", text: "black" }, // 6
+            { bg: "rgba(255, 165, 0, 0.6)", btn: "#FFA500", text: "black" }, // 7
+            { bg: "rgba(211, 211, 211, 0.5)", btn: "#A9A9A9", text: "black" }, // 8
+            { bg: "rgba(255, 255, 255, 0.6)", btn: "#00FF00", text: "black" }, // 9
+            { bg: "rgba(255, 255, 255, 0.6)", btn: "#ADD8E6", text: "black" }, // 10
+            { bg: "rgba(255, 255, 255, 0.6)", btn: "#A0522D", text: "black" }, // 11
+            { bg: "rgba(255, 182, 193, 0.6)", btn: "#FF69B4", text: "black" }, // 12
+            { bg: "rgba(255, 255, 255, 0.6)", btn: "#800080", text: "black" }, // 13
+            { bg: "#e6d5d5", btn: "#8a7272", text: "black" }, // 14
+          ];
+
+          const idx = Number(data.selectedThemeIndex);
+          if (!isNaN(idx)) {
+            // @ts-ignore
+            data['themePreview'] = themeColors[idx];
+          }
+        } catch (e) {
+          console.error("Failed to enhance theme log", e);
+        }
+      }
     }
 
     // Use shared logger

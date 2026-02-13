@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { Theme, prisma } from "@plinkk/prisma";
 import { coerceThemeData, readBuiltInThemes } from "../../../lib/theme";
 import { logUserAction } from "../../../lib/userLogger";
+import { themeColors } from "../../../lib/themeNames";
 
 // const prisma = new PrismaClient();
 
@@ -162,27 +163,32 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
       if (builtInIndex < 0 || builtInIndex >= built.length)
         return reply.code(400).send({ error: "builtInIndex out of range" });
       const themeData = built[builtInIndex];
+
+      const tName = `Thème ${builtInIndex}`;
+      const tPreview = themeColors[builtInIndex];
+
       const created = await prisma.theme.create({
         data: {
-          name: `builtin-${builtInIndex}`,
-          data: themeData,
+          name: tName,
+          data: themeData as any, // Cast to any to avoid strict JSON input issues if themeData structure varies
           authorId: userId as string,
           status: "APPROVED",
           isPrivate: true,
         },
-        select: { id: true },
+        select: { id: true, name: true },
       });
       await prisma.user.update({
         where: { id: userId as string },
         data: { selectedCustomThemeId: created.id },
       });
+      await logUserAction(userId as string, "SELECT_THEME", created.id, { themeName: created.name, themePreview: tPreview, isCustom: false, builtInIndex }, request.ip);
       return reply.send({ ok: true, selected: created.id });
     }
     if (!themeId || typeof themeId !== "string")
       return reply.code(400).send({ error: "themeId requis" });
     const t = await prisma.theme.findUnique({
       where: { id: themeId },
-      select: { id: true, authorId: true, isPrivate: true, status: true },
+      select: { id: true, name: true, authorId: true, isPrivate: true, status: true },
     });
     if (!t || t.authorId !== userId)
       return reply.code(404).send({ error: "Thème introuvable" });
@@ -190,6 +196,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
       where: { id: userId as string },
       data: { selectedCustomThemeId: t.id },
     });
+    await logUserAction(userId as string, "SELECT_THEME", t.id, { themeName: t.name, isCustom: true }, request.ip);
     return reply.send({ ok: true });
   });
 
