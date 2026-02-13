@@ -1,127 +1,201 @@
 <%- include('partials/head.ejs', { title: 'Tableau de bord - Mes Plinkks' ,
   description: 'Gère tes pages Plinkk, crée-en de nouvelles et modifie-les.' , robots: 'noindex,nofollow' }) %>
   <%- include('partials/header-dash.ejs') %>
-    
+
     <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
       <%- include('partials/asside_dash.ejs', { active: 'plinkks' }) %>
 
         <main class="col-span-12 lg:col-span-10 space-y-6">
           <!-- Header -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl">
             <div>
               <h1 class="text-2xl font-bold text-white">Mes Plinkks</h1>
               <p class="text-sm text-slate-400 mt-1">Gérez vos pages et créez-en de nouvelles.</p>
             </div>
-            <% if (plinkks.length >= maxPages) { %>
-              <a href="/premium" class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 border border-slate-700 text-slate-400 cursor-not-allowed hover:bg-slate-800 hover:text-slate-400">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <% if (plinkks.length>= maxPages) { %>
+              <a href="/premium"
+                class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 border border-slate-700 text-slate-400 cursor-not-allowed hover:bg-slate-800 hover:text-slate-400">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
                 <span>Limite atteinte (<%= maxPages %>)</span>
               </a>
-            <% } else { %>
-              <button id="btnCreatePlinkk" class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-all hover:scale-105">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                <span>Créer un Plinkk</span>
-              </button>
-            <% } %>
+              <% } else { %>
+                <button id="btnCreatePlinkk"
+                  class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-all hover:scale-105">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span>Créer un Plinkk</span>
+                </button>
+                <% } %>
           </div>
 
-          <% if (plinkks.length >= maxPages) { %>
-            <div class="bg-gradient-to-r from-violet-900/40 to-fuchsia-900/40 border border-violet-500/30 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    <div class="p-3 bg-violet-600/20 rounded-xl text-violet-300">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-white text-lg">Débloquez plus de pages Plinkk</h3>
-                        <p class="text-slate-300 text-sm">Vous avez atteint la limite de votre plan. Passez Premium pour créer plus de pages !</p>
-                    </div>
+          <% if (plinkks.length>= maxPages) { %>
+            <div
+              class="bg-gradient-to-r from-violet-900/40 to-fuchsia-900/40 border border-violet-500/30 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div class="flex items-center gap-4">
+                <div class="p-3 bg-violet-600/20 rounded-xl text-violet-300">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
                 </div>
-                <a href="/premium" class="px-6 py-2.5 bg-white text-violet-900 font-bold rounded-xl hover:bg-slate-200 transition-colors shadow-lg shadow-black/20 whitespace-nowrap text-sm">
-                    Passer Premium
-                </a>
-            </div>
-          <% } %>
-
-          <!-- Plinkks Grid -->
-          <% if (plinkks && plinkks.length> 0) { %>
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              <% plinkks.forEach(plinkk=> { %>
-                <div class="group relative bg-slate-900 border border-slate-800 rounded-3xl p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-900/10">
-                  <div class="flex items-start justify-between mb-6">
-                    <div class="flex items-center gap-4">
-                      <div class="h-14 w-14 rounded-2xl bg-slate-800 border border-slate-700 overflow-hidden grid place-items-center text-2xl font-bold text-slate-400 group-hover:border-violet-500/30 transition-colors animate-pulse">
-                        <% if (plinkk.pfp) { %>
-                          <img src="/public/uploads/<%= plinkk.pfp %>" alt="<%= plinkk.slug %>" class="h-full w-full object-cover opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0'); this.parentElement.classList.remove('animate-pulse');" />
-                        <% } else { %>
-                          <script>document.currentScript.parentElement.classList.remove('animate-pulse');</script>
-                          <%= plinkk.slug.substring(0, 1).toUpperCase() %>
-                        <% } %>
-                      </div>
-                      <div>
-                        <h3 class="font-bold text-white text-lg group-hover:text-violet-400 transition-colors flex items-center gap-2 flex-wrap">
-                          <%= plinkk.name || plinkk.slug %>
-                        </h3>
-                        <a href="https://plinkk.fr/<%= plinkk.slug %>" target="_blank" class="text-sm text-slate-400 hover:text-violet-400 hover:underline flex items-center gap-1 transition-colors" onclick="event.stopPropagation()">
-                          plinkk.fr/<%= plinkk.slug %>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                        </a>
-                      </div>
-                    </div>
-                    
-                    <div class="relative">
-                      <button class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors" onclick="toggleMenu('<%= plinkk.id %>', event)">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                      </button>
-                      <!-- Dropdown Menu -->
-                      <div id="menu-<%= plinkk.id %>" class="hidden absolute right-0 top-full mt-2 w-48 bg-slate-900 border border-slate-800 rounded-xl shadow-xl z-20 overflow-hidden animate-scale-in origin-top-right">
-                        <a href="/edit?plinkkId=<%= plinkk.id %>" class="flex items-center gap-2 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                          Modifier
-                        </a>
-                        <a href="/stats?plinkkId=<%= plinkk.id %>" class="flex items-center gap-2 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
-                          Statistiques
-                        </a>
-                        <button onclick="exportPlinkk('<%= plinkk.id %>')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors text-left">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                          Exporter
-                        </button>
-                        <button onclick="openDeleteModal('<%= plinkk.id %>', '<%= plinkk.slug %>')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-left">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                          Supprimer
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="flex items-center justify-between pt-4 border-t border-slate-800">
-                    <div class="flex items-center gap-2 text-xs text-slate-400">
-                      <span class="flex items-center gap-1">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        <%= plinkk.views || 0 %>
-                      </span>
-                      <span class="w-1 h-1 rounded-full bg-slate-700"></span>
-                      <span><%= new Date(plinkk.createdAt).toLocaleDateString() %></span>
-                    </div>
-                    <a href="/edit?plinkkId=<%= plinkk.id %>" class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
-                      Gérer
-                    </a>
-                  </div>
+                <div>
+                  <h3 class="font-bold text-white text-lg">Débloquez plus de pages Plinkk</h3>
+                  <p class="text-slate-300 text-sm">Vous avez atteint la limite de votre plan. Passez Premium pour créer
+                    plus de pages !</p>
                 </div>
-              <% }) %>
-            </div>
-          <% } else { %>
-            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-12 text-center">
-              <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg class="w-10 h-10 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
               </div>
-              <h3 class="text-xl font-bold text-white mb-2">Aucun Plinkk</h3>
-              <p class="text-slate-400 mb-8 max-w-md mx-auto">Vous n'avez pas encore créé de page Plinkk. Commencez dès maintenant pour partager vos liens !</p>
-              <button onclick="document.getElementById('btnCreatePlinkk').click()" class="px-6 py-3 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-all hover:scale-105">
-                Créer mon premier Plinkk
-              </button>
+              <a href="/premium"
+                class="px-6 py-2.5 bg-white text-violet-900 font-bold rounded-xl hover:bg-slate-200 transition-colors shadow-lg shadow-black/20 whitespace-nowrap text-sm">
+                Passer Premium
+              </a>
             </div>
-          <% } %>
+            <% } %>
+
+              <!-- Plinkks Grid -->
+              <% if (plinkks && plinkks.length> 0) { %>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  <% plinkks.forEach(plinkk=> { %>
+                    <div
+                      class="group relative bg-slate-900 border border-slate-800 rounded-3xl p-6 hover:border-violet-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-violet-900/10">
+                      <div class="flex items-start justify-between mb-6">
+                        <div class="flex items-center gap-4">
+                          <div
+                            class="h-14 w-14 rounded-2xl bg-slate-800 border border-slate-700 overflow-hidden grid place-items-center text-2xl font-bold text-slate-400 group-hover:border-violet-500/30 transition-colors animate-pulse">
+                            <% if (plinkk.pfp) { %>
+                              <img src="/public/uploads/<%= plinkk.pfp %>" alt="<%= plinkk.slug %>"
+                                class="h-full w-full object-cover opacity-0 transition-opacity duration-300"
+                                onload="this.classList.remove('opacity-0'); this.parentElement.classList.remove('animate-pulse');" />
+                              <% } else { %>
+                                <script>document.currentScript.parentElement.classList.remove('animate-pulse');</script>
+                                <%= plinkk.slug.substring(0, 1).toUpperCase() %>
+                                  <% } %>
+                          </div>
+                          <div>
+                            <h3
+                              class="font-bold text-white text-lg group-hover:text-violet-400 transition-colors flex items-center gap-2 flex-wrap">
+                              <%= plinkk.name || plinkk.slug %>
+                            </h3>
+                            <a href="https://plinkk.fr/<%= plinkk.slug %>" target="_blank"
+                              class="text-sm text-slate-400 hover:text-violet-400 hover:underline flex items-center gap-1 transition-colors"
+                              onclick="event.stopPropagation()">
+                              plinkk.fr/<%= plinkk.slug %>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                  stroke-width="2">
+                                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                  <polyline points="15 3 21 3 21 9"></polyline>
+                                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                            </a>
+                          </div>
+                        </div>
+
+                        <div class="relative">
+                          <button
+                            class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                            onclick="toggleMenu('<%= plinkk.id %>', event)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                              stroke-width="2">
+                              <circle cx="12" cy="12" r="1" />
+                              <circle cx="12" cy="5" r="1" />
+                              <circle cx="12" cy="19" r="1" />
+                            </svg>
+                          </button>
+                          <!-- Dropdown Menu -->
+                          <div id="menu-<%= plinkk.id %>"
+                            class="hidden absolute right-0 top-full mt-2 w-48 bg-slate-900 border border-slate-800 rounded-xl shadow-xl z-20 overflow-hidden animate-scale-in origin-top-right">
+                            <a href="/edit?plinkkId=<%= plinkk.id %>"
+                              class="flex items-center gap-2 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                              </svg>
+                              Modifier
+                            </a>
+                            <a href="/stats?plinkkId=<%= plinkk.id %>"
+                              class="flex items-center gap-2 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M3 3v18h18" />
+                                <path d="M18 17V9" />
+                                <path d="M13 17V5" />
+                                <path d="M8 17v-3" />
+                              </svg>
+                              Statistiques
+                            </a>
+                            <button onclick="exportPlinkk('<%= plinkk.id %>')"
+                              class="w-full flex items-center gap-2 px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors text-left">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                              </svg>
+                              Exporter
+                            </button>
+                            <button onclick="openDeleteModal('<%= plinkk.id %>', '<%= plinkk.slug %>')"
+                              class="w-full flex items-center gap-2 px-4 py-3 text-sm text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-left">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path
+                                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                </path>
+                              </svg>
+                              Supprimer
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center justify-between pt-4 border-t border-slate-800">
+                        <div class="flex items-center gap-2 text-xs text-slate-400">
+                          <span class="flex items-center gap-1">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                              stroke-width="2">
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                              <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <%= plinkk.views || 0 %>
+                          </span>
+                          <span class="w-1 h-1 rounded-full bg-slate-700"></span>
+                          <span>
+                            <%= new Date(plinkk.createdAt).toLocaleDateString() %>
+                          </span>
+                        </div>
+                        <a href="/edit?plinkkId=<%= plinkk.id %>"
+                          class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
+                          Gérer
+                        </a>
+                      </div>
+                    </div>
+                    <% }) %>
+                </div>
+                <% } else { %>
+                  <div class="bg-slate-900 border border-slate-800 rounded-3xl p-12 text-center">
+                    <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <svg class="w-10 h-10 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Aucun Plinkk</h3>
+                    <p class="text-slate-400 mb-8 max-w-md mx-auto">Vous n'avez pas encore créé de page Plinkk.
+                      Commencez dès maintenant pour partager vos liens !</p>
+                    <button onclick="document.getElementById('btnCreatePlinkk').click()"
+                      class="px-6 py-3 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-all hover:scale-105">
+                      Créer mon premier Plinkk
+                    </button>
+                  </div>
+                  <% } %>
         </main>
     </div>
 
@@ -132,8 +206,12 @@
         <div class="rounded-3xl bg-slate-900 border border-slate-800 p-8 shadow-2xl shadow-black/50">
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-xl font-bold text-white">Nouveau Plinkk</h3>
-            <button class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors modal-close">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <button
+              class="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors modal-close">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
             </button>
           </div>
 
@@ -142,14 +220,18 @@
               <label class="block text-sm font-medium text-slate-300 mb-2">Identifiant (slug)</label>
               <div class="relative">
                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm">plinkk.fr/</span>
-                <input type="text" name="slug" required pattern="[a-zA-Z0-9-_]+" class="w-full pl-20 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none transition-colors" placeholder="mon-super-plinkk" />
+                <input type="text" name="slug" required pattern="[a-zA-Z0-9-_]+"
+                  class="w-full pl-20 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none transition-colors"
+                  placeholder="mon-super-plinkk" />
               </div>
               <p class="text-xs text-slate-500 mt-2">Lettres, chiffres, tirets et underscores uniquement.</p>
             </div>
 
             <div class="flex items-center justify-end gap-3">
-              <button type="button" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors modal-close">Annuler</button>
-              <button type="submit" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors">Créer</button>
+              <button type="button"
+                class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors modal-close">Annuler</button>
+              <button type="submit"
+                class="px-4 py-2.5 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors">Créer</button>
             </div>
           </form>
         </div>
@@ -163,7 +245,9 @@
         <div class="rounded-3xl bg-slate-900 border border-slate-800 p-8 shadow-2xl shadow-black/50">
           <div class="flex items-center gap-4 mb-6">
             <div class="p-3 rounded-full bg-rose-500/10 text-rose-500">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
             </div>
             <div>
               <h3 class="text-xl font-bold text-white">Supprimer ce Plinkk ?</h3>
@@ -171,12 +255,74 @@
             </div>
           </div>
 
-          <p class="text-slate-300 mb-6">Êtes-vous sûr de vouloir supprimer <span id="deleteSlug" class="font-bold text-white"></span> ? Toutes les données associées seront perdues.</p>
+          <p class="text-slate-300 mb-6">Êtes-vous sûr de vouloir supprimer <span id="deleteSlug"
+              class="font-bold text-white"></span> ? Toutes les données associées seront perdues.</p>
 
           <form id="formDeletePlinkk" class="flex items-center justify-end gap-3">
             <input type="hidden" name="plinkkId" id="deletePlinkkId" />
-            <button type="button" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors modal-close">Annuler</button>
-            <button type="submit" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">Supprimer</button>
+            <button type="button"
+              class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors modal-close">Annuler</button>
+            <button type="submit"
+              class="px-4 py-2.5 text-sm font-medium rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">Supprimer</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="exportModal" class="fixed inset-0 hidden z-50 grid place-items-center backdrop-blur-sm">
+      <div class="absolute inset-0 bg-black/60 modal-overlay"></div>
+      <div class="relative w-full max-w-md mx-4 animate-scale-in">
+        <div class="rounded-3xl bg-slate-900 border border-slate-800 p-8 shadow-2xl shadow-black/50">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="p-3 rounded-full bg-blue-500/10 text-blue-500">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-white">Exporter ce Plinkk</h3>
+              <p class="text-sm text-slate-400">Choisissez les éléments à inclure.</p>
+            </div>
+          </div>
+
+          <form id="formExportPlinkk" class="space-y-4">
+            <input type="hidden" name="plinkkId" id="exportPlinkkId" />
+
+            <div class="space-y-3">
+              <label
+                class="flex items-center gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                <input type="checkbox" name="includeImages" checked
+                  class="w-5 h-5 rounded border-slate-700 bg-slate-800 text-violet-600 focus:ring-violet-900 focus:ring-offset-0">
+                <span class="text-sm font-medium text-slate-200">Inclure les images (profil, cover...)</span>
+              </label>
+              <label
+                class="flex items-center gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                <input type="checkbox" name="includeIcons" checked
+                  class="w-5 h-5 rounded border-slate-700 bg-slate-800 text-violet-600 focus:ring-violet-900 focus:ring-offset-0">
+                <span class="text-sm font-medium text-slate-200">Inclure les icônes (réseaux...)</span>
+              </label>
+              <label
+                class="flex items-center gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                <input type="checkbox" name="includeCanva" checked
+                  class="w-5 h-5 rounded border-slate-700 bg-slate-800 text-violet-600 focus:ring-violet-900 focus:ring-offset-0">
+                <span class="text-sm font-medium text-slate-200">Inclure l'animation Canva</span>
+              </label>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 mt-6">
+              <button type="button"
+                class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors modal-close">Annuler</button>
+              <button type="submit"
+                class="px-4 py-2.5 text-sm font-medium rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/20 transition-colors flex items-center gap-2">
+                <span>Télécharger</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              </button>
+            </div>
           </form>
         </div>
       </div>
@@ -190,10 +336,10 @@
         if (!container) return console.log(message);
         const el = document.createElement('div');
         el.className = 'pointer-events-auto max-w-sm w-full rounded-xl px-4 py-3 text-sm shadow-lg border flex items-center gap-3 animate-slide-in-right';
-        
+
         let bg = 'bg-slate-900 text-white border-slate-800';
         let icon = '';
-        
+
         if (type === 'success') {
           bg = 'bg-slate-900 text-emerald-400 border-emerald-500/30';
           icon = '<svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
@@ -201,26 +347,46 @@
           bg = 'bg-slate-900 text-rose-400 border-rose-500/30';
           icon = '<svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
         }
-        
+
         el.className += ' ' + bg;
         el.innerHTML = `${icon}<span>${message}</span>`;
-        
+
         container.appendChild(el);
-        
+
         const timeout = opts.timeout || 3500;
-        const remove = () => { 
-          el.style.opacity = '0'; 
+        const remove = () => {
+          el.style.opacity = '0';
           el.style.transform = 'translateX(100%)';
-          setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 300); 
+          setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
         };
         el.addEventListener('click', remove);
         setTimeout(remove, timeout);
         return el;
       }
 
-      async function exportPlinkk(id) {
+      const exportModal = document.getElementById('exportModal');
+
+      function exportPlinkk(id) {
+        document.getElementById('exportPlinkkId').value = id;
+        exportModal.classList.remove('hidden');
+      }
+
+      document.getElementById('formExportPlinkk')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const id = fd.get('plinkkId');
+        const params = new URLSearchParams();
+        if (fd.get('includeImages')) params.append('includeImages', 'true');
+        if (fd.get('includeIcons')) params.append('includeIcons', 'true');
+        if (fd.get('includeCanva')) params.append('includeCanva', 'true');
+
+        const btn = e.target.querySelector('button[type="submit"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+        btn.disabled = true;
+
         try {
-          const res = await fetch(`/api/me/plinkks/${id}/export.zip`);
+          const res = await fetch(`/api/me/plinkks/${id}/export.zip?${params.toString()}`);
           if (res.ok) {
             const blob = await res.blob();
             const url = window.URL.createObjectURL(blob);
@@ -231,24 +397,31 @@
             a.click();
             a.remove();
             showAlert('Export téléchargé', 'success');
+            exportModal.classList.add('hidden');
           } else {
-            showAlert('Erreur lors de l\'export', 'error');
+            const text = await res.json();
+            const msg = text.details ? `${text.error}: ${text.details}` : (text.error || 'Erreur lors de l\'export');
+            showAlert(msg, 'error', { timeout: 5000 });
           }
         } catch (err) {
           showAlert('Erreur réseau', 'error');
+        } finally {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
         }
-      }
+      });
 
-      // Menu handling
+
+      // Menu handling (rest of code...)
       function toggleMenu(id, e) {
         e.stopPropagation();
         const menu = document.getElementById(`menu-${id}`);
         const allMenus = document.querySelectorAll('[id^="menu-"]');
-        
+
         allMenus.forEach(m => {
           if (m.id !== `menu-${id}`) m.classList.add('hidden');
         });
-        
+
         menu.classList.toggle('hidden');
       }
 
@@ -270,6 +443,7 @@
         el.addEventListener('click', () => {
           createModal.classList.add('hidden');
           deleteModal.classList.add('hidden');
+          exportModal.classList.add('hidden');
         });
       });
 
@@ -278,14 +452,14 @@
         e.preventDefault();
         const fd = new FormData(e.target);
         const slug = fd.get('slug');
-        
+
         try {
           const res = await fetch('/api/me/plinkks', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ slug })
           });
-          
+
           if (res.ok) {
             const data = await res.json();
             showAlert('Plinkk créé avec succès !', 'success');
@@ -293,10 +467,10 @@
           } else {
             const err = await res.json();
             if (err.error === 'max_pages_reached' && err.canUpgrade) {
-               if (confirm(err.message + "\n\nVoulez-vous découvrir nos offres Premium ?")) {
-                  window.location.href = '/premium';
-               }
-               return;
+              if (confirm(err.message + "\n\nVoulez-vous découvrir nos offres Premium ?")) {
+                window.location.href = '/premium';
+              }
+              return;
             }
             showAlert(err.error || 'Erreur lors de la création', 'error');
           }
@@ -315,12 +489,12 @@
       document.getElementById('formDeletePlinkk')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('deletePlinkkId').value;
-        
+
         try {
           const res = await fetch(`/api/me/plinkks/${id}`, {
             method: 'DELETE'
           });
-          
+
           if (res.ok) {
             showAlert('Plinkk supprimé', 'success');
             setTimeout(() => window.location.reload(), 1000);
