@@ -9,6 +9,7 @@ import { generateProfileConfig } from "../../../../lib/generateConfig";
 import { generateTheme } from "../../../../lib/generateTheme";
 import { fetchRemoteFile } from "../../../../lib/fileUtils";
 import { canvaData } from "../../../../public/config/canvaConfig";
+import { logUserAction } from "../../../../lib/userLogger";
 
 export function plinkksExportRoutes(fastify: FastifyInstance) {
   fastify.get("/:id/export.zip", async (request, reply) => {
@@ -85,6 +86,8 @@ export function plinkksExportRoutes(fastify: FastifyInstance) {
 
     const themes = await generateTheme(page.userId);
     const archive = archiver("zip", { zlib: { level: 9 } });
+
+    await logUserAction(userId as string, "EXPORT_PLINKK", id, {}, request.ip);
 
     archive.on("error", function (err) {
       console.error("Archiver error:", err);

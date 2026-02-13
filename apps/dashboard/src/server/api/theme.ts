@@ -4,6 +4,8 @@ import { coerceThemeData } from "../../lib/theme";
 import { verifyRoleIsStaff } from "../../lib/verifyRole";
 import { ensurePermission } from "../../lib/permissions";
 import { generateTheme } from "../../lib/generateTheme";
+import { logUserAction } from "../../lib/userLogger";
+import { logAdminAction } from "../../lib/adminLogger";
 
 // const prisma = new PrismaClient();
 
@@ -46,14 +48,15 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post("/:id/approve-update", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'APPROVE_THEME');
     if (!ok) return;
     const { id } = request.params as { id: string };
     const t = await prisma.theme.findUnique({
       where: { id },
-      select: { pendingUpdate: true },
+      select: { pendingUpdate: true, authorId: true, name: true },
     });
     if (!t || !t.pendingUpdate)
       return reply.code(400).send({ error: "Aucune mise à jour en attente" });
@@ -66,18 +69,23 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
         pendingUpdateMessage: null,
       },
     });
+    if (t.authorId) {
+      await logUserAction(t.authorId, "THEME_UPDATE_APPROVED", meId, { themeId: id, themeName: t.name }, request.ip);
+      await logAdminAction(meId, "APPROVE_THEME_UPDATE", t.authorId, { themeId: id }, request.ip);
+    }
     return reply.send({ ok: true });
   });
 
   fastify.post("/:id/reject-update", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'APPROVE_THEME');
     if (!ok) return;
     const { id } = request.params as { id: string };
     const t = await prisma.theme.findUnique({
       where: { id },
-      select: { pendingUpdate: true },
+      select: { pendingUpdate: true, authorId: true, name: true },
     });
     if (!t || !t.pendingUpdate)
       return reply.code(400).send({ error: "Aucune mise à jour en attente" });
@@ -89,37 +97,54 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
         pendingUpdateMessage: null,
       },
     });
+    if (t.authorId) {
+      await logUserAction(t.authorId, "THEME_UPDATE_REJECTED", meId, { themeId: id, themeName: t.name }, request.ip);
+      await logAdminAction(meId, "REJECT_THEME_UPDATE", t.authorId, { themeId: id }, request.ip);
+    }
     return reply.send({ ok: true });
   });
 
   fastify.post("/:id/unarchive", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'ARCHIVE_THEME');
     if (!ok) return;
     const { id } = request.params as { id: string };
-    await prisma.theme.update({
+    const updated = await prisma.theme.update({
       where: { id },
       data: { status: "APPROVED" },
+      select: { id: true, status: true, authorId: true, name: true },
     });
+    if (updated.authorId) {
+      await logUserAction(updated.authorId, "THEME_UNARCHIVED", meId, { themeId: id, themeName: updated.name }, request.ip);
+      await logAdminAction(meId, "UNARCHIVE_THEME", updated.authorId, { themeId: id }, request.ip);
+    }
     return reply.send({ ok: true });
   });
 
   fastify.post("/:id/archive", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'ARCHIVE_THEME');
     if (!ok) return;
     const { id } = request.params as { id: string };
-    await prisma.theme.update({
+    const updated = await prisma.theme.update({
       where: { id },
       data: { status: "ARCHIVED" },
+      select: { id: true, status: true, authorId: true, name: true },
     });
+    if (updated.authorId) {
+      await logUserAction(updated.authorId, "THEME_ARCHIVED", meId, { themeId: id, themeName: updated.name }, request.ip);
+      await logAdminAction(meId, "ARCHIVE_THEME", updated.authorId, { themeId: id }, request.ip);
+    }
     return reply.send({ ok: true });
   });
 
   fastify.post("/:id/approve", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'APPROVE_THEME');
     if (!ok) return;
@@ -127,13 +152,18 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     const updated = await prisma.theme.update({
       where: { id },
       data: { status: "APPROVED" },
-      select: { id: true, status: true },
+      select: { id: true, status: true, authorId: true, name: true },
     });
+    if (updated.authorId) {
+      await logUserAction(updated.authorId, "THEME_APPROVED", meId, { themeId: id, themeName: updated.name }, request.ip);
+      await logAdminAction(meId, "APPROVE_THEME", updated.authorId, { themeId: id }, request.ip);
+    }
     return reply.send(updated);
   });
 
   fastify.post("/:id/reject", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'APPROVE_THEME');
     if (!ok) return;
@@ -141,19 +171,29 @@ export function apiThemeRoutes(fastify: FastifyInstance) {
     const updated = await prisma.theme.update({
       where: { id },
       data: { status: "REJECTED" },
-      select: { id: true, status: true },
+      select: { id: true, status: true, authorId: true, name: true },
     });
+    if (updated.authorId) {
+      await logUserAction(updated.authorId, "THEME_REJECTED", meId, { themeId: id, themeName: updated.name }, request.ip);
+      await logAdminAction(meId, "REJECT_THEME", updated.authorId, { themeId: id }, request.ip);
+    }
     return reply.send(updated);
   });
 
   fastify.delete("/:id", async (request, reply) => {
-    const meId = request.session.get("data");
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, 'DELETE_ANY_THEME');
     if (!ok) return;
     const { id } = request.params as { id: string };
     try {
+      const t = await prisma.theme.findUnique({ where: { id }, select: { authorId: true, name: true } });
       await prisma.theme.delete({ where: { id } });
+      if (t && t.authorId) {
+        await logUserAction(t.authorId, "THEME_DELETED", meId, { themeId: id, themeName: t.name }, request.ip);
+        await logAdminAction(meId, "DELETE_THEME", t.authorId, { themeId: id }, request.ip);
+      }
       return reply.send({ ok: true });
     } catch (e) {
       return reply.code(404).send({ error: "Not found" });

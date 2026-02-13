@@ -1,559 +1,799 @@
-<%- include('partials/head.ejs', { title: 'Logs Admin - Administration', description: 'Historique des actions administratives.', robots: 'noindex,nofollow' }) %>
-<%- include('partials/header-dash.ejs', { user: user }) %>
+<%- include('partials/head.ejs', { title: 'Logs Admin - Administration' ,
+    description: 'Historique des actions administratives.' , robots: 'noindex,nofollow' }) %>
+    <%- include('partials/header-dash.ejs', { user: user }) %>
 
-<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-    <%- include('partials/admin-nav.ejs', { user: user, active: 'logs' }) %>
+        <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+            <%- include('partials/admin-nav.ejs', { user: user, active: 'logs' }) %>
 
-    <main class="col-span-12 lg:col-span-10 space-y-8">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-            <div class="relative z-10">
-                <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Logs d'Audit</h1>
-                <p class="text-slate-400 text-lg">Historique des actions effectuées par les administrateurs et les utilisateurs.</p>
-            </div>
-        </div>
-
-        <div class="flex items-center gap-2 p-1 bg-slate-900 border border-slate-800 rounded-2xl w-fit">
-            <button onclick="switchTab('admin')" id="tab-admin" class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-blue-600 text-white shadow-lg shadow-blue-900/20">
-                Logs Staff
-            </button>
-            <button onclick="switchTab('user')" id="tab-user" class="px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
-                Logs Utilisateurs
-            </button>
-        </div>
-
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 mb-6 flex flex-wrap gap-4 items-end">
-            <div class="flex flex-col gap-1">
-                <label id="labelAdmin" class="text-xs text-slate-400 uppercase font-bold">Acteur (ID)</label>
-                <input type="text" id="filterAdmin" placeholder="ID..." class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
-            </div>
-            <div class="flex flex-col gap-1">
-                <label class="text-xs text-slate-400 uppercase font-bold">Cible (ID)</label>
-                <input type="text" id="filterTarget" placeholder="ID..." class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
-            </div>
-            <div class="flex flex-col gap-1">
-                <label class="text-xs text-slate-400 uppercase font-bold">Action</label>
-                <select id="filterAction" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
-                    <option value="">Toutes</option>
-                </select>
-                <select id="filterActionAdmin" class="hidden">
-                    <option value="">Toutes</option>
-                    <option value="LOGIN">Connexion</option>
-                    <option value="IMPERSONATE">Impersonnification</option>
-                    <option value="UPDATE_PROFILE">Modif. Profil</option>
-                    <option value="UPDATE_USER_PROFILE">Modif. Profil (API)</option>
-                    <option value="BAN_USER">Bannissement</option>
-                    <option value="UNBAN_USER">Débannissement</option>
-                    <option value="REVOKE_SESSION">Révocation Session</option>
-                    <option value="REVOKE_ALL_SESSIONS">Révocation (Toutes)</option>
-                    <option value="UPDATE_USER_ROLE">Modif. Rôle (API)</option>
-                    <option value="UPDATE_ROLE">Modif. Rôle</option>
-                    <option value="UPDATE_BADGES">Modif. Badges</option>
-                    <option value="DISABLE_2FA">Désactiver 2FA</option>
-                    <option value="CREATE_ROLE">Création Rôle</option>
-                    <option value="UPDATE_ROLE">Modif. Rôle</option>
-                    <option value="DELETE_ROLE">Suppr. Rôle</option>
-                    <option value="MANAGE_THEME">Thèmes</option>
-                    <option value="RUN_TASK">Tâches Système</option>
-                </select>
-                <select id="filterActionUser" class="hidden">
-                    <option value="">Toutes</option>
-                    <option value="LOGIN">Connexion</option>
-                    <option value="REGISTER">Inscription</option>
-                    <option value="UPDATE_PROFILE">Modif. Profil</option>
-                    <option value="CHANGE_PASSWORD">Modif. Password</option>
-                    <option value="CHANGE_EMAIL">Modif. Email</option>
-                    <option value="UPDATE_AVATAR">Modif. Photo Profil</option>
-                    <option value="CREATE_PLINKK">Création Plinkk</option>
-                    <option value="UPDATE_PLINKK">Modif. Plinkk</option>
-                    <option value="DELETE_PLINKK">Suppr. Plinkk</option>
-                    <option value="CREATE_REDIRECT">Création Redirection</option>
-                    <option value="UPDATE_REDIRECT">Modif. Redirection</option>
-                    <option value="DELETE_REDIRECT">Suppr. Redirection</option>
-                    <option value="CREATE_THEME">Création Thème</option>
-                    <option value="UPDATE_THEME">Modif. Thème</option>
-                    <option value="DELETE_THEME">Suppr. Thème</option>
-                    <option value="CREATE_API_KEY">Création Clé API</option>
-                    <option value="LINK_DNS">Liaison DNS</option>
-                    <option value="REVOKE_SESSION">Révocation Session</option>
-                    <option value="CONNECT_ACCOUNT">Liaison Compte</option>
-                </select>
-            </div>
-            <div class="flex flex-col gap-1">
-                <label class="text-xs text-slate-400 uppercase font-bold">De</label>
-                <input type="date" id="filterFrom" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
-            </div>
-            <div class="flex flex-col gap-1">
-                <label class="text-xs text-slate-400 uppercase font-bold">À</label>
-                <input type="date" id="filterTo" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
-            </div>
-            <div class="flex flex-col gap-1">
-                <label class="text-xs text-slate-400 uppercase font-bold">Tri</label>
-                <select id="sortOrder" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
-                    <option value="desc">Récent d'abord</option>
-                    <option value="asc">Ancien d'abord</option>
-                </select>
-            </div>
-            <button onclick="currentPage=1; loadLogs()" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-colors h-[38px]">Filtrer</button>
-        </div>
-
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-800 bg-slate-950/50 text-xs uppercase tracking-wider text-slate-400">
-                            <th class="px-6 py-4 font-medium">Date</th>
-                            <th id="headerUser" class="px-6 py-4 font-medium">Admin</th>
-                            <th class="px-6 py-4 font-medium">Action</th>
-                            <th class="px-6 py-4 font-medium">Cible</th>
-                            <th class="px-6 py-4 font-medium">Détails</th>
-                            <th class="px-6 py-4 font-medium">IP</th>
-                            <th class="px-6 py-4 font-medium"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="logsTableBody" class="text-sm text-slate-300 divide-y divide-slate-800">
-                        <tr><td colspan="7" class="px-6 py-8 text-center text-slate-500">Chargement...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="p-4 border-t border-slate-800 bg-slate-950/30 flex justify-between items-center" id="paginationControls">
-                <button id="prevPage" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm disabled:opacity-50">Précédent</button>
-                <span id="pageInfo" class="text-slate-400 text-sm">Page 1</span>
-                <button id="nextPage" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm disabled:opacity-50">Suivant</button>
-            </div>
-        </div>
-    </main>
-</div>
-
-<!-- Modal Détails Log -->
-<div id="logDetailsModal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black/80 backdrop-blur-xl transition-all duration-300" onclick="closeLogDetails()"></div>
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-slate-900/90 border border-slate-700/50 rounded-[2.5rem] shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] p-0 overflow-hidden ring-1 ring-white/10">
-        <!-- Header -->
-        <div class="p-8 pb-4 flex justify-between items-start">
-            <div>
-                <div class="flex items-center gap-3 mb-2">
-                    <div class="p-2.5 bg-violet-600/20 rounded-2xl border border-violet-500/30">
-                        <svg class="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <main class="col-span-12 lg:col-span-10 space-y-8">
+                    <div
+                        class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+                        <div
+                            class="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none">
+                        </div>
+                        <div class="relative z-10">
+                            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Logs d'Audit</h1>
+                            <p class="text-slate-400 text-lg">Historique des actions effectuées par les administrateurs
+                                et les utilisateurs.</p>
+                        </div>
                     </div>
-                    <h2 class="text-2xl font-black text-white tracking-tight">Détails de l'activité</h2>
-                </div>
-                <p class="text-slate-500 text-xs font-mono bg-slate-800/50 px-3 py-1 rounded-full border border-slate-700/50 w-fit" id="modalLogId"></p>
-            </div>
-            <button onclick="closeLogDetails()" class="p-3 hover:bg-slate-800 rounded-2xl text-slate-500 hover:text-white transition-all transform hover:rotate-90">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"></path></svg>
-            </button>
-        </div>
-        
-        <div class="p-8 pt-4 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
-            <!-- Info Brutes -->
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-slate-950/40 rounded-3xl p-5 border border-slate-800/50 group hover:border-blue-500/30 transition-colors">
-                    <label class="text-[10px] text-slate-500 uppercase font-bold block mb-2 tracking-widest flex items-center gap-2">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        Horodatage
-                    </label>
-                    <div id="modalDate" class="text-white font-mono text-sm group-hover:text-blue-400 transition-colors"></div>
-                </div>
-                <div class="bg-slate-950/40 rounded-3xl p-5 border border-slate-800/50 group hover:border-emerald-500/30 transition-colors">
-                    <label class="text-[10px] text-slate-500 uppercase font-bold block mb-2 tracking-widest flex items-center gap-2">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A2 2 0 013 15.487V6.513a2 2 0 011.553-1.943l1.9-0.475a4 4 0 011.547 0l1.9 0.475A2 2 0 0111.447 6.513v8.974a2 2 0 01-0.553 1.289l-1.9 0.475a4 4 0 01-1.547 0z"></path></svg>
-                        Adresse IP
-                    </label>
-                    <div id="modalIp" class="text-white font-mono text-sm group-hover:text-emerald-400 transition-colors"></div>
-                </div>
-            </div>
 
-            <!-- Acteur -->
-            <div class="bg-slate-950/40 rounded-3xl p-5 border border-slate-800/50 shadow-inner">
-                <label class="text-[10px] text-slate-500 uppercase font-bold block mb-4 tracking-widest">Acteur du log</label>
-                <div class="flex items-center gap-4">
-                    <div class="relative">
-                        <div class="w-14 h-14 rounded-2xl bg-blue-600/10 flex items-center justify-center text-xl font-black text-blue-400 border border-blue-500/20 shadow-lg" id="modalAdminAvatar"></div>
-                        <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-4 border-slate-900 rounded-full"></div>
+                    <div class="flex items-center gap-2 p-1 bg-slate-900 border border-slate-800 rounded-2xl w-fit">
+                        <button onclick="switchTab('admin')" id="tab-admin"
+                            class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-blue-600 text-white shadow-lg shadow-blue-900/20">
+                            Logs Staff
+                        </button>
+                        <button onclick="switchTab('user')" id="tab-user"
+                            class="px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800">
+                            Logs Utilisateurs
+                        </button>
                     </div>
+
+                    <div
+                        class="bg-slate-900 border border-slate-800 rounded-3xl p-4 mb-6 flex flex-wrap gap-4 items-end">
+                        <div class="flex flex-col gap-1">
+                            <label id="labelAdmin" class="text-xs text-slate-400 uppercase font-bold">Acteur
+                                (ID)</label>
+                            <input type="text" id="filterAdmin" placeholder="ID..."
+                                class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs text-slate-400 uppercase font-bold">Cible (ID)</label>
+                            <input type="text" id="filterTarget" placeholder="ID..."
+                                class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs text-slate-400 uppercase font-bold">Action</label>
+                            <select id="filterAction"
+                                class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
+                                <option value="">Toutes</option>
+                            </select>
+                            <select id="filterActionAdmin" class="hidden">
+                                <option value="">Toutes</option>
+                                <option value="LOGIN">Connexion</option>
+                                <option value="IMPERSONATE">Impersonnification</option>
+                                <option value="UPDATE_PROFILE">Modif. Profil</option>
+                                <option value="UPDATE_USER_PROFILE">Modif. Profil (API)</option>
+                                <option value="BAN_USER">Bannissement</option>
+                                <option value="UNBAN_USER">Débannissement</option>
+                                <option value="REVOKE_SESSION">Révocation Session</option>
+                                <option value="REVOKE_ALL_SESSIONS">Révocation (Toutes)</option>
+                                <option value="UPDATE_USER_ROLE">Modif. Rôle (API)</option>
+                                <option value="UPDATE_ROLE">Modif. Rôle</option>
+                                <option value="UPDATE_BADGES">Modif. Badges</option>
+                                <option value="DISABLE_2FA">Désactiver 2FA</option>
+                                <option value="CREATE_ROLE">Création Rôle</option>
+                                <option value="UPDATE_ROLE">Modif. Rôle</option>
+                                <option value="DELETE_ROLE">Suppr. Rôle</option>
+                                <option value="MANAGE_THEME">Thèmes</option>
+                                <option value="RUN_TASK">Tâches Système</option>
+                            </select>
+                            <select id="filterActionUser" class="hidden">
+                                <option value="">Toutes</option>
+                                <option value="LOGIN">Connexion</option>
+                                <option value="REGISTER">Inscription</option>
+                                <option value="UPDATE_PROFILE">Modif. Profil</option>
+                                <option value="CHANGE_PASSWORD">Modif. Password</option>
+                                <option value="CHANGE_EMAIL">Modif. Email</option>
+                                <option value="UPDATE_AVATAR">Modif. Photo Profil</option>
+                                <option value="CREATE_PLINKK">Création Plinkk</option>
+                                <option value="UPDATE_PLINKK">Modif. Plinkk</option>
+                                <option value="DELETE_PLINKK">Suppr. Plinkk</option>
+                                <option value="CREATE_REDIRECT">Création Redirection</option>
+                                <option value="UPDATE_REDIRECT">Modif. Redirection</option>
+                                <option value="DELETE_REDIRECT">Suppr. Redirection</option>
+                                <option value="CREATE_THEME">Création Thème</option>
+                                <option value="UPDATE_THEME">Modif. Thème</option>
+                                <option value="DELETE_THEME">Suppr. Thème</option>
+                                <option value="CREATE_API_KEY">Création Clé API</option>
+                                <option value="LINK_DNS">Liaison DNS</option>
+                                <option value="REVOKE_SESSION">Révocation Session</option>
+                                <option value="CONNECT_ACCOUNT">Liaison Compte</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs text-slate-400 uppercase font-bold">De</label>
+                            <input type="date" id="filterFrom"
+                                class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs text-slate-400 uppercase font-bold">À</label>
+                            <input type="date" id="filterTo"
+                                class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs text-slate-400 uppercase font-bold">Tri</label>
+                            <select id="sortOrder"
+                                class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors">
+                                <option value="desc">Récent d'abord</option>
+                                <option value="asc">Ancien d'abord</option>
+                            </select>
+                        </div>
+                        <button onclick="currentPage=1; loadLogs()"
+                            class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-colors h-[38px]">Filtrer</button>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr
+                                        class="border-b border-slate-800 bg-slate-950/50 text-xs uppercase tracking-wider text-slate-400">
+                                        <th class="px-6 py-4 font-medium">Date</th>
+                                        <th id="headerUser" class="px-6 py-4 font-medium">Admin</th>
+                                        <th class="px-6 py-4 font-medium">Action</th>
+                                        <th class="px-6 py-4 font-medium">Cible</th>
+                                        <th class="px-6 py-4 font-medium">Détails</th>
+                                        <th class="px-6 py-4 font-medium">IP</th>
+                                        <th class="px-6 py-4 font-medium"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="logsTableBody" class="text-sm text-slate-300 divide-y divide-slate-800">
+                                    <tr>
+                                        <td colspan="7" class="px-6 py-8 text-center text-slate-500">Chargement...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="p-4 border-t border-slate-800 bg-slate-950/30 flex justify-between items-center"
+                            id="paginationControls">
+                            <button id="prevPage"
+                                class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm disabled:opacity-50">Précédent</button>
+                            <span id="pageInfo" class="text-slate-400 text-sm">Page 1</span>
+                            <button id="nextPage"
+                                class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm disabled:opacity-50">Suivant</button>
+                        </div>
+                    </div>
+                </main>
+        </div>
+
+        <!-- Modal Détails Log -->
+        <div id="logDetailsModal" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-black/80 backdrop-blur-xl transition-all duration-300"
+                onclick="closeLogDetails()"></div>
+            <div
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-slate-900/90 border border-slate-700/50 rounded-[2.5rem] shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] p-0 overflow-hidden ring-1 ring-white/10">
+                <!-- Header -->
+                <div class="p-8 pb-4 flex justify-between items-start">
                     <div>
-                        <div id="modalAdminName" class="text-white text-lg font-bold tracking-tight"></div>
-                        <div id="modalAdminId" class="text-slate-500 text-[10px] font-mono mt-0.5 opacity-60"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action -->
-            <div class="bg-slate-950/40 rounded-3xl p-5 border border-slate-800/50">
-                <label class="text-[10px] text-slate-500 uppercase font-bold block mb-3 tracking-widest">Évènement</label>
-                <div class="flex flex-col gap-3">
-                    <div class="flex items-center gap-3">
-                        <div class="h-10 px-4 flex items-center justify-center rounded-xl bg-violet-600/10 text-violet-400 border border-violet-500/20 text-xs font-black font-mono tracking-tighter" id="modalAction"></div>
-                        <span class="text-slate-600 font-medium italic">sur la cible</span>
-                        <div class="flex-1 bg-slate-900 rounded-xl px-4 py-2 border border-slate-800 text-white font-mono text-xs break-all shadow-inner" id="modalTarget"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Cible Utilisateur -->
-            <div id="modalTargetUserInfo" class="hidden relative overflow-hidden bg-blue-600/5 rounded-3xl p-6 border border-blue-500/20">
-                <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                    <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
-                </div>
-                <label class="text-[10px] text-blue-400 uppercase font-bold block mb-4 tracking-widest">Utilisateur Cible détecté</label>
-                <div class="flex items-center justify-between relative z-10">
-                    <div class="flex items-center gap-4">
-                        <div class="relative">
-                            <img id="modalTargetAvatar" src="" class="w-14 h-14 rounded-2xl border-2 border-blue-500/30 hidden shadow-xl">
-                            <div id="modalTargetAvatarPlaceholder" class="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/20 flex items-center justify-center text-xl font-black text-blue-400"></div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="p-2.5 bg-violet-600/20 rounded-2xl border border-violet-500/30">
+                                <svg class="w-5 h-5 text-violet-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-black text-white tracking-tight">Détails de l'activité</h2>
                         </div>
-                        <div>
-                            <div id="modalTargetName" class="text-white text-lg font-bold tracking-tight"></div>
-                            <div id="modalTargetEmail" class="text-slate-400 text-xs font-medium opacity-80"></div>
-                        </div>
+                        <p class="text-slate-500 text-xs font-mono bg-slate-800/50 px-3 py-1 rounded-full border border-slate-700/50 w-fit"
+                            id="modalLogId"></p>
                     </div>
-                    <a id="modalTargetLink" href="" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black rounded-2xl transition-all shadow-lg shadow-blue-900/40 transform hover:scale-105">
-                        VOIR PROFIL
-                    </a>
-                </div>
-            </div>
-
-            <!-- Métadonnées -->
-            <div class="space-y-3">
-                <div class="flex items-center justify-between mb-4 px-2">
-                    <label class="text-[10px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2">
-                        <svg class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-                        Données additionnelles (JSON)
-                    </label>
-                    <button id="copyJsonBtn" class="text-[10px] text-slate-500 hover:text-white flex items-center gap-1.5 transition-colors group">
-                        <svg class="w-3 h-3 opacity-50 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                        Copier la data
+                    <button onclick="closeLogDetails()"
+                        class="p-3 hover:bg-slate-800 rounded-2xl text-slate-500 hover:text-white transition-all transform hover:rotate-90">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M18 6L6 18M6 6l12 12"></path>
+                        </svg>
                     </button>
                 </div>
-                <div id="modalJson" class="grid grid-cols-1 gap-3"></div>
-            </div>
-        </div>
-        
-        <!-- Footer -->
-        <div class="p-6 bg-slate-950/20 border-t border-slate-800/50 flex justify-end px-8">
-            <button onclick="closeLogDetails()" class="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-2xl transition-all border border-slate-700/50">
-                Fermer
-            </button>
-        </div>
-    </div>
-</div>
 
-<!-- Modal Gestion Utilisateur (repris de dash.ejs) -->
-<div id="userManageModal" class="fixed inset-0 hidden z-[2147483600] items-center justify-center backdrop-blur-md">
-    <div class="absolute inset-0 bg-black/70 animate-fade-in" data-close></div>
-    
-    <div class="relative w-full max-w-5xl h-[85vh] bg-slate-900 flex overflow-hidden rounded-2xl shadow-2xl animate-scale-in mx-4 font-sans text-slate-200 border border-slate-800">
-        
-        <!-- Sidebar -->
-        <div class="w-64 bg-slate-950 flex-shrink-0 flex flex-col border-r border-slate-800">
-            <div class="p-5 pb-2">
-                 <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">UTILISATEUR</div>
-                 <div id="umSidebarName" class="font-bold text-white truncate text-base">User</div>
-                 <div id="umSidebarId" class="text-xs text-slate-500 truncate font-mono mt-0.5">@id</div>
-            </div>
-            
-            <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scrollbar" id="umTabsNav">
-                <button data-tab="overview" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-slate-800 text-white ring-1 ring-slate-700">
-                    <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    Vue d'ensemble
-                </button>
-                <button data-tab="profile" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium">
-                    <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    Profil
-                </button>
-                <button data-tab="plinkks" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium">
-                    <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                    Plinkks
-                </button>
-                <button data-tab="moderation" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium">
-                    <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    Modération
-                </button>
-                <div class="my-2 border-t border-slate-800 mx-2"></div>
-                <button data-tab="security" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium">
-                    <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                    Sécurité
-                </button>
-                <button data-tab="danger" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-sm font-medium">
-                    <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    Zone Rouge
-                </button>
-            </nav>
-            
-            <div class="p-4 border-t border-slate-800 text-[10px] text-slate-600 font-mono text-center">
-                User ID: <span id="umFooterId" class="select-all"></span>
-            </div>
-        </div>
-
-        <!-- Content -->
-        <div class="flex-1 flex flex-col min-w-0 bg-slate-900 relative">
-            <div class="absolute right-6 top-6 z-10">
-                <button id="umClose" class="flex flex-col items-center justify-center w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white transition-all ring-1 ring-slate-700">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-            </div>
-
-            <div class="flex-1 overflow-y-auto p-10 custom-scrollbar scroll-smooth" id="umContentArea">
-                
-                <!-- CONTENT: OVERVIEW -->
-                <div data-content="overview" class="space-y-8 animate-fade-in block">
-                    <h2 class="text-2xl font-bold text-white mb-6">Vue d'ensemble</h2>
-                    
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                         <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800">
-                            <div class="text-[11px] font-bold text-slate-500 uppercase mb-1">Ancienneté</div>
-                            <div id="umStatAge" class="text-lg font-bold text-white truncate">-</div>
-                         </div>
-                         <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800">
-                            <div class="text-[11px] font-bold text-slate-500 uppercase mb-1">Sessions</div>
-                            <div id="umStatSessions" class="text-lg font-bold text-violet-400">-</div>
-                         </div>
-                         <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800">
-                            <div class="text-[11px] font-bold text-slate-500 uppercase mb-1">Vues Cumulées</div>
-                            <div id="umStatViewsTotal" class="text-lg font-bold text-emerald-400">-</div>
-                         </div>
-                         <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800" data-tip="Total clics / Total vues">
-                            <div class="text-[11px] font-bold text-slate-500 uppercase mb-1">Taux de clic (CTR)</div>
-                            <div id="umStatCTR" class="text-lg font-bold text-amber-400">-</div>
-                         </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Rôles -->
-                        <div class="bg-slate-950/30 border border-slate-800 rounded-2xl p-5">
-                            <div class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Rôle & Permissions</div>
-                            <select id="umRole" class="w-full rounded-xl bg-slate-900 border border-slate-700 px-4 py-3 text-sm text-white focus:border-violet-500 outline-none transition-colors mb-4"></select>
-                            
-                            <div class="space-y-3">
-                                <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                                    <input id="umBadgeVerified" type="checkbox" class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-blue-500 focus:ring-blue-500 focus:ring-offset-0">
-                                    <span class="text-sm text-slate-300 flex items-center gap-2">Vérifié <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></span>
-                                    <svg id="umBadgeVerifiedSpin" class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                                </label>
-                                <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                                    <input id="umBadgePartner" type="checkbox" class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-violet-500 focus:ring-violet-500 focus:ring-offset-0">
-                                    <span class="text-sm text-slate-300 flex items-center gap-2">Partenaire <svg class="w-4 h-4 text-violet-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
-                                    <svg id="umBadgePartnerSpin" class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                                </label>
-                                <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                                    <input id="umBadgePremium" type="checkbox" class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500 focus:ring-offset-0">
-                                    <span class="text-sm text-slate-300 flex items-center gap-2">Premium <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.7 5.48 6.05.88-4.38 4.27 1.03 6.02L12 15.9 6.6 18.65l1.03-6.02L3.25 8.36l6.05-.88L12 2z"/></svg></span>
-                                    <svg id="umBadgePremiumSpin" class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                                </label>
+                <div class="p-8 pt-4 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                    <!-- Info Brutes -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div
+                            class="bg-slate-950/40 rounded-3xl p-5 border border-slate-800/50 group hover:border-blue-500/30 transition-colors">
+                            <label
+                                class="text-[10px] text-slate-500 uppercase font-bold block mb-2 tracking-widest flex items-center gap-2">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                                Horodatage
+                            </label>
+                            <div id="modalDate"
+                                class="text-white font-mono text-sm group-hover:text-blue-400 transition-colors"></div>
+                        </div>
+                        <div
+                            class="bg-slate-950/40 rounded-3xl p-5 border border-slate-800/50 group hover:border-emerald-500/30 transition-colors">
+                            <label
+                                class="text-[10px] text-slate-500 uppercase font-bold block mb-2 tracking-widest flex items-center gap-2">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 20l-5.447-2.724A2 2 0 013 15.487V6.513a2 2 0 011.553-1.943l1.9-0.475a4 4 0 011.547 0l1.9 0.475A2 2 0 0111.447 6.513v8.974a2 2 0 01-0.553 1.289l-1.9 0.475a4 4 0 01-1.547 0z">
+                                    </path>
+                                </svg>
+                                Adresse IP
+                            </label>
+                            <div id="modalIp"
+                                class="text-white font-mono text-sm group-hover:text-emerald-400 transition-colors">
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Actions Rapides -->
-                        <div class="bg-slate-950/30 border border-slate-800 rounded-2xl p-5">
-                             <div class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Actions Rapides</div>
-                             <div class="grid grid-cols-2 gap-3">
-                                <a id="umViewProfile" target="_blank" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all text-center gap-2 group cursor-pointer">
-                                    <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <svg class="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    <!-- Acteur -->
+                    <div class="bg-slate-950/40 rounded-3xl p-5 border border-slate-800/50 shadow-inner">
+                        <label class="text-[10px] text-slate-500 uppercase font-bold block mb-4 tracking-widest">Acteur
+                            du log</label>
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <div class="w-14 h-14 rounded-2xl bg-blue-600/10 flex items-center justify-center text-xl font-black text-blue-400 border border-blue-500/20 shadow-lg"
+                                    id="modalAdminAvatar"></div>
+                                <div
+                                    class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-4 border-slate-900 rounded-full">
+                                </div>
+                            </div>
+                            <div>
+                                <div id="modalAdminName" class="text-white text-lg font-bold tracking-tight"></div>
+                                <div id="modalAdminId" class="text-slate-500 text-[10px] font-mono mt-0.5 opacity-60">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action -->
+                    <div class="bg-slate-950/40 rounded-3xl p-5 border border-slate-800/50">
+                        <label
+                            class="text-[10px] text-slate-500 uppercase font-bold block mb-3 tracking-widest">Évènement</label>
+                        <div class="flex flex-col gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="h-10 px-4 flex items-center justify-center rounded-xl bg-violet-600/10 text-violet-400 border border-violet-500/20 text-xs font-black font-mono tracking-tighter"
+                                    id="modalAction"></div>
+                                <span class="text-slate-600 font-medium italic">sur la cible</span>
+                                <div class="flex-1 bg-slate-900 rounded-xl px-4 py-2 border border-slate-800 text-white font-mono text-xs break-all shadow-inner"
+                                    id="modalTarget"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cible Utilisateur -->
+                    <div id="modalTargetUserInfo"
+                        class="hidden relative overflow-hidden bg-blue-600/5 rounded-3xl p-6 border border-blue-500/20">
+                        <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                            <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z">
+                                </path>
+                            </svg>
+                        </div>
+                        <label
+                            class="text-[10px] text-blue-400 uppercase font-bold block mb-4 tracking-widest">Utilisateur
+                            Cible détecté</label>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div class="flex items-center gap-4">
+                                <div class="relative">
+                                    <img id="modalTargetAvatar" src=""
+                                        class="w-14 h-14 rounded-2xl border-2 border-blue-500/30 hidden shadow-xl">
+                                    <div id="modalTargetAvatarPlaceholder"
+                                        class="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/20 flex items-center justify-center text-xl font-black text-blue-400">
                                     </div>
-                                    <span class="text-xs font-medium text-slate-300">Voir Profil</span>
-                                </a>
-                                <button id="umCopyLink" class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all text-center gap-2 group">
-                                    <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <svg class="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                                    </div>
-                                    <span class="text-xs font-medium text-slate-300">Copier lien</span>
-                                </button>
-                                <button id="umImpersonate" class="col-span-2 flex items-center justify-center p-3 gap-3 rounded-xl bg-slate-800 hover:bg-violet-600/20 border border-slate-700 hover:border-violet-500/50 transition-all text-center group">
-                                     <svg class="w-5 h-5 text-slate-400 group-hover:text-violet-400 plinkk-spinner hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"></circle><path d="M22 12a10 10 0 0 1-10 10"></path></svg>
-                                     <svg class="w-5 h-5 text-slate-400 group-hover:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                     <span class="text-sm font-medium text-slate-300 group-hover:text-violet-200">Se connecter en tant que</span>
-                                </button>
-                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CONTENT: PROFILE -->
-                <div data-content="profile" class="hidden space-y-8 animate-fade-in block">
-                    <h2 class="text-2xl font-bold text-white mb-6">Profil & Identifiants</h2>
-                    
-                    <div class="bg-slate-950/30 border border-slate-800 rounded-2xl p-6 space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Nom d'utilisateur</label>
-                                <input id="umEditUsername" type="text" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:border-violet-500 outline-none transition-colors" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Email</label>
-                                <input id="umEditEmail" type="email" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:border-violet-500 outline-none transition-colors" />
-                            </div>
-                        </div>
-                        <div class="flex justify-end pt-2">
-                             <button id="umSaveProfile" class="px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium shadow-lg shadow-violet-900/20 transition-colors has-spinner flex items-center gap-2">
-                                <svg class="plinkk-spinner hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                                <span>Enregistrer les modifications</span>
-                             </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CONTENT: PLINKKS -->
-                <div data-content="plinkks" class="hidden space-y-8 animate-fade-in block">
-                     <div class="flex items-center justify-between mb-6">
-                         <h2 class="text-2xl font-bold text-white">Contenus de l'utilisateur</h2>
-                         <div class="flex gap-2">
-                             <div class="px-3 py-1 rounded-full bg-slate-800 text-slate-400 text-xs font-bold uppercase ring-1 ring-slate-700">
-                                 <span id="umPlCount">0</span> Plinkks
-                             </div>
-                             <div class="px-3 py-1 rounded-full bg-slate-800 text-slate-400 text-xs font-bold uppercase ring-1 ring-slate-700">
-                                 <span id="umRdCount">0</span> Redirs
-                             </div>
-                         </div>
-                     </div>
-
-                     <!-- PLINKKS LIST -->
-                     <section>
-                         <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                             Pages Plinkk
-                         </h3>
-                         <div id="umPlList" class="grid grid-cols-1 gap-3">
-                             <!-- Dynamic Plinkks -->
-                         </div>
-                     </section>
-
-                     <!-- REDIRECTS LIST -->
-                     <section class="mt-8">
-                         <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.826a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                             Redirections
-                         </h3>
-                         <div id="umRdList" class="grid grid-cols-1 gap-3">
-                             <!-- Dynamic Redirects -->
-                         </div>
-                     </section>
-                </div>
-
-                <!-- CONTENT: MODERATION -->
-                <div data-content="moderation" class="hidden space-y-8 animate-fade-in block">
-                     <h2 class="text-2xl font-bold text-white mb-6">Modération & Bans</h2>
-                     
-                     <div class="bg-slate-950/30 border border-slate-800 rounded-2xl p-6">
-                        <div id="umBanState" class="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-sm mb-6 hidden flex gap-3 items-start">
-                            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                            <div>
-                                <div class="font-bold">Utilisateur banni</div>
-                                <div class="text-orange-300/80 mt-1 banned-details"></div>
-                            </div>
-                        </div>
-
-                        <div id="umBanForm" class="space-y-5">
-                             <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Raison du bannissement</label>
-                                <textarea id="umBanReason" rows="3" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:border-rose-500 outline-none resize-none" placeholder="Motif visible par l'administration uniquement"></textarea>
-                             </div>
-                             <div class="grid grid-cols-2 gap-5">
+                                </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Durée (minutes)</label>
-                                    <input id="umBanMinutes" type="number" step="1" min="-1" class="w-full rounded-xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:border-rose-500 outline-none" placeholder="-1 pour permanent" value="-1" />
+                                    <div id="modalTargetName" class="text-white text-lg font-bold tracking-tight"></div>
+                                    <div id="modalTargetEmail" class="text-slate-400 text-xs font-medium opacity-80">
+                                    </div>
                                 </div>
-                                <div class="flex items-end pb-3">
-                                    <label class="flex items-center gap-3 cursor-pointer">
-                                        <input id="umBanDeletePlinkk" type="checkbox" class="rounded border-slate-700 bg-slate-900 text-rose-600 focus:ring-0">
-                                        <span class="text-sm text-slate-300">Supprimer toutes ses pages Plinkk</span>
-                                    </label>
-                                </div>
-                             </div>
-                             <div class="pt-2">
-                                 <button id="umBanApply" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold shadow-lg shadow-rose-900/20 transition-colors has-spinner flex items-center justify-center gap-2">
-                                     <svg class="plinkk-spinner hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                                     <span>Appliquer le bannissement</span>
-                                 </button>
-                             </div>
-                        </div>
-                        
-                        <div id="umBanRevokeContainer" class="hidden pt-2">
-                             <button id="umBanRevoke" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold border border-slate-700 transition-colors has-spinner flex items-center justify-center gap-2">
-                                 <svg class="plinkk-spinner hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                                 <span>Révoquer le bannissement</span>
-                             </button>
-                        </div>
-                     </div>
-                </div>
-                
-                <!-- CONTENT: SECURITY -->
-                <div data-content="security" class="hidden space-y-8 animate-fade-in block">
-                     <h2 class="text-2xl font-bold text-white mb-6">Sécurité</h2>
-                     <div class="bg-slate-950/30 border border-slate-800 rounded-2xl p-6 space-y-4">
-                        <label class="flex items-center justify-between p-4 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                            <span class="text-sm font-medium text-slate-300">Forcer le reset du mot de passe à la prochaine connexion</span>
-                            <div class="relative inline-flex items-center cursor-pointer">
-                                <input id="umForcePwd" type="checkbox" class="sr-only peer">
-                                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
                             </div>
-                        </label>
-                        
-                        <div class="flex items-center justify-between p-4 rounded-xl bg-slate-900 border border-slate-800">
-                             <div>
-                                 <div class="text-sm font-medium text-slate-300">Authentification à deux facteurs</div>
-                                 <div class="text-xs text-slate-500 mt-1">Désactive la 2FA si l'utilisateur a perdu son accès.</div>
-                             </div>
-                             <button id="umDisable2fa" class="px-4 py-2 rounded-lg bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 text-xs font-bold uppercase tracking-wide border border-amber-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed has-spinner flex items-center gap-2">
-                                <svg class="plinkk-spinner hidden" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                                <span>Désactiver</span>
-                             </button>
+                            <a id="modalTargetLink" href=""
+                                class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-black rounded-2xl transition-all shadow-lg shadow-blue-900/40 transform hover:scale-105">
+                                VOIR PROFIL
+                            </a>
                         </div>
-                     </div>
+                    </div>
+
+                    <!-- Métadonnées -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between mb-4 px-2">
+                            <label
+                                class="text-[10px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2">
+                                <svg class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                                </svg>
+                                Données additionnelles (JSON)
+                            </label>
+                            <button id="copyJsonBtn"
+                                class="text-[10px] text-slate-500 hover:text-white flex items-center gap-1.5 transition-colors group">
+                                <svg class="w-3 h-3 opacity-50 group-hover:opacity-100 transition-opacity" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3">
+                                    </path>
+                                </svg>
+                                Copier la data
+                            </button>
+                        </div>
+                        <div id="modalJson" class="grid grid-cols-1 gap-3"></div>
+                    </div>
                 </div>
 
-                <!-- CONTENT: DANGER -->
-                <div data-content="danger" class="hidden space-y-8 animate-fade-in block">
-                     <h2 class="text-2xl font-bold text-rose-500 mb-6">Zone Dangereuse</h2>
-                     <div class="bg-rose-950/10 border border-rose-900/20 rounded-2xl p-6">
-                         <div class="mb-6">
-                             <h3 class="font-bold text-rose-400 text-lg">Suppression du compte</h3>
-                             <p class="text-rose-300/60 text-sm mt-1">Cette action est irréversible. Toutes les données, pages et liens seront définitivement effacés.</p>
-                         </div>
-                         <button id="umDelete" class="w-full py-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold shadow-lg shadow-rose-900/20 transition-colors has-spinner flex items-center justify-center gap-2">
-                             <svg class="plinkk-spinner hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2"/><path d="M22 12a10 10 0 0 1-10 10"/></svg>
-                             <span>Supprimer définitivement ce compte</span>
-                         </button>
-                     </div>
+                <!-- Footer -->
+                <div class="p-6 bg-slate-950/20 border-t border-slate-800/50 flex justify-end px-8">
+                    <button onclick="closeLogDetails()"
+                        class="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-2xl transition-all border border-slate-700/50">
+                        Fermer
+                    </button>
                 </div>
-
             </div>
         </div>
-    </div>
-</div>
 
-<script>
-    // --- UTILS (repris de dash.ejs) ---
+        <!-- Modal Gestion Utilisateur (repris de dash.ejs) -->
+        <div id="userManageModal"
+            class="fixed inset-0 hidden z-[2147483600] items-center justify-center backdrop-blur-md">
+            <div class="absolute inset-0 bg-black/70 animate-fade-in" data-close></div>
 
-    function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `fixed bottom-6 right-6 z-[3000] flex items-center gap-3 px-6 py-4 rounded-2xl border backdrop-blur-xl shadow-2xl animate-slide-up-fade`;
-        
-        const colors = {
-            success: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
-            error: 'bg-rose-500/10 border-rose-500/20 text-rose-400',
-            info: 'bg-blue-500/10 border-blue-500/20 text-blue-400'
-        };
-        
-        toast.classList.add(...colors[type].split(' '));
-        toast.innerHTML = `
+            <div
+                class="relative w-full max-w-5xl h-[85vh] bg-slate-900 flex overflow-hidden rounded-2xl shadow-2xl animate-scale-in mx-4 font-sans text-slate-200 border border-slate-800">
+
+                <!-- Sidebar -->
+                <div class="w-64 bg-slate-950 flex-shrink-0 flex flex-col border-r border-slate-800">
+                    <div class="p-5 pb-2">
+                        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">UTILISATEUR
+                        </div>
+                        <div id="umSidebarName" class="font-bold text-white truncate text-base">User</div>
+                        <div id="umSidebarId" class="text-xs text-slate-500 truncate font-mono mt-0.5">@id</div>
+                    </div>
+
+                    <nav class="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scrollbar" id="umTabsNav">
+                        <button data-tab="overview"
+                            class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-slate-800 text-white ring-1 ring-slate-700">
+                            <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Vue d'ensemble
+                        </button>
+                        <button data-tab="profile"
+                            class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium">
+                            <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            Profil
+                        </button>
+                        <button data-tab="plinkks"
+                            class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium">
+                            <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                            Plinkks
+                        </button>
+                        <button data-tab="moderation"
+                            class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium">
+                            <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            Modération
+                        </button>
+                        <div class="my-2 border-t border-slate-800 mx-2"></div>
+                        <button data-tab="security"
+                            class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium">
+                            <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            Sécurité
+                        </button>
+                        <button data-tab="danger"
+                            class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-sm font-medium">
+                            <svg class="w-4 h-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Zone Rouge
+                        </button>
+                    </nav>
+
+                    <div class="p-4 border-t border-slate-800 text-[10px] text-slate-600 font-mono text-center">
+                        User ID: <span id="umFooterId" class="select-all"></span>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-1 flex flex-col min-w-0 bg-slate-900 relative">
+                    <div class="absolute right-6 top-6 z-10">
+                        <button id="umClose"
+                            class="flex flex-col items-center justify-center w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white transition-all ring-1 ring-slate-700">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="flex-1 overflow-y-auto p-10 custom-scrollbar scroll-smooth" id="umContentArea">
+
+                        <!-- CONTENT: OVERVIEW -->
+                        <div data-content="overview" class="space-y-8 animate-fade-in block">
+                            <h2 class="text-2xl font-bold text-white mb-6">Vue d'ensemble</h2>
+
+                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800">
+                                    <div class="text-[11px] font-bold text-slate-500 uppercase mb-1">Ancienneté</div>
+                                    <div id="umStatAge" class="text-lg font-bold text-white truncate">-</div>
+                                </div>
+                                <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800">
+                                    <div class="text-[11px] font-bold text-slate-500 uppercase mb-1">Sessions</div>
+                                    <div id="umStatSessions" class="text-lg font-bold text-violet-400">-</div>
+                                </div>
+                                <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800">
+                                    <div class="text-[11px] font-bold text-slate-500 uppercase mb-1">Vues Cumulées</div>
+                                    <div id="umStatViewsTotal" class="text-lg font-bold text-emerald-400">-</div>
+                                </div>
+                                <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-800"
+                                    data-tip="Total clics / Total vues">
+                                    <div class="text-[11px] font-bold text-slate-500 uppercase mb-1">Taux de clic (CTR)
+                                    </div>
+                                    <div id="umStatCTR" class="text-lg font-bold text-amber-400">-</div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <!-- Rôles -->
+                                <div class="bg-slate-950/30 border border-slate-800 rounded-2xl p-5">
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Rôle &
+                                        Permissions</div>
+                                    <select id="umRole"
+                                        class="w-full rounded-xl bg-slate-900 border border-slate-700 px-4 py-3 text-sm text-white focus:border-violet-500 outline-none transition-colors mb-4"></select>
+
+                                    <div class="space-y-3">
+                                        <label
+                                            class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                                            <input id="umBadgeVerified" type="checkbox"
+                                                class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-blue-500 focus:ring-blue-500 focus:ring-offset-0">
+                                            <span class="text-sm text-slate-300 flex items-center gap-2">Vérifié <svg
+                                                    class="w-4 h-4 text-blue-400" fill="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                                                </svg></span>
+                                            <svg id="umBadgeVerifiedSpin"
+                                                class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24"
+                                                fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10" opacity="0.2" />
+                                                <path d="M22 12a10 10 0 0 1-10 10" />
+                                            </svg>
+                                        </label>
+                                        <label
+                                            class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                                            <input id="umBadgePartner" type="checkbox"
+                                                class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-violet-500 focus:ring-violet-500 focus:ring-offset-0">
+                                            <span class="text-sm text-slate-300 flex items-center gap-2">Partenaire <svg
+                                                    class="w-4 h-4 text-violet-400" fill="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                                </svg></span>
+                                            <svg id="umBadgePartnerSpin"
+                                                class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24"
+                                                fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10" opacity="0.2" />
+                                                <path d="M22 12a10 10 0 0 1-10 10" />
+                                            </svg>
+                                        </label>
+                                        <label
+                                            class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                                            <input id="umBadgePremium" type="checkbox"
+                                                class="w-4 h-4 rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500 focus:ring-offset-0">
+                                            <span class="text-sm text-slate-300 flex items-center gap-2">Premium <svg
+                                                    class="w-4 h-4 text-amber-400" fill="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M12 2l2.7 5.48 6.05.88-4.38 4.27 1.03 6.02L12 15.9 6.6 18.65l1.03-6.02L3.25 8.36l6.05-.88L12 2z" />
+                                                </svg></span>
+                                            <svg id="umBadgePremiumSpin"
+                                                class="plinkk-spinner hidden ml-auto text-slate-500" viewBox="0 0 24 24"
+                                                fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10" opacity="0.2" />
+                                                <path d="M22 12a10 10 0 0 1-10 10" />
+                                            </svg>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Actions Rapides -->
+                                <div class="bg-slate-950/30 border border-slate-800 rounded-2xl p-5">
+                                    <div class="text-xs font-bold text-slate-500 uppercase mb-4 tracking-wider">Actions
+                                        Rapides</div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <a id="umViewProfile" target="_blank"
+                                            class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all text-center gap-2 group cursor-pointer">
+                                            <div
+                                                class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                <svg class="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            </div>
+                                            <span class="text-xs font-medium text-slate-300">Voir Profil</span>
+                                        </a>
+                                        <button id="umCopyLink"
+                                            class="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all text-center gap-2 group">
+                                            <div
+                                                class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                <svg class="w-4 h-4 text-slate-300" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                                </svg>
+                                            </div>
+                                            <span class="text-xs font-medium text-slate-300">Copier lien</span>
+                                        </button>
+                                        <button id="umImpersonate"
+                                            class="col-span-2 flex items-center justify-center p-3 gap-3 rounded-xl bg-slate-800 hover:bg-violet-600/20 border border-slate-700 hover:border-violet-500/50 transition-all text-center group">
+                                            <svg class="w-5 h-5 text-slate-400 group-hover:text-violet-400 plinkk-spinner hidden"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10" opacity="0.2"></circle>
+                                                <path d="M22 12a10 10 0 0 1-10 10"></path>
+                                            </svg>
+                                            <svg class="w-5 h-5 text-slate-400 group-hover:text-violet-400" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            <span
+                                                class="text-sm font-medium text-slate-300 group-hover:text-violet-200">Se
+                                                connecter en tant que</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CONTENT: PROFILE -->
+                        <div data-content="profile" class="hidden space-y-8 animate-fade-in block">
+                            <h2 class="text-2xl font-bold text-white mb-6">Profil & Identifiants</h2>
+
+                            <div class="bg-slate-950/30 border border-slate-800 rounded-2xl p-6 space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Nom
+                                            d'utilisateur</label>
+                                        <input id="umEditUsername" type="text"
+                                            class="w-full rounded-xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:border-violet-500 outline-none transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="block text-xs font-bold text-slate-500 uppercase mb-2">Email</label>
+                                        <input id="umEditEmail" type="email"
+                                            class="w-full rounded-xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:border-violet-500 outline-none transition-colors" />
+                                    </div>
+                                </div>
+                                <div class="flex justify-end pt-2">
+                                    <button id="umSaveProfile"
+                                        class="px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium shadow-lg shadow-violet-900/20 transition-colors has-spinner flex items-center gap-2">
+                                        <svg class="plinkk-spinner hidden" width="16" height="16" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10" opacity="0.2" />
+                                            <path d="M22 12a10 10 0 0 1-10 10" />
+                                        </svg>
+                                        <span>Enregistrer les modifications</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CONTENT: PLINKKS -->
+                        <div data-content="plinkks" class="hidden space-y-8 animate-fade-in block">
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="text-2xl font-bold text-white">Contenus de l'utilisateur</h2>
+                                <div class="flex gap-2">
+                                    <div
+                                        class="px-3 py-1 rounded-full bg-slate-800 text-slate-400 text-xs font-bold uppercase ring-1 ring-slate-700">
+                                        <span id="umPlCount">0</span> Plinkks
+                                    </div>
+                                    <div
+                                        class="px-3 py-1 rounded-full bg-slate-800 text-slate-400 text-xs font-bold uppercase ring-1 ring-slate-700">
+                                        <span id="umRdCount">0</span> Redirs
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PLINKKS LIST -->
+                            <section>
+                                <h3
+                                    class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                    </svg>
+                                    Pages Plinkk
+                                </h3>
+                                <div id="umPlList" class="grid grid-cols-1 gap-3">
+                                    <!-- Dynamic Plinkks -->
+                                </div>
+                            </section>
+
+                            <!-- REDIRECTS LIST -->
+                            <section class="mt-8">
+                                <h3
+                                    class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.826a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                    </svg>
+                                    Redirections
+                                </h3>
+                                <div id="umRdList" class="grid grid-cols-1 gap-3">
+                                    <!-- Dynamic Redirects -->
+                                </div>
+                            </section>
+                        </div>
+
+                        <!-- CONTENT: MODERATION -->
+                        <div data-content="moderation" class="hidden space-y-8 animate-fade-in block">
+                            <h2 class="text-2xl font-bold text-white mb-6">Modération & Bans</h2>
+
+                            <div class="bg-slate-950/30 border border-slate-800 rounded-2xl p-6">
+                                <div id="umBanState"
+                                    class="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-sm mb-6 hidden flex gap-3 items-start">
+                                    <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <div>
+                                        <div class="font-bold">Utilisateur banni</div>
+                                        <div class="text-orange-300/80 mt-1 banned-details"></div>
+                                    </div>
+                                </div>
+
+                                <div id="umBanForm" class="space-y-5">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Raison du
+                                            bannissement</label>
+                                        <textarea id="umBanReason" rows="3"
+                                            class="w-full rounded-xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:border-rose-500 outline-none resize-none"
+                                            placeholder="Motif visible par l'administration uniquement"></textarea>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-5">
+                                        <div>
+                                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Durée
+                                                (minutes)</label>
+                                            <input id="umBanMinutes" type="number" step="1" min="-1"
+                                                class="w-full rounded-xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:border-rose-500 outline-none"
+                                                placeholder="-1 pour permanent" value="-1" />
+                                        </div>
+                                        <div class="flex items-end pb-3">
+                                            <label class="flex items-center gap-3 cursor-pointer">
+                                                <input id="umBanDeletePlinkk" type="checkbox"
+                                                    class="rounded border-slate-700 bg-slate-900 text-rose-600 focus:ring-0">
+                                                <span class="text-sm text-slate-300">Supprimer toutes ses pages
+                                                    Plinkk</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="pt-2">
+                                        <button id="umBanApply"
+                                            class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold shadow-lg shadow-rose-900/20 transition-colors has-spinner flex items-center justify-center gap-2">
+                                            <svg class="plinkk-spinner hidden" width="16" height="16"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10" opacity="0.2" />
+                                                <path d="M22 12a10 10 0 0 1-10 10" />
+                                            </svg>
+                                            <span>Appliquer le bannissement</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="umBanRevokeContainer" class="hidden pt-2">
+                                    <button id="umBanRevoke"
+                                        class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold border border-slate-700 transition-colors has-spinner flex items-center justify-center gap-2">
+                                        <svg class="plinkk-spinner hidden" width="16" height="16" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10" opacity="0.2" />
+                                            <path d="M22 12a10 10 0 0 1-10 10" />
+                                        </svg>
+                                        <span>Révoquer le bannissement</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CONTENT: SECURITY -->
+                        <div data-content="security" class="hidden space-y-8 animate-fade-in block">
+                            <h2 class="text-2xl font-bold text-white mb-6">Sécurité</h2>
+                            <div class="bg-slate-950/30 border border-slate-800 rounded-2xl p-6 space-y-4">
+                                <label
+                                    class="flex items-center justify-between p-4 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                                    <span class="text-sm font-medium text-slate-300">Forcer le reset du mot de passe à
+                                        la prochaine connexion</span>
+                                    <div class="relative inline-flex items-center cursor-pointer">
+                                        <input id="umForcePwd" type="checkbox" class="sr-only peer">
+                                        <div
+                                            class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600">
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <div
+                                    class="flex items-center justify-between p-4 rounded-xl bg-slate-900 border border-slate-800">
+                                    <div>
+                                        <div class="text-sm font-medium text-slate-300">Authentification à deux facteurs
+                                        </div>
+                                        <div class="text-xs text-slate-500 mt-1">Désactive la 2FA si l'utilisateur a
+                                            perdu son accès.</div>
+                                    </div>
+                                    <button id="umDisable2fa"
+                                        class="px-4 py-2 rounded-lg bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 text-xs font-bold uppercase tracking-wide border border-amber-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed has-spinner flex items-center gap-2">
+                                        <svg class="plinkk-spinner hidden" width="14" height="14" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10" opacity="0.2" />
+                                            <path d="M22 12a10 10 0 0 1-10 10" />
+                                        </svg>
+                                        <span>Désactiver</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CONTENT: DANGER -->
+                        <div data-content="danger" class="hidden space-y-8 animate-fade-in block">
+                            <h2 class="text-2xl font-bold text-rose-500 mb-6">Zone Dangereuse</h2>
+                            <div class="bg-rose-950/10 border border-rose-900/20 rounded-2xl p-6">
+                                <div class="mb-6">
+                                    <h3 class="font-bold text-rose-400 text-lg">Suppression du compte</h3>
+                                    <p class="text-rose-300/60 text-sm mt-1">Cette action est irréversible. Toutes les
+                                        données, pages et liens seront définitivement effacés.</p>
+                                </div>
+                                <button id="umDelete"
+                                    class="w-full py-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold shadow-lg shadow-rose-900/20 transition-colors has-spinner flex items-center justify-center gap-2">
+                                    <svg class="plinkk-spinner hidden" width="18" height="18" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10" opacity="0.2" />
+                                        <path d="M22 12a10 10 0 0 1-10 10" />
+                                    </svg>
+                                    <span>Supprimer définitivement ce compte</span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // --- UTILS (repris de dash.ejs) ---
+
+            function showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `fixed bottom-6 right-6 z-[3000] flex items-center gap-3 px-6 py-4 rounded-2xl border backdrop-blur-xl shadow-2xl animate-slide-up-fade`;
+
+                const colors = {
+                    success: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+                    error: 'bg-rose-500/10 border-rose-500/20 text-rose-400',
+                    info: 'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                };
+
+                toast.classList.add(...colors[type].split(' '));
+                toast.innerHTML = `
             <div class="w-2 h-2 rounded-full animate-pulse bg-current"></div>
             <span class="text-sm font-semibold tracking-wide">${message}</span>
         `;
-        
-        document.body.appendChild(toast);
-        setTimeout(() => {
-            toast.classList.replace('animate-slide-up-fade', 'animate-fade-out');
-            setTimeout(() => toast.remove(), 400);
-        }, 4000);
-    }
 
-    function confirmSimple(title, message, confirmText = 'Confirmer') {
-        return new Promise((resolve) => {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 z-[3100] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in';
-            modal.innerHTML = `
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.classList.replace('animate-slide-up-fade', 'animate-fade-out');
+                    setTimeout(() => toast.remove(), 400);
+                }, 4000);
+            }
+
+            function confirmSimple(title, message, confirmText = 'Confirmer') {
+                return new Promise((resolve) => {
+                    const modal = document.createElement('div');
+                    modal.className = 'fixed inset-0 z-[3100] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in';
+                    modal.innerHTML = `
                 <div class="absolute inset-0 bg-black/60" onclick="this.parentElement.remove();"></div>
                 <div class="relative bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl animate-scale-in">
                     <h3 class="text-xl font-bold text-white mb-2">${title}</h3>
@@ -564,19 +804,19 @@
                     </div>
                 </div>
             `;
-            document.body.appendChild(modal);
-            modal.querySelector('#modalConfirmBtn').addEventListener('click', () => {
-                modal.remove();
-                resolve(true);
-            });
-        });
-    }
+                    document.body.appendChild(modal);
+                    modal.querySelector('#modalConfirmBtn').addEventListener('click', () => {
+                        modal.remove();
+                        resolve(true);
+                    });
+                });
+            }
 
-    function confirmWithInput(title, message, expectedValue, confirmText = 'Supprimer') {
-        return new Promise((resolve) => {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 z-[3100] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in';
-            modal.innerHTML = `
+            function confirmWithInput(title, message, expectedValue, confirmText = 'Supprimer') {
+                return new Promise((resolve) => {
+                    const modal = document.createElement('div');
+                    modal.className = 'fixed inset-0 z-[3100] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in';
+                    modal.innerHTML = `
                 <div class="absolute inset-0 bg-black/60" onclick="this.parentElement.remove();"></div>
                 <div class="relative bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-md w-full shadow-2xl animate-scale-in">
                     <h3 class="text-xl font-bold text-white mb-2">${title}</h3>
@@ -589,136 +829,136 @@
                     </div>
                 </div>
             `;
-            document.body.appendChild(modal);
-            const input = modal.querySelector('#confirmInput');
-            const btn = modal.querySelector('#modalConfirmBtn');
-            input.focus();
-            input.addEventListener('input', (e) => {
-                const matches = e.target.value === expectedValue;
-                btn.disabled = !matches;
-                btn.className = matches 
-                    ? 'flex-1 px-6 py-3 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold shadow-lg shadow-rose-900/20 transition-all'
-                    : 'flex-1 px-6 py-3 rounded-2xl bg-rose-600/50 text-white/50 text-sm font-bold cursor-not-allowed transition-all';
-            });
-            btn.addEventListener('click', () => {
-                modal.remove();
-                resolve(true);
-            });
-        });
-    }
-
-    const um = {
-        currentUserId: null,
-        modal: document.getElementById('userManageModal'),
-        tabsNav: document.getElementById('umTabsNav'),
-        contentArea: document.getElementById('umContentArea'),
-        
-        open(userId) {
-            this.currentUserId = userId;
-            this.resetTabs();
-            this.modal.classList.remove('hidden');
-            this.modal.classList.add('flex');
-            document.body.style.overflow = 'hidden';
-            
-            // Setup initial UI
-            document.getElementById('umSidebarName').textContent = 'Chargement...';
-            document.getElementById('umSidebarId').textContent = '@' + userId;
-            document.getElementById('umFooterId').textContent = userId;
-            
-            this.fetchData();
-        },
-        
-        close() {
-            this.modal.classList.add('hidden');
-            this.modal.classList.remove('flex');
-            document.body.style.overflow = 'auto';
-            this.currentUserId = null;
-        },
-        
-        resetTabs() {
-            this.tabsNav.querySelectorAll('button').forEach(btn => {
-                btn.className = 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium';
-                if (btn.dataset.tab === 'overview') {
-                    btn.className = 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-slate-800 text-white ring-1 ring-slate-700';
-                }
-                if (btn.dataset.tab === 'danger') {
-                    btn.className = 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-sm font-medium';
-                }
-            });
-            this.contentArea.querySelectorAll('[data-content]').forEach(c => {
-                c.classList.add('hidden');
-                if (c.dataset.content === 'overview') c.classList.remove('hidden');
-            });
-        },
-        
-        async fetchData() {
-            try {
-                const res = await fetch(`/api/users/${this.currentUserId}`);
-                if (!res.ok) throw new Error('Action impossible');
-                const user = await res.json();
-                
-                document.getElementById('umSidebarName').textContent = user.userName;
-                const createdAt = new Date(user.createdAt);
-                const diffDays = Math.floor((new Date() - createdAt) / (1000 * 60 * 60 * 24));
-                document.getElementById('umStatAge').textContent = `${diffDays} jours`;
-                document.getElementById('umStatSessions').textContent = user._count?.sessions || 0;
-                
-                document.getElementById('umEditUsername').value = user.userName || '';
-                document.getElementById('umEditEmail').value = user.email || '';
-                
-                const roleSelect = document.getElementById('umRole');
-                roleSelect.innerHTML = '';
-                const roles = ["USER", "PREMIUM", "PARTNER", "MODERATOR", "DEVELOPER", "ADMIN"];
-                roles.forEach(r => {
-                    const opt = document.createElement('option');
-                    opt.value = r;
-                    opt.textContent = r;
-                    opt.selected = user.role?.name === r;
-                    roleSelect.appendChild(opt);
+                    document.body.appendChild(modal);
+                    const input = modal.querySelector('#confirmInput');
+                    const btn = modal.querySelector('#modalConfirmBtn');
+                    input.focus();
+                    input.addEventListener('input', (e) => {
+                        const matches = e.target.value === expectedValue;
+                        btn.disabled = !matches;
+                        btn.className = matches
+                            ? 'flex-1 px-6 py-3 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold shadow-lg shadow-rose-900/20 transition-all'
+                            : 'flex-1 px-6 py-3 rounded-2xl bg-rose-600/50 text-white/50 text-sm font-bold cursor-not-allowed transition-all';
+                    });
+                    btn.addEventListener('click', () => {
+                        modal.remove();
+                        resolve(true);
+                    });
                 });
-                
-                document.getElementById('umBadgeVerified').checked = user.isVerified || false;
-                document.getElementById('umBadgePartner').checked = user.role?.name === 'PARTNER' || false;
-                document.getElementById('umBadgePremium').checked = user.role?.name === 'PREMIUM' || false;
-
-                const banState = document.getElementById('umBanState');
-                if (user.isBanned) {
-                    banState.classList.remove('hidden');
-                    banState.querySelector('.banned-details').innerHTML = `Banni jusqu'au ${new Date(user.banExpires).toLocaleString()}<br>Raison: ${user.banReason || 'Aucune'}`;
-                    document.getElementById('umBanForm').classList.add('hidden');
-                    document.getElementById('umBanRevokeContainer').classList.remove('hidden');
-                } else {
-                    banState.classList.add('hidden');
-                    document.getElementById('umBanForm').classList.remove('hidden');
-                    document.getElementById('umBanRevokeContainer').classList.add('hidden');
-                }
-
-                document.getElementById('umForcePwd').checked = user.forcePasswordChange || false;
-                document.getElementById('umDisable2fa').disabled = !user.twoFactorEnabled;
-                document.getElementById('umViewProfile').href = "<%= frontendUrl %>/" + user.userName;
-                
-                this.fetchContent();
-            } catch (e) {
-                showToast(e.message, 'error');
-                this.close();
             }
-        },
 
-        async fetchContent() {
-            try {
-                const res = await fetch(`/api/admin/plinkks/${this.currentUserId}`);
-                const data = await res.json();
-                const plList = document.getElementById('umPlList');
-                const rdList = document.getElementById('umRdList');
-                plList.innerHTML = '';
-                rdList.innerHTML = '';
-                document.getElementById('umPlCount').textContent = (data.plinkks || []).length;
-                document.getElementById('umRdCount').textContent = (data.redirects || []).length;
-                
-                (data.plinkks || []).forEach(p => {
-                    const div = document.createElement('div');
-                    div.className = 'flex items-center justify-between p-3 bg-slate-800/50 rounded-xl border border-slate-800 hover:border-slate-700 transition-all';
-                    div.innerHTML = `
+            const um = {
+                currentUserId: null,
+                modal: document.getElementById('userManageModal'),
+                tabsNav: document.getElementById('umTabsNav'),
+                contentArea: document.getElementById('umContentArea'),
+
+                open(userId) {
+                    this.currentUserId = userId;
+                    this.resetTabs();
+                    this.modal.classList.remove('hidden');
+                    this.modal.classList.add('flex');
+                    document.body.style.overflow = 'hidden';
+
+                    // Setup initial UI
+                    document.getElementById('umSidebarName').textContent = 'Chargement...';
+                    document.getElementById('umSidebarId').textContent = '@' + userId;
+                    document.getElementById('umFooterId').textContent = userId;
+
+                    this.fetchData();
+                },
+
+                close() {
+                    this.modal.classList.add('hidden');
+                    this.modal.classList.remove('flex');
+                    document.body.style.overflow = 'auto';
+                    this.currentUserId = null;
+                },
+
+                resetTabs() {
+                    this.tabsNav.querySelectorAll('button').forEach(btn => {
+                        btn.className = 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium';
+                        if (btn.dataset.tab === 'overview') {
+                            btn.className = 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-slate-800 text-white ring-1 ring-slate-700';
+                        }
+                        if (btn.dataset.tab === 'danger') {
+                            btn.className = 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-sm font-medium';
+                        }
+                    });
+                    this.contentArea.querySelectorAll('[data-content]').forEach(c => {
+                        c.classList.add('hidden');
+                        if (c.dataset.content === 'overview') c.classList.remove('hidden');
+                    });
+                },
+
+                async fetchData() {
+                    try {
+                        const res = await fetch(`/api/users/${this.currentUserId}`);
+                        if (!res.ok) throw new Error('Action impossible');
+                        const user = await res.json();
+
+                        document.getElementById('umSidebarName').textContent = user.userName;
+                        const createdAt = new Date(user.createdAt);
+                        const diffDays = Math.floor((new Date() - createdAt) / (1000 * 60 * 60 * 24));
+                        document.getElementById('umStatAge').textContent = `${diffDays} jours`;
+                        document.getElementById('umStatSessions').textContent = user._count?.sessions || 0;
+
+                        document.getElementById('umEditUsername').value = user.userName || '';
+                        document.getElementById('umEditEmail').value = user.email || '';
+
+                        const roleSelect = document.getElementById('umRole');
+                        roleSelect.innerHTML = '';
+                        const roles = ["USER", "PREMIUM", "PARTNER", "MODERATOR", "DEVELOPER", "ADMIN"];
+                        roles.forEach(r => {
+                            const opt = document.createElement('option');
+                            opt.value = r;
+                            opt.textContent = r;
+                            opt.selected = user.role?.name === r;
+                            roleSelect.appendChild(opt);
+                        });
+
+                        document.getElementById('umBadgeVerified').checked = user.isVerified || false;
+                        document.getElementById('umBadgePartner').checked = user.role?.name === 'PARTNER' || false;
+                        document.getElementById('umBadgePremium').checked = user.role?.name === 'PREMIUM' || false;
+
+                        const banState = document.getElementById('umBanState');
+                        if (user.isBanned) {
+                            banState.classList.remove('hidden');
+                            banState.querySelector('.banned-details').innerHTML = `Banni jusqu'au ${new Date(user.banExpires).toLocaleString()}<br>Raison: ${user.banReason || 'Aucune'}`;
+                            document.getElementById('umBanForm').classList.add('hidden');
+                            document.getElementById('umBanRevokeContainer').classList.remove('hidden');
+                        } else {
+                            banState.classList.add('hidden');
+                            document.getElementById('umBanForm').classList.remove('hidden');
+                            document.getElementById('umBanRevokeContainer').classList.add('hidden');
+                        }
+
+                        document.getElementById('umForcePwd').checked = user.forcePasswordChange || false;
+                        document.getElementById('umDisable2fa').disabled = !user.twoFactorEnabled;
+                        document.getElementById('umViewProfile').href = "<%= frontendUrl %>/" + user.userName;
+
+                        this.fetchContent();
+                    } catch (e) {
+                        showToast(e.message, 'error');
+                        this.close();
+                    }
+                },
+
+                async fetchContent() {
+                    try {
+                        const res = await fetch(`/api/admin/plinkks/${this.currentUserId}`);
+                        const data = await res.json();
+                        const plList = document.getElementById('umPlList');
+                        const rdList = document.getElementById('umRdList');
+                        plList.innerHTML = '';
+                        rdList.innerHTML = '';
+                        document.getElementById('umPlCount').textContent = (data.plinkks || []).length;
+                        document.getElementById('umRdCount').textContent = (data.redirects || []).length;
+
+                        (data.plinkks || []).forEach(p => {
+                            const div = document.createElement('div');
+                            div.className = 'flex items-center justify-between p-3 bg-slate-800/50 rounded-xl border border-slate-800 hover:border-slate-700 transition-all';
+                            div.innerHTML = `
                         <div class="min-w-0 flex-1 pr-4">
                             <div class="flex items-center gap-2">
                                 <span class="text-sm font-bold text-white truncate">/${p.slug}</span>
@@ -733,13 +973,13 @@
                             </a>
                         </div>
                     `;
-                    plList.appendChild(div);
-                });
-                
-                (data.redirects || []).forEach(r => {
-                    const div = document.createElement('div');
-                    div.className = 'flex items-center justify-between p-3 bg-slate-800/50 rounded-xl border border-slate-800 hover:border-slate-700 transition-all';
-                    div.innerHTML = `
+                            plList.appendChild(div);
+                        });
+
+                        (data.redirects || []).forEach(r => {
+                            const div = document.createElement('div');
+                            div.className = 'flex items-center justify-between p-3 bg-slate-800/50 rounded-xl border border-slate-800 hover:border-slate-700 transition-all';
+                            div.innerHTML = `
                         <div class="min-w-0 flex-1 pr-4">
                             <div class="text-sm font-bold text-white truncate">/${r.slug}</div>
                             <div class="text-[10px] text-slate-500 truncate mt-0.5">${r.url}</div>
@@ -751,191 +991,191 @@
                             </a>
                         </div>
                     `;
-                    rdList.appendChild(div);
+                            rdList.appendChild(div);
+                        });
+
+                        if (!(data.plinkks || []).length) plList.innerHTML = '<div class="text-xs text-slate-600 italic py-2">Aucune page Plinkk</div>';
+                        if (!(data.redirects || []).length) rdList.innerHTML = '<div class="text-xs text-slate-600 italic py-2">Aucune redirection</div>';
+                    } catch (e) { console.error('Erreur contenu:', e); }
+                }
+            };
+
+            um.tabsNav.addEventListener('click', (e) => {
+                const btn = e.target.closest('button');
+                if (!btn || !btn.dataset.tab) return;
+
+                um.tabsNav.querySelectorAll('button').forEach(b => {
+                    b.className = 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium';
+                    if (b.dataset.tab === 'danger') b.className = 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-sm font-medium';
                 });
-                
-                if (!(data.plinkks || []).length) plList.innerHTML = '<div class="text-xs text-slate-600 italic py-2">Aucune page Plinkk</div>';
-                if (!(data.redirects || []).length) rdList.innerHTML = '<div class="text-xs text-slate-600 italic py-2">Aucune redirection</div>';
-            } catch (e) { console.error('Erreur contenu:', e); }
-        }
-    };
 
-    um.tabsNav.addEventListener('click', (e) => {
-        const btn = e.target.closest('button');
-        if (!btn || !btn.dataset.tab) return;
-        
-        um.tabsNav.querySelectorAll('button').forEach(b => {
-            b.className = 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors text-sm font-medium';
-            if (b.dataset.tab === 'danger') b.className = 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-sm font-medium';
-        });
-        
-        if (btn.dataset.tab === 'danger') {
-            btn.className = 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-rose-300 bg-rose-500/20 ring-1 ring-rose-500/30 text-sm font-medium';
-        } else {
-            btn.className = 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-slate-800 text-white ring-1 ring-slate-700';
-        }
-        
-        um.contentArea.querySelectorAll('[data-content]').forEach(c => {
-            c.classList.add('hidden');
-            if (c.dataset.content === btn.dataset.tab) c.classList.remove('hidden');
-        });
-    });
+                if (btn.dataset.tab === 'danger') {
+                    btn.className = 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-rose-300 bg-rose-500/20 ring-1 ring-rose-500/30 text-sm font-medium';
+                } else {
+                    btn.className = 'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-slate-800 text-white ring-1 ring-slate-700';
+                }
 
-    document.getElementById('umClose').addEventListener('click', () => um.close());
-    um.modal.querySelector('[data-close]').addEventListener('click', () => um.close());
-
-    document.getElementById('umSaveProfile').addEventListener('click', async (e) => {
-        const btn = e.currentTarget;
-        const name = document.getElementById('umEditUsername').value;
-        const email = document.getElementById('umEditEmail').value;
-        try {
-            btn.querySelector('.plinkk-spinner').classList.remove('hidden');
-            const res = await fetch(`/api/users/${um.currentUserId}/profile`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userName: name, email })
-            });
-            if (!res.ok) throw new Error('Erreur lors de la mise à jour');
-            showToast('Profil mis à jour !', 'success');
-        } catch (e) { showToast(e.message, 'error'); }
-        finally { btn.querySelector('.plinkk-spinner').classList.add('hidden'); }
-    });
-
-    document.getElementById('umRole').addEventListener('change', async (e) => {
-        try {
-            const res = await fetch(`/api/users/${um.currentUserId}/role`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ role: e.target.value })
-            });
-            if (!res.ok) throw new Error('Erreur modification rôle');
-            showToast('Rôle modifié !', 'success');
-            um.fetchData();
-        } catch (e) { showToast(e.message, 'error'); }
-    });
-
-    const toggleBadge = async (type, checked, spinnerId) => {
-        const spinner = document.getElementById(spinnerId);
-        try {
-            spinner.classList.remove('hidden');
-            const res = await fetch(`/api/users/${um.currentUserId}/badges`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type, value: checked })
-            });
-            if (!res.ok) throw new Error('Erreur badges');
-            showToast('Badges mis à jour !', 'success');
-        } catch (e) { showToast(e.message, 'error'); }
-        finally { spinner.classList.add('hidden'); }
-    };
-
-    document.getElementById('umBadgeVerified').addEventListener('change', (e) => toggleBadge('verified', e.target.checked, 'umBadgeVerifiedSpin'));
-    document.getElementById('umBadgePartner').addEventListener('change', (e) => toggleBadge('partner', e.target.checked, 'umBadgePartnerSpin'));
-    document.getElementById('umBadgePremium').addEventListener('change', (e) => toggleBadge('premium', e.target.checked, 'umBadgePremiumSpin'));
-
-    document.getElementById('umBanApply').addEventListener('click', async (e) => {
-        const reason = document.getElementById('umBanReason').value;
-        const minutes = parseInt(document.getElementById('umBanMinutes').value);
-        const del = document.getElementById('umBanDeletePlinkk').checked;
-        if (await confirmSimple('Bannir l\'utilisateur', 'Êtes-vous sûr de vouloir bannir cet utilisateur ?')) {
-            const btn = e.currentTarget;
-            try {
-                btn.querySelector('.plinkk-spinner').classList.remove('hidden');
-                const res = await fetch(`/api/users/${um.currentUserId}/ban`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reason, minutes, deletePlinkks: del })
+                um.contentArea.querySelectorAll('[data-content]').forEach(c => {
+                    c.classList.add('hidden');
+                    if (c.dataset.content === btn.dataset.tab) c.classList.remove('hidden');
                 });
-                if (!res.ok) throw new Error('Erreur ban');
-                showToast('Utilisateur banni !', 'success');
-                um.fetchData();
-            } catch (e) { showToast(e.message, 'error'); }
-            finally { btn.querySelector('.plinkk-spinner').classList.add('hidden'); }
-        }
-    });
-
-    document.getElementById('umBanRevoke').addEventListener('click', async (e) => {
-        if (await confirmSimple('Révoquer le bannissement', 'L\'utilisateur pourra à nouveau se connecter.')) {
-            const btn = e.currentTarget;
-            try {
-                btn.querySelector('.plinkk-spinner').classList.remove('hidden');
-                const res = await fetch(`/api/users/${um.currentUserId}/unban`, { method: 'POST' });
-                if (!res.ok) throw new Error('Erreur unban');
-                showToast('Bannissement révoqué !', 'success');
-                um.fetchData();
-            } catch (e) { showToast(e.message, 'error'); }
-            finally { btn.querySelector('.plinkk-spinner').classList.add('hidden'); }
-        }
-    });
-
-    document.getElementById('umForcePwd').addEventListener('change', async (e) => {
-        try {
-            const res = await fetch(`/api/users/${um.currentUserId}/force-password-reset`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ value: e.target.checked })
             });
-            if (!res.ok) throw new Error('Erreur');
-            showToast('Config mise à jour', 'success');
-        } catch (e) { showToast(e.message, 'error'); }
-    });
 
-    document.getElementById('umDisable2fa').addEventListener('click', async (e) => {
-        if (await confirmSimple('Désactiver la 2FA', 'L\'utilisateur pourra se connecter sans code.')) {
-            const btn = e.currentTarget;
-            try {
-                btn.querySelector('.plinkk-spinner').classList.remove('hidden');
-                const res = await fetch(`/api/users/${um.currentUserId}/disable-2fa`, { method: 'POST' });
-                if (!res.ok) throw new Error('Erreur');
-                showToast('2FA désactivée', 'success');
-                um.fetchData();
-            } catch (e) { showToast(e.message, 'error'); }
-            finally { btn.querySelector('.plinkk-spinner').classList.add('hidden'); }
-        }
-    });
+            document.getElementById('umClose').addEventListener('click', () => um.close());
+            um.modal.querySelector('[data-close]').addEventListener('click', () => um.close());
 
-    document.getElementById('umDelete').addEventListener('click', async (e) => {
-        const name = document.getElementById('umEditUsername').value;
-        if (await confirmWithInput('Suppression totale', `Toutes les données de l'utilisateur seront effacées.`, name)) {
-            const btn = e.currentTarget;
-            try {
-                btn.querySelector('.plinkk-spinner').classList.remove('hidden');
-                const res = await fetch(`/api/users/${um.currentUserId}`, { method: 'DELETE' });
-                if (!res.ok) throw new Error('Erreur suppression');
-                showToast('Compte supprimé !', 'success');
-                um.close();
-            } catch (e) { showToast(e.message, 'error'); }
-            finally { btn.querySelector('.plinkk-spinner').classList.add('hidden'); }
-        }
-    });
+            document.getElementById('umSaveProfile').addEventListener('click', async (e) => {
+                const btn = e.currentTarget;
+                const name = document.getElementById('umEditUsername').value;
+                const email = document.getElementById('umEditEmail').value;
+                try {
+                    btn.querySelector('.plinkk-spinner').classList.remove('hidden');
+                    const res = await fetch(`/api/users/${um.currentUserId}/profile`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userName: name, email })
+                    });
+                    if (!res.ok) throw new Error('Erreur lors de la mise à jour');
+                    showToast('Profil mis à jour !', 'success');
+                } catch (e) { showToast(e.message, 'error'); }
+                finally { btn.querySelector('.plinkk-spinner').classList.add('hidden'); }
+            });
 
-    document.getElementById('umImpersonate').addEventListener('click', async (e) => {
-        const btn = e.currentTarget;
-        try {
-            btn.querySelector('.plinkk-spinner').classList.remove('hidden');
-            const res = await fetch(`/api/admin/impersonate/${um.currentUserId}`, { method: 'POST' });
-            if (!res.ok) throw new Error('Échec de l\'impersonation');
-            showToast('Redirection...', 'success');
-            window.location.href = '/dashboard';
-        } catch (e) { showToast(e.message, 'error'); }
-        finally { btn.querySelector('.plinkk-spinner').classList.add('hidden'); }
-    });
+            document.getElementById('umRole').addEventListener('change', async (e) => {
+                try {
+                    const res = await fetch(`/api/users/${um.currentUserId}/role`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role: e.target.value })
+                    });
+                    if (!res.ok) throw new Error('Erreur modification rôle');
+                    showToast('Rôle modifié !', 'success');
+                    um.fetchData();
+                } catch (e) { showToast(e.message, 'error'); }
+            });
 
-    document.getElementById('umCopyLink').addEventListener('click', () => {
-        const url = document.getElementById('umViewProfile').href;
-        navigator.clipboard.writeText(url);
-        showToast('Lien copié !', 'success');
-    });
+            const toggleBadge = async (type, checked, spinnerId) => {
+                const spinner = document.getElementById(spinnerId);
+                try {
+                    spinner.classList.remove('hidden');
+                    const res = await fetch(`/api/users/${um.currentUserId}/badges`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type, value: checked })
+                    });
+                    if (!res.ok) throw new Error('Erreur badges');
+                    showToast('Badges mis à jour !', 'success');
+                } catch (e) { showToast(e.message, 'error'); }
+                finally { spinner.classList.add('hidden'); }
+            };
 
-    // --- LOGS LOGIC (Restaurée) ---
-    let currentPage = 1;
-    const limit = 50;
-    let currentLogs = [];
-    let currentTab = 'admin';
+            document.getElementById('umBadgeVerified').addEventListener('change', (e) => toggleBadge('verified', e.target.checked, 'umBadgeVerifiedSpin'));
+            document.getElementById('umBadgePartner').addEventListener('change', (e) => toggleBadge('partner', e.target.checked, 'umBadgePartnerSpin'));
+            document.getElementById('umBadgePremium').addEventListener('change', (e) => toggleBadge('premium', e.target.checked, 'umBadgePremiumSpin'));
 
-    function renderSkeleton() {
-        const tbody = document.getElementById('logsTableBody');
-        tbody.innerHTML = Array(limit).fill(0).map(() => `
+            document.getElementById('umBanApply').addEventListener('click', async (e) => {
+                const reason = document.getElementById('umBanReason').value;
+                const minutes = parseInt(document.getElementById('umBanMinutes').value);
+                const del = document.getElementById('umBanDeletePlinkk').checked;
+                if (await confirmSimple('Bannir l\'utilisateur', 'Êtes-vous sûr de vouloir bannir cet utilisateur ?')) {
+                    const btn = e.currentTarget;
+                    try {
+                        btn.querySelector('.plinkk-spinner').classList.remove('hidden');
+                        const res = await fetch(`/api/users/${um.currentUserId}/ban`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ reason, minutes, deletePlinkks: del })
+                        });
+                        if (!res.ok) throw new Error('Erreur ban');
+                        showToast('Utilisateur banni !', 'success');
+                        um.fetchData();
+                    } catch (e) { showToast(e.message, 'error'); }
+                    finally { btn.querySelector('.plinkk-spinner').classList.add('hidden'); }
+                }
+            });
+
+            document.getElementById('umBanRevoke').addEventListener('click', async (e) => {
+                if (await confirmSimple('Révoquer le bannissement', 'L\'utilisateur pourra à nouveau se connecter.')) {
+                    const btn = e.currentTarget;
+                    try {
+                        btn.querySelector('.plinkk-spinner').classList.remove('hidden');
+                        const res = await fetch(`/api/users/${um.currentUserId}/unban`, { method: 'POST' });
+                        if (!res.ok) throw new Error('Erreur unban');
+                        showToast('Bannissement révoqué !', 'success');
+                        um.fetchData();
+                    } catch (e) { showToast(e.message, 'error'); }
+                    finally { btn.querySelector('.plinkk-spinner').classList.add('hidden'); }
+                }
+            });
+
+            document.getElementById('umForcePwd').addEventListener('change', async (e) => {
+                try {
+                    const res = await fetch(`/api/users/${um.currentUserId}/force-password-reset`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ value: e.target.checked })
+                    });
+                    if (!res.ok) throw new Error('Erreur');
+                    showToast('Config mise à jour', 'success');
+                } catch (e) { showToast(e.message, 'error'); }
+            });
+
+            document.getElementById('umDisable2fa').addEventListener('click', async (e) => {
+                if (await confirmSimple('Désactiver la 2FA', 'L\'utilisateur pourra se connecter sans code.')) {
+                    const btn = e.currentTarget;
+                    try {
+                        btn.querySelector('.plinkk-spinner').classList.remove('hidden');
+                        const res = await fetch(`/api/users/${um.currentUserId}/disable-2fa`, { method: 'POST' });
+                        if (!res.ok) throw new Error('Erreur');
+                        showToast('2FA désactivée', 'success');
+                        um.fetchData();
+                    } catch (e) { showToast(e.message, 'error'); }
+                    finally { btn.querySelector('.plinkk-spinner').classList.add('hidden'); }
+                }
+            });
+
+            document.getElementById('umDelete').addEventListener('click', async (e) => {
+                const name = document.getElementById('umEditUsername').value;
+                if (await confirmWithInput('Suppression totale', `Toutes les données de l'utilisateur seront effacées.`, name)) {
+                    const btn = e.currentTarget;
+                    try {
+                        btn.querySelector('.plinkk-spinner').classList.remove('hidden');
+                        const res = await fetch(`/api/users/${um.currentUserId}`, { method: 'DELETE' });
+                        if (!res.ok) throw new Error('Erreur suppression');
+                        showToast('Compte supprimé !', 'success');
+                        um.close();
+                    } catch (e) { showToast(e.message, 'error'); }
+                    finally { btn.querySelector('.plinkk-spinner').classList.add('hidden'); }
+                }
+            });
+
+            document.getElementById('umImpersonate').addEventListener('click', async (e) => {
+                const btn = e.currentTarget;
+                try {
+                    btn.querySelector('.plinkk-spinner').classList.remove('hidden');
+                    const res = await fetch(`/api/admin/impersonate/${um.currentUserId}`, { method: 'POST' });
+                    if (!res.ok) throw new Error('Échec de l\'impersonation');
+                    showToast('Redirection...', 'success');
+                    window.location.href = '/dashboard';
+                } catch (e) { showToast(e.message, 'error'); }
+                finally { btn.querySelector('.plinkk-spinner').classList.add('hidden'); }
+            });
+
+            document.getElementById('umCopyLink').addEventListener('click', () => {
+                const url = document.getElementById('umViewProfile').href;
+                navigator.clipboard.writeText(url);
+                showToast('Lien copié !', 'success');
+            });
+
+            // --- LOGS LOGIC (Restaurée) ---
+            let currentPage = 1;
+            const limit = 50;
+            let currentLogs = [];
+            let currentTab = 'admin';
+
+            function renderSkeleton() {
+                const tbody = document.getElementById('logsTableBody');
+                tbody.innerHTML = Array(limit).fill(0).map(() => `
             <tr class="animate-pulse">
                 <td class="px-6 py-4"><div class="h-3 w-24 bg-slate-800 rounded"></div></td>
                 <td class="px-6 py-4"><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-slate-800"></div><div class="h-3 w-20 bg-slate-800 rounded"></div></div></td>
@@ -946,148 +1186,255 @@
                 <td class="px-6 py-4"></td>
             </tr>
         `).join('');
-    }
-
-    function switchTab(tab) {
-        currentTab = tab;
-        currentPage = 1;
-        const btnAdmin = document.getElementById('tab-admin');
-        const btnUser = document.getElementById('tab-user');
-        const labelAdmin = document.getElementById('labelAdmin');
-        const headerUser = document.getElementById('headerUser');
-        const filterAction = document.getElementById('filterAction');
-        const sourceSelect = document.getElementById(tab === 'admin' ? 'filterActionAdmin' : 'filterActionUser');
-
-        if (tab === 'admin') {
-            btnAdmin.className = 'px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-blue-600 text-white shadow-lg shadow-blue-900/20';
-            btnUser.className = 'px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800';
-            labelAdmin.textContent = 'Admin (ID)';
-            headerUser.textContent = 'Admin';
-        } else {
-            btnUser.className = 'px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-blue-600 text-white shadow-lg shadow-blue-900/20';
-            btnAdmin.className = 'px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800';
-            labelAdmin.textContent = 'Utilisateur (ID)';
-            headerUser.textContent = 'Utilisateur';
-        }
-        filterAction.innerHTML = sourceSelect.innerHTML;
-        loadLogs();
-    }
-
-    function openLogDetails(index) {
-        const log = currentLogs[index];
-        if (!log) return;
-        document.getElementById('modalLogId').textContent = `ID: ${log.id}`;
-        document.getElementById('modalDate').textContent = new Date(log.createdAt).toLocaleString();
-        document.getElementById('modalIp').textContent = log.ip || 'N/A';
-        const userName = currentTab === 'admin' ? log.adminName : (log.userName || log.userId);
-        const userId = currentTab === 'admin' ? log.adminId : log.userId;
-        document.getElementById('modalAdminName').textContent = userName;
-        document.getElementById('modalAdminId').textContent = userId;
-        document.getElementById('modalAdminAvatar').textContent = (userName || '?').charAt(0).toUpperCase();
-        document.getElementById('modalAction').textContent = log.action;
-        document.getElementById('modalTarget').textContent = log.targetId || 'N/A';
-
-        const targetInfo = document.getElementById('modalTargetUserInfo');
-        if (log.targetUser) {
-            targetInfo.classList.remove('hidden');
-            const u = log.targetUser;
-            document.getElementById('modalTargetName').textContent = u.userName || u.name || 'Inconnu';
-            document.getElementById('modalTargetEmail').textContent = u.email || 'Pas d\'email';
-            const targetLink = document.getElementById('modalTargetLink');
-            targetLink.onclick = (e) => { e.preventDefault(); um.open(u.id); };
-            const avatar = document.getElementById('modalTargetAvatar');
-            const placeholder = document.getElementById('modalTargetAvatarPlaceholder');
-            if (u.image) { avatar.src = u.image; avatar.classList.remove('hidden'); placeholder.classList.add('hidden'); }
-            else { avatar.classList.add('hidden'); placeholder.classList.remove('hidden'); placeholder.textContent = (u.userName || u.name || '?').charAt(0).toUpperCase(); }
-        } else { targetInfo.classList.add('hidden'); }
-        
-        const jsonContainer = document.getElementById('modalJson');
-        jsonContainer.innerHTML = '';
-        const details = log.details || {};
-        const keys = Object.keys(details).filter(k => k !== 'targetUser');
-        if (keys.length > 0) {
-            keys.forEach(key => {
-                const value = details[key];
-                const item = document.createElement('div');
-                item.className = 'bg-slate-900/40 rounded-2xl p-4 border border-slate-800/50 flex flex-col gap-1 hover:bg-slate-900/60 transition-colors shadow-inner';
-                const label = document.createElement('div');
-                label.className = 'text-[9px] text-slate-500 uppercase font-black tracking-widest font-mono opacity-50';
-                label.textContent = key;
-                const val = document.createElement('div');
-                val.className = 'text-emerald-400 font-mono text-xs break-all leading-relaxed tracking-tight';
-                if (typeof value === 'object' && value !== null) {
-                    val.textContent = JSON.stringify(value, null, 2);
-                    val.className += ' whitespace-pre-wrap mt-1 bg-black/20 p-3 rounded-xl border border-white/5';
-                } else { val.textContent = value; }
-                item.append(label, val);
-                jsonContainer.appendChild(item);
-            });
-            document.getElementById('copyJsonBtn').onclick = () => {
-                navigator.clipboard.writeText(JSON.stringify(details, null, 2));
-                showToast('JSON copié !', 'success');
-            };
-            document.getElementById('copyJsonBtn').parentElement.classList.remove('hidden');
-        } else {
-            jsonContainer.innerHTML = '<div class="flex flex-col items-center justify-center py-8 opacity-20 text-xs font-bold uppercase italic tracking-widest">Aucune donnée supplémentaire</div>';
-            document.getElementById('copyJsonBtn').parentElement.classList.add('hidden');
-        }
-        document.getElementById('logDetailsModal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeLogDetails() {
-        document.getElementById('logDetailsModal').classList.add('hidden');
-        document.body.style.overflow = 'auto';
-    }
-
-    async function loadLogs() {
-        const tbody = document.getElementById('logsTableBody');
-        renderSkeleton();
-        const adminId = document.getElementById('filterAdmin').value;
-        const targetId = document.getElementById('filterTarget').value;
-        const action = document.getElementById('filterAction').value;
-        const from = document.getElementById('filterFrom').value;
-        const to = document.getElementById('filterTo').value;
-        const sort = document.getElementById('sortOrder').value;
-
-        const params = new URLSearchParams({ page: currentPage, limit: limit, sort: sort });
-        if (adminId) params.append('adminId', adminId);
-        if (targetId) params.append('targetId', targetId);
-        if (action) params.append('action', action);
-        if (from) params.append('from', from);
-        if (to) params.append('to', to);
-
-        try {
-            const endpoint = currentTab === 'admin' ? '/admin/logs/api' : '/admin/logs/user-api';
-            const res = await fetch(`${endpoint}?${params.toString()}`);
-            if (!res.ok) throw new Error('Erreur chargement');
-            const data = await res.json();
-            currentLogs = data.logs;
-            if (data.logs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-slate-500">Aucun log trouvé.</td></tr>';
-                return;
             }
-            tbody.innerHTML = data.logs.map((log, index) => {
+
+            function switchTab(tab) {
+                currentTab = tab;
+                currentPage = 1;
+                const btnAdmin = document.getElementById('tab-admin');
+                const btnUser = document.getElementById('tab-user');
+                const labelAdmin = document.getElementById('labelAdmin');
+                const headerUser = document.getElementById('headerUser');
+                const filterAction = document.getElementById('filterAction');
+                const sourceSelect = document.getElementById(tab === 'admin' ? 'filterActionAdmin' : 'filterActionUser');
+
+                if (tab === 'admin') {
+                    btnAdmin.className = 'px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-blue-600 text-white shadow-lg shadow-blue-900/20';
+                    btnUser.className = 'px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800';
+                    labelAdmin.textContent = 'Admin (ID)';
+                    headerUser.textContent = 'Admin';
+                } else {
+                    btnUser.className = 'px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-blue-600 text-white shadow-lg shadow-blue-900/20';
+                    btnAdmin.className = 'px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800';
+                    labelAdmin.textContent = 'Utilisateur (ID)';
+                    headerUser.textContent = 'Utilisateur';
+                }
+                filterAction.innerHTML = sourceSelect.innerHTML;
+                loadLogs();
+            }
+
+            function openLogDetails(index) {
+                const log = currentLogs[index];
+                if (!log) return;
+                document.getElementById('modalLogId').textContent = `ID: ${log.id}`;
+                document.getElementById('modalDate').textContent = new Date(log.createdAt).toLocaleString();
+                document.getElementById('modalIp').textContent = log.ip || 'N/A';
+                const userName = currentTab === 'admin' ? log.adminName : (log.userName || log.userId);
                 const userId = currentTab === 'admin' ? log.adminId : log.userId;
-                let targetDisplay = '-';
+                document.getElementById('modalAdminName').textContent = userName;
+                document.getElementById('modalAdminId').textContent = userId;
+                document.getElementById('modalAdminAvatar').textContent = (userName || '?').charAt(0).toUpperCase();
+                document.getElementById('modalAction').textContent = log.action;
+                document.getElementById('modalTarget').textContent = log.targetId || 'N/A';
+
+                const targetInfo = document.getElementById('modalTargetUserInfo');
                 if (log.targetUser) {
-                    const name = log.targetUser.userName || log.targetUser.name || 'Inconnu';
-                    targetDisplay = `
-                        <div class="flex items-center gap-2 cursor-pointer group/target" onclick="event.stopPropagation(); um.open('${log.targetUser.id}')">    
+                    targetInfo.classList.remove('hidden');
+                    const u = log.targetUser;
+                    document.getElementById('modalTargetName').textContent = u.userName || u.name || 'Inconnu';
+                    document.getElementById('modalTargetEmail').textContent = u.email || 'Pas d\'email';
+                    const targetLink = document.getElementById('modalTargetLink');
+                    targetLink.onclick = (e) => { e.preventDefault(); um.open(u.id); };
+                    const avatar = document.getElementById('modalTargetAvatar');
+                    const placeholder = document.getElementById('modalTargetAvatarPlaceholder');
+                    if (u.image) { avatar.src = u.image; avatar.classList.remove('hidden'); placeholder.classList.add('hidden'); }
+                    else { avatar.classList.add('hidden'); placeholder.classList.remove('hidden'); placeholder.textContent = (u.userName || u.name || '?').charAt(0).toUpperCase(); }
+                } else { targetInfo.classList.add('hidden'); }
+
+                const jsonContainer = document.getElementById('modalJson');
+                jsonContainer.innerHTML = '';
+                const details = log.details || {};
+
+                // Handle explicit "changes" array from logDetailedAction
+                if (Array.isArray(details.changes) && details.changes.length > 0) {
+                    const changesDiv = document.createElement('div');
+                    changesDiv.className = 'flex flex-col gap-2 mb-4';
+
+                    const title = document.createElement('div');
+                    title.className = 'text-[10px] text-slate-500 uppercase font-black tracking-widest font-mono opacity-80 mb-1';
+                    title.textContent = 'Modifications';
+                    changesDiv.appendChild(title);
+
+                    details.changes.forEach(changeStr => {
+                        const item = document.createElement('div');
+                        item.className = 'bg-slate-900/40 rounded-xl p-3 border border-slate-800/50 flex items-center text-xs font-mono text-slate-300';
+
+                        // Parse "key: old -> new" if possible for better styling
+                        const parts = changeStr.match(/^([^:]+):\s*(.*)\s*->\s*(.*)$/);
+                        if (parts) {
+                            item.innerHTML = `
+                        <span class="font-bold text-violet-400 mr-2">${parts[1]}</span>
+                        <span class="text-rose-400/80 line-through mr-2 opacity-70">${parts[2]}</span>
+                        <span class="text-slate-500 mr-2">➜</span>
+                        <span class="text-emerald-400 font-bold">${parts[3]}</span>
+                    `;
+                        } else {
+                            item.textContent = changeStr;
+                        }
+                        changesDiv.appendChild(item);
+                    });
+                    jsonContainer.appendChild(changesDiv);
+                }
+
+                // Handle legacy "Old -> New" object structure (e.g. { key: { old: ..., new: ... } })
+                const legacyChanges = Object.keys(details).filter(k =>
+                    details[k] && typeof details[k] === 'object' && 'old' in details[k] && 'new' in details[k]
+                );
+
+                if (legacyChanges.length > 0) {
+                    const legacyDiv = document.createElement('div');
+                    legacyDiv.className = 'flex flex-col gap-2 mb-4';
+
+                    if (!Array.isArray(details.changes)) { // Only add title if not already shown above
+                        const title = document.createElement('div');
+                        title.className = 'text-[10px] text-slate-500 uppercase font-black tracking-widest font-mono opacity-80 mb-1';
+                        title.textContent = 'Modifications (Détail)';
+                        legacyDiv.appendChild(title);
+                    }
+
+                    legacyChanges.forEach(key => {
+                        const change = details[key];
+                        const item = document.createElement('div');
+                        item.className = 'bg-slate-900/40 rounded-xl p-3 border border-slate-800/50 text-xs font-mono text-slate-300';
+
+                        const oldVal = typeof change.old === 'object' ? JSON.stringify(change.old) : String(change.old);
+                        const newVal = typeof change.new === 'object' ? JSON.stringify(change.new) : String(change.new);
+
+                        item.innerHTML = `
+                    <span class="font-bold text-violet-400 mr-2">${key}</span>
+                    <div class="mt-1 pl-2 border-l-2 border-slate-800">
+                        <div class="flex items-start gap-2">
+                             <span class="text-rose-500 w-4">-</span>
+                             <span class="text-rose-400/80 break-all">${oldVal}</span>
+                        </div>
+                        <div class="flex items-start gap-2 mt-1">
+                             <span class="text-emerald-500 w-4">+</span>
+                             <span class="text-emerald-400 font-bold break-all">${newVal}</span>
+                        </div>
+                    </div>
+                 `;
+                        legacyDiv.appendChild(item);
+                    });
+                    jsonContainer.appendChild(legacyDiv);
+                }
+
+                // Other details (exclude handled keys)
+                const ignoredKeys = ['changes', 'formatted', 'diff', 'category', 'targetUser', ...legacyChanges];
+                const otherKeys = Object.keys(details).filter(k => !ignoredKeys.includes(k));
+
+                if (otherKeys.length > 0) {
+                    const rawDetailsContainer = document.createElement('div');
+                    rawDetailsContainer.className = 'mt-4 pt-4 border-t border-slate-800/50';
+
+                    const toggleBtn = document.createElement('button');
+                    toggleBtn.className = 'flex items-center gap-2 text-[10px] text-slate-500 uppercase font-black tracking-widest font-mono opacity-60 hover:opacity-100 transition-opacity mb-3';
+                    toggleBtn.innerHTML = `
+                <span>Données brutes additionnelles</span>
+                <svg class="w-3 h-3 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            `;
+
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'hidden grid grid-cols-1 gap-2';
+
+                    toggleBtn.onclick = () => {
+                        contentDiv.classList.toggle('hidden');
+                        toggleBtn.querySelector('svg').classList.toggle('rotate-180');
+                    };
+
+                    otherKeys.forEach(key => {
+                        const value = details[key];
+                        const item = document.createElement('div');
+                        item.className = 'bg-slate-950/30 rounded-lg p-3 border border-slate-800/30 flex flex-col gap-1';
+                        item.innerHTML = `
+                    <div class="text-[9px] text-slate-600 uppercase font-bold tracking-wider">${key}</div>
+                    <div class="text-slate-400 font-mono text-xs break-all whitespace-pre-wrap">${typeof value === 'object' ? JSON.stringify(value, null, 2) : value}</div>
+                `;
+                        contentDiv.appendChild(item);
+                    });
+
+                    rawDetailsContainer.appendChild(toggleBtn);
+                    rawDetailsContainer.appendChild(contentDiv);
+                    jsonContainer.appendChild(rawDetailsContainer);
+
+                    document.getElementById('copyJsonBtn').parentElement.classList.remove('hidden');
+                } else {
+                    // If we displayed changes but no other keys, keep copy button visible but maybe no "raw data" section
+                    if (legacyChanges.length === 0 && (!Array.isArray(details.changes) || details.changes.length === 0)) {
+                        jsonContainer.innerHTML += '<div class="flex flex-col items-center justify-center py-8 opacity-20 text-xs font-bold uppercase italic tracking-widest">Aucune donnée supplémentaire</div>';
+                        document.getElementById('copyJsonBtn').parentElement.classList.add('hidden');
+                    } else {
+                        document.getElementById('copyJsonBtn').parentElement.classList.remove('hidden');
+                    }
+                }
+                document.getElementById('logDetailsModal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeLogDetails() {
+                document.getElementById('logDetailsModal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            async function loadLogs() {
+                const tbody = document.getElementById('logsTableBody');
+                renderSkeleton();
+                const adminId = document.getElementById('filterAdmin').value;
+                const targetId = document.getElementById('filterTarget').value;
+                const action = document.getElementById('filterAction').value;
+                const from = document.getElementById('filterFrom').value;
+                const to = document.getElementById('filterTo').value;
+                const sort = document.getElementById('sortOrder').value;
+
+                const params = new URLSearchParams({ page: currentPage, limit: limit, sort: sort });
+                if (adminId) params.append('adminId', adminId);
+                if (targetId) params.append('targetId', targetId);
+                if (action) params.append('action', action);
+                if (from) params.append('from', from);
+                if (to) params.append('to', to);
+
+                try {
+                    const endpoint = currentTab === 'admin' ? '/admin/logs/api' : '/admin/logs/user-api';
+                    const res = await fetch(`${endpoint}?${params.toString()}`);
+                    if (!res.ok) {
+                        const text = await res.text();
+                        throw new Error(`Statut ${res.status}: ${text.substring(0, 100)}`);
+                    }
+                    const data = await res.json();
+                    currentLogs = data.logs;
+                    if (data.logs.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-slate-500">Aucun log trouvé.</td></tr>';
+                        return;
+                    }
+                    tbody.innerHTML = data.logs.map((log, index) => {
+                        const userId = currentTab === 'admin' ? log.adminId : log.userId;
+                        let targetDisplay = '-';
+
+                        if (log.targetUser) {
+                            const name = log.targetUser.userName || log.targetUser.name || 'Utilisateur';
+                            const targetId = log.targetUser.id || log.targetId;
+                            targetDisplay = `
+                        <div class="flex items-center gap-2 cursor-pointer group/target" onclick="event.stopPropagation(); um.open('${targetId}')">    
                             <div class="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-[8px] font-bold overflow-hidden border border-slate-700/50 group-hover/target:border-blue-500 transition-colors">
-                                ${log.targetUser.image ? `<img src="${log.targetUser.image}" class="w-full h-full object-cover">` : name.charAt(0).toUpperCase()}
+                                ${log.targetUser.image ? `<img src="${log.targetUser.image}" class="w-full h-full object-cover">` : (name || '?').charAt(0).toUpperCase()}
                             </div>
                             <span class="max-w-[120px] truncate group-hover/target:text-blue-400 transition-colors">${name}</span>
                         </div>
                     `;
-                } else if (log.targetId) {
-                    targetDisplay = `<span class="text-slate-500 font-mono text-[10px] italic cursor-pointer hover:text-blue-400 transition-colors" onclick="event.stopPropagation(); um.open('${log.targetId}')">${log.targetId}</span>`;
-                }
-                const uName = currentTab === 'admin' ? log.adminName : (log.userName || log.userId);
-                const uImage = currentTab === 'admin' ? log.adminImage : log.userImage;
-                return `
+                        } else if (log.targetId) {
+                            targetDisplay = `<span class="text-slate-500 font-mono text-[10px] italic cursor-pointer hover:text-blue-400 transition-colors" onclick="event.stopPropagation(); um.open('${log.targetId}')">${log.targetId}</span>`;
+                        }
+
+                        const uName = (currentTab === 'admin' ? log.adminName : log.userName) || log.userId || log.adminId || 'Inconnu';
+                        const uImage = currentTab === 'admin' ? log.adminImage : log.userImage;
+
+                        let detailsCount = 0;
+                        try {
+                            detailsCount = (log.details && typeof log.details === 'object') ? Object.keys(log.details).length : 0;
+                        } catch (err) { console.warn("Erreur détails log:", err); }
+
+                        return `
                     <tr class="hover:bg-slate-800/50 transition-colors border-b border-slate-800/30 last:border-0" onclick="openLogDetails(${index})">
-                        <td class="px-6 py-4 whitespace-nowrap text-slate-500 font-mono text-[11px]">${new Date(log.createdAt).toLocaleString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-slate-500 font-mono text-[11px]">${log.createdAt ? new Date(log.createdAt).toLocaleString() : '-'}</td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-2 cursor-pointer group/source" onclick="event.stopPropagation(); um.open('${userId}')">
                                 <div class="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center text-[10px] font-bold overflow-hidden border border-slate-700/50 shadow-inner group-hover/source:border-blue-500 transition-colors">
@@ -1096,26 +1443,30 @@
                                 <span class="text-white text-sm font-medium tracking-tight group-hover/source:text-blue-400 transition-colors">${uName}</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-lg bg-violet-600/10 border border-violet-500/20 text-[10px] font-bold font-mono text-violet-400 tracking-wider">${log.action}</span></td>
+                        <td class="px-6 py-4"><span class="px-2.5 py-1 rounded-lg bg-violet-600/10 border border-violet-500/20 text-[10px] font-bold font-mono text-violet-400 tracking-wider">${log.action || 'ACTION'}</span></td>
                         <td class="px-6 py-4 text-slate-400 font-mono text-xs">${targetDisplay}</td>
-                        <td class="px-6 py-4"><div class="flex items-center gap-1.5 text-slate-500 text-[10px]"><span class="w-1.5 h-1.5 rounded-full ${log.details && Object.keys(log.details).length > 0 ? 'bg-emerald-500' : 'bg-slate-700'}"></span>${log.details && Object.keys(log.details).length > 0 ? 'Détails dispos' : 'Aucun détail'}</div></td>
+                        <td class="px-6 py-4"><div class="flex items-center gap-1.5 text-slate-500 text-[10px]"><span class="w-1.5 h-1.5 rounded-full ${detailsCount > 0 ? 'bg-emerald-500' : 'bg-slate-700'}"></span>${detailsCount > 0 ? 'Détails dispos' : 'Aucun détail'}</div></td>
                         <td class="px-6 py-4 text-slate-500 font-mono text-[10px]">${log.ip || '-'}</td>
                         <td class="px-6 py-4 text-right"><button class="p-2 hover:bg-slate-700 rounded-lg text-slate-500 hover:text-white transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button></td>
                     </tr>
                 `;
-            }).join('');
-            const totalPages = Math.ceil(data.total / limit);
-            document.getElementById('pageInfo').textContent = `Page ${currentPage} / ${totalPages || 1}`;
-            document.getElementById('prevPage').disabled = currentPage <= 1;
-            document.getElementById('nextPage').disabled = currentPage >= totalPages;
-        } catch (e) { tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-rose-500">Erreur lors du chargement des logs.</td></tr>'; }
-    }
+                    }).join('');
+                    const totalPages = Math.ceil(data.total / limit);
+                    document.getElementById('pageInfo').textContent = `Page ${currentPage} / ${totalPages || 1}`;
+                    document.getElementById('prevPage').disabled = currentPage <= 1;
+                    document.getElementById('nextPage').disabled = currentPage >= totalPages;
+                } catch (e) {
+                    console.error('Erreur logs:', e);
+                    tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-rose-500">Erreur lors du chargement des logs: ${e.message}</td></tr>`;
+                }
+            }
 
-    document.getElementById('prevPage').addEventListener('click', () => { if (currentPage > 1) { currentPage--; loadLogs(); } });
-    document.getElementById('nextPage').addEventListener('click', () => { currentPage++; loadLogs(); });
+            document.getElementById('prevPage').addEventListener('click', () => { if (currentPage > 1) { currentPage--; loadLogs(); } });
+            document.getElementById('nextPage').addEventListener('click', () => { currentPage++; loadLogs(); });
 
-    window.addEventListener('DOMContentLoaded', () => { switchTab('admin'); });
-</script>
+            window.addEventListener('DOMContentLoaded', () => { switchTab('admin'); });
+        </script>
 
-</body>
-</html>
+        </body>
+
+        </html>

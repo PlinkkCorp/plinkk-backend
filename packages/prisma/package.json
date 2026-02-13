@@ -20,18 +20,19 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.0.0",
-    "@prisma/client": "^7.0.0",
-    "@prisma/client-runtime-utils": "^7.0.0",
+    "@prisma/adapter-pg": "^7.3.0",
+    "@prisma/client": "^7.3.0",
+    "@prisma/client-runtime-utils": "^7.3.0",
     "@types/pg": "^8.15.6",
     "dotenv": "^17.2.3",
-    "pg": "^8.16.3",
+    "pg": "^8.18.0",
+    "pg-connection-string": "^2.7.0",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
-    "@prisma/config": "^7.1.0",
+    "@prisma/config": "^7.3.0",
     "@types/node": "^20.11.0",
-    "prisma": "^7.0.0",
+    "prisma": "^7.3.0",
     "typescript": "^5.3.3"
   }
 }

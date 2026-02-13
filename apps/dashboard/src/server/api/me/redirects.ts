@@ -18,7 +18,8 @@ import {
   PREMIUM_MAX_REDIRECTS,
 } from "@plinkk/shared";
 import z from "zod";
-import { logUserAction } from "../../../lib/userLogger";
+import { logUserAction, logDetailedAction } from "../../../lib/userLogger";
+import { calculateObjectDiff } from "../../../lib/diffUtils";
 
 const createRedirectSchema = z.object({
   slug: z.string().min(2).max(50),
@@ -39,7 +40,7 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
   // Liste des redirections de l'utilisateur
   fastify.get("/", { preHandler: requireAuth }, async (request, reply) => {
     const userId = request.userId!;
-    
+
     const redirects = await getUserRedirects(userId);
     return reply.send({ redirects });
   });
@@ -47,14 +48,14 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
   // Vérifier la disponibilité d'un slug
   fastify.get("/check-slug", { preHandler: requireAuth }, async (request, reply) => {
     const { slug } = request.query as { slug?: string };
-    
+
     if (!slug) {
       return reply.code(400).send({ error: "missing_slug" });
     }
-    
+
     const normalizedSlug = slugify(slug);
     const result = await isRedirectSlugAvailable(normalizedSlug);
-    
+
     return reply.send({
       slug: normalizedSlug,
       available: result.available,
@@ -66,7 +67,7 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
   fastify.post("/", { preHandler: requireAuthWithUser }, async (request, reply) => {
     const userId = request.userId!;
     const user = request.currentUser!;
-    
+
     // Valider les données
     let data;
     try {
@@ -74,11 +75,11 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
     } catch (e) {
       return reply.code(400).send({ error: "invalid_data", details: (e as z.ZodError<unknown>).issues });
     }
-    
+
     // Vérifier la limite de redirections
     const currentCount = await countUserRedirects(userId);
     const maxRedirects = getMaxRedirects(user);
-    
+
     if (currentCount >= maxRedirects) {
       const isPremium = isUserPremium(user);
       const canUpgrade = !isPremium && PREMIUM_MAX_REDIRECTS > maxRedirects;
@@ -94,25 +95,27 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
           : "Limite de redirections atteinte.",
       });
     }
-    
+
     // Normaliser et vérifier le slug
     const normalizedSlug = slugify(data.slug);
     const slugCheck = await isRedirectSlugAvailable(normalizedSlug);
-    
+
     if (!slugCheck.available) {
       return reply.code(409).send({
         error: "slug_unavailable",
         reason: slugCheck.reason,
       });
     }
-    
+
     // Créer la redirection
     try {
       const redirect = await createRedirect(userId, normalizedSlug, data.targetUrl, {
         title: data.title,
         description: data.description,
       });
-      await logUserAction(userId, "CREATE_REDIRECT", redirect.id, { slug: normalizedSlug, targetUrl: data.targetUrl }, request.ip);
+      await logDetailedAction(userId, "CREATE_REDIRECT", redirect.id, {}, redirect, request.ip, {
+        formatted: `Created redirect '${redirect.slug}' -> '${redirect.targetUrl}'`
+      });
       return reply.code(201).send({ redirect });
     } catch (e) {
       request.log?.error(e, "createRedirect failed");
@@ -124,19 +127,19 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
   fastify.get("/:redirectId", { preHandler: requireAuth }, async (request, reply) => {
     const userId = request.userId!;
     const { redirectId } = request.params as { redirectId: string };
-    
+
     const redirect = await prisma.redirect.findUnique({
       where: { id: redirectId },
     });
-    
+
     if (!redirect) {
       return reply.code(404).send({ error: "redirect_not_found" });
     }
-    
+
     if (redirect.userId !== userId) {
       return reply.code(403).send({ error: "forbidden" });
     }
-    
+
     return reply.send({ redirect });
   });
 
@@ -144,7 +147,7 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
   fastify.patch("/:redirectId", { preHandler: requireAuth }, async (request, reply) => {
     const userId = request.userId!;
     const { redirectId } = request.params as { redirectId: string };
-    
+
     // Valider les données
     let data;
     try {
@@ -152,38 +155,41 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
     } catch (e) {
       return reply.code(400).send({ error: "invalid_data", details: (e as z.ZodError<unknown>).issues });
     }
-    
+
     // Vérifier que la redirection appartient à l'utilisateur
     const existing = await prisma.redirect.findUnique({
       where: { id: redirectId },
     });
-    
+
     if (!existing) {
       return reply.code(404).send({ error: "redirect_not_found" });
     }
-    
+
     if (existing.userId !== userId) {
       return reply.code(403).send({ error: "forbidden" });
     }
-    
+
     // Si le slug change, vérifier sa disponibilité
     if (data.slug && data.slug !== existing.slug) {
       const normalizedSlug = slugify(data.slug);
       const slugCheck = await isRedirectSlugAvailable(normalizedSlug, redirectId);
-      
+
       if (!slugCheck.available) {
         return reply.code(409).send({
           error: "slug_unavailable",
           reason: slugCheck.reason,
         });
       }
-      
+
       data.slug = normalizedSlug;
     }
-    
+
     try {
       const redirect = await updateRedirect(redirectId, data);
-      await logUserAction(userId, "UPDATE_REDIRECT", redirectId, data, request.ip);
+
+      await logDetailedAction(userId, "UPDATE_REDIRECT", redirectId, existing, redirect, request.ip, {
+        formatted: `Updated redirect '${redirect.slug}'`
+      });
       return reply.send({ redirect });
     } catch (e) {
       request.log?.error(e, "updateRedirect failed");
@@ -195,23 +201,25 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
   fastify.delete("/:redirectId", { preHandler: requireAuth }, async (request, reply) => {
     const userId = request.userId!;
     const { redirectId } = request.params as { redirectId: string };
-    
+
     // Vérifier que la redirection appartient à l'utilisateur
     const existing = await prisma.redirect.findUnique({
       where: { id: redirectId },
     });
-    
+
     if (!existing) {
       return reply.code(404).send({ error: "redirect_not_found" });
     }
-    
+
     if (existing.userId !== userId) {
       return reply.code(403).send({ error: "forbidden" });
     }
-    
+
     try {
       await deleteRedirect(redirectId);
-      await logUserAction(userId, "DELETE_REDIRECT", redirectId, {}, request.ip);
+      await logDetailedAction(userId, "DELETE_REDIRECT", redirectId, existing, {}, request.ip, {
+        formatted: `Deleted redirect '${existing.slug}'`
+      });
       return reply.send({ ok: true });
     } catch (e) {
       request.log?.error(e, "deleteRedirect failed");
@@ -224,20 +232,20 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
     const userId = request.userId!;
     const { redirectId } = request.params as { redirectId: string };
     const { days } = request.query as { days?: string };
-    
+
     // Vérifier que la redirection appartient à l'utilisateur
     const existing = await prisma.redirect.findUnique({
       where: { id: redirectId },
     });
-    
+
     if (!existing) {
       return reply.code(404).send({ error: "redirect_not_found" });
     }
-    
+
     if (existing.userId !== userId) {
       return reply.code(403).send({ error: "forbidden" });
     }
-    
+
     const stats = await getRedirectStats(redirectId, days ? parseInt(days, 10) : 30);
     return reply.send({ stats });
   });
@@ -246,10 +254,10 @@ export function apiMeRedirectsRoutes(fastify: FastifyInstance) {
   fastify.get("/limits", { preHandler: requireAuthWithUser }, async (request, reply) => {
     const userId = request.userId!;
     const user = request.currentUser!;
-    
+
     const currentCount = await countUserRedirects(userId);
     const maxRedirects = getMaxRedirects(user);
-    
+
     return reply.send({
       current: currentCount,
       max: maxRedirects,

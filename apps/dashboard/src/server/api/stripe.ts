@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import Stripe from "stripe";
 import { requireAuth } from "../../middleware/auth";
 import { prisma } from "@plinkk/prisma";
+import { logUserAction } from "../../lib/userLogger";
 import {
   stripe,
   createCheckoutSession,
@@ -53,6 +54,8 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
         dashboardUrl
       );
       
+      await logUserAction(userId, "UPDATE_PLAN", null, { premium: body.premium, extraPlinkks: body.extraPlinkks, extraRedirects: body.extraRedirects, plan: body.plan }, request.ip);
+
       return reply.send(result);
     } catch (e: unknown) {
       request.log?.error(e, "Plan update failed");
@@ -88,7 +91,8 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
       if (sub.cancel_at_period_end) {
         return reply.send({ updated: true, message: "La résiliation est déjà programmée." });
       }
-
+await logUserAction(userId, "CANCEL_SUBSCRIPTION", sub.id, {}, request.ip);
+      
       await stripe.subscriptions.update(sub.id, { cancel_at_period_end: true });
       return reply.send({ updated: true, message: "Résiliation programmée à la fin de la période." });
     } catch (e: unknown) {

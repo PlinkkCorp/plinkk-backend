@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { prisma, Prisma } from "@plinkk/prisma";
+import { logUserAction } from "../../lib/userLogger";
 import {
   verifyRoleIsStaff,
   verifyRoleAdmin,
@@ -96,6 +97,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     if (Object.keys(data).length > 0) {
         const u = await prisma.user.update({ where: { id }, data });
         await logAdminAction(meId, 'UPDATE_USER_PROFILE', id, data, request.ip);
+        /* @ts-ignore */
+        await logUserAction(id, "ADMIN_UPDATE_PROFILE", meId, data, request.ip);
         return reply.send({ id: u.id, userName: u.userName, email: u.email });
     }
     return reply.send({ ok: true });
@@ -193,6 +196,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       },
     });
     await logAdminAction(meId, 'BAN_USER', id, { email: u.email, reason: body.reason, time: body.time }, request.ip);
+    await logUserAction(id, "BANNED", meId, { email: u.email, reason: body.reason, time: body.time }, request.ip);
     return reply.send({ ok: true, ban });
   });
 
@@ -218,6 +222,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { revoquedAt: new Date() },
     });
     await logAdminAction(meId, 'UNBAN_USER', id, { email: u.email }, request.ip);
+    await logUserAction(id, "UNBANNED", meId, { email: u.email }, request.ip);
     return reply.send({ ok: true });
   });
 
@@ -263,6 +268,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { roleId: dbRole.id },
       include: { role: true },
     });
+    await logUserAction(id, "ADMIN_UPDATE_ROLE", meId, { oldRole: meRole, newRole: targetRole }, request.ip);
     await logAdminAction(meId, 'UPDATE_USER_ROLE', id, { oldRole: meRole, newRole: targetRole }, request.ip);
     return reply.send({ id: updated.id, role: updated.role });
   });
@@ -280,6 +286,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { cosmetics },
       include: { cosmetics: true },
     });
+    await logUserAction(id, "ADMIN_UPDATE_COSMETICS", meId, { cosmetics }, request.ip);
     await logAdminAction(meId, 'UPDATE_USER_COSMETICS', id, { cosmetics }, request.ip);
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
   });
@@ -293,6 +300,15 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
     await prisma.user.delete({ where: { id } });
     await logAdminAction(meId, 'DELETE_USER', id, {}, request.ip);
+    // User is deleted, we can't log to their userLog if it cascades or if user doesn't exist.
+    // However, if we keep logs, we might want to log it before deletion or check cascade rules.
+    // Usually logs should be kept. Assuming userLog might be deleted if it has foreign key.
+    // Let's assume we log it before deletion if we want to keep trace, but if user is gone...
+    // Actually, if the user is deleted, their logs might be deleted too depending on schema.
+    // Let's skip user log for total deletion or log it before if schema allows standalone logs (unlikely with relation).
+    // If Relation is User -> UserLog[], deleting User deletes logs.
+    // So logging a "DELETED" action to a user about to be deleted is moot unless we keep logs.
+    // I will skip logUserAction for DELETE_USER for now as the user is gone.
     return reply.send({ ok: true });
   });
 
@@ -318,6 +334,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { twoFactorSecret: "", twoFactorEnabled: false },
     });
     await logAdminAction(meId, 'RESET_2FA_USER', id, {}, request.ip);
+    await logUserAction(id, "ADMIN_RESET_2FA", meId, {}, request.ip);
     return reply.send({ ok: true, changed: true });
   });
 
@@ -339,6 +356,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { isPublic: Boolean(isPublic) },
       select: { id: true, isPublic: true },
     });
+    await logUserAction(id, "ADMIN_UPDATE_VISIBILITY", meId, { isPublic }, request.ip);
     await logAdminAction(meId, 'UPDATE_USER_VISIBILITY', id, { isPublic }, request.ip);
     return reply.send(updated);
   });
@@ -368,6 +386,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { publicEmail: newPublicEmail },
       select: { id: true, publicEmail: true },
     });
+    await logUserAction(id, "ADMIN_UPDATE_EMAIL_VISIBILITY", meId, { isEmailPublic }, request.ip);
     await logAdminAction(meId, 'UPDATE_USER_EMAIL_VISIBILITY', id, { isEmailPublic }, request.ip);
     return reply.send({ id: updated.id, isEmailPublic: Boolean(updated.publicEmail) });
   });
@@ -394,6 +413,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       data: { mustChangePassword: mustChange },
       select: { id: true, mustChangePassword: true },
     });
+    await logUserAction(id, "ADMIN_FORCE_PASSWORD_RESET", meId, { mustChange }, request.ip);
     await logAdminAction(meId, 'FORCE_PASSWORD_RESET', id, { mustChange }, request.ip);
     return reply.send({ id: updated.id, mustChangePassword: updated.mustChangePassword });
   });
@@ -466,6 +486,9 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     const created = await prisma.bannedEmail.create({
       data: { email, reason, time },
     });
+    if (targetUser) {
+      await logUserAction(targetUser.id, "BANNED_EMAIL", userId, { email, reason, time }, request.ip);
+    }
     await logAdminAction(userId, 'BAN_EMAIL', undefined, { email, reason, time }, request.ip);
     return reply.send({
       ok: true,
@@ -495,6 +518,10 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     });
     if (!res.count) return reply.code(404).send({ error: "not_found" });
     await logAdminAction(userId, 'UNBAN_EMAIL', undefined, { email: target }, request.ip);
+    const targetUser = await prisma.user.findFirst({ where: { email: target }, select: { id: true } });
+    if (targetUser) {
+        await logUserAction(targetUser.id, "UNBANNED_EMAIL", userId, { email: target }, request.ip);
+    }
     return reply.send({ ok: true, count: res.count });
   });
 

@@ -26,15 +26,15 @@ export function loginRoutes(fastify: FastifyInstance) {
       } catch {
         try {
           request.session.delete();
-        } catch {}
+        } catch { }
       }
     }
 
     const currentUser =
       currentUserId && String(currentUserId).includes("__totp")
         ? await prisma.user.findUnique({
-            where: { id: String(currentUserId).split("__")[0] },
-          })
+          where: { id: String(currentUserId).split("__")[0] },
+        })
         : null;
 
     const returnToQuery =
@@ -117,8 +117,7 @@ export function loginRoutes(fastify: FastifyInstance) {
         (request.query as { returnTo: string })?.returnTo;
       request.session.set("data", user.id + "__totp");
       return reply.redirect(
-        `/totp${
-          returnToQuery ? `?returnTo=${encodeURIComponent(returnToQuery)}` : ""
+        `/totp${returnToQuery ? `?returnTo=${encodeURIComponent(returnToQuery)}` : ""
         }`
       );
     }
@@ -165,6 +164,7 @@ export function loginRoutes(fastify: FastifyInstance) {
 
     // Switch session to target user
     await createUserSession(target.id, request);
+    await logUserAction(meId, "IMPERSONATE", target.id, { targetUsername: target.userName }, request.ip);
     return reply.send({ success: true });
   });
 
@@ -186,6 +186,8 @@ export function loginRoutes(fastify: FastifyInstance) {
         expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 min
       },
     });
+
+    await logUserAction(meId, "GENERATE_MAGIC_LINK", id, {}, request.ip);
     return reply.send({ url: `/login/magic?token=${token}` });
   });
 
@@ -218,12 +220,11 @@ async function checkUserBan(
         new Date(ban.createdAt).getTime() + ban.time * 60000 > Date.now();
 
       if (isActive) {
-        return `Votre compte a été banni pour la raison suivante: ${
-          ban.reason || "Violation des règles"
-        }. Veuillez contacter l'administration pour plus de détails à contact@plinkk.fr`;
+        return `Votre compte a été banni pour la raison suivante: ${ban.reason || "Violation des règles"
+          }. Veuillez contacter l'administration pour plus de détails à contact@plinkk.fr`;
       }
     }
-  } catch {}
+  } catch { }
 
   return null;
 }

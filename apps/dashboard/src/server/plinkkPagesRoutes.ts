@@ -9,6 +9,7 @@ import {
   isReservedSlug,
 } from "../lib/plinkkUtils";
 import { replyView } from "../lib/replyView";
+import { logUserAction } from "../lib/userLogger";
 
 // const prisma = new PrismaClient();
 
@@ -78,12 +79,13 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
         ? "PRIVATE"
         : "PUBLIC";
     const isActive = !!body.isActive;
-    await createPlinkkForUser(prisma, me.id, {
+    const created = await createPlinkkForUser(prisma, me.id, {
       name: title || "Page",
       slugBase,
       visibility,
       isActive,
     });
+    await logUserAction(userId, "CREATE_PLINKK", userId, { plinkkId: created.id, name: created.name }, request.ip);
     return reply.redirect("/plinkks");
   });
 
@@ -128,7 +130,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     const page = await prisma.plinkk.findUnique({ where: { id } });
     if (!page || page.userId !== userId)
       return reply.code(404).view("erreurs/404.ejs", { user: { id: userId } });
-    let data: Plinkk;
+    const data: Partial<Plinkk> = {};
     if (typeof body.title === "string" && body.title.trim())
       data.name = body.title.trim();
     if (typeof body.slug === "string" && body.slug.trim()) {
@@ -168,9 +170,11 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
         }),
       ]);
       await reindexNonDefault(prisma, userId);
+      await logUserAction(userId, "SET_DEFAULT_PLINKK", userId, { plinkkId: id, name: page.name }, request.ip);
     }
     if (Object.keys(data).length) {
       await prisma.plinkk.update({ where: { id }, data });
+      await logUserAction(userId, "UPDATE_PLINKK", userId, { plinkkId: id, changes: data }, request.ip);
     }
     return reply.redirect("/plinkks");
   });
@@ -199,11 +203,13 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
       }
       if (mode === "hard") {
         await prisma.plinkk.delete({ where: { id } });
+        await logUserAction(userId, "DELETE_PLINKK", userId, { plinkkId: id, name: page.name, mode: "hard" }, request.ip);
       } else {
         await prisma.plinkk.update({
           where: { id },
           data: { isActive: false },
         });
+        await logUserAction(userId, "DEACTIVATE_PLINKK", userId, { plinkkId: id, name: page.name, mode: "soft" }, request.ip);
       }
       await reindexNonDefault(prisma, userId);
       return reply.redirect("/plinkks");
@@ -243,6 +249,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
         }),
       ]);
       await reindexNonDefault(prisma, userId);
+      await logUserAction(userId, "SET_DEFAULT_PLINKK", userId, { plinkkId: id, name: page.name }, request.ip);
       return reply.redirect("/plinkks");
     }
   );

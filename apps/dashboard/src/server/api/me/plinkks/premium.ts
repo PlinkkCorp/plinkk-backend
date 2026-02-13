@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import bcrypt from "bcrypt";
 import { canUsePasswordProtectedPlinkk, canUseScheduledLinks } from "@plinkk/shared";
+import { logUserAction } from "../../../../lib/userLogger";
 
 async function validatePlinkkOwnership(userId: string | undefined, plinkkId: string) {
   if (!userId) return null;
@@ -54,6 +55,8 @@ export function plinkksPremiumRoutes(fastify: FastifyInstance) {
       data: { passwordHash: hash },
     });
 
+    await logUserAction(userId, "SET_PLINKK_PASSWORD", id, {}, request.ip);
+
     return reply.send({ ok: true, hasPassword: true });
   });
 
@@ -72,6 +75,7 @@ export function plinkksPremiumRoutes(fastify: FastifyInstance) {
       where: { id },
       data: { passwordHash: null },
     });
+    await logUserAction(userId, "REMOVE_PLINKK_PASSWORD", id, {}, request.ip);
 
     return reply.send({ ok: true, hasPassword: false });
   });
@@ -161,6 +165,8 @@ export function plinkksPremiumRoutes(fastify: FastifyInstance) {
       select: { id: true, scheduledAt: true, expiresAt: true },
     });
 
+    await logUserAction(userId, "UPDATE_LINK_SCHEDULE", id, { linkId, scheduledAt: data.scheduledAt, expiresAt: data.expiresAt }, request.ip);
+
     return reply.send({ ok: true, link: updated });
   });
 
@@ -186,6 +192,8 @@ export function plinkksPremiumRoutes(fastify: FastifyInstance) {
       data: { scheduledAt: null, expiresAt: null },
       select: { id: true, scheduledAt: true, expiresAt: true },
     });
+
+    await logUserAction(userId, "DELETE_LINK_SCHEDULE", id, { linkId }, request.ip);
 
     return reply.send({ ok: true, link: updated });
   });

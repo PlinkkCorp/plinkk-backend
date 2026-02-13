@@ -11,7 +11,7 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 		aud?: string;
 		email?: string;
 		name?: string;
-        picture?: string;
+		picture?: string;
 		[key: string]: unknown;
 	}
 	fastify.get("/auth/google", async (request, reply) => {
@@ -43,43 +43,43 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 
 			const email = payload.email as string | undefined;
 			const name = (payload.name as string) || (payload.email as string) || "user";
-            const picture = payload.picture as string | undefined;
+			const picture = payload.picture as string | undefined;
 			const googleId = payload.sub as string | undefined;
 
 			if (!email || !googleId) {
 				return reply.code(400).send({ success: false, error: "no_email_or_sub" });
 			}
 
-			const currentUserId = request.session?.get("data"); 
+			const currentUserId = request.session?.get("data");
 
 			if (currentUserId && !String(currentUserId).includes("__totp")) {
-				 const existingConnection = await prisma.connection.findUnique({
-					 where: {
-						 provider_providerId: {
-							 provider: 'google',
-							 providerId: googleId
-						 }
-					 }
-				 });
+				const existingConnection = await prisma.connection.findUnique({
+					where: {
+						provider_providerId: {
+							provider: 'google',
+							providerId: googleId
+						}
+					}
+				});
 
-				 if (existingConnection) {
-					 if (existingConnection.userId !== currentUserId) {
-						 return reply.code(400).send({ success: false, error: "already_linked_to_other_user" });
-					 }
-				 } else {
-					 await prisma.connection.create({
-						 data: {
-							 provider: 'google',
-							 providerId: googleId,
-							 email: email,
-							 name: name,
-							 userId: currentUserId as string,
-                             isIdentity: true
-						 }
-					 });
-					 await logUserAction(currentUserId as string, "LINK_ACCOUNT", googleId, { provider: "google", email }, request.ip);
-				 }
-				 return reply.code(200).send({ success: true, redirect: "/account" });
+				if (existingConnection) {
+					if (existingConnection.userId !== currentUserId) {
+						return reply.code(400).send({ success: false, error: "already_linked_to_other_user" });
+					}
+				} else {
+					await prisma.connection.create({
+						data: {
+							provider: 'google',
+							providerId: googleId,
+							email: email,
+							name: name,
+							userId: currentUserId as string,
+							isIdentity: true
+						}
+					});
+					await logUserAction(currentUserId as string, "LINK_ACCOUNT", googleId, { provider: "google", email }, request.ip);
+				}
+				return reply.code(200).send({ success: true, redirect: "/account" });
 			}
 
 			let connection = await prisma.connection.findUnique({
@@ -94,20 +94,20 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 			let user;
 
 			if (connection) {
-                // If the connection is not marked as identity but should be (migration), update it?
-                // For now, assume Google is always identity.
+				// If the connection is not marked as identity but should be (migration), update it?
+				// For now, assume Google is always identity.
 				user = await prisma.user.findUnique({ where: { id: connection.userId }, include: { role: true } });
-                if (user && !user.image && picture) {
-                    await prisma.user.update({ where: { id: user.id }, data: { image: picture } });
-                    user.image = picture;
-                }
+				if (user && !user.image && picture) {
+					await prisma.user.update({ where: { id: user.id }, data: { image: picture } });
+					user.image = picture;
+				}
 			} else {
 				user = await prisma.user.findFirst({ where: { email }, include: { role: true } });
 
 				if (user) {
-                    if (!user.image && picture) {
-                        await prisma.user.update({ where: { id: user.id }, data: { image: picture } });
-                    }
+					if (!user.image && picture) {
+						await prisma.user.update({ where: { id: user.id }, data: { image: picture } });
+					}
 					await prisma.connection.create({
 						data: {
 							provider: 'google',
@@ -115,7 +115,7 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 							email: email,
 							name: name,
 							userId: user.id,
-                            isIdentity: true
+							isIdentity: true
 						}
 					});
 				} else {
@@ -126,9 +126,9 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 							userName: name,
 							name: name,
 							email: email,
-                            image: picture || undefined,
+							image: picture || undefined,
 							password: idToken,
-                            hasPassword: false, // User created via Google has no real password
+							hasPassword: false, // User created via Google has no real password
 							role: {
 								connectOrCreate: {
 									where: { name: "USER" },
@@ -141,12 +141,13 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 									providerId: googleId,
 									email: email,
 									name: name,
-                                    isIdentity: true
+									isIdentity: true
 								}
 							}
 						},
 						include: { role: true },
 					});
+					await logUserAction(user.id, "REGISTER", null, { method: "GOOGLE" }, request.ip);
 
 					try {
 						await prisma.cosmetic.create({ data: { userId: user.id } });
@@ -162,7 +163,15 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 				}
 			}
 
-			if (user) await createUserSession(user.id, request);
+			if (user) {
+				await createUserSession(user.id, request);
+				// Determines if it was a login or register
+				// Actually, we can check if we just created it.
+				// But simpler: if we are here, we are logging in.
+				// If we created a new user, we should have logged REGISTER.
+				// Let's rely on simple LOGIN log here for all successful sessions.
+				await logUserAction(user.id, "LOGIN", null, { method: "GOOGLE" }, request.ip);
+			}
 
 			return reply.send({ success: true, redirect: "/" });
 		} catch (e) {

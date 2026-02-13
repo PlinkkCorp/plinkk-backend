@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { PlinkkSettings, prisma } from "@plinkk/prisma";
 import { pickDefined } from "../../../../lib/plinkkUtils";
+import { logUserAction, logDetailedAction } from "../../../../lib/userLogger";
 // import { canUseVisualEffects } from "@plinkk/shared";
 
 export function plinkksConfigRoutes(fastify: FastifyInstance) {
@@ -84,11 +85,11 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       categories: categories.map((c) => ({ id: c.id, name: c.name, order: c.order })),
       statusbar: statusbar
         ? {
-            text: statusbar.text,
-            colorBg: statusbar.colorBg,
-            fontTextColor: statusbar.fontTextColor,
-            statusText: statusbar.statusText,
-          }
+          text: statusbar.text,
+          colorBg: statusbar.colorBg,
+          fontTextColor: statusbar.fontTextColor,
+          statusText: statusbar.statusText,
+        }
         : null,
     };
     return reply.send(cfg);
@@ -135,6 +136,8 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
     }
     */
 
+    const currentSettings = await prisma.plinkkSettings.findUnique({ where: { plinkkId: id } });
+
     const data = pickDefined({
       profileLink: body.profileLink,
       profileImage: body.profileImage,
@@ -168,6 +171,15 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       layoutOrder: body.layoutOrder,
     });
 
+    // Construct oldData for detailed logging
+    const oldData: Record<string, any> = {};
+    if (currentSettings) {
+      for (const key of Object.keys(data)) {
+        // @ts-ignore
+        oldData[key] = currentSettings[key];
+      }
+    }
+
     if (Object.keys(data).length > 0) {
       await prisma.plinkkSettings.upsert({
         where: { plinkkId: id },
@@ -175,12 +187,41 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
         update: data,
       });
     }
+
+    // Check if userName (on plinkk model) changed
+    // Add to data/oldData for logging purpose if changed
     if (typeof body.userName === "string" && body.userName.trim()) {
-      await prisma.plinkk.update({
-        where: { id },
-        data: { name: body.userName.trim() },
-      });
+      const newName = body.userName.trim();
+      if (page.name !== newName) {
+        await prisma.plinkk.update({
+          where: { id },
+          data: { name: newName },
+        });
+        // Add to logging context
+        // @ts-ignore
+        oldData['plinkkName'] = page.name;
+        // @ts-ignore
+        data['plinkkName'] = newName;
+      }
     }
+
+    // Determine Action Type
+    const themeFields = [
+      'selectedThemeIndex', 'neonEnable', 'buttonThemeEnable',
+      'EnableAnimationArticle', 'EnableAnimationButton', 'EnableAnimationBackground',
+      'selectedAnimationIndex', 'selectedAnimationButtonIndex', 'selectedAnimationBackgroundIndex',
+      'canvaEnable', 'selectedCanvasIndex', 'degBackgroundColor', 'backgroundSize',
+      'animationDurationBackground', 'delayAnimationButton', 'profileHoverColor'
+    ];
+
+    let logAction = "UPDATE_PLINKK_CONFIG";
+    const changedKeys = Object.keys(data); // data contains only fields that were sent/picked
+    if (changedKeys.some(k => themeFields.includes(k))) {
+      logAction = "UPDATE_PLINKK_THEME";
+    }
+
+    // Use shared logger
+    await logDetailedAction(userId as string, logAction, id, oldData, data, request.ip);
 
     return reply.send({ ok: true });
   });
@@ -192,14 +233,22 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
     const page = await prisma.plinkk.findFirst({ where: { id, userId: String(userId) } });
     if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
 
+    const currentSettings = await prisma.plinkkSettings.findUnique({ where: { plinkkId: id } });
     const body = request.body as { layoutOrder?: string[] };
+
     if (body?.layoutOrder !== undefined) {
+      const oldData = { layoutOrder: currentSettings?.layoutOrder };
+      const newData = { layoutOrder: body.layoutOrder };
+
       await prisma.plinkkSettings.upsert({
         where: { plinkkId: id },
         create: { plinkkId: id, layoutOrder: body.layoutOrder },
         update: { layoutOrder: body.layoutOrder },
       });
+
+      await logDetailedAction(userId as string, "UPDATE_PLINKK_LAYOUT", id, oldData, newData, request.ip);
     }
+
     return reply.send({ ok: true });
   });
 }

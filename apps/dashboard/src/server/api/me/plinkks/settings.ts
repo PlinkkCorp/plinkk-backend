@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { Label, Link, NeonColor, PlinkkStatusbar, SocialIcon, prisma } from "@plinkk/prisma";
 import { pickDefined } from "../../../../lib/plinkkUtils";
 import { logUserAction } from "../../../../lib/userLogger";
+import { calculateArrayDiff, calculateObjectDiff } from "../../../../lib/diffUtils";
 
 async function validatePlinkkOwnership(userId: string | undefined, plinkkId: string) {
   if (!userId) return null;
@@ -23,10 +24,18 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
         typeof item === "string"
           ? item
           : item && typeof item.color === "string"
-          ? item.color
-          : null
+            ? item.color
+            : null
       )
       .filter((c): c is string => !!c && typeof c === "string" && c.trim() !== "");
+
+    const existingBg = await prisma.backgroundColor.findMany({ where: { userId, plinkkId: id } });
+    const oldColors = existingBg.map(b => b.color);
+    const newColors = colors;
+
+    // Simple array diff for primitives
+    const added = newColors.filter(c => !oldColors.includes(c));
+    const removed = oldColors.filter(c => !newColors.includes(c));
 
     await prisma.backgroundColor.deleteMany({ where: { userId, plinkkId: id } });
     if (colors.length > 0) {
@@ -35,7 +44,12 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
       });
     }
 
-    await logUserAction(userId, "UPDATE_PLINKK_BACKGROUND", id, { count: colors.length }, request.ip);
+    if (added.length > 0 || removed.length > 0) {
+      await logUserAction(userId, "UPDATE_PLINKK_BACKGROUND", id, {
+        diff: { background: { added, removed } },
+        formatted: `Updated background: +${added.length} added, -${removed.length} removed`
+      }, request.ip);
+    }
 
     return reply.send({ ok: true });
   });
@@ -50,6 +64,17 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
     const body = request.body as { labels: Label[] };
 
     if (Array.isArray(body.labels)) {
+      const oldLabels = await prisma.label.findMany({ where: { userId, plinkkId: id } });
+      // Labels don't seem to have stable IDs from the frontend based on this code (it deletes all and recreates).
+      // We'll treat them as a fresh list and diff by properties or just log the new state vs old state count ?
+      // Since they are recreated, we can try to diff by content if we want "every little detail".
+      // Let's rely on content diffing.
+
+      const changes = {
+        old: oldLabels.map(l => ({ text: l.data, color: l.color, fontColor: l.fontColor })),
+        new: body.labels.map(l => ({ text: l.data, color: l.color, fontColor: l.fontColor }))
+      };
+
       await prisma.label.deleteMany({ where: { userId, plinkkId: id } });
       if (body.labels.length > 0) {
         await prisma.label.createMany({
@@ -62,7 +87,20 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           })),
         });
       }
-      await logUserAction(userId, "UPDATE_PLINKK_LABELS", id, { count: body.labels.length }, request.ip);
+      // Only log if something actually changed?
+      // Diffing labels by content is expensive if we just wiped them.
+      // But we can check if old count != new count OR if JSON stringified content differs.
+      // For now, let's trust that if the endpoint is called with data, we log it.
+      // But the user complained about spam.
+      // Let's do a quick check:
+      const hasChanges = JSON.stringify(changes.old) !== JSON.stringify(changes.new);
+
+      if (hasChanges) {
+        await logUserAction(userId, "UPDATE_PLINKK_LABELS", id, {
+          diff: changes,
+          formatted: `Updated labels: ${body.labels.length} active`
+        }, request.ip);
+      }
     }
 
     return reply.send({ ok: true });
@@ -78,6 +116,15 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
     const body = request.body as { socialIcon: SocialIcon[] };
 
     if (Array.isArray(body.socialIcon)) {
+      const oldSocials = await prisma.socialIcon.findMany({ where: { userId, plinkkId: id } });
+
+      // Similar to labels, they seem to be wipes and recreated.
+      // Log old vs new content.
+      const changes = {
+        old: oldSocials.map(s => ({ icon: s.icon, url: s.url })),
+        new: body.socialIcon.map(s => ({ icon: s.icon, url: s.url }))
+      };
+
       await prisma.socialIcon.deleteMany({ where: { userId, plinkkId: id } });
       if (body.socialIcon.length > 0) {
         await prisma.socialIcon.createMany({
@@ -89,7 +136,13 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           })),
         });
       }
-      await logUserAction(userId, "UPDATE_PLINKK_SOCIALS", id, { count: body.socialIcon.length }, request.ip);
+      const hasChanges = JSON.stringify(changes.old) !== JSON.stringify(changes.new);
+      if (hasChanges) {
+        await logUserAction(userId, "UPDATE_PLINKK_SOCIALS", id, {
+          diff: changes,
+          formatted: `Updated social icons: ${body.socialIcon.length} active`
+        }, request.ip);
+      }
     }
 
     return reply.send({ ok: true });
@@ -107,7 +160,6 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
     if (Array.isArray(body.links)) {
       const existing = await prisma.link.findMany({
         where: { userId, plinkkId: id },
-        select: { id: true },
       });
       const existingIds = new Set(existing.map((l) => l.id));
       const incomingIds = new Set(body.links.map((l) => l.id).filter(Boolean));
@@ -136,25 +188,36 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           });
         }
       }
-      await logUserAction(userId, "UPDATE_PLINKK_LINKS", id, { count: body.links.length }, request.ip);
+
+      const updatedLinks = await prisma.link.findMany({ where: { userId, plinkkId: id } });
+
+      // Calculate diff using the fully populated old and new lists
+      const diff = calculateArrayDiff(existing, updatedLinks, "id", ["userId", "plinkkId", "createdAt", "updatedAt", "clicks"]);
+      const hasChanges = diff.added.length > 0 || diff.removed.length > 0 || diff.updated.length > 0 || diff.reordered;
+      if (hasChanges) {
+        await logUserAction(userId, "UPDATE_PLINKK_LINKS", id, {
+          diff,
+          formatted: `Updated links: ${updatedLinks.length} active`
+        }, request.ip);
+      }
+
+      return reply.send({
+        ok: true,
+        links: updatedLinks.map((l) => ({
+          id: l.id,
+          icon: l.icon,
+          url: l.url,
+          text: l.text,
+          name: l.name,
+          description: l.description,
+          showDescriptionOnHover: l.showDescriptionOnHover,
+          showDescription: l.showDescription,
+          categoryId: l.categoryId,
+        })),
+      });
     }
 
-    const updatedLinks = await prisma.link.findMany({ where: { userId, plinkkId: id } });
-
-    return reply.send({
-      ok: true,
-      links: updatedLinks.map((l) => ({
-        id: l.id,
-        icon: l.icon,
-        url: l.url,
-        text: l.text,
-        name: l.name,
-        description: l.description,
-        showDescriptionOnHover: l.showDescriptionOnHover,
-        showDescription: l.showDescription,
-        categoryId: l.categoryId,
-      })),
-    });
+    return reply.send({ ok: true });
   });
 
   fastify.put("/:id/config/categories", async (request, reply) => {
@@ -169,7 +232,6 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
     if (Array.isArray(body.categories)) {
       const existing = await prisma.category.findMany({
         where: { plinkkId: id },
-        select: { id: true },
       });
       const existingIds = new Set(existing.map((c) => c.id));
       const incomingIds = new Set(body.categories.map((c) => c.id).filter(Boolean));
@@ -190,18 +252,29 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           });
         }
       }
-      await logUserAction(userId, "UPDATE_PLINKK_CATEGORIES", id, { count: body.categories.length }, request.ip);
+
+      const updatedCategories = await prisma.category.findMany({
+        where: { plinkkId: id },
+        orderBy: { order: "asc" },
+      });
+
+      // Calculate diff using fully populated lists
+      const diff = calculateArrayDiff(existing, updatedCategories, "id", ["plinkkId", "createdAt", "updatedAt"]);
+      const hasChanges = diff.added.length > 0 || diff.removed.length > 0 || diff.updated.length > 0 || diff.reordered;
+      if (hasChanges) {
+        await logUserAction(userId, "UPDATE_PLINKK_CATEGORIES", id, {
+          diff,
+          formatted: `Updated categories: ${updatedCategories.length} active`
+        }, request.ip);
+      }
+
+      return reply.send({
+        ok: true,
+        categories: updatedCategories.map((c) => ({ id: c.id, name: c.name, order: c.order })),
+      });
     }
 
-    const updatedCategories = await prisma.category.findMany({
-      where: { plinkkId: id },
-      orderBy: { order: "asc" },
-    });
-
-    return reply.send({
-      ok: true,
-      categories: updatedCategories.map((c) => ({ id: c.id, name: c.name, order: c.order })),
-    });
+    return reply.send({ ok: true });
   });
 
   fastify.put("/:id/config/statusBar", async (request, reply) => {
@@ -235,7 +308,19 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           }),
         });
       }
-      await logUserAction(userId, "UPDATE_PLINKK_STATUSBAR", id, {}, request.ip);
+
+      const oldStatus = await prisma.plinkkStatusbar.findUnique({ where: { plinkkId: id } });
+      const changes = calculateObjectDiff(oldStatus || {}, body.statusbar, ["id", "plinkkId"]);
+
+      // Use logDetailedAction for object diff consistency (it wraps in 'diff' property)
+      // But here we already calculated 'changes' with calculateObjectDiff.
+      // So we just wrap it manually.
+      if (Object.keys(changes).length > 0) {
+        await logUserAction(userId, "UPDATE_PLINKK_STATUSBAR", id, {
+          diff: changes,
+          formatted: "Updated status bar settings"
+        }, request.ip);
+      }
     }
 
     return reply.send({ ok: true });
@@ -251,6 +336,15 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
     const body = request.body as { neonColors: NeonColor[] };
 
     if (Array.isArray(body.neonColors)) {
+      const existingNeon = await prisma.neonColor.findMany({ where: { userId, plinkkId: id } });
+      const oldColors = existingNeon.map(c => c.color);
+      const newColors = body.neonColors.map(c => c.color);
+
+      const changes = {
+        added: newColors.filter(c => !oldColors.includes(c)),
+        removed: oldColors.filter(c => !newColors.includes(c))
+      };
+
       await prisma.neonColor.deleteMany({ where: { userId, plinkkId: id } });
       if (body.neonColors.length > 0) {
         await prisma.neonColor.createMany({
@@ -261,7 +355,12 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           })),
         });
       }
-      await logUserAction(userId, "UPDATE_PLINKK_NEON", id, { count: body.neonColors.length }, request.ip);
+      if (changes.added.length > 0 || changes.removed.length > 0) {
+        await logUserAction(userId, "UPDATE_PLINKK_NEON", id, {
+          diff: { neonColors: changes },
+          formatted: `Updated neon colors: ${newColors.length} active`
+        }, request.ip);
+      }
     }
 
     return reply.send({ ok: true });

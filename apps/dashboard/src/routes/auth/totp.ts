@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { authenticator } from "otplib";
 import { prisma } from "@plinkk/prisma";
 import { createUserSession } from "../../services/sessionService";
+import { logUserAction } from "../../lib/userLogger";
 
 export function totpRoutes(fastify: FastifyInstance) {
   fastify.get("/totp", (request, reply) => {
@@ -52,6 +53,7 @@ export function totpRoutes(fastify: FastifyInstance) {
         (request.query as { returnTo: string })?.returnTo;
 
       await createUserSession(user.id, request);
+      await logUserAction(user.id, "LOGIN_2FA", null, { method: "TOTP" }, request.ip);
 
       return reply.redirect(returnTo || "/");
     }

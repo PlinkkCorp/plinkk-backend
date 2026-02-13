@@ -37,7 +37,19 @@ export async function ensurePermission(
 ): Promise<boolean> {
   const mode = options?.mode || "json";
   const all = options?.all || false;
-  const meId = request.session.get("data") as string | undefined;
+
+  let meId = (request as any).userId;
+  if (!meId) {
+    const sessionData = request.session.get("data");
+    if (sessionData) {
+      if (typeof sessionData === "object" && (sessionData as any).id) {
+        meId = (sessionData as any).id;
+      } else if (typeof sessionData === "string") {
+        meId = sessionData;
+      }
+    }
+  }
+
   if (!meId) {
     if (mode === "redirect") {
       const ret = request.url || "/";

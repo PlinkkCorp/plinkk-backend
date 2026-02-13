@@ -11,7 +11,8 @@ import {
   isUserPremium,
   PREMIUM_MAX_PLINKKS,
 } from "@plinkk/shared";
-import { logUserAction } from "../../../../lib/userLogger";
+import { logUserAction, logDetailedAction } from "../../../../lib/userLogger";
+import { calculateObjectDiff } from "../../../../lib/diffUtils";
 
 export function plinkksCrudRoutes(fastify: FastifyInstance) {
   fastify.patch("/:id", async (request, reply) => {
@@ -34,11 +35,11 @@ export function plinkksCrudRoutes(fastify: FastifyInstance) {
       await prisma.$transaction([
         ...(prev
           ? [
-              prisma.plinkk.update({
-                where: { id: prev.id },
-                data: { isDefault: false, index: Math.max(1, prev.index || 1) },
-              }),
-            ]
+            prisma.plinkk.update({
+              where: { id: prev.id },
+              data: { isDefault: false, index: Math.max(1, prev.index || 1) },
+            }),
+          ]
           : []),
         prisma.plinkk.update({
           where: { id },
@@ -47,10 +48,17 @@ export function plinkksCrudRoutes(fastify: FastifyInstance) {
       ]);
       await reindexNonDefault(prisma, userId);
     }
-    if (Object.keys(patch).length) {
-      await prisma.plinkk.update({ where: { id }, data: patch });
-    }
-    await logUserAction(userId, "UPDATE_PLINKK", id, patch, request.ip);
+    const updated = await prisma.plinkk.findUnique({ where: { id } });
+    const actions: string[] = [];
+    if (typeof body.isPublic === "boolean") actions.push(body.isPublic ? "Made Public" : "Made Private");
+    if (body.isDefault === true) actions.push("Set as Default");
+
+    const formattedAction = actions.length > 0 ? actions.join(", ") : "Updated details";
+
+    await logDetailedAction(userId, "UPDATE_PLINKK", id, p, updated || {}, request.ip, {
+      formatted: `Updated Plinkk '${updated?.name}': ${formattedAction}`
+    });
+
     return reply.send({ ok: true });
   });
 
@@ -70,7 +78,9 @@ export function plinkksCrudRoutes(fastify: FastifyInstance) {
     }
     await prisma.plinkk.delete({ where: { id } });
     await reindexNonDefault(prisma, userId);
-    await logUserAction(userId, "DELETE_PLINKK", id, {}, request.ip);
+    await logDetailedAction(userId, "DELETE_PLINKK", id, page, {}, request.ip, {
+      formatted: `Deleted Plinkk '${page.name}'`
+    });
     return reply.send({ ok: true });
   });
 
@@ -119,7 +129,9 @@ export function plinkksCrudRoutes(fastify: FastifyInstance) {
         name: rawName,
         slugBase: base,
       });
-      await logUserAction(userId, "CREATE_PLINKK", created.id, { slug: created.slug, name: created.name }, request.ip);
+      await logDetailedAction(userId, "CREATE_PLINKK", created.id, {}, created, request.ip, {
+        formatted: `Created Plinkk '${created.name}' (${created.slug})`
+      });
       return reply
         .code(201)
         .send({ id: created.id, slug: created.slug, name: created.name });

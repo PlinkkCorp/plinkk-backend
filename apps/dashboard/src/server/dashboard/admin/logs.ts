@@ -62,39 +62,49 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
     });
   });
 
-  fastify.get<{ Querystring: LogsQuery }>("/api", { preHandler: [requireAuth] }, async function (request, reply) {
+  fastify.get<{ Querystring: any }>("/api", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_ADMIN_LOGS");
     if (!ok) return;
 
-    const { page = 1, limit = 50, adminId, targetId, action, from, to, sort = "desc" } = request.query;
-    const skip = (Number(page) - 1) * Number(limit);
-    const take = Number(limit);
+    const query = request.query as any;
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 50;
+    const skip = (page - 1) * limit;
+    const sortOrder = query.sort === "asc" ? "asc" : "desc";
 
-    const where: Prisma.AdminLogWhereInput = {};
-    if (adminId) where.adminId = adminId;
-    if (targetId) where.targetId = targetId;
-    if (action) where.action = action;
-    if (from || to) {
-      where.createdAt = {};
-      if (from) {
-        const d = new Date(from);
-        if (!isNaN(d.getTime())) where.createdAt.gte = d;
+    const where: any = {};
+    if (query.adminId && typeof query.adminId === 'string' && query.adminId.trim()) {
+      where.adminId = query.adminId.trim();
+    }
+    if (query.targetId && typeof query.targetId === 'string' && query.targetId.trim()) {
+      where.targetId = query.targetId.trim();
+    }
+    if (query.action && typeof query.action === 'string' && query.action.trim()) {
+      where.action = query.action.trim();
+    }
+    
+    if (query.from || query.to) {
+      const dateFilter: any = {};
+      if (query.from) {
+        const d = new Date(query.from);
+        if (!isNaN(d.getTime())) dateFilter.gte = d;
       }
-      if (to) {
-        const d = new Date(to);
-        if (!isNaN(d.getTime())) where.createdAt.lte = d;
+      if (query.to) {
+        const d = new Date(query.to);
+        if (!isNaN(d.getTime())) dateFilter.lte = d;
+      }
+      if (Object.keys(dateFilter).length > 0) {
+        where.createdAt = dateFilter;
       }
     }
 
-    const [logs, total] = await Promise.all([
-      prisma.adminLog.findMany({
-        where,
-        orderBy: { createdAt: sort === "asc" ? "asc" : "desc" },
-        skip,
-        take,
-      }),
-      prisma.adminLog.count({ where }),
-    ]);
+    const total = await prisma.adminLog.count({ where });
+    const logs = await prisma.adminLog.findMany({
+      where,
+      orderBy: { createdAt: sortOrder as Prisma.SortOrder },
+      skip: skip < 0 ? 0 : skip,
+      take: limit <= 0 ? 50 : limit,
+    });
 
     const adminIds = [...new Set(logs.map((l) => l.adminId))];
     const targetIds = [...new Set(logs.filter(l => l.targetId).map(l => l.targetId!))];
@@ -110,8 +120,8 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
       })
     ]);
 
-    const adminMap = new Map(admins.map((a) => [a.id, a]));
-    const targetMap = new Map(targetUsers.map((u) => [u.id, u]));
+    const adminMap = new Map<string, any>(admins.map((a) => [a.id, a]));
+    const targetMap = new Map<string, any>(targetUsers.map((u) => [u.id, u]));
 
     const enriched: EnrichedAdminLog[] = logs.map((l) => {
       const admin = adminMap.get(l.adminId);
@@ -133,74 +143,97 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
     return reply.send({ logs: enriched, total });
   });
 
-  fastify.get<{ Querystring: LogsQuery }>("/user-api", { preHandler: [requireAuth] }, async function (request, reply) {
+  fastify.get<{ Querystring: any }>("/user-api", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_ADMIN_LOGS");
     if (!ok) return;
 
-    const { page = 1, limit = 50, adminId: userId, targetId, action, from, to, sort = "desc" } = request.query;
-    const skip = (Number(page) - 1) * Number(limit);
-    const take = Number(limit);
+    const query = request.query as any;
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 50;
+    const skip = (page - 1) * limit;
+    const sortOrder = query.sort === "asc" ? "asc" : "desc";
 
     const where: Prisma.UserLogWhereInput = {};
-    if (userId) where.userId = userId;
-    if (targetId) where.targetId = targetId;
-    if (action) where.action = action;
-    if (from || to) {
-      where.createdAt = {};
-      if (from) {
-        const d = new Date(from);
-        if (!isNaN(d.getTime())) where.createdAt.gte = d;
+    const adminIdInput = query.adminId && typeof query.adminId === 'string' ? query.adminId.trim() : null;
+    if (adminIdInput) {
+      where.userId = adminIdInput;
+    }
+    
+    const targetIdInput = query.targetId && typeof query.targetId === 'string' ? query.targetId.trim() : null;
+    if (targetIdInput) {
+      where.targetId = targetIdInput;
+    }
+    
+    const actionInput = query.action && typeof query.action === 'string' ? query.action.trim() : null;
+    if (actionInput) {
+      where.action = actionInput;
+    }
+    
+    if (query.from || query.to) {
+      const dateFilter: Prisma.DateTimeFilter<"UserLog"> = {};
+      if (query.from) {
+        const d = new Date(query.from);
+        if (!isNaN(d.getTime())) dateFilter.gte = d.toISOString();
       }
-      if (to) {
-        const d = new Date(to);
-        if (!isNaN(d.getTime())) where.createdAt.lte = d;
+      if (query.to) {
+        const d = new Date(query.to);
+        if (!isNaN(d.getTime())) dateFilter.lte = d.toISOString();
+      }
+      if (Object.keys(dateFilter).length > 0) {
+        where.createdAt = dateFilter;
       }
     }
 
-    const [logs, total] = await Promise.all([
-      prisma.userLog.findMany({
-        where,
-        orderBy: { createdAt: sort === "asc" ? "asc" : "desc" },
-        skip,
-        take,
-      }),
-      prisma.userLog.count({ where }),
-    ]);
+    try {
+      const [total, logs] = await Promise.all([
+        prisma.userLog.count({ where }),
+        prisma.userLog.findMany({
+          where,
+          orderBy: { createdAt: sortOrder as Prisma.SortOrder },
+          skip: skip < 0 ? 0 : skip,
+          take: limit <= 0 ? 50 : limit,
+        })
+      ]);
 
-    const userIds = [...new Set(logs.map((l) => l.userId))];
-    const targetIds = [...new Set(logs.filter(l => l.targetId).map(l => l.targetId!))];
+      const userIds = [...new Set(logs.map((l) => l.userId).filter(Boolean) as string[])];
+      const targetIds = [...new Set(logs.filter(l => l.targetId).map(l => l.targetId!) as string[])];
 
-    const [users, targetUsers] = await Promise.all([
-      prisma.user.findMany({
-        where: { id: { in: userIds } },
-        select: { id: true, userName: true, image: true },
-      }),
-      prisma.user.findMany({
-        where: { id: { in: targetIds } },
-        select: { id: true, userName: true, email: true, image: true }
-      })
-    ]);
+      const [users, targetUsers] = await Promise.all([
+        prisma.user.findMany({
+          where: { id: { in: userIds } },
+          select: { id: true, userName: true, image: true },
+        }),
+        prisma.user.findMany({
+          where: { id: { in: targetIds } },
+          select: { id: true, userName: true, email: true, image: true }
+        })
+      ]);
 
-    const userMap = new Map(users.map((u) => [u.id, u]));
-    const targetMap = new Map(targetUsers.map((u) => [u.id, u]));
+      const userMap = new Map<string, any>(users.map((u) => [u.id, u]));
+      const targetMap = new Map<string, any>(targetUsers.map((u) => [u.id, u]));
 
-    const enriched: EnrichedUserLog[] = logs.map((l) => {
-      const user = userMap.get(l.userId);
-      const targetUser = l.targetId ? targetMap.get(l.targetId) : null;
-      
-      return {
-        ...l,
-        userName: user?.userName || l.userId,
-        userImage: user?.image || null,
-        targetUser: targetUser ? {
-          id: targetUser.id,
-          userName: targetUser.userName,
-          email: targetUser.email,
-          image: targetUser.image
-        } : null
-      };
-    });
+      const enriched: EnrichedUserLog[] = logs.map((l) => {
+        const user = userMap.get(l.userId);
+        const targetUser = l.targetId ? targetMap.get(l.targetId) : null;
+        
+        return {
+          ...l,
+          userName: user?.userName || l.userId,
+          userImage: user?.image || null,
+          targetUser: targetUser ? {
+            id: targetUser.id,
+            userName: targetUser.userName,
+            email: targetUser.email,
+            image: targetUser.image
+          } : null
+        };
+      });
 
-    return reply.send({ logs: enriched, total });
+      return reply.send({ logs: enriched, total });
+    } catch (err) {
+      console.error("Erreur critique /user-api:", err);
+      const errorMessage = err instanceof Error ? err.stack || err.message : String(err);
+      return reply.code(500).send({ error: "INTERNAL_SERVER_ERROR", message: errorMessage });
+    }
   });
 }
