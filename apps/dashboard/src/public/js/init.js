@@ -4,18 +4,18 @@
  */
 
 // Imports des features
-import { createToggleThemeButton, applyAnimation, applyAnimationButton, applyDynamicStyles, applyFirstTheme } from './features/index.js';
+import { createToggleThemeButton, applyAnimation, applyAnimationButton, applyDynamicStyles, applyFirstTheme } from './styleTools.js';
 
 // Imports des composants
-import { 
-    createProfileContainer, 
-    createUserName, 
-    createStatusBar, 
-    createLabelButtons, 
-    createIconList, 
-    createEmailAndDescription, 
-    createLinkBoxes 
-} from './components/index.js';
+import {
+    createProfileContainer,
+    createUserName,
+    createStatusBar,
+    createLabelButtons,
+    createIconList,
+    createEmailAndDescription,
+    createLinkBoxes
+} from './tools.js';
 
 // Imports existants
 import { initEasterEggs } from './easterEggs.js';
@@ -31,7 +31,7 @@ export const themesLoaded = (async () => {
     try {
         const identifier = (window.__PLINKK_IDENTIFIER__ || (location.pathname.split('/').filter(Boolean)[1] || '')).trim();
         const payload = await loadThemes(identifier);
-        
+
         if (payload?.builtIns?.length) {
             payload.builtIns.forEach(t => themes.push(t));
         }
@@ -70,19 +70,19 @@ function getRenderers(profileData, article) {
  */
 function renderLayout(profileData, article) {
     const renderers = getRenderers(profileData, article);
-    
-    let order = Array.isArray(profileData.layoutOrder) 
-        ? profileData.layoutOrder.slice() 
+
+    let order = Array.isArray(profileData.layoutOrder)
+        ? profileData.layoutOrder.slice()
         : DEFAULT_LAYOUT;
-    
+
     const KNOWN = new Set(DEFAULT_LAYOUT);
     const filtered = order.filter(k => KNOWN.has(k));
-    
+
     // Ajouter les éléments manquants
     DEFAULT_LAYOUT.forEach(k => {
         if (!filtered.includes(k)) filtered.push(k);
     });
-    
+
     // Rendre chaque section
     filtered.forEach(key => {
         try {
@@ -98,14 +98,14 @@ function renderLayout(profileData, article) {
  */
 function handleInjectedTheme(profileData, injectedTheme) {
     if (!injectedTheme || typeof injectedTheme !== 'object') return;
-    
-    const same = (a, b) => a && b && 
-        a.background === b.background && 
-        a.buttonBackground === b.buttonBackground && 
+
+    const same = (a, b) => a && b &&
+        a.background === b.background &&
+        a.buttonBackground === b.buttonBackground &&
         a.textColor === b.textColor;
-    
+
     const existing = themes.findIndex(t => same(t, injectedTheme));
-    
+
     if (existing === -1) {
         themes.unshift(injectedTheme);
         profileData.selectedThemeIndex = 0;
@@ -119,17 +119,17 @@ function handleInjectedTheme(profileData, injectedTheme) {
  */
 function normalizeThemeIndex(profileData) {
     let idx = Number(profileData.selectedThemeIndex);
-    
+
     if (!Number.isFinite(idx) || isNaN(idx)) {
         idx = 0;
     }
-    
+
     if (!themes.length) {
         idx = 0;
     } else {
         idx = ((Math.floor(idx) % themes.length) + themes.length) % themes.length;
     }
-    
+
     profileData.selectedThemeIndex = idx;
 }
 
@@ -139,14 +139,14 @@ function normalizeThemeIndex(profileData) {
 function createFooter(profileData) {
     const isPreview = new URLSearchParams(window.location.search).get('preview') === '1';
     if (isPreview) return;
-    
+
     const themeIndex = profileData.selectedThemeIndex % themes.length;
     const theme = themes[themeIndex];
-    
+
     const footer = document.createElement('footer');
     footer.innerHTML = `Design with ❤️ by <a href="http://plinkk.fr" target="_blank" rel="noopener noreferrer"><p style="color:${theme?.buttonTextColor || 'defaultColor'};display:inline;padding:2px 2px 2px 4px;border-radius:5px;background-color:${theme?.buttonBackground || 'defaultColor'};">Plinkk©</p></a>`;
     footer.style.zIndex = '9999';
-    
+
     document.body.appendChild(footer);
 }
 
@@ -158,10 +158,10 @@ function setupEventListeners() {
         try {
             const detail = ev?.detail;
             const idx = detail?.index ?? window.__PLINKK_INJECTED_THEME_INDEX__;
-            const theme = typeof idx === 'number' 
-                ? themes[idx % themes.length] 
+            const theme = typeof idx === 'number'
+                ? themes[idx % themes.length]
                 : window.__PLINKK_INJECTED_THEME__;
-            
+
             if (theme) {
                 createToggleThemeButton(theme);
                 applyFirstTheme(theme);
@@ -175,12 +175,12 @@ function setupEventListeners() {
 /**
  * Point d'entrée principal
  */
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', async function () {
     // Récupération des données
     const identifier = (window.__PLINKK_IDENTIFIER__ || (location.pathname.split('/').filter(Boolean)[1] || '')).trim();
     const params = new URLSearchParams(location.search);
     if (identifier) params.set('username', identifier);
-    
+
     // Chargement de la configuration
     let profileData, injectedTheme;
     try {
@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Failed to load config:', e);
         return;
     }
-    
+
     // Parse si nécessaire
     if (typeof profileData === 'string') {
         try {
@@ -201,26 +201,26 @@ document.addEventListener('DOMContentLoaded', async function() {
             return;
         }
     }
-    
+
     // Validation
     if (!profileData || typeof profileData !== 'object') {
         console.error('profileData is not defined or is not an object.');
         return;
     }
-    
+
     // Exposer les données globalement
     try {
         window.profileData = profileData;
         window.__PLINKK_PROFILE_DATA__ = profileData;
     } catch (e) { /* ignore */ }
-    
+
     // Récupérer l'article
     const article = document.getElementById('profile-article');
     if (!article) {
         console.error("Element with id 'profile-article' not found.");
         return;
     }
-    
+
     // Rendre le layout
     try {
         renderLayout(profileData, article);
@@ -234,33 +234,33 @@ document.addEventListener('DOMContentLoaded', async function() {
         createIconList(profileData);
         article.appendChild(createEmailAndDescription(profileData));
     }
-    
+
     // Attendre le chargement des thèmes
     try {
         await themesLoaded;
     } catch (_) { /* ignore */ }
-    
+
     // Gérer le thème injecté
     try {
         handleInjectedTheme(profileData, injectedTheme);
     } catch (e) {
         console.warn('injectedTheme handling failed', e);
     }
-    
+
     // Normaliser l'index du thème
     try {
         normalizeThemeIndex(profileData);
     } catch (e) {
         profileData.selectedThemeIndex = 0;
     }
-    
+
     // Créer le bouton de thème
     if (themes.length) {
         createToggleThemeButton(themes[profileData.selectedThemeIndex % themes.length]);
     } else {
         console.warn('Themes array is empty or not defined.');
     }
-    
+
     // Vérifier si les liens sont rendus
     try {
         const hasLinksRendered = !!document.querySelector('#profile-article .discord-box, #profile-article .button');
@@ -269,33 +269,33 @@ document.addEventListener('DOMContentLoaded', async function() {
             linkBoxes?.forEach(box => article.appendChild(box));
         }
     } catch (_) { /* ignore */ }
-    
+
     // Titre et favicon
-    document.title = profileData.userName 
-        ? `${profileData.userName} - Plinkk` 
+    document.title = profileData.userName
+        ? `${profileData.userName} - Plinkk`
         : 'Plinkk By Klaynight';
-    
+
     if (profileData.iconUrl) {
         const link = document.createElement('link');
         link.rel = 'icon';
         link.href = profileData.iconUrl;
         document.head.appendChild(link);
     }
-    
+
     // Footer
     createFooter(profileData);
-    
+
     // Easter eggs
     initEasterEggs();
-    
+
     // Event listeners
     setupEventListeners();
-    
+
     // Désactiver le néon par défaut
     try {
         profileData.neonEnable = 0;
     } catch (_) { /* ignore */ }
-    
+
     // Appliquer les animations
     if (!animations?.length) {
         console.warn('Animations array is empty or not defined.');
@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             !!profileData.canvaEnable,
             profileData.selectedCanvasIndex % canvaData.length
         );
-        
+
         applyFirstTheme(themes[profileData.selectedThemeIndex % themes.length]);
         applyAnimation(animations[profileData.selectedAnimationIndex % animations.length], !!profileData.EnableAnimationArticle);
         applyAnimationButton(animations[profileData.selectedAnimationButtonIndex % animations.length], !!profileData.EnableAnimationButton, profileData.delayAnimationButton);

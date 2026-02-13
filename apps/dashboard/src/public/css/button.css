@@ -599,6 +599,12 @@
       --button-border:1px solid #FFFFFF;
   }
   
+  /* Web */
+  .button-web {
+      --button-text:#ffffff;
+      --button-background:#475569;
+  }
+  
   /* WhatsApp */
   .button-whatsapp {
       --button-text:#ffffff;

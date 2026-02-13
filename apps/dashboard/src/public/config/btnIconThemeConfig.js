@@ -498,6 +498,12 @@ export const btnIconThemeConfig = [
         alt: "VSCO"
     },
     {
+        name: "Web",
+        icon: "https://s3.marvideo.fr/plinkk-image/icons/generic-website.svg",
+        themeClass: "button-web",
+        alt: "Site Web"
+    },
+    {
         name: "WhatsApp",
         icon: "https://s3.marvideo.fr/plinkk-image/icons/whatsapp.svg",
         themeClass: "button-whatsapp",
