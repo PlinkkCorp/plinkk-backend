@@ -1189,6 +1189,13 @@
             }
 
             function switchTab(tab) {
+                // Update URL hash
+                if (history.pushState) {
+                    history.replaceState(null, null, '#' + tab);
+                } else {
+                    window.location.hash = tab;
+                }
+
                 currentTab = tab;
                 currentPage = 1;
                 const btnAdmin = document.getElementById('tab-admin');
@@ -1464,7 +1471,14 @@
             document.getElementById('prevPage').addEventListener('click', () => { if (currentPage > 1) { currentPage--; loadLogs(); } });
             document.getElementById('nextPage').addEventListener('click', () => { currentPage++; loadLogs(); });
 
-            window.addEventListener('DOMContentLoaded', () => { switchTab('admin'); });
+            window.addEventListener('DOMContentLoaded', () => {
+                const hash = window.location.hash.substring(1);
+                if (hash === 'user') {
+                    switchTab('user');
+                } else {
+                    switchTab('admin');
+                }
+            });
         </script>
 
         </body>
