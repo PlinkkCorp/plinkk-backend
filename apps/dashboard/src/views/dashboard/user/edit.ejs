@@ -133,6 +133,16 @@
                                     </button>
                                 </li>
                                 <li>
+                                    <button data-target="#section-history"
+                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                                        <svg class="size-4" viewBox="0 0 24 24" fill="white">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polyline points="12 6 12 12 16 14"></polyline>
+                                        </svg>
+                                        Historique
+                                    </button>
+                                </li>
+                                <li>
                                     <button data-target="#section-statusbar"
                                         class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
                                         <svg class="size-4" viewBox="0 0 24 24" fill="white">
@@ -825,9 +835,55 @@
                                 <div class="space-y-3" id="layoutList" role="list"></div>
                             </div>
 
+                            <div id="section-history"
+                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                                <div class="mb-6 pb-4 border-b border-slate-800 flex justify-between items-center">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Historique des versions</h3>
+                                        <p class="text-sm text-slate-400">Gérez vos sauvegardes et versions
+                                            automatiques.</p>
+                                    </div>
+                                    <button id="refreshHistory"
+                                        class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-colors"
+                                        title="Rafraîchir">
+                                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path
+                                                d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
+                                        </svg>
+                                    </button>
+                                </div>
 
+                                <!-- Tabs for History -->
+                                <div class="flex space-x-1 rounded-xl bg-slate-950/50 p-1 mb-6">
+                                    <button onclick="switchHistoryTab('auto')" id="tab-history-auto"
+                                        class="w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-blue-700 ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2 bg-white shadow text-slate-900">
+                                        Automatique
+                                    </button>
+                                    <button onclick="switchHistoryTab('manual')" id="tab-history-manual"
+                                        class="w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-slate-400 hover:bg-white/[0.12] hover:text-white">
+                                        Sauvegardes
+                                    </button>
+                                </div>
 
+                                <!-- Manual Backup Action -->
+                                <div id="manual-backup-actions" class="hidden mb-6">
+                                    <div class="flex gap-2">
+                                        <input type="text" id="backupName"
+                                            placeholder="Nom de la sauvegarde (ex: Avant refonte)"
+                                            class="flex-1 px-4 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-violet-500 transition-colors">
+                                        <button onclick="createBackup()"
+                                            class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg font-medium transition-colors shadow-lg shadow-violet-900/20 whitespace-nowrap">
+                                            Créer une sauvegarde
+                                        </button>
+                                    </div>
+                                </div>
 
+                                <div id="historyList"
+                                    class="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <div class="text-center py-8 text-slate-500">Chargement...</div>
+                                </div>
+                            </div>
                         </div>
                     </section>
 
@@ -896,9 +952,15 @@
 
                     <script>
                         window.__PLINKK_USER_ID__ = "<%= user.id %>";
+                        window.__PLINKK_SELECTED_ID__ = "<%= page.id %>";
                         (function () {
                             const btns = Array.from(document.querySelectorAll('.tab-btn'));
                             const sections = Array.from(document.querySelectorAll('[id^="section-"]'));
+
+                            // History State
+                            let currentHistoryTab = 'auto'; // 'auto' | 'manual'
+                            let historyData = { versions: [], backups: [] };
+
                             const selectTab = (target) => {
                                 sections.forEach(s => s.classList.toggle('hidden', `#${s.id}` !== target));
                                 btns.forEach(b => b.setAttribute('aria-selected', b.dataset.target === target ? 'true' : 'false'));
@@ -910,30 +972,142 @@
                                 }
                             };
 
+                            window.switchHistoryTab = (tab) => {
+                                currentHistoryTab = tab;
+                                const btnAuto = document.getElementById('tab-history-auto');
+                                const btnManual = document.getElementById('tab-history-manual');
+                                const manualActions = document.getElementById('manual-backup-actions');
+
+                                if (tab === 'auto') {
+                                    btnAuto.classList.add('bg-white', 'shadow', 'text-slate-900');
+                                    btnAuto.classList.remove('text-slate-400', 'hover:bg-white/[0.12]', 'hover:text-white');
+
+                                    btnManual.classList.remove('bg-white', 'shadow', 'text-slate-900');
+                                    btnManual.classList.add('text-slate-400', 'hover:bg-white/[0.12]', 'hover:text-white');
+
+                                    manualActions.classList.add('hidden');
+                                } else {
+                                    btnManual.classList.add('bg-white', 'shadow', 'text-slate-900');
+                                    btnManual.classList.remove('text-slate-400', 'hover:bg-white/[0.12]', 'hover:text-white');
+
+                                    btnAuto.classList.remove('bg-white', 'shadow', 'text-slate-900');
+                                    btnAuto.classList.add('text-slate-400', 'hover:bg-white/[0.12]', 'hover:text-white');
+
+                                    manualActions.classList.remove('hidden');
+                                }
+                                renderHistoryList();
+                            };
+
+                            // Skeleton Loader
+                            const getSkeletonHtml = () => Array(5).fill(0).map(() => `
+                                <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 animate-pulse">
+                                    <div class="flex items-center justify-between">
+                                        <div class="space-y-2 flex-1">
+                                            <div class="h-4 bg-slate-800 rounded w-1/3"></div>
+                                            <div class="h-3 bg-slate-800/60 rounded w-1/4"></div>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <div class="h-8 w-16 bg-slate-800 rounded-lg"></div>
+                                            <div class="h-8 w-20 bg-slate-800 rounded-lg"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('');
+
                             async function loadHistory() {
                                 const list = document.getElementById('historyList');
                                 if (!list) return;
-                                list.innerHTML = '<div class="text-center py-8 text-slate-500"><svg class="size-6 animate-spin mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25" /><path d="M12 2a10 10 0 0110 10" /></svg>Chargement...</div>';
+
+                                // Show skeleton only if empty or explicitly reloading
+                                if (!historyData.versions.length && !historyData.backups.length) {
+                                    list.innerHTML = getSkeletonHtml();
+                                }
+
                                 try {
+                                    console.log('Fetching history for:', window.__PLINKK_SELECTED_ID__);
                                     const res = await fetch(`/api/me/plinkks/${window.__PLINKK_SELECTED_ID__}/history`);
+                                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                                     const data = await res.json();
-                                    if (data.versions && data.versions.length > 0) {
-                                        list.innerHTML = data.versions.map(v => `
-                                            <div class="flex items-center justify-between p-4 rounded-2xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition-all group">
-                                                <div class="min-w-0">
-                                                    <div class="font-medium text-slate-200 truncate">${v.label || 'Version automatique'}</div>
-                                                    <div class="text-xs text-slate-500">${new Date(v.createdAt).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
-                                                </div>
-                                                <div class="flex items-center gap-2">
-                                                    <button onclick="restoreVersion('${v.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-colors shadow-lg shadow-violet-900/20">Restaurer</button>
+                                    console.log('History data:', data);
+                                    historyData = data; // { versions: [], backups: [] }
+                                    renderHistoryList();
+                                } catch (e) {
+                                    console.error('History fetch error:', e);
+                                    list.innerHTML = '<div class="text-center py-8 text-red-400">Erreur lors du chargement de l\'historique.</div>';
+                                }
+                            }
+
+                            function renderHistoryList() {
+                                const list = document.getElementById('historyList');
+                                const items = currentHistoryTab === 'auto' ? historyData.versions : historyData.backups;
+
+                                if (items && items.length > 0) {
+                                    list.innerHTML = items.map(v => {
+                                        const dateStr = new Date(v.createdAt).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                                        const detailsHtml = v.changes && v.changes.length > 0
+                                            ? `<div class="mt-2 pl-3 border-l-2 border-slate-700 text-xs text-slate-400 space-y-1 hidden" id="details-${v.id}">
+                                                ${v.changes.map(c => `<div>• ${c}</div>`).join('')}
+                                               </div>`
+                                            : '';
+                                        const expandBtn = v.changes && v.changes.length > 0
+                                            ? `<button onclick="toggleDetails('${v.id}')" class="text-[10px] uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors ml-2">Détails</button>`
+                                            : '';
+
+                                        return `
+                                        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition-all group">
+                                            <div class="flex items-start justify-between mb-2">
+                                                <div class="min-w-0 flex-1">
+                                                    <div class="flex items-center">
+                                                        <div class="font-medium text-slate-200 truncate">${v.label || (currentHistoryTab === 'auto' ? 'Modification' : 'Sauvegarde')}</div>
+                                                        ${expandBtn}
+                                                    </div>
+                                                    <div class="text-xs text-slate-500">${dateStr}</div>
                                                 </div>
                                             </div>
-                                        `).join('');
+                                            ${detailsHtml}
+                                            <div class="flex items-center gap-2 mt-3 justify-end">
+                                                <button onclick="previewVersion('${v.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-colors border border-slate-700">Aperçu</button>
+                                                <button onclick="restoreVersion('${v.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-colors shadow-lg shadow-violet-900/20">Restaurer</button>
+                                            </div>
+                                        </div>
+                                    `}).join('');
+                                } else {
+                                    list.innerHTML = '<div class="text-center py-8 text-slate-500">Aucun élément disponible.</div>';
+                                }
+                            }
+
+                            window.toggleDetails = (id) => {
+                                const el = document.getElementById(`details-${id}`);
+                                if (el) el.classList.toggle('hidden');
+                            }
+
+                            window.createBackup = async () => {
+                                const nameInput = document.getElementById('backupName');
+                                const name = nameInput.value;
+
+                                const btn = document.querySelector('#manual-backup-actions button');
+                                const originalText = btn.innerText;
+                                btn.innerText = 'Création...';
+                                btn.disabled = true;
+
+                                try {
+                                    const res = await fetch(`/api/me/plinkks/${window.__PLINKK_SELECTED_ID__}/history`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ name })
+                                    });
+                                    const data = await res.json();
+                                    if (data.ok) {
+                                        nameInput.value = '';
+                                        loadHistory(); // Reloads and re-renders
                                     } else {
-                                        list.innerHTML = '<div class="text-center py-8 text-slate-500">Aucun historique disponible pour le moment.</div>';
+                                        alert('Erreur: ' + (data.error || 'Impossible de créer la sauvegarde'));
                                     }
                                 } catch (e) {
-                                    list.innerHTML = '<div class="text-center py-8 text-red-400">Erreur lors du chargement de l\'historique.</div>';
+                                    alert('Erreur lors de la création de la sauvegarde');
+                                } finally {
+                                    btn.innerText = originalText;
+                                    btn.disabled = false;
                                 }
                             }
 
@@ -952,10 +1126,27 @@
                                 }
                             }
 
+                            window.previewVersion = (versionId) => {
+                                const frame = document.getElementById('preview');
+                                if (!frame) return;
+                                try {
+                                    const url = new URL(frame.src);
+                                    url.searchParams.set('versionId', versionId);
+                                    url.searchParams.set('t', Date.now()); // Force refresh
+                                    frame.src = url.toString();
+                                } catch (e) {
+                                    console.error("Preview error", e);
+                                }
+                            };
+
                             document.getElementById('refreshHistory')?.addEventListener('click', loadHistory);
                             btns.forEach(b => b.addEventListener('click', () => selectTab(b.dataset.target)));
+
+                            // Initialize
                             const initial = location.hash && sections.some(s => `#${s.id}` === location.hash) ? location.hash : '#section-profile';
                             selectTab(initial);
+                            // Preload history immediately if we are on the history tab or just in the background
+                            loadHistory();
                         })();
                     </script>
                     <style>

@@ -265,7 +265,7 @@
                             <div class="flex items-center gap-4">
                                 <div class="relative">
                                     <img id="modalTargetAvatar" src=""
-                                        class="w-14 h-14 rounded-2xl border-2 border-blue-500/30 hidden shadow-xl">
+                                        class="w-14 h-14 rounded-2xl border-2 border-blue-500/30 hidden shadow-xl no-invert">
                                     <div id="modalTargetAvatarPlaceholder"
                                         class="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/20 flex items-center justify-center text-xl font-black text-blue-400">
                                     </div>
@@ -311,7 +311,17 @@
                 </div>
 
                 <!-- Footer -->
-                <div class="p-6 bg-slate-950/20 border-t border-slate-800/50 flex justify-end px-8">
+                <div class="p-6 bg-slate-950/20 border-t border-slate-800/50 flex justify-between px-8">
+                    <div>
+                        <button id="btnRestoreState" onclick="restoreState()"
+                            class="hidden px-6 py-3 bg-amber-600/10 hover:bg-amber-600/20 border border-amber-600/30 text-amber-500 hover:text-amber-400 text-xs font-bold rounded-2xl transition-all flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Restaurer cet état
+                        </button>
+                    </div>
                     <button onclick="closeLogDetails()"
                         class="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-2xl transition-all border border-slate-700/50">
                         Fermer
@@ -1172,6 +1182,34 @@
             const limit = 50;
             let currentLogs = [];
             let currentTab = 'admin';
+            let currentDetailId = null;
+
+            async function restoreState() {
+                if (!currentDetailId) return;
+
+                if (await confirmSimple('Restaurer cet état ?', 'Attention : Cette action va annuler TOUTES les modifications effectuées sur cet élément APRÈS cette date. Cela peut entraîner une perte de données sur les actions récentes.', 'Restaurer')) {
+                    const btn = document.getElementById('btnRestoreState');
+                    const originalText = btn.innerHTML;
+
+                    try {
+                        btn.disabled = true;
+                        btn.innerHTML = `<svg class="plinkk-spinner w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.2" /><path d="M22 12a10 10 0 0 1-10 10" /></svg> Restauration...`;
+
+                        const res = await fetch(`/admin/logs/restore/${currentDetailId}`, { method: 'POST' });
+                        const data = await res.json();
+
+                        if (!res.ok) throw new Error(data.message || 'Erreur lors de la restauration');
+
+                        showToast(`Restauration effectuée ! (${data.revertedCount} actions annulées)`, 'success');
+                        closeLogDetails();
+                        loadLogs(); // Refresh logs to see the RESTORE event
+                    } catch (e) {
+                        showToast(e.message, 'error');
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                    }
+                }
+            }
 
             function renderSkeleton() {
                 const tbody = document.getElementById('logsTableBody');
@@ -1223,6 +1261,17 @@
             function openLogDetails(index) {
                 const log = currentLogs[index];
                 if (!log) return;
+                currentDetailId = log.id;
+
+                // Determine if we show restore button
+                // We show it only if there is a diff (changes) AND we have a targetId
+                const hasDiff = log.details && (log.details.diff || (log.details.changes && log.details.changes.length > 0));
+                const btnRestore = document.getElementById('btnRestoreState');
+                if (currentTab === 'admin' && hasDiff && log.targetId) {
+                    btnRestore.classList.remove('hidden');
+                } else {
+                    btnRestore.classList.add('hidden');
+                }
                 document.getElementById('modalLogId').textContent = `ID: ${log.id}`;
                 document.getElementById('modalDate').textContent = new Date(log.createdAt).toLocaleString();
                 document.getElementById('modalIp').textContent = log.ip || 'N/A';
@@ -1235,7 +1284,7 @@
                 if (log.adminImage || log.userImage) {
                     const imgUrl = currentTab === 'admin' ? log.adminImage : log.userImage;
                     if (imgUrl) {
-                        adminAvatar.innerHTML = `<img src="${imgUrl}" class="w-full h-full object-cover rounded-2xl">`;
+                        adminAvatar.innerHTML = `<img src="${imgUrl}" class="w-full h-full object-cover rounded-2xl no-invert">`;
                         adminAvatar.className = "w-14 h-14 rounded-2xl bg-blue-600/10 border border-blue-500/20 shadow-lg p-0 overflow-hidden";
                     } else {
                         adminAvatar.textContent = (userName || '?').charAt(0).toUpperCase();
@@ -1556,7 +1605,7 @@
                             targetDisplay = `
                         <div class="flex items-center gap-2 cursor-pointer group/target" onclick="event.stopPropagation(); um.open('${targetId}')">    
                             <div class="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-[8px] font-bold overflow-hidden border border-slate-700/50 group-hover/target:border-blue-500 transition-colors">
-                                ${log.targetUser.image ? `<img src="${log.targetUser.image}" class="w-full h-full object-cover">` : (name || '?').charAt(0).toUpperCase()}
+                                ${log.targetUser.image ? `<img src="${log.targetUser.image}" class="w-full h-full object-cover no-invert">` : (name || '?').charAt(0).toUpperCase()}
                             </div>
                             <span class="max-w-[120px] truncate group-hover/target:text-blue-400 transition-colors">${name}</span>
                         </div>
@@ -1579,7 +1628,7 @@
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-2 cursor-pointer group/source" onclick="event.stopPropagation(); um.open('${userId}')">
                                 <div class="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center text-[10px] font-bold overflow-hidden border border-slate-700/50 shadow-inner group-hover/source:border-blue-500 transition-colors">
-                                    ${uImage ? `<img src="${uImage}" class="w-full h-full object-cover">` : (uName || '?').charAt(0).toUpperCase()}
+                                    ${uImage ? `<img src="${uImage}" class="w-full h-full object-cover no-invert">` : (uName || '?').charAt(0).toUpperCase()}
                                 </div>
                                 <span class="text-white text-sm font-medium tracking-tight group-hover/source:text-blue-400 transition-colors">${uName}</span>
                             </div>

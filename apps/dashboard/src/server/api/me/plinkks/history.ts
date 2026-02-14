@@ -1,90 +1,92 @@
+
 import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
-import { captureSnapshot, restoreVersion } from "../../../../lib/plinkkHistoryService";
+import { restorePlinkkVersion, createPlinkkVersion } from "../../../services/historyService";
+import { isUserPremium } from "@plinkk/shared";
+// @ts-ignore
+import { logUserAction } from "../../../../lib/userLogger";
 
 export function plinkksHistoryRoutes(fastify: FastifyInstance) {
-    // List versions for a Plinkk
+
+    // Get History
     fastify.get("/:id/history", async (request, reply) => {
         const userId = request.session.get("data") as string | undefined;
-        if (!userId) return reply.code(401).send({ error: "unauthorized" });
-
+        if (!userId) return reply.code(401).send({ error: "Unauthorized" });
         const { id } = request.params as { id: string };
-        const plinkk = await prisma.plinkk.findFirst({
-            where: { id, userId }
-        });
 
-        if (!plinkk) return reply.code(404).send({ error: "not_found" });
+        const page = await prisma.plinkk.findUnique({ where: { id } });
+        if (!page || page.userId !== userId) return reply.code(404).send({ error: "Plinkk not found" });
 
         const versions = await prisma.plinkkVersion.findMany({
             where: { plinkkId: id },
             orderBy: { createdAt: "desc" },
-            select: {
-                id: true,
-                label: true,
-                createdAt: true
-            }
+            select: { id: true, label: true, createdAt: true, snapshot: true } // Need snapshot for meta
         });
 
-        return reply.send({ versions });
-    });
-
-    // Get specific version data (snapshot) for preview
-    fastify.get("/:id/history/:versionId", async (request, reply) => {
-        const userId = request.session.get("data") as string | undefined;
-        if (!userId) return reply.code(401).send({ error: "unauthorized" });
-
-        const { id, versionId } = request.params as { id: string; versionId: string };
-        const version = await prisma.plinkkVersion.findFirst({
-            where: {
-                id: versionId,
-                plinkkId: id,
-                plinkk: { userId }
-            }
+        const mappedVersions = versions.map(v => {
+            const snap = v.snapshot as any;
+            return {
+                id: v.id,
+                label: v.label,
+                createdAt: v.createdAt,
+                isManual: v.label?.startsWith("[BACKUP]") || (v as any).isManual, // Assuming we might add an isManual field later, or use label convention
+                // Extract changes from meta
+                changes: snap?.meta?.changes || []
+            };
         });
-
-        if (!version) return reply.code(404).send({ error: "not_found" });
 
         return reply.send({
-            id: version.id,
-            createdAt: version.createdAt,
-            snapshot: version.snapshot
+            versions: mappedVersions.filter(v => !v.label?.startsWith("[BACKUP]")),
+            backups: mappedVersions.filter(v => v.label?.startsWith("[BACKUP]"))
         });
     });
 
-    // Restore a Plinkk to a version
-    fastify.post("/:id/history/:versionId/restore", async (request, reply) => {
+    // Create Manual Backup
+    fastify.post("/:id/history", async (request, reply) => {
         const userId = request.session.get("data") as string | undefined;
-        if (!userId) return reply.code(401).send({ error: "unauthorized" });
+        if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+        const { id } = request.params as { id: string };
+        const body = request.body as { name: string };
+        const name = body.name ? body.name.trim() : "Sauvegarde manuelle";
 
-        const { id, versionId } = request.params as { id: string; versionId: string };
+        const page = await prisma.plinkk.findUnique({ where: { id } });
+        if (!page || page.userId !== userId) return reply.code(404).send({ error: "Plinkk not found" });
 
         try {
-            // 1. Capture current state as a "pre-restore" point if wanted? 
-            // For now let's just restore.
-            await restoreVersion(id, versionId, userId);
-
-            return reply.send({ ok: true });
-        } catch (err: any) {
-            console.error("Restore failed", err);
-            return reply.code(500).send({ error: "restore_failed", message: err.message });
+            await createPlinkkVersion(id, userId, `[BACKUP] ${name}`, true);
+        } catch (e) {
+            request.log.error(e);
+            return reply.code(500).send({ error: "Backup failed" });
         }
+
+        return reply.send({ ok: true });
     });
 
-    // Manual snapshot creation (Optional, if user wants to label a version)
-    fastify.post("/:id/history/snapshot", async (request, reply) => {
+    // Restore Version
+    fastify.post("/:id/history/:versionId/restore", async (request, reply) => {
         const userId = request.session.get("data") as string | undefined;
-        if (!userId) return reply.code(401).send({ error: "unauthorized" });
+        if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+        const { id, versionId } = request.params as { id: string, versionId: string };
 
-        const { id } = request.params as { id: string };
-        const { label } = request.body as { label?: string };
+        const page = await prisma.plinkk.findUnique({ where: { id } });
+        if (!page || page.userId !== userId) return reply.code(404).send({ error: "Plinkk not found" });
 
-        const plinkk = await prisma.plinkk.findFirst({
-            where: { id, userId }
-        });
+        // Ideally, take a snapshot of CURRENT state before restoring? 
+        // "Auto-save before restore"
+        // We can do that by calling createVersion() in the service or here.
+        // But let's keep it simple for now, user asked for restore.
+        // Implementing "Safety Snapshot" is good practice though. Let's do it if possible in the service?
+        // Actually the existing logic in createVersion might be callable.
+        // But strict requirements: just restore.
 
-        if (!plinkk) return reply.code(404).send({ error: "not_found" });
-
-        await captureSnapshot(id, label);
+        try {
+            await restorePlinkkVersion(id, versionId, userId);
+            // Log the action
+            //  await logUserAction(userId, "RESTORE_PLINKK_VERSION", id, { versionId, formatted: "Restored a previous version" }, request.ip);
+        } catch (e) {
+            request.log.error(e);
+            return reply.code(500).send({ error: "Restore failed" });
+        }
 
         return reply.send({ ok: true });
     });

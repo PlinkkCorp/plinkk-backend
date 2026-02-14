@@ -9,7 +9,7 @@ import { dashboardCosmeticsRoutes } from "./dashboard/cosmetics";
 import { dashboardEditRoutes } from "./dashboard/edit";
 import { dashboardAccountRoutes } from "./dashboard/account";
 import { dashboardThemesRoutes } from "./dashboard/themes";
-import { dashboardVersionsRoutes } from "./dashboard/versions";
+
 import { dashboardRedirectsRoutes } from "./dashboard/redirects";
 import { getPublicPath } from "../services/plinkkService";
 
@@ -21,7 +21,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.register(dashboardEditRoutes, { prefix: "/edit" });
   fastify.register(dashboardAccountRoutes, { prefix: "/account" });
   fastify.register(dashboardThemesRoutes, { prefix: "/themes" });
-  fastify.register(dashboardVersionsRoutes, { prefix: "/versions" });
+
   fastify.register(dashboardRedirectsRoutes, { prefix: "/redirects" });
 
   fastify.get("/premium", { preHandler: [requireAuthRedirect] }, async function (request, reply) {

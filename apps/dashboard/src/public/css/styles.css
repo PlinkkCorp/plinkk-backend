@@ -12,7 +12,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    background: 
+    background:
         radial-gradient(circle at 20% 20%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
         radial-gradient(circle at 80% 80%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
         radial-gradient(circle at 40% 40%, rgba(120, 219, 226, 0.2) 0%, transparent 50%),
@@ -30,15 +30,15 @@ body {
 article {
     position: relative;
     text-align: center;
-    background: 
-        linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.08) 0%, 
+    background:
+        linear-gradient(135deg,
+            rgba(255, 255, 255, 0.08) 0%,
             rgba(255, 255, 255, 0.03) 100%);
     padding: 24px 20px;
     border-radius: 24px;
     backdrop-filter: blur(24px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 
+    box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.4),
         0 24px 64px rgba(0, 0, 0, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.15),
@@ -61,10 +61,10 @@ article::before {
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
-        linear-gradient(135deg, 
-            rgba(120, 119, 198, 0.08) 0%, 
-            rgba(255, 119, 198, 0.08) 50%, 
+    background:
+        linear-gradient(135deg,
+            rgba(120, 119, 198, 0.08) 0%,
+            rgba(255, 119, 198, 0.08) 50%,
             rgba(120, 219, 226, 0.08) 100%);
     opacity: 0.6;
     transition: opacity 0.6s ease;
@@ -79,7 +79,7 @@ article:hover::before {
 
 article:hover {
     transform: translateY(-4px) scale(1.01);
-    box-shadow: 
+    box-shadow:
         0 12px 40px rgba(0, 0, 0, 0.4),
         0 24px 64px rgba(0, 0, 0, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.2),
@@ -91,11 +91,11 @@ h1 {
     font-size: 2rem;
     font-weight: 700;
     margin-bottom: 4px;
-    background: linear-gradient(135deg, 
-        #f8fafc 0%, 
-        #cbd5e1 30%, 
-        #7c3aed 60%, 
-        #f59e0b 100%);
+    background: linear-gradient(135deg,
+            #f8fafc 0%,
+            #cbd5e1 30%,
+            #7c3aed 60%,
+            #f59e0b 100%);
     background-size: 300% 300%;
     background-clip: text;
     -webkit-background-clip: text;
@@ -172,7 +172,7 @@ p {
     border: 3px solid rgba(255, 255, 255, 0.15);
     object-fit: cover;
     cursor: pointer;
-    box-shadow: 
+    box-shadow:
         0 16px 48px rgba(0, 0, 0, 0.4),
         0 0 0 1px rgba(255, 255, 255, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -190,8 +190,8 @@ p {
     right: -3px;
     bottom: -3px;
     border-radius: 50%;
-    background: linear-gradient(45deg, 
-        #7c3aed, #f59e0b, #06b6d4, #7c3aed);
+    background: linear-gradient(45deg,
+            #7c3aed, #f59e0b, #06b6d4, #7c3aed);
     background-size: 400% 400%;
     z-index: -1;
     animation: neon 2s infinite alternate;
@@ -207,8 +207,8 @@ p {
     right: -6px;
     bottom: -6px;
     border-radius: 50%;
-    background: linear-gradient(45deg, 
-        #7c3aed, #f59e0b, #06b6d4, #7c3aed);
+    background: linear-gradient(45deg,
+            #7c3aed, #f59e0b, #06b6d4, #7c3aed);
     background-size: 500% 500%;
     z-index: -2;
     animation: neon-2 2s infinite alternate;
@@ -229,9 +229,9 @@ p {
     border-radius: 50%;
     position: absolute;
     backface-visibility: hidden;
-    background: 
-        linear-gradient(135deg, 
-            rgba(15, 15, 15, 0.95) 0%, 
+    background:
+        linear-gradient(135deg,
+            rgba(15, 15, 15, 0.95) 0%,
             rgba(30, 30, 30, 0.9) 100%);
     display: flex;
     justify-content: center;
@@ -258,7 +258,7 @@ p {
 
 .profile-container:hover .profile-pic-wrapper {
     transform: rotateY(180deg) scale(1.08);
-    box-shadow: 
+    box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.5),
         0 0 0 1px rgba(255, 255, 255, 0.2),
         0 0 80px rgba(124, 58, 237, 0.4);
@@ -266,9 +266,9 @@ p {
 
 .profile-container:hover .profile-link {
     transform: rotateY(0deg) scale(1.08);
-    background: 
-        linear-gradient(135deg, 
-            rgba(25, 25, 25, 0.95) 0%, 
+    background:
+        linear-gradient(135deg,
+            rgba(25, 25, 25, 0.95) 0%,
             rgba(40, 40, 40, 0.9) 100%);
 }
 
@@ -282,7 +282,7 @@ p {
 
 .profile-link:hover a {
     transform: scale(1.15);
-    text-shadow: 
+    text-shadow:
         0 0 20px rgba(255, 255, 255, 0.6),
         0 0 40px rgba(124, 58, 237, 0.4);
     color: #7c3aed;
@@ -306,7 +306,7 @@ p {
     cursor: pointer;
     min-width: 140px;
     min-height: 140px;
-    box-shadow: 
+    box-shadow:
         0 16px 48px rgba(0, 0, 0, 0.4),
         0 0 0 1px rgba(255, 255, 255, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -315,9 +315,9 @@ p {
 }
 
 .profile-link {
-    background: 
-        linear-gradient(135deg, 
-            rgba(15, 15, 15, 0.95) 0%, 
+    background:
+        linear-gradient(135deg,
+            rgba(15, 15, 15, 0.95) 0%,
             rgba(30, 30, 30, 0.9) 100%);
     display: flex;
     justify-content: center;
@@ -331,7 +331,7 @@ p {
 
 .profile-container:hover .profile-pic {
     transform: rotateY(180deg) scale(1.03);
-    box-shadow: 
+    box-shadow:
         0 16px 48px rgba(0, 0, 0, 0.4),
         0 0 0 1px rgba(255, 255, 255, 0.2),
         0 0 60px rgba(124, 58, 237, 0.3);
@@ -339,9 +339,9 @@ p {
 
 .profile-container:hover .profile-link {
     transform: rotateY(0deg) scale(1.03);
-    background: 
-        linear-gradient(135deg, 
-            rgba(25, 25, 25, 0.95) 0%, 
+    background:
+        linear-gradient(135deg,
+            rgba(25, 25, 25, 0.95) 0%,
             rgba(40, 40, 40, 0.9) 100%);
 }
 
@@ -355,14 +355,16 @@ p {
 
 .profile-link:hover a {
     transform: scale(1.15);
-    text-shadow: 
+    text-shadow:
         0 0 20px rgba(255, 255, 255, 0.6),
         0 0 40px rgba(124, 58, 237, 0.4);
     color: #7c3aed;
 }
 
-/* Classes communes pour le système */
-.profile-container, .profile-pic-wrapper, .profile-link, .profile-container a {
+.profile-container,
+.profile-pic-wrapper,
+.profile-link,
+.profile-container a {
     border-radius: 100%;
 }
 
@@ -371,31 +373,31 @@ p {
     filter: blur(0);
 }
 
-/* Animations neon existantes préservées */
 @keyframes neon {
     0% {
         filter: hue-rotate(0deg);
     }
+
     100% {
         filter: hue-rotate(360deg);
     }
 }
 
-/* Animation neon-2 préservée */
 @keyframes neon-2 {
     0% {
         filter: hue-rotate(0deg);
     }
+
     100% {
         filter: hue-rotate(360deg);
     }
 }
 
-/* Animation neon avec blur préservée */
 @keyframes neonBlur {
     0% {
         filter: hue-rotate(0deg) blur(20px);
     }
+
     100% {
         filter: hue-rotate(360deg) blur(20px);
     }
@@ -413,7 +415,6 @@ p {
 
 
 
-/* Email */
 .email-description-container {
     font-size: 0.9em;
     color: white;
@@ -424,7 +425,7 @@ p {
     z-index: 999;
 }
 
-.email { 
+.email {
     position: relative;
     border-radius: 8px;
 }
@@ -441,19 +442,20 @@ p {
     cursor: pointer;
     font-size: 0.8em;
     transition: background-color 0.3s ease;
-    background-color: rgba(255,255,255, 0.2);
+    background-color: rgba(255, 255, 255, 0.2);
 }
+
 .copy-btn:hover {
-    background-color: rgba(255,255,255, 0.3);
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 /* Cartes ultra-modernes avec design futuriste */
 .discord-box {
     display: block;
     margin-top: 12px;
-    background: 
-        linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.09) 0%, 
+    background:
+        linear-gradient(135deg,
+            rgba(255, 255, 255, 0.09) 0%,
             rgba(255, 255, 255, 0.04) 100%);
     border-radius: 16px;
     color: #f8fafc;
@@ -466,7 +468,7 @@ p {
     border: 1px solid rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(16px) saturate(180%);
     overflow: hidden;
-    box-shadow: 
+    box-shadow:
         0 4px 16px rgba(0, 0, 0, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
@@ -478,10 +480,10 @@ p {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, 
-        transparent 0%, 
-        rgba(255, 255, 255, 0.12) 50%, 
-        transparent 100%);
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.12) 50%,
+            transparent 100%);
     transition: left 0.6s ease;
     z-index: 1;
 }
@@ -493,10 +495,10 @@ p {
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
-        linear-gradient(135deg, 
-            rgba(124, 58, 237, 0.15) 0%, 
-            rgba(255, 119, 198, 0.15) 50%, 
+    background:
+        linear-gradient(135deg,
+            rgba(124, 58, 237, 0.15) 0%,
+            rgba(255, 119, 198, 0.15) 50%,
             rgba(120, 219, 226, 0.15) 100%);
     opacity: 0;
     transition: opacity 0.4s ease;
@@ -506,11 +508,11 @@ p {
 
 .discord-box:hover {
     transform: translateY(-2px) scale(1.01);
-    background: 
-        linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.12) 0%, 
+    background:
+        linear-gradient(135deg,
+            rgba(255, 255, 255, 0.12) 0%,
             rgba(255, 255, 255, 0.06) 100%);
-    box-shadow: 
+    box-shadow:
         0 6px 24px rgba(0, 0, 0, 0.25),
         0 12px 32px rgba(0, 0, 0, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.15),
@@ -541,9 +543,8 @@ p {
 .discord-box:hover img,
 .discord-box:hover .link-icon {
     transform: scale(1.05) rotate(2deg);
-    filter: 
-        drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3)) 
-        drop-shadow(0 0 15px rgba(124, 58, 237, 0.2));
+    filter:
+        drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3)) drop-shadow(0 0 15px rgba(124, 58, 237, 0.2));
 }
 
 .discord-box a {
@@ -562,7 +563,6 @@ p {
 }
 
 footer {
-    /* Use fixed to reliably center the footer at the viewport bottom */
     position: fixed;
     bottom: 10px;
     left: 50%;
@@ -574,15 +574,15 @@ footer {
     font-weight: 500;
     color: rgba(248, 250, 252, 0.7);
     letter-spacing: 0.8px;
-    background: 
-        linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.08) 0%, 
+    background:
+        linear-gradient(135deg,
+            rgba(255, 255, 255, 0.08) 0%,
             rgba(255, 255, 255, 0.04) 100%);
     backdrop-filter: blur(16px) saturate(180%);
     padding: 8px 16px;
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 
+    box-shadow:
         0 4px 16px rgba(0, 0, 0, 0.2),
         0 8px 32px rgba(0, 0, 0, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -593,13 +593,13 @@ footer {
 }
 
 footer:hover {
-    background: 
-        linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.10) 0%, 
+    background:
+        linear-gradient(135deg,
+            rgba(255, 255, 255, 0.10) 0%,
             rgba(255, 255, 255, 0.05) 100%);
     transform: translate(-50%, -2px) scale(1.01);
     color: rgba(248, 250, 252, 0.9);
-    box-shadow: 
+    box-shadow:
         0 6px 20px rgba(0, 0, 0, 0.25),
         0 12px 32px rgba(0, 0, 0, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.15),
@@ -632,29 +632,29 @@ span img {
         width: calc(100vw - 20px);
         max-width: 340px;
     }
-    
+
     h1 {
         font-size: 1.5rem;
     }
-    
+
     h2 {
         font-size: 0.9rem;
     }
-    
-    
+
+
     /* Ajustements pour la barre de statut mobile */
     .status-bar-container {
         bottom: 6px;
         right: 6px;
         gap: 8px;
     }
-    
+
     .circle-status-bar {
         width: 20px;
         height: 20px;
         border-width: 3px;
     }
-    
+
     .statusBarText {
         font-size: 0.7em;
         padding: 6px 10px;
@@ -667,32 +667,33 @@ span img {
         padding: 16px 12px;
         margin: 1em 5px;
     }
+
     .profile-link a {
         font-size: 1.3em;
     }
-    
+
     h1 {
         font-size: 1.3rem;
     }
-    
+
     .label-button {
         padding: 6px 12px;
         font-size: 0.65em;
     }
-    
+
     /* Barre de statut ultra-compacte sur très petits écrans */
     .status-bar-container {
         bottom: 4px;
         right: 4px;
         gap: 6px;
     }
-    
+
     .circle-status-bar {
         width: 18px;
         height: 18px;
         border-width: 3px;
     }
-    
+
     .statusBarText {
         font-size: 0.65em;
         padding: 4px 8px;
@@ -724,8 +725,8 @@ canvas {
     left: 0;
     width: 100%;
     height: 100%;
-    min-height: 100%; 
-    min-width: 100%; 
+    min-height: 100%;
+    min-width: 100%;
 }
 
 .dg {
@@ -768,16 +769,16 @@ canvas {
     font-size: 0.8em;
     font-weight: 500;
     width: max-content;
-    background: 
-        linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.12) 0%, 
+    background:
+        linear-gradient(135deg,
+            rgba(255, 255, 255, 0.12) 0%,
             rgba(255, 255, 255, 0.06) 100%);
     border: 1px solid rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(12px) saturate(150%);
     letter-spacing: 0.03em;
     position: relative;
     overflow: hidden;
-    box-shadow: 
+    box-shadow:
         0 2px 8px rgba(0, 0, 0, 0.15),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
@@ -789,10 +790,10 @@ canvas {
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
-        linear-gradient(135deg, 
-            rgba(124, 58, 237, 0.2) 0%, 
-            rgba(255, 119, 198, 0.2) 50%, 
+    background:
+        linear-gradient(135deg,
+            rgba(124, 58, 237, 0.2) 0%,
+            rgba(255, 119, 198, 0.2) 50%,
             rgba(120, 219, 226, 0.2) 100%);
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -801,12 +802,12 @@ canvas {
 
 .label-button:hover {
     transform: translateY(-2px) scale(1.02);
-    background: 
-        linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.16) 0%, 
+    background:
+        linear-gradient(135deg,
+            rgba(255, 255, 255, 0.16) 0%,
             rgba(255, 255, 255, 0.08) 100%);
     border-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 
+    box-shadow:
         0 6px 20px rgba(0, 0, 0, 0.2),
         0 12px 32px rgba(0, 0, 0, 0.1),
         0 0 0 1px rgba(255, 255, 255, 0.15),
@@ -816,7 +817,8 @@ canvas {
 .label-button:hover::before {
     opacity: 1;
 }
- .icon-list {
+
+.icon-list {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -858,13 +860,13 @@ canvas {
     position: relative;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-    background: 
-        linear-gradient(135deg, 
-            rgba(255, 255, 255, 0.95) 0%, 
+    background:
+        linear-gradient(135deg,
+            rgba(255, 255, 255, 0.95) 0%,
             rgba(255, 255, 255, 0.85) 100%);
     border: 5px solid rgba(25, 25, 25, 1);
     backdrop-filter: blur(10px);
-    box-shadow: 
+    box-shadow:
         0 3px 12px rgba(0, 0, 0, 0.5),
         0 0 0 3px rgba(255, 255, 255, 0.1),
         inset 0 0 0 2px rgba(255, 255, 255, 0.3);
@@ -893,7 +895,7 @@ canvas {
 
 .circle-status-bar:hover {
     transform: scale(1.2);
-    box-shadow: 
+    box-shadow:
         0 6px 16px rgba(0, 0, 0, 0.6),
         0 0 0 4px rgba(255, 255, 255, 0.4),
         inset 0 0 0 2px rgba(255, 255, 255, 0.5);
@@ -905,9 +907,9 @@ canvas {
 
 /* Texte de statut style Discord */
 .statusBarText {
-    background: 
-        linear-gradient(135deg, 
-            rgba(20, 20, 20, 0.95) 0%, 
+    background:
+        linear-gradient(135deg,
+            rgba(20, 20, 20, 0.95) 0%,
             rgba(10, 10, 10, 0.95) 100%);
     color: #ffffff;
     padding: 6px 10px;
@@ -917,7 +919,7 @@ canvas {
     letter-spacing: 0.3px;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 
+    box-shadow:
         0 4px 16px rgba(0, 0, 0, 0.5),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     opacity: 0;
@@ -938,10 +940,10 @@ canvas {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, 
-        transparent 0%, 
-        rgba(255, 255, 255, 0.1) 50%, 
-        transparent 100%);
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            transparent 100%);
     transition: left 0.4s ease;
 }
 
@@ -951,13 +953,13 @@ canvas {
 }
 
 .statusBarText:hover {
-    background: 
-        linear-gradient(135deg, 
-            rgba(40, 40, 40, 0.95) 0%, 
+    background:
+        linear-gradient(135deg,
+            rgba(40, 40, 40, 0.95) 0%,
             rgba(30, 30, 30, 0.95) 100%);
     transform: translateX(0) scale(1.02);
     border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 
+    box-shadow:
         0 6px 20px rgba(0, 0, 0, 0.5),
         inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
@@ -970,7 +972,7 @@ canvas {
 .circle-status-bar.status-online {
     background: #43b581;
     border-color: rgba(25, 25, 25, 1);
-    box-shadow: 
+    box-shadow:
         0 3px 12px rgba(0, 0, 0, 0.5),
         0 0 0 3px rgba(255, 255, 255, 0.3),
         inset 0 0 0 2px rgba(255, 255, 255, 0.2);
@@ -979,7 +981,7 @@ canvas {
 .circle-status-bar.status-busy {
     background: #f04747;
     border-color: rgba(25, 25, 25, 1);
-    box-shadow: 
+    box-shadow:
         0 3px 12px rgba(0, 0, 0, 0.5),
         0 0 0 3px rgba(255, 255, 255, 0.3),
         inset 0 0 0 2px rgba(255, 255, 255, 0.2);
@@ -988,7 +990,7 @@ canvas {
 .circle-status-bar.status-away {
     background: #faa61a;
     border-color: rgba(25, 25, 25, 1);
-    box-shadow: 
+    box-shadow:
         0 3px 12px rgba(0, 0, 0, 0.5),
         0 0 0 3px rgba(255, 255, 255, 0.3),
         inset 0 0 0 2px rgba(255, 255, 255, 0.2);
@@ -997,7 +999,7 @@ canvas {
 .circle-status-bar.status-offline {
     background: #747f8d;
     border-color: rgba(25, 25, 25, 1);
-    box-shadow: 
+    box-shadow:
         0 3px 12px rgba(0, 0, 0, 0.5),
         0 0 0 3px rgba(255, 255, 255, 0.3),
         inset 0 0 0 2px rgba(255, 255, 255, 0.2);
@@ -1007,22 +1009,53 @@ canvas {
 
 /* Animation de vibration */
 @keyframes vibrate_btn {
-    0% { transform: translate(0, -50%); }
-    20% { transform: translate(-2px, calc(2px - 50%)); }
-    40% { transform: translate(-2px, calc(-2px - 50%)); }
-    60% { transform: translate(2px, calc(2px - 50%)); }
-    80% { transform: translate(2px, calc(-2px - 50%)); }
-    100% { transform: translate(0, -50%); }
+    0% {
+        transform: translate(0, -50%);
+    }
+
+    20% {
+        transform: translate(-2px, calc(2px - 50%));
+    }
+
+    40% {
+        transform: translate(-2px, calc(-2px - 50%));
+    }
+
+    60% {
+        transform: translate(2px, calc(2px - 50%));
+    }
+
+    80% {
+        transform: translate(2px, calc(-2px - 50%));
+    }
+
+    100% {
+        transform: translate(0, -50%);
+    }
 }
+
 @keyframes vibrate_parent {
-    20% { transform: translate(-2px,2px); }
-    40% { transform: translate(-2px, -2px); }
-    60% { transform: translate(2px, 2px); }
-    80% { transform: translate(2px, -2px); }
+    20% {
+        transform: translate(-2px, 2px);
+    }
+
+    40% {
+        transform: translate(-2px, -2px);
+    }
+
+    60% {
+        transform: translate(2px, 2px);
+    }
+
+    80% {
+        transform: translate(2px, -2px);
+    }
 }
+
 .vibrate_btn {
     animation: vibrate_btn 0.2s linear;
 }
+
 .vibrate_parent {
     animation: vibrate_parent 0.2s linear;
 }
@@ -1036,11 +1069,12 @@ canvas {
     border-radius: 16px;
     font-weight: bold;
     z-index: 9999;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s;     
+    transition: opacity 0.3s;
 }
+
 .copy-modal.show {
     opacity: 1;
     pointer-events: auto;
@@ -1052,10 +1086,17 @@ canvas {
     border: 2px dashed #ff0000;
     animation: crack 0.4s linear infinite alternate;
 }
+
 @keyframes crack {
-    0% { filter: brightness(1) grayscale(0); }
-    100% { filter: brightness(1.2) grayscale(0.7); }
+    0% {
+        filter: brightness(1) grayscale(0);
+    }
+
+    100% {
+        filter: brightness(1.2) grayscale(0.7);
+    }
 }
+
 .btn-broken {
     filter: grayscale(1) blur(1px);
     border: 2px solid #333;
@@ -1063,54 +1104,92 @@ canvas {
     color: #888;
     animation: shake 0.2s linear infinite alternate;
 }
+
 @keyframes shake {
-    0% { transform: rotate(-2deg) scale(1.05) translateY(-50%);}
-    100% { transform: rotate(2deg) scale(0.95) translateY(-50%);}
+    0% {
+        transform: rotate(-2deg) scale(1.05) translateY(-50%);
+    }
+
+    100% {
+        transform: rotate(2deg) scale(0.95) translateY(-50%);
+    }
 }
+
 .btn-explode {
     animation: explode 0.8s forwards;
 }
+
 @keyframes explode {
-    0% { transform: scale(1) rotate(0deg) translateY(-50%); opacity: 1;}
-    80% { transform: scale(2) rotate(720deg) translateY(-50%); opacity: 1;}
-    100% { transform: scale(0.1) rotate(1080deg) translateY(-50%); opacity: 0;}
+    0% {
+        transform: scale(1) rotate(0deg) translateY(-50%);
+        opacity: 1;
+    }
+
+    80% {
+        transform: scale(2) rotate(720deg) translateY(-50%);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(0.1) rotate(1080deg) translateY(-50%);
+        opacity: 0;
+    }
 }
 
-.rainbow-footer, h1.rainbow-footer {
-  background: linear-gradient(90deg, #ff0080, #7928ca, #0078ff, #00cfff, #00ff8f, #ff0080);
-  background-size: 200% auto;
-  color: transparent;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: rainbow-move 3s linear infinite;
-  transition: background 0.5s;
+.rainbow-footer,
+h1.rainbow-footer {
+    background: linear-gradient(90deg, #ff0080, #7928ca, #0078ff, #00cfff, #00ff8f, #ff0080);
+    background-size: 200% auto;
+    color: transparent;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: rainbow-move 3s linear infinite;
+    transition: background 0.5s;
 }
 
 @keyframes rainbow-move {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .reverse-theme {
     filter: invert(1) hue-rotate(180deg);
     transition: filter 0.5s;
 }
-.reverse-theme img,
+
+.reverse-theme img:not(.no-invert),
 .reverse-theme video {
     filter: invert(1) hue-rotate(180deg);
 }
 
 .easter-egg-gear-btn {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
+
 .easter-egg-modal {
     animation: fadeInEggModal 0.2s;
 }
+
 @keyframes fadeInEggModal {
-    from { opacity: 0; transform: translateY(-10px);}
-    to { opacity: 1; transform: translateY(0);}
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Animations ultra-fluides et modernes */
@@ -1119,6 +1198,7 @@ canvas {
         opacity: 0;
         transform: translateY(60px) scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -1126,21 +1206,28 @@ canvas {
 }
 
 @keyframes gradientFlow {
-    0%, 100% {
+
+    0%,
+    100% {
         background-position: 0% 50%;
     }
+
     50% {
         background-position: 100% 50%;
     }
 }
 
 @keyframes floatGentle {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0px) rotate(0deg);
     }
+
     33% {
         transform: translateY(-8px) rotate(1deg);
     }
+
     66% {
         transform: translateY(-4px) rotate(-1deg);
     }
@@ -1150,19 +1237,24 @@ canvas {
     0% {
         background-position: 0% 50%;
     }
+
     50% {
         background-position: 100% 50%;
     }
+
     100% {
         background-position: 0% 50%;
     }
 }
 
 @keyframes iconPulse {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
         opacity: 1;
     }
+
     50% {
         transform: scale(1.05);
         opacity: 0.9;
@@ -1174,6 +1266,7 @@ canvas {
         opacity: 0;
         transform: translateX(-50px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -1181,54 +1274,67 @@ canvas {
 }
 
 @keyframes glow {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
     }
+
     50% {
         box-shadow: 0 0 40px rgba(124, 58, 237, 0.6);
     }
 }
+
 .egg-switch-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 10px;
 }
+
 .switch {
-  position: relative;
-  display: inline-block;
-  width: 38px;
-  height: 20px;
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 20px;
 }
+
 .switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
+
 .slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #888;
-  transition: .3s;
-  border-radius: 20px;
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #888;
+    transition: .3s;
+    border-radius: 20px;
 }
+
 .slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 2px;
-  bottom: 2px;
-  background-color: white;
-  transition: .3s;
-  border-radius: 50%;
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
 }
-input:checked + .slider {
-  background-color: #00ff8f;
+
+input:checked+.slider {
+    background-color: #00ff8f;
 }
-input:checked + .slider:before {
-  transform: translateX(18px);
+
+input:checked+.slider:before {
+    transform: translateX(18px);
 }
 
 .show-desc-btn {
@@ -1246,6 +1352,7 @@ input:checked + .slider:before {
     will-change: left, bottom, transform;
     transition: filter 0.3s;
 }
+
 .companion-animal svg {
     pointer-events: none;
     user-select: none;

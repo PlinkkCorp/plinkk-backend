@@ -3,7 +3,8 @@ import { Label, Link, NeonColor, PlinkkStatusbar, SocialIcon, prisma } from "@pl
 import { pickDefined } from "../../../../lib/plinkkUtils";
 import { logUserAction } from "../../../../lib/userLogger";
 import { calculateArrayDiff, calculateObjectDiff } from "../../../../lib/diffUtils";
-import { captureSnapshot } from "../../../../lib/plinkkHistoryService";
+import { createPlinkkVersion } from "../../../services/historyService";
+
 
 async function validatePlinkkOwnership(userId: string | undefined, plinkkId: string) {
   if (!userId) return null;
@@ -46,12 +47,20 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
     }
 
     if (added.length > 0 || removed.length > 0) {
+      const changes: string[] = [];
+      added.forEach(c => changes.push(`Added background color: ${c}`));
+      removed.forEach(c => changes.push(`Removed background color: ${c}`));
+
       await logUserAction(userId, "UPDATE_PLINKK_BACKGROUND", id, {
         diff: { background: { added, removed } },
+        changes,
         formatted: `Updated background: +${added.length} added, -${removed.length} removed`
       }, request.ip);
 
-      captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
+      const label = added.length > 0 ? `Ajout arrière-plan (${added.length})` :
+        removed.length > 0 ? `Suppression arrière-plan (${removed.length})` :
+          "Mise à jour arrière-plan";
+      createPlinkkVersion(id, userId, label, false, changes).catch(err => request.log.error(err));
     }
 
     return reply.send({ ok: true });
@@ -99,13 +108,22 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
       const hasChanges = JSON.stringify(changes.old) !== JSON.stringify(changes.new);
 
       if (hasChanges) {
+        const readableChanges: string[] = [];
+        if (changes.old.length !== changes.new.length) {
+          readableChanges.push(`Label count: ${changes.old.length} -> ${changes.new.length}`);
+        } else {
+          readableChanges.push("Updated labels content");
+        }
+
         await logUserAction(userId, "UPDATE_PLINKK_LABELS", id, {
-          diff: changes,
+          diff: changes, // This is actually the object diff structure
+          changes: readableChanges, // Our string array
           formatted: `Updated labels: ${body.labels.length} active`
         }, request.ip);
 
-        captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
+        createPlinkkVersion(id, userId, `Mise à jour étiquettes (${body.labels.length} actives)`, false, readableChanges).catch(err => request.log.error(err));
       }
+
     }
 
     return reply.send({ ok: true });
@@ -143,12 +161,19 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
       }
       const hasChanges = JSON.stringify(changes.old) !== JSON.stringify(changes.new);
       if (hasChanges) {
+        const readableChanges: string[] = [];
+        if (changes.old.length !== changes.new.length) {
+          readableChanges.push(`Social icons count: ${changes.old.length} -> ${changes.new.length}`);
+        } else {
+          readableChanges.push("Updated social icons");
+        }
         await logUserAction(userId, "UPDATE_PLINKK_SOCIALS", id, {
           diff: changes,
+          changes: readableChanges,
           formatted: `Updated social icons: ${body.socialIcon.length} active`
         }, request.ip);
 
-        captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
+        createPlinkkVersion(id, userId, `Mise à jour réseaux sociaux (${body.socialIcon.length} actifs)`, false, readableChanges).catch(err => request.log.error(err));
       }
     }
 
@@ -202,28 +227,43 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
       const diff = calculateArrayDiff(existing, updatedLinks, "id", ["userId", "plinkkId", "createdAt", "updatedAt", "clicks"]);
       const hasChanges = diff.added.length > 0 || diff.removed.length > 0 || diff.updated.length > 0 || diff.reordered;
       if (hasChanges) {
+        const changes: string[] = [];
+        diff.added.forEach((l: any) => changes.push(`Added Link: ${l.text || l.url}`));
+        diff.removed.forEach((l: any) => changes.push(`Removed Link: ${l.text || l.url}`));
+        diff.updated.forEach((u: any) => {
+          const keys = Object.keys(u.diff).join(', ');
+          changes.push(`Updated Link '${u.item.text || u.item.url}': ${keys}`);
+        });
+        if (diff.reordered) changes.push("Reordered links");
+
         await logUserAction(userId, "UPDATE_PLINKK_LINKS", id, {
           diff,
+          changes,
           formatted: `Updated links: ${updatedLinks.length} active`
         }, request.ip);
 
-        captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
-      }
+        let linkLabel = "Mise à jour liens";
+        if (diff.added.length > 0) linkLabel = `Ajout liens (+${diff.added.length})`;
+        else if (diff.removed.length > 0) linkLabel = `Suppression liens (-${diff.removed.length})`;
+        else if (diff.reordered) linkLabel = "Réorganisation liens";
+        else if (diff.updated.length > 0) linkLabel = "Modification liens";
 
-      return reply.send({
-        ok: true,
-        links: updatedLinks.map((l) => ({
-          id: l.id,
-          icon: l.icon,
-          url: l.url,
-          text: l.text,
-          name: l.name,
-          description: l.description,
-          showDescriptionOnHover: l.showDescriptionOnHover,
-          showDescription: l.showDescription,
-          categoryId: l.categoryId,
-        })),
-      });
+        createPlinkkVersion(id, userId, linkLabel, false, changes).catch(err => request.log.error(err));
+        return reply.send({
+          ok: true,
+          links: updatedLinks.map((l) => ({
+            id: l.id,
+            icon: l.icon,
+            url: l.url,
+            text: l.text,
+            name: l.name,
+            description: l.description,
+            showDescriptionOnHover: l.showDescriptionOnHover,
+            showDescription: l.showDescription,
+            categoryId: l.categoryId,
+          })),
+        });
+      }
     }
 
     return reply.send({ ok: true });
@@ -273,10 +313,24 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
       if (hasChanges) {
         await logUserAction(userId, "UPDATE_PLINKK_CATEGORIES", id, {
           diff,
+          changes: diff.added.map((c: any) => `Added Category: ${c.name}`).concat(
+            diff.removed.map((c: any) => `Removed Category: ${c.name}`),
+            diff.updated.map((c: any) => `Updated Category: ${c.item.name}`),
+            diff.reordered ? ["Reordered categories"] : []
+          ),
           formatted: `Updated categories: ${updatedCategories.length} active`
         }, request.ip);
 
-        captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
+        let catLabel = "Mise à jour catégories";
+        if (diff.added.length > 0) catLabel = `Ajout catégorie (+${diff.added.length})`;
+        else if (diff.removed.length > 0) catLabel = `Suppression catégorie (-${diff.removed.length})`;
+        else if (diff.reordered) catLabel = "Réorganisation catégories";
+
+        createPlinkkVersion(id, userId, catLabel, false, diff.added.map((c: any) => `Added Category: ${c.name}`).concat(
+          diff.removed.map((c: any) => `Removed Category: ${c.name}`),
+          diff.updated.map((c: any) => `Updated Category: ${c.item.name}`),
+          diff.reordered ? ["Reordered categories"] : []
+        )).catch(err => request.log.error(err));
       }
 
       return reply.send({
@@ -284,6 +338,8 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
         categories: updatedCategories.map((c) => ({ id: c.id, name: c.name, order: c.order })),
       });
     }
+
+
 
     return reply.send({ ok: true });
   });
@@ -332,9 +388,11 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           formatted: "Updated status bar settings"
         }, request.ip);
 
-        captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
+        createPlinkkVersion(id, userId, "Mise à jour barre de statut", false, ["Updated status bar settings"]).catch(err => request.log.error(err));
       }
     }
+
+
 
     return reply.send({ ok: true });
   });
@@ -374,9 +432,11 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           formatted: `Updated neon colors: ${newColors.length} active`
         }, request.ip);
 
-        captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
+        createPlinkkVersion(id, userId, "Mise à jour couleurs néon", false, newColors.length > 0 ? [`Set ${newColors.length} neon colors`] : ["Removed neon colors"]).catch(err => request.log.error(err));
       }
     }
+
+
 
     return reply.send({ ok: true });
   });

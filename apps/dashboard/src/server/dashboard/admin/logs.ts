@@ -3,6 +3,8 @@ import { Prisma, prisma } from "@plinkk/prisma";
 import { replyView } from "../../../lib/replyView";
 import { ensurePermission } from "../../../lib/permissions";
 import { logAdminAction } from "../../../lib/adminLogger";
+import { logAdminAction } from "../../../lib/adminLogger";
+import { restoreLogState } from "../../../services/adminLogService";
 import { requireAuthRedirect, requireAuth } from "../../../middleware/auth";
 
 interface LogsQuery {
@@ -234,6 +236,23 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
       console.error("Erreur critique /user-api:", err);
       const errorMessage = err instanceof Error ? err.stack || err.message : String(err);
       return reply.code(500).send({ error: "INTERNAL_SERVER_ERROR", message: errorMessage });
+    }
+  });
+  fastify.post<{ Params: { id: string } }>("/restore/:id", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_ADMIN_LOGS");
+    if (!ok) return;
+
+    const { id } = request.params;
+    const adminId = request.userId!;
+    const adminIp = request.ip;
+
+    try {
+      const result = await restoreLogState(id, adminId, adminIp);
+      return reply.send(result);
+    } catch (err) {
+      console.error("Erreur restore log:", err);
+      const errorMessage = err instanceof Error ? err.stack || err.message : String(err);
+      return reply.code(400).send({ error: "BAD_REQUEST", message: errorMessage });
     }
   });
 }

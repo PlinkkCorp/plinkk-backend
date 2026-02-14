@@ -4,7 +4,7 @@ import { calculateObjectDiff } from './diffUtils';
 
 export async function logUserAction(userId: string, action: string, targetId?: string, details?: any, ip?: string) {
   try {
-    await prisma.userLog.create({
+    return await prisma.userLog.create({
       data: {
         userId,
         action,
@@ -15,6 +15,7 @@ export async function logUserAction(userId: string, action: string, targetId?: s
     });
   } catch (e) {
     console.error('Failed to create user log:', e);
+    return null;
   }
 }
 

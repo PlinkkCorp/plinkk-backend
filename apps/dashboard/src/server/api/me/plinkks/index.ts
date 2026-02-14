@@ -4,7 +4,7 @@ import { plinkksConfigRoutes } from "./config";
 import { plinkksSettingsRoutes } from "./settings";
 import { plinkksExportRoutes } from "./export";
 import { plinkksPremiumRoutes } from "./premium";
-import { plinkksHistoryRoutes } from "./history";
+
 
 export function apiMePlinkksRoutes(fastify: FastifyInstance) {
   fastify.register(plinkksCrudRoutes);
@@ -12,5 +12,5 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
   fastify.register(plinkksSettingsRoutes);
   fastify.register(plinkksExportRoutes);
   fastify.register(plinkksPremiumRoutes);
-  fastify.register(plinkksHistoryRoutes);
+  fastify.register(import("./history.js").then(m => m.plinkksHistoryRoutes));
 }

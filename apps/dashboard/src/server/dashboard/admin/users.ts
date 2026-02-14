@@ -2,7 +2,7 @@ import { FastifyInstance, FastifyRequest } from "fastify";
 import { Prisma, prisma } from "@plinkk/prisma";
 import { replyView } from "../../../lib/replyView";
 import { ensurePermission, SessionData } from "../../../lib/permissions";
-import { logAdminAction } from "../../../lib/adminLogger";
+import { logAdminAction, logDetailedAdminAction } from "../../../lib/adminLogger";
 import { requireAuth, requireAuthWithUser } from "../../../middleware/auth";
 
 // Internal helper to get admin ID with proper typing
@@ -139,12 +139,19 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
     const adminId = getAdminId(request);
     if (!adminId) return reply.code(401).send({ error: "unauthorized" });
 
+    const oldUser = await prisma.user.findUnique({
+      where: { id },
+      select: { email: true, userName: true }
+    });
+
     await prisma.user.update({
       where: { id },
       data: { email, userName }
     });
 
-    await logAdminAction(adminId, "UPDATE_PROFILE", id, { email, userName }, request.ip);
+    if (oldUser) {
+      await logDetailedAdminAction(adminId, "UPDATE_PROFILE", id, oldUser, { email, userName }, request.ip);
+    }
     return reply.redirect(`/admin/users/${id}`);
   });
 
@@ -158,12 +165,19 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
     const { plinkkId, slug } = request.body as { plinkkId: string, slug: string };
 
     try {
+      const oldPlinkk = await prisma.plinkk.findUnique({
+        where: { id: plinkkId },
+        select: { slug: true }
+      });
+
       await prisma.plinkk.update({
         where: { id: plinkkId },
         data: { slug }
       });
       const adminId = getAdminId(request);
-      if (adminId) await logAdminAction(adminId, "UPDATE_SLUG", id, { plinkkId, slug }, request.ip);
+      if (adminId && oldPlinkk) {
+        await logDetailedAdminAction(adminId, "UPDATE_SLUG", id, { slug: oldPlinkk.slug }, { slug }, request.ip, { plinkkId });
+      }
     } catch (e) {
       // likely unique constraint
       // request.flash?.("error", "Slug indisponible");
@@ -187,13 +201,21 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
     const roleObj = await prisma.role.findFirst({ where: { OR: [{ id: roleId }, { name: roleId }] } });
     if (!roleObj) return reply.code(400).send({ error: "Invalid role" });
 
+    // Get old role name for diff
+    const oldUser = await prisma.user.findUnique({
+      where: { id },
+      include: { role: true }
+    });
+
     await prisma.user.update({
       where: { id },
       data: { roleId: roleObj.id }
     });
 
     const adminId = getAdminId(request);
-    if (adminId) await logAdminAction(adminId, "UPDATE_ROLE", id, { role: roleObj.name }, request.ip);
+    if (adminId && oldUser) {
+      await logDetailedAdminAction(adminId, "UPDATE_ROLE", id, { role: oldUser.role?.name }, { role: roleObj.name }, request.ip);
+    }
     return reply.send({ success: true });
   });
 

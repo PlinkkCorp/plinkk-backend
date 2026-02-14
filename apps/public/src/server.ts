@@ -12,6 +12,7 @@ import {
   PlinkkSettings,
   Role,
   User,
+  PlinkkVersion,
 } from "@plinkk/prisma";
 import { prisma } from "@plinkk/prisma";
 import fastifyCookie from "@fastify/cookie";
@@ -145,24 +146,111 @@ fastify.addHook("onRequest", async (request, reply) => {
           request
         );
 
-        const links = await prisma.link.findMany({
-          where: { plinkkId: resolved.page.id, userId: resolved.user.id },
-        });
-        const isOwner =
-          (request.session.get("data") as string | undefined) ===
-          resolved.user.id;
-        const publicPath =
-          resolved.page && resolved.page.slug
-            ? resolved.page.slug
-            : resolved.user.id;
+        // Check for versionId in query for preview
+        const query = (request.query as { versionId?: string });
+        const versionId = query.versionId;
+
+        // Default values from resolved page
+        let displayPage = resolved.page;
+        let displayUser = resolved.user;
+
+        // Fetch additional data for default view
+        const [
+          settings,
+          background,
+          neonColors,
+          labels,
+          socialIcon,
+          statusbar,
+          links,
+          categories,
+        ] = await Promise.all([
+          prisma.plinkkSettings.findUnique({ where: { plinkkId: resolved.page.id } }),
+          prisma.backgroundColor.findMany({ where: { plinkkId: resolved.page.id } }),
+          prisma.neonColor.findMany({ where: { plinkkId: resolved.page.id } }),
+          prisma.label.findMany({ where: { plinkkId: resolved.page.id } }),
+          prisma.socialIcon.findMany({ where: { plinkkId: resolved.page.id } }),
+          prisma.plinkkStatusbar.findUnique({ where: { plinkkId: resolved.page.id } }),
+          prisma.link.findMany({ where: { plinkkId: resolved.page.id } }),
+          prisma.category.findMany({ where: { plinkkId: resolved.page.id }, orderBy: { order: "asc" } }),
+        ]);
+
+        // Initialize display variables
+        let displaySettings = settings;
+        let displayBackground = background;
+        let displayNeonColors = neonColors;
+        let displayLabels = labels;
+        let displaySocialIcons = socialIcon;
+        let displayStatusbar = statusbar;
+        let displayLinks = links;
+        let displayCategories = categories;
+
+        if (versionId) {
+          // Try to load snapshot
+          console.log(`[Preview] Loading version ${versionId} for plinkk ${resolved.page.id}`);
+          const version = await prisma.plinkkVersion.findUnique({ where: { id: versionId } });
+
+          if (version && version.plinkkId === resolved.page.id) {
+            const snapshot = version.snapshot as any;
+            console.log(`[Preview] Snapshot loaded. Keys: ${Object.keys(snapshot).join(', ')}`);
+
+            if (snapshot.plinkk) {
+              displayPage = { ...displayPage, ...snapshot.plinkk };
+            }
+            if (snapshot.settings) {
+              displaySettings = { ...displaySettings, ...snapshot.settings };
+            }
+            if (snapshot.background) {
+              displayBackground = snapshot.background;
+            }
+            if (snapshot.neonColors) {
+              displayNeonColors = snapshot.neonColors;
+            }
+            if (snapshot.labels) {
+              displayLabels = snapshot.labels;
+            }
+            if (snapshot.socialIcon) {
+              displaySocialIcons = snapshot.socialIcon;
+            }
+            if (snapshot.statusbar) {
+              displayStatusbar = snapshot.statusbar;
+            }
+            if (snapshot.links) {
+              displayLinks = snapshot.links;
+            }
+            if (snapshot.categories) {
+              displayCategories = snapshot.categories;
+            }
+          } else {
+            console.log(`[Preview] Version not found or mismatch: ${versionId}`);
+          }
+        }
+
+        const isOwner = (request.session.get("data") as string | undefined) === resolved.user.id;
+        const publicPath = displayPage && displayPage.slug ? displayPage.slug : displayUser.id;
 
         return reply.view("plinkk/show.ejs", {
-          page: resolved.page,
-          userId: resolved.user.id,
-          username: resolved.user.id,
+          page: displayPage,
+          userId: displayUser.id,
+          username: displayUser.id,
           isOwner,
-          links,
+          links: displayLinks,
           publicPath,
+          // Pass other display variables to view if needed, 
+          // though show.ejs typically fetches them via /config.js or bundles them?
+          // Actually show.ejs usually relies on client-side fetching from /config.js for dynamic stuff,
+          // OR it renders server-side.
+          // Looking at line 219, /config.js exists.
+          // If show.ejs uses SSR variables for initial render, we need to pass them.
+          // But based on current code, show.ejs receives 'page', 'userId', etc.
+          // Let's assume show.ejs or its scripts use these passed variables or fetch config.js.
+          // Since we are modifying the server logic for the main page load, we should ensure
+          // that if the template uses them, they are correct.
+          // However, the original code only passed 'page', 'userId', 'username', 'isOwner', 'links', 'publicPath'.
+          // It seems the preview logic (versionId) primarily affects 'displayPage' and 'displayLinks' for the server-rendered part.
+          // The visual settings (background, neon, etc.) are likely handled by /config.js which we ALSO modified in previous steps.
+          // So for THIS route (the HTML serve), we just need to ensure displayPage and displayLinks are correct.
+          // We fetched everything to be safe and consistent with /config.js logic.
         });
       } else if (request.url === "/css/styles.css") {
         return reply.sendFile(`css/styles.css`);
@@ -209,6 +297,48 @@ fastify.addHook("onRequest", async (request, reply) => {
             orderBy: { order: 'asc' }
           }),
         ]);
+
+        // HISTORY PREVIEW LOGIC
+        // Check referer for versionId
+        let versionIdArg: string | null = null;
+        try {
+          const referer = request.headers.referer;
+          if (referer) {
+            const u = new URL(referer);
+            versionIdArg = u.searchParams.get("versionId");
+          }
+        } catch (e) { }
+
+        let finalSettings = settings;
+        let finalBackground = background;
+        let finalLabels = labels;
+        let finalNeon = neonColors;
+        let finalSocial = socialIcons;
+        let finalLinks = links;
+        let finalStatusbar = pageStatusbar;
+        let finalCategories = categories;
+
+        if (versionIdArg) {
+          const version = await prisma.plinkkVersion.findUnique({ where: { id: versionIdArg } });
+          if (version && version.plinkkId === page.id) {
+            const snap = version.snapshot as any;
+            console.log(`[Config.js] Loaded version ${versionIdArg} for ${page.id}`);
+
+            // Override with snapshot data
+            // Note: we must map them carefully if the shape differs, but since we saved them direct from DB, they should match.
+            // Dates might be strings now.
+            if (snap.settings) finalSettings = { ...finalSettings, ...snap.settings }; // Merge with default settings to ensure no missing fields
+            if (snap.background) finalBackground = snap.background;
+            if (snap.neonColors) finalNeon = snap.neonColors;
+            if (snap.labels) finalLabels = snap.labels;
+            if (snap.socialIcon) finalSocial = snap.socialIcon; // Fix key: socialIcon (from historyService) vs socialIcons (local var)
+            if (snap.links) finalLinks = snap.links;
+            if (snap.statusbar) finalStatusbar = snap.statusbar; // Snap might be null? Statusbar is optional?
+            if (snap.categories) finalCategories = snap.categories;
+          } else {
+            console.log(`[Config.js] Version not found: ${versionIdArg}`);
+          }
+        }
         let injectedThemeVar = "";
         try {
           const normalizeHex = (v?: string) => {
@@ -246,7 +376,7 @@ fastify.addHook("onRequest", async (request, reply) => {
             const c = (i: number) =>
               Math.round(
                 parseInt(a.slice(i, i + 2), 16) * (1 - ratio) +
-                  parseInt(b.slice(i, i + 2), 16) * ratio
+                parseInt(b.slice(i, i + 2), 16) * ratio
               );
             const r = c(0),
               g = c(2),
@@ -317,10 +447,10 @@ fastify.addHook("onRequest", async (request, reply) => {
             const candidate = sub
               ? sub
               : await prisma.theme.findFirst({
-                  where: { authorId: page.user.id, status: "DRAFT" },
-                  select: { data: true },
-                  orderBy: { updatedAt: "desc" },
-                });
+                where: { authorId: page.user.id, status: "DRAFT" },
+                select: { data: true },
+                orderBy: { updatedAt: "desc" },
+              });
             if (candidate && candidate.data) {
               const full = coerceThemeData(candidate.data);
               if (full) {
@@ -329,7 +459,7 @@ fastify.addHook("onRequest", async (request, reply) => {
               }
             }
           }
-        } catch {}
+        } catch { }
         let injectedObj = null;
         try {
           if (injectedThemeVar) {
@@ -340,61 +470,61 @@ fastify.addHook("onRequest", async (request, reply) => {
               .replace(/;$/, "");
             injectedObj = JSON.parse(objStr);
           }
-        } catch (e) {}
+        } catch (e) { }
 
         const pageProfile: User & PlinkkSettings = {
           plinkkId: null,
           ...page.user,
-          profileLink: settings?.profileLink ?? "",
-          profileImage: settings?.profileImage ?? "",
-          profileIcon: settings?.profileIcon ?? "",
-          profileSiteText: settings?.profileSiteText ?? "",
-          userName: settings?.userName ?? page.user.userName,
-          iconUrl: settings?.iconUrl ?? "",
-          description: settings?.description ?? "",
-          profileHoverColor: settings?.profileHoverColor ?? "",
-          degBackgroundColor: settings?.degBackgroundColor ?? 45,
-          neonEnable: settings?.neonEnable ?? 1,
-          buttonThemeEnable: settings?.buttonThemeEnable ?? 1,
-          EnableAnimationArticle: settings?.EnableAnimationArticle ?? 1,
-          EnableAnimationButton: settings?.EnableAnimationButton ?? 1,
-          EnableAnimationBackground: settings?.EnableAnimationBackground ?? 1,
-          backgroundSize: settings?.backgroundSize ?? 50,
-          selectedThemeIndex: settings?.selectedThemeIndex ?? 13,
-          selectedAnimationIndex: settings?.selectedAnimationIndex ?? 0,
+          profileLink: finalSettings?.profileLink ?? "",
+          profileImage: finalSettings?.profileImage ?? "",
+          profileIcon: finalSettings?.profileIcon ?? "",
+          profileSiteText: finalSettings?.profileSiteText ?? "",
+          userName: finalSettings?.userName ?? page.user.userName,
+          iconUrl: finalSettings?.iconUrl ?? "",
+          description: finalSettings?.description ?? "",
+          profileHoverColor: finalSettings?.profileHoverColor ?? "",
+          degBackgroundColor: finalSettings?.degBackgroundColor ?? 45,
+          neonEnable: finalSettings?.neonEnable ?? 1,
+          buttonThemeEnable: finalSettings?.buttonThemeEnable ?? 1,
+          EnableAnimationArticle: finalSettings?.EnableAnimationArticle ?? 1,
+          EnableAnimationButton: finalSettings?.EnableAnimationButton ?? 1,
+          EnableAnimationBackground: finalSettings?.EnableAnimationBackground ?? 1,
+          backgroundSize: finalSettings?.backgroundSize ?? 50,
+          selectedThemeIndex: finalSettings?.selectedThemeIndex ?? 13,
+          selectedAnimationIndex: finalSettings?.selectedAnimationIndex ?? 0,
           selectedAnimationButtonIndex:
-            settings?.selectedAnimationButtonIndex ?? 10,
+            finalSettings?.selectedAnimationButtonIndex ?? 10,
           selectedAnimationBackgroundIndex:
-            settings?.selectedAnimationBackgroundIndex ?? 0,
+            finalSettings?.selectedAnimationBackgroundIndex ?? 0,
           animationDurationBackground:
-            settings?.animationDurationBackground ?? 30,
-          delayAnimationButton: settings?.delayAnimationButton ?? 0.1,
-          affichageEmail: settings?.affichageEmail ?? null,
+            finalSettings?.animationDurationBackground ?? 30,
+          delayAnimationButton: finalSettings?.delayAnimationButton ?? 0.1,
+          affichageEmail: finalSettings?.affichageEmail ?? null,
           publicEmail:
-            settings &&
-            Object.prototype.hasOwnProperty.call(settings, "affichageEmail")
-              ? settings.affichageEmail
+            finalSettings &&
+              Object.prototype.hasOwnProperty.call(finalSettings, "affichageEmail")
+              ? finalSettings.affichageEmail
               : page.user.publicEmail ?? null,
-          canvaEnable: settings?.canvaEnable ?? 1,
-          selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
-          layoutOrder: settings?.layoutOrder ?? null,
-          publicPhone: settings?.publicPhone ?? null,
-          showVerifiedBadge: settings?.showVerifiedBadge ?? true,
-          showPartnerBadge: settings?.showPartnerBadge ?? true,
-          enableVCard: settings?.enableVCard ?? false,
-          enableLinkCategories: settings?.enableLinkCategories ?? false,
+          canvaEnable: finalSettings?.canvaEnable ?? 1,
+          selectedCanvasIndex: finalSettings?.selectedCanvasIndex ?? 16,
+          layoutOrder: finalSettings?.layoutOrder ?? null,
+          publicPhone: finalSettings?.publicPhone ?? null,
+          showVerifiedBadge: finalSettings?.showVerifiedBadge ?? true,
+          showPartnerBadge: finalSettings?.showPartnerBadge ?? true,
+          enableVCard: finalSettings?.enableVCard ?? false,
+          enableLinkCategories: finalSettings?.enableLinkCategories ?? false,
         };
 
         const generated = generateProfileConfig(
           pageProfile,
-          links,
-          background,
-          labels,
-          neonColors,
-          socialIcons,
-          pageStatusbar,
+          finalLinks,
+          finalBackground,
+          finalLabels,
+          finalNeon,
+          finalSocial,
+          finalStatusbar,
           injectedObj,
-          categories
+          finalCategories
         );
         const mini = minify(generated);
         return reply.type("text/javascript").send(mini.code || "");
@@ -433,9 +563,9 @@ fastify.get("/", async function (request, reply) {
   const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
   const currentUser = currentUserId
     ? await prisma.user.findUnique({
-        where: { id: currentUserId },
-        include: { role: true },
-      })
+      where: { id: currentUserId },
+      include: { role: true },
+    })
     : null;
 
   const [userCount, linkCount, totalViewsResult] = await Promise.all([
@@ -478,7 +608,7 @@ fastify.get("/", async function (request, reply) {
     } else {
       msgs = anns.filter((a) => a.global);
     }
-  } catch (e) {}
+  } catch (e) { }
   return await replyView(reply, "index.ejs", currentUser, {
     userCount,
     linkCount,
@@ -491,9 +621,9 @@ fastify.get("/users", async (request, reply) => {
   const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
   const currentUser = currentUserId
     ? await prisma.user.findUnique({
-        where: { id: currentUserId },
-        include: { role: true },
-      })
+      where: { id: currentUserId },
+      include: { role: true },
+    })
     : null;
   const plinkks = await prisma.plinkk.findMany({
     where: { isPublic: true },
@@ -537,7 +667,7 @@ fastify.get("/users", async (request, reply) => {
     } else {
       msgs = anns.filter((a) => a.global);
     }
-  } catch (e) {}
+  } catch (e) { }
   return await replyView(reply, "users.ejs", currentUser, {
     plinkks: plinkks,
   });
@@ -568,9 +698,9 @@ fastify.get("/*", async (request, reply) => {
   const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
   const currentUser = currentUserId
     ? await prisma.user.findUnique({
-        where: { id: currentUserId },
-        include: { role: true },
-      })
+      where: { id: currentUserId },
+      include: { role: true },
+    })
     : null;
 
   const [userCount, linkCount, totalViewsResult] = await Promise.all([
@@ -630,9 +760,9 @@ fastify.setErrorHandler((error, request, reply) => {
 
   if (error instanceof AppError) {
     if (request.raw.url?.startsWith("/api")) {
-      return reply.code(error.statusCode).send({ 
+      return reply.code(error.statusCode).send({
         error: error.code.toLowerCase(),
-        message: error.message 
+        message: error.message
       });
     }
     const sessionData = request.session.get("data");

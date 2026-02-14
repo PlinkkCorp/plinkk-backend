@@ -3,8 +3,9 @@ import { PlinkkSettings, prisma } from "@plinkk/prisma";
 import { pickDefined } from "../../../../lib/plinkkUtils";
 import { logUserAction, logDetailedAction } from "../../../../lib/userLogger";
 import { themeNames, themeColors } from "../../../../lib/themeNames";
+import { createPlinkkVersion } from "../../../services/historyService";
 // import { canUseVisualEffects } from "@plinkk/shared";
-import { captureSnapshot } from "../../../../lib/plinkkHistoryService";
+
 
 export function plinkksConfigRoutes(fastify: FastifyInstance) {
   fastify.get("/:id/config", async (request, reply) => {
@@ -217,19 +218,42 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
     ];
 
     let logAction = "UPDATE_PLINKK_CONFIG";
-    const changedKeys = Object.keys(data); // data contains only fields that were sent/picked
-    if (changedKeys.some(k => themeFields.includes(k))) {
+    let historyLabel = "Mise à jour configuration";
+
+    // Compare data with currentSettings to find actual changes
+    const realChanges: string[] = [];
+    console.log('[Config] Data keys:', Object.keys(data));
+
+    Object.keys(data).forEach(key => {
+      // @ts-ignore
+      const newVal = data[key];
+      // @ts-ignore
+      const oldVal = currentSettings ? currentSettings[key] : undefined;
+
+      // Debug particular keys if needed
+      // console.log(`[Config] Key: ${key}, New: ${newVal}, Old: ${oldVal}`);
+
+      // Simple equality check, sufficient for primitives (strings, numbers, booleans)
+      // If arrays (like layoutOrder), we need deeper check
+      if (Array.isArray(newVal) && Array.isArray(oldVal)) {
+        if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+          realChanges.push(key);
+        }
+      } else if (newVal != oldVal) { // Use loose equality to handle "1" == 1
+        realChanges.push(key);
+      }
+    });
+
+    console.log('[Config] Real Changes detected:', realChanges);
+
+    if (realChanges.some(k => themeFields.includes(k))) {
       logAction = "UPDATE_PLINKK_THEME";
+      historyLabel = "Modification du thème";
 
       // Enhance theme logging with details if index changed
       // Handle both number and string (if coming from relaxed JSON parsing)
       if (data.selectedThemeIndex !== undefined && data.selectedThemeIndex !== null) {
         try {
-          // Import built-in themes (dynamic import or use what's available)
-          // Since we can't easily import from shared in this context without build step issues sometimes,
-          // we'll use a local mapping for names based on the shared file structure we saw.
-
-
           const idx = Number(data.selectedThemeIndex);
           if (!isNaN(idx)) {
             // @ts-ignore
@@ -239,13 +263,25 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
           console.error("Failed to enhance theme log", e);
         }
       }
+    } else if (realChanges.includes("description")) {
+      historyLabel = "Mise à jour description";
+    } else if (realChanges.includes("userName") || realChanges.includes("profileSiteText")) {
+      historyLabel = "Mise à jour infos profil";
     }
 
     // Use shared logger
     await logDetailedAction(userId as string, logAction, id, oldData, data, request.ip);
 
     // Capture snapshot for history
-    captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
+    if (realChanges.length > 0) {
+      console.log('[Config] Creating version with label:', historyLabel);
+      createPlinkkVersion(id, userId as string, historyLabel, false, realChanges.map(k => `Updated ${k}`)).catch(err => {
+        console.error('[Config] Failed to create version:', err);
+        request.log.error(err);
+      });
+    } else {
+      console.log('[Config] No real changes, skipping version creation.');
+    }
 
     return reply.send({ ok: true });
   });
@@ -261,19 +297,31 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
     const body = request.body as { layoutOrder?: string[] };
 
     if (body?.layoutOrder !== undefined) {
-      const oldData = { layoutOrder: currentSettings?.layoutOrder };
-      const newData = { layoutOrder: body.layoutOrder };
+      const oldOrder = currentSettings?.layoutOrder;
+      const newOrder = body.layoutOrder;
 
-      await prisma.plinkkSettings.upsert({
-        where: { plinkkId: id },
-        create: { plinkkId: id, layoutOrder: body.layoutOrder },
-        update: { layoutOrder: body.layoutOrder },
-      });
+      let changed = false;
+      if (!oldOrder && newOrder) changed = true;
+      else if (oldOrder && !newOrder) changed = true; // Unlikely if body.layoutOrder is defined
+      else if (oldOrder && newOrder) {
+        if (JSON.stringify(oldOrder) !== JSON.stringify(newOrder)) changed = true;
+      }
 
-      await logDetailedAction(userId as string, "UPDATE_PLINKK_LAYOUT", id, oldData, newData, request.ip);
+      if (changed) {
+        const oldData = { layoutOrder: oldOrder };
+        const newData = { layoutOrder: newOrder };
 
-      // Capture snapshot for history
-      captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
+        await prisma.plinkkSettings.upsert({
+          where: { plinkkId: id },
+          create: { plinkkId: id, layoutOrder: body.layoutOrder },
+          update: { layoutOrder: body.layoutOrder },
+        });
+
+        await logDetailedAction(userId as string, "UPDATE_PLINKK_LAYOUT", id, oldData, newData, request.ip);
+
+        // Capture snapshot for history
+        createPlinkkVersion(id, userId as string, "Réorganisation des sections", false, ["Reordered layout sections"]).catch(err => request.log.error(err));
+      }
     }
 
     return reply.send({ ok: true });
