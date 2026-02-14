@@ -31,7 +31,8 @@
                 content="<%= ((typeof title !== 'undefined' && title) ? title + ' — ' : '') %>Plinkk" />
               <meta name="twitter:description" content="<%= desc %>" />
               <meta name="twitter:image" content="<%= img %>" />
-              <script defer src="/umami_script.js" data-website-id="69e21905-d1fc-48c8-a64e-26a6ad5ad089" data-host-url="https://analytics.plinkk.fr"></script>
+              <script defer src="/umami_script.js" data-website-id="69e21905-d1fc-48c8-a64e-26a6ad5ad089"
+                data-host-url="https://analytics.plinkk.fr"></script>
               <script src="https://accounts.google.com/gsi/client" async defer></script>
               <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
               <style>
@@ -125,8 +126,13 @@
                 }
 
                 @keyframes fade-out {
-                  from { opacity: 1 }
-                  to { opacity: 0 }
+                  from {
+                    opacity: 1
+                  }
+
+                  to {
+                    opacity: 0
+                  }
                 }
 
                 @keyframes slide-up {
@@ -153,13 +159,28 @@
                   }
                 }
 
-                 @keyframes drawer-in {
-                  from { opacity: 0; transform: translateX(100%); }
-                  to { opacity: 1; transform: translateX(0); }
+                @keyframes drawer-in {
+                  from {
+                    opacity: 0;
+                    transform: translateX(100%);
+                  }
+
+                  to {
+                    opacity: 1;
+                    transform: translateX(0);
+                  }
                 }
+
                 @keyframes drawer-out {
-                  from { opacity: 1; transform: translateX(0); }
-                  to { opacity: 0; transform: translateX(100%); }
+                  from {
+                    opacity: 1;
+                    transform: translateX(0);
+                  }
+
+                  to {
+                    opacity: 0;
+                    transform: translateX(100%);
+                  }
                 }
 
                 .animate-fade-in {
@@ -177,27 +198,41 @@
                 .animate-backdrop-in {
                   animation: fade-in .25s var(--ease-out-quad) both
                 }
+
                 .animate-backdrop-out {
                   animation: fade-out .16s ease-in both
                 }
+
                 .animate-drawer-in {
                   animation: drawer-in .32s var(--ease-out-quad) both
                 }
+
                 .animate-drawer-out {
-                  animation: drawer-out .22s cubic-bezier(.4,0,1,1) both
+                  animation: drawer-out .22s cubic-bezier(.4, 0, 1, 1) both
                 }
-                .animate-tab-switch { animation: fade-in .22s var(--ease-out-quad) both }
+
+                .animate-tab-switch {
+                  animation: fade-in .22s var(--ease-out-quad) both
+                }
 
                 @keyframes pulse {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: .5; }
+
+                  0%,
+                  100% {
+                    opacity: 1;
+                  }
+
+                  50% {
+                    opacity: .5;
+                  }
                 }
+
                 .animate-pulse {
-                    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+                  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
                 }
 
                 .filter-white {
-                    filter: invert(1) brightness(2) grayscale(1) !important;
+                  filter: invert(1) brightness(2) grayscale(1) !important;
                 }
 
                 .glass {
@@ -210,7 +245,12 @@
                 }
 
                 @media (prefers-reduced-motion: reduce) {
-                  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+                  * {
+                    animation-duration: 0.001ms !important;
+                    animation-iteration-count: 1 !important;
+                    transition-duration: 0.001ms !important;
+                    scroll-behavior: auto !important;
+                  }
                 }
               </style>
               <%- (typeof extraHead !=='undefined' ? extraHead : '' ) %>

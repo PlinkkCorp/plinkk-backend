@@ -11,6 +11,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum ThemeStatus {
@@ -234,6 +235,7 @@ model Link {
   description            String?  @default("Ma description")
   showDescriptionOnHover Boolean? @default(true)
   showDescription        Boolean? @default(true)
+  buttonTheme            String?  @default("system")
   clicks                 Int      @default(0)
 
   // Scheduled links (premium) : programmation d'activation/désactivation

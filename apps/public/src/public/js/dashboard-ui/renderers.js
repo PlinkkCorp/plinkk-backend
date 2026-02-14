@@ -26,17 +26,17 @@ export function renderBackground({ container, addBtn, colors, scheduleAutoSave }
     );
   } else {
     colors.forEach((c, idx) => {
-  const row = el('div', { class: 'flex items-center gap-1 w-full' });
+      const row = el('div', { class: 'flex items-center gap-1 w-full' });
       row.dataset.dragIndex = String(idx);
-  const gripBtn = el('button', { type: 'button', class: 'h-9 w-9 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 mr-1', title: 'Déplacer', 'aria-label': 'Déplacer' });
-  gripBtn.style.cursor = 'grab';
+      const gripBtn = el('button', { type: 'button', class: 'h-9 w-9 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 mr-1', title: 'Déplacer', 'aria-label': 'Déplacer' });
+      gripBtn.style.cursor = 'grab';
       gripBtn.appendChild(createGripSVG(18));
       const color = el('input', { type: 'color', value: c, class: 'h-10 w-full rounded bg-slate-900 border border-slate-800 p-1 flex-1' });
       const rm = trashButton(() => { colors.splice(idx, 1); renderBackground({ container, addBtn, colors, scheduleAutoSave }); scheduleAutoSave(); });
       color.addEventListener('input', () => { colors[idx] = color.value; scheduleAutoSave(); });
-  const rmWrap = el('div', { class: 'w-10 flex justify-end' }); rmWrap.append(rm);
+      const rmWrap = el('div', { class: 'w-10 flex justify-end' }); rmWrap.append(rm);
       row.append(gripBtn, color, rmWrap);
-      try { enableDragHandle(gripBtn, row, container, colors, () => renderBackground({ container, addBtn, colors, scheduleAutoSave }), scheduleAutoSave); } catch {}
+      try { enableDragHandle(gripBtn, row, container, colors, () => renderBackground({ container, addBtn, colors, scheduleAutoSave }), scheduleAutoSave); } catch { }
       container.appendChild(row);
     });
   }
@@ -149,7 +149,7 @@ export function renderLabels({ container, addBtn, labels, scheduleAutoSave }) {
       rmWrap.append(rm);
 
       row.append(dataWrapper, color, fontColor, pickWrap, rmWrap);
-      try { enableDragHandle(gripBtn, row, container, labels, () => renderLabels({ container, addBtn, labels, scheduleAutoSave }), scheduleAutoSave); } catch {}
+      try { enableDragHandle(gripBtn, row, container, labels, () => renderLabels({ container, addBtn, labels, scheduleAutoSave }), scheduleAutoSave); } catch { }
       container.appendChild(row);
     });
   }
@@ -239,7 +239,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
       gripBtn.style.cursor = 'grab';
       gripBtn.appendChild(createGripSVG(18));
       const urlSourceSel = el('select', { class: 'h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm w-full md:w-40' });
-      ;['platform','custom'].forEach(v => urlSourceSel.appendChild(el('option', { value: v, text: v === 'platform' ? 'Plateforme' : 'Personnalisé' })));
+      ;['platform', 'custom'].forEach(v => urlSourceSel.appendChild(el('option', { value: v, text: v === 'platform' ? 'Plateforme' : 'Personnalisé' })));
       const urlWrap = el('div', { class: 'relative w-full md:w-1/3' });
       const urlCellWrapper = el('div', { class: 'flex items-center gap-2 w-full md:w-auto' });
       const url = el('input', { type: 'url', value: s.url || '', class: 'pl-3 pr-20 py-2 w-full rounded bg-slate-900 border border-slate-800' });
@@ -250,7 +250,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
       const iconWrap = el('div', { class: 'flex items-center gap-2 w-full md:w-1/3' });
       const iconPreview = el('img', { class: 'h-8 w-8 rounded bg-slate-800 border border-slate-700' });
       const sourceSel = el('select', { class: 'h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm' }, []);
-      ;['catalog','url','upload'].forEach(v => {
+      ;['catalog', 'url', 'upload'].forEach(v => {
         const o = el('option', { value: v, text: v === 'catalog' ? 'Librairie' : v === 'url' ? 'Lien' : 'Importer' });
         sourceSel.appendChild(o);
       });
@@ -375,7 +375,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
       const gripWrap = el('div', { class: 'w-full md:w-auto flex items-center' });
       gripWrap.append(urlCellWrapper);
       row.append(gripWrap, urlSourceSel, urlWrap, iconWrap, rmCell);
-      try { enableDragHandle(gripBtn, row, container, socials, () => renderSocial({ container, addBtn, socials, scheduleAutoSave }), scheduleAutoSave); } catch {}
+      try { enableDragHandle(gripBtn, row, container, socials, () => renderSocial({ container, addBtn, socials, scheduleAutoSave }), scheduleAutoSave); } catch { }
       container.appendChild(row);
     });
   }
@@ -404,7 +404,7 @@ export function renderLinks({ container, addBtn, links, scheduleAutoSave }) {
       gripBtn.appendChild(createGripSVG(18));
       const iconPreview = el('img', { class: 'h-8 w-8 rounded bg-slate-800 border border-slate-700' });
       const sourceSel = el('select', { class: 'h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm w-32' }, []);
-      ;['catalog','url','upload'].forEach(v => {
+      ;['catalog', 'url', 'upload'].forEach(v => {
         const o = el('option', { value: v, text: v === 'catalog' ? 'Librairie' : v === 'url' ? 'Lien' : 'Importer' });
         sourceSel.appendChild(o);
       });
@@ -440,7 +440,7 @@ export function renderLinks({ container, addBtn, links, scheduleAutoSave }) {
       line3.append(description, rmCell);
 
       row.append(line1, line2, line3);
-      try { enableDragHandle(gripBtn, row, container, links, () => renderLinks({ container, addBtn, links, scheduleAutoSave }), scheduleAutoSave); } catch {}
+      try { enableDragHandle(gripBtn, row, container, links, () => renderLinks({ container, addBtn, links, scheduleAutoSave }), scheduleAutoSave); } catch { }
       function setPreviewByValue(val) { if (isUrlish(val)) iconPreview.src = val; else iconPreview.src = val; }
 
       function openIconPickerForLink() {
@@ -540,7 +540,7 @@ export function renderLayout({ container, order, scheduleAutoSave }) {
     const label = el('div', { class: 'text-sm text-slate-200' });
     label.textContent = LABELS[key] || key;
     row.append(gripBtn, label);
-    try { enableDragHandle(gripBtn, row, container, order, () => renderLayout({ container, order, scheduleAutoSave }), scheduleAutoSave); } catch {}
+    try { enableDragHandle(gripBtn, row, container, order, () => renderLayout({ container, order, scheduleAutoSave }), scheduleAutoSave); } catch { }
     container.appendChild(row);
   });
 }
