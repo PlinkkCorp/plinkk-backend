@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { prisma, Prisma } from "@plinkk/prisma";
+import { prisma, Prisma, AdminLog, UserLog } from "@plinkk/prisma";
 import { logUserAction } from "../../lib/userLogger";
 import {
   verifyRoleIsStaff,
@@ -742,24 +742,33 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true, data });
   });
 
-  fastify.get("/:id/logs", async (request, reply) => {
+  interface LogQuery {
+    page?: string;
+    limit?: string;
+    source?: string;
+    search?: string;
+    from?: string;
+    to?: string;
+  }
+
+  fastify.get<{ Querystring: LogQuery }>("/:id/logs", async (request, reply) => {
     const sessionData = request.session.get("data");
-    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+    const meId = (typeof sessionData === "object" ? (sessionData as { id: string })?.id : sessionData) as string | undefined;
     if (!meId) return reply.code(401).send({ error: "Unauthorized" });
     const ok = await ensurePermission(request, reply, "MANAGE_USERS");
     if (!ok) return;
 
     const { id } = request.params as { id: string };
-    const query = request.query as any;
-    const page = Math.max(1, parseInt(query.page) || 1);
-    const limit = Math.max(1, Math.min(100, parseInt(query.limit) || 20));
+    const query = request.query;
+    const page = Math.max(1, parseInt(query.page || "1") || 1);
+    const limit = Math.max(1, Math.min(100, parseInt(query.limit || "20") || 20));
     const source = (query.source || "ALL").toUpperCase(); // ALL, ADMIN, USER
     const search = (query.search || "").trim();
     const from = query.from ? new Date(query.from) : null;
     const to = query.to ? new Date(query.to) : null;
 
     // Common Date Filter
-    const dateFilter: any = {};
+    const dateFilter: { gte?: Date; lte?: Date } = {};
     if (from && !isNaN(from.getTime())) dateFilter.gte = from;
     if (to && !isNaN(to.getTime())) dateFilter.lte = to;
 
@@ -792,8 +801,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     // Execution strategy: Fetch (page * limit) from permitted sources, merge, sort, slice.
     const fetchLimit = page * limit;
 
-    let adminLogs: any[] = [];
-    let userLogs: any[] = [];
+    let adminLogs: AdminLog[] = [];
+    let userLogs: UserLog[] = [];
 
     if (source === "ALL" || source === "ADMIN") {
       adminLogs = await prisma.adminLog.findMany({

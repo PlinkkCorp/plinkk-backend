@@ -2,7 +2,15 @@ import { prisma } from "@plinkk/prisma";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { UnauthorizedError, ForbiddenError } from "@plinkk/shared";
 
-// const prisma = new PrismaClient();
+declare module "fastify" {
+  interface FastifyRequest {
+    userId?: string;
+  }
+}
+
+export interface SessionData {
+  id?: string;
+}
 
 export async function getUserPermissionKeys(userId: string): Promise<Set<string>> {
   if (!userId) return new Set();
@@ -38,12 +46,12 @@ export async function ensurePermission(
   const mode = options?.mode || "json";
   const all = options?.all || false;
 
-  let meId = (request as any).userId;
+  let meId = request.userId;
   if (!meId) {
-    const sessionData = request.session.get("data");
+    const sessionData = request.session.get("data") as string | SessionData | undefined;
     if (sessionData) {
-      if (typeof sessionData === "object" && (sessionData as any).id) {
-        meId = (sessionData as any).id;
+      if (typeof sessionData === "object" && sessionData.id) {
+        meId = sessionData.id;
       } else if (typeof sessionData === "string") {
         meId = sessionData;
       }

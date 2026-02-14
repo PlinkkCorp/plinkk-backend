@@ -1,9 +1,15 @@
-import { FastifyInstance } from "fastify";
+import { FastifyInstance, FastifyRequest } from "fastify";
 import { Prisma, prisma } from "@plinkk/prisma";
 import { replyView } from "../../../lib/replyView";
-import { ensurePermission } from "../../../lib/permissions";
+import { ensurePermission, SessionData } from "../../../lib/permissions";
 import { logAdminAction } from "../../../lib/adminLogger";
 import { requireAuth, requireAuthWithUser } from "../../../middleware/auth";
+
+// Internal helper to get admin ID with proper typing
+function getAdminId(request: FastifyRequest): string | undefined {
+  const sessionData = request.session.get("data") as string | SessionData | undefined;
+  return typeof sessionData === 'string' ? sessionData : sessionData?.id;
+}
 
 interface UserSearchQuery {
   q?: string;
@@ -130,8 +136,7 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
     const { email, userName } = request.body as { email: string, userName: string };
 
-    const sessionData = request.session.get("data");
-    const adminId = typeof sessionData === 'string' ? sessionData : (sessionData as any)?.id;
+    const adminId = getAdminId(request);
     if (!adminId) return reply.code(401).send({ error: "unauthorized" });
 
     await prisma.user.update({
@@ -157,8 +162,7 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
         where: { id: plinkkId },
         data: { slug }
       });
-      const sessionData = request.session.get("data");
-      const adminId = typeof sessionData === 'string' ? sessionData : (sessionData as any)?.id;
+      const adminId = getAdminId(request);
       if (adminId) await logAdminAction(adminId, "UPDATE_SLUG", id, { plinkkId, slug }, request.ip);
     } catch (e) {
       // likely unique constraint
@@ -188,8 +192,7 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
       data: { roleId: roleObj.id }
     });
 
-    const sessionData = request.session.get("data");
-    const adminId = typeof sessionData === 'string' ? sessionData : (sessionData as any)?.id;
+    const adminId = getAdminId(request);
     if (adminId) await logAdminAction(adminId, "UPDATE_ROLE", id, { role: roleObj.name }, request.ip);
     return reply.send({ success: true });
   });
@@ -202,7 +205,7 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
     const { type, value } = request.body as { type: string, value: boolean };
 
-    const data: any = {};
+    const data: Prisma.UserUpdateInput = {};
 
     if (type === 'VERIFIED') {
       data.isVerified = value;
@@ -246,8 +249,7 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
     }
 
     await prisma.user.update({ where: { id }, data });
-    const sessionData = request.session.get("data");
-    const adminId = typeof sessionData === 'string' ? sessionData : (sessionData as any)?.id;
+    const adminId = getAdminId(request);
     if (adminId) await logAdminAction(adminId, "UPDATE_BADGES", id, { type, value }, request.ip);
     return reply.send({ success: true });
   });
@@ -263,8 +265,7 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
       data: { twoFactorEnabled: false, twoFactorSecret: null }
     });
 
-    const sessionData = request.session.get("data");
-    const adminId = typeof sessionData === 'string' ? sessionData : (sessionData as any)?.id;
+    const adminId = getAdminId(request);
     if (adminId) await logAdminAction(adminId, "DISABLE_2FA", id, {}, request.ip);
     return reply.send({ success: true });
   });
@@ -282,8 +283,7 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
       data: { mustChangePassword: !!mustChange }
     });
 
-    const sessionData = request.session.get("data");
-    const adminId = typeof sessionData === 'string' ? sessionData : (sessionData as any)?.id;
+    const adminId = getAdminId(request);
     if (adminId) await logAdminAction(adminId, "FORCE_PASSWORD_RESET", id, { mustChange }, request.ip);
     return reply.send({ success: true });
   });
@@ -331,8 +331,7 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
 
     if (updated.count === 0) return reply.code(400).send({ error: "no_active_ban" });
 
-    const sessionData = request.session.get("data");
-    const adminId = typeof sessionData === 'string' ? sessionData : (sessionData as any)?.id;
+    const adminId = getAdminId(request);
     if (adminId) await logAdminAction(adminId, "UNBAN_USER", id, {}, request.ip);
     return reply.send({ success: true });
   });
@@ -362,8 +361,7 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
     const target = await prisma.user.findUnique({ where: { id } });
     if (!target) return reply.code(404).send({ error: "not_found" });
 
-    const sessionData = request.session.get("data");
-    const adminId = typeof sessionData === 'string' ? sessionData : (sessionData as any)?.id;
+    const adminId = getAdminId(request);
     if (!adminId) return reply.code(401).send({ error: "unauthorized" });
 
     await logAdminAction(adminId, "IMPERSONATE", id, { targetName: target.userName }, request.ip);
@@ -381,8 +379,7 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
     const target = await prisma.user.findUnique({ where: { id } });
     if (!target) return reply.code(404).send({ ok: false });
 
-    const sessionData = request.session.get("data");
-    const adminId = typeof sessionData === 'string' ? sessionData : (sessionData as any)?.id;
+    const adminId = getAdminId(request);
     if (!adminId) return reply.code(401).send({ error: "unauthorized" });
 
     await prisma.user.delete({ where: { id } });

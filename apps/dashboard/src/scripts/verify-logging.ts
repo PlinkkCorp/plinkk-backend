@@ -56,7 +56,14 @@ async function main() {
 
         console.log("Log entry found:", JSON.stringify(log, null, 2));
 
-        const details = log.details as any;
+        interface LogDetails {
+            diff?: Record<string, { old: any; new: any }>;
+            formatted?: string;
+            changes?: string[];
+            category?: string;
+        }
+
+        const details = log.details as unknown as LogDetails;
 
         // Check diff structure
         if (!details.diff) {
@@ -119,7 +126,7 @@ async function main() {
             orderBy: { createdAt: 'desc' }
         });
 
-        const pDetails = plinkkLog?.details as any;
+        const pDetails = plinkkLog?.details as unknown as LogDetails;
         if (pDetails?.category !== "PLINKK") {
             throw new Error(`Category verification failed: Expected PLINKK, got ${pDetails?.category}`);
         }

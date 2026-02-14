@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { Theme, prisma } from "@plinkk/prisma";
+import { Theme, prisma, Prisma } from "@plinkk/prisma";
 import { coerceThemeData, readBuiltInThemes } from "../../../lib/theme";
 import { logUserAction } from "../../../lib/userLogger";
 import { themeColors } from "../../../lib/themeNames";
@@ -170,7 +170,7 @@ export function apiMeThemesRoutes(fastify: FastifyInstance) {
       const created = await prisma.theme.create({
         data: {
           name: tName,
-          data: themeData as any, // Cast to any to avoid strict JSON input issues if themeData structure varies
+          data: themeData as Prisma.InputJsonObject, // Cast to InputJsonObject to satisfy Prisma JSON requirements
           authorId: userId as string,
           status: "APPROVED",
           isPrivate: true,

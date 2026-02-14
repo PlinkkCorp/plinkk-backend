@@ -337,7 +337,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     });
     const updated = await prisma.user.update({
       where: { id: userId as string },
-      data: { gravatarEmailSource: source as any },
+      data: { gravatarEmailSource: source as "PRIMARY" | "PUBLIC" },
       select: { gravatarEmailSource: true },
     });
     await logDetailedAction(userId as string, "UPDATE_GRAVATAR_SOURCE", null, oldUser, updated, request.ip, {
