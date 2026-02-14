@@ -898,6 +898,17 @@
                                 <div class="flex items-center justify-between mb-6 relative z-10">
                                     <h3 class="text-base font-semibold text-white">Aperçu en direct</h3>
                                     <div class="flex items-center gap-2">
+                                        <button id="resetPreview"
+                                            class="hidden px-3 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-all shadow-lg shadow-indigo-900/20 items-center gap-1.5"
+                                            title="Revenir à l'état actuel" onclick="previewVersion('')">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <polyline points="23 4 23 10 17 10"></polyline>
+                                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                            </svg>
+                                            Retour au direct
+                                        </button>
                                         <button id="refreshPreview"
                                             class="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
                                             title="Rafraîchir">
@@ -1156,10 +1167,23 @@
 
                             window.previewVersion = (versionId) => {
                                 const frame = document.getElementById('preview');
+                                const resetBtn = document.getElementById('resetPreview');
                                 if (!frame) return;
                                 try {
                                     const url = new URL(frame.src);
-                                    url.searchParams.set('versionId', versionId);
+                                    if (versionId) {
+                                        url.searchParams.set('versionId', versionId);
+                                        if (resetBtn) {
+                                            resetBtn.classList.remove('hidden');
+                                            resetBtn.classList.add('flex');
+                                        }
+                                    } else {
+                                        url.searchParams.delete('versionId');
+                                        if (resetBtn) {
+                                            resetBtn.classList.add('hidden');
+                                            resetBtn.classList.remove('flex');
+                                        }
+                                    }
                                     url.searchParams.set('t', Date.now()); // Force refresh
                                     frame.src = url.toString();
                                 } catch (e) {
