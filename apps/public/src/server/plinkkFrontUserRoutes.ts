@@ -1,4 +1,5 @@
 import { FastifyInstance } from "fastify";
+import "@fastify/static";
 import { existsSync } from "fs";
 import path from "path";
 import { generateProfileConfig } from "../lib/generateConfig";
@@ -13,13 +14,12 @@ import { coerceThemeData } from "../lib/theme";
 import { generateBundle } from "../lib/generateBundle";
 import { generateTheme } from "../lib/generateTheme";
 import { roundedRect, wrapText } from "../lib/fileUtils";
-// Chargement paresseux de 'canvas' pour tolérer l'absence de binaire natif (Node 22/Windows)
+
 type CanvasMod = typeof import("canvas") | null;
 let _canvasMod: CanvasMod = null;
 async function ensureCanvas(): Promise<CanvasMod> {
   if (_canvasMod !== null) return _canvasMod;
   try {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
     const mod: typeof import("canvas") = await import("canvas");
     _canvasMod = mod;
   } catch (e) {
@@ -40,16 +40,12 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       };
       if (!username) return reply.redirect("/");
 
-      // On tente de résoudre la page
       const resolved = await resolvePlinkkPage(prisma, username, identifier);
 
-      // Si page introuvable ou erreur
       if (resolved.status !== 200 || !resolved.page || !resolved.user) {
         return reply.redirect(`/${username}`);
       }
 
-      // Si ce n'est pas protégé, redirect vers la page
-      // Note: identifier peut être vide, donc on reconstruit l'url
       const targetUrl = identifier
         ? `/${username}/${identifier}`
         : `/${username}`;
@@ -58,14 +54,12 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         return reply.redirect(targetUrl);
       }
 
-      // Si on est le propriétaire
       const sessionData = request.session.get("data");
       const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
       if (currentUserId === resolved.user.id) {
         return reply.redirect(targetUrl);
       }
 
-      // Vérification mot de passe
       if (!password) {
         return reply.view("plinkk/password.ejs", {
           page: resolved.page,
@@ -81,7 +75,6 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       );
 
       if (isValid) {
-        // Unlock pour cette page spécifique
         request.session.set(`plinkk_unlocked_${resolved.page.id}`, true);
         return reply.redirect(targetUrl);
       } else {
@@ -106,8 +99,6 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         return;
       }
 
-      // Ignore obvious asset-like requests or reserved system paths so they
-      // don't get treated as a username and cause DB updates (e.g. favicon.ico)
       const reservedRoots = new Set([
         "favicon.ico",
         "robots.txt",
@@ -129,8 +120,6 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         return reply.code(404).send({ error: "not_found" });
       }
 
-      // Slug-first: si le premier segment correspond à un plinkk.slug global,
-      // afficher directement cette page (le plinkk est indépendant du compte).
       try {
         const pageBySlug = await prisma.plinkk.findFirst({
           where: { slug: username },
@@ -144,7 +133,6 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             request,
           );
           if (resolved.status === 200) {
-            // Vérifier si l'utilisateur est banni par email
             try {
               const u = await prisma.user.findUnique({
                 where: { id: resolved.user.id },
@@ -159,14 +147,14 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
                     ban.time == null ||
                     ban.time < 0 ||
                     new Date(ban.createdAt).getTime() + ban.time * 60000 >
-                      Date.now();
+                    Date.now();
                   if (isActive) {
                     const until =
                       typeof ban.time === "number" && ban.time > 0
                         ? new Date(
-                            new Date(ban.createdAt).getTime() +
-                              ban.time * 60000,
-                          ).toISOString()
+                          new Date(ban.createdAt).getTime() +
+                          ban.time * 60000,
+                        ).toISOString()
                         : null;
                     return reply.view("erreurs/banned.ejs", {
                       reason: ban.reason || "Violation des règles",
@@ -176,7 +164,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
                   }
                 }
               }
-            } catch (e) {}
+            } catch (e) { }
 
             // Plinkk protégé par mot de passe : afficher le formulaire
             if (resolved.isPasswordProtected && !resolved.isOwner) {
@@ -213,12 +201,28 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
                 request,
               );
             }
+
+            // HISTORY PREVIEW LOGIC
+            const versionId = (request.query as { versionId?: string }).versionId;
+            let displayPage = resolved.page;
+            let displayLinks = links;
+
+            if (versionId) {
+              const version = await prisma.plinkkVersion.findUnique({ where: { id: versionId } });
+              if (version && version.plinkkId === resolved.page.id) {
+                const snap = version.snapshot as any;
+                if (snap.plinkk) displayPage = { ...displayPage, ...snap.plinkk };
+                if (snap.links) displayLinks = snap.links;
+                console.log(`[Preview] Applied version ${versionId} to server-render for ${resolved.page.id}`);
+              }
+            }
+
             return reply.view("plinkk/show.ejs", {
-              page: resolved.page,
+              page: displayPage,
               userId: resolved.user.id,
               username: resolved.user.id,
               isOwner,
-              links,
+              links: displayLinks,
               publicPath,
             });
           }
@@ -306,13 +310,13 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
                 ban.time == null ||
                 ban.time < 0 ||
                 new Date(ban.createdAt).getTime() + ban.time * 60000 >
-                  Date.now();
+                Date.now();
               if (isActive) {
                 const until =
                   typeof ban.time === "number" && ban.time > 0
                     ? new Date(
-                        new Date(ban.createdAt).getTime() + ban.time * 60000,
-                      ).toISOString()
+                      new Date(ban.createdAt).getTime() + ban.time * 60000,
+                    ).toISOString()
                     : null;
                 return reply.view("erreurs/banned.ejs", {
                   reason: ban.reason || "Violation des règles",
@@ -322,7 +326,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
               }
             }
           }
-        } catch (e) {}
+        } catch (e) { }
 
         // Plinkk protégé par mot de passe : afficher le formulaire
         if (resolved.isPasswordProtected && !resolved.isOwner) {
@@ -359,12 +363,28 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             request,
           );
         }
+
+        // HISTORY PREVIEW LOGIC
+        const versionId = (request.query as { versionId?: string }).versionId;
+        let displayPage = resolved.page;
+        let displayLinks = links;
+
+        if (versionId) {
+          const version = await prisma.plinkkVersion.findUnique({ where: { id: versionId } });
+          if (version && version.plinkkId === resolved.page.id) {
+            const snap = version.snapshot as any;
+            if (snap.plinkk) displayPage = { ...displayPage, ...snap.plinkk };
+            if (snap.links) displayLinks = snap.links;
+            console.log(`[Preview] Applied version ${versionId} to server-render (fallback) for ${resolved.page.id}`);
+          }
+        }
+
         return reply.view("plinkk/show.ejs", {
-          page: resolved.page,
+          page: displayPage,
           userId: resolved.user.id,
           username: resolved.user.id,
           isOwner,
-          links,
+          links: displayLinks,
           publicPath,
         });
       }
@@ -548,6 +568,45 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           orderBy: { order: "asc" },
         }),
       ]);
+
+      // HISTORY PREVIEW LOGIC
+      // Check referer for versionId (if loaded in iframe) or query
+      let versionIdArg: string | null = (request.query as any).versionId || null;
+      if (!versionIdArg) {
+        try {
+          const referer = request.headers.referer;
+          if (referer) {
+            const u = new URL(referer);
+            versionIdArg = u.searchParams.get("versionId");
+          }
+        } catch (e) { }
+      }
+
+      let finalSettings = settings;
+      let finalBackground = background;
+      let finalLabels = labels;
+      let finalNeon = neonColors;
+      let finalSocial = socialIcons;
+      let finalLinks = links;
+      let finalStatusbar = pageStatusbar;
+      let finalCategories = categories;
+
+      if (versionIdArg) {
+        const version = await prisma.plinkkVersion.findUnique({ where: { id: versionIdArg } });
+        if (version && version.plinkkId === page.id) {
+          const snap = version.snapshot as any;
+          console.log(`[Config.js] Loaded version ${versionIdArg} for ${page.id}`);
+
+          if (snap.settings) finalSettings = { ...finalSettings, ...snap.settings };
+          if (snap.background) finalBackground = snap.background;
+          if (snap.neonColors) finalNeon = snap.neonColors;
+          if (snap.labels) finalLabels = snap.labels;
+          if (snap.socialIcon) finalSocial = snap.socialIcon;
+          if (snap.links) finalLinks = snap.links;
+          if (snap.statusbar) finalStatusbar = snap.statusbar;
+          if (snap.categories) finalCategories = snap.categories;
+        }
+      }
       // Si un thème privé est sélectionné, récupérer ses données, les normaliser en "full shape"
       // et l'injecter comme thème 0 pour le front.
       let injectedThemeVar = "";
@@ -588,7 +647,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           const c = (i: number) =>
             Math.round(
               parseInt(a.slice(i, i + 2), 16) * (1 - ratio) +
-                parseInt(b.slice(i, i + 2), 16) * ratio,
+              parseInt(b.slice(i, i + 2), 16) * ratio,
             );
           const r = c(0),
             g = c(2),
@@ -658,10 +717,10 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           const candidate = sub
             ? sub
             : await prisma.theme.findFirst({
-                where: { authorId: page.user.id, status: "DRAFT" },
-                select: { data: true },
-                orderBy: { updatedAt: "desc" },
-              });
+              where: { authorId: page.user.id, status: "DRAFT" },
+              select: { data: true },
+              orderBy: { updatedAt: "desc" },
+            });
           if (candidate && candidate.data) {
             const full = coerceThemeData(candidate.data);
             if (full) {
@@ -670,7 +729,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             }
           }
         }
-      } catch {}
+      } catch { }
       // If we computed an injected theme, parse it to pass as object
       let injectedObj = null;
       try {
@@ -691,60 +750,57 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       const pageProfile: User & PlinkkSettings = {
         plinkkId: null,
         ...page.user,
-        profileLink: settings?.profileLink ?? "",
-        profileImage: settings?.profileImage ?? "",
-        profileIcon: settings?.profileIcon ?? "",
-        profileSiteText: settings?.profileSiteText ?? "",
-        userName: settings?.userName ?? page.user.userName,
-        iconUrl: settings?.iconUrl ?? "",
-        description: settings?.description ?? "",
-        profileHoverColor: settings?.profileHoverColor ?? "",
-        degBackgroundColor: settings?.degBackgroundColor ?? 45,
-        neonEnable: settings?.neonEnable ?? 1,
-        buttonThemeEnable: settings?.buttonThemeEnable ?? 1,
-        EnableAnimationArticle: settings?.EnableAnimationArticle ?? 1,
-        EnableAnimationButton: settings?.EnableAnimationButton ?? 1,
-        EnableAnimationBackground: settings?.EnableAnimationBackground ?? 1,
-        backgroundSize: settings?.backgroundSize ?? 50,
-        selectedThemeIndex: settings?.selectedThemeIndex ?? 13,
-        selectedAnimationIndex: settings?.selectedAnimationIndex ?? 0,
+        profileLink: finalSettings?.profileLink ?? "",
+        profileImage: finalSettings?.profileImage ?? "",
+        profileIcon: finalSettings?.profileIcon ?? "",
+        profileSiteText: finalSettings?.profileSiteText ?? "",
+        userName: finalSettings?.userName ?? page.user.userName,
+        iconUrl: finalSettings?.iconUrl ?? "",
+        description: finalSettings?.description ?? "",
+        profileHoverColor: finalSettings?.profileHoverColor ?? "",
+        degBackgroundColor: finalSettings?.degBackgroundColor ?? 45,
+        neonEnable: finalSettings?.neonEnable ?? 1,
+        buttonThemeEnable: finalSettings?.buttonThemeEnable ?? 1,
+        EnableAnimationArticle: finalSettings?.EnableAnimationArticle ?? 1,
+        EnableAnimationButton: finalSettings?.EnableAnimationButton ?? 1,
+        EnableAnimationBackground: finalSettings?.EnableAnimationBackground ?? 1,
+        backgroundSize: finalSettings?.backgroundSize ?? 50,
+        selectedThemeIndex: finalSettings?.selectedThemeIndex ?? 13,
+        selectedAnimationIndex: finalSettings?.selectedAnimationIndex ?? 0,
         selectedAnimationButtonIndex:
-          settings?.selectedAnimationButtonIndex ?? 10,
+          finalSettings?.selectedAnimationButtonIndex ?? 10,
         selectedAnimationBackgroundIndex:
-          settings?.selectedAnimationBackgroundIndex ?? 0,
+          finalSettings?.selectedAnimationBackgroundIndex ?? 0,
         animationDurationBackground:
-          settings?.animationDurationBackground ?? 30,
-        delayAnimationButton: settings?.delayAnimationButton ?? 0.1,
-        // Support for per-Plinkk public email: if a PlinkkSettings.affichageEmail
-        // exists we must prefer it for the generated profile config. We expose it
-        // both as `affichageEmail` and override `publicEmail` so generateProfileConfig
-        // (which reads profile.publicEmail) will pick up the page-specific value.
-        affichageEmail: settings?.affichageEmail ?? null,
+          finalSettings?.animationDurationBackground ?? 30,
+        delayAnimationButton: finalSettings?.delayAnimationButton ?? 0.1,
+        // Support for per-Plinkk public email
+        affichageEmail: finalSettings?.affichageEmail ?? null,
         publicEmail:
-          settings &&
-          Object.prototype.hasOwnProperty.call(settings, "affichageEmail")
-            ? settings.affichageEmail
+          finalSettings &&
+            Object.prototype.hasOwnProperty.call(finalSettings, "affichageEmail")
+            ? finalSettings.affichageEmail
             : (page.user.publicEmail ?? null),
-        canvaEnable: settings?.canvaEnable ?? 1,
-        selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
-        layoutOrder: settings?.layoutOrder ?? null,
-        showVerifiedBadge: settings?.showVerifiedBadge ?? false,
-        showPartnerBadge: settings?.showPartnerBadge ?? false,
-        enableVCard: settings?.enableVCard ?? true,
-        publicPhone: settings?.publicPhone ?? "",
-        enableLinkCategories: settings?.enableLinkCategories ?? false,
+        canvaEnable: finalSettings?.canvaEnable ?? 1,
+        selectedCanvasIndex: finalSettings?.selectedCanvasIndex ?? 16,
+        layoutOrder: finalSettings?.layoutOrder ?? null,
+        showVerifiedBadge: finalSettings?.showVerifiedBadge ?? false,
+        showPartnerBadge: finalSettings?.showPartnerBadge ?? false,
+        enableVCard: finalSettings?.enableVCard ?? true,
+        publicPhone: finalSettings?.publicPhone ?? "",
+        enableLinkCategories: finalSettings?.enableLinkCategories ?? false,
       };
 
       const generated = generateProfileConfig(
         pageProfile,
-        links,
-        background,
-        labels,
-        neonColors,
-        socialIcons,
-        pageStatusbar,
+        finalLinks,
+        finalBackground,
+        finalLabels,
+        finalNeon,
+        finalSocial,
+        finalStatusbar,
         injectedObj,
-        categories,
+        finalCategories,
       ).replaceAll("{{username}}", username);
 
       // If debug=1 in query, return the non-minified generated code for inspection
@@ -906,7 +962,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     });
     const links = filterScheduledLinks(allLinks);
 
-    const sessionData = request.session.get("data"); 
+    const sessionData = request.session.get("data");
     const isOwner =
       ((typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined) === resolved.user.id;
     if (!isPreview) {
@@ -952,7 +1008,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         linkId,
         dateStr,
       );
-    } catch (e) {}
+    } catch (e) { }
 
     try {
       if (link.plinkkId) {
@@ -977,7 +1033,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       // Si canvas indisponible (ex: Node 22 sous Windows sans précompilé),
       // on renvoie une image statique par défaut pour débloquer le dev.
       try {
-        return reply.sendFile(
+        return reply.redirect(
           "https://s3.marvideo.fr/plinkk-image/default_profile.png",
         );
       } catch {
@@ -997,7 +1053,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       registerFont(path.resolve("assets/fonts/Inter-Regular.ttf"), {
         family: "Inter",
       });
-    } catch {}
+    } catch { }
 
     const { id } = request.params as { id: string };
     const resolved = await resolvePlinkkPage(prisma, id, undefined, request);
@@ -1045,8 +1101,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       const image = page.settings.profileImage.startsWith("/public/")
         ? request.protocol + "://" + request.host + page.settings.profileImage
         : page.settings.profileImage ||
-          request.host +
-            "https://s3.marvideo.fr/plinkk-image/default_profile.png";
+        request.host +
+        "https://s3.marvideo.fr/plinkk-image/default_profile.png";
 
       /* const image = page.settings.profileImage.startsWith("/public/")
         ? request.protocol + "://" + request.host + page.settings.profileImage

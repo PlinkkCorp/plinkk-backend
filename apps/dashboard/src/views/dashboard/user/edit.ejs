@@ -1044,33 +1044,61 @@
                                 if (items && items.length > 0) {
                                     list.innerHTML = items.map(v => {
                                         const dateStr = new Date(v.createdAt).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                                        // Enhanced change rendering
+                                        const renderChange = (c) => {
+                                            if (typeof c === 'string') return `<div>• ${c}</div>`;
+
+                                            const keyLabel = c.key.replace('.', ' ').replace(/([A-Z])/g, ' $1').toLowerCase();
+                                            const type = c.type || 'updated';
+
+                                            let diffHtml = '';
+                                            if (type === 'added') {
+                                                diffHtml = `<span class="text-emerald-400 font-medium">Nouveau:</span> <span class="text-slate-200">${c.new}</span>`;
+                                            } else if (type === 'removed') {
+                                                diffHtml = `<span class="text-rose-400 font-medium">Supprimé:</span> <span class="text-slate-400 line-through">${c.old}</span>`;
+                                            } else if (type === 'reordered') {
+                                                diffHtml = `<span class="text-violet-400 font-medium">Réorganisé</span>`;
+                                            } else { // updated
+                                                // Handle array/object previews if needed, for now strings
+                                                const oldVal = typeof c.old === 'object' ? '...' : c.old;
+                                                const newVal = typeof c.new === 'object' ? '...' : c.new;
+                                                diffHtml = `<span class="text-slate-400 line-through">${oldVal}</span> <span class="mx-1">→</span> <span class="text-emerald-400">${newVal}</span>`;
+                                            }
+
+                                            return `<div class="flex flex-col mb-1 last:mb-0">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400 uppercase font-bold tracking-tight">${keyLabel}</span>
+                                                        <span class="text-[11px] text-slate-300">${diffHtml}</span>
+                                                    </div>
+                                                </div>`;
+                                        };
+
                                         const detailsHtml = v.changes && v.changes.length > 0
-                                            ? `<div class="mt-2 pl-3 border-l-2 border-slate-700 text-xs text-slate-400 space-y-1 hidden" id="details-${v.id}">
-                                                ${v.changes.map(c => `<div>• ${c}</div>`).join('')}
-                                               </div>`
+                                            ? `<div class="mt-3 pl-3 border-l-2 border-violet-500/30 text-xs space-y-2" id="details-${v.id}">
+                                                    ${v.changes.map(c => renderChange(c)).join('')}
+                                                   </div>`
                                             : '';
-                                        const expandBtn = v.changes && v.changes.length > 0
-                                            ? `<button onclick="toggleDetails('${v.id}')" class="text-[10px] uppercase tracking-wider text-slate-500 hover:text-slate-300 transition-colors ml-2">Détails</button>`
-                                            : '';
+                                        const expandBtn = '';
 
                                         return `
-                                        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition-all group">
-                                            <div class="flex items-start justify-between mb-2">
-                                                <div class="min-w-0 flex-1">
-                                                    <div class="flex items-center">
-                                                        <div class="font-medium text-slate-200 truncate">${v.label || (currentHistoryTab === 'auto' ? 'Modification' : 'Sauvegarde')}</div>
-                                                        ${expandBtn}
+                                            <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition-all group">
+                                                <div class="flex items-start justify-between mb-2">
+                                                    <div class="min-w-0 flex-1">
+                                                        <div class="flex items-center">
+                                                            <div class="font-medium text-slate-200 truncate">${v.label || (currentHistoryTab === 'auto' ? 'Modification' : 'Sauvegarde')}</div>
+                                                            ${expandBtn}
+                                                        </div>
+                                                        <div class="text-xs text-slate-500">${dateStr}</div>
                                                     </div>
-                                                    <div class="text-xs text-slate-500">${dateStr}</div>
+                                                </div>
+                                                ${detailsHtml}
+                                                <div class="flex items-center gap-2 mt-3 justify-end">
+                                                    <button onclick="previewVersion('${v.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-colors border border-slate-700">Aperçu</button>
+                                                    <button onclick="restoreVersion('${v.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-colors shadow-lg shadow-violet-900/20">Restaurer</button>
                                                 </div>
                                             </div>
-                                            ${detailsHtml}
-                                            <div class="flex items-center gap-2 mt-3 justify-end">
-                                                <button onclick="previewVersion('${v.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-colors border border-slate-700">Aperçu</button>
-                                                <button onclick="restoreVersion('${v.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-colors shadow-lg shadow-violet-900/20">Restaurer</button>
-                                            </div>
-                                        </div>
-                                    `}).join('');
+                                        `}).join('');
                                 } else {
                                     list.innerHTML = '<div class="text-center py-8 text-slate-500">Aucun élément disponible.</div>';
                                 }

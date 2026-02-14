@@ -47,13 +47,13 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
     }
 
     if (added.length > 0 || removed.length > 0) {
-      const changes: string[] = [];
-      added.forEach(c => changes.push(`Added background color: ${c}`));
-      removed.forEach(c => changes.push(`Removed background color: ${c}`));
+      const changes: (string | any)[] = [];
+      added.forEach(c => changes.push({ key: 'background', new: c, type: 'added' as const }));
+      removed.forEach(c => changes.push({ key: 'background', old: c, type: 'removed' as const }));
 
       await logUserAction(userId, "UPDATE_PLINKK_BACKGROUND", id, {
         diff: { background: { added, removed } },
-        changes,
+        changes: changes.map(c => typeof c === 'string' ? c : `${c.type === 'added' ? 'Added' : 'Removed'} background color: ${c.new || c.old}`),
         formatted: `Updated background: +${added.length} added, -${removed.length} removed`
       }, request.ip);
 
@@ -109,11 +109,15 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
 
       if (hasChanges) {
         const readableChanges: string[] = [];
+        const structuredChanges: any[] = [];
+
         if (changes.old.length !== changes.new.length) {
           readableChanges.push(`Label count: ${changes.old.length} -> ${changes.new.length}`);
         } else {
           readableChanges.push("Updated labels content");
         }
+
+        structuredChanges.push({ key: 'labels', old: changes.old, new: changes.new, type: 'updated' as const });
 
         await logUserAction(userId, "UPDATE_PLINKK_LABELS", id, {
           diff: changes, // This is actually the object diff structure
@@ -121,7 +125,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           formatted: `Updated labels: ${body.labels.length} active`
         }, request.ip);
 
-        createPlinkkVersion(id, userId, `Mise à jour étiquettes (${body.labels.length} actives)`, false, readableChanges).catch(err => request.log.error(err));
+        createPlinkkVersion(id, userId, `Mise à jour étiquettes (${body.labels.length} actives)`, false, structuredChanges).catch(err => request.log.error(err));
       }
 
     }
@@ -162,18 +166,21 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
       const hasChanges = JSON.stringify(changes.old) !== JSON.stringify(changes.new);
       if (hasChanges) {
         const readableChanges: string[] = [];
+        const structuredChanges: any[] = [];
         if (changes.old.length !== changes.new.length) {
           readableChanges.push(`Social icons count: ${changes.old.length} -> ${changes.new.length}`);
         } else {
           readableChanges.push("Updated social icons");
         }
+        structuredChanges.push({ key: 'socialIcon', old: changes.old, new: changes.new, type: 'updated' as const });
+
         await logUserAction(userId, "UPDATE_PLINKK_SOCIALS", id, {
           diff: changes,
           changes: readableChanges,
           formatted: `Updated social icons: ${body.socialIcon.length} active`
         }, request.ip);
 
-        createPlinkkVersion(id, userId, `Mise à jour réseaux sociaux (${body.socialIcon.length} actifs)`, false, readableChanges).catch(err => request.log.error(err));
+        createPlinkkVersion(id, userId, `Mise à jour réseaux sociaux (${body.socialIcon.length} actifs)`, false, structuredChanges).catch(err => request.log.error(err));
       }
     }
 
@@ -228,13 +235,24 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
       const hasChanges = diff.added.length > 0 || diff.removed.length > 0 || diff.updated.length > 0 || diff.reordered;
       if (hasChanges) {
         const changes: string[] = [];
-        diff.added.forEach((l: any) => changes.push(`Added Link: ${l.text || l.url}`));
-        diff.removed.forEach((l: any) => changes.push(`Removed Link: ${l.text || l.url}`));
+        const structuredChanges: any[] = [];
+        diff.added.forEach((l: any) => {
+          changes.push(`Added Link: ${l.text || l.url}`);
+          structuredChanges.push({ key: 'link', new: l.text || l.url, type: 'added' as const });
+        });
+        diff.removed.forEach((l: any) => {
+          changes.push(`Removed Link: ${l.text || l.url}`);
+          structuredChanges.push({ key: 'link', old: l.text || l.url, type: 'removed' as const });
+        });
         diff.updated.forEach((u: any) => {
           const keys = Object.keys(u.diff).join(', ');
           changes.push(`Updated Link '${u.item.text || u.item.url}': ${keys}`);
+          structuredChanges.push({ key: 'link', old: u.item.text || u.item.url, new: u.item.text || u.item.url, type: 'updated' as const, detail: keys });
         });
-        if (diff.reordered) changes.push("Reordered links");
+        if (diff.reordered) {
+          changes.push("Reordered links");
+          structuredChanges.push({ key: 'links', type: 'reordered' as const });
+        }
 
         await logUserAction(userId, "UPDATE_PLINKK_LINKS", id, {
           diff,
@@ -248,7 +266,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
         else if (diff.reordered) linkLabel = "Réorganisation liens";
         else if (diff.updated.length > 0) linkLabel = "Modification liens";
 
-        createPlinkkVersion(id, userId, linkLabel, false, changes).catch(err => request.log.error(err));
+        createPlinkkVersion(id, userId, linkLabel, false, structuredChanges).catch(err => request.log.error(err));
         return reply.send({
           ok: true,
           links: updatedLinks.map((l) => ({
@@ -311,13 +329,21 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
       const diff = calculateArrayDiff(existing, updatedCategories, "id", ["plinkkId", "createdAt", "updatedAt"]);
       const hasChanges = diff.added.length > 0 || diff.removed.length > 0 || diff.updated.length > 0 || diff.reordered;
       if (hasChanges) {
+        const readableChanges = diff.added.map((c: any) => `Added Category: ${c.name}`).concat(
+          diff.removed.map((c: any) => `Removed Category: ${c.name}`),
+          diff.updated.map((c: any) => `Updated Category: ${c.item.name}`),
+          diff.reordered ? ["Reordered categories"] : []
+        );
+
+        const structuredChanges: any[] = [];
+        diff.added.forEach((c: any) => structuredChanges.push({ key: 'category', new: c.name, type: 'added' as const }));
+        diff.removed.forEach((c: any) => structuredChanges.push({ key: 'category', old: c.name, type: 'removed' as const }));
+        diff.updated.forEach((c: any) => structuredChanges.push({ key: 'category', old: c.item.name, new: c.item.name, type: 'updated' as const }));
+        if (diff.reordered) structuredChanges.push({ key: 'categories', type: 'reordered' as const });
+
         await logUserAction(userId, "UPDATE_PLINKK_CATEGORIES", id, {
           diff,
-          changes: diff.added.map((c: any) => `Added Category: ${c.name}`).concat(
-            diff.removed.map((c: any) => `Removed Category: ${c.name}`),
-            diff.updated.map((c: any) => `Updated Category: ${c.item.name}`),
-            diff.reordered ? ["Reordered categories"] : []
-          ),
+          changes: readableChanges,
           formatted: `Updated categories: ${updatedCategories.length} active`
         }, request.ip);
 
@@ -326,11 +352,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
         else if (diff.removed.length > 0) catLabel = `Suppression catégorie (-${diff.removed.length})`;
         else if (diff.reordered) catLabel = "Réorganisation catégories";
 
-        createPlinkkVersion(id, userId, catLabel, false, diff.added.map((c: any) => `Added Category: ${c.name}`).concat(
-          diff.removed.map((c: any) => `Removed Category: ${c.name}`),
-          diff.updated.map((c: any) => `Updated Category: ${c.item.name}`),
-          diff.reordered ? ["Reordered categories"] : []
-        )).catch(err => request.log.error(err));
+        createPlinkkVersion(id, userId, catLabel, false, structuredChanges).catch(err => request.log.error(err));
       }
 
       return reply.send({
@@ -383,12 +405,19 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
       // But here we already calculated 'changes' with calculateObjectDiff.
       // So we just wrap it manually.
       if (Object.keys(changes).length > 0) {
+        const structuredChanges = Object.keys(changes).map(key => ({
+          key: `statusbar.${key}`,
+          old: (oldStatus as any)?.[key],
+          new: (body.statusbar as any)?.[key],
+          type: 'updated' as const
+        }));
+
         await logUserAction(userId, "UPDATE_PLINKK_STATUSBAR", id, {
           diff: changes,
           formatted: "Updated status bar settings"
         }, request.ip);
 
-        createPlinkkVersion(id, userId, "Mise à jour barre de statut", false, ["Updated status bar settings"]).catch(err => request.log.error(err));
+        createPlinkkVersion(id, userId, "Mise à jour barre de statut", false, structuredChanges).catch(err => request.log.error(err));
       }
     }
 
@@ -427,12 +456,16 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
         });
       }
       if (changes.added.length > 0 || changes.removed.length > 0) {
+        const structuredChanges: any[] = [];
+        changes.added.forEach(c => structuredChanges.push({ key: 'neonColor', new: c, type: 'added' as const }));
+        changes.removed.forEach(c => structuredChanges.push({ key: 'neonColor', old: c, type: 'removed' as const }));
+
         await logUserAction(userId, "UPDATE_PLINKK_NEON", id, {
           diff: { neonColors: changes },
           formatted: `Updated neon colors: ${newColors.length} active`
         }, request.ip);
 
-        createPlinkkVersion(id, userId, "Mise à jour couleurs néon", false, newColors.length > 0 ? [`Set ${newColors.length} neon colors`] : ["Removed neon colors"]).catch(err => request.log.error(err));
+        createPlinkkVersion(id, userId, "Mise à jour couleurs néon", false, structuredChanges).catch(err => request.log.error(err));
       }
     }
 

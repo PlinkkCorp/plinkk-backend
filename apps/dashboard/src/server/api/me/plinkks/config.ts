@@ -275,7 +275,13 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
     // Capture snapshot for history
     if (realChanges.length > 0) {
       console.log('[Config] Creating version with label:', historyLabel);
-      createPlinkkVersion(id, userId as string, historyLabel, false, realChanges.map(k => `Updated ${k}`)).catch(err => {
+      const structuredChanges = realChanges.map(k => ({
+        key: k,
+        old: (currentSettings as any)?.[k],
+        new: (data as any)?.[k],
+        type: 'updated' as const
+      }));
+      createPlinkkVersion(id, userId as string, historyLabel, false, structuredChanges).catch(err => {
         console.error('[Config] Failed to create version:', err);
         request.log.error(err);
       });
@@ -320,7 +326,12 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
         await logDetailedAction(userId as string, "UPDATE_PLINKK_LAYOUT", id, oldData, newData, request.ip);
 
         // Capture snapshot for history
-        createPlinkkVersion(id, userId as string, "Réorganisation des sections", false, ["Reordered layout sections"]).catch(err => request.log.error(err));
+        createPlinkkVersion(id, userId as string, "Réorganisation des sections", false, [{
+          key: 'layoutOrder',
+          old: oldOrder,
+          new: newOrder,
+          type: 'reordered' as const
+        }]).catch(err => request.log.error(err));
       }
     }
 

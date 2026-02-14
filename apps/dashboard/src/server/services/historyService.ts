@@ -6,6 +6,13 @@ const MAX_VERSIONS_FREE = 5;
 const MAX_VERSIONS_PREMIUM = 50;
 const MAX_MANUAL_BACKUPS = 10; // Separate limit for manual backups
 
+export interface Change {
+    key: string;
+    old?: any;
+    new?: any;
+    type?: 'added' | 'removed' | 'updated' | 'reordered';
+}
+
 /**
  * Creates a new version (snapshot) of the Plinkk configuration.
  * Should be called AFTER a successful update.
@@ -15,7 +22,7 @@ export async function createPlinkkVersion(
     userId: string,
     label?: string,
     isManual: boolean = false,
-    changes: string[] = [] // New parameter for detailed changes
+    changes: (string | Change)[] = [] // New parameter for detailed changes
 ) {
     try {
         // 1. Fetch complete current state
