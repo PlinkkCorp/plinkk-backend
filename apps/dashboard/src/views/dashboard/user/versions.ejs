@@ -93,7 +93,7 @@
         document.getElementById('noSelection').classList.add('hidden');
         document.getElementById('historyContent').classList.remove('hidden');
 
-        const plinkksList = <% - JSON.stringify(plinkks || []) %>;
+        const plinkksList = <%- JSON.stringify(plinkks || []) %>;
         const plinkk = plinkksList.find(p => p.id === id);
         document.getElementById('selectedPlinkkName').textContent = `Versions de ${plinkk.name}`;
 
@@ -118,7 +118,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                   <button onclick="restoreVersion('${currentPlinkkId}', '${v.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-colors shadow-lg shadow-violet-900/20">Restaurer</button>
-                  <a href="/dashboard/edit?plinkkId=${currentPlinkkId}#section-history" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 group-hover:text-white transition-colors">
+                  <a href="/edit?plinkkId=${currentPlinkkId}#section-history" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 group-hover:text-white transition-colors">
                     <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
