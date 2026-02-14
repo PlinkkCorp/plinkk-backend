@@ -2,15 +2,15 @@ import { el } from '../../core/domUtils.js';
 import { isSafeUrl, disableDrag, disableContextMenuOnImage } from '../../security.js';
 
 const DEFAULT_ICONS = {
-    twitter: 'https://s3.marvideo.fr/plinkk-image/icons/twitter.svg',
-    instagram: 'https://s3.marvideo.fr/plinkk-image/icons/instagram.svg',
-    youtube: 'https://s3.marvideo.fr/plinkk-image/icons/youtube.svg',
-    tiktok: 'https://s3.marvideo.fr/plinkk-image/icons/tiktok.svg',
-    discord: 'https://s3.marvideo.fr/plinkk-image/icons/discord.svg',
-    github: 'https://s3.marvideo.fr/plinkk-image/icons/github.svg',
-    linkedin: 'https://s3.marvideo.fr/plinkk-image/icons/linkedin.svg',
-    twitch: 'https://s3.marvideo.fr/plinkk-image/icons/twitch.svg',
-    default: 'https://s3.marvideo.fr/plinkk-image/icons/link.svg'
+    twitter: 'https://cdn.plinkk.fr/icons/twitter.svg',
+    instagram: 'https://cdn.plinkk.fr/icons/instagram.svg',
+    youtube: 'https://cdn.plinkk.fr/icons/youtube.svg',
+    tiktok: 'https://cdn.plinkk.fr/icons/tiktok.svg',
+    discord: 'https://cdn.plinkk.fr/icons/discord.svg',
+    github: 'https://cdn.plinkk.fr/icons/github.svg',
+    linkedin: 'https://cdn.plinkk.fr/icons/linkedin.svg',
+    twitch: 'https://cdn.plinkk.fr/icons/twitch.svg',
+    default: 'https://cdn.plinkk.fr/icons/link.svg'
 };
 
 function detectPlatform(url) {

@@ -20,14 +20,14 @@ export function createLinkBox(linkData, config = {}) {
     
     if (linkData.icon) {
         const icon = el('img', {
-            src: isSafeUrl(linkData.icon) ? linkData.icon : 'https://s3.marvideo.fr/plinkk-image/icons/link.svg',
+            src: isSafeUrl(linkData.icon) ? linkData.icon : 'https://cdn.plinkk.fr/icons/link.svg',
             alt: '',
             class: 'link-icon',
             loading: 'lazy'
         });
         
         icon.onerror = function() {
-            this.src = 'https://s3.marvideo.fr/plinkk-image/icons/link.svg';
+            this.src = 'https://cdn.plinkk.fr/icons/link.svg';
         };
         
         disableDrag(icon);

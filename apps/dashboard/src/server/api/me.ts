@@ -778,7 +778,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const uniqueFiles = Array.from(new Map(allFiles.map((item) => [item.Key, item])).values());
 
     const uploads = uniqueFiles.map((o) => ({
-      url: `https://s3.marvideo.fr/plinkk-image/${o.Key}`,
+      url: `https://cdn.plinkk.fr/${o.Key}`,
       key: o.Key,
       name: o.Key?.split('/').pop(),
       lastModified: o.LastModified

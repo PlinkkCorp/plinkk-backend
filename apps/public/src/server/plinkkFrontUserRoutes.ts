@@ -1034,7 +1034,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       // on renvoie une image statique par défaut pour débloquer le dev.
       try {
         return reply.redirect(
-          "https://s3.marvideo.fr/plinkk-image/default_profile.png",
+          "https://cdn.plinkk.fr/default_profile.png",
         );
       } catch {
         return reply.code(501).send({
@@ -1102,13 +1102,13 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         ? request.protocol + "://" + request.host + page.settings.profileImage
         : page.settings.profileImage ||
         request.host +
-        "https://s3.marvideo.fr/plinkk-image/default_profile.png";
+        "https://cdn.plinkk.fr/default_profile.png";
 
       /* const image = page.settings.profileImage.startsWith("/public/")
         ? request.protocol + "://" + request.host + page.settings.profileImage
         : "https://plinkk.fr/" + page.settings.slug + ".png" ||
           request.host +
-            "https://s3.marvideo.fr/plinkk-image/default_profile.png"; */
+            "https://cdn.plinkk.fr/default_profile.png"; */
 
       const avatar = await loadImage(image);
 

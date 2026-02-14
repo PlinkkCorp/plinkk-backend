@@ -11,7 +11,7 @@ export function createEmailContainer(profileData, config = {}) {
     const container = el('div', { class: 'email-container' });
     
     const emailIcon = el('img', {
-        src: 'https://s3.marvideo.fr/plinkk-image/icons/email.svg',
+        src: 'https://cdn.plinkk.fr/icons/email.svg',
         alt: 'email',
         class: 'email-icon'
     });
@@ -62,7 +62,7 @@ export function createEmailAndDescription(profileData, config = {}) {
     
     if (email?.trim()) {
         const emailIcon = el('img', {
-            src: 'https://s3.marvideo.fr/plinkk-image/icons/email.svg',
+            src: 'https://cdn.plinkk.fr/icons/email.svg',
             alt: 'email',
             class: 'email-icon'
         });

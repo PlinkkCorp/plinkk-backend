@@ -49,7 +49,7 @@ export function createProfileContainer(profileData) {
         profilePic.src = profileData.profileImage;
     }
     else {
-        profilePic.src = "https://s3.marvideo.fr/plinkk-image/logo.svg";
+        profilePic.src = "https://cdn.plinkk.fr/logo.svg";
     }
     // Try a single fallback to the username logo, then stop retrying to avoid infinite loops
     profilePic.onerror = function () {
@@ -57,7 +57,7 @@ export function createProfileContainer(profileData) {
             if (!this._triedFallback) {
                 this._triedFallback = true;
                 // Attempt a single fallback
-                this.src = "https://s3.marvideo.fr/plinkk-image/logo.svg";
+                this.src = "https://cdn.plinkk.fr/logo.svg";
                 return;
             }
         }
@@ -113,7 +113,7 @@ export function createProfileContainer(profileData) {
         profileIcon.src = profileData.profileIcon;
     }
     else {
-        profileIcon.src = "https://s3.marvideo.fr/plinkk-image/default_profile.png";
+        profileIcon.src = "https://cdn.plinkk.fr/default_profile.png";
     }
     // Single-attempt fallback for the icon, then stop retrying
     profileIcon.onerror = function () {
@@ -121,7 +121,7 @@ export function createProfileContainer(profileData) {
         try {
             if (!this._triedFallback) {
                 this._triedFallback = true;
-                this.src = "https://s3.marvideo.fr/plinkk-image/default_profile.png";
+                this.src = "https://cdn.plinkk.fr/default_profile.png";
                 return;
             }
         }
@@ -853,7 +853,7 @@ export function createIconList(profileData) {
             if (/^(https?:\/\/|\/|data:)/i.test(iconVal)) {
                 iconImg.src = iconVal;
             } else {
-                iconImg.src = `https://s3.marvideo.fr/plinkk-image/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
+                iconImg.src = `https://cdn.plinkk.fr/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
             }
         iconImg.onload = () => {
             iconImg.classList.remove('opacity-0');

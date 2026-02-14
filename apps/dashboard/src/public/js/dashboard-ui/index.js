@@ -776,7 +776,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       openIconModal((val) => {
           const replaced = (val.startsWith('http://') || val.startsWith('https://')) 
             ? val 
-            : `https://s3.marvideo.fr/plinkk-image/icons/${val}.svg`;
+            : `https://cdn.plinkk.fr/icons/${val}.svg`;
             
           targetInput.value = replaced;
           targetInput.dispatchEvent(new Event('input', { bubbles: true }));
