@@ -31,7 +31,7 @@ export function createProfileContainer(profileData) {
         frameDiv.style.borderRadius = "50%";
         frameDiv.style.pointerEvents = "none";
         frameDiv.style.zIndex = "10";
-        
+
         if (frame === 'neon') {
             frameDiv.style.boxShadow = "0 0 0 2px rgba(139,92,246,0.8), 0 0 15px rgba(139,92,246,0.6), inset 0 0 10px rgba(139,92,246,0.4)";
         } else if (frame === 'glow') {
@@ -95,7 +95,7 @@ export function createProfileContainer(profileData) {
     const profileLinkDiv = document.createElement("div");
     profileLinkDiv.className = "profile-link";
     const profileLinkSpan = document.createElement("span");
-    
+
     // Icon wrapper for skeleton
     const profileIconWrapper = document.createElement("span");
     profileIconWrapper.className = "profile-icon-wrapper animate-pulse bg-white/10";
@@ -134,7 +134,7 @@ export function createProfileContainer(profileData) {
         }
         catch (e) { }
     };
-    profileIcon.onload = function() {
+    profileIcon.onload = function () {
         this.classList.remove('opacity-0');
         profileIconWrapper.classList.remove('animate-pulse', 'bg-white/10');
     };
@@ -277,28 +277,28 @@ export function createEmailAndDescription(profileData) {
         if (navigator.clipboard) {
             navigator.clipboard.writeText(profileData.email)
                 .then(() => {
-                copyBtn.innerHTML = `
+                    copyBtn.innerHTML = `
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                             <polyline points="20 6 9 17 4 12"/>
                         </svg>
                     `;
-                // Timer indépendant pour l'icône
-                if (iconTimeout)
-                    clearTimeout(iconTimeout);
-                iconTimeout = setTimeout(() => {
-                    copyBtn.innerHTML = `
+                    // Timer indépendant pour l'icône
+                    if (iconTimeout)
+                        clearTimeout(iconTimeout);
+                    iconTimeout = setTimeout(() => {
+                        copyBtn.innerHTML = `
                             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                             </svg>
                         `;
-                }, 2000);
-            })
+                    }, 2000);
+                })
                 .catch(() => {
-                showCopyModal("Erreur lors de la copie", copyBtn);
-            });
+                    showCopyModal("Erreur lors de la copie", copyBtn);
+                });
         }
         else {
             // Fallback : sélection manuelle
@@ -486,7 +486,7 @@ export function createLinkBoxes(profileData) {
         console.warn("No links found in profile data.");
         return [];
     }
-    
+
     // Helper to create a single link box
     const createBox = (link) => {
         const discordBox = document.createElement("div");
@@ -542,11 +542,17 @@ export function createLinkBoxes(profileData) {
             discordIcon.loading = "lazy";
             discordIcon.classList.add("link-icon");
         }
-        
-        // Selective filter white for link icons
-        const iconVal = String(discordIcon.src || '');
-        if (iconVal.includes('bi-') || iconVal.includes('/icons/')) {
-             discordIcon.classList.add('filter-white');
+
+        // Selective inversion for Bootstrap and internal icons
+        const src = (discordIcon.src || '').toLowerCase();
+        const isCatalogue = src.includes('s3.marvideo.fr') || src.startsWith('/icons/');
+        const isBootstrap = src.includes('bi-');
+
+        // Use the specific requested class for inversion
+        if (isCatalogue || isBootstrap) {
+            discordIcon.classList.add('bi-invert');
+        } else {
+            discordIcon.classList.remove('bi-invert');
         }
 
         // Créer un conteneur pour le contenu principal (icône + texte)
@@ -843,18 +849,18 @@ export function createIconList(profileData) {
     else if (profileData.socialIcon.length > maxIconNumber) {
         console.warn(`Too many social icons found in profile data, only the first ${maxIconNumber} will be displayed.`);
     }
-        profileData.socialIcon.slice(0, maxIconNumber).forEach(iconData => {
+    profileData.socialIcon.slice(0, maxIconNumber).forEach(iconData => {
         const iconItem = document.createElement("div");
         iconItem.className = "icon-item animate-pulse";
         const iconImg = document.createElement("img");
-            // Supporte slug (catalogue), URL absolue et data URI
-            const iconVal = String(iconData.icon || '').trim();
-            const isBootstrap = iconVal.startsWith('bi-');
-            if (/^(https?:\/\/|\/|data:)/i.test(iconVal)) {
-                iconImg.src = iconVal;
-            } else {
-                iconImg.src = `https://s3.marvideo.fr/plinkk-image/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
-            }
+        // Supporte slug (catalogue), URL absolue et data URI
+        const iconVal = String(iconData.icon || '').trim();
+        const isBootstrap = iconVal.startsWith('bi-');
+        if (/^(https?:\/\/|\/|data:)/i.test(iconVal)) {
+            iconImg.src = iconVal;
+        } else {
+            iconImg.src = `https://s3.marvideo.fr/plinkk-image/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
+        }
         iconImg.onload = () => {
             iconImg.classList.remove('opacity-0');
             iconItem.classList.remove('animate-pulse');
@@ -864,7 +870,16 @@ export function createIconList(profileData) {
         };
         setSafeText(iconImg, iconData.icon);
         iconImg.alt = iconData.icon;
-        iconImg.className = "opacity-0 transition-opacity duration-300" + (isBootstrap ? " filter-white" : "");
+        const src = (iconImg.src || '').toLowerCase();
+        const isCatalogue = src.includes('s3.marvideo.fr') || src.startsWith('/icons/');
+        const isBootstrapIcon = isBootstrap || src.includes('bi-');
+
+        // Use the bi-invert class for theme-aware icons
+        if (isCatalogue || isBootstrapIcon) {
+            iconImg.classList.add('bi-invert');
+        } else {
+            iconImg.classList.remove('bi-invert');
+        }
         iconImg.loading = "lazy";
         disableDrag(iconImg);
         disableContextMenuOnImage(iconImg);

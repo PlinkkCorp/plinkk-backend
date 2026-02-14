@@ -274,6 +274,35 @@ export function applyTheme(theme) {
             htmlBouton.style.boxShadow = `0 0 10px ${theme.buttonBackground}`;
         });
     });
+
+    // Fix contrast for Username (h1) and Labels in light themes
+    const h1 = document.querySelector("h1");
+    if (h1) {
+        if (!theme.darkTheme) {
+            h1.style.color = "black";
+            h1.style.webkitTextFillColor = "black";
+            h1.style.background = "none";
+            h1.style.textShadow = "none";
+        } else {
+            // Restore default CSS gradient behavior for dark themes
+            h1.style.color = "";
+            h1.style.webkitTextFillColor = "";
+            h1.style.background = "";
+            h1.style.textShadow = "";
+        }
+    }
+
+    document.querySelectorAll(".label-button").forEach((label) => {
+        const htmlLabel = label;
+        if (!theme.darkTheme) {
+            htmlLabel.style.color = "black";
+        } else {
+            // Respect the fontColor from profileData if possible, or fallback to CSS
+            // However, applyTheme only receives the theme object.
+            // For dark themes, we usually want white or the defined theme color.
+            htmlLabel.style.color = theme.textColor;
+        }
+    });
 }
 export function setBackgroundStyles(profileData) {
     const _p = profileData || getProfileData() || {};
@@ -286,7 +315,7 @@ export function setBackgroundStyles(profileData) {
     // Always use Plinkk background (independent from cosmetics)
     const colors = Array.isArray(_p.background) ? _p.background.filter(Boolean) : null;
     const deg = (Number.isFinite(_p.degBackgroundColor) ? _p.degBackgroundColor : 45) || 45;
-    
+
     if (colors) {
         if (colors.length === 0) {
             document.body.style.background = '';
@@ -316,7 +345,7 @@ export function setBackgroundStyles(profileData) {
         effectDiv.style.inset = '0';
         effectDiv.style.pointerEvents = 'none';
         effectDiv.style.zIndex = '-1'; // Behind content
-        
+
         if (effect === 'sparkles') {
             effectDiv.style.backgroundImage = `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 0L12 8L20 10L12 12L10 20L8 12L0 10L8 8L10 0Z' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E")`;
         } else if (effect === 'noise') {
@@ -375,27 +404,27 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
                 // Charger les scripts dans l'ordre
                 loadScript('/canvaAnimation/matrix-effect/effect.js')
                     .then(() => {
-                    console.log("Effect.js loaded, checking window.Effect:", typeof window.Effect);
-                    return loadScript('/canvaAnimation/matrix-effect/symbol.js');
-                })
+                        console.log("Effect.js loaded, checking window.Effect:", typeof window.Effect);
+                        return loadScript('/canvaAnimation/matrix-effect/symbol.js');
+                    })
                     .then(() => {
-                    console.log("Symbol.js loaded, checking window.Symbol:", typeof window.Symbol);
-                    return loadScript('/canvaAnimation/matrix-effect/app.js');
-                })
+                        console.log("Symbol.js loaded, checking window.Symbol:", typeof window.Symbol);
+                        return loadScript('/canvaAnimation/matrix-effect/app.js');
+                    })
                     .then(() => {
-                    console.log("App.js loaded, checking runCanvasAnimation:", typeof runCanvasAnimation);
-                    if (typeof runCanvasAnimation === "function") {
-                        runCanvasAnimation(ctx, canvas);
-                    }
-                    else {
-                        console.error("runCanvasAnimation is not a function");
-                        setBackgroundStyles(profileData);
-                    }
-                })
+                        console.log("App.js loaded, checking runCanvasAnimation:", typeof runCanvasAnimation);
+                        if (typeof runCanvasAnimation === "function") {
+                            runCanvasAnimation(ctx, canvas);
+                        }
+                        else {
+                            console.error("runCanvasAnimation is not a function");
+                            setBackgroundStyles(profileData);
+                        }
+                    })
                     .catch((error) => {
-                    console.error("Error loading Matrix effect scripts:", error);
-                    setBackgroundStyles(profileData);
-                });
+                        console.error("Error loading Matrix effect scripts:", error);
+                        setBackgroundStyles(profileData);
+                    });
             }
             else {
                 // Pour les autres animations
