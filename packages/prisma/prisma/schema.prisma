@@ -418,6 +418,7 @@ model Plinkk {
   settings    PlinkkSettings?
   pageStats   PageStat[]        @relation("PageStats")
   reports     Report[]
+  versions    PlinkkVersion[]
 
   host Host?
 
@@ -549,6 +550,18 @@ model UserLog {
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@index([userId])
+}
+
+model PlinkkVersion {
+  id        String   @id @default(nanoid(16))
+  plinkkId  String
+  plinkk    Plinkk   @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+  snapshot  Json
+  label     String?
+  createdAt DateTime @default(now())
+
+  @@index([plinkkId])
+  @@index([createdAt])
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

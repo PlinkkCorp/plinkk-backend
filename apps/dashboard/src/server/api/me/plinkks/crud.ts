@@ -13,6 +13,7 @@ import {
 } from "@plinkk/shared";
 import { logUserAction, logDetailedAction } from "../../../../lib/userLogger";
 import { calculateObjectDiff } from "../../../../lib/diffUtils";
+import { captureSnapshot } from "../../../../lib/plinkkHistoryService";
 
 export function plinkksCrudRoutes(fastify: FastifyInstance) {
   fastify.patch("/:id", async (request, reply) => {
@@ -58,6 +59,10 @@ export function plinkksCrudRoutes(fastify: FastifyInstance) {
     await logDetailedAction(userId, "UPDATE_PLINKK", id, p, updated || {}, request.ip, {
       formatted: `Updated Plinkk '${updated?.name}': ${formattedAction}`
     });
+
+    if (actions.length > 0) {
+      captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
+    }
 
     return reply.send({ ok: true });
   });

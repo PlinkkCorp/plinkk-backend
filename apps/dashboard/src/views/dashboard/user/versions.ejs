@@ -1,24 +1,157 @@
-<%- include('partials/head.ejs', { title: 'Versions', description: 'Prévisualise des anciennes versions de Plinkk (à venir).', robots: 'noindex,nofollow' }) %>
-<%- include('partials/header-dash.ejs', { user: user }) %>
+<%- include('partials/head.ejs', { title: 'Versions' , description: 'Gérez l\' historique de vos Plinkks.',
+  robots: 'noindex,nofollow' }) %>
+  <%- include('partials/header-dash.ejs', { user: user }) %>
 
-    <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-4 px-4 py-4">
+    <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-8 px-4 py-8">
       <%- include('partials/asside_dash.ejs', { active: 'versions' }) %>
-      <main class="col-span-12 lg:col-span-9 space-y-4">
-      <div class="rounded-lg border border-slate-800/60 bg-slate-900/60 p-4 shadow animate-slide-up">
-        <div class="mb-3"><h3 class="font-medium">Aperçu anciennes versions</h3><p class="text-xs text-slate-400">Choisissez une ancienne version de Plinkk pour prévisualiser (à venir).</p></div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label class="block text-sm md:col-span-2">
-            <div class="mt-1 relative">
-              <input type="text" class="pl-3 pr-20 py-2 w-full rounded bg-slate-900/60 border border-slate-800/60" value="Plinkk v1 (à venir)" readonly />
-              <button type="button" class="absolute right-1 top-1 h-8 px-2 text-xs rounded bg-cyan-700/80 border border-cyan-500/40 text-white opacity-60 cursor-not-allowed">Choisir</button>
+
+        <main class="col-span-12 lg:col-span-9 space-y-6">
+          <div class="flex items-center justify-between bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+            <div>
+              <h1 class="text-2xl font-bold text-white">Historique des versions</h1>
+              <p class="text-sm text-slate-400 mt-1">Gérez et restaurez les versions précédentes de vos Plinkks.</p>
             </div>
-          </label>
-          <div class="md:col-span-2">
-            <div class="rounded border border-indigo-800/40 bg-slate-900/40 aspect-[16/10] flex items-center justify-center text-slate-300 text-sm">Prévisualisation désactivée (à venir)</div>
           </div>
-        </div>
-      </div>
-      </main>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Plinkk List -->
+            <div class="md:col-span-1 space-y-3">
+              <h3 class="text-sm font-semibold text-slate-400 px-2">Vos Plinkks</h3>
+              <% if (plinkks && plinkks.length> 0) { %>
+                <% plinkks.forEach(p=> { %>
+                  <button onclick="selectPlinkk('<%= p.id %>')"
+                    class="w-full text-left p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-violet-500/50 transition-all group plinkk-btn"
+                    data-id="<%= p.id %>">
+                    <div class="font-medium text-white group-hover:text-violet-400 transition-colors">
+                      <%= p.name %>
+                    </div>
+                    <div class="text-xs text-slate-500">/<%= p.slug %> • <%= p._count.versions %> versions</div>
+                  </button>
+                  <% }) %>
+                    <% } else { %>
+                      <div
+                        class="p-4 text-center text-slate-500 bg-slate-900/40 rounded-2xl border border-dashed border-slate-800">
+                        Aucun Plinkk trouvé.
+                      </div>
+                      <% } %>
+            </div>
+
+            <!-- History Detail -->
+            <div class="md:col-span-2 space-y-4">
+              <div id="historyDetail" class="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 min-h-[400px]">
+                <div id="noSelection"
+                  class="flex flex-col items-center justify-center h-full py-20 text-center space-y-4">
+                  <div class="p-4 rounded-full bg-slate-800/50 text-slate-500">
+                    <svg class="size-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                      <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="text-slate-200 font-medium">Sélectionnez un Plinkk</h4>
+                    <p class="text-sm text-slate-500 max-w-xs mx-auto">Choisissez un Plinkk dans la liste pour voir son
+                      historique de versions.</p>
+                  </div>
+                </div>
+
+                <div id="historyContent" class="hidden space-y-6">
+                  <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+                    <h3 id="selectedPlinkkName" class="text-lg font-semibold text-white">Versions</h3>
+                    <button id="refreshBtn"
+                      class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 transition-colors">
+                      <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 2v6h-6M3 12a9 9 0 0115-6.7L21 8M3 22v-6h6M21 12a9 9 0 01-15 6.7L3 16" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div id="historyTimeline" class="space-y-3">
+                    <!-- JS Populated -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
     </div>
-  </body>
-  </html>
+
+    <script>
+      let currentPlinkkId = null;
+
+      async function selectPlinkk(id) {
+        currentPlinkkId = id;
+
+        // UI updates
+        document.querySelectorAll('.plinkk-btn').forEach(b => {
+          if (b.dataset.id === id) {
+            b.classList.add('border-violet-500', 'bg-slate-800/50');
+            b.classList.remove('border-slate-800', 'bg-slate-900');
+          } else {
+            b.classList.remove('border-violet-500', 'bg-slate-800/50');
+            b.classList.add('border-slate-800', 'bg-slate-900');
+          }
+        });
+
+        document.getElementById('noSelection').classList.add('hidden');
+        document.getElementById('historyContent').classList.remove('hidden');
+
+        const plinkksList = <% - JSON.stringify(plinkks || []) %>;
+        const plinkk = plinkksList.find(p => p.id === id);
+        document.getElementById('selectedPlinkkName').textContent = `Versions de ${plinkk.name}`;
+
+        loadHistory();
+      }
+
+      async function loadHistory() {
+        if (!currentPlinkkId) return;
+        const timeline = document.getElementById('historyTimeline');
+        timeline.innerHTML = '<div class="text-center py-20 text-slate-500 animate-pulse text-sm">Chargement de l\'historique...</div>';
+
+        try {
+          const res = await fetch(`/api/me/plinkks/${currentPlinkkId}/history`);
+          const data = await res.json();
+
+          if (data.versions && data.versions.length > 0) {
+            timeline.innerHTML = data.versions.map(v => `
+              <div class="flex items-center justify-between p-4 rounded-2xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition-all group">
+                <div>
+                  <div class="font-medium text-slate-200">${v.label || 'Version automatique'}</div>
+                  <div class="text-xs text-slate-500">${new Date(v.createdAt).toLocaleString('fr-FR')}</div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button onclick="restoreVersion('${currentPlinkkId}', '${v.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-colors shadow-lg shadow-violet-900/20">Restaurer</button>
+                  <a href="/dashboard/edit?plinkkId=${currentPlinkkId}#section-history" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 group-hover:text-white transition-colors">
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            `).join('');
+          } else {
+            timeline.innerHTML = '<div class="text-center py-20 text-slate-500 text-sm">Aucun historique disponible.</div>';
+          }
+        } catch (e) {
+          timeline.innerHTML = '<div class="text-center py-20 text-red-400 text-sm">Erreur de chargement.</div>';
+        }
+      }
+
+      async function restoreVersion(plinkkId, versionId) {
+        if (!confirm('Voulez-vous vraiment restaurer cette version ?')) return;
+        try {
+          const res = await fetch(`/api/me/plinkks/${plinkkId}/history/${versionId}/restore`, { method: 'POST' });
+          const data = await res.json();
+          if (data.ok) {
+            alert('Version restaurée !');
+            window.location.reload();
+          } else {
+            alert('Erreur: ' + (data.error || 'Inconnue'));
+          }
+        } catch (e) {
+          alert('Erreur réseau');
+        }
+      }
+
+      document.getElementById('refreshBtn').onclick = loadHistory;
+    </script>
+    </body>
+
+    </html>

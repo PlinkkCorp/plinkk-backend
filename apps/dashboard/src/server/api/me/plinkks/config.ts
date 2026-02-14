@@ -4,6 +4,7 @@ import { pickDefined } from "../../../../lib/plinkkUtils";
 import { logUserAction, logDetailedAction } from "../../../../lib/userLogger";
 import { themeNames, themeColors } from "../../../../lib/themeNames";
 // import { canUseVisualEffects } from "@plinkk/shared";
+import { captureSnapshot } from "../../../../lib/plinkkHistoryService";
 
 export function plinkksConfigRoutes(fastify: FastifyInstance) {
   fastify.get("/:id/config", async (request, reply) => {
@@ -243,6 +244,9 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
     // Use shared logger
     await logDetailedAction(userId as string, logAction, id, oldData, data, request.ip);
 
+    // Capture snapshot for history
+    captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
+
     return reply.send({ ok: true });
   });
 
@@ -267,6 +271,9 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       });
 
       await logDetailedAction(userId as string, "UPDATE_PLINKK_LAYOUT", id, oldData, newData, request.ip);
+
+      // Capture snapshot for history
+      captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
     }
 
     return reply.send({ ok: true });

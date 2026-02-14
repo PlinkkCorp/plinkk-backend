@@ -3,6 +3,7 @@ import { Label, Link, NeonColor, PlinkkStatusbar, SocialIcon, prisma } from "@pl
 import { pickDefined } from "../../../../lib/plinkkUtils";
 import { logUserAction } from "../../../../lib/userLogger";
 import { calculateArrayDiff, calculateObjectDiff } from "../../../../lib/diffUtils";
+import { captureSnapshot } from "../../../../lib/plinkkHistoryService";
 
 async function validatePlinkkOwnership(userId: string | undefined, plinkkId: string) {
   if (!userId) return null;
@@ -49,6 +50,8 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
         diff: { background: { added, removed } },
         formatted: `Updated background: +${added.length} added, -${removed.length} removed`
       }, request.ip);
+
+      captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
     }
 
     return reply.send({ ok: true });
@@ -100,6 +103,8 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           diff: changes,
           formatted: `Updated labels: ${body.labels.length} active`
         }, request.ip);
+
+        captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
       }
     }
 
@@ -142,6 +147,8 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           diff: changes,
           formatted: `Updated social icons: ${body.socialIcon.length} active`
         }, request.ip);
+
+        captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
       }
     }
 
@@ -199,6 +206,8 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           diff,
           formatted: `Updated links: ${updatedLinks.length} active`
         }, request.ip);
+
+        captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
       }
 
       return reply.send({
@@ -266,6 +275,8 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           diff,
           formatted: `Updated categories: ${updatedCategories.length} active`
         }, request.ip);
+
+        captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
       }
 
       return reply.send({
@@ -320,6 +331,8 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           diff: changes,
           formatted: "Updated status bar settings"
         }, request.ip);
+
+        captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
       }
     }
 
@@ -360,6 +373,8 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           diff: { neonColors: changes },
           formatted: `Updated neon colors: ${newColors.length} active`
         }, request.ip);
+
+        captureSnapshot(id).catch(err => console.error("History snapshot failed", err));
       }
     }
 
