@@ -1,13 +1,10 @@
 import 'dotenv/config';
 import { PrismaClient } from "./generated/prisma/index.js";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool, PoolConfig } from "pg";
-import { parse } from "pg-connection-string";
 
 export * from "./generated/prisma/index.js";
 
-const dbUrl = process.env.DATABASE_URL;
 
+/* 
 // Nettoyage radical de l'environnement pour éviter que le driver pg ne récupère des objets invalides
 for (const key in process.env) {
   if (key.startsWith('PG')) {
@@ -43,3 +40,6 @@ const poolConfig: PoolConfig = {
 const pool = new Pool(poolConfig);
 const adapter = new PrismaPg(pool);
 export const prisma = new PrismaClient({ adapter });
+*/
+
+export const prisma = new PrismaClient();
