@@ -32,16 +32,16 @@ function escapeHtml(text) {
 
 async function saveConfig(endpoint, data) {
     if (window.__PLINKK_SHOW_SAVING__) window.__PLINKK_SHOW_SAVING__();
-    
+
     try {
         const res = await fetch('/api/me/plinkks/' + encodeURIComponent(plinkkId) + '/config/' + endpoint, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-        
+
         if (!res.ok) throw new Error('Save failed');
-        
+
         if (window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
         return await res.json();
     } catch (e) {
@@ -68,7 +68,7 @@ window.__PLINKK_GET_CONFIG__ = () => currentConfig;
 async function loadPlinkkPage() {
     const plinkkRenderer = qs('#plinkkRenderer');
     if (!plinkkRenderer) return;
-    
+
     if (!plinkkId) {
         plinkkRenderer.innerHTML = `
             <div class="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-500">
@@ -81,7 +81,7 @@ async function loadPlinkkPage() {
             </div>`;
         return;
     }
-    
+
     try {
         const response = await fetch('/api/me/plinkks/' + encodeURIComponent(plinkkId) + '/config');
         if (!response.ok) throw new Error('Failed to load config');
@@ -111,14 +111,14 @@ window.__PLINKK_RENDERER_RELOAD__ = loadPlinkkPage;
 function renderPlinkk(config) {
     const plinkkRenderer = qs('#plinkkRenderer');
     if (!plinkkRenderer) return;
-    
+
     const plinkk = config || {};
     const links = config.links || [];
     const categories = config.categories || [];
     const labels = config.labels || [];
     const socialIcon = config.socialIcon || [];
     const statusbar = config.statusbar || null;
-    
+
     // Extraction des styles
     const bgColor = plinkk?.backgroundColor || '#0c0c0c';
     const bgColor2 = plinkk?.backgroundColor2 || bgColor;
@@ -130,7 +130,7 @@ function renderPlinkk(config) {
     const name = plinkk?.userName || plinkk?.name || plinkk?.slug || '';
     const description = plinkk?.description || '';
     const email = plinkk?.email || '';
-    
+
     // Canvas
     const canvaEnable = plinkk?.canvaEnable || false;
     const canvasIndexRaw = plinkk?.selectedCanvasIndex;
@@ -142,7 +142,7 @@ function renderPlinkk(config) {
             canvasFileName = canvaConfig[idx].fileNames;
         }
     }
-    
+
     // Background
     let bgStyle = '';
     if (!canvaEnable || !canvasFileName) {
@@ -154,16 +154,16 @@ function renderPlinkk(config) {
     } else {
         bgStyle = 'background: transparent;';
     }
-    
+
     // Icône par défaut
     const DEFAULT_LINK_ICON = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>');
-    
+
     // Render link
     function renderLink(link, index) {
         const linkIcon = link.icon || DEFAULT_LINK_ICON;
         const linkText = link.text || link.name || link.url || 'Lien';
         const isHidden = link.hidden ? ' opacity-50' : '';
-        
+
         return `
             <div class="link-item${isHidden}" data-link-id="${link.id}" data-index="${index}" draggable="true">
                 <div class="link-content">
@@ -176,9 +176,9 @@ function renderPlinkk(config) {
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
                     <button class="action-btn toggle-link-btn" data-id="${link.id}" data-hidden="${link.hidden ? 'true' : 'false'}" title="${link.hidden ? 'Afficher' : 'Masquer'}">
-                        ${link.hidden 
-                            ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
-                            : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'}
+                        ${link.hidden
+                ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+                : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'}
                     </button>
                     <button class="action-btn delete-link-btn" data-id="${link.id}" title="Supprimer">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -186,7 +186,7 @@ function renderPlinkk(config) {
                 </div>
             </div>`;
     }
-    
+
     // Render social
     function renderSocial(social, index) {
         return `
@@ -206,7 +206,7 @@ function renderPlinkk(config) {
                 </button>
             </div>`;
     }
-    
+
     // Render label
     function renderLabel(label, index) {
         const bgClr = label.color || 'rgba(124,58,237,0.3)';
@@ -223,27 +223,27 @@ function renderPlinkk(config) {
                 <div class="label-desc editable-inline editable-multiline" data-field="description" data-type="label" data-index="${index}">${escapeHtml(label.description || '')}</div>
             </span>`;
     }
-    
+
     // Construire le HTML
-    const linksHTML = links.length > 0 
+    const linksHTML = links.length > 0
         ? links.map((l, i) => renderLink(l, i)).join('')
         : '<div class="empty-hint">Aucun lien ajouté</div>';
-    
+
     const socialsHTML = socialIcon.length > 0
         ? socialIcon.map((s, i) => renderSocial(s, i)).join('')
         : '';
-    
+
     const labelsHTML = labels.length > 0
         ? labels.map((l, i) => renderLabel(l, i)).join('')
         : '';
-    
+
     // Statusbar
     let statusbarHTML = '';
     if (statusbar && (statusbar.text || statusbar.statusText)) {
-        const statusDot = statusbar.statusText === '🟢' ? '#22c55e' 
-                        : statusbar.statusText === '🔴' ? '#ef4444'
-                        : statusbar.statusText === '🟡' ? '#eab308' 
-                        : '#64748b';
+        const statusDot = statusbar.statusText === '🟢' ? '#22c55e'
+            : statusbar.statusText === '🔴' ? '#ef4444'
+                : statusbar.statusText === '🟡' ? '#eab308'
+                    : '#64748b';
         statusbarHTML = `
             <div class="statusbar-wrapper" data-type="statusbar">
                 <div class="statusbar-content" style="background:${statusbar.colorBg || '#1f2937'};">
@@ -255,10 +255,10 @@ function renderPlinkk(config) {
                 </button>
             </div>`;
     }
-    
+
     // Initial du profil
     const initial = name.charAt(0).toUpperCase() || 'P';
-    
+
     // Description & Email
     let descEmailHTML = '';
     if (email || description) {
@@ -277,12 +277,12 @@ function renderPlinkk(config) {
         }
         descEmailHTML += '</div>';
     }
-    
+
     // Canvas HTML
-    const canvasHTML = (canvaEnable && canvasFileName) 
-        ? '<div class="canvas-bg" id="canvasContainer"><canvas id="animatedCanvas"></canvas></div>' 
+    const canvasHTML = (canvaEnable && canvasFileName)
+        ? '<div class="canvas-bg" id="canvasContainer"><canvas id="animatedCanvas"></canvas></div>'
         : '';
-    
+
     // CSS du rendu
     const css = `
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -313,7 +313,7 @@ function renderPlinkk(config) {
         /* Profile */
         .profile-section { position: relative; margin-bottom: 16px; }
         .profile-pic-container {
-            width: 120px; height: 120px; margin: 0 auto;
+            width: 160px; height: 160px; margin: 0 auto;
             position: relative; border-radius: 50%;
             filter: drop-shadow(0 8px 24px rgba(0,0,0,0.4));
         }
@@ -583,7 +583,7 @@ function renderPlinkk(config) {
         .popover-btn.delete { background: rgba(239,68,68,0.15); color: #ef4444; }
         .popover-btn.delete:hover { background: rgba(239,68,68,0.25); }
     `;
-    
+
     // HTML final
     plinkkRenderer.innerHTML = `
         <style>${css}</style>
@@ -591,9 +591,9 @@ function renderPlinkk(config) {
         <article class="plinkk-article">
             <div class="profile-section">
                 <div class="profile-pic-container">
-                    ${pfp 
-                        ? `<img src="${pfp}" alt="${name}" class="profile-pic" onerror="this.outerHTML='<span class=profile-initial>${initial}</span>'"/>`
-                        : `<span class="profile-initial">${initial}</span>`}
+                    ${pfp
+            ? `<img src="${pfp}" alt="${name}" class="profile-pic" onerror="this.outerHTML='<span class=profile-initial>${initial}</span>'"/>`
+            : `<span class="profile-initial">${initial}</span>`}
                     <div class="profile-upload-overlay">
                         <label title="Changer l'image">
                             <input type="file" id="pfpUploadInline" accept="image/*" style="display:none"/>
@@ -636,10 +636,10 @@ function renderPlinkk(config) {
             </div>
         </article>
     `;
-    
+
     // Attacher les handlers
     setupEventHandlers();
-    
+
     // Initialiser le canvas si activé
     if (canvaEnable && canvasFileName) {
         initCanvas(canvasFileName);
@@ -651,10 +651,10 @@ function renderPlinkk(config) {
 function setupEventHandlers() {
     const plinkkRenderer = qs('#plinkkRenderer');
     if (!plinkkRenderer) return;
-    
+
     // Édition inline
     setupInlineEditing();
-    
+
     // Délégation d'événements
     plinkkRenderer.addEventListener('click', handleClick);
 
@@ -721,25 +721,25 @@ function setupEventHandlers() {
 function handleClick(e) {
     const target = e.target.closest('button');
     if (!target) return;
-    
+
     // Ajouter un lien
     if (target.id === 'addLinkInline' || target.id === 'addLinkToolbar') {
         e.preventDefault();
         addNewLink();
     }
-    
+
     // Ajouter un social
     if (target.id === 'addSocialInline' || target.id === 'addSocialToolbar') {
         e.preventDefault();
         openSocialPicker();
     }
-    
+
     // Ajouter un label
     if (target.id === 'addLabelInline' || target.id === 'addLabelToolbar') {
         e.preventDefault();
         addNewLabel();
     }
-    
+
     // Supprimer un lien
     if (target.classList.contains('delete-link-btn')) {
         e.preventDefault();
@@ -748,7 +748,7 @@ function handleClick(e) {
             deleteLink(linkId);
         }
     }
-    
+
     // Toggle visibilité lien
     if (target.classList.contains('toggle-link-btn')) {
         e.preventDefault();
@@ -756,14 +756,14 @@ function handleClick(e) {
         const isHidden = target.dataset.hidden === 'true';
         toggleLink(linkId, !isHidden);
     }
-    
+
     // Éditer un lien
     if (target.classList.contains('edit-link-btn')) {
         e.preventDefault();
         const linkId = target.dataset.id;
         openLinkPopover(linkId, target);
     }
-    
+
     // Supprimer un social
     if (target.classList.contains('social-delete-btn')) {
         e.preventDefault();
@@ -772,14 +772,14 @@ function handleClick(e) {
             deleteSocial(index);
         }
     }
-    
+
     // Éditer un social
     if (target.classList.contains('social-edit-btn')) {
         e.preventDefault();
         const index = parseInt(target.dataset.index);
         openSocialPopover(index, target);
     }
-    
+
     // Supprimer un label
     if (target.classList.contains('label-delete-btn')) {
         e.preventDefault();
@@ -788,14 +788,14 @@ function handleClick(e) {
             deleteLabel(index);
         }
     }
-    
+
     // Éditer un label
     if (target.classList.contains('label-edit-btn')) {
         e.preventDefault();
         const index = parseInt(target.dataset.index);
         openLabelPopover(index, target);
     }
-    
+
     // Éditer statusbar
     if (target.classList.contains('statusbar-edit-btn')) {
         e.preventDefault();
@@ -806,47 +806,47 @@ function handleClick(e) {
 // Édition inline
 function setupInlineEditing() {
     const editables = document.querySelectorAll('#plinkkRenderer .editable-inline');
-    
+
     editables.forEach(el => {
-        el.addEventListener('click', function(e) {
+        el.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             if (el.classList.contains('editing')) return;
-            
+
             const field = el.dataset.field;
             const type = el.dataset.type;
             const id = el.dataset.id;
             const index = el.dataset.index;
             const isMultiline = el.classList.contains('editable-multiline');
             const originalText = el.textContent;
-            
+
             el.classList.add('editing');
-            
-            const input = isMultiline 
-                ? document.createElement('textarea') 
+
+            const input = isMultiline
+                ? document.createElement('textarea')
                 : document.createElement('input');
-            
+
             input.className = isMultiline ? 'editable-textarea' : 'editable-input';
             input.value = originalText;
             if (!isMultiline) input.type = 'text';
-            
+
             const computedStyle = window.getComputedStyle(el);
             input.style.fontSize = computedStyle.fontSize;
             input.style.fontWeight = computedStyle.fontWeight;
             input.style.color = computedStyle.color;
             input.style.textAlign = computedStyle.textAlign;
-            
+
             el.textContent = '';
             el.appendChild(input);
             input.focus();
             input.select();
-            
+
             const save = async () => {
                 const newValue = input.value.trim();
                 el.classList.remove('editing');
                 el.textContent = newValue || originalText;
-                
+
                 if (newValue !== originalText) {
                     try {
                         if (type === 'plinkk') {
@@ -877,7 +877,7 @@ function setupInlineEditing() {
                     }
                 }
             };
-            
+
             input.addEventListener('blur', save);
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !isMultiline) {
@@ -944,17 +944,17 @@ function closeAllPopovers() {
 
 function openLinkPopover(linkId, target) {
     closeAllPopovers();
-    
+
     const link = currentConfig?.links?.find(l => l.id === linkId);
     if (!link) return;
-    
+
     const rect = target.getBoundingClientRect();
     const popover = document.createElement('div');
     popover.className = 'edit-popover';
     popover.style.position = 'fixed';
     popover.style.top = Math.min(rect.bottom + 8, window.innerHeight - 300) + 'px';
     popover.style.left = Math.min(rect.left, window.innerWidth - 320) + 'px';
-    
+
     popover.innerHTML = `
         <div class="popover-header">
             <span class="popover-title">
@@ -984,15 +984,15 @@ function openLinkPopover(linkId, target) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(popover);
-    
+
     popover.querySelector('.popover-close').onclick = () => popover.remove();
-    
+
     popover.querySelector('#popoverLinkSave').onclick = async () => {
         const url = popover.querySelector('#popoverLinkUrl').value;
         const icon = popover.querySelector('#popoverLinkIcon').value;
-        
+
         const links = (currentConfig.links || []).map(l => {
             if (l.id === linkId) {
                 l.url = url;
@@ -1000,12 +1000,12 @@ function openLinkPopover(linkId, target) {
             }
             return l;
         });
-        
+
         await saveLinks(links);
         popover.remove();
         loadPlinkkPage();
     };
-    
+
     popover.querySelector('#popoverLinkDelete').onclick = async () => {
         if (confirm('Supprimer ce lien ?')) {
             await deleteLink(linkId);
@@ -1016,17 +1016,17 @@ function openLinkPopover(linkId, target) {
 
 function openLabelPopover(index, target) {
     closeAllPopovers();
-    
+
     const label = currentConfig?.labels?.[index];
     if (!label) return;
-    
+
     const rect = target.getBoundingClientRect();
     const popover = document.createElement('div');
     popover.className = 'edit-popover';
     popover.style.position = 'fixed';
     popover.style.top = Math.min(rect.bottom + 8, window.innerHeight - 280) + 'px';
     popover.style.left = Math.min(rect.left, window.innerWidth - 320) + 'px';
-    
+
     popover.innerHTML = `
         <div class="popover-header">
             <span class="popover-title">
@@ -1050,15 +1050,15 @@ function openLabelPopover(index, target) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(popover);
-    
+
     popover.querySelector('.popover-close').onclick = () => popover.remove();
-    
+
     popover.querySelector('#popoverLabelSave').onclick = async () => {
         const bgColor = popover.querySelector('#popoverLabelBg').value;
         const fontColor = popover.querySelector('#popoverLabelFont').value;
-        
+
         const labels = (currentConfig.labels || []).map((l, i) => {
             if (i === index) {
                 l.color = bgColor;
@@ -1066,12 +1066,12 @@ function openLabelPopover(index, target) {
             }
             return l;
         });
-        
+
         await saveLabels(labels);
         popover.remove();
         loadPlinkkPage();
     };
-    
+
     popover.querySelector('#popoverLabelDelete').onclick = async () => {
         if (confirm('Supprimer ce label ?')) {
             await deleteLabel(index);
@@ -1082,17 +1082,17 @@ function openLabelPopover(index, target) {
 
 function openSocialPopover(index, target) {
     closeAllPopovers();
-    
+
     const social = currentConfig?.socialIcon?.[index];
     if (!social) return;
-    
+
     const rect = target.getBoundingClientRect();
     const popover = document.createElement('div');
     popover.className = 'edit-popover';
     popover.style.position = 'fixed';
     popover.style.top = Math.min(rect.bottom + 8, window.innerHeight - 280) + 'px';
     popover.style.left = Math.min(rect.left, window.innerWidth - 320) + 'px';
-    
+
     popover.innerHTML = `
         <div class="popover-header">
             <span class="popover-title">
@@ -1116,15 +1116,15 @@ function openSocialPopover(index, target) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(popover);
-    
+
     popover.querySelector('.popover-close').onclick = () => popover.remove();
-    
+
     popover.querySelector('#popoverSocialSave').onclick = async () => {
         const url = popover.querySelector('#popoverSocialUrl').value;
         const icon = popover.querySelector('#popoverSocialIcon').value;
-        
+
         const socialIcon = (currentConfig.socialIcon || []).map((s, i) => {
             if (i === index) {
                 s.url = url;
@@ -1132,12 +1132,12 @@ function openSocialPopover(index, target) {
             }
             return s;
         });
-        
+
         await saveSocialIcons(socialIcon);
         popover.remove();
         loadPlinkkPage();
     };
-    
+
     popover.querySelector('#popoverSocialDelete').onclick = async () => {
         if (confirm('Supprimer ce réseau social ?')) {
             await deleteSocial(index);
@@ -1148,16 +1148,16 @@ function openSocialPopover(index, target) {
 
 function openStatusPopover(target) {
     closeAllPopovers();
-    
+
     const statusbar = currentConfig?.statusbar || {};
-    
+
     const rect = target.getBoundingClientRect();
     const popover = document.createElement('div');
     popover.className = 'edit-popover';
     popover.style.position = 'fixed';
     popover.style.top = Math.min(rect.bottom + 8, window.innerHeight - 280) + 'px';
     popover.style.left = Math.min(rect.left, window.innerWidth - 320) + 'px';
-    
+
     popover.innerHTML = `
         <div class="popover-header">
             <span class="popover-title">Modifier le statut</span>
@@ -1186,16 +1186,16 @@ function openStatusPopover(target) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(popover);
-    
+
     popover.querySelector('.popover-close').onclick = () => popover.remove();
-    
+
     popover.querySelector('#popoverStatusSave').onclick = async () => {
         const text = popover.querySelector('#popoverStatusText').value;
         const statusText = popover.querySelector('#popoverStatusIcon').value;
         const colorBg = popover.querySelector('#popoverStatusBg').value;
-        
+
         await saveStatusBar({ text, statusText, colorBg });
         popover.remove();
         loadPlinkkPage();
@@ -1215,12 +1215,12 @@ function openSocialPicker() {
 function initCanvas(canvasFileName) {
     const canvas = document.getElementById('animatedCanvas');
     if (!canvas) return;
-    
+
     const container = document.getElementById('plinkkRenderer');
     const rect = container ? container.getBoundingClientRect() : { width: 800, height: 600 };
     canvas.width = rect.width || 800;
     canvas.height = rect.height || 600;
-    
+
     // Load extensions declared in canvaConfig (e.g. SimplexNoise, animejs)
     const canvaConfig = window.__PLINKK_CFG__?.canvaData || [];
     const configItem = canvaConfig.find(c => c.fileNames === canvasFileName || c.fileName === canvasFileName);
@@ -1260,7 +1260,7 @@ function initCanvas(canvasFileName) {
 
             const script = document.createElement('script');
             script.src = '/public/canvaAnimation/' + canvasFileName;
-            script.onload = function() {
+            script.onload = function () {
                 try {
                     if (typeof runCanvasAnimation === 'function') {
                         runCanvasAnimation(canvas.getContext('2d'), canvas);
@@ -1276,7 +1276,7 @@ function initCanvas(canvasFileName) {
             // fallback: still try to load the main script
             const script = document.createElement('script');
             script.src = '/public/canvaAnimation/' + canvasFileName;
-            script.onload = function() {
+            script.onload = function () {
                 if (typeof runCanvasAnimation === 'function') {
                     runCanvasAnimation(canvas.getContext('2d'), canvas);
                 }
@@ -1286,8 +1286,8 @@ function initCanvas(canvasFileName) {
     }
 
     loadExtensionsAndScript();
-    
-    window.addEventListener('resize', function() {
+
+    window.addEventListener('resize', function () {
         if (container) {
             const newRect = container.getBoundingClientRect();
             canvas.width = newRect.width || 800;
@@ -1298,7 +1298,7 @@ function initCanvas(canvasFileName) {
 
 // ===== TOOLBAR HANDLERS =====
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Handlers toolbar
     const addLinkToolbar = qs('#addLinkToolbar');
     const addSocialToolbar = qs('#addSocialToolbar');
@@ -1306,17 +1306,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const togglePreviewToolbar = qs('#togglePreviewToolbar');
     const openThemeToolbar = qs('#openThemeToolbar');
     const openCanvasToolbar = qs('#openCanvasToolbar');
-    
+
     if (addLinkToolbar) addLinkToolbar.addEventListener('click', addNewLink);
     if (addSocialToolbar) addSocialToolbar.addEventListener('click', openSocialPicker);
     if (addLabelToolbar) addLabelToolbar.addEventListener('click', addNewLabel);
-    
+
     // Preview toggle
     function openPreview() {
         const container = qs('#previewContainer');
         const iframe = qs('#previewIframe');
         if (!container || !iframe) return;
-        const base = window.__PLINKK_FRONTEND_URL__ || ''; 
+        const base = window.__PLINKK_FRONTEND_URL__ || '';
         const path = window.__PLINKK_PREVIEW_PATH__ || ('/' + (window.__PLINKK_USER_ID__ || ''));
         iframe.src = base + path;
         container.classList.remove('hidden');
@@ -1349,7 +1349,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const closePreviewBtn = qs('#closePreviewBtn');
     if (closePreviewBtn) closePreviewBtn.addEventListener('click', closePreview);
-    
+
     function openPicker(kind) {
         const modal = qs('#pickerModal');
         const title = qs('#pickerTitle');
@@ -1405,7 +1405,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const previewStyle = computePreviewStyle(it, kind);
             const card = document.createElement('button');
             card.className = 'p-3 rounded bg-slate-800 hover:bg-slate-700 text-left w-full flex items-center gap-3';
-            const previewHtml = `<div class="picker-preview" style="${previewStyle}">${kind==='canvas' ? `<div style=\"padding:6px;color:white;font-size:11px\">${escapeHtml(it.animationName||it.fileNames||'')}</div>` : ''}</div>`;
+            const previewHtml = `<div class="picker-preview" style="${previewStyle}">${kind === 'canvas' ? `<div style=\"padding:6px;color:white;font-size:11px\">${escapeHtml(it.animationName || it.fileNames || '')}</div>` : ''}</div>`;
             card.innerHTML = `<div class="picker-card-content">${previewHtml}<div><div class="picker-card-title">${escapeHtml(name)}</div><div class="picker-card-desc">${escapeHtml(desc)}</div></div></div>`;
             card.addEventListener('click', async () => {
                 if (kind === 'theme') {
@@ -1433,10 +1433,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (openThemeToolbar) openThemeToolbar.addEventListener('click', () => openPicker('theme'));
     if (openCanvasToolbar) openCanvasToolbar.addEventListener('click', () => openPicker('canvas'));
-    
+
     // Fermer les popovers au clic extérieur
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.edit-popover') && 
+        if (!e.target.closest('.edit-popover') &&
             !e.target.closest('.edit-link-btn') &&
             !e.target.closest('.label-edit-btn') &&
             !e.target.closest('.social-edit-btn') &&
@@ -1444,7 +1444,7 @@ document.addEventListener('DOMContentLoaded', function() {
             closeAllPopovers();
         }
     });
-    
+
     // Charger la page
     loadPlinkkPage();
 });
