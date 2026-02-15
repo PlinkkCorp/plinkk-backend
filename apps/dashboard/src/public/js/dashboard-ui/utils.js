@@ -227,8 +227,7 @@ export function getIconClass(src) {
   const isBootstrap = s.includes('bi-') || s.includes('bootstrap-icons');
   const isJsDelivr = s.includes('cdn.jsdelivr.net');
 
-  if (isJsDelivr) return ' bi-invert';
-  if (isCatalogue || isBootstrap) return ' icon-cdn';
+  if (isCatalogue || isBootstrap || isJsDelivr) return ' icon-cdn';
   return '';
 }
 

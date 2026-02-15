@@ -26,13 +26,30 @@ body {
     background-attachment: fixed;
 }
 
+/* Profile Avatar Theme Fixes */
+.light-theme .plinkk-av-img {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0;
+}
+
+.dark-theme .plinkk-av-img {
+    background: #1e293b !important;
+    color: #ffffff !important;
+}
+
 /* Conteneur principal ultra-moderne */
+/* Icon inversion system */
 .bi-invert {
     filter: invert(1) brightness(2) grayscale(1);
     transition: filter 0.3s ease;
 }
 
-body:not(.dark-theme) .bi-invert {
+.dark-theme .bi-invert {
+    filter: invert(1) brightness(2) grayscale(1);
+}
+
+.light-theme .bi-invert {
     filter: none !important;
 }
 
@@ -40,8 +57,21 @@ body:not(.dark-theme) .bi-invert {
     transition: filter 0.3s ease;
 }
 
+.dark-theme .icon-cdn {
+    filter: none;
+}
+
+.light-theme .icon-cdn {
+    filter: invert(1) brightness(0) grayscale(1) !important;
+}
+
+/* Fallback for cases where theme class might be on body */
 body:not(.dark-theme) .icon-cdn {
     filter: invert(1) brightness(0) grayscale(1) !important;
+}
+
+body:not(.dark-theme) .bi-invert {
+    filter: none !important;
 }
 
 article {
@@ -70,6 +100,7 @@ article {
     animation: fadeInUp 1.2s cubic-bezier(0.165, 0.84, 0.44, 1);
     will-change: transform;
 }
+
 
 article::before {
     content: '';

@@ -457,7 +457,6 @@ export function createLinkBoxes(profileData) {
             if (themeConfig) {
                 const themeClass = themeConfig.themeClass;
                 discordBox.className = `button ${themeClass}`;
-                discordIcon.className = "link-icon";
                 discordIcon.src = themeConfig.icon;
                 discordIcon.loading = "lazy";
                 discordIcon.className = "icon";
@@ -476,6 +475,16 @@ export function createLinkBoxes(profileData) {
             discordIcon.src = String(link.icon || '').trim();
             discordIcon.alt = link.text;
             discordIcon.loading = "lazy";
+        }
+
+        // Add inversion logic
+        const src = (discordIcon.src || '').toLowerCase();
+        const isCatalogue = src.includes('s3.marvideo.fr') || src.includes('cdn.plinkk.fr') || src.startsWith('/icons/');
+        const isBootstrap = src.includes('bi-') || src.includes('bootstrap-icons');
+        const isJsDelivr = src.includes('cdn.jsdelivr.net');
+
+        if (isJsDelivr || isCatalogue || isBootstrap) {
+            discordIcon.classList.add('icon-cdn');
         }
         // Créer un conteneur pour le contenu principal (icône + texte)
         const mainContent = document.createElement("div");
@@ -746,6 +755,16 @@ export function createIconList(profileData) {
         }
         setSafeText(iconImg, iconData.icon);
         iconImg.alt = iconData.icon;
+
+        // Add inversion logic
+        const srcImg = (iconImg.src || '').toLowerCase();
+        const isCatalogueImg = srcImg.includes('s3.marvideo.fr') || srcImg.includes('cdn.plinkk.fr') || srcImg.includes('/icons/');
+        const isBootstrapImg = srcImg.includes('bi-') || srcImg.includes('bootstrap-icons');
+        const isJsDelivrImg = srcImg.includes('cdn.jsdelivr.net');
+
+        if (isJsDelivrImg || isCatalogueImg || isBootstrapImg) {
+            iconImg.classList.add('icon-cdn');
+        }
         iconImg.loading = "lazy";
         disableDrag(iconImg);
         disableContextMenuOnImage(iconImg);

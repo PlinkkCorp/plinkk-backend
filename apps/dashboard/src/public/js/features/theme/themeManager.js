@@ -15,7 +15,7 @@ let currentTheme = { ...DEFAULT_THEME };
 
 export function applyTheme(theme = {}) {
     const safeTheme = {};
-    
+
     for (const [key, value] of Object.entries(theme)) {
         if (isSafeColor(value)) {
             safeTheme[key] = value;
@@ -23,14 +23,23 @@ export function applyTheme(theme = {}) {
             safeTheme[key] = DEFAULT_THEME[key];
         }
     }
-    
+
     currentTheme = { ...DEFAULT_THEME, ...safeTheme };
-    
+
     const root = document.documentElement;
     for (const [key, value] of Object.entries(currentTheme)) {
         root.style.setProperty(`--theme-${key}`, value);
     }
-    
+
+    const isDark = !theme.background || theme.background === '#1a1a2e'; // Default to dark if not specified or matches DARK_THEME
+    if (isDark) {
+        root.classList.add('dark-theme');
+        root.classList.remove('light-theme');
+    } else {
+        root.classList.add('light-theme');
+        root.classList.remove('dark-theme');
+    }
+
     try {
         localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(currentTheme));
     } catch (e) {
