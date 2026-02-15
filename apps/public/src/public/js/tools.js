@@ -558,10 +558,10 @@ export function createLinkBoxes(profileData) {
         // Reset classes
         discordIcon.classList.remove('bi-invert', 'icon-cdn');
 
-        if (isCatalogue || isBootstrap) {
-            discordIcon.classList.add('icon-cdn');
-        } else if (isJsDelivr) {
+        if (isJsDelivr) {
             discordIcon.classList.add('bi-invert');
+        } else if (isCatalogue || isBootstrap) {
+            discordIcon.classList.add('icon-cdn');
         }
 
         // Créer un conteneur pour le contenu principal (icône + texte)
@@ -887,10 +887,10 @@ export function createIconList(profileData) {
         // Use consistent inversion classes
         iconImg.classList.remove('bi-invert', 'icon-cdn');
 
-        if (isCatalogue || isBootstrapIcon) {
-            iconImg.classList.add('icon-cdn');
-        } else if (isJsDelivr) {
+        if (isJsDelivr) {
             iconImg.classList.add('bi-invert');
+        } else if (isCatalogue || isBootstrapIcon) {
+            iconImg.classList.add('icon-cdn');
         }
         iconImg.loading = "lazy";
         disableDrag(iconImg);

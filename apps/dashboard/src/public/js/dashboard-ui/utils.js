@@ -226,8 +226,9 @@ export function getIconClass(src) {
   const isCatalogue = s.includes('s3.marvideo.fr') || s.includes('cdn.plinkk.fr') || s.includes('/icons/');
   const isBootstrap = s.includes('bi-') || s.includes('bootstrap-icons');
   const isJsDelivr = s.includes('cdn.jsdelivr.net');
-  if (isCatalogue || isBootstrap) return ' icon-cdn';
+
   if (isJsDelivr) return ' bi-invert';
+  if (isCatalogue || isBootstrap) return ' icon-cdn';
   return '';
 }
 
