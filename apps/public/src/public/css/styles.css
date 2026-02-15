@@ -193,10 +193,10 @@ p {
 
 .profile-container {
   position: relative;
-  width: 160px;
-  height: 160px;
-  min-width: 160px;
-  min-height: 160px;
+  width: 180px;
+  height: 180px;
+  min-width: 180px;
+  min-height: 180px;
   margin: 0 auto 20px auto;
   perspective: 1000px;
   filter: drop-shadow(0 16px 32px rgba(0, 0, 0, 0.4));
@@ -213,8 +213,8 @@ p {
 }
 
 .profile-pic-wrapper {
-  width: 160px;
-  height: 160px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   position: absolute;
   backface-visibility: hidden;
@@ -350,8 +350,8 @@ p {
   object-fit: cover;
   z-index: 3;
   cursor: pointer;
-  min-width: 160px;
-  min-height: 160px;
+  min-width: 180px;
+  min-height: 180px;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
@@ -447,8 +447,8 @@ p {
 }
 
 .profile-container a {
-  height: 160px;
-  width: 160px;
+  height: 180px;
+  width: 180px;
   display: block;
 }
 

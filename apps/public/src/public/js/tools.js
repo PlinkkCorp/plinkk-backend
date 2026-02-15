@@ -103,8 +103,8 @@ export function createProfileContainer(profileData) {
     profileIconWrapper.style.alignItems = "center";
     profileIconWrapper.style.justifyContent = "center";
     profileIconWrapper.style.borderRadius = "50%";
-    profileIconWrapper.style.width = "18px";
-    profileIconWrapper.style.height = "18px";
+    profileIconWrapper.style.width = "100px";
+    profileIconWrapper.style.height = "100px";
     profileIconWrapper.style.marginRight = "6px";
     profileIconWrapper.style.overflow = "hidden";
 
