@@ -1,4 +1,4 @@
-import { qs, el } from './utils.js';
+import { qs, el, getIconClass } from './utils.js';
 
 /* --- SHA256 Helper (Async) --- */
 async function sha256(message) {
@@ -266,15 +266,13 @@ export async function populateIconGrid(filterText) {
       card.setAttribute('type', 'button');
       card.className = 'p-3 rounded-xl border border-slate-800 bg-slate-950 hover:bg-slate-800 hover:border-violet-500/50 transition-all flex flex-col items-center justify-center gap-3';
 
-      const isBootstrap = i.slug && i.slug.startsWith('bi-');
-
       const imgContainer = document.createElement('div');
       imgContainer.className = 'h-10 w-10 rounded-lg bg-slate-800 animate-pulse shrink-0 flex items-center justify-center overflow-hidden';
 
       const img = document.createElement('img');
       img.src = i.url || `https://cdn.plinkk.fr/icons/${i.slug}.svg`;
       img.alt = i.displayName;
-      img.className = 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + (isBootstrap ? ' filter-white' : '');
+      img.className = 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + getIconClass(img.src);
       img.onload = () => {
         img.classList.remove('opacity-0');
         imgContainer.classList.remove('animate-pulse', 'bg-slate-800');

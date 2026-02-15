@@ -27,6 +27,23 @@ body {
 }
 
 /* Conteneur principal ultra-moderne */
+.bi-invert {
+    filter: invert(1) brightness(2) grayscale(1);
+    transition: filter 0.3s ease;
+}
+
+body:not(.dark-theme) .bi-invert {
+    filter: none !important;
+}
+
+.icon-cdn {
+    transition: filter 0.3s ease;
+}
+
+body:not(.dark-theme) .icon-cdn {
+    filter: invert(1) brightness(0) grayscale(1) !important;
+}
+
 article {
     position: relative;
     text-align: center;

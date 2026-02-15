@@ -1,6 +1,6 @@
-import { el, srOnly, trashButton, createGripSVG, enableDragHandle, isUrlish } from './utils.js';
+import { el, srOnly, trashButton, createGripSVG, enableDragHandle, isUrlish, getIconClass } from './utils.js';
 import { openIconModal } from './pickers.js';
-import { btnIconThemeConfig } from '../config/btnIconThemeConfig.js';
+import { btnIconThemeConfig } from '../../config/btnIconThemeConfig.js';
 
 export function renderSkeletons(container, count = 3) {
   if (!container) return;
@@ -272,9 +272,9 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
       grip.appendChild(createGripSVG(16));
 
       const iconContainer = el('div', { class: 'h-10 w-10 rounded bg-slate-800 animate-pulse shrink-0 overflow-hidden border border-slate-700 flex items-center justify-center' });
-      const isBootstrap = s.icon && s.icon.startsWith('bi-');
+      const srcUrl = s.icon ? (isUrlish(s.icon) ? s.icon : `https://cdn.plinkk.fr/icons/${s.icon}.svg`) : '';
       const iconImg = el('img', {
-        class: 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + (isBootstrap ? ' filter-white' : '')
+        class: 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + getIconClass(srcUrl)
       });
       iconImg.onload = () => { iconImg.classList.remove('opacity-0'); iconContainer.classList.remove('animate-pulse'); };
       iconImg.onerror = () => { iconContainer.classList.remove('animate-pulse'); };
@@ -1097,9 +1097,8 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
     grip.appendChild(createGripSVG(16));
 
     const iconContainer = el('div', { class: 'h-10 w-10 rounded bg-slate-800 animate-pulse shrink-0 overflow-hidden border border-slate-700 flex items-center justify-center' });
-    const isBootstrap = l.icon && l.icon.includes('bi-');
     const iconImg = el('img', {
-      class: 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + (isBootstrap ? ' filter-white' : '')
+      class: 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + getIconClass(l.icon)
     });
     iconImg.onload = () => { iconImg.classList.remove('opacity-0'); iconContainer.classList.remove('animate-pulse'); };
     iconImg.onerror = () => { iconContainer.classList.remove('animate-pulse'); };

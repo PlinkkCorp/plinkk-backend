@@ -75,7 +75,7 @@ export function createGripSVG(size = 20) {
   return svg;
 }
 
-export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, renderFn, scheduleAutoSave = () => {}) {
+export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, renderFn, scheduleAutoSave = () => { }) {
   let dragging = false;
   let ghost = null;
   let placeholder = null;
@@ -167,7 +167,7 @@ export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, rende
 
     const rows = Array.from(containerEl.children).filter((c) => c !== ghost && c !== placeholder && isDraggableRow(c));
     const ghostMidY = y + startRect.height / 2;
-    let newIndex = rows.length; 
+    let newIndex = rows.length;
     for (let i = 0; i < rows.length; i++) {
       const r = rows[i].getBoundingClientRect();
       const mid = r.top + r.height / 2;
@@ -218,6 +218,17 @@ export function isUrlish(v) {
   if (!v || typeof v !== 'string') return false;
   const s = v.trim();
   return s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/') || s.startsWith('data:');
+}
+
+export function getIconClass(src) {
+  if (!src) return '';
+  const s = src.toLowerCase();
+  const isCatalogue = s.includes('s3.marvideo.fr') || s.includes('cdn.plinkk.fr') || s.includes('/icons/');
+  const isBootstrap = s.includes('bi-') || s.includes('bootstrap-icons');
+  const isJsDelivr = s.includes('cdn.jsdelivr.net');
+  if (isCatalogue || isBootstrap) return ' icon-cdn';
+  if (isJsDelivr) return ' bi-invert';
+  return '';
 }
 
 export function fillSelect(selectEl, items, getLabel) {

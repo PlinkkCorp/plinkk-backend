@@ -549,16 +549,19 @@ export function createLinkBoxes(profileData) {
             discordIcon.classList.add("link-icon");
         }
 
-        // Selective inversion for Bootstrap and internal icons
+        // Selective inversion logic based on source
         const src = (discordIcon.src || '').toLowerCase();
-        const isCatalogue = src.includes('s3.marvideo.fr') || src.startsWith('/icons/');
-        const isBootstrap = src.includes('bi-');
+        const isCatalogue = src.includes('s3.marvideo.fr') || src.includes('cdn.plinkk.fr') || src.startsWith('/icons/');
+        const isBootstrap = src.includes('bi-') || src.includes('bootstrap-icons');
+        const isJsDelivr = src.includes('cdn.jsdelivr.net');
 
-        // Use the specific requested class for inversion
+        // Reset classes
+        discordIcon.classList.remove('bi-invert', 'icon-cdn');
+
         if (isCatalogue || isBootstrap) {
+            discordIcon.classList.add('icon-cdn');
+        } else if (isJsDelivr) {
             discordIcon.classList.add('bi-invert');
-        } else {
-            discordIcon.classList.remove('bi-invert');
         }
 
         // Créer un conteneur pour le contenu principal (icône + texte)
@@ -877,14 +880,17 @@ export function createIconList(profileData) {
         setSafeText(iconImg, iconData.icon);
         iconImg.alt = iconData.icon;
         const src = (iconImg.src || '').toLowerCase();
-        const isCatalogue = src.includes('s3.marvideo.fr') || src.startsWith('/icons/');
-        const isBootstrapIcon = isBootstrap || src.includes('bi-');
+        const isCatalogue = src.includes('s3.marvideo.fr') || src.includes('cdn.plinkk.fr') || src.startsWith('/icons/');
+        const isBootstrapIcon = isBootstrap || src.includes('bi-') || src.includes('bootstrap-icons');
+        const isJsDelivr = src.includes('cdn.jsdelivr.net');
 
-        // Use the bi-invert class for theme-aware icons
+        // Use consistent inversion classes
+        iconImg.classList.remove('bi-invert', 'icon-cdn');
+
         if (isCatalogue || isBootstrapIcon) {
+            iconImg.classList.add('icon-cdn');
+        } else if (isJsDelivr) {
             iconImg.classList.add('bi-invert');
-        } else {
-            iconImg.classList.remove('bi-invert');
         }
         iconImg.loading = "lazy";
         disableDrag(iconImg);

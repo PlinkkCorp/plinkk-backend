@@ -372,8 +372,8 @@
                                                 br='border-violet-500/30' ; tx='text-violet-200' ; ic='text-violet-400'
                                                 ; } %>
                                                 <div class="pointer-events-auto rounded-xl border <%= br %> <%= bg %> shadow-2xl backdrop-blur-xl overflow-hidden site-msg-item animate-slide-in-right"
-                                                    data-msg-id="\u003c%- __SM__.id %\u003e"
-                                                    data-msg="\u003c%- JSON.stringify(__SM__ || null).replace(/'/g, '&#39;') %\u003e">
+                                                    data-msg-id="<%- __SM__.id %>"
+                                                    data-msg="<%- JSON.stringify(__SM__ || null).replace(/'/g, '&#39;') %>">
                                                     <div class="flex items-start gap-3 p-4 <%= tx %>">
                                                         <div class="<%= ic %> shrink-0 mt-0.5">
                                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -425,8 +425,8 @@
                                                         pBg='bg-violet-500/10' ; pBr='border-violet-500/20' ;
                                                         pTx='text-violet-200' ; pIc='text-violet-400' ; } %>
                                                         <div class="fixed inset-0 z-[70] flex items-center justify-center p-4 site-msg-item"
-                                                            id="sitePopupWrap" data-msg-id="\u003c%- __POP__.id %\u003e"
-                                                            data-msg="\u003c%- JSON.stringify(__POP__ || null).replace(/'/g, '&#39;') %\u003e">
+                                                            id="sitePopupWrap" data-msg-id="<%- __POP__.id %>"
+                                                            data-msg="<%- JSON.stringify(__POP__ || null).replace(/'/g, '&#39;') %>">
                                                             <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
                                                                 id="sitePopupBackdrop"></div>
                                                             <div
