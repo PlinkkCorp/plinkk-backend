@@ -1093,7 +1093,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
     row.dataset.dragIndex = String(idx);
 
     const left = el('div', { class: 'flex items-center gap-3 min-w-0' });
-    const grip = el('button', { type: 'button', class: 'h-8 w-8 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-400 cursor-grab', title: 'Déplacer' });
+    const grip = el('button', { type: 'button', class: 'h-8 w-8 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-400 cursor-grab touch-none', title: 'Déplacer', style: 'touch-action: none;' });
     grip.appendChild(createGripSVG(16));
 
     const iconContainer = el('div', { class: 'h-10 w-10 rounded bg-slate-800 animate-pulse shrink-0 overflow-hidden border border-slate-700 flex items-center justify-center' });
@@ -1191,7 +1191,7 @@ export function renderLayout({ container, order, scheduleAutoSave }) {
     const row = el('div', { class: 'flex items-center gap-3 w-full rounded-xl border border-slate-800 bg-slate-900/50 px-3 py-3 select-none hover:border-slate-700 transition-colors' });
     row.dataset.dragIndex = String(idx);
 
-    const gripBtn = el('button', { type: 'button', class: 'h-8 w-8 inline-flex items-center justify-center rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-400 cursor-grab active:cursor-grabbing transition-colors', title: 'Déplacer', 'aria-label': 'Déplacer' });
+    const gripBtn = el('button', { type: 'button', class: 'h-8 w-8 inline-flex items-center justify-center rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-400 cursor-grab active:cursor-grabbing transition-colors touch-none', title: 'Déplacer', 'aria-label': 'Déplacer', style: 'touch-action: none;' });
     gripBtn.appendChild(createGripSVG(16));
 
     const label = el('div', { class: 'text-sm font-medium text-slate-200' });

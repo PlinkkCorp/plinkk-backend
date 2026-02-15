@@ -218,7 +218,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           showDescription: l.showDescription ?? undefined,
           categoryId: l.categoryId ?? null,
           // @ts-ignore - Field added to schema but client generation might be pending
-          buttonTheme: l.buttonTheme || "system",
+          // buttonTheme: l.buttonTheme || "system",
         };
 
         if (l.id && existingIds.has(l.id)) {

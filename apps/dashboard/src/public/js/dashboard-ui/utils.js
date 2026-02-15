@@ -101,9 +101,11 @@ export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, rende
 
   function cleanup() {
     dragging = false;
-    document.removeEventListener('pointermove', onPointerMove);
-    document.removeEventListener('pointerup', onPointerUp);
-    document.removeEventListener('pointercancel', onPointerUp);
+    if (handleEl) {
+      handleEl.removeEventListener('pointermove', onPointerMove);
+      handleEl.removeEventListener('pointerup', onPointerUp);
+      handleEl.removeEventListener('pointercancel', onPointerUp);
+    }
     if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost);
     ghost = null;
     if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
@@ -116,6 +118,7 @@ export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, rende
 
   function onPointerDown(e) {
     if (dragging) return;
+    if (e.button !== 0) return; // Only left click
     e.preventDefault();
     e.stopPropagation();
 
@@ -125,6 +128,11 @@ export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, rende
     offsetY = e.clientY - startRect.top;
     prevUserSelect = document.body.style.userSelect || '';
     document.body.style.userSelect = 'none';
+
+    handleEl.setPointerCapture(e.pointerId);
+    handleEl.addEventListener('pointermove', onPointerMove);
+    handleEl.addEventListener('pointerup', onPointerUp);
+    handleEl.addEventListener('pointercancel', onPointerUp);
 
     ghost = rowEl.cloneNode(true);
     ghost.style.position = 'fixed';
@@ -149,10 +157,6 @@ export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, rende
 
     startIndex = Number(rowEl.dataset.dragIndex || '-1');
     targetIndex = startIndex;
-
-    document.addEventListener('pointermove', onPointerMove, { passive: false });
-    document.addEventListener('pointerup', onPointerUp, { passive: false });
-    document.addEventListener('pointercancel', onPointerUp, { passive: false });
   }
 
   function onPointerMove(e) {
@@ -165,18 +169,52 @@ export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, rende
       ghost.style.top = `${y}px`;
     }
 
-    const rows = Array.from(containerEl.children).filter((c) => c !== ghost && c !== placeholder && isDraggableRow(c));
+    // ghost height/2 for center
     const ghostMidY = y + startRect.height / 2;
+
+    const rows = Array.from(containerEl.children).filter((c) => c !== ghost && c !== placeholder && isDraggableRow(c));
     let newIndex = rows.length;
+
+    // We can rely on visual position of rows (except rowEl which is hidden)
+    // If we skip rowEl (mid=0), newIndex might start higher?
+    // Let's stick to simple geometry: find the first row whose CENTER is below ghost center.
+    // That means we are ABOVE that row.
     for (let i = 0; i < rows.length; i++) {
       const r = rows[i].getBoundingClientRect();
+      // If element is hidden (our rowEl), r.height is 0. mid is 0.
+      // 0 is usually < ghostMidY (unless dragging at very top).
+      // So condition (ghostMidY < 0) matches only if dragged VERY high?
+      // Actually usually ghostMidY is positive.
+      // So (ghostMidY < 0) is False.
+      // So we skip it. This is correct behavior (treat it as "above" us).
+      // If we skip it, we continue to check next row.
       const mid = r.top + r.height / 2;
-      if (ghostMidY < mid) { newIndex = i; break; }
+      if (r.height > 0 && ghostMidY < mid) {
+        newIndex = i;
+        break;
+      }
     }
+
+    // Logic check: if rows contains [A, B, C]. A is hidden.
+    // i=0 (A): height=0. skip.
+    // i=1 (B): valid mid.
+    // If ghost < mid(B) -> newIndex = 1.
+    // Insert before B.
+    // placeholder is inserted before B.
+    // Layout: [Placeholder, B, C]. 
+    // Wait. A is hidden.
+    // DOM: [Placeholder, A(hidden), B, C]. (If inserted before A?)
+    // If we call InsertBefore(Placeholder, rows[1]=B).
+    // DOM: [A(hidden), Placeholder, B, C].
+    // Visually: Placeholder, B, C.
+    // Correct.
+
     const currentIndex = Array.from(containerEl.children).indexOf(placeholder);
     const desiredEl = rows[newIndex];
     if (desiredEl && containerEl.contains(desiredEl)) {
-      if (currentIndex > -1) containerEl.insertBefore(placeholder, desiredEl);
+      if (currentIndex > -1 && placeholder !== desiredEl) {
+        containerEl.insertBefore(placeholder, desiredEl);
+      }
     } else {
       containerEl.appendChild(placeholder);
     }
@@ -186,18 +224,59 @@ export function enableDragHandle(handleEl, rowEl, containerEl, itemsArray, rende
   function onPointerUp(e) {
     if (!dragging) return;
     e.preventDefault();
+
+    // release capture implicit
+    // handleEl.releasePointerCapture(e.pointerId);
+
     let desiredIndex = Math.max(0, Math.min(targetIndex, itemsArray.length));
     const originalIdx = Number(rowEl.dataset.dragIndex || '-1');
 
     cleanup();
 
-    if (originalIdx >= 0 && originalIdx < itemsArray.length && desiredIndex !== originalIdx) {
-      const item = itemsArray.splice(originalIdx, 1)[0];
-      if (originalIdx < desiredIndex) desiredIndex -= 1;
-      const finalIndex = Math.max(0, Math.min(desiredIndex, itemsArray.length));
-      itemsArray.splice(finalIndex, 0, item);
-      renderFn(itemsArray);
-      scheduleAutoSave();
+    if (originalIdx >= 0 && originalIdx < itemsArray.length) {
+      // Adjustment logic:
+      // If we moved item DOWN (original < desired), we shifted subsequent items UP.
+      // The desiredIndex (from rows) assumes strictly "insert at this index in the condensed list".
+      // Example: [A, B, C]. Move A to after B.
+      // rows=[A, B, C]. A hidden.
+      // ghost below B.
+      // i=0(A) skip. i=1(B) skip. i=2(C). ghost < mid(C).
+      // newIndex = 2.
+      // targetIndex = 2.
+      // desiredIndex = 2.
+      // Remove A (0). List [B, C].
+      // Insert at 2? [B, C, A].
+      // Wait. A was at 0. B at 1. C at 2.
+      // If we insert at 2, we get [B, C, A].
+      // This means A moved after C.
+      // But we were between B and C!
+      // If we are between B and C, ghost < mid(C) is TRUE.
+      // So newIndex = 2.
+      // So insert at 2.
+      // [B, C] -> insert at 2 -> [B, C, A].
+      // This puts A AFTER C.
+      // ERROR.
+      // If strictly before C, it should be index 1 in [B, C].
+      // In [B, C], B is 0, C is 1.
+      // So we want index 1.
+      // But newIndex was 2 (index in [A, B, C]).
+      // So if original (0) < target (2), we must subtract 1?
+      // 2 - 1 = 1.
+      // Insert at 1 -> [B, A, C].
+      // Correct!
+
+      if (desiredIndex > originalIdx) {
+        desiredIndex -= 1;
+      }
+
+      if (desiredIndex !== originalIdx) {
+        const item = itemsArray.splice(originalIdx, 1)[0];
+        itemsArray.splice(desiredIndex, 0, item);
+        renderFn(itemsArray);
+        scheduleAutoSave();
+      } else {
+        renderFn(itemsArray);
+      }
     } else {
       renderFn(itemsArray);
     }
