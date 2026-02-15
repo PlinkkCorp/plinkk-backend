@@ -227,7 +227,8 @@ export function getIconClass(src) {
   const isBootstrap = s.includes('bi-') || s.includes('bootstrap-icons');
   const isJsDelivr = s.includes('cdn.jsdelivr.net');
 
-  if (isCatalogue || isBootstrap || isJsDelivr) return ' icon-cdn';
+  if (isCatalogue || isBootstrap) return ' icon-cdn';
+  if (isJsDelivr) return ' icon-black-source';
   return '';
 }
 

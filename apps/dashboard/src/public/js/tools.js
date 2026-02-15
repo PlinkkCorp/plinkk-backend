@@ -483,8 +483,10 @@ export function createLinkBoxes(profileData) {
         const isBootstrap = src.includes('bi-') || src.includes('bootstrap-icons');
         const isJsDelivr = src.includes('cdn.jsdelivr.net');
 
-        if (isJsDelivr || isCatalogue || isBootstrap) {
+        if (isCatalogue || isBootstrap) {
             discordIcon.classList.add('icon-cdn');
+        } else if (isJsDelivr) {
+            discordIcon.classList.add('icon-black-source');
         }
         // Créer un conteneur pour le contenu principal (icône + texte)
         const mainContent = document.createElement("div");
@@ -762,8 +764,10 @@ export function createIconList(profileData) {
         const isBootstrapImg = srcImg.includes('bi-') || srcImg.includes('bootstrap-icons');
         const isJsDelivrImg = srcImg.includes('cdn.jsdelivr.net');
 
-        if (isJsDelivrImg || isCatalogueImg || isBootstrapImg) {
+        if (isCatalogueImg || isBootstrapImg) {
             iconImg.classList.add('icon-cdn');
+        } else if (isJsDelivrImg) {
+            iconImg.classList.add('icon-black-source');
         }
         iconImg.loading = "lazy";
         disableDrag(iconImg);

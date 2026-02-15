@@ -558,8 +558,10 @@ export function createLinkBoxes(profileData) {
         // Reset classes
         discordIcon.classList.remove('bi-invert', 'icon-cdn');
 
-        if (isJsDelivr || isCatalogue || isBootstrap) {
+        if (isCatalogue || isBootstrap) {
             discordIcon.classList.add('icon-cdn');
+        } else if (isJsDelivr) {
+            discordIcon.classList.add('icon-black-source');
         }
 
         // Créer un conteneur pour le contenu principal (icône + texte)

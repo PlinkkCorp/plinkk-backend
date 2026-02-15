@@ -31,6 +31,23 @@ body:not(.dark-theme) .icon-cdn {
   filter: invert(1) brightness(0) grayscale(1) !important;
 }
 
+body.dark-theme .icon-cdn {
+  filter: none;
+}
+
+/* New class for black source icons (like jsdelivr) */
+.icon-black-source {
+  transition: filter 0.3s ease;
+}
+
+body:not(.dark-theme) .icon-black-source {
+  filter: none !important;
+}
+
+body.dark-theme .icon-black-source {
+  filter: invert(1) brightness(2) grayscale(1) !important;
+}
+
 .filter-white {
   filter: invert(1) brightness(2) grayscale(1);
 }
