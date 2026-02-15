@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // Rendu des sections selon l'ordre choisi (layoutOrder) si présent
     try {
-        const DEFAULT_LAYOUT = ['profile','username','statusbar','labels','social','email','links'];
+        const DEFAULT_LAYOUT = ['profile', 'username', 'statusbar', 'labels', 'social', 'email', 'links'];
         let order = Array.isArray(profileData.layoutOrder) ? profileData.layoutOrder.slice() : DEFAULT_LAYOUT;
         const KNOWN = new Set(DEFAULT_LAYOUT);
         // Normaliser: garder seulement les connus puis ajouter les manquants dans l'ordre par défaut
@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     } catch (e) { }
     // Désactiver le néon globalement (override temporaire)
-    try { profileData.neonEnable = 0; } catch(_) {}
+
     if (!animations || !animations.length) {
         console.warn("Animations array is empty or not defined.");
     }

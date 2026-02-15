@@ -152,8 +152,8 @@ p {
 
 /* Wrapper pour le système de logo */
 .profile-pic-wrapper {
-    width: 100%;
-    height: 100%;
+    width: 140px;
+    height: 140px;
     border-radius: 50%;
     position: absolute;
     backface-visibility: hidden;
@@ -161,7 +161,6 @@ p {
     top: 0;
     left: 0;
     aspect-ratio: 1 / 1;
-    min-height: 140px;
 }
 
 /* Image de profil sans animation */
