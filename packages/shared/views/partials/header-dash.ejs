@@ -292,10 +292,10 @@
                                         (lvl==='error' || lvl==='critical' ) { bg='bg-rose-500/10' ;
                                         br='border-rose-500/20' ; tx='text-rose-200' ; ic='text-rose-400' ; } else if
                                         (maintenanceLevel) { bg='bg-violet-500/10' ; br='border-violet-500/20' ;
-                                        tx='text-violet-200' ; ic='text-violet-400' ; } %>
+                                        tx='text-violet-200' ; ic='text-violet-400' ; } const
+                                        msgJson=JSON.stringify(__SM__ || null).replace(/'/g, "&#39;" ); %>
                                         <div class="flex items-center gap-3 px-4 py-2.5 rounded-xl border <%= br %> <%= bg %> <%= tx %> text-sm site-msg-item"
-                                            data-msg-id="<%- __SM__.id %>"
-                                            data-msg='<%- JSON.stringify(__SM__ || null).replace(/' /g, "&#39;" ) %>'>
+                                            data-msg-id="<%- __SM__.id %>" data-msg='<%- msgJson %>'>
                                             <div class="<%= ic %> shrink-0">
                                                 <% if (lvl==='success' ) { %>
                                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -370,10 +370,10 @@
                                                 br='border-rose-500/30' ; tx='text-rose-200' ; ic='text-rose-400' ; }
                                                 else if (maintenanceLevel) { bg='bg-[#0f1a30]' ;
                                                 br='border-violet-500/30' ; tx='text-violet-200' ; ic='text-violet-400'
-                                                ; } %>
+                                                ; } const msgJson=JSON.stringify(__SM__ || null).replace(/'/g, "&#39;"
+                                                ); %>
                                                 <div class="pointer-events-auto rounded-xl border <%= br %> <%= bg %> shadow-2xl backdrop-blur-xl overflow-hidden site-msg-item animate-slide-in-right"
-                                                    data-msg-id="<%- __SM__.id %>"
-                                                    data-msg="<%- JSON.stringify(__SM__ || null).replace(/'/g, '&#39;') %>">
+                                                    data-msg-id="<%- __SM__.id %>" data-msg='<%- msgJson %>'>
                                                     <div class="flex items-start gap-3 p-4 <%= tx %>">
                                                         <div class="<%= ic %> shrink-0 mt-0.5">
                                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -423,10 +423,12 @@
                                                         pBr='border-rose-500/20' ; pTx='text-rose-200' ;
                                                         pIc='text-rose-400' ; } else if (pLvl==='maintenance' ) {
                                                         pBg='bg-violet-500/10' ; pBr='border-violet-500/20' ;
-                                                        pTx='text-violet-200' ; pIc='text-violet-400' ; } %>
+                                                        pTx='text-violet-200' ; pIc='text-violet-400' ; } const
+                                                        popJson=JSON.stringify(__POP__ || null).replace(/'/g, "&#39;" );
+                                                        %>
                                                         <div class="fixed inset-0 z-[70] flex items-center justify-center p-4 site-msg-item"
                                                             id="sitePopupWrap" data-msg-id="<%- __POP__.id %>"
-                                                            data-msg="<%- JSON.stringify(__POP__ || null).replace(/'/g, '&#39;') %>">
+                                                            data-msg='<%- popJson %>'>
                                                             <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
                                                                 id="sitePopupBackdrop"></div>
                                                             <div
