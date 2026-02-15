@@ -1,5 +1,6 @@
 import { el, srOnly, trashButton, createGripSVG, enableDragHandle, isUrlish } from './utils.js';
 import { openIconModal } from './pickers.js';
+import { btnIconThemeConfig } from '../config/btnIconThemeConfig.js';
 
 export function renderSkeletons(container, count = 3) {
   if (!container) return;
@@ -51,17 +52,17 @@ export function renderBackground({ container, addBtn, colors, scheduleAutoSave }
     );
   } else {
     colors.forEach((c, idx) => {
-  const row = el('div', { class: 'flex items-center gap-1 w-full' });
+      const row = el('div', { class: 'flex items-center gap-1 w-full' });
       row.dataset.dragIndex = String(idx);
-  const gripBtn = el('button', { type: 'button', class: 'h-9 w-9 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 mr-1', title: 'Déplacer', 'aria-label': 'Déplacer' });
-  gripBtn.style.cursor = 'grab';
+      const gripBtn = el('button', { type: 'button', class: 'h-9 w-9 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 mr-1', title: 'Déplacer', 'aria-label': 'Déplacer' });
+      gripBtn.style.cursor = 'grab';
       gripBtn.appendChild(createGripSVG(18));
       const color = el('input', { type: 'color', value: c, class: 'h-10 w-full rounded bg-slate-900 border border-slate-800 p-1 flex-1' });
       const rm = trashButton(() => { colors.splice(idx, 1); renderBackground({ container, addBtn, colors, scheduleAutoSave }); scheduleAutoSave(); });
       color.addEventListener('input', () => { colors[idx] = color.value; scheduleAutoSave(); });
-  const rmWrap = el('div', { class: 'w-10 flex justify-end' }); rmWrap.append(rm);
+      const rmWrap = el('div', { class: 'w-10 flex justify-end' }); rmWrap.append(rm);
       row.append(gripBtn, color, rmWrap);
-      try { enableDragHandle(gripBtn, row, container, colors, () => renderBackground({ container, addBtn, colors, scheduleAutoSave }), scheduleAutoSave); } catch {}
+      try { enableDragHandle(gripBtn, row, container, colors, () => renderBackground({ container, addBtn, colors, scheduleAutoSave }), scheduleAutoSave); } catch { }
       container.appendChild(row);
     });
   }
@@ -176,7 +177,7 @@ export function renderLabels({ container, addBtn, labels, scheduleAutoSave }) {
       rmWrap.append(rm);
 
       row.append(dataWrapper, color, fontColor, pickWrap, rmWrap);
-      try { enableDragHandle(gripBtn, row, container, labels, () => renderLabels({ container, addBtn, labels, scheduleAutoSave }), scheduleAutoSave); } catch {}
+      try { enableDragHandle(gripBtn, row, container, labels, () => renderLabels({ container, addBtn, labels, scheduleAutoSave }), scheduleAutoSave); } catch { }
       container.appendChild(row);
     });
   }
@@ -249,7 +250,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
     { id: 'vrchat', name: 'VRChat', pattern: 'https://vrchat.com/home/user/{handle}', iconSlug: 'vrchat' },
     { id: 'line', name: 'LINE', pattern: 'https://line.me/ti/p/{handle}', iconSlug: 'line' },
   ];
-  try { window.__SOCIAL_PLATFORM_LIST__ = SOCIAL_PLATFORMS; } catch (e) {}
+  try { window.__SOCIAL_PLATFORM_LIST__ = SOCIAL_PLATFORMS; } catch (e) { }
 
   if (!Array.isArray(socials) || socials.length === 0) {
     container.append(
@@ -272,7 +273,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
 
       const iconContainer = el('div', { class: 'h-10 w-10 rounded bg-slate-800 animate-pulse shrink-0 overflow-hidden border border-slate-700 flex items-center justify-center' });
       const isBootstrap = s.icon && s.icon.startsWith('bi-');
-      const iconImg = el('img', { 
+      const iconImg = el('img', {
         class: 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + (isBootstrap ? ' filter-white' : '')
       });
       iconImg.onload = () => { iconImg.classList.remove('opacity-0'); iconContainer.classList.remove('animate-pulse'); };
@@ -295,7 +296,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
       function openEditor() {
         const editor = el('div', { class: 'flex flex-col md:flex-row items-center gap-2 p-2 bg-slate-950 rounded border border-slate-800' });
         const gripBtn = el('button', { type: 'button', class: 'h-9 w-9 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 ml-0 self-center shrink-0', title: 'Déplacer' }); gripBtn.style.cursor = 'grab'; gripBtn.appendChild(createGripSVG(18));
-        const urlSourceSel = el('select', { class: 'h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm w-full md:w-40' }); ['custom'].forEach(v => urlSourceSel.appendChild(el('option', { value: v, text: 'Personnalisé' })));
+        const urlSourceSel = el('select', { class: 'h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm w-full md:w-40' });['custom'].forEach(v => urlSourceSel.appendChild(el('option', { value: v, text: 'Personnalisé' })));
         const urlWrap = el('div', { class: 'relative w-full md:w-1/3' });
         const url = el('input', { type: 'url', value: s.url || '', class: 'pl-3 pr-20 py-2 w-full rounded bg-slate-900 border border-slate-800' });
         const urlPickBtn = el('button', { type: 'button', text: 'Choisir', class: 'absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 border border-slate-700 hover:bg-slate-700' });
@@ -304,7 +305,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
         const iconWrap = el('div', { class: 'flex items-center gap-2 w-full md:w-1/3' });
         const iconPreview = el('img', { class: 'h-8 w-8 rounded bg-slate-800 border border-slate-700' });
         const sourceSel = el('select', { class: 'h-10 px-2 rounded bg-slate-900 border border-slate-800 text-sm' }, []);
-        ['catalog','url','upload'].forEach(v => sourceSel.appendChild(el('option', { value: v, text: v === 'catalog' ? 'Librairie' : v === 'url' ? 'Lien' : 'Importer' })));
+        ['catalog', 'url', 'upload'].forEach(v => sourceSel.appendChild(el('option', { value: v, text: v === 'catalog' ? 'Librairie' : v === 'url' ? 'Lien' : 'Importer' })));
         const catalogWrap = el('div', { class: 'relative flex-1' });
         const iconName = el('input', { type: 'text', value: s.icon || '', class: 'pl-3 pr-20 py-2 w-full rounded bg-slate-900 border border-slate-800 cursor-pointer', placeholder: 'Cliquer pour choisir', readonly: 'true', tabindex: '0' });
         const pickBtn = el('button', { class: 'absolute right-1 top-1 h-8 px-2 text-xs rounded bg-slate-800 border border-slate-700 hover:bg-slate-700', text: 'Choisir', type: 'button' }); catalogWrap.append(iconName, pickBtn);
@@ -351,18 +352,18 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
         e.preventDefault(); e.stopPropagation();
         try {
           if (window && window.__OPEN_SOCIAL_MODAL__) {
-              const prefill = { text: s.name || s.title || '', url: s.url || '', icon: s.icon || '', description: s.description || '', categoryId: s.categoryId || null, newTab: !!s.newTab };
-              window.__OPEN_SOCIAL_MODAL__(null, {
-                prefill,
-                onSave: (payload) => {
-                    try { s.url = payload.url; s.icon = payload.icon; s.newTab = !!payload.newTab; } catch (e) {}
-                    renderSocial({ container, addBtn, socials, scheduleAutoSave });
-                    scheduleAutoSave();
-                  }
-              });
-              return;
-            }
-        } catch (err) {}
+            const prefill = { text: s.name || s.title || '', url: s.url || '', icon: s.icon || '', description: s.description || '', categoryId: s.categoryId || null, newTab: !!s.newTab };
+            window.__OPEN_SOCIAL_MODAL__(null, {
+              prefill,
+              onSave: (payload) => {
+                try { s.url = payload.url; s.icon = payload.icon; s.newTab = !!payload.newTab; } catch (e) { }
+                renderSocial({ container, addBtn, socials, scheduleAutoSave });
+                scheduleAutoSave();
+              }
+            });
+            return;
+          }
+        } catch (err) { }
         // fallback to inline editor
         openEditor();
       });
@@ -370,7 +371,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
 
       actions.append(editBtn, dupBtn, rm);
       row.append(left, actions);
-      try { enableDragHandle(grip, row, container, socials, () => renderSocial({ container, addBtn, socials, scheduleAutoSave }), scheduleAutoSave); } catch {}
+      try { enableDragHandle(grip, row, container, socials, () => renderSocial({ container, addBtn, socials, scheduleAutoSave }), scheduleAutoSave); } catch { }
       container.appendChild(row);
     });
   }
@@ -380,7 +381,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
 export function renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate }) {
   if (!container) return;
   container.innerHTML = '';
-  
+
   const listContainer = container;
 
   const triggerUpdate = () => {
@@ -394,10 +395,10 @@ export function renderCategories({ container, addBtn, categories, links, schedul
         title: 'Aucune catégorie',
         description: 'Créez des catégories pour organiser vos liens.',
         actionLabel: '+ Créer une catégorie',
-        onAction: () => { 
-            categories.push({ name: 'Nouvelle catégorie', order: categories.length }); 
-            renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate }); 
-            triggerUpdate(); 
+        onAction: () => {
+          categories.push({ name: 'Nouvelle catégorie', order: categories.length });
+          renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate });
+          triggerUpdate();
         },
       })
     );
@@ -405,33 +406,33 @@ export function renderCategories({ container, addBtn, categories, links, schedul
     categories.forEach((c, idx) => {
       const row = el('div', { class: 'group flex items-center gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition-all' });
       row.dataset.dragIndex = String(idx);
-      
+
       const gripBtn = el('button', { type: 'button', class: 'h-8 w-8 inline-flex items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-colors cursor-grab active:cursor-grabbing', title: 'Déplacer', 'aria-label': 'Déplacer' });
       gripBtn.appendChild(createGripSVG(16));
-      
+
       const contentWrap = el('div', { class: 'flex-1 flex flex-col gap-1' });
       const nameInput = el('input', { type: 'text', value: c.name || '', class: 'w-full bg-transparent border-none focus:ring-0 text-sm font-medium text-slate-200 placeholder-slate-600 p-0', placeholder: 'Nom de la catégorie' });
       nameInput.addEventListener('input', () => { c.name = nameInput.value; triggerUpdate(); });
-      
+
       const count = links ? links.filter(l => l.categoryId === c.id || (c.name && l.categoryId === c.name)).length : 0;
       const countBadge = el('span', { class: 'text-xs text-slate-500', text: `${count} lien${count > 1 ? 's' : ''}` });
-      
+
       contentWrap.append(nameInput, countBadge);
 
       const rm = trashButton(() => { categories.splice(idx, 1); renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate }); triggerUpdate(); }, 'Supprimer la catégorie');
-      
+
       row.append(gripBtn, contentWrap, rm);
-      try { enableDragHandle(gripBtn, row, listContainer, categories, () => { renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate }); triggerUpdate(); }, scheduleAutoSave); } catch {}
+      try { enableDragHandle(gripBtn, row, listContainer, categories, () => { renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate }); triggerUpdate(); }, scheduleAutoSave); } catch { }
       listContainer.appendChild(row);
     });
   }
 
   if (addBtn) {
-      addBtn.onclick = () => { 
-        categories.push({ name: 'Nouvelle catégorie', order: categories.length }); 
-        renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate }); 
-        triggerUpdate(); 
-      };
+    addBtn.onclick = () => {
+      categories.push({ name: 'Nouvelle catégorie', order: categories.length });
+      renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate });
+      triggerUpdate();
+    };
   }
 }
 
@@ -451,6 +452,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
   let modalIcon = modal && document.getElementById('linkModalIconInput');
   const modalDesc = modal && document.getElementById('linkModalDescInput');
   const modalCat = modal && document.getElementById('linkModalCategory');
+  const modalTheme = modal && document.getElementById('linkModalTheme');
   const modalNewTab = modal && document.getElementById('linkModalNewTab');
   const modalSaveBtn = modal && document.getElementById('linkModalSave');
   const modalCancelBtn = modal && document.getElementById('linkModalCancel');
@@ -465,12 +467,24 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
     (categories || []).forEach(c => modalCat.append(el('option', { value: c.id || c.name, text: c.name })));
   }
 
+  function fillThemeSelect() {
+    if (!modalTheme) return;
+    if (modalTheme._filled) return;
+    modalTheme.innerHTML = '';
+    modalTheme.append(el('option', { value: 'system', text: 'Thème par défaut (Système)' }));
+    (btnIconThemeConfig || []).forEach(t => {
+      modalTheme.append(el('option', { value: t.themeClass, text: t.name }));
+    });
+    modalTheme._filled = true;
+  }
+
   let editingIndex = null;
   function openLinkModal(idx) {
     if (!modal) return;
     editingIndex = (typeof idx === 'number') ? idx : null;
-    const l = (editingIndex !== null) ? links[editingIndex] : { url: '', text: '', icon: '', description: '', categoryId: null, newTab: false };
+    const l = (editingIndex !== null) ? links[editingIndex] : { url: '', text: '', icon: '', description: '', categoryId: null, buttonTheme: 'system', newTab: false };
     fillCategorySelect();
+    fillThemeSelect();
     modalTitle.value = l.text || '';
     // store URL without scheme in the input (prefix shown in UI)
     try {
@@ -479,8 +493,8 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       // set scheme display based on existing url
       let scheme = 'https';
       if (/^http:/.test(String(raw))) scheme = 'http';
-      try { if (modal) modal.dataset.urlScheme = scheme; } catch {}
-      try { if (modalSchemeBtn) modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = scheme + '://'; } catch {}
+      try { if (modal) modal.dataset.urlScheme = scheme; } catch { }
+      try { if (modalSchemeBtn) modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = scheme + '://'; } catch { }
     } catch {
       modalUrl.value = l.url || '';
     }
@@ -522,8 +536,8 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
     if (pickBtn && !pickBtn._bound) {
       pickBtn.addEventListener('click', () => {
         openIconModal((slug) => {
-          const replaced = (slug.startsWith('http://') || slug.startsWith('https://')) 
-            ? slug 
+          const replaced = (slug.startsWith('http://') || slug.startsWith('https://'))
+            ? slug
             : `https://cdn.plinkk.fr/icons/${slug}.svg`;
           if (iconInput) iconInput.value = replaced;
         }, 'linkModalIconInput');
@@ -605,14 +619,14 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
                       }
                       if (final) {
                         if (url) url.value = final;
-                        try { modal.dataset.urlScheme = /^http:/.test(final) ? 'http' : 'https'; } catch {}
+                        try { modal.dataset.urlScheme = /^http:/.test(final) ? 'http' : 'https'; } catch { }
                         const iconSourceEl = document.getElementById('linkModalIconSource');
                         const iconInput = document.getElementById('linkModalIconInput');
                         if (iconSourceEl) iconSourceEl.value = 'catalog';
                         if (iconInput) iconInput.value = `https://cdn.plinkk.fr/icons/${plat.iconSlug}.svg`;
                       }
                     });
-                  } catch (e) {}
+                  } catch (e) { }
                 }
               });
             });
@@ -645,14 +659,14 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
                   }
                   if (final) {
                     if (url) url.value = final;
-                    try { modal.dataset.urlScheme = /^http:/.test(final) ? 'http' : 'https'; } catch {}
+                    try { modal.dataset.urlScheme = /^http:/.test(final) ? 'http' : 'https'; } catch { }
                     const iconSourceEl = document.getElementById('linkModalIconSource');
                     const iconInput = document.getElementById('linkModalIconInput');
                     if (iconSourceEl) iconSourceEl.value = 'catalog';
                     if (iconInput) iconInput.value = `https://cdn.plinkk.fr/icons/${plat.iconSlug}.svg`;
                   }
                 });
-              } catch (e) {}
+              } catch (e) { }
             });
             grid.appendChild(btn);
           });
@@ -660,14 +674,15 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
           presetsWrap._bound = true;
         }
       }
-    } catch (e) {}
+    } catch (e) { }
 
     modalIcon = document.getElementById('linkModalIconInput') || document.getElementById('linkModalIconInputUrl');
     modalDesc.value = l.description || '';
     modalCat.value = l.categoryId || '';
+    if (modalTheme) modalTheme.value = l.buttonTheme || 'system';
     modalNewTab.checked = !!l.newTab;
     // Persist editing index on modal element so the save handler (bound once) can read it
-    try { if (editingIndex !== null) modal.dataset.editingIndex = String(editingIndex); else delete modal.dataset.editingIndex; } catch {}
+    try { if (editingIndex !== null) modal.dataset.editingIndex = String(editingIndex); else delete modal.dataset.editingIndex; } catch { }
     // If icon source is catalog, ensure the input is readonly (cannot edit the stored library link)
     try {
       if (iconSourceEl && iconSourceEl.value === 'catalog') {
@@ -675,17 +690,17 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       } else {
         if (iconInput) iconInput.removeAttribute('readonly');
       }
-    } catch {}
+    } catch { }
     modal.classList.remove('hidden');
     modal.setAttribute('aria-hidden', 'false');
-    try { modalTitle && modalTitle.focus(); } catch {}
+    try { modalTitle && modalTitle.focus(); } catch { }
   }
 
   function closeLinkModal() {
     if (!modal) return;
     modal.classList.add('hidden');
     modal.setAttribute('aria-hidden', 'true');
-    try { if (modal) delete modal.dataset.editingIndex; } catch {}
+    try { if (modal) delete modal.dataset.editingIndex; } catch { }
     editingIndex = null;
   }
 
@@ -693,7 +708,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
   // Usage: window.__OPEN_LINK_MODAL__(idxOrNull, { prefill: {...}, onSave: (payload)=>{} })
   try {
     window.__OPEN_LINK_MODAL__ = (idx, opts) => {
-      try { if (modal) modal.dataset.mode = 'link'; } catch (e) {}
+      try { if (modal) modal.dataset.mode = 'link'; } catch (e) { }
       openLinkModal(idx);
       if (!opts) return;
       try {
@@ -702,8 +717,8 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
         if (p.url !== undefined) {
           // remove scheme for input
           modalUrl.value = String(p.url || '').replace(/^https?:\/\//i, '');
-          try { modal.dataset.urlScheme = p.url && /^http:/.test(p.url) ? 'http' : 'https'; } catch {}
-          try { modalSchemeBtn && (modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = (modal.dataset.urlScheme || 'https') + '://'); } catch {}
+          try { modal.dataset.urlScheme = p.url && /^http:/.test(p.url) ? 'http' : 'https'; } catch { }
+          try { modalSchemeBtn && (modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = (modal.dataset.urlScheme || 'https') + '://'); } catch { }
         }
         if (p.icon !== undefined) {
           const iconSourceEl = document.getElementById('linkModalIconSource');
@@ -726,14 +741,14 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
         if (p.description !== undefined) modalDesc.value = p.description || '';
         if (p.categoryId !== undefined && modalCat) modalCat.value = p.categoryId || '';
         if (p.newTab !== undefined && modalNewTab) modalNewTab.checked = !!p.newTab;
-      } catch (e) {}
+      } catch (e) { }
       if (opts.onSave && modal) modal._externalSaveHandler = opts.onSave;
     };
-  } catch (e) {}
+  } catch (e) { }
   // Separate social modal helper that reuses link modal DOM but marks mode and allows different save handling
   try {
     window.__OPEN_SOCIAL_MODAL__ = (idx, opts) => {
-      try { if (modal) modal.dataset.mode = 'social'; } catch (e) {}
+      try { if (modal) modal.dataset.mode = 'social'; } catch (e) { }
       openLinkModal(idx);
       if (!opts) return;
       try {
@@ -761,14 +776,14 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
         if (p.description !== undefined) modalDesc.value = p.description || '';
         if (p.categoryId !== undefined && modalCat) modalCat.value = p.categoryId || '';
         if (p.newTab !== undefined && modalNewTab) modalNewTab.checked = !!p.newTab;
-      } catch (e) {}
+      } catch (e) { }
       if (opts.onSave && modal) modal._externalSaveHandler = opts.onSave;
     };
-  } catch (e) {}
+  } catch (e) { }
 
   // When opening in social mode, adapt the modal DOM: hide category/newTab, change header, ensure platform button visible
   try {
-    const originalAdjust = () => {};
+    const originalAdjust = () => { };
     const adjustSocialModeUI = () => {
       if (!modal) return;
       const isSocial = modal.dataset && modal.dataset.mode === 'social';
@@ -776,25 +791,25 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       try {
         const header = modal.querySelector('h2') || modal.querySelector('.modal-title');
         if (header) header.textContent = isSocial ? 'Modifier le réseau social' : 'Modifier le lien';
-      } catch (e) {}
+      } catch (e) { }
       // hide title and description and category for social mode
       try {
         const titleEl = document.getElementById('linkModalTitleInput');
         if (titleEl && titleEl.parentElement) titleEl.parentElement.style.display = isSocial ? 'none' : '';
-      } catch (e) {}
+      } catch (e) { }
       try {
         const desc = document.getElementById('linkModalDescInput');
         if (desc && desc.parentElement) desc.parentElement.style.display = isSocial ? 'none' : '';
-      } catch (e) {}
+      } catch (e) { }
       try {
         const cat = document.getElementById('linkModalCategory');
         if (cat && cat.parentElement) cat.parentElement.style.display = isSocial ? 'none' : '';
-      } catch (e) {}
+      } catch (e) { }
       // show newTab checkbox wrapper for social mode
       try {
         const newTab = document.getElementById('linkModalNewTab');
         if (newTab && newTab.parentElement) newTab.parentElement.style.display = isSocial ? '' : '';
-      } catch (e) {}
+      } catch (e) { }
       // add presets button above URL for social mode
       try {
         const modalContent = document.querySelector('#linkModal .space-y-3');
@@ -831,29 +846,31 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
                 btn.append(imgContainer, label);
                 btn.addEventListener('click', () => {
                   modal.remove();
-                  try { window.__OPEN_PLATFORM_MODAL__(plat, ({ handle, country, path }) => {
-                    let final = '';
-                    if (plat.id === 'apple-music') {
-                      const c = (country || 'fr').trim();
-                      const p = (path || '').trim().replace(/^\/+/, '');
-                      if (c && p) final = `https://music.apple.com/${c}/${p}`;
-                    } else if (plat.id === 'apple-podcasts') {
-                      const c = (country || 'fr').trim();
-                      const p = (path || '').trim().replace(/^\/+/, '');
-                      if (c && p) final = `https://podcasts.apple.com/${c}/${p}`;
-                    } else {
-                      const h = (handle || '').trim();
-                      final = plat.pattern.replace('{handle}', h);
-                    }
-                    if (final) {
-                      const urlEl = document.getElementById('linkModalUrlInput');
-                      if (urlEl) urlEl.value = final;
-                      const iconSourceEl = document.getElementById('linkModalIconSource');
-                      const iconInput = document.getElementById('linkModalIconInput');
-                      if (iconSourceEl) iconSourceEl.value = 'catalog';
-                      if (iconInput) iconInput.value = `https://cdn.plinkk.fr/icons/${plat.iconSlug}.svg`;
-                    }
-                  }); } catch (e) {}
+                  try {
+                    window.__OPEN_PLATFORM_MODAL__(plat, ({ handle, country, path }) => {
+                      let final = '';
+                      if (plat.id === 'apple-music') {
+                        const c = (country || 'fr').trim();
+                        const p = (path || '').trim().replace(/^\/+/, '');
+                        if (c && p) final = `https://music.apple.com/${c}/${p}`;
+                      } else if (plat.id === 'apple-podcasts') {
+                        const c = (country || 'fr').trim();
+                        const p = (path || '').trim().replace(/^\/+/, '');
+                        if (c && p) final = `https://podcasts.apple.com/${c}/${p}`;
+                      } else {
+                        const h = (handle || '').trim();
+                        final = plat.pattern.replace('{handle}', h);
+                      }
+                      if (final) {
+                        const urlEl = document.getElementById('linkModalUrlInput');
+                        if (urlEl) urlEl.value = final;
+                        const iconSourceEl = document.getElementById('linkModalIconSource');
+                        const iconInput = document.getElementById('linkModalIconInput');
+                        if (iconSourceEl) iconSourceEl.value = 'catalog';
+                        if (iconInput) iconInput.value = `https://cdn.plinkk.fr/icons/${plat.iconSlug}.svg`;
+                      }
+                    });
+                  } catch (e) { }
                 });
                 grid.appendChild(btn);
                 platformBtns.push(btn);
@@ -889,7 +906,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
         } else {
           if (presetsBtn) presetsBtn.style.display = 'none';
         }
-      } catch (e) {}
+      } catch (e) { }
       // add Enter key handling for inputs
       try {
         const inputs = modalContent.querySelectorAll('input:not([type="checkbox"]), select');
@@ -910,15 +927,15 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
             }
           });
         });
-      } catch (e) {}
+      } catch (e) { }
     };
     // observe modal dataset changes could be complex; call adjust when modal is opened/closed via existing handlers
     // patch openLinkModal and closeLinkModal points by wrapping existing functions: call adjust after openLinkModal sets modal visible
     const oldOpen = openLinkModal;
-    openLinkModal = function(idx) { oldOpen(idx); try { adjustSocialModeUI(); } catch(e){} };
+    openLinkModal = function (idx) { oldOpen(idx); try { adjustSocialModeUI(); } catch (e) { } };
     const oldClose = closeLinkModal;
-    closeLinkModal = function() { try { if (modal) { delete modal.dataset.mode; } } catch(e){}; try { adjustSocialModeUI(); } catch(e){}; oldClose(); };
-  } catch (e) {}
+    closeLinkModal = function () { try { if (modal) { delete modal.dataset.mode; } } catch (e) { }; try { adjustSocialModeUI(); } catch (e) { }; oldClose(); };
+  } catch (e) { }
 
   // Initialize modal buttons only once
   if (modal && !modal._initialized) {
@@ -932,15 +949,15 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       Array.from(modalSchemeMenu.querySelectorAll('button[data-scheme]')).forEach(b => {
         b.addEventListener('click', (ev) => {
           const s = ev.currentTarget.getAttribute('data-scheme');
-          try { modal.dataset.urlScheme = s; } catch {}
-          try { modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = s + '://'; } catch {}
+          try { modal.dataset.urlScheme = s; } catch { }
+          try { modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = s + '://'; } catch { }
           modalSchemeMenu.classList.add('hidden');
           // focus url input
-          try { modalUrl && modalUrl.focus(); } catch {}
+          try { modalUrl && modalUrl.focus(); } catch { }
         });
       });
       // close on outside click
-      document.addEventListener('click', () => { try { modalSchemeMenu.classList.add('hidden'); } catch {} });
+      document.addEventListener('click', () => { try { modalSchemeMenu.classList.add('hidden'); } catch { } });
       modalSchemeBtn._bound = true;
     }
     // auto-detect scheme if user pastes 'http(s)://' in the URL input
@@ -954,13 +971,13 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
             if (match) {
               const s = match[1].toLowerCase();
               const rest = match[2] || '';
-              try { modal.dataset.urlScheme = s; } catch {}
-              try { modalSchemeBtn && (modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = s + '://'); } catch {}
+              try { modal.dataset.urlScheme = s; } catch { }
+              try { modalSchemeBtn && (modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = s + '://'); } catch { }
               // update input without the scheme
               if (modalUrl.value !== rest) modalUrl.value = rest;
             }
           }
-        } catch (err) {}
+        } catch (err) { }
       });
       modalUrl._schemeBound = true;
     }
@@ -982,19 +999,27 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       let scheme = 'https';
       try { scheme = modal && modal.dataset && modal.dataset.urlScheme ? modal.dataset.urlScheme : 'https'; } catch { scheme = 'https'; }
       const fullUrl = rawUrl ? (scheme + '://' + rawUrl) : (scheme + '://');
-      const payload = { text: modalTitle.value.trim(), url: fullUrl, icon: iconValue, description: modalDesc.value.trim() || '', categoryId: modalCat.value || null, newTab: !!modalNewTab.checked };
+      const payload = {
+        text: modalTitle.value.trim(),
+        url: fullUrl,
+        icon: iconValue,
+        description: modalDesc.value.trim() || '',
+        categoryId: modalCat.value || null,
+        buttonTheme: modalTheme ? modalTheme.value : 'system',
+        newTab: !!modalNewTab.checked
+      };
 
       // If an external save handler was provided (via window.__OPEN_LINK_MODAL__), call it instead
       try {
         if (modal && modal._externalSaveHandler) {
-          try { modal._externalSaveHandler(payload); } catch (err) {}
+          try { modal._externalSaveHandler(payload); } catch (err) { }
           try { delete modal._externalSaveHandler; } catch (e) { modal._externalSaveHandler = null; }
           renderLinks({ container, addBtn, links, categories, scheduleAutoSave });
           scheduleAutoSave();
           closeLinkModal();
           return;
         }
-      } catch (e) {}
+      } catch (e) { }
       // read editing index from modal dataset (safe across re-renders)
       let mi = null;
       try { mi = modal && modal.dataset && modal.dataset.editingIndex ? parseInt(modal.dataset.editingIndex, 10) : null; } catch { mi = null; }
@@ -1019,7 +1044,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
         modal.addEventListener('click', (e) => { if (e.target === modal) closeLinkModal(); });
         modal._boundOuterClose = true;
       }
-    } catch (e) {}
+    } catch (e) { }
     // close on Escape
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) closeLinkModal(); });
     modal._initialized = true;
@@ -1073,7 +1098,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
 
     const iconContainer = el('div', { class: 'h-10 w-10 rounded bg-slate-800 animate-pulse shrink-0 overflow-hidden border border-slate-700 flex items-center justify-center' });
     const isBootstrap = l.icon && l.icon.includes('bi-');
-    const iconImg = el('img', { 
+    const iconImg = el('img', {
       class: 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + (isBootstrap ? ' filter-white' : '')
     });
     iconImg.onload = () => { iconImg.classList.remove('opacity-0'); iconContainer.classList.remove('animate-pulse'); };
@@ -1122,7 +1147,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
     actions.append(editBtn, dupBtn, rm);
 
     row.append(left, actions);
-    try { enableDragHandle(grip, row, container, links, () => renderLinks({ container, addBtn, links, categories, scheduleAutoSave }), scheduleAutoSave); } catch {}
+    try { enableDragHandle(grip, row, container, links, () => renderLinks({ container, addBtn, links, categories, scheduleAutoSave }), scheduleAutoSave); } catch { }
 
     container.appendChild(row);
   });
@@ -1134,14 +1159,14 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
 export function renderLayout({ container, order, scheduleAutoSave }) {
   if (!container) return;
   container.innerHTML = '';
-  
+
   const KNOWN = ['profile', 'username', 'labels', 'social', 'email', 'links'];
-  
+
   if (!Array.isArray(order) || order.length === 0) {
     if (Array.isArray(order)) {
-        order.splice(0, order.length, ...KNOWN);
+      order.splice(0, order.length, ...KNOWN);
     } else {
-        order = [...KNOWN];
+      order = [...KNOWN];
     }
   }
 
@@ -1149,9 +1174,9 @@ export function renderLayout({ container, order, scheduleAutoSave }) {
   const normalized = [];
   order.forEach(k => { if (KNOWN.includes(k) && !seen.has(k)) { seen.add(k); normalized.push(k); } });
   KNOWN.forEach(k => { if (!seen.has(k)) normalized.push(k); });
-  
+
   if (Array.isArray(order)) {
-      order.splice(0, order.length, ...normalized);
+    order.splice(0, order.length, ...normalized);
   }
 
   const LABELS = {
@@ -1166,15 +1191,15 @@ export function renderLayout({ container, order, scheduleAutoSave }) {
   normalized.forEach((key, idx) => {
     const row = el('div', { class: 'flex items-center gap-3 w-full rounded-xl border border-slate-800 bg-slate-900/50 px-3 py-3 select-none hover:border-slate-700 transition-colors' });
     row.dataset.dragIndex = String(idx);
-    
+
     const gripBtn = el('button', { type: 'button', class: 'h-8 w-8 inline-flex items-center justify-center rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-400 cursor-grab active:cursor-grabbing transition-colors', title: 'Déplacer', 'aria-label': 'Déplacer' });
     gripBtn.appendChild(createGripSVG(16));
-    
+
     const label = el('div', { class: 'text-sm font-medium text-slate-200' });
     label.textContent = LABELS[key] || key;
-    
+
     row.append(gripBtn, label);
-    try { enableDragHandle(gripBtn, row, container, order, () => renderLayout({ container, order, scheduleAutoSave }), scheduleAutoSave); } catch {}
+    try { enableDragHandle(gripBtn, row, container, order, () => renderLayout({ container, order, scheduleAutoSave }), scheduleAutoSave); } catch { }
     container.appendChild(row);
   });
 }

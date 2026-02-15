@@ -217,6 +217,8 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           showDescriptionOnHover: l.showDescriptionOnHover ?? undefined,
           showDescription: l.showDescription ?? undefined,
           categoryId: l.categoryId ?? null,
+          // @ts-ignore - Field added to schema but client generation might be pending
+          buttonTheme: l.buttonTheme || "system",
         };
 
         if (l.id && existingIds.has(l.id)) {
@@ -279,6 +281,8 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
             showDescriptionOnHover: l.showDescriptionOnHover,
             showDescription: l.showDescription,
             categoryId: l.categoryId,
+            // @ts-ignore
+            buttonTheme: l.buttonTheme,
           })),
         });
       }

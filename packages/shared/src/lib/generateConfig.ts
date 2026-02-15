@@ -33,82 +33,72 @@ export function generateProfileConfig(
         userName: ${JSON.stringify(profile.userName || "User")},
         email: ${JSON.stringify(profile.publicEmail || "")},
         links: ${JSON.stringify(
-          links.map((l) => ({
-            icon: l.icon,
-            url: l.url,
-            id: l.id,
-            text: l.text,
-            name: l.name,
-            description: l.description,
-            showDescriptionOnHover: l.showDescriptionOnHover,
-            showDescription: l.showDescription,
-            categoryId: l.categoryId
-          }))
-        )},
+    links.map((l) => ({
+      icon: l.icon,
+      url: l.url,
+      id: l.id,
+      text: l.text,
+      name: l.name,
+      description: l.description,
+      showDescriptionOnHover: l.showDescriptionOnHover,
+      showDescription: l.showDescription,
+      categoryId: l.categoryId,
+      // @ts-ignore
+      buttonTheme: l.buttonTheme,
+    }))
+  )},
         categories: ${JSON.stringify(
-          categories.map(c => ({
-            id: c.id,
-            name: c.name,
-            order: c.order
-          }))
-        )},
+    categories.map(c => ({
+      id: c.id,
+      name: c.name,
+      order: c.order
+    }))
+  )},
         background: ${JSON.stringify(backgroundColors.map((c) => c.color))},
-        degBackgroundColor: ${
-          profile.degBackgroundColor ?? 45
-        },
+        degBackgroundColor: ${profile.degBackgroundColor ?? 45
+    },
         profileHoverColor: ${JSON.stringify(profile.profileHoverColor)},
         neonColors: ${JSON.stringify(neonColors.map((c) => c.color))},
         iconUrl: ${JSON.stringify(profile.iconUrl || "")},
         description: ${JSON.stringify(profile.description || "")},
         labels: ${JSON.stringify(
-          labels.map((l) => ({
-            data: l.data,
-            color: l.color,
-            fontColor: l.fontColor,
-          }))
-        )},
+      labels.map((l) => ({
+        data: l.data,
+        color: l.color,
+        fontColor: l.fontColor,
+      }))
+    )},
         socialIcon: ${JSON.stringify(
-          socialIcons.map((l) => ({ url: l.url, icon: l.icon }))
-        )},
+      socialIcons.map((l) => ({ url: l.url, icon: l.icon }))
+    )},
         statusbar: ${JSON.stringify(
-          statusBar ?? { text: "", colorBg: "#222222", fontTextColor: 1, statusText: "offline" }
-        )},
+      statusBar ?? { text: "", colorBg: "#222222", fontTextColor: 1, statusText: "offline" }
+    )},
         neonEnable: ${profile.neonEnable ?? 1},
-        buttonThemeEnable: ${
-          profile.buttonThemeEnable ?? 1
-        },
-        EnableAnimationArticle: ${
-          profile.EnableAnimationArticle ?? 1
-        },
-        EnableAnimationButton: ${
-          profile.EnableAnimationButton ?? 1
-        },
-        EnableAnimationBackground: ${
-          profile.EnableAnimationBackground ?? 1
-        },
+        buttonThemeEnable: ${profile.buttonThemeEnable ?? 1
+    },
+        EnableAnimationArticle: ${profile.EnableAnimationArticle ?? 1
+    },
+        EnableAnimationButton: ${profile.EnableAnimationButton ?? 1
+    },
+        EnableAnimationBackground: ${profile.EnableAnimationBackground ?? 1
+    },
         backgroundSize: ${profile.backgroundSize ?? 50},
-        selectedThemeIndex: ${
-          profile.selectedThemeIndex ?? 13
-        },
-        selectedAnimationIndex: ${
-          profile.selectedAnimationIndex ?? 0
-        },
-        selectedAnimationButtonIndex: ${
-          profile.selectedAnimationButtonIndex ?? 10
-        },
-        selectedAnimationBackgroundIndex: ${
-          profile.selectedAnimationBackgroundIndex ?? 10
-        },
-        animationDurationBackground: ${
-          profile.animationDurationBackground ?? 30
-        },
-        delayAnimationButton: ${
-          profile.delayAnimationButton ?? 0.1
-        },
+        selectedThemeIndex: ${profile.selectedThemeIndex ?? 13
+    },
+        selectedAnimationIndex: ${profile.selectedAnimationIndex ?? 0
+    },
+        selectedAnimationButtonIndex: ${profile.selectedAnimationButtonIndex ?? 10
+    },
+        selectedAnimationBackgroundIndex: ${profile.selectedAnimationBackgroundIndex ?? 10
+    },
+        animationDurationBackground: ${profile.animationDurationBackground ?? 30
+    },
+        delayAnimationButton: ${profile.delayAnimationButton ?? 0.1
+    },
         canvaEnable: ${profile.canvaEnable ?? 1},
-        selectedCanvasIndex: ${
-          profile.selectedCanvasIndex ?? 16
-        },
+        selectedCanvasIndex: ${profile.selectedCanvasIndex ?? 16
+    },
         layoutOrder: ${JSON.stringify((profile).layoutOrder ?? null)},
         cosmetics: ${JSON.stringify(profile.cosmetics || {})},
         isVerified: ${profile.isVerified ?? false},

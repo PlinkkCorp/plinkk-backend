@@ -519,7 +519,13 @@ export function createLinkBoxes(profileData) {
             discordLink.title = "Lien non valide";
         }
         if (profileData.buttonThemeEnable === 1) {
-            const themeConfig = btnIconThemeConfig === null || btnIconThemeConfig === void 0 ? void 0 : btnIconThemeConfig.find(config => config.name === link.name);
+            let themeConfig = null;
+            if (link.buttonTheme && link.buttonTheme !== 'system') {
+                themeConfig = btnIconThemeConfig?.find(config => config.themeClass === link.buttonTheme);
+            } else {
+                themeConfig = btnIconThemeConfig?.find(config => config.name === link.name);
+            }
+
             if (themeConfig) {
                 const themeClass = themeConfig.themeClass;
                 discordBox.className = `button ${themeClass}`;
