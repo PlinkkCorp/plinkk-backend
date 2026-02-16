@@ -16,6 +16,7 @@ import { adminSystemRoutes } from "./system";
 import { adminUsersRoutes } from "./users";
 import { adminBansRoutes } from "./bans";
 import { adminPlinkksRoutes } from "./plinkks";
+import { adminMaintenanceRoutes } from "./maintenance";
 
 export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.register(dashboardAdminReportsRoutes, { prefix: "/reports" });
@@ -29,6 +30,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.register(adminUsersRoutes, { prefix: "/users" });
   fastify.register(adminBansRoutes, { prefix: "/bans" });
   fastify.register(adminPlinkksRoutes, { prefix: "/plinkks" });
+  fastify.register(adminMaintenanceRoutes, { prefix: "/maintenance" });
 
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_ADMIN", { mode: "redirect" });
@@ -56,7 +58,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
           .map((b) => String(b.email).toLowerCase())
       );
       users = users.filter((u) => !activeEmails.has(String(u.email).toLowerCase()));
-    } catch {}
+    } catch { }
 
     return replyView(reply, "dashboard/admin/dash.ejs", request.currentUser!, {
       users,

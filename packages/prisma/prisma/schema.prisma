@@ -618,3 +618,20 @@ model Purchase {
 
   @@index([userId])
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Maintenance
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Maintenance {
+  id             String    @id @default("config")
+  global         Boolean   @default(false) // Maintenance globale
+  dashboard      Boolean   @default(false) // Maintenance dashboard uniquement
+  activePages    String[]  @default([])    // Pages spécifiques en maintenance (ex: ["/login", "/register"])
+  reason         String?
+  scheduledStart DateTime?
+  scheduledEnd   DateTime?
+  allowedIps     String[]  @default([])
+  allowedRoles   String[]  @default([])
+  updatedAt      DateTime  @updatedAt
+}

@@ -1,0 +1,318 @@
+<div id="game-breakout"
+    class="relative w-full max-w-md mx-auto aspect-square bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-2xl group"
+    style="display: none;">
+    <canvas id="breakoutCanvas" width="400" height="400" class="w-full h-full cursor-none outline-none"
+        tabindex="0"></canvas>
+
+    <!-- UI Overlay -->
+    <div class="absolute top-4 left-4 right-4 flex justify-between pointer-events-none z-10">
+        <div class="bg-black/40 backdrop-blur px-3 py-1 rounded-lg text-xs font-mono text-white border border-white/5">
+            SCORE: <span id="breakoutScore" class="text-blue-400 font-bold">0</span>
+        </div>
+        <div
+            class="bg-black/40 backdrop-blur px-3 py-1 rounded-lg text-xs font-mono text-slate-400 border border-white/5 hidden md:block">
+            ARROWS TO MOVE
+        </div>
+    </div>
+
+    <!-- Start Overlay -->
+    <div id="breakoutStart"
+        class="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20">
+        <div
+            class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20 animate-bounce">
+            <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                <circle cx="12" cy="12" r="2"></circle>
+            </svg>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-2">Neon Breakout</h3>
+        <p class="text-slate-400 text-sm mb-6">Détruisez les briques, ne laissez pas tomber la balle !</p>
+        <button onclick="breakoutGame.start()"
+            class="px-6 py-2 bg-white text-black font-bold rounded-lg hover:bg-blue-50 transition-colors transform hover:scale-105 active:scale-95 shadow-lg shadow-white/10">
+            Jouer
+        </button>
+    </div>
+
+    <!-- Game Over Overlay -->
+    <div id="breakoutGameOver"
+        class="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-20 hidden">
+        <div id="boIconContainer" class="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-slate-800">
+            <!-- Icon injected by JS -->
+        </div>
+        <h3 class="text-xl font-bold text-white mb-1" id="boTitle">Perdu !</h3>
+        <p class="text-blue-400 text-lg font-mono mb-6">Score: <span id="breakoutFinalScore">0</span></p>
+        <button onclick="breakoutGame.start()"
+            class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors transform hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/20">
+            Rejouer
+        </button>
+    </div>
+</div>
+
+<script>
+    const breakoutGame = (() => {
+        const canvas = document.getElementById('breakoutCanvas');
+        const ctx = canvas.getContext('2d');
+        const startScreen = document.getElementById('breakoutStart');
+        const endScreen = document.getElementById('breakoutGameOver');
+        const scoreEl = document.getElementById('breakoutScore');
+        const finalScoreEl = document.getElementById('breakoutFinalScore');
+        const titleEl = document.getElementById('boTitle');
+
+        // Config
+        const paddleWidth = 100;
+        const paddleHeight = 10;
+        const ballRadius = 6;
+        let paddleX = (canvas.width - paddleWidth) / 2;
+        let rightPressed = false;
+        let leftPressed = false;
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height - 30;
+        let dx = 3;
+        let dy = -3;
+        let score = 0;
+        let lives = 3;
+        let bricks = [];
+        let particles = [];
+        let gameLoop;
+        let isRunning = false;
+
+        // Brick Config
+        const brickRowCount = 5;
+        const brickColumnCount = 7;
+        const brickWidth = 45;
+        const brickHeight = 15;
+        const brickPadding = 10;
+        const brickOffsetTop = 50;
+        const brickOffsetLeft = 10;
+
+        // Events
+        document.addEventListener("keydown", keyDownHandler, false);
+        document.addEventListener("keyup", keyUpHandler, false);
+
+        // Touch Interaction
+        canvas.addEventListener('touchmove', e => {
+            e.preventDefault();
+            const touchX = e.changedTouches[0].clientX - canvas.getBoundingClientRect().left;
+            paddleX = touchX - paddleWidth / 2;
+            // Clamp
+            if (paddleX < 0) paddleX = 0;
+            if (paddleX + paddleWidth > canvas.width) paddleX = canvas.width - paddleWidth;
+        }, { passive: false });
+
+        function keyDownHandler(e) {
+            if (e.key == "Right" || e.key == "ArrowRight") rightPressed = true;
+            else if (e.key == "Left" || e.key == "ArrowLeft") leftPressed = true;
+        }
+
+        function keyUpHandler(e) {
+            if (e.key == "Right" || e.key == "ArrowRight") rightPressed = false;
+            else if (e.key == "Left" || e.key == "ArrowLeft") leftPressed = false;
+        }
+
+        function initBricks() {
+            bricks = [];
+            for (let c = 0; c < brickColumnCount; c++) {
+                bricks[c] = [];
+                for (let r = 0; r < brickRowCount; r++) {
+                    bricks[c][r] = { x: 0, y: 0, status: 1, color: `hsl(${180 + r * 30}, 70%, 50%)` };
+                }
+            }
+        }
+
+        function createParticles(x, y, color) {
+            for (let i = 0; i < 12; i++) { // Increased particles
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4,
+                    life: 1.0,
+                    color: color
+                });
+            }
+        }
+
+        function drawBall() {
+            // Trail effect (simple)
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#ffffff";
+
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+            ctx.closePath();
+            ctx.shadowBlur = 0;
+        }
+
+        function drawPaddle() {
+            ctx.beginPath();
+            ctx.rect(paddleX, canvas.height - paddleHeight - 10, paddleWidth, paddleHeight);
+            ctx.fillStyle = "#3b82f6";
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#3b82f6";
+            ctx.fill();
+            ctx.closePath();
+            ctx.shadowBlur = 0;
+        }
+
+        function drawBricks() {
+            for (let c = 0; c < brickColumnCount; c++) {
+                for (let r = 0; r < brickRowCount; r++) {
+                    if (bricks[c][r].status == 1) {
+                        const brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft;
+                        const brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop;
+                        bricks[c][r].x = brickX;
+                        bricks[c][r].y = brickY;
+
+                        ctx.beginPath();
+                        ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                        ctx.fillStyle = bricks[c][r].color;
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = bricks[c][r].color;
+                        ctx.fill();
+                        ctx.closePath();
+                        ctx.shadowBlur = 0;
+                    }
+                }
+            }
+        }
+
+        function collisionDetection() {
+            for (let c = 0; c < brickColumnCount; c++) {
+                for (let r = 0; r < brickRowCount; r++) {
+                    const b = bricks[c][r];
+                    if (b.status == 1) {
+                        if (ballX > b.x && ballX < b.x + brickWidth && ballY > b.y && ballY < b.y + brickHeight) {
+                            dy = -dy;
+                            b.status = 0;
+                            score++;
+                            scoreEl.innerText = score;
+                            createParticles(b.x + brickWidth / 2, b.y + brickHeight / 2, b.color);
+
+                            if (score == brickRowCount * brickColumnCount) {
+                                gameOver(true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function drawParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.03; // Slower fade
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+            ctx.globalAlpha = 1.0;
+        }
+
+        function draw() {
+            if (!isRunning) return;
+
+            // Clear with slight trail effect
+            ctx.fillStyle = 'rgba(2, 6, 23, 0.3)'; // High transparency for trail
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            drawBricks();
+            drawBall();
+            drawPaddle();
+            drawParticles();
+            collisionDetection();
+
+            // Ball Wall Collision
+            if (ballX + dx > canvas.width - ballRadius || ballX + dx < ballRadius) {
+                dx = -dx;
+            }
+            if (ballY + dy < ballRadius) {
+                dy = -dy;
+            } else if (ballY + dy > canvas.height - ballRadius - 10) { // check paddle height
+                if (ballX > paddleX && ballX < paddleX + paddleWidth) {
+                    dy = -dy;
+                    // Add some randomness/control based on hit position
+                    const hitPoint = ballX - (paddleX + paddleWidth / 2);
+                    dx = hitPoint * 0.15;
+                    createParticles(ballX, ballY, '#3b82f6');
+                } else if (ballY + dy > canvas.height - ballRadius) {
+                    // Missed
+                    gameOver(false);
+                    return;
+                }
+            }
+
+            // Move Paddle
+            if (rightPressed && paddleX < canvas.width - paddleWidth) {
+                paddleX += 7;
+            }
+            else if (leftPressed && paddleX > 0) {
+                paddleX -= 7;
+            }
+
+            ballX += dx;
+            ballY += dy;
+
+            gameLoop = requestAnimationFrame(draw);
+        }
+
+        function start() {
+            ballX = canvas.width / 2;
+            ballY = canvas.height - 30;
+            // MUCH SLOWER START
+            dx = 2 * (Math.random() > 0.5 ? 1 : -1);
+            dy = -2;
+            score = 0;
+            paddleX = (canvas.width - paddleWidth) / 2;
+            particles = [];
+
+            initBricks();
+            scoreEl.innerText = score;
+            startScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
+
+            isRunning = true;
+            canvas.focus();
+            if (gameLoop) cancelAnimationFrame(gameLoop);
+
+            // Full clear first
+            ctx.fillStyle = '#020617';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            draw();
+        }
+
+        function stop() {
+            isRunning = false;
+            cancelAnimationFrame(gameLoop);
+        }
+
+        function gameOver(win) {
+            stop();
+            finalScoreEl.innerText = score;
+            titleEl.innerText = win ? 'Gagné !' : 'Perdu !';
+
+            const iconContainer = document.getElementById('boIconContainer');
+            if (win) {
+                iconContainer.className = "w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-4";
+                iconContainer.innerHTML = `<svg class="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>`; // Star/Confetti-ish
+            } else {
+                iconContainer.className = "w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4";
+                iconContainer.innerHTML = `<svg class="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>`;
+            }
+
+            endScreen.classList.remove('hidden');
+        }
+
+        return { start, stop };
+    })();
+</script>

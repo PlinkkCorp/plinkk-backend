@@ -117,6 +117,40 @@ fastify.register(redirectRoutes);
 fastify.register(staticPagesRoutes);
 fastify.register(plinkkFrontUserRoutes);
 
+fastify.addHook("preHandler", async (request, reply) => {
+  if (request.url.startsWith("/public") ||
+    request.url.startsWith("/assets") ||
+    request.url.startsWith("/js/") ||
+    request.url.startsWith("/css/") ||
+    request.url.startsWith("/umami_script.js")
+  ) return;
+
+  const maintenance = await prisma.maintenance.findUnique({ where: { id: "config" } });
+
+  if (maintenance) {
+    if (maintenance.global || maintenance.activePages.includes(request.url)) {
+      // Check for bypass permission
+      const sessionData = request.session.get("data");
+      const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+
+      if (currentUserId) {
+        const user = await prisma.user.findUnique({
+          where: { id: currentUserId },
+          include: { role: { include: { permissions: true } } }
+        });
+        const hasPermission = user?.role?.permissions.some(rp => rp.permissionKey === "ACCESS_MAINTENANCE");
+        if (hasPermission) return;
+      }
+
+      return reply.code(503).view("erreurs/503.ejs", {
+        reason: maintenance.reason || "Maintenance en cours",
+        currentUser: null,
+        global: maintenance.global
+      });
+    }
+  }
+});
+
 fastify.addHook("onRequest", async (request, reply) => {
   const host = request.headers.host || "";
 

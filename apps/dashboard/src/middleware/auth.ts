@@ -38,7 +38,7 @@ export async function requireAuthWithUser(request: FastifyRequest, reply: Fastif
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { role: true },
+    include: { role: { include: { permissions: true } } },
   });
 
   if (!user) {
@@ -53,7 +53,7 @@ export async function requireAuthWithUser(request: FastifyRequest, reply: Fastif
 export async function requireAuthRedirect(request: FastifyRequest, reply: FastifyReply) {
   const sessionData = request.session.get("data");
   const returnTo = request.url || "/";
-  
+
   if (!sessionData) {
     return reply.redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
@@ -70,7 +70,7 @@ export async function requireAuthRedirect(request: FastifyRequest, reply: Fastif
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { role: true },
+    include: { role: { include: { permissions: true } } },
   });
 
   if (!user) {
@@ -96,7 +96,7 @@ export async function requireStaff(request: FastifyRequest, reply: FastifyReply)
 
   const user = await prisma.user.findFirst({
     where: { id: userId },
-    include: { role: true },
+    include: { role: { include: { permissions: true } } },
   });
 
   if (!user || !verifyRoleIsStaff(user.role)) {
@@ -128,7 +128,7 @@ export async function requireStaffRedirect(request: FastifyRequest, reply: Fasti
 
   const user = await prisma.user.findFirst({
     where: { id: userId },
-    include: { role: true },
+    include: { role: { include: { permissions: true } } },
   });
 
   if (!user) {
@@ -152,7 +152,7 @@ export async function requireAdmin(request: FastifyRequest, reply: FastifyReply)
 
   const user = await prisma.user.findFirst({
     where: { id: userId as string },
-    include: { role: true },
+    include: { role: { include: { permissions: true } } },
   });
 
   if (!user || !verifyRoleAdmin(user.role)) {
@@ -170,7 +170,7 @@ export async function optionalAuth(request: FastifyRequest, _reply: FastifyReply
     request.userId = userId as string;
     const user = await prisma.user.findUnique({
       where: { id: userId as string },
-      include: { role: true },
+      include: { role: { include: { permissions: true } } },
     });
     if (user) {
       request.currentUser = user;

@@ -1,0 +1,418 @@
+<%- include('partials/head.ejs', { title: 'Maintenance - Administration' , description: 'Gérez la maintenance et '
+    + 'accès au site.' , robots: 'noindex,nofollow' }) %>
+    <%- include('partials/header-dash.ejs', { user: user }) %>
+
+        <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+            <%- include('partials/admin-nav.ejs', { user: user, active: 'maintenance' }) %>
+
+                <main class="col-span-12 lg:col-span-10 space-y-8 relative">
+                    <!-- Header -->
+                    <div
+                        class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-violet-900 to-slate-900 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+                        <div
+                            class="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none">
+                        </div>
+                        <div class="relative z-10">
+                            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Maintenance & Accès</h1>
+                            <p class="text-slate-300 text-lg">Contrôlez la disponibilité du site, planifiez des arrêts
+                                et gérez les exceptions.</p>
+                        </div>
+                        <div
+                            class="relative z-10 flex items-center gap-3 bg-slate-950/50 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
+                            <div
+                                class="w-3 h-3 rounded-full <%= maintenance.global ? 'bg-red-500 animate-pulse' : 'bg-emerald-500' %>">
+                            </div>
+                            <span class="font-medium text-white">
+                                <%= maintenance.global ? 'Maintenance Active' : 'Système Opérationnel' %>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Main Controls -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Global State -->
+                        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6">
+                            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                                <svg class="w-5 h-5 text-violet-400" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                                    <line x1="12" y1="2" x2="12" y2="12"></line>
+                                </svg>
+                                État Général
+                            </h2>
+
+                            <!-- Global Toggle -->
+                            <div
+                                class="flex items-center justify-between p-4 bg-slate-950 rounded-xl border border-slate-800">
+                                <div>
+                                    <div class="font-medium text-white">Maintenance Globale</div>
+                                    <div class="text-sm text-slate-400">Bloque l'accès public et dashboard pour tous
+                                        (sauf whitelist).</div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="maintGlobal" class="sr-only peer" <%=maintenance.global
+                                        ? 'checked' : '' %>>
+                                    <div
+                                        class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600">
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Dashboard Toggle -->
+                            <div
+                                class="flex items-center justify-between p-4 bg-slate-950 rounded-xl border border-slate-800">
+                                <div>
+                                    <div class="font-medium text-white">Maintenance Dashboard</div>
+                                    <div class="text-sm text-slate-400">Bloque uniquement l'accès au tableau de bord.
+                                    </div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="maintDashboard" class="sr-only peer"
+                                        <%=maintenance.dashboard ? 'checked' : '' %>>
+                                    <div
+                                        class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600">
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Reason -->
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-slate-400">Raison / Message affiché</label>
+                                <textarea id="maintReason" rows="3"
+                                    class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 transition-colors placeholder-slate-600"
+                                    placeholder="Ex: Mise à jour système en cours..."><%= maintenance.reason || '' %></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Scheduling -->
+                        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6">
+                            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                                <svg class="w-5 h-5 text-violet-400" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                Planification
+                            </h2>
+                            <div class="bg-slate-950/50 p-4 rounded-xl border border-slate-800 text-sm text-slate-400">
+                                Programmez une maintenance automatique. Le système passera en mode maintenance globale
+                                durant cette période.
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <label class="text-sm font-medium text-slate-400">Début (UTC)</label>
+                                    <input type="datetime-local" id="schedStart"
+                                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 transition-colors [color-scheme:dark]"
+                                        value="<%= maintenance.scheduledStart ? new Date(maintenance.scheduledStart).toISOString().slice(0, 16) : '' %>">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-sm font-medium text-slate-400">Fin (UTC)</label>
+                                    <input type="datetime-local" id="schedEnd"
+                                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 transition-colors [color-scheme:dark]"
+                                        value="<%= maintenance.scheduledEnd ? new Date(maintenance.scheduledEnd).toISOString().slice(0, 16) : '' %>">
+                                </div>
+                            </div>
+
+                            <div class="pt-2 flex justify-end">
+                                <button onclick="clearSchedule()"
+                                    class="text-xs text-slate-500 hover:text-slate-300 underline">Effacer la
+                                    planification</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Whitelists -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                        <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                            Exceptions & Accès
+                        </h2>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <!-- Active Pages -->
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-semibold text-slate-300">Pages Autorisées</h3>
+                                    <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded">URL
+                                        publiques</span>
+                                </div>
+                                <div class="bg-slate-950 rounded-xl border border-slate-800 p-2 min-h-[160px] max-h-[240px] overflow-y-auto space-y-1"
+                                    id="list-pages">
+                                    <!-- Filled by JS -->
+                                </div>
+                                <div class="flex gap-2">
+                                    <input type="text" id="newPage" placeholder="/login"
+                                        class="flex-1 bg-slate-800 border-none rounded-lg px-3 py-2 text-white text-sm focus:ring-1 focus:ring-violet-500">
+                                    <button onclick="addItem('pages', document.getElementById('newPage').value)"
+                                        class="bg-violet-600 hover:bg-violet-700 text-white p-2 rounded-lg transition-colors">
+                                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Allowed IPs -->
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-semibold text-slate-300">IPs Autorisées</h3>
+                                    <button onclick="addItem('ips', 'YOUR_IP')"
+                                        class="text-xs text-violet-400 hover:text-violet-300 underline"
+                                        id="btnAddMyIp">Ajouter mon IP</button>
+                                </div>
+                                <div class="bg-slate-950 rounded-xl border border-slate-800 p-2 min-h-[160px] max-h-[240px] overflow-y-auto space-y-1"
+                                    id="list-ips">
+                                    <!-- Filled by JS -->
+                                </div>
+                                <div class="flex gap-2">
+                                    <input type="text" id="newIp" placeholder="192.168.1.1"
+                                        class="flex-1 bg-slate-800 border-none rounded-lg px-3 py-2 text-white text-sm focus:ring-1 focus:ring-violet-500">
+                                    <button onclick="addItem('ips', document.getElementById('newIp').value)"
+                                        class="bg-violet-600 hover:bg-violet-700 text-white p-2 rounded-lg transition-colors">
+                                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Allowed Roles -->
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-semibold text-slate-300">Rôles Autorisés</h3>
+                                    <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded">Bypass</span>
+                                </div>
+                                <div class="bg-slate-950 rounded-xl border border-slate-800 p-2 min-h-[160px] max-h-[240px] overflow-y-auto space-y-1"
+                                    id="list-roles">
+                                    <!-- Filled by JS -->
+                                </div>
+                                <div class="flex gap-2">
+                                    <select id="newRole"
+                                        class="flex-1 bg-slate-800 border-none rounded-lg px-3 py-2 text-white text-sm focus:ring-1 focus:ring-violet-500">
+                                        <option value="">Sélectionner...</option>
+                                        <% roles.forEach(role=> { %>
+                                            <option value="<%= role.name %>">
+                                                <%= role.name %>
+                                            </option>
+                                            <% }); %>
+                                    </select>
+                                    <button onclick="addItem('roles', document.getElementById('newRole').value)"
+                                        class="bg-violet-600 hover:bg-violet-700 text-white p-2 rounded-lg transition-colors">
+                                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sticky Save Action -->
+                    <div
+                        class="sticky bottom-6 bg-slate-900/80 backdrop-blur-lg border border-slate-800 p-4 rounded-xl flex items-center justify-between shadow-2xl">
+                        <div class="text-sm text-slate-400" id="status-message">
+                            <% if (!maintenance.activePages.length && !maintenance.allowedIps.length &&
+                                !maintenance.allowedRoles.length) { %>
+                                <span class="text-orange-400 flex items-center gap-2">
+                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                    Attention: Aucune exception configurée.
+                                </span>
+                                <% } else { %>
+                                    <span class="text-emerald-400 flex items-center gap-2">
+                                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                        Configuration prête.
+                                    </span>
+                                    <% } %>
+                        </div>
+                        <button onclick="saveAll()"
+                            class="px-8 py-2.5 bg-white text-black font-bold rounded-lg hover:bg-slate-200 transition-all shadow-lg hover:shadow-white/20 flex items-center gap-2">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                            Enregistrer les changements
+                        </button>
+                    </div>
+
+                </main>
+        </div>
+
+        <!-- Data holder for server-side state -->
+        <div id="maintenance-data" hidden data-pages="<%= JSON.stringify(maintenance.activePages || []) %>"
+            data-ips="<%= JSON.stringify(maintenance.allowedIps || []) %>"
+            data-roles="<%= JSON.stringify(maintenance.allowedRoles || []) %>"></div>
+
+        <script>
+            // Initial State from Server
+            const dataEl = document.getElementById('maintenance-data');
+            const state = {
+                pages: JSON.parse(dataEl.getAttribute('data-pages') || '[]'),
+                ips: JSON.parse(dataEl.getAttribute('data-ips') || '[]'),
+                roles: JSON.parse(dataEl.getAttribute('data-roles') || '[]')
+            };
+
+            // Render Lists
+            function renderList(type) {
+                const container = document.getElementById(`list-${type}`);
+                container.innerHTML = '';
+
+                if (state[type].length === 0) {
+                    container.innerHTML = '<div class="text-slate-600 italic text-xs text-center py-4">Aucune entrée</div>';
+                    return;
+                }
+
+                state[type].forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = 'flex items-center justify-between px-3 py-2 bg-slate-900 rounded-lg hover:bg-slate-800 transition-colors group';
+                    el.innerHTML = `
+                <span class="text-slate-300 text-sm font-mono truncate">${item}</span>
+                <button onclick="removeItem('${type}', '${item}')" class="text-slate-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            `;
+                    container.appendChild(el);
+                });
+            }
+
+            function addItem(type, value) {
+                if (!value) return;
+                if (value === 'YOUR_IP') {
+                    // Fetch current IP
+                    fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => addItem('ips', d.ip));
+                    return;
+                }
+
+                value = value.trim();
+                if (state[type].includes(value)) return;
+
+                state[type].push(value);
+                renderList(type);
+
+                // Reset Inputs
+                if (type === 'pages') document.getElementById('newPage').value = '';
+                if (type === 'ips') document.getElementById('newIp').value = '';
+                if (type === 'roles') document.getElementById('newRole').value = '';
+            }
+
+            function removeItem(type, value) {
+                state[type] = state[type].filter(i => i !== value);
+                renderList(type);
+            }
+
+            function clearSchedule() {
+                document.getElementById('schedStart').value = '';
+                document.getElementById('schedEnd').value = '';
+            }
+
+            async function saveAll() {
+                const global = document.getElementById('maintGlobal').checked;
+                const dashboard = document.getElementById('maintDashboard').checked;
+                const reason = document.getElementById('maintReason').value;
+                const schedStartVal = document.getElementById('schedStart').value;
+                const schedEndVal = document.getElementById('schedEnd').value;
+
+                // Basic validation
+                let scheduledStart = null;
+                let scheduledEnd = null;
+
+                if (schedStartVal) scheduledStart = new Date(schedStartVal).toISOString();
+                if (schedEndVal) scheduledEnd = new Date(schedEndVal).toISOString();
+
+                const data = {
+                    global,
+                    dashboard,
+                    reason,
+                    scheduledStart,
+                    scheduledEnd,
+                    activePages: state.pages,
+                    allowedIps: state.ips,
+                    allowedRoles: state.roles
+                };
+
+                const btn = document.querySelector('button[onclick="saveAll()"]');
+                const statusMsg = document.getElementById('status-message');
+                const origContent = btn.innerHTML;
+
+                // Loading State
+                btn.disabled = true;
+                btn.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Enregistrement...
+                `;
+
+                try {
+                    const res = await fetch('/api/admin/maintenance', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (res.ok) {
+                        btn.innerHTML = `
+                            <svg class="w-5 h-5 mr-2 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Enregistré !
+                        `;
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        const contentType = res.headers.get("content-type");
+                        let errorMessage = 'Erreur inconnue';
+                        if (contentType && contentType.indexOf("application/json") !== -1) {
+                            const errorJson = await res.json();
+                            errorMessage = errorJson.message || errorJson.error || 'Erreur serveur';
+                        } else {
+                            errorMessage = await res.text() || res.statusText;
+                        }
+                        throw new Error(errorMessage);
+                    }
+                } catch (e) {
+                    console.error("Save Error:", e);
+                    btn.innerHTML = `
+                        <svg class="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Erreur !
+                    `;
+
+                    // Show detailed error
+                    statusMsg.innerHTML = `<span class="text-red-400 font-mono text-xs break-all">Erreur: ${e.message}</span>`;
+
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = origContent;
+                    }, 3000);
+                }
+            }
+
+            // Init
+            renderList('pages');
+            renderList('ips');
+            renderList('roles');
+        </script>
+        </body>
+
+        </html>

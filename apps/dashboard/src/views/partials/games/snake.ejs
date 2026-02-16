@@ -1,0 +1,402 @@
+<div id="game-snake"
+    class="relative w-full max-w-md mx-auto aspect-square bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-2xl group">
+    <canvas id="snakeCanvas" width="400" height="400" class="w-full h-full cursor-none outline-none"
+        tabindex="0"></canvas>
+
+    <!-- UI Overlay -->
+    <div class="absolute top-4 left-4 right-4 flex justify-between pointer-events-none z-10">
+        <div class="bg-black/40 backdrop-blur px-3 py-1 rounded-lg text-xs font-mono text-white border border-white/5">
+            SCORE: <span id="snakeScore" class="text-violet-400 font-bold">0</span>
+        </div>
+        <div
+            class="bg-black/40 backdrop-blur px-3 py-1 rounded-lg text-xs font-mono text-slate-400 border border-white/5 hidden md:block">
+            ARROWS TO MOVE
+        </div>
+    </div>
+
+    <!-- Start Overlay -->
+    <div id="snakeStart"
+        class="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20">
+        <div
+            class="w-16 h-16 bg-violet-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-violet-500/20 animate-bounce">
+            <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
+                </path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-2">Neon Snake</h3>
+        <p class="text-slate-400 text-sm mb-6">Mangez les pommes, évitez les murs et votre queue !</p>
+        <button onclick="snakeGame.start()"
+            class="px-6 py-2 bg-white text-black font-bold rounded-lg hover:bg-violet-50 transition-colors transform hover:scale-105 active:scale-95 shadow-lg shadow-white/10">
+            Jouer
+        </button>
+    </div>
+
+    <!-- Game Over Overlay -->
+    <div id="snakeGameOver"
+        class="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-20 hidden">
+        <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-1">Perdu !</h3>
+        <p class="text-violet-400 text-lg font-mono mb-6">Score: <span id="snakeFinalScore">0</span></p>
+        <button onclick="snakeGame.start()"
+            class="px-6 py-2 bg-violet-600 text-white font-bold rounded-lg hover:bg-violet-700 transition-colors transform hover:scale-105 active:scale-95 shadow-lg shadow-violet-500/20">
+            Rejouer
+        </button>
+    </div>
+</div>
+
+<script>
+    const snakeGame = (() => {
+        const canvas = document.getElementById('snakeCanvas');
+        const ctx = canvas.getContext('2d');
+        const startScreen = document.getElementById('snakeStart');
+        const endScreen = document.getElementById('snakeGameOver');
+        const scoreEl = document.getElementById('snakeScore');
+        const finalScoreEl = document.getElementById('snakeFinalScore');
+
+        // Config
+        const gridSize = 20;
+        const tileCount = 20;
+        let speed = 7;
+
+        // Game State
+        let headX = 10;
+        let headY = 10;
+        let velocityX = 0;
+        let velocityY = 0;
+        let body = [];
+        let tailLen = 2;
+        let appleX = 5;
+        let appleY = 5;
+        let score = 0;
+        let gameLoop;
+        let isRunning = false;
+        let particles = [];
+        let obstacles = [];
+        let portals = [];
+
+        // Setup Event Listeners
+        document.addEventListener('keydown', keyDown);
+
+        // Touch Interaction
+        let touchStartX = 0;
+        let touchStartY = 0;
+        canvas.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+            e.preventDefault();
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', e => { e.preventDefault(); }, { passive: false });
+
+        canvas.addEventListener('touchend', e => {
+            if (!isRunning) return;
+            const touchEndX = e.changedTouches[0].screenX;
+            const touchEndY = e.changedTouches[0].screenY;
+            handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY);
+        });
+
+        function handleSwipe(sx, sy, ex, ey) {
+            const dx = ex - sx;
+            const dy = ey - sy;
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 0) { if (velocityX !== -1) { velocityX = 1; velocityY = 0; } }
+                else { if (velocityX !== 1) { velocityX = -1; velocityY = 0; } }
+            } else {
+                if (dy > 0) { if (velocityY !== -1) { velocityX = 0; velocityY = 1; } }
+                else { if (velocityY !== 1) { velocityX = 0; velocityY = -1; } }
+            }
+        }
+
+        function keyDown(event) {
+            if (!isRunning) return;
+            // Prevent default scroll
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
+                event.preventDefault();
+            }
+            if (event.code === 'ArrowUp') { if (velocityY !== 1) { velocityX = 0; velocityY = -1; } }
+            if (event.code === 'ArrowDown') { if (velocityY !== -1) { velocityX = 0; velocityY = 1; } }
+            if (event.code === 'ArrowLeft') { if (velocityX !== 1) { velocityX = -1; velocityY = 0; } }
+            if (event.code === 'ArrowRight') { if (velocityX !== -1) { velocityX = 1; velocityY = 0; } }
+        }
+
+        function spawnApple() {
+            // Avoid spawning on snake or obstacles
+            let valid = false;
+            while (!valid) {
+                appleX = Math.floor(Math.random() * tileCount);
+                appleY = Math.floor(Math.random() * tileCount);
+                valid = true;
+
+                // Check body
+                for (let part of body) {
+                    if (part.x === appleX && part.y === appleY) valid = false;
+                }
+                // Check head
+                if (headX === appleX && headY === appleY) valid = false;
+
+                // Check obstacles
+                for (let obs of obstacles) {
+                    if (obs.x === appleX && obs.y === appleY) valid = false;
+                }
+            }
+        }
+
+        function createParticles(x, y, color) {
+            for (let i = 0; i < 8; i++) {
+                particles.push({
+                    x: x * gridSize + gridSize / 2,
+                    y: y * gridSize + gridSize / 2,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4,
+                    life: 1.0,
+                    color: color
+                });
+            }
+        }
+
+        function generateObstacles(level) {
+            obstacles = [];
+            const numObstacles = Math.min(5 + level, 15);
+            for (let i = 0; i < numObstacles; i++) {
+                let ox, oy;
+                let conflict = true;
+                while (conflict) {
+                    ox = Math.floor(Math.random() * tileCount);
+                    oy = Math.floor(Math.random() * tileCount);
+                    conflict = false;
+                    // Avoid center start area
+                    if (Math.abs(ox - 10) < 3 && Math.abs(oy - 10) < 3) conflict = true;
+                }
+                obstacles.push({ x: ox, y: oy });
+            }
+        }
+
+        function generatePortals() {
+            portals = [];
+            // Pair 1
+            let p1 = getRandomEmptyCell();
+            let p2 = getRandomEmptyCell();
+            portals.push({ ...p1, id: 1, target: p2, color: '#a855f7' }); // violet-500
+            portals.push({ ...p2, id: 1, target: p1, color: '#a855f7' });
+
+            // Pair 2 (maybe specific level?)
+            let p3 = getRandomEmptyCell();
+            let p4 = getRandomEmptyCell();
+            portals.push({ ...p3, id: 2, target: p4, color: '#3b82f6' }); // blue-500
+            portals.push({ ...p4, id: 2, target: p3, color: '#3b82f6' });
+        }
+
+        function getRandomEmptyCell() {
+            let cell;
+            let valid = false;
+            while (!valid) {
+                cell = { x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount) };
+                valid = true;
+                // Check body, head, obstacles, existing portals
+                if (headX === cell.x && headY === cell.y) valid = false;
+                for (let part of body) if (part.x === cell.x && part.y === cell.y) valid = false;
+                for (let obs of obstacles) if (obs.x === cell.x && obs.y === cell.y) valid = false;
+                for (let p of portals) if (p.x === cell.x && p.y === cell.y) valid = false;
+                // Avoid edges for portals to prevent instant death on exit if facing wall logic is tricky
+                if (cell.x === 0 || cell.x === tileCount - 1 || cell.y === 0 || cell.y === tileCount - 1) valid = false;
+            }
+            return cell;
+        }
+
+        function drawGame() {
+            if (!isRunning) return;
+
+            // Move
+            let nextX = headX + velocityX;
+            let nextY = headY + velocityY;
+
+            // Wall Death (No more screen wrap)
+            if (nextX < 0 || nextX >= tileCount || nextY < 0 || nextY >= tileCount) {
+                gameOver();
+                return;
+            }
+
+            // Portal Logic
+            let teleported = false;
+            for (let p of portals) {
+                if (p.x === nextX && p.y === nextY) {
+                    nextX = p.target.x;
+                    nextY = p.target.y;
+                    // Maintain velocity, but if we spawn ON the target, we need to move one step out to avoid loop?
+                    // Actually standard snake portal behavior: enter portal -> emerge from target.
+                    // But we simply move head to target. The next frame it moves from target.
+                    // However, if the target is nextX, nextY, we are effectively "on" the portal.
+                    // We need to ensure we don't instantly collide with the portal we just came out of?
+                    // Simplified: Teleport head to target position immediately. 
+                    // But we need to make sure we don't hit the target portal and loop back.
+                    // Since we move 'into' p, we emerge 'at' p.target.
+                    // To avoid instant re-teleport, we can disable portal for 1 tick or move 1 step further.
+                    // Let's just set head position to target and NOT trigger collision there.
+                    teleported = true;
+                    createParticles(p.x, p.y, p.color);
+                    createParticles(p.target.x, p.target.y, p.color);
+                    break;
+                }
+            }
+
+            // Collision: Body
+            // Check AFTER teleport
+            for (let part of body) {
+                if (part.x === nextX && part.y === nextY) {
+                    gameOver();
+                    return;
+                }
+            }
+
+            // Collision: Obstacles
+            for (let obs of obstacles) {
+                if (obs.x === nextX && obs.y === nextY) {
+                    gameOver();
+                    return;
+                }
+            }
+
+            headX = nextX;
+            headY = nextY;
+
+            // Draw Background
+            ctx.fillStyle = '#020617';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x <= canvas.width; x += gridSize) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+            for (let y = 0; y <= canvas.height; y += gridSize) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
+
+            // Draw Portals
+            for (let p of portals) {
+                ctx.fillStyle = p.color;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(p.x * gridSize + gridSize / 2, p.y * gridSize + gridSize / 2, gridSize / 2 - 2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Vortex effect
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(p.x * gridSize + gridSize / 2, p.y * gridSize + gridSize / 2, gridSize / 4, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+
+            // Draw Obstacles
+            ctx.fillStyle = '#334155';
+            for (let obs of obstacles) {
+                ctx.fillRect(obs.x * gridSize + 1, obs.y * gridSize + 1, gridSize - 2, gridSize - 2);
+            }
+
+            // Draw Snake
+            for (let i = 0; i < body.length; i++) {
+                ctx.fillStyle = `hsl(${260 + (i * 2)}, 80%, 65%)`;
+                ctx.fillRect(body[i].x * gridSize, body[i].y * gridSize, gridSize - 1, gridSize - 1);
+            }
+            // Head
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = '#ffffff';
+            ctx.shadowBlur = 15;
+            ctx.fillRect(headX * gridSize, headY * gridSize, gridSize - 1, gridSize - 1);
+            ctx.shadowBlur = 0;
+
+            body.push({ x: headX, y: headY });
+            while (body.length > tailLen) {
+                body.shift();
+            }
+
+            // Draw Apple
+            ctx.fillStyle = '#10b981';
+            ctx.shadowColor = '#10b981';
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            const ax = appleX * gridSize + gridSize / 2;
+            const ay = appleY * gridSize + gridSize / 2;
+            ctx.arc(ax, ay, gridSize / 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Eat Apple
+            if (appleX === headX && appleY === headY) {
+                tailLen++;
+                score += 10;
+                scoreEl.innerText = score;
+                createParticles(appleX, appleY, '#10b981');
+                spawnApple();
+                if (score % 50 === 0) {
+                    speed = Math.min(speed + 1, 20);
+                    clearInterval(gameLoop);
+                    gameLoop = setInterval(drawGame, 1000 / speed);
+                }
+            }
+
+            // Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.05;
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+            ctx.globalAlpha = 1.0;
+        }
+
+        function start() {
+            headX = 10;
+            headY = 10;
+            velocityX = 1;
+            velocityY = 0;
+            body = [];
+            tailLen = 3;
+            score = 0;
+            speed = 8;
+            particles = [];
+            portals = [];
+
+            generateObstacles(0);
+            generatePortals(); // New
+            spawnApple();
+
+            startScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
+            scoreEl.innerText = score;
+
+            isRunning = true;
+            canvas.focus();
+
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(drawGame, 1000 / speed);
+        }
+
+        function stop() {
+            isRunning = false;
+            clearInterval(gameLoop);
+        }
+
+        function gameOver() {
+            stop();
+            finalScoreEl.innerText = score;
+            endScreen.classList.remove('hidden');
+        }
+
+        return { start, stop };
+    })();
+</script>

@@ -17,6 +17,7 @@ import { apiAdminRolesRoutes } from "./api/admin/roles";
 import { apiAdminRedirectsRoutes } from "./api/admin/redirects";
 import { apiStripeRoutes } from "./api/stripe";
 import { UnauthorizedError, ForbiddenError, BadRequestError, ConflictError } from "@plinkk/shared";
+import { apiAdminMaintenanceRoutes } from "./api/admin/maintenance";
 
 // const prisma = new PrismaClient();
 
@@ -29,6 +30,7 @@ export function apiRoutes(fastify: FastifyInstance) {
   fastify.register(apiAdminPlinkksRoutes, { prefix: "/admin/plinkks" });
   fastify.register(apiAdminRolesRoutes, { prefix: "/admin/roles" });
   fastify.register(apiAdminRedirectsRoutes, { prefix: "/admin/redirects" });
+  fastify.register(apiAdminMaintenanceRoutes, { prefix: "/admin/maintenance" });
   fastify.register(apiStripeRoutes, { prefix: "/stripe" });
 
   fastify.get("/roles", async (request, reply) => {
@@ -158,7 +160,7 @@ export function apiRoutes(fastify: FastifyInstance) {
             slug: `bi-${slug}`,
             displayName: toTitle(slug),
             url: `https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/${slug}.svg`,
-            }));
+          }));
         }
       } catch (e) {
         console.error("Failed to fetch bootstrap icons", e);
