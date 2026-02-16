@@ -1,0 +1,37 @@
+<main class="relative flex min-h-screen items-center justify-center overflow-hidden px-4 md:px-8 bg-slate-950">
+    <!-- Background Effects -->
+    <div
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none">
+    </div>
+    <div
+        class="absolute bottom-0 right-0 w-[600px] h-[600px] bg-violet-600/5 rounded-full blur-[100px] pointer-events-none">
+    </div>
+
+    <div class="relative z-10 max-w-2xl text-center animate-in fade-in zoom-in duration-700">
+        <p
+            class="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-bold tracking-wide mb-6">
+            Erreur 404
+        </p>
+        <h1 class="text-5xl font-bold tracking-tight text-white sm:text-7xl mb-6">
+            Page introuvable
+        </h1>
+        <p class="text-lg text-slate-400 leading-relaxed max-w-lg mx-auto mb-10">
+            Désolé, nous n'avons pas trouvé la page que vous recherchez. Elle a peut-être été déplacée ou supprimée.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="/"
+                class="px-8 py-3 rounded-full bg-white text-slate-900 font-bold hover:bg-indigo-50 transition-all transform hover:scale-105 shadow-lg shadow-indigo-500/20">
+                Retour à l'accueil
+            </a>
+            <a href="mailto:contact@plinkk.fr"
+                class="px-8 py-3 rounded-full bg-white/5 text-white font-medium border border-white/10 hover:bg-white/10 transition-all flex items-center gap-2">
+                Contactez le support
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+            </a>
+        </div>
+    </div>
+</main>
