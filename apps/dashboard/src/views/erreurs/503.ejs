@@ -1,6 +1,6 @@
 <% if (typeof frontendUrl==='undefined' ) { var frontendUrl='https://plinkk.fr' ; } %>
     <%- include('partials/head', { title: 'Maintenance en cours - Plinkk' }) %>
-    <%- include('partials/header') %>
+    <%- include('partials/header', { frontendUrl: frontendUrl }) %>
 
         <main
             class="relative flex min-h-screen pt-20 lg:pt-0 items-center justify-center overflow-hidden px-4 md:px-8 bg-slate-950">
