@@ -474,16 +474,15 @@
                     const iconSvg = `<svg class="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[page.icon] || ICONS['globe']}</svg>`;
 
                     // Color Logic
-                    const activeBgClass = isGlobalOn ? 'checked:bg-emerald-500 checked:border-emerald-500' : 'checked:bg-red-500 checked:border-red-500';
+                    const activeBgClass = isGlobalOn ? 'checked:bg-emerald-500 checked:border-emerald-500 text-emerald-500' : 'checked:bg-red-500 checked:border-red-500 text-red-500';
 
                     row.innerHTML = `
                          <div class="col-span-1 flex items-center justify-center">
                             <div class="relative flex items-center justify-center w-full">
                                 <input type="checkbox" id="chk-${page.path}" 
-                                    class="peer w-5 h-5 cursor-pointer appearance-none rounded border border-slate-600 bg-slate-800 ${activeBgClass} transition-all" 
+                                    class="peer w-5 h-5 cursor-pointer appearance-none rounded border border-slate-600 bg-slate-800 ${activeBgClass} transition-all focus:ring-0 focus:ring-offset-0" 
                                     ${isChecked ? 'checked' : ''}
                                     onclick="togglePage('${page.path}', event)">
-                                <svg class="absolute w-3.5 h-3.5 text-white pointer-events-none opacity-0 peer-checked:opacity-100 top-0.5 left-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                             </div>
                         </div>
                         <div class="col-span-11 flex items-center justify-between min-w-0">
