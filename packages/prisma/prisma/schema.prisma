@@ -627,7 +627,8 @@ model Maintenance {
   id             String    @id @default("config")
   global         Boolean   @default(false) // Maintenance globale
   dashboard      Boolean   @default(false) // Maintenance dashboard uniquement
-  activePages    String[]  @default([])    // Pages spécifiques en maintenance (ex: ["/login", "/register"])
+  activePages    String[]  @default([])    // Pages spécifiques en exceptions (Allowlist)
+  maintenancePages String[] @default([])   // Pages spécifiques en maintenance (Blocklist)
   reason         String?
   scheduledStart DateTime?
   scheduledEnd   DateTime?

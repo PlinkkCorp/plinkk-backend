@@ -4,6 +4,7 @@ export interface MaintenanceStatus {
     global: boolean;
     dashboard: boolean;
     activePages: string[];
+    maintenancePages: string[];
     reason: string | null;
     scheduledStart: Date | null;
     scheduledEnd: Date | null;
@@ -23,6 +24,7 @@ export async function getMaintenanceStatus(): Promise<MaintenanceStatus> {
             global: false,
             dashboard: false,
             activePages: [],
+            maintenancePages: [],
             reason: null,
             scheduledStart: null,
             scheduledEnd: null,
@@ -35,6 +37,7 @@ export async function getMaintenanceStatus(): Promise<MaintenanceStatus> {
         global: config.global,
         dashboard: config.dashboard,
         activePages: config.activePages,
+        maintenancePages: config.maintenancePages,
         reason: config.reason,
         scheduledStart: config.scheduledStart,
         scheduledEnd: config.scheduledEnd,
@@ -51,6 +54,7 @@ export async function updateMaintenanceStatus(data: Partial<MaintenanceStatus>):
             global: data.global ?? false,
             dashboard: data.dashboard ?? false,
             activePages: data.activePages ?? [],
+            maintenancePages: data.maintenancePages ?? [],
             reason: data.reason ?? null,
             scheduledStart: data.scheduledStart ?? null,
             scheduledEnd: data.scheduledEnd ?? null,
@@ -66,6 +70,7 @@ export async function updateMaintenanceStatus(data: Partial<MaintenanceStatus>):
         global: config.global,
         dashboard: config.dashboard,
         activePages: config.activePages,
+        maintenancePages: config.maintenancePages,
         reason: config.reason,
         scheduledStart: config.scheduledStart,
         scheduledEnd: config.scheduledEnd,
@@ -86,27 +91,23 @@ export function isMaintenanceActive(status: MaintenanceStatus, path: string, isD
     const now = new Date();
     const isScheduled = status.scheduledStart && status.scheduledEnd && now >= status.scheduledStart && now <= status.scheduledEnd;
 
-    // 4. Determine Active State
-    let active = status.global || isScheduled;
-    if (isDashboard && status.dashboard) active = true;
+    // 4. Determine Global Active State
+    let globalActive = status.global || isScheduled;
+    if (isDashboard && status.dashboard) globalActive = true;
 
-    // 5. Check Page Specific Exceptions (if active)
-    if (active) {
-        // If maintenance IS active, check if current page is allowed (activePages is a WHITELIST of allowed pages during maintenance, wait...)
-        // Actually, looking at original code: `if (status.activePages.includes(path)) return true;`
-        // Wait, the original code logic was weird: `if (status.activePages.includes(path)) return true;` -> This means activePages were "Pages in Maintenance", NOT "Allowed Pages".
-        // BUT usually activePages means "Allowed pages". Let's re-read the original View.
-        // View says: "Pages Spécifiques". "Gérez l'accès au site".
-        // Code: `if (status.activePages.includes(path)) return true;` -> If path is in activePages, maintenance IS active for it?
-        // Let's assume activePages in the NEW design should be a WHITELIST (Pages ALLOWED during maintenance).
-        // OR we stick to the old logic where `activePages` defined specific pages that are DOWN.
-        // The prompt says "whitelist pages". So I will implement it as a WHITELIST.
-        // Meaning: If maintenance is active, BUT path is in activePages, then return FALSE (not active for this page).
+    // 5. Logic
+    if (globalActive) {
+        // Global Maintenance Triggered.
+        // Check Exceptions (Allowlist / activePages)
+        // activePages SHOULD be a list of paths that are STILL accessible during maintenance.
+        if (status.activePages.includes(path)) return false; // Allowed -> Not Maintenance
 
-        if (status.activePages.includes(path)) return false; // ALLOWED page
+        return true; // Maintenance Active
+    } else {
+        // Global Maintenance OFF.
+        // Check Specific Blocks (Blocklist / maintenancePages)
+        if (status.maintenancePages && status.maintenancePages.includes(path)) return true; // Blocked -> Maintenance Active
 
-        return true; // Maintenance IS active and page is NOT allowed
+        return false;
     }
-
-    return false;
 }

@@ -127,81 +127,140 @@
                     </div>
 
                     <!-- Whitelists -->
-                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
-                        <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                            </svg>
-                            Exceptions & Accès
-                        </h2>
+                    <!-- New Layout: 2 Columns (Main List + Side Settings) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <!-- Active Pages -->
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <h3 class="text-lg font-semibold text-slate-300">Pages Autorisées</h3>
-                                    <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded">URL
-                                        publiques</span>
-                                </div>
-                                <div class="bg-slate-950 rounded-xl border border-slate-800 p-2 min-h-[160px] max-h-[240px] overflow-y-auto space-y-1"
-                                    id="list-pages">
-                                    <!-- Filled by JS -->
-                                </div>
-                                <div class="flex gap-2">
-                                    <input type="text" id="newPage" placeholder="/login"
-                                        class="flex-1 bg-slate-800 border-none rounded-lg px-3 py-2 text-white text-sm focus:ring-1 focus:ring-violet-500">
-                                    <button onclick="addItem('pages', document.getElementById('newPage').value)"
-                                        class="bg-violet-600 hover:bg-violet-700 text-white p-2 rounded-lg transition-colors">
-                                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2">
-                                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <!-- LEFT COLUMN: Page Manager (File Explorer Style) -->
+                        <div class="lg:col-span-8 space-y-6">
+                            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 h-full flex flex-col">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-violet-400" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                                            <line x1="9" y1="21" x2="9" y2="9"></line>
                                         </svg>
+                                        Pages & Routes
+                                    </h2>
+                                    <!-- Dynamic Badge based on Global State -->
+                                    <div id="mode-badge"
+                                        class="px-3 py-1 rounded-full text-xs font-bold transition-colors">
+                                        <!-- Filled by JS -->
+                                    </div>
+                                </div>
+
+                                <!-- Introduction / Legend -->
+                                <div class="bg-slate-950/50 rounded-xl p-4 mb-4 text-sm border border-slate-800/50">
+                                    <p class="text-slate-400" id="mode-description">
+                                        <!-- Filled by JS -->
+                                    </p>
+                                </div>
+
+                                <!-- File Explorer Toolbar -->
+                                <div class="flex gap-2 mb-2 p-1 bg-slate-950 rounded-lg border border-slate-800">
+                                    <input type="text" id="newCustomPage"
+                                        placeholder="Ajouter une route (ex: /promo/ete)"
+                                        class="flex-1 bg-transparent border-none text-white text-sm focus:ring-0 px-3 placeholder-slate-600">
+                                    <button onclick="addCustomPage()"
+                                        class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs rounded-md transition-colors">
+                                        + Ajouter
                                     </button>
                                 </div>
+
+                                <!-- File Explorer List -->
+                                <div
+                                    class="flex-1 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden flex flex-col">
+                                    <!-- Header -->
+                                    <div
+                                        class="grid grid-cols-12 gap-4 px-4 py-2 bg-slate-900 border-b border-slate-800 text-xs font-medium text-slate-500 uppercase">
+                                        <div class="col-span-1 text-center">État</div>
+                                        <div class="col-span-11">Page / Route</div>
+                                    </div>
+
+                                    <!-- Scrollable Content -->
+                                    <div class="overflow-y-auto flex-1 p-2 space-y-0.5 custom-scrollbar"
+                                        id="file-explorer-list" style="min-height: 400px; max-height: 600px;">
+                                        <!-- Filled by JS -->
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+
+                        <!-- RIGHT COLUMN: Settings (IPs, Roles, Whitelist) -->
+                        <div class="lg:col-span-4 space-y-6">
 
                             <!-- Allowed IPs -->
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <h3 class="text-lg font-semibold text-slate-300">IPs Autorisées</h3>
-                                    <button onclick="addItem('ips', 'YOUR_IP')"
-                                        class="text-xs text-violet-400 hover:text-violet-300 underline"
-                                        id="btnAddMyIp">Ajouter mon IP</button>
-                                </div>
-                                <div class="bg-slate-950 rounded-xl border border-slate-800 p-2 min-h-[160px] max-h-[240px] overflow-y-auto space-y-1"
+                            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                                <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-violet-400" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    </svg>
+                                    IPs Autorisées
+                                </h2>
+                                <div class="bg-slate-950 rounded-xl border border-slate-800 p-2 min-h-[120px] max-h-[200px] overflow-y-auto space-y-1 mb-3"
                                     id="list-ips">
                                     <!-- Filled by JS -->
                                 </div>
-                                <div class="flex gap-2">
-                                    <input type="text" id="newIp" placeholder="192.168.1.1"
-                                        class="flex-1 bg-slate-800 border-none rounded-lg px-3 py-2 text-white text-sm focus:ring-1 focus:ring-violet-500">
-                                    <button onclick="addItem('ips', document.getElementById('newIp').value)"
-                                        class="bg-violet-600 hover:bg-violet-700 text-white p-2 rounded-lg transition-colors">
-                                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="2">
-                                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <div class="space-y-2">
+                                    <button onclick="addItem('ips', 'YOUR_IP')"
+                                        class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-violet-400 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors flex items-center justify-center gap-2 group"
+                                        id="btnAddMyIp">
+                                        <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                            </path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                         </svg>
+                                        Ajouter mon IP
                                     </button>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="newIp" placeholder="1.1.1.1"
+                                            class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-violet-500">
+                                        <button onclick="addItem('ips', document.getElementById('newIp').value)"
+                                            class="p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors">
+                                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2">
+                                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Allowed Roles -->
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <h3 class="text-lg font-semibold text-slate-300">Rôles Autorisés</h3>
-                                    <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded">Bypass</span>
+                            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-violet-400" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="9" cy="7" r="4"></circle>
+                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                        </svg>
+                                        Rôles Autorisés
+                                    </h2>
+                                    <span
+                                        class="text-[10px] uppercase font-bold bg-indigo-900/50 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/30">Bypass</span>
                                 </div>
-                                <div class="bg-slate-950 rounded-xl border border-slate-800 p-2 min-h-[160px] max-h-[240px] overflow-y-auto space-y-1"
+
+                                <div class="bg-slate-950 rounded-xl border border-slate-800 p-2 min-h-[120px] max-h-[200px] overflow-y-auto space-y-1 mb-3"
                                     id="list-roles">
                                     <!-- Filled by JS -->
                                 </div>
+
                                 <div class="flex gap-2">
                                     <select id="newRole"
-                                        class="flex-1 bg-slate-800 border-none rounded-lg px-3 py-2 text-white text-sm focus:ring-1 focus:ring-violet-500">
-                                        <option value="">Sélectionner...</option>
+                                        class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-violet-500">
+                                        <option value="">Ajouter un rôle...</option>
                                         <% roles.forEach(role=> { %>
                                             <option value="<%= role.name %>">
                                                 <%= role.name %>
@@ -209,7 +268,7 @@
                                             <% }); %>
                                     </select>
                                     <button onclick="addItem('roles', document.getElementById('newRole').value)"
-                                        class="bg-violet-600 hover:bg-violet-700 text-white p-2 rounded-lg transition-colors">
+                                        class="p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors">
                                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                             stroke-width="2">
                                             <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -218,6 +277,7 @@
                                     </button>
                                 </div>
                             </div>
+
                         </div>
                     </div>
 
@@ -226,7 +286,7 @@
                         class="sticky bottom-6 bg-slate-900/80 backdrop-blur-lg border border-slate-800 p-4 rounded-xl flex items-center justify-between shadow-2xl">
                         <div class="text-sm text-slate-400" id="status-message">
                             <% if (!maintenance.activePages.length && !maintenance.allowedIps.length &&
-                                !maintenance.allowedRoles.length) { %>
+                                !maintenance.allowedRoles.length && !maintenance.maintenancePages?.length) { %>
                                 <span class="text-orange-400 flex items-center gap-2">
                                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2">
@@ -234,7 +294,7 @@
                                         <line x1="12" y1="8" x2="12" y2="12"></line>
                                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                                     </svg>
-                                    Attention: Aucune exception configurée.
+                                    Attention: Aucune configuration spécifique.
                                 </span>
                                 <% } else { %>
                                     <span class="text-emerald-400 flex items-center gap-2">
@@ -263,71 +323,313 @@
 
         <!-- Data holder for server-side state -->
         <div id="maintenance-data" hidden data-pages="<%= JSON.stringify(maintenance.activePages || []) %>"
+            data-maintenance-pages="<%= JSON.stringify(maintenance.maintenancePages || []) %>"
             data-ips="<%= JSON.stringify(maintenance.allowedIps || []) %>"
             data-roles="<%= JSON.stringify(maintenance.allowedRoles || []) %>"></div>
 
         <script>
+            // System Pages Definition
+            const SYSTEM_PAGES = [
+                { path: '/', label: 'Page d\'accueil', icon: 'home' },
+                { path: '/login', label: 'Connexion', icon: 'log-in' },
+                { path: '/register', label: 'Inscription', icon: 'user-plus' },
+
+                // User Dashboard Routes
+                { path: '/dashboard', label: 'Tableau de bord', icon: 'layout' },
+                { path: '/plinkks', label: 'Mes Pages', icon: 'layers' },
+                { path: '/stats', label: 'Statistiques', icon: 'bar-chart' },
+                { path: '/account', label: 'Mon Compte', icon: 'user' },
+                { path: '/sessions', label: 'Sessions & Sécurité', icon: 'shield' },
+                { path: '/premium', label: 'Abonnement', icon: 'star' },
+                { path: '/cosmetics', label: 'Apparence', icon: 'palette' },
+                { path: '/themes', label: 'Thèmes', icon: 'droplet' },
+
+                // Public/Other
+                { path: '/pricing', label: 'Tarifs', icon: 'credit-card' },
+                { path: '/contact', label: 'Contact', icon: 'mail' },
+                { path: '/legal/mentions-legales', label: 'Mentions Légales', icon: 'file-text' },
+                { path: '/legal/cgu', label: 'CGU', icon: 'file-text' },
+            ];
+
+            // Icons Map
+            const ICONS = {
+                'home': '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>',
+                'log-in': '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line>',
+                'user-plus': '<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line>',
+                'layout': '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line>',
+                'credit-card': '<rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line>',
+                'mail': '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline>',
+                'file-text': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline>',
+                'globe': '<circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>',
+
+                // New Icons
+                'layers': '<polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline>',
+                'bar-chart': '<line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line>',
+                'user': '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>',
+                'shield': '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>',
+                'star': '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>',
+                'palette': '<path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle>',
+                'droplet': '<path d="M12 2.69l5.74 5.74a8 8 0 1 1-11.31 0z"></path>'
+            };
+
             // Initial State from Server
             const dataEl = document.getElementById('maintenance-data');
             const state = {
-                pages: JSON.parse(dataEl.getAttribute('data-pages') || '[]'),
+                // Determine initial checked pages based on Global State
+                // We merge both lists into a single "selected" set for the UI
+                isGlobal: dataEl.getAttribute('data-global') === 'true',
+                activePages: JSON.parse(dataEl.getAttribute('data-pages') || '[]'),
+                maintenancePages: JSON.parse(dataEl.getAttribute('data-maintenance-pages') || '[]'),
+
                 ips: JSON.parse(dataEl.getAttribute('data-ips') || '[]'),
-                roles: JSON.parse(dataEl.getAttribute('data-roles') || '[]')
+                roles: JSON.parse(dataEl.getAttribute('data-roles') || '[]'),
+
+                // Unified list of ALL pages we know about (System + Custom)
+                allPages: [],
+                // Set of paths that are currently "checked"
+                selectedPaths: new Set()
             };
 
-            // Render Lists
-            function renderList(type) {
+            // --- Initialization Logic ---
+            function initPages() {
+                // 1. Populate Selected Paths from both sources (safe start)
+                state.activePages.forEach(p => state.selectedPaths.add(p));
+                state.maintenancePages.forEach(p => state.selectedPaths.add(p));
+
+                // 2. Add System Pages
+                state.allPages = SYSTEM_PAGES.map(p => ({ ...p, isCustom: false }));
+
+                // 3. Add Custom Pages from loaded data
+                // We find any path in selectedPaths that isn't in SYSTEM_PAGES
+                const knownPaths = new Set(state.allPages.map(p => p.path));
+                state.selectedPaths.forEach(path => {
+                    if (!knownPaths.has(path)) {
+                        state.allPages.push({
+                            path: path,
+                            label: path, // Use path as label for custom
+                            icon: 'globe',
+                            isCustom: true
+                        });
+                    }
+                });
+            }
+
+            // --- Rendering Logic ---
+
+            function updateModeUI() {
+                const globalCheckbox = document.getElementById('maintGlobal');
+                const isGlobalOn = globalCheckbox ? globalCheckbox.checked : state.isGlobal;
+
+                const badge = document.getElementById('mode-badge');
+                const desc = document.getElementById('mode-description');
+
+                if (isGlobalOn) {
+                    badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-emerald-900/50 text-emerald-400 border border-emerald-500/30';
+                    badge.innerHTML = 'MODE: EXCEPTIONS';
+                    desc.innerHTML = `
+                        <span class="text-emerald-400 font-bold">Maintenance Globale ACTIVÉE</span>. 
+                        Sélectionnez les pages qui doivent rester <strong class="text-white">ACCESSIBLES</strong> (Exceptions).
+                        Toutes les autres pages seront bloquées.
+                    `;
+                } else {
+                    badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-red-900/50 text-red-400 border border-red-500/30';
+                    badge.innerHTML = 'MODE: BLOCAGE INDI.';
+                    desc.innerHTML = `
+                         <span class="text-slate-300 font-bold">Maintenance Globale DÉSACTIVÉE</span>.
+                         Sélectionnez les pages qui doivent être <strong class="text-red-400">BLOQUÉES</strong>.
+                         Le reste du site restera accessible.
+                    `;
+                }
+
+                renderFileExplorer();
+            }
+
+            function renderFileExplorer() {
+                const container = document.getElementById('file-explorer-list');
+                const globalCheckbox = document.getElementById('maintGlobal');
+                const isGlobalOn = globalCheckbox ? globalCheckbox.checked : state.isGlobal;
+
+                container.innerHTML = '';
+
+                // Sort: System first, then Custom (alphabetical)
+                const sortedPages = [...state.allPages].sort((a, b) => {
+                    if (a.isCustom === b.isCustom) return a.path.localeCompare(b.path);
+                    return a.isCustom ? 1 : -1;
+                });
+
+                sortedPages.forEach(page => {
+                    const isChecked = state.selectedPaths.has(page.path);
+
+                    const row = document.createElement('div');
+                    // Use CSS Grid to match header alignment (1 col State, 11 cols Content)
+                    row.className = `group grid grid-cols-12 gap-4 px-4 py-3 rounded-lg border border-transparent hover:bg-slate-900 transition-all cursor-pointer items-center ${isChecked ? 'bg-slate-900/50 border-slate-800' : ''}`;
+                    row.onclick = (e) => {
+                        // Toggle checkbox if clicking row (and not inner elements)
+                        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+                            togglePage(page.path);
+                        }
+                    };
+
+                    // Icon
+                    const iconSvg = `<svg class="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[page.icon] || ICONS['globe']}</svg>`;
+
+                    // Color Logic
+                    const activeBgClass = isGlobalOn ? 'checked:bg-emerald-500 checked:border-emerald-500' : 'checked:bg-red-500 checked:border-red-500';
+
+                    row.innerHTML = `
+                         <div class="col-span-1 flex items-center justify-center">
+                            <div class="relative flex items-center justify-center w-full">
+                                <input type="checkbox" id="chk-${page.path}" 
+                                    class="peer w-5 h-5 cursor-pointer appearance-none rounded border border-slate-600 bg-slate-800 ${activeBgClass} transition-all" 
+                                    ${isChecked ? 'checked' : ''}
+                                    onclick="togglePage('${page.path}', event)">
+                                <svg class="absolute w-3.5 h-3.5 text-white pointer-events-none opacity-0 peer-checked:opacity-100 top-0.5 left-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                        </div>
+                        <div class="col-span-11 flex items-center justify-between min-w-0">
+                            <div class="flex items-center gap-3 min-w-0">
+                                ${iconSvg}
+                                <div class="flex flex-col min-w-0">
+                                    <span class="text-sm font-medium text-slate-200 truncate ${isChecked ? 'text-white' : ''}">${page.label}</span>
+                                    ${page.isCustom ? `<span class="text-[10px] text-slate-500 font-mono truncate">${page.path}</span>` : ''}
+                                </div>
+                            </div>
+                            
+                            ${page.isCustom ? `
+                                <button onclick="removeCustomPage('${page.path}', event)" class="p-1.5 text-slate-600 hover:text-red-400 hover:bg-red-900/20 rounded-md transition-colors opacity-0 group-hover:opacity-100" title="Supprimer">
+                                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </button>
+                            ` : `<span class="text-[10px] text-slate-600 font-mono opacity-0 group-hover:opacity-100 transition-opacity">${page.path}</span>`}
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
+            }
+
+            function togglePage(path, e) {
+                if (e) e.stopPropagation();
+
+                if (state.selectedPaths.has(path)) {
+                    state.selectedPaths.delete(path);
+                } else {
+                    // Start Confirmation Logic if necessary
+                    // (Optional: Warning when blocking critical pages in Block Mode?)
+                    state.selectedPaths.add(path);
+                }
+                renderFileExplorer();
+            }
+
+            // --- Custom Page Management ---
+            function addCustomPage() {
+                const input = document.getElementById('newCustomPage');
+                const path = input.value.trim();
+
+                if (!path) return;
+
+                // Existing check
+                if (state.allPages.find(p => p.path === path)) {
+                    input.value = ''; // Exists
+                    return;
+                }
+
+                // Confirmation for sensitive/weird paths
+                const isGeneric = !path.startsWith('/') || (path.startsWith('/') && path.split('/').length === 2 && path.length < 5);
+                const isWildcard = path.includes('*');
+
+                if (isGeneric || isWildcard) {
+                    const globalCheckbox = document.getElementById('maintGlobal');
+                    const isGlobalOn = globalCheckbox ? globalCheckbox.checked : state.isGlobal;
+
+                    // If Global ON -> Adding Exception (Safe)
+                    // If Global OFF -> Adding Block (Dangerous)
+                    if (!isGlobalOn) {
+                        if (!confirm(`Attention: Vous ajoutez "${path}".\nEn mode actuel (Blocage), cela va BLOQUER cette route.\n\nÊtes-vous sûr de vouloir continuer ?`)) {
+                            return;
+                        }
+                    }
+                }
+
+                state.allPages.push({
+                    path: path,
+                    label: path,
+                    icon: 'globe',
+                    isCustom: true
+                });
+
+                state.selectedPaths.add(path);
+                renderFileExplorer();
+                input.value = '';
+            }
+
+            function removeCustomPage(path, e) {
+                if (e) e.stopPropagation();
+                if (!confirm('Retirer cette page de la liste ?')) return;
+
+                state.allPages = state.allPages.filter(p => p.path !== path);
+                state.selectedPaths.delete(path);
+                renderFileExplorer();
+            }
+
+            // --- Other Items (IPs / Roles) ---
+            function renderSimpleList(type) {
                 const container = document.getElementById(`list-${type}`);
+                if (!container) return;
                 container.innerHTML = '';
 
                 if (state[type].length === 0) {
-                    container.innerHTML = '<div class="text-slate-600 italic text-xs text-center py-4">Aucune entrée</div>';
+                    container.innerHTML = '<div class="text-slate-600 italic text-[10px] text-center py-2">Aucune entrée</div>';
                     return;
                 }
 
                 state[type].forEach(item => {
                     const el = document.createElement('div');
-                    el.className = 'flex items-center justify-between px-3 py-2 bg-slate-900 rounded-lg hover:bg-slate-800 transition-colors group';
+                    el.className = 'flex items-center justify-between px-3 py-1.5 bg-slate-900 rounded-lg border border-slate-800/50 hover:border-slate-700 transition-colors group';
                     el.innerHTML = `
-                <span class="text-slate-300 text-sm font-mono truncate">${item}</span>
-                <button onclick="removeItem('${type}', '${item}')" class="text-slate-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-            `;
+                        <span class="text-slate-300 text-xs font-mono truncate">${item}</span>
+                        <button onclick="removeItem('${type}', '${item}')" class="text-slate-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
+                             <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    `;
                     container.appendChild(el);
                 });
             }
 
             function addItem(type, value) {
                 if (!value) return;
+                // IP Special Case
                 if (value === 'YOUR_IP') {
-                    // Fetch current IP
-                    fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => addItem('ips', d.ip));
+                    const btn = document.getElementById('btnAddMyIp');
+                    const orig = btn.innerHTML;
+                    btn.innerHTML = '...';
+                    fetch('https://api.ipify.org?format=json')
+                        .then(r => r.json())
+                        .then(d => {
+                            addItem('ips', d.ip);
+                            btn.innerHTML = orig;
+                        })
+                        .catch(() => {
+                            btn.innerHTML = 'Err';
+                            setTimeout(() => btn.innerHTML = orig, 2000);
+                        });
                     return;
                 }
 
                 value = value.trim();
+                // Duplicate check
                 if (state[type].includes(value)) return;
-
                 state[type].push(value);
-                renderList(type);
+                renderSimpleList(type);
 
-                // Reset Inputs
-                if (type === 'pages') document.getElementById('newPage').value = '';
                 if (type === 'ips') document.getElementById('newIp').value = '';
                 if (type === 'roles') document.getElementById('newRole').value = '';
             }
 
             function removeItem(type, value) {
                 state[type] = state[type].filter(i => i !== value);
-                renderList(type);
+                renderSimpleList(type);
             }
 
-            function clearSchedule() {
-                document.getElementById('schedStart').value = '';
-                document.getElementById('schedEnd').value = '';
-            }
-
+            // --- SAVE ---
             async function saveAll() {
                 const global = document.getElementById('maintGlobal').checked;
                 const dashboard = document.getElementById('maintDashboard').checked;
@@ -335,12 +637,23 @@
                 const schedStartVal = document.getElementById('schedStart').value;
                 const schedEndVal = document.getElementById('schedEnd').value;
 
-                // Basic validation
                 let scheduledStart = null;
                 let scheduledEnd = null;
-
                 if (schedStartVal) scheduledStart = new Date(schedStartVal).toISOString();
                 if (schedEndVal) scheduledEnd = new Date(schedEndVal).toISOString();
+
+                // --- COMPUTE LISTS FROM FILE EXPLORER ---
+                // If Global ON -> Checked = activePages (Exceptions), maintenancePages = []
+                // If Global OFF -> Checked = maintenancePages (Blocklist), activePages = []
+                const checkedPaths = Array.from(state.selectedPaths);
+                let newActivePages = [];
+                let newMaintenancePages = [];
+
+                if (global) {
+                    newActivePages = checkedPaths;
+                } else {
+                    newMaintenancePages = checkedPaths;
+                }
 
                 const data = {
                     global,
@@ -348,24 +661,18 @@
                     reason,
                     scheduledStart,
                     scheduledEnd,
-                    activePages: state.pages,
+                    activePages: newActivePages,
+                    maintenancePages: newMaintenancePages,
                     allowedIps: state.ips,
                     allowedRoles: state.roles
                 };
 
+                // Helper to change button state
                 const btn = document.querySelector('button[onclick="saveAll()"]');
                 const statusMsg = document.getElementById('status-message');
                 const origContent = btn.innerHTML;
-
-                // Loading State
                 btn.disabled = true;
-                btn.innerHTML = `
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Enregistrement...
-                `;
+                btn.innerHTML = 'Enregistrement...';
 
                 try {
                     const res = await fetch('/api/admin/maintenance', {
@@ -375,43 +682,31 @@
                     });
 
                     if (res.ok) {
-                        btn.innerHTML = `
-                            <svg class="w-5 h-5 mr-2 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            Enregistré !
-                        `;
+                        btn.innerHTML = 'Enregistré !';
                         setTimeout(() => window.location.reload(), 1000);
                     } else {
-                        const contentType = res.headers.get("content-type");
-                        let errorMessage = 'Erreur inconnue';
-                        if (contentType && contentType.indexOf("application/json") !== -1) {
-                            const errorJson = await res.json();
-                            errorMessage = errorJson.message || errorJson.error || 'Erreur serveur';
-                        } else {
-                            errorMessage = await res.text() || res.statusText;
-                        }
-                        throw new Error(errorMessage);
+                        throw new Error('Erreur');
                     }
                 } catch (e) {
                     console.error("Save Error:", e);
-                    btn.innerHTML = `
-                        <svg class="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Erreur !
-                    `;
-
-                    // Show detailed error
-                    statusMsg.innerHTML = `<span class="text-red-400 font-mono text-xs break-all">Erreur: ${e.message}</span>`;
-
+                    btn.innerHTML = 'Erreur';
                     setTimeout(() => {
                         btn.disabled = false;
                         btn.innerHTML = origContent;
-                    }, 3000);
+                    }, 2000);
                 }
             }
 
+            // --- Events ---
+            // Listen to Global Switch to update UI text/color
+            document.getElementById('maintGlobal').addEventListener('change', updateModeUI);
+
             // Init
-            renderList('pages');
-            renderList('ips');
-            renderList('roles');
+            initPages();
+            updateModeUI();
+            renderSimpleList('ips');
+            renderSimpleList('roles');
+
         </script>
         </body>
 

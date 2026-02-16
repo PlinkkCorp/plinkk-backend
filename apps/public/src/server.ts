@@ -128,7 +128,19 @@ fastify.addHook("preHandler", async (request, reply) => {
   const maintenance = await prisma.maintenance.findUnique({ where: { id: "config" } });
 
   if (maintenance) {
-    if (maintenance.global || maintenance.activePages.includes(request.url)) {
+    let isActive = maintenance.global;
+
+    // Check specific page maintenance (Blocklist) if global is OFF
+    if (!isActive && maintenance.maintenancePages.includes(request.url)) {
+      isActive = true;
+    }
+
+    // Check exceptions (Allowlist) if global is ON
+    if (isActive && maintenance.activePages.includes(request.url)) {
+      isActive = false;
+    }
+
+    if (isActive) {
       // Check for bypass permission
       const sessionData = request.session.get("data");
       const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;

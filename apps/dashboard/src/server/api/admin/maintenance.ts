@@ -42,6 +42,7 @@ export async function apiAdminMaintenanceRoutes(fastify: FastifyInstance) {
                 global: body.global,
                 dashboard: body.dashboard,
                 activePages: body.activePages,
+                maintenancePages: body.maintenancePages,
                 reason: body.reason,
                 scheduledStart: body.scheduledStart ? new Date(body.scheduledStart) : null,
                 scheduledEnd: body.scheduledEnd ? new Date(body.scheduledEnd) : null,
