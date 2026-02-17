@@ -1,0 +1,278 @@
+<%- include('partials/head.ejs', { title: 'Soumissions' , description: 'Consultez les soumissions de vos formulaires.' ,
+    robots: 'noindex,nofollow' }) %>
+    <%- include('partials/header-dash.ejs', { user: user }) %>
+
+        <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+            <%- include('partials/asside_dash.ejs', { active: 'leads' }) %>
+
+                <main class="col-span-12 lg:col-span-10 space-y-8 relative">
+
+                    <!-- HEADER -->
+                    <div
+                        class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+                        <div
+                            class="absolute top-0 right-0 w-64 h-64 bg-emerald-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none">
+                        </div>
+                        <div class="relative z-10">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h1 class="text-3xl md:text-4xl font-bold text-white">Soumissions</h1>
+                                <% const _leads=(typeof leads !=='undefined' && Array.isArray(leads)) ? leads : []; %>
+                                    <span
+                                        class="px-2.5 py-1 bg-slate-800 text-slate-300 text-[10px] font-bold rounded-lg uppercase tracking-wider border border-slate-700">
+                                        <%= _leads.length %>
+                                    </span>
+                            </div>
+                            <p class="text-slate-400 text-lg">Consultez les réponses reçues via vos formulaires de
+                                contact.</p>
+                        </div>
+                        <div class="relative z-10 flex items-center gap-3">
+                            <button id="btnExportCSV"
+                                class="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white font-medium rounded-xl hover:bg-slate-700 border border-slate-700 transition-colors"
+                                title="Exporter en CSV">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                                CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- SEARCH & FILTER -->
+                    <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="sm:col-span-2">
+                                <label class="text-sm text-slate-400 mb-2 block font-medium">Recherche</label>
+                                <input id="fSearch" type="text"
+                                    class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-600 focus:border-violet-500 transition-all outline-none"
+                                    placeholder="Nom, email, message..." />
+                            </div>
+                            <div>
+                                <label class="text-sm text-slate-400 mb-2 block font-medium">Formulaire</label>
+                                <select id="fLink"
+                                    class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white focus:border-violet-500 transition-all outline-none">
+                                    <option value="">Tous</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LEADS TABLE -->
+                    <div class="bg-slate-950/30 border border-slate-800 rounded-3xl overflow-hidden">
+                        <div class="p-6 border-b border-slate-800 bg-slate-900/50">
+                            <h2 class="font-bold text-white text-xl">Détail des soumissions</h2>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr
+                                        class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500 bg-slate-950/50">
+                                        <th class="p-4 font-bold">Date</th>
+                                        <th class="p-4 font-bold">Formulaire</th>
+                                        <th class="p-4 font-bold">Nom</th>
+                                        <th class="p-4 font-bold">Email</th>
+                                        <th class="p-4 font-bold">Message</th>
+                                        <th class="p-4 font-bold text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leadsBody" class="divide-y divide-slate-800/50">
+                                    <% if (_leads.length> 0) { %>
+                                        <% _leads.forEach(lead=> { %>
+                                            <% const formData=lead.formData || {}; %>
+                                                <% let leadName='' ; let leadEmail='' ; let leadMessage='' ;
+                                                    Object.entries(formData).forEach(([key, val])=> {
+                                                    const k = key.toLowerCase();
+                                                    if (!leadName && (k.includes('nom') || k.includes('name') ||
+                                                    k.includes('prenom') || k.includes('prénom'))) leadName =
+                                                    String(val);
+                                                    else if (!leadEmail && (k.includes('email') || k.includes('mail') ||
+                                                    k.includes('courriel'))) leadEmail = String(val);
+                                                    else if (!leadMessage && (k.includes('message') ||
+                                                    k.includes('sujet') || k.includes('objet') ||
+                                                    k.includes('contenu'))) leadMessage = String(val);
+                                                    });
+                                                    %>
+                                                    <tr class="hover:bg-slate-800/30 transition-colors group lead-row"
+                                                        data-id="<%= lead.id %>"
+                                                        data-link="<%= lead.linkInfo ? lead.linkInfo.id : '' %>">
+                                                        <td class="p-4 text-sm text-slate-300 whitespace-nowrap">
+                                                            <div class="flex flex-col">
+                                                                <span class="font-medium">
+                                                                    <%= new
+                                                                        Date(lead.createdAt).toLocaleDateString('fr-FR',
+                                                                        { day: 'numeric' , month: 'short' ,
+                                                                        year: 'numeric' }) %>
+                                                                </span>
+                                                                <span class="text-[10px] text-slate-500">
+                                                                    <%= new
+                                                                        Date(lead.createdAt).toLocaleTimeString('fr-FR',
+                                                                        { hour: '2-digit' , minute: '2-digit' }) %>
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td class="p-4">
+                                                            <% if (lead.linkInfo) { %>
+                                                                <span
+                                                                    class="px-2.5 py-1 bg-violet-500/10 text-violet-400 rounded-lg text-xs font-bold border border-violet-500/20">
+                                                                    <%= lead.linkInfo.text || 'Formulaire' %>
+                                                                </span>
+                                                                <% } else { %>
+                                                                    <span
+                                                                        class="text-slate-500 text-xs italic">Supprimé</span>
+                                                                    <% } %>
+                                                        </td>
+                                                        <td class="p-4 text-sm text-slate-200 font-medium">
+                                                            <%= leadName || '-' %>
+                                                        </td>
+                                                        <td class="p-4 text-sm">
+                                                            <% if (leadEmail) { %>
+                                                                <a href="mailto:<%= leadEmail %>"
+                                                                    class="text-violet-400 hover:text-violet-300 underline decoration-violet-500/30 hover:decoration-violet-400/60 transition-colors">
+                                                                    <%= leadEmail %>
+                                                                </a>
+                                                                <% } else { %>
+                                                                    <span class="text-slate-500">-</span>
+                                                                    <% } %>
+                                                        </td>
+                                                        <td class="p-4 text-sm text-slate-300 max-w-xs">
+                                                            <span class="line-clamp-2 break-all">
+                                                                <%= leadMessage || '-' %>
+                                                            </span>
+                                                        </td>
+                                                        <td class="p-4 text-right">
+                                                            <button onclick="deleteLead('<%= lead.id %>')"
+                                                                class="p-2 bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 rounded-lg transition-all inline-flex items-center justify-center"
+                                                                title="Supprimer">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                    viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                                    </path>
+                                                                </svg>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    <% }) %>
+                                                        <% } else { %>
+                                                            <tr>
+                                                                <td colspan="6" class="p-12 text-center">
+                                                                    <div class="flex flex-col items-center gap-4">
+                                                                        <div class="p-4 bg-slate-800/50 rounded-2xl">
+                                                                            <svg class="w-8 h-8 text-slate-600"
+                                                                                fill="none" stroke="currentColor"
+                                                                                viewBox="0 0 24 24">
+                                                                                <path stroke-linecap="round"
+                                                                                    stroke-linejoin="round"
+                                                                                    stroke-width="2"
+                                                                                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+                                                                                </path>
+                                                                            </svg>
+                                                                        </div>
+                                                                        <p class="text-slate-500 font-medium">Aucune
+                                                                            soumission pour le moment.</p>
+                                                                        <p class="text-slate-600 text-sm">Les réponses à
+                                                                            vos formulaires apparaîtront ici.</p>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </main>
+        </div>
+
+        <script>
+            (function () {
+                const qs = (s) => document.querySelector(s);
+                const qsa = (s) => Array.from(document.querySelectorAll(s));
+                const rows = qsa('.lead-row');
+
+                // Populate link filter dropdown
+                const linkSelect = qs('#fLink');
+                const linkMap = new Map();
+                rows.forEach(row => {
+                    const linkId = row.dataset.link;
+                    const linkLabel = row.querySelector('td:nth-child(2) span')?.textContent?.trim();
+                    if (linkId && linkLabel && !linkMap.has(linkId)) {
+                        linkMap.set(linkId, linkLabel);
+                    }
+                });
+                linkMap.forEach((label, id) => {
+                    const opt = document.createElement('option');
+                    opt.value = id;
+                    opt.textContent = label;
+                    linkSelect.appendChild(opt);
+                });
+
+                // Filter logic
+                function applyFilter() {
+                    const q = (qs('#fSearch')?.value || '').toLowerCase().trim();
+                    const linkFilter = qs('#fLink')?.value || '';
+
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        const linkId = row.dataset.link;
+                        const matchSearch = !q || text.includes(q);
+                        const matchLink = !linkFilter || linkId === linkFilter;
+                        row.style.display = (matchSearch && matchLink) ? '' : 'none';
+                    });
+                }
+
+                qs('#fSearch')?.addEventListener('input', applyFilter);
+                qs('#fLink')?.addEventListener('change', applyFilter);
+
+                // CSV export
+                qs('#btnExportCSV')?.addEventListener('click', () => {
+                    const esc = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+                    const csvRows = [['Date', 'Formulaire', 'Nom', 'Email', 'Message'].map(esc).join(',')];
+
+                    rows.forEach(row => {
+                        if (row.style.display === 'none') return;
+                        const date = row.querySelector('td:nth-child(1) .font-medium')?.textContent?.trim() || '';
+                        const form = row.querySelector('td:nth-child(2) span')?.textContent?.trim() || '';
+                        const nom = row.querySelector('td:nth-child(3)')?.textContent?.trim() || '';
+                        const email = row.querySelector('td:nth-child(4)')?.textContent?.trim() || '';
+                        const message = row.querySelector('td:nth-child(5)')?.textContent?.trim() || '';
+                        csvRows.push([date, form, nom, email, message].map(esc).join(','));
+                    });
+
+                    const blob = new Blob([csvRows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'plinkk-leads-' + new Date().toISOString().slice(0, 10) + '.csv';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    setTimeout(() => URL.revokeObjectURL(url), 2000);
+                });
+
+                // Delete a lead
+                window.deleteLead = async function (id) {
+                    if (!confirm('Supprimer cette soumission ?')) return;
+                    try {
+                        const res = await fetch('/leads/api/' + id, { method: 'DELETE', credentials: 'same-origin' });
+                        if (res.ok) {
+                            const row = qs('[data-id="' + id + '"]');
+                            if (row) {
+                                row.style.opacity = '0';
+                                row.style.transform = 'translateX(20px)';
+                                row.style.transition = 'all 0.3s ease';
+                                setTimeout(() => row.remove(), 300);
+                            }
+                        } else {
+                            alert('Erreur lors de la suppression.');
+                        }
+                    } catch (e) {
+                        alert('Erreur réseau.');
+                    }
+                };
+            })();
+        </script>
+
+        <%- include('partials/footer.ejs') %>

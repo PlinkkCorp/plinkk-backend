@@ -11,6 +11,7 @@ import { dashboardAccountRoutes } from "./dashboard/account";
 import { dashboardThemesRoutes } from "./dashboard/themes";
 
 import { dashboardRedirectsRoutes } from "./dashboard/redirects";
+import { dashboardLeadsRoutes } from "./dashboard/leads";
 import { getPublicPath } from "../services/plinkkService";
 
 export function dashboardRoutes(fastify: FastifyInstance) {
@@ -23,6 +24,7 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.register(dashboardThemesRoutes, { prefix: "/themes" });
 
   fastify.register(dashboardRedirectsRoutes, { prefix: "/redirects" });
+  fastify.register(dashboardLeadsRoutes, { prefix: "/leads" });
 
   fastify.get("/premium", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
     const userInfo = request.currentUser!;

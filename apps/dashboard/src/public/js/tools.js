@@ -23,7 +23,7 @@ export function createProfileContainer(profileData) {
         const frameDiv = document.createElement("div");
         frameDiv.className = "avatar-frame";
         frameDiv.style.position = "absolute";
-        frameDiv.style.inset = "-4px"; 
+        frameDiv.style.inset = "-4px";
         frameDiv.style.borderRadius = "50%";
         frameDiv.style.pointerEvents = "none";
         frameDiv.style.zIndex = "10";
@@ -506,66 +506,76 @@ export function createLinkBoxes(profileData) {
         if (link.type === 'FORM' && link.formData) {
             const container = document.createElement("div");
             container.className = "discord-box form-box";
-            if (profileData.buttonThemeEnable === 1 && link.buttonTheme && link.buttonTheme !== 'system') {
-                // Apply button theme styles if needed, or keep generic form style
-                // For forms, we might want a distinct look or just the toggle button to look like a link
-            }
+            container.style.overflow = "visible";
 
             // Create toggle button (looks like a link)
             const toggle = document.createElement("button");
-            toggle.className = "form-toggle-btn w-full h-full flex items-center justify-center gap-2";
-            toggle.style.background = "transparent";
-            toggle.style.border = "none";
-            toggle.style.color = "inherit";
-            toggle.style.cursor = "pointer";
-            toggle.style.padding = "0";
+            toggle.className = "form-toggle-btn";
 
             const icon = document.createElement("img");
-            icon.src = link.icon || 'https://cdn.plinkk.fr/icons/mail.svg'; // Default mail icon
+            icon.src = link.icon || 'https://cdn.plinkk.fr/icons/mail.svg';
             icon.className = "w-6 h-6 object-contain";
             icon.loading = "lazy";
+            icon.style.position = "relative";
+            icon.style.zIndex = "5";
+            icon.style.animation = "none";
 
             const text = document.createElement("span");
             text.textContent = link.text || "Contactez-nous";
-            text.style.fontWeight = "500";
+            text.style.fontWeight = "600";
+            text.style.position = "relative";
+            text.style.zIndex = "5";
+
+            const chevron = document.createElement("div");
+            chevron.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
+            chevron.style.marginLeft = "auto";
+            chevron.style.opacity = "0.5";
+            chevron.style.transition = "transform 0.3s ease";
+            chevron.style.position = "relative";
+            chevron.style.zIndex = "5";
 
             toggle.appendChild(icon);
             toggle.appendChild(text);
+            toggle.appendChild(chevron);
 
             // Form Content Container
             const formContent = document.createElement("div");
-            formContent.className = "form-content hidden"; // Hidden by default
-            formContent.style.width = "100%";
-            formContent.style.padding = "12px";
-            formContent.style.marginTop = "8px";
-            formContent.style.backgroundColor = "rgba(0,0,0,0.2)";
-            formContent.style.borderRadius = "8px";
+            formContent.className = "form-content hidden";
+            formContent.style.opacity = "0";
+            formContent.style.transform = "translateY(8px)";
+            formContent.style.transition = "opacity 0.4s ease, transform 0.4s ease";
 
             // Build inputs from formData fields
             const inputs = [];
             const fields = link.formData.fields || [];
             fields.forEach(field => {
                 const wrapper = document.createElement("div");
-                wrapper.style.marginBottom = "8px";
+                wrapper.className = "form-field-wrapper";
 
                 const label = document.createElement("label");
-                label.textContent = field.label;
-                label.style.display = "block";
-                label.style.fontSize = "0.8rem";
-                label.style.marginBottom = "4px";
-                label.style.opacity = "0.8";
+
+                let labelIcon = '';
+                const labelText = (field.label || '').toUpperCase();
+                if (labelText.includes('NOM') || labelText.includes('NAME')) {
+                    labelIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+                } else if (labelText.includes('MAIL')) {
+                    labelIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
+                } else if (labelText.includes('MESSAGE') || labelText.includes('SUJET')) {
+                    labelIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
+                }
+
+                label.innerHTML = `${labelIcon}${field.label}`;
 
                 let input;
                 if (field.type === 'textarea') {
                     input = document.createElement("textarea");
-                    input.rows = 3;
+                    input.rows = 4;
                 } else {
                     input = document.createElement("input");
                     input.type = field.type || "text";
                 }
-                input.className = "w-full p-2 rounded bg-white/10 border border-white/20 focus:border-white/50 outline-none transition-colors";
                 input.placeholder = field.placeholder || "";
-                input.name = field.name || field.label; // Simple name mapping
+                input.name = field.name || field.label;
                 input.required = field.required !== false;
 
                 inputs.push({ name: field.name, element: input });
@@ -577,31 +587,47 @@ export function createLinkBoxes(profileData) {
 
             // Submit Button
             const submitBtn = document.createElement("button");
-            submitBtn.textContent = link.formData.buttonText || "Envoyer";
-            submitBtn.className = "w-full p-2 mt-2 rounded bg-white/20 hover:bg-white/30 transition-colors font-medium";
+            submitBtn.className = "form-submit-btn";
+
+            const shine = document.createElement("div");
+            shine.className = "shine";
+            submitBtn.appendChild(shine);
+
+            const btnText = document.createElement("span");
+            btnText.textContent = link.formData.buttonText || "Envoyer";
+            btnText.style.position = "relative";
+            btnText.style.zIndex = "2";
+            submitBtn.appendChild(btnText);
 
             const statusMsg = document.createElement("div");
-            statusMsg.className = "mt-2 text-center text-sm hidden";
+            statusMsg.className = "form-status hidden";
 
             submitBtn.onclick = async (e) => {
                 e.preventDefault();
                 submitBtn.disabled = true;
-                submitBtn.textContent = "Envoi...";
+                btnText.textContent = "Envoi en cours...";
 
                 // Collect data
                 const data = {};
                 let valid = true;
                 inputs.forEach(item => {
                     data[item.name] = item.element.value;
-                    if (item.element.required && !item.element.value) valid = false;
+                    if (item.element.required && !item.element.value) {
+                        valid = false;
+                        item.element.style.borderColor = "rgba(248, 113, 113, 0.5)";
+                        item.element.style.background = "rgba(248, 113, 113, 0.05)";
+                    } else {
+                        item.element.style.borderColor = "";
+                        item.element.style.background = "";
+                    }
                 });
 
                 if (!valid) {
                     statusMsg.textContent = "Veuillez remplir tous les champs obligatoires.";
-                    statusMsg.className = "mt-2 text-center text-sm text-red-400";
+                    statusMsg.className = "form-status error";
                     statusMsg.classList.remove("hidden");
                     submitBtn.disabled = false;
-                    submitBtn.textContent = link.formData.buttonText || "Envoyer";
+                    btnText.textContent = link.formData.buttonText || "Envoyer";
                     return;
                 }
 
@@ -613,32 +639,46 @@ export function createLinkBoxes(profileData) {
                     });
 
                     if (res.ok) {
-                        statusMsg.textContent = link.formData.successMessage || "Envoyé avec succès !";
-                        statusMsg.className = "mt-2 text-center text-sm text-green-400";
-                        // Clear inputs
+                        statusMsg.textContent = link.formData.successMessage || "Message envoyé avec succès !";
+                        statusMsg.className = "form-status success";
                         inputs.forEach(i => i.element.value = "");
                         setTimeout(() => {
-                            formContent.classList.add("hidden");
-                        }, 2000);
+                            if (!formContent.classList.contains("hidden")) toggle.click();
+                        }, 2500);
                     } else {
                         throw new Error("Erreur serveur");
                     }
                 } catch (err) {
                     statusMsg.textContent = "Une erreur est survenue. Réessayez.";
-                    statusMsg.className = "mt-2 text-center text-sm text-red-400";
+                    statusMsg.className = "form-status error";
                 } finally {
                     statusMsg.classList.remove("hidden");
                     submitBtn.disabled = false;
-                    submitBtn.textContent = link.formData.buttonText || "Envoyer";
+                    btnText.textContent = link.formData.buttonText || "Envoyer";
                 }
             };
 
             formContent.appendChild(submitBtn);
             formContent.appendChild(statusMsg);
 
-            // Toggle logic
+            // Toggle logic with animations
             toggle.onclick = () => {
-                formContent.classList.toggle("hidden");
+                const isHidden = formContent.classList.contains("hidden");
+                if (isHidden) {
+                    formContent.classList.remove("hidden");
+                    chevron.style.transform = "rotate(180deg)";
+                    setTimeout(() => {
+                        formContent.style.opacity = "1";
+                        formContent.style.transform = "translateY(0)";
+                    }, 10);
+                } else {
+                    formContent.style.opacity = "0";
+                    formContent.style.transform = "translateY(8px)";
+                    chevron.style.transform = "rotate(0deg)";
+                    setTimeout(() => {
+                        formContent.classList.add("hidden");
+                    }, 400);
+                }
             };
 
             container.appendChild(toggle);
@@ -665,7 +705,7 @@ export function createLinkBoxes(profileData) {
                 // --- SMART EMBED LOGIC ---
                 try {
                     const urlObj = new URL(embedUrl);
-                    
+
                     // 1. YouTube
                     if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
                         isYouTube = true;
@@ -677,7 +717,7 @@ export function createLinkBoxes(profileData) {
                         } else if (urlObj.pathname.includes('/embed/')) {
                             videoId = urlObj.pathname.split('/embed/')[1];
                         }
-                        
+
                         if (videoId) {
                             embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
                         }
@@ -688,8 +728,8 @@ export function createLinkBoxes(profileData) {
                         isSpotify = true;
                         // open.spotify.com/track/ID -> open.spotify.com/embed/track/ID
                         if (!urlObj.pathname.includes('/embed')) {
-                             // Handle standard web player links
-                             embedUrl = `https://open.spotify.com/embed${urlObj.pathname}`;
+                            // Handle standard web player links
+                            embedUrl = `https://open.spotify.com/embed${urlObj.pathname}`;
                         }
                     }
 
@@ -709,7 +749,7 @@ export function createLinkBoxes(profileData) {
                 iframe.src = embedUrl;
                 iframe.style.width = "100%";
                 iframe.style.border = "none";
-                
+
                 // Adjust height based on type
                 if (isSpotify) {
                     iframe.style.height = "152px"; // Standard Spotify compact embed height (80 or 152)
@@ -719,12 +759,12 @@ export function createLinkBoxes(profileData) {
                     iframe.style.height = "auto";
                     iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
                 } else {
-                     iframe.style.height = "100%";
-                     iframe.style.minHeight = "200px";
+                    iframe.style.height = "100%";
+                    iframe.style.minHeight = "200px";
                 }
-                
+
                 iframe.loading = "lazy";
-                
+
                 container.appendChild(iframe);
             } else {
                 container.textContent = "Contenu intégré invalide";
@@ -1212,8 +1252,8 @@ export function createStatusBar(profileData) {
         const statusBar = document.createElement("div");
         statusBar.className = "status-bar";
         if (profileData.statusbar && profileData.statusbar.text) {
-             setSafeText(statusBar, profileData.statusbar.text);
-             article.appendChild(statusBar);
+            setSafeText(statusBar, profileData.statusbar.text);
+            article.appendChild(statusBar);
         }
         return;
     }
@@ -1226,13 +1266,13 @@ export function createStatusBar(profileData) {
         statusBar.style.background = s.colorBg || "#222";
         statusBar.style.color = s.colorText || "#ccc";
         // ... more styling ...
-        
+
         const statusText = document.createElement("span");
         setSafeText(statusText, s.text);
         if (s.fontTextColor) {
             // Apply font color logic
         }
-        
+
         statusBar.appendChild(statusText);
         // Insert AFTER profile container
         profileContainer.parentNode.insertBefore(statusBar, profileContainer.nextSibling);

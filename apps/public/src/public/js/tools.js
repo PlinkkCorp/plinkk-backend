@@ -521,31 +521,33 @@ export function createLinkBoxes(profileData) {
         // --- 2. Lead/Form Handling ---
         if (link.type === 'FORM' && link.formData) {
             const container = document.createElement("div");
-            container.className = "discord-box form-box transition-all duration-500 overflow-hidden";
+            container.className = "discord-box form-box transition-all duration-500 overflow-visible";
             container.style.height = "auto";
             container.style.minHeight = "60px";
 
             // Create toggle button (looks like a link)
             const toggle = document.createElement("button");
-            toggle.className = "form-toggle-btn w-full h-[60px] flex items-center justify-center gap-3 transition-colors duration-300";
-            toggle.style.background = "transparent";
-            toggle.style.border = "none";
-            toggle.style.color = "inherit";
-            toggle.style.cursor = "pointer";
-            toggle.style.padding = "0 20px";
+            toggle.className = "form-toggle-btn";
 
             const icon = document.createElement("img");
             icon.src = link.icon || 'https://cdn.plinkk.fr/icons/mail.svg';
-            icon.className = "w-6 h-6 object-contain transition-transform duration-300 group-hover:scale-110";
+            icon.className = "w-6 h-6 object-contain";
             icon.loading = "lazy";
+            icon.style.position = "relative";
+            icon.style.zIndex = "5";
 
             const text = document.createElement("span");
             text.textContent = link.text || "Contactez-nous";
-            text.className = "text-base font-semibold tracking-wide";
+            text.style.position = "relative";
+            text.style.zIndex = "5";
 
             const chevron = document.createElement("div");
             chevron.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
-            chevron.className = "ml-auto opacity-50 transition-transform duration-300";
+            chevron.style.marginLeft = "auto";
+            chevron.style.opacity = "0.5";
+            chevron.style.transition = "transform 0.3s ease";
+            chevron.style.position = "relative";
+            chevron.style.zIndex = "5";
 
             toggle.appendChild(icon);
             toggle.appendChild(text);
@@ -553,36 +555,29 @@ export function createLinkBoxes(profileData) {
 
             // Form Content Container
             const formContent = document.createElement("div");
-            formContent.className = "form-content hidden opacity-0 translate-y-4 transition-all duration-500 ease-out";
-            formContent.style.width = "calc(100% - 32px)";
-            formContent.style.margin = "0 16px 20px 16px";
-            formContent.style.padding = "24px";
-            formContent.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
-            formContent.style.backdropFilter = "blur(20px) saturate(180%)";
-            formContent.style.webkitBackdropFilter = "blur(20px) saturate(180%)";
-            formContent.style.borderRadius = "24px";
-            formContent.style.border = "1px solid rgba(255, 255, 255, 0.12)";
-            formContent.style.boxShadow = "inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 20px 40px rgba(0, 0, 0, 0.4)";
+            formContent.className = "form-content hidden";
+            formContent.style.opacity = "0";
+            formContent.style.transform = "translateY(8px)";
+            formContent.style.transition = "opacity 0.4s ease, transform 0.4s ease";
 
             // Build inputs from formData fields
             const inputs = [];
             const fields = link.formData.fields || [];
             fields.forEach(field => {
                 const wrapper = document.createElement("div");
-                wrapper.style.marginBottom = "20px";
+                wrapper.className = "form-field-wrapper";
 
                 const label = document.createElement("label");
-                label.className = "flex items-center text-[10px] font-bold text-white/50 mb-2 uppercase tracking-[0.1em]";
 
-                // Add icons based on label text or common field names
+                // Add icons based on label text
                 let labelIcon = '';
                 const labelText = (field.label || '').toUpperCase();
                 if (labelText.includes('NOM') || labelText.includes('NAME')) {
-                    labelIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+                    labelIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
                 } else if (labelText.includes('MAIL')) {
-                    labelIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
+                    labelIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
                 } else if (labelText.includes('MESSAGE') || labelText.includes('SUJET')) {
-                    labelIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
+                    labelIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
                 }
 
                 label.innerHTML = `${labelIcon}${field.label}`;
@@ -591,12 +586,10 @@ export function createLinkBoxes(profileData) {
                 if (field.type === 'textarea') {
                     input = document.createElement("textarea");
                     input.rows = 4;
-                    input.style.resize = "none";
                 } else {
                     input = document.createElement("input");
                     input.type = field.type || "text";
                 }
-                input.className = "w-full p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 focus:border-white/40 focus:bg-white/10 outline-none transition-all duration-300 placeholder-white/20 text-white text-sm shadow-inner";
                 input.placeholder = field.placeholder || "";
                 input.name = field.name || field.label;
                 input.required = field.required !== false;
@@ -610,26 +603,25 @@ export function createLinkBoxes(profileData) {
 
             // Submit Button
             const submitBtn = document.createElement("button");
-            submitBtn.className = "w-full py-4 px-6 mt-2 rounded-xl bg-white/10 hover:bg-white/20 active:scale-[0.98] border border-white/10 transition-all duration-300 font-bold text-white shadow-xl flex items-center justify-center gap-2 relative overflow-hidden group";
+            submitBtn.className = "form-submit-btn";
 
-            // Add a subtle shine effect div
             const shine = document.createElement("div");
-            shine.className = "absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000";
+            shine.className = "shine";
             submitBtn.appendChild(shine);
 
             const btnText = document.createElement("span");
             btnText.textContent = link.formData.buttonText || "Envoyer";
-            btnText.className = "relative z-10";
+            btnText.style.position = "relative";
+            btnText.style.zIndex = "2";
             submitBtn.appendChild(btnText);
 
             const statusMsg = document.createElement("div");
-            statusMsg.className = "mt-4 text-center text-sm font-medium hidden p-3 rounded-xl transition-all duration-300";
+            statusMsg.className = "form-status hidden";
 
             submitBtn.onclick = async (e) => {
                 e.preventDefault();
                 submitBtn.disabled = true;
                 btnText.textContent = "Envoi en cours...";
-                submitBtn.classList.add("opacity-70", "cursor-not-allowed");
 
                 // Collect data
                 const data = {};
@@ -638,19 +630,20 @@ export function createLinkBoxes(profileData) {
                     data[item.name] = item.element.value;
                     if (item.element.required && !item.element.value) {
                         valid = false;
-                        item.element.classList.add("border-red-500/50", "bg-red-500/5");
+                        item.element.style.borderColor = "rgba(248, 113, 113, 0.5)";
+                        item.element.style.background = "rgba(248, 113, 113, 0.05)";
                     } else {
-                        item.element.classList.remove("border-red-500/50", "bg-red-500/5");
+                        item.element.style.borderColor = "";
+                        item.element.style.background = "";
                     }
                 });
 
                 if (!valid) {
                     statusMsg.textContent = "Veuillez remplir tous les champs obligatoires.";
-                    statusMsg.className = "mt-4 text-center text-sm text-red-400 bg-red-400/10 border border-red-400/20 p-3 rounded-xl";
+                    statusMsg.className = "form-status error";
                     statusMsg.classList.remove("hidden");
                     submitBtn.disabled = false;
                     btnText.textContent = link.formData.buttonText || "Envoyer";
-                    submitBtn.classList.remove("opacity-70", "cursor-not-allowed");
                     return;
                 }
 
@@ -663,23 +656,22 @@ export function createLinkBoxes(profileData) {
 
                     if (res.ok) {
                         statusMsg.textContent = link.formData.successMessage || "Message envoyé avec succès !";
-                        statusMsg.className = "mt-4 text-center text-sm text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 p-3 rounded-xl";
+                        statusMsg.className = "form-status success";
                         // Clear inputs
                         inputs.forEach(i => i.element.value = "");
                         setTimeout(() => {
-                            if (!formContent.classList.contains("hidden")) toggle.click(); // Close form after success
+                            if (!formContent.classList.contains("hidden")) toggle.click();
                         }, 2500);
                     } else {
                         throw new Error("Erreur serveur");
                     }
                 } catch (err) {
                     statusMsg.textContent = "Une erreur est survenue. Veuillez réessayer plus tard.";
-                    statusMsg.className = "mt-4 text-center text-sm text-red-400 bg-red-400/10 border border-red-400/20 p-3 rounded-xl";
+                    statusMsg.className = "form-status error";
                 } finally {
                     statusMsg.classList.remove("hidden");
                     submitBtn.disabled = false;
                     btnText.textContent = link.formData.buttonText || "Envoyer";
-                    submitBtn.classList.remove("opacity-70", "cursor-not-allowed");
                 }
             };
 
@@ -693,14 +685,16 @@ export function createLinkBoxes(profileData) {
                     formContent.classList.remove("hidden");
                     chevron.style.transform = "rotate(180deg)";
                     setTimeout(() => {
-                        formContent.classList.remove("opacity-0", "translate-y-4");
+                        formContent.style.opacity = "1";
+                        formContent.style.transform = "translateY(0)";
                     }, 10);
                 } else {
-                    formContent.classList.add("opacity-0", "translate-y-4");
+                    formContent.style.opacity = "0";
+                    formContent.style.transform = "translateY(8px)";
                     chevron.style.transform = "rotate(0deg)";
                     setTimeout(() => {
                         formContent.classList.add("hidden");
-                    }, 500);
+                    }, 400);
                 }
             };
 

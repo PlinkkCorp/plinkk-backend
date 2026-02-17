@@ -94,11 +94,13 @@ export function applyTheme(theme) {
     article.style.background = theme.background;
     article.style.color = theme.textColor;
     document.querySelectorAll(".discord-box").forEach((box) => {
+        if (box.classList.contains("form-box") || box.classList.contains("embed-box")) return;
         const htmlBox = box;
         htmlBox.style.backgroundColor = theme.buttonBackground;
         htmlBox.style.color = theme.buttonTextColor;
     });
     document.querySelectorAll(".discord-box").forEach((box) => {
+        if (box.classList.contains("form-box") || box.classList.contains("embed-box")) return;
         const htmlBox = box;
         htmlBox.addEventListener("mouseover", () => {
             htmlBox.style.backgroundColor = theme.buttonHoverBackground;
