@@ -1,4 +1,9 @@
-export const styleSheet = document.styleSheets[0];
+// Create a dedicated style element for animations
+const styleEl = document.createElement('style');
+document.head.appendChild(styleEl);
+const styleSheet = styleEl.sheet;
+
+export { styleSheet };
 export const animations = [
     {
         name: "fade",
@@ -199,11 +204,13 @@ styleSheet.insertRule(`
 styleSheet.insertRule(`
 @keyframes moveBackground {
     0% {
-        background-position: 0 0;
+        background-position: 0% 50%;
     }
-
+    50% {
+        background-position: 100% 50%;
+    }
     100% {
-        background-position: 100% 100%;
+        background-position: 0% 50%;
     }
 }
 `, styleSheet.cssRules.length);

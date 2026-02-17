@@ -1645,3 +1645,38 @@ input:checked+.slider:before {
   background: rgba(248, 113, 113, 0.08);
   border: 1px solid rgba(248, 113, 113, 0.2);
 }
+
+/* Bento Grid Layout */
+.bento-grid {
+  display: grid !important;
+  grid-template-columns: repeat(12, 1fr) !important;
+  gap: 12px !important;
+  width: 100% !important;
+  margin: 20px 0 !important;
+  padding: 0 !important;
+}
+
+/* Ensure article can expand for bento */
+body.layout-bento article {
+  max-width: 800px !important;
+  width: 90% !important;
+}
+
+/* Bento Item Base */
+.bento-item {
+  margin-top: 0 !important;
+  /* Reset margin from .discord-box */
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+@media (max-width: 768px) {
+  body.layout-bento article {
+    width: 95% !important;
+  }
+
+  .bento-grid {
+    gap: 8px !important;
+  }
+}

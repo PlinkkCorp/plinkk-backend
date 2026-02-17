@@ -33,6 +33,9 @@ try {
       try { if (iconSelectCallback) iconSelectCallback(v); } catch (e) { }
       try { closeIconModal(); } catch (e) { }
     };
+    window.__DASH_PICKERS__.openPicker = openPicker;
+    window.__DASH_PICKERS__.closePicker = closePicker;
+    window.__DASH_PICKERS__.renderPickerGrid = renderPickerGrid;
     window.__DASH_PICKERS__.refreshUploads = () => {
       userUploadsCache = null;
     };
@@ -515,8 +518,9 @@ export function openPlatformEntryModal(platform, cb) {
   const m = ensurePlatformEntryModal();
   m.open(platform, cb);
 }
+try { window.__OPEN_PLATFORM_MODAL__ = openPlatformEntryModal; } catch { }
 
 export function getPickerContext() {
-  return { pickerGrid, openPicker, closePicker };
+  return { pickerGrid, openPicker, closePicker, openPlatformEntryModal };
 }
 

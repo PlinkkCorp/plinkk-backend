@@ -380,8 +380,8 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
         }, request.ip);
 
         let catLabel = "Mise à jour catégories";
-        if (diff.added.length > 0) catLabel = `Ajout catégorie (+${diff.added.length})`;
-        else if (diff.removed.length > 0) catLabel = `Suppression catégorie (-${diff.removed.length})`;
+        if (diff.added.length > 0) catLabel = `Ajout catégorie(+${diff.added.length})`;
+        else if (diff.removed.length > 0) catLabel = `Suppression catégorie(-${diff.removed.length})`;
         else if (diff.reordered) catLabel = "Réorganisation catégories";
 
         createPlinkkVersion(id, userId, catLabel, false, structuredChanges).catch(err => request.log.error(err));
@@ -393,7 +393,47 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
       });
     }
 
+    return reply.send({ ok: true });
+  });
 
+  fastify.put("/:id/config/links/layout", async (request, reply) => {
+    const userId = request.session.get("data") as string | undefined;
+    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
+    const { id } = request.params as { id: string };
+    if (!(await validatePlinkkOwnership(userId, id)))
+      return reply.code(404).send({ error: "Plinkk introuvable" });
+
+    const body = request.body as { layoutMode: string; updates: { id: string; gridX: number; gridY: number; gridW: number; gridH: number }[] };
+
+    // Update layout mode first if provided
+    if (body.layoutMode) {
+      await prisma.plinkkSettings.upsert({
+        where: { plinkkId: id },
+        create: { plinkkId: id, layoutMode: body.layoutMode },
+        update: { layoutMode: body.layoutMode }
+      });
+    }
+
+    if (Array.isArray(body.updates)) {
+      // Use transaction to update all links
+      await prisma.$transaction(
+        body.updates.map(u =>
+          prisma.link.update({
+            where: { id: u.id },
+            data: {
+              gridX: u.gridX,
+              gridY: u.gridY,
+              gridW: u.gridW,
+              gridH: u.gridH
+            }
+          })
+        )
+      );
+
+      await logUserAction(userId, "UPDATE_PLINKK_LAYOUT", id, {
+        formatted: `Updated Bento Layout for ${body.updates.length} links`
+      }, request.ip);
+    }
 
     return reply.send({ ok: true });
   });
@@ -438,7 +478,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
       // So we just wrap it manually.
       if (Object.keys(changes).length > 0) {
         const structuredChanges = Object.keys(changes).map(key => ({
-          key: `statusbar.${key}`,
+          key: `statusbar.${key} `,
           old: (oldStatus as any)?.[key],
           new: (body.statusbar as any)?.[key],
           type: 'updated' as const

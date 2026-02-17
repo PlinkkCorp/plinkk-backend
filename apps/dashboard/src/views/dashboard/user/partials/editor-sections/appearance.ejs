@@ -1,0 +1,117 @@
+<div class="mb-6 pb-4 border-b border-slate-800">
+    <h3 class="text-lg font-semibold text-white">Apparence</h3>
+    <p class="text-sm text-slate-400">Personnalise les couleurs et le style de ta page.</p>
+</div>
+
+<div class="space-y-6">
+    <div>
+        <label class="block text-sm font-medium text-slate-300 mb-3">Thème
+            global</label>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <% const themes=[ { id: 'simple' , name: 'Simple' , bg: 'bg-slate-900' , preview: 'bg-slate-800' }, {
+                id: 'glass' , name: 'Glass' , bg: 'bg-slate-900' , preview: 'bg-white/10 backdrop-blur' }, {
+                id: 'gradient' , name: 'Gradient' , bg: 'bg-gradient-to-br from-violet-900 to-slate-900' ,
+                preview: 'bg-white/10' }, { id: 'neon' , name: 'Néon' , bg: 'bg-black' ,
+                preview: 'border border-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]' } ]; %>
+                <% themes.forEach(t=> { %>
+                    <label class="cursor-pointer group relative">
+                        <input type="radio" name="theme" value="<%= t.id %>" class="peer sr-only" <%=plinkk.theme===t.id
+                            ? 'checked' : '' %>>
+                        <div
+                            class="aspect-square rounded-xl border-2 border-slate-800 peer-checked:border-violet-500 peer-checked:shadow-[0_0_0_4px_rgba(139,92,246,0.2)] transition-all overflow-hidden relative group-hover:border-slate-700 <%= t.bg %>">
+                            <div
+                                class="absolute inset-x-2 top-2 h-2 rounded-full opacity-50 <%= t.id === 'simple' ? 'bg-slate-700' : 'bg-white/20' %>">
+                            </div>
+                            <div class="absolute inset-x-2 top-6 bottom-2 rounded-lg <%= t.preview %>">
+                            </div>
+
+                            <div
+                                class="absolute bottom-2 left-0 right-0 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span
+                                    class="text-[10px] font-bold text-white bg-black/50 px-2 py-0.5 rounded-full backdrop-blur-sm">
+                                    <%= t.name %>
+                                </span>
+                            </div>
+
+                            <div
+                                class="absolute top-2 right-2 w-4 h-4 rounded-full bg-violet-500 text-white flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-all scale-0 peer-checked:scale-100">
+                                <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                    </label>
+                    <% }); %>
+        </div>
+    </div>
+
+    <div>
+        <label class="block text-sm font-medium text-slate-300 mb-3">Couleur
+            d'accentuation</label>
+        <div class="flex flex-wrap gap-3">
+            <% const colors=[ '#8b5cf6' , '#ec4899' , '#ef4444' , '#f59e0b' , '#10b981' , '#3b82f6' , '#6366f1'
+                , '#1e293b' ]; %>
+                <% colors.forEach(c=> { %>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="accentColor" value="<%= c %>" class="peer sr-only"
+                            <%=plinkk.accentColor===c ? 'checked' : '' %>>
+                        <div class="w-10 h-10 rounded-full border-2 border-transparent peer-checked:border-white ring-2 ring-transparent peer-checked:ring-<%= c === '#1e293b' ? 'slate-500' : 'violet-500' %> transition-all hover:scale-110 shadow-lg relative"
+                            style="background-color: <%= c %>">
+                            <% if (c==='#1e293b' ) { %>
+                                <div class="absolute inset-0 rounded-full ring-1 ring-white/20">
+                                </div>
+                                <% } %>
+                        </div>
+                    </label>
+                    <% }); %>
+                        <div class="relative">
+                            <input type="color" id="customAccentColor" value="<%= plinkk.accentColor %>"
+                                class="opacity-0 w-10 h-10 absolute inset-0 cursor-pointer z-10" />
+                            <div
+                                class="w-10 h-10 rounded-full border border-slate-700 bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 19l7-7 3 3-7 7-3-3zM18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z">
+                                    </path>
+                                    <path d="M2 2l7.586 7.586"></path>
+                                    <circle cx="11" cy="11" r="2"></circle>
+                                </svg>
+                            </div>
+                        </div>
+        </div>
+    </div>
+
+    <div>
+        <label class="block text-sm font-medium text-slate-300 mb-3">Style des
+            boutons</label>
+        <div class="grid grid-cols-3 gap-3">
+            <% const btnStyles=[ { id: 'rounded' , name: 'Arrondi' , cls: 'rounded-xl' }, { id: 'pill' , name: 'Pilule'
+                , cls: 'rounded-full' }, { id: 'sharp' , name: 'Carré' , cls: 'rounded-none' } ]; %>
+                <% btnStyles.forEach(s=> { %>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="buttonStyle" value="<%= s.id %>" class="peer sr-only"
+                            <%=plinkk.buttonStyle===s.id ? 'checked' : '' %>>
+                        <div
+                            class="h-12 border border-slate-700 bg-slate-800 peer-checked:bg-white peer-checked:text-slate-900 peer-checked:border-white transition-all flex items-center justify-center text-sm font-medium text-slate-300 <%= s.cls %> hover:bg-slate-700">
+                            <%= s.name %>
+                        </div>
+                    </label>
+                    <% }); %>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+        <label class="block text-sm font-medium text-slate-300 mb-2">Police</label>
+        <select id="fontFamily"
+            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200">
+            <% const fonts=[ 'Inter' , 'Roboto' , 'Lato' , 'Open Sans' , 'Montserrat' , 'Poppins' , 'Playfair Display'
+                ]; %>
+                <% fonts.forEach(f=> { %>
+                    <option value="<%= f %>" <%=plinkk.font===f ? 'selected' : '' %>>
+                        <%= f %>
+                    </option>
+                    <% }); %>
+        </select>
+    </div>
+</div>

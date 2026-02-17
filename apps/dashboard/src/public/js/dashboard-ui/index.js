@@ -1,804 +1,442 @@
-import { el, qs, attachAutoSave, fillSelect, vOrNull, numOrNull } from './utils.js';
-import { openIconModal, openPicker, renderPickerGrid, renderBtnThemeCard, closePicker, ensurePlatformEntryModal, pickerSelect } from './pickers.js';
-import { renderBackground, renderNeon, renderLabels, renderSocial, renderLinks, renderLayout, renderCategories, renderSkeletons } from './renderers.js';
-import { ensureCanvasPreviewModal, openCanvasInlinePreview, buildCanvasPreviewUrl, refreshSelectedCanvasPreview, renderCanvasCard } from './canvas.js';
-import { setupStatusDropdown, updateStatusControlsDisabled, updateStatusPreview } from './status.js';
+import { store as state } from './state.js';
+import { bentoManager } from './bento-manager.js';
+import { historyManager } from './history-manager.js';
+import { uiUtils } from './ui-utils.js';
+import { linkManager } from './link-manager.js';
+import { settingsManager } from './settings-manager.js';
+import { categoryManager } from './category-manager.js';
+import { renderSocial } from './renderers.js';
+import { animations, animationBackground } from '../../config/animationConfig.js';
+import { canvaData } from '../../config/canvaConfig.js';
 
-// Expose some picker helpers for renderers (simple bridge without global namespace pollution ideally)
-window.__DASH_PICKERS__ = { openPicker, renderPickerGrid, renderBtnThemeCard, pickerOnSelect: (i) => pickerSelect(i) };
-window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().open(platform, cb);
-
-(function () {
-  const statusEl = qs('#status');
-  const preview = qs('#preview');
-  const saveBtn = qs('#saveBtn');
-  const resetBtn = qs('#resetBtn');
-  const refreshBtn = qs('#refreshPreview');
-
-  const selectedCanvasPreviewFrame = qs('#selectedCanvasPreviewFrame');
-  const selectedCanvasPreviewOverlay = qs('#selectedCanvasPreviewOverlay');
-  const canvasPreviewEnable = qs('#canvasPreviewEnable');
-
-  let autoSaveTimer = null;
-  let previewTimer = null;
-  let suspendAutoSave = false;
-  let saving = false;
-  let saveQueued = false;
-  // Délais pour limiter le spam de requêtes et de rafraîchissements
-  const AUTO_SAVE_DELAY = 1500; // délai avant PUT auto (1.5s)
-  const PREVIEW_REFRESH_DELAY = 1000; // délai avant déclencher un refresh si aucune autre frappe (debounce)
-  const PREVIEW_MIN_INTERVAL = 1000; // intervalle min entre 2 refresh effectifs (throttle)
-  let lastPreviewAt = 0;
-  let previewQueued = false;
-
-  const f = {
-    profileLink: qs('#profileLink'),
-    profileSiteText: qs('#profileSiteText'),
-    userName: qs('#userName'),
-    email: qs('#email'),
-    profileImage: qs('#profileImage'),
-    profileIcon: qs('#profileIcon'),
-    iconUrl: qs('#iconUrl'),
-    description: qs('#description'),
-    profileHoverColor: qs('#profileHoverColor'),
-    degBackgroundColor: qs('#degBackgroundColor'),
-    neonEnable: qs('#neonEnable'),
-    buttonThemeEnable: qs('#buttonThemeEnable'),
-    canvaEnable: qs('#canvaEnable'),
-    showVerifiedBadge: qs('#showVerifiedBadge'),
-    showPartnerBadge: qs('#showPartnerBadge'),
-    // enableVCard: qs('#enableVCard'),
-    publicPhone: qs('#publicPhone'),
-    enableLinkCategories: qs('#enableLinkCategories'),
-    categoriesContainer: qs('#categoriesContainer'),
-    addCategory: qs('#addCategory'),
-    categoriesDisabledMsg: qs('#categoriesDisabledMsg'),
-    selectedThemeIndex: qs('#selectedThemeIndex'),
-    selectedAnimationIndex: qs('#selectedAnimationIndex'),
-    selectedAnimationButtonIndex: qs('#selectedAnimationButtonIndex'),
-    selectedAnimationBackgroundIndex: qs('#selectedAnimationBackgroundIndex'),
-    animationDurationBackground: qs('#animationDurationBackground'),
-    delayAnimationButton: qs('#delayAnimationButton'),
-    backgroundSize: qs('#backgroundSize'),
-    selectedCanvasIndex: qs('#selectedCanvasIndex'),
-    status_text: qs('#status_text'),
-    status_fontTextColor: qs('#status_fontTextColor'),
-    status_statusText: qs('#status_statusText'),
-    statusPreviewChip: qs('#statusPreviewChip'),
-    statusDropdown: qs('#statusDropdown'),
-    statusDropdownBtn: qs('#statusDropdownBtn'),
-    statusDropdownPanel: qs('#statusDropdownPanel'),
-    backgroundList: qs('#backgroundList'),
-    addBackgroundColor: qs('#addBackgroundColor'),
-    invertBackgroundColors: qs('#invertBackgroundColors'),
-    neonList: qs('#neonList'),
-    addNeonColor: qs('#addNeonColor'),
-    labelsList: qs('#labelsList'),
-    addLabel: qs('#addLabel'),
-    socialList: qs('#socialList'),
-    addSocial: qs('#addSocial'),
-    linksList: qs('#linksList'),
-    addLink: qs('#addLink'),
-    layoutList: qs('#layoutList'),
-    layoutMode: document.querySelectorAll('input[name="layoutMode"]'),
-  };
-
-  const setStatus = (text, kind = '') => {
-    if (!statusEl) return;
-    statusEl.textContent = text || '';
-    statusEl.className = 'text-xs ' + (kind === 'error' ? 'text-red-400' : kind === 'success' ? 'text-emerald-400' : 'text-slate-400');
-  };
-
-  // Expose un déclencheur global pour l’autosave depuis le template (ex: lors d’un clic sur le bouton de masquage)
-  window.__DASH_TRIGGER_SAVE__ = () => {
-    try { scheduleAutoSave(); } catch { }
-  };
-  const schedulePreviewRefresh = () => {
-    // Debounce: repousser si ça tape vite
-    if (previewTimer) clearTimeout(previewTimer);
-    previewTimer = setTimeout(() => {
-      const now = Date.now();
-      const elapsed = now - lastPreviewAt;
-      // Throttle: au plus 1 refresh/s
-      if (elapsed >= PREVIEW_MIN_INTERVAL) {
-        try { refreshPreview(); } catch { }
-        lastPreviewAt = Date.now();
-        previewQueued = false;
-      } else if (!previewQueued) {
-        previewQueued = true;
-        setTimeout(() => {
-          try { refreshPreview(); } catch { }
-          lastPreviewAt = Date.now();
-          previewQueued = false;
-        }, PREVIEW_MIN_INTERVAL - elapsed);
-      }
-    }, PREVIEW_REFRESH_DELAY);
-  };
-  const scheduleAutoSave = () => {
-    if (suspendAutoSave) return;
-    if (autoSaveTimer) clearTimeout(autoSaveTimer);
-    setStatus('Enregistrement...');
-    autoSaveTimer = setTimeout(() => { saveNow(false); }, AUTO_SAVE_DELAY);
-  };
-
-  function getConfigEndpoint(section) {
-    const pid = (window.__PLINKK_SELECTED_ID__ || '').trim();
-    if (pid) return `/api/me/plinkks/${encodeURIComponent(pid)}/config`;
-    return '/api/me/config';
+class DashboardUI {
+  constructor() {
+    this.tabs = document.querySelectorAll('.tab-btn');
+    this.sections = document.querySelectorAll('[id^="section-"]');
+    this.plinkkId = window.__PLINKK_SELECTED_ID__;
+    this.saveTimeout = null;
   }
-  const fetchConfig = () => fetch(getConfigEndpoint()).then(async (r) => { if (!r.ok) throw new Error(await r.text()); return r.json(); });
-  const putConfig = (section, obj) => fetch(getConfigEndpoint() + `/${section}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(obj) }).then(async (r) => { if (!r.ok) throw new Error(await r.text()); return r.json(); });
 
-  async function saveNow(manual) {
-    if (autoSaveTimer) { clearTimeout(autoSaveTimer); autoSaveTimer = null; }
-    if (saving) { saveQueued = true; return; }
-    saving = true;
-    const hash = location.hash.replace("#section-", "") !== "" ? location.hash.replace("#section-", "") : 'profile'
-    let sectionsAPI = [];
-    let sectionsAPIFunction = []
-    switch (hash) {
-      case "appearance":
-        sectionsAPI = ["plinkk", "neonColor"]
-        sectionsAPIFunction = [collectPayloadPlinkk, collectPayloadNeonColor]
-        break;
-      case "background":
-        sectionsAPI = ["background", "plinkk"]
-        sectionsAPIFunction = [collectPayloadBackground, collectPayloadPlinkk]
-        break;
+  init() {
+    console.log('Dashboard UI Initializing...');
 
-      case "links":
-        sectionsAPI = ["socialIcon", "links", "plinkk"]
-        sectionsAPIFunction = [collectPayloadSocialIcon, collectPayloadLinks, collectPayloadPlinkk]
-        break;
-      case "categories":
-        sectionsAPI = ["categories", "plinkk"]
-        sectionsAPIFunction = [collectPayloadCategories, collectPayloadPlinkk]
-        break;
-      case "animations":
-        sectionsAPI = ["plinkk"]
-        sectionsAPIFunction = [collectPayloadPlinkk]
-        break;
-      case "statusbar":
-        sectionsAPI = ["statusBar"]
-        sectionsAPIFunction = [collectPayloadStatusBar]
-        break;
-      case "layout":
-        sectionsAPI = ["layout"]
-        sectionsAPIFunction = [collectPayloadLayout]
-        break;
-      default:
-        sectionsAPI = ["plinkk"]
-        sectionsAPIFunction = [collectPayloadPlinkk]
-        break;
-    }
-    setStatus('Enregistrement...');
-    try {
-      for (let i = 0; i < sectionsAPI.length; i++) {
-        const section = sectionsAPI[i];
-        const payloadFn = sectionsAPIFunction[i];
-        const payload = typeof payloadFn === 'function' ? payloadFn() : payloadFn;
-        const res = await putConfig(section, payload);
-
-        if (section === 'categories' && res.categories && Array.isArray(res.categories)) {
-          state.categories = res.categories;
-          state.links.forEach(l => {
-            const cat = state.categories.find(c => c.name === l.categoryId || c.id === l.categoryId);
-            if (cat) {
-              l.categoryId = cat.id;
-            }
-          });
-          renderCategories({
-            container: f.categoriesContainer,
-            addBtn: f.addCategory,
-            categories: state.categories,
-            scheduleAutoSave,
-            onUpdate: () => {
-              renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave });
-            }
-          });
+    // Ctrl+S / Cmd+S Handler
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        // Show saved feedback
+        const statusEl = document.getElementById('status');
+        if (statusEl) {
+          statusEl.textContent = 'Sauvegardé !';
+          statusEl.classList.remove('opacity-0');
+          setTimeout(() => {
+            statusEl.classList.add('opacity-0');
+          }, 2000);
         }
+        // Optional: Trigger a save if there's a pending state,
+        // but since we auto-save on input, this is mostly for UX reassurance.
+      }
+    });
 
-        if (section === 'links' && res.links && Array.isArray(res.links)) {
-          // Attempt to reconcile IDs for new links
-          const dbLinks = res.links;
-          const usedDbIds = new Set();
+    // Initialize Sub-Modules
+    const initialState = window.__INITIAL_STATE__ || {};
+    // Ensure we pass plinkkId if present in state or fallback
+    if (!initialState.plinkkId && this.plinkkId) {
+      initialState.plinkkId = this.plinkkId;
+    }
 
-          // First pass: mark IDs that are already known
-          state.links.forEach(l => {
-            if (l.id && dbLinks.find(d => d.id === l.id)) {
-              usedDbIds.add(l.id);
-            }
-          });
+    state.init(initialState);
+    bentoManager.init();
+    historyManager.init();
+    uiUtils.init();
+    linkManager.init();
+    settingsManager.init();
+    categoryManager.init();
 
-          // Second pass: assign IDs to new links
-          state.links.forEach(l => {
-            if (!l.id) {
-              // Try to find a matching link in DB response that hasn't been matched yet
-              const match = dbLinks.find(d =>
-                !usedDbIds.has(d.id) &&
-                d.url === l.url &&
-                d.text === l.text &&
-                d.name === l.name
-              );
-              if (match) {
-                l.id = match.id;
-                usedDbIds.add(match.id);
-              }
-            }
-          });
+    this.initTabs();
+    this.initLayoutToggles();
+    this.initStatusLogic();
+    this.initLabelsLogic();
+    this.initBackgroundTypeToggles();
+    this.initCanvasSelection();
+    this.initAnimationModals();
+    this.initSocials();
+
+    if (window.initSortable) {
+      this.onTabChange = (targetId) => {
+        if (targetId === '#section-links') {
+          setTimeout(() => window.initSortable(), 100);
         }
-      }
-      setStatus(manual ? 'Enregistré ✓' : 'Enregistré automatiquement ✓', 'success');
-      schedulePreviewRefresh();
-    } catch (e) {
-      let msg = e?.message || '';
-      try {
-        const json = JSON.parse(msg);
-        if (json.error) msg = json.error;
-      } catch { }
-      setStatus('Erreur: ' + msg, 'error');
-    } finally {
-      saving = false;
-      if (saveQueued) { saveQueued = false; scheduleAutoSave(); }
+        if (targetId === '#section-history') {
+          historyManager.loadHistory();
+        }
+      };
     }
   }
 
-  const state = { background: [], neonColors: [], labels: [], socialIcon: [], links: [], categories: [], layoutOrder: [] };
-
-  async function ensureCfg(maxWaitMs = 3000) {
-    const start = Date.now();
-    while (!window.__PLINKK_CFG__) {
-      if (Date.now() - start > maxWaitMs) break;
-      await new Promise((r) => setTimeout(r, 50));
-    }
-    return window.__PLINKK_CFG__ || { themes: [], animations: [], animationBackground: [], canvaData: [], btnIconThemeConfig: [] };
-  }
-
-  async function fillForm(cfg) {
-    suspendAutoSave = true;
-    f.profileLink.value = cfg.profileLink || '';
-    f.profileSiteText.value = cfg.profileSiteText || '';
-    f.userName.value = cfg.userName || '';
-    f.email.value = cfg.email || '';
-    f.profileImage.value = cfg.profileImage || '';
-    f.profileIcon.value = cfg.profileIcon || '';
-    f.iconUrl.value = cfg.iconUrl || '';
-    f.description.value = cfg.description || '';
-    f.profileHoverColor.value = cfg.profileHoverColor || '#7289DA';
-    f.degBackgroundColor.value = cfg.degBackgroundColor ?? 45;
-
-    try {
-      f.degBackgroundColor.dispatchEvent(new Event('input', { bubbles: true }));
-      f.degBackgroundColor.dispatchEvent(new Event('change', { bubbles: true }));
-    } catch { }
-    f.buttonThemeEnable.checked = (cfg.buttonThemeEnable ?? 1) === 1;
-    f.canvaEnable.checked = (cfg.canvaEnable ?? 1) === 1;
-    if (f.showVerifiedBadge) f.showVerifiedBadge.checked = (cfg.showVerifiedBadge ?? true);
-    if (f.showPartnerBadge) f.showPartnerBadge.checked = (cfg.showPartnerBadge ?? true);
-    // if (f.enableVCard) f.enableVCard.checked = (cfg.enableVCard ?? true);
-    if (f.publicPhone) f.publicPhone.value = cfg.publicPhone || '';
-    if (f.enableLinkCategories) f.enableLinkCategories.checked = (cfg.enableLinkCategories ?? false);
-
-    if (f.layoutMode) {
-      const mode = cfg.layoutMode || 'LIST';
-      f.layoutMode.forEach(r => { r.checked = r.value === mode; });
-    }
-
-    f.categoriesHint = qs('#categoriesHint');
-
-    if (f.enableLinkCategories) {
-      if (f.enableLinkCategories.checked) {
-        f.categoriesContainer.classList.remove('hidden');
-        if (f.addCategory) f.addCategory.classList.remove('hidden');
-        if (f.categoriesDisabledMsg) f.categoriesDisabledMsg.classList.add('hidden');
-        if (f.categoriesHint) f.categoriesHint.classList.remove('hidden');
-      } else {
-        f.categoriesContainer.classList.add('hidden');
-        if (f.addCategory) f.addCategory.classList.add('hidden');
-        if (f.categoriesDisabledMsg) f.categoriesDisabledMsg.classList.remove('hidden');
-        if (f.categoriesHint) f.categoriesHint.classList.add('hidden');
-      }
-    }
-
-    const { themes = [], animations: anims = [], animationBackground: animBgs = [], canvaData: canvases = [] } = await ensureCfg();
-    fillSelect(f.selectedThemeIndex, themes, (t, i) => (t?.name ? `${i} · ${t.name}` : `Thème ${i}`));
-    fillSelect(f.selectedAnimationIndex, anims, (a, i) => (a?.name ? `${i} · ${a.name}` : `Anim ${i}`));
-    fillSelect(f.selectedAnimationButtonIndex, anims, (a, i) => (a?.name ? `${i} · ${a.name}` : `Anim ${i}`));
-    fillSelect(f.selectedAnimationBackgroundIndex, animBgs, (a, i) => (a?.name ? `${i} · ${a.name}` : `Anim BG ${i}`));
-    fillSelect(f.selectedCanvasIndex, canvases, (c, i) => (c?.animationName ? `${i} · ${c.animationName}` : `Canvas ${i}`));
-
-    f.selectedThemeIndex.value = String(cfg.selectedThemeIndex ?? 13);
-    f.selectedAnimationIndex.value = String(cfg.selectedAnimationIndex ?? 0);
-    f.selectedAnimationButtonIndex.value = String(cfg.selectedAnimationButtonIndex ?? 10);
-    f.selectedAnimationBackgroundIndex.value = String(cfg.selectedAnimationBackgroundIndex ?? 10);
-    f.animationDurationBackground.value = cfg.animationDurationBackground ?? 30;
-    f.delayAnimationButton.value = cfg.delayAnimationButton ?? 0.1;
-    f.backgroundSize.value = cfg.backgroundSize ?? 50;
-    f.selectedCanvasIndex.value = String(cfg.selectedCanvasIndex ?? 16);
-
-    const canvasLabelEl = qs('#selectedCanvasLabel');
-    if (canvasLabelEl) {
-      const idx = Number(f.selectedCanvasIndex.value || 0) || 0;
-      const item = canvases[idx];
-      canvasLabelEl.value = item?.animationName ? `#${idx} · ${item.animationName}` : `#${idx}`;
-    }
-    const canvasPickerBtn = qs('#openCanvasPicker');
-    const setCanvasControlsState = (enabled) => {
-      if (canvasPickerBtn) canvasPickerBtn.disabled = !enabled;
-      if (canvasLabelEl) canvasLabelEl.disabled = !enabled;
+  initTabs() {
+    const handleTabClick = (e) => {
+      const btn = e.currentTarget;
+      const target = btn.dataset.target;
+      this.switchTab(target);
     };
-    setCanvasControlsState(f.canvaEnable.checked);
-    if (canvasPreviewEnable) {
-      canvasPreviewEnable.disabled = !f.canvaEnable.checked;
-      if (!f.canvaEnable.checked) canvasPreviewEnable.checked = false;
+
+    this.tabs.forEach(btn => btn.addEventListener('click', handleTabClick));
+
+    const hash = location.hash;
+    if (hash && document.querySelector(hash)) {
+      this.switchTab(hash);
+    } else {
+      this.switchTab('#section-profile');
     }
-    refreshSelectedCanvasPreview({
-      cfg: window.__PLINKK_CFG__ || {},
-      canvaEnableEl: f.canvaEnable,
-      selectedCanvasIndexEl: f.selectedCanvasIndex,
-      selectedCanvasPreviewOverlay,
-      selectedCanvasPreviewFrame,
-      canvasPreviewEnable,
+
+    window.addEventListener('popstate', () => {
+      if (location.hash) this.switchTab(location.hash);
+    });
+  }
+
+  switchTab(targetId) {
+    this.sections.forEach(s => {
+      s.classList.toggle('hidden', `#${s.id}` !== targetId);
+    });
+    this.tabs.forEach(b => {
+      b.setAttribute('aria-selected', b.dataset.target === targetId ? 'true' : 'false');
     });
 
-    const sb = cfg.statusbar || {};
-    f.status_text.value = sb.text || '';
-    f.status_fontTextColor.value = sb.fontTextColor ?? 1;
-    f.status_statusText.value = sb.statusText || 'busy';
-    setupStatusDropdown({ elements: f, scheduleAutoSave });
-    updateStatusPreview({ elements: f });
-    setTimeout(() => updateStatusControlsDisabled({ elements: f }), 0);
+    if (this.onTabChange) this.onTabChange(targetId);
 
-    state.background = Array.isArray(cfg.background) ? [...cfg.background] : [];
-    state.neonColors = Array.isArray(cfg.neonColors) ? [...cfg.neonColors] : [];
-    state.labels = Array.isArray(cfg.labels) ? cfg.labels.map((x) => ({ ...x })) : [];
-    state.socialIcon = Array.isArray(cfg.socialIcon) ? cfg.socialIcon.map((x) => ({ ...x })) : [];
-    state.links = Array.isArray(cfg.links) ? cfg.links.map((x) => ({ ...x })) : [];
-    state.categories = Array.isArray(cfg.categories) ? cfg.categories.map((x) => ({ ...x })) : [];
-    const DEFAULT_LAYOUT = ['profile', 'username', 'social', 'email', 'links'];
-    state.layoutOrder = Array.isArray(cfg.layoutOrder) ? [...cfg.layoutOrder].filter(x => x !== 'labels') : [...DEFAULT_LAYOUT];
+    if (history.replaceState) {
+      history.replaceState(null, '', targetId);
+    } else {
+      location.hash = targetId;
+    }
+  }
 
-    renderBackground({ container: f.backgroundList, addBtn: f.addBackgroundColor, colors: state.background, scheduleAutoSave });
-    renderNeon({ container: f.neonList, addBtn: f.addNeonColor, colors: state.neonColors, neonEnableEl: f.neonEnable, scheduleAutoSave });
-    // renderLabels({ container: f.labelsList, addBtn: f.addLabel, labels: state.labels, scheduleAutoSave });
-    try { renderSocial({ container: f.socialList, addBtn: f.addSocial, socials: state.socialIcon, scheduleAutoSave }); } catch (e) { console.error('renderSocial error', e); setStatus('Erreur affichage socials', 'error'); }
-    try { renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave }); } catch (e) { console.error('renderLinks initial error', e); setStatus('Erreur affichage liens', 'error'); }
-    renderCategories({
-      container: f.categoriesContainer,
-      addBtn: f.addCategory,
-      categories: state.categories,
-      links: state.links,
-      scheduleAutoSave,
-      onUpdate: () => {
-        renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave });
+  initLayoutToggles() {
+    const radios = document.getElementsByName('layoutMode');
+    const layoutList = document.getElementById('layoutList');
+    const bentoEditor = document.getElementById('bentoEditor');
+
+    const toggleEditor = (mode) => {
+      if (mode === 'BENTO') {
+        bentoManager.initGrid();
+        bentoEditor.classList.remove('hidden');
+      } else {
+        bentoEditor.classList.add('hidden');
       }
-    });
-    renderLayout({ container: f.layoutList, order: state.layoutOrder, scheduleAutoSave });
 
-    if (f.invertBackgroundColors) {
-      f.invertBackgroundColors.addEventListener('click', () => {
-        state.background.reverse();
-        renderBackground({ container: f.backgroundList, addBtn: f.addBackgroundColor, colors: state.background, scheduleAutoSave });
-        scheduleAutoSave();
+      state.setLayoutMode(mode);
+
+      this.saveSetting('layoutMode', mode);
+    };
+
+    Array.from(radios).forEach(r => {
+      r.addEventListener('change', (e) => toggleEditor(e.target.value));
+      if (r.checked) toggleEditor(r.value);
+    });
+
+    const saveBtn = document.getElementById('saveBentoLayout');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', async () => {
+        const originalText = saveBtn.innerText;
+        saveBtn.innerText = 'Enregistrement...';
+        saveBtn.disabled = true;
+        try {
+          await bentoManager.saveLayout();
+          saveBtn.innerText = 'Enregistré !';
+          setTimeout(() => {
+            saveBtn.innerText = originalText;
+            saveBtn.disabled = false;
+          }, 2000);
+        } catch (e) {
+          console.error(e);
+          saveBtn.innerText = 'Erreur';
+          saveBtn.disabled = false;
+        }
+      });
+    }
+  }
+
+  initStatusLogic() {
+    const showStatus = document.getElementById('showStatus');
+    const statusFields = document.getElementById('statusFields');
+    const clearStatus = document.getElementById('clearStatus');
+    const statusText = document.getElementById('status_text');
+    const statusEmoji = document.getElementById('status_emoji');
+
+    if (showStatus) {
+      showStatus.addEventListener('change', (e) => {
+        if (e.target.checked) {
+          statusFields.classList.remove('opacity-50', 'pointer-events-none');
+        } else {
+          statusFields.classList.add('opacity-50', 'pointer-events-none');
+        }
+        this.saveSetting('statusVisible', e.target.checked);
       });
     }
 
-    const hasNeonColors = state.neonColors.length > 0;
-    if (f.neonEnable) {
-      f.neonEnable.checked = false;
-      f.neonEnable.disabled = true;
-      f.neonEnable.title = 'Néon temporairement désactivé';
+    if (clearStatus) {
+      clearStatus.addEventListener('click', () => {
+        if (statusText) statusText.value = '';
+        if (statusEmoji) statusEmoji.value = '👋';
+        const btn = document.querySelector('[data-picker-for="status_emoji"]');
+        if (btn) btn.innerText = '👋';
+
+        this.saveSetting('statusText', '');
+        this.saveSetting('statusEmoji', '👋');
+      });
     }
-    suspendAutoSave = false;
+
+    if (statusText) {
+      statusText.addEventListener('input', () => this.debouncedSaveSetting('statusText', statusText.value));
+    }
+
+    if (statusEmoji) {
+      statusEmoji.addEventListener('input', () => this.debouncedSaveSetting('statusEmoji', statusEmoji.value));
+      const observer = new MutationObserver(() => {
+        this.debouncedSaveSetting('statusEmoji', statusEmoji.value);
+      });
+      observer.observe(statusEmoji, { attributes: true, attributeFilter: ['value'] });
+    }
   }
 
-  function isMasked(el) {
-    if (!el) return false;
-    return !!(el.classList?.contains('masked-field') || (el.dataset && typeof el.dataset._originalValue !== 'undefined'));
-  }
+  async initAnimationModals() {
+    const profileBtn = document.getElementById('openProfileAnimPicker');
+    const buttonBtn = document.getElementById('openButtonAnimPicker');
+    const backgroundBtn = document.getElementById('openBackgroundAnimPicker');
 
-  function maskedOr(val, el) {
-    return isMasked(el) ? null : val;
-  }
+    const anims = animations || [];
+    const bgAnims = animationBackground || [];
 
-  function collectPayloadPlinkk() {
-    return {
-      profileLink: vOrNull(f.profileLink.value),
-      profileImage: vOrNull(f.profileImage.value),
-      userName: vOrNull(f.userName.value),
-
-      profileIcon: maskedOr(vOrNull(f.profileIcon.value), f.profileIcon),
-      profileSiteText: maskedOr(vOrNull(f.profileSiteText.value), f.profileSiteText),
-      affichageEmail: maskedOr(vOrNull(f.email.value), f.email),
-      iconUrl: maskedOr(vOrNull(f.iconUrl.value), f.iconUrl),
-      description: maskedOr(vOrNull(f.description.value), f.description),
-      profileHoverColor: vOrNull(f.profileHoverColor.value),
-      degBackgroundColor: numOrNull(f.degBackgroundColor.value),
-      neonEnable: state.neonColors.length > 0 && f.neonEnable?.checked ? 1 : 0,
-      buttonThemeEnable: f.buttonThemeEnable.checked ? 1 : 0,
-      showVerifiedBadge: f.showVerifiedBadge ? f.showVerifiedBadge.checked : true,
-      showPartnerBadge: f.showPartnerBadge ? f.showPartnerBadge.checked : true,
-      enableVCard: false, // f.enableVCard ? f.enableVCard.checked : true,
-      publicPhone: f.publicPhone ? vOrNull(f.publicPhone.value) : null,
-      enableLinkCategories: f.enableLinkCategories ? f.enableLinkCategories.checked : false,
-      backgroundSize: numOrNull(f.backgroundSize.value),
-      selectedThemeIndex: numOrNull(f.selectedThemeIndex.value),
-      selectedAnimationIndex: numOrNull(f.selectedAnimationIndex.value),
-      selectedAnimationButtonIndex: numOrNull(f.selectedAnimationButtonIndex.value),
-      selectedAnimationBackgroundIndex: numOrNull(f.selectedAnimationBackgroundIndex.value),
-      animationDurationBackground: numOrNull(f.animationDurationBackground.value),
-      delayAnimationButton: parseFloat(f.delayAnimationButton.value || '0'),
-      canvaEnable: f.canvaEnable.checked ? 1 : 0,
-      selectedCanvasIndex: numOrNull(f.selectedCanvasIndex.value),
+    const updateLabel = (fieldId, list) => {
+      const val = parseInt(document.getElementById(fieldId)?.value || 0);
+      const displayId = fieldId === 'selectedAnimationIndex' ? 'profileAnimName' :
+        fieldId === 'selectedAnimationButtonIndex' ? 'buttonAnimName' : 'backgroundAnimName';
+      const displayEl = document.getElementById(displayId);
+      if (displayEl) displayEl.textContent = list[val]?.name || 'Aucune';
     };
-  }
 
-  function collectPayloadBackground() {
-    return {
-      background: state.background,
+    // Update labels immediately
+    updateLabel('selectedAnimationIndex', anims);
+    updateLabel('selectedAnimationButtonIndex', anims);
+    updateLabel('selectedAnimationBackgroundIndex', bgAnims);
+
+    if (!profileBtn && !buttonBtn && !backgroundBtn) return;
+
+    const { openPicker } = window.__DASH_PICKERS__ || {};
+    if (!openPicker) {
+      console.warn('Picker context not found. Modal buttons will not work.');
+      return;
+    }
+
+    const renderAnimationCard = (item, idx, fieldId) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'group p-3 rounded-xl border border-slate-800 bg-slate-950 hover:bg-slate-900 hover:border-violet-500/50 transition-all text-left flex flex-col items-center gap-3';
+
+      const previewContainer = document.createElement('div');
+      previewContainer.className = 'size-12 rounded-lg bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-700/50 group-hover:border-violet-500/30 transition-colors';
+
+      const preview = document.createElement('div');
+      const isBg = fieldId === 'selectedAnimationBackgroundIndex';
+      preview.className = isBg ? 'w-full h-full' : 'size-3 rounded-full bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]';
+
+      if (isBg) {
+        preview.style.background = 'linear-gradient(45deg, #8b5cf6, #ec4899, #8b5cf6)';
+        preview.style.backgroundSize = '200% 200%';
+      }
+
+      // Use the animation name specifically for preview, with fixed duration and infinite loop
+      // The config 'name' matches the @keyframes name
+      const animName = item.name || item.animationName;
+      preview.style.animation = `${animName} 2s infinite ease-in-out`;
+
+      previewContainer.appendChild(preview);
+
+      const info = document.createElement('div');
+      info.className = 'w-full text-center';
+      const name = document.createElement('div');
+      name.className = 'text-xs font-medium text-slate-200 truncate';
+      name.textContent = item.name;
+      info.appendChild(name);
+
+      card.append(previewContainer, info);
+      card.onclick = () => {
+        const hiddenInput = document.getElementById(fieldId);
+        if (hiddenInput) {
+          hiddenInput.value = idx;
+          hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        updateLabel(fieldId, list);
+
+        this.saveSetting(fieldId, idx);
+        window.__DASH_PICKERS__.closePicker();
+      };
+
+      return card;
     };
+
+    if (profileBtn) {
+      profileBtn.onclick = () => openPicker({
+        title: 'Animation du Profil',
+        type: 'anim',
+        items: anims,
+        renderCard: (item, idx) => renderAnimationCard(item, idx, 'selectedAnimationIndex')
+      });
+    }
+
+    if (buttonBtn) {
+      buttonBtn.onclick = () => openPicker({
+        title: 'Animation des Boutons',
+        type: 'anim',
+        items: anims,
+        renderCard: (item, idx) => renderAnimationCard(item, idx, 'selectedAnimationButtonIndex')
+      });
+    }
+
+    if (backgroundBtn) {
+      backgroundBtn.onclick = () => openPicker({
+        title: 'Animation du Fond',
+        type: 'anim',
+        items: bgAnims,
+        renderCard: (item, idx) => renderAnimationCard(item, idx, 'selectedAnimationBackgroundIndex')
+      });
+    }
   }
 
-  function collectPayloadLabels() {
-    return {
-      labels: state.labels,
+  initSocials() {
+    const list = document.getElementById('socialIconsList');
+    const addBtn = document.getElementById('addSocialIcon');
+    if (!list) return;
+
+    const plinkk = window.__INITIAL_STATE__ || {};
+    const socials = plinkk.socialIcons || [];
+
+    const scheduleSave = () => {
+      if (window.__PLINKK_SAVE_SOCIAL__) {
+        window.__PLINKK_SAVE_SOCIAL__(socials);
+      }
     };
+
+    renderSocial({
+      container: list,
+      addBtn: addBtn,
+      socials: socials,
+      scheduleAutoSave: scheduleSave
+    });
   }
 
-  function collectPayloadSocialIcon() {
-    return {
-      socialIcon: state.socialIcon,
-    };
+  initLabelsLogic() {
   }
 
-  function collectPayloadLinks() {
-    return {
-      links: state.links,
-    };
-  }
+  initBackgroundTypeToggles() {
+    const btns = document.querySelectorAll('.bg-type-btn');
+    const options = document.querySelectorAll('.bg-options');
 
-  function collectPayloadCategories() {
-    return {
-      categories: state.categories,
-    };
-  }
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const type = btn.dataset.bgType;
 
-  function collectPayloadLayout() {
-    const mode = Array.from(f.layoutMode || []).find(r => r.checked)?.value || 'LIST';
-    return {
-      layoutOrder: state.layoutOrder,
-      layoutMode: mode,
-    };
-  }
-
-  function collectPayloadStatusBar() {
-    const sbText = vOrNull(f.status_text.value);
-    const statusbar = sbText === null ? null : { text: sbText, fontTextColor: numOrNull(f.status_fontTextColor.value), statusText: vOrNull(f.status_statusText.value) };
-    return {
-      statusbar,
-    };
-  }
-
-  function collectPayloadNeonColor() {
-    return {
-      neonColors: state.neonColors,
-    };
-  }
-
-  function refreshPreview() {
-    if (!preview) return;
-    const url = new URL(preview.src, window.location.origin);
-    url.searchParams.set('t', Date.now().toString());
-    preview.src = url.toString();
-  }
-
-  saveBtn?.addEventListener('click', async () => { saveNow(true); });
-  resetBtn?.addEventListener('click', async () => {
-    setStatus('Réinitialisation...');
-    try { const cfg = await fetchConfig(); fillForm(cfg); setStatus('Données rechargées', 'success'); }
-    catch (e) { setStatus('Erreur: ' + (e?.message || ''), 'error'); }
-  });
-  refreshBtn?.addEventListener('click', (e) => { e.preventDefault(); schedulePreviewRefresh(); });
-
-  [
-    f.profileLink, f.profileSiteText, f.userName, f.email,
-    f.profileImage, f.profileIcon, f.iconUrl, f.description,
-    f.profileHoverColor, f.degBackgroundColor,
-    f.neonEnable, f.buttonThemeEnable, f.canvaEnable,
-    f.showVerifiedBadge, f.showPartnerBadge, /* f.enableVCard, */ f.publicPhone, f.enableLinkCategories,
-    f.selectedThemeIndex, f.selectedAnimationIndex,
-    f.selectedAnimationButtonIndex, f.selectedAnimationBackgroundIndex,
-    f.animationDurationBackground, f.delayAnimationButton, f.backgroundSize,
-    f.selectedCanvasIndex,
-    f.status_text, f.status_fontTextColor, f.status_statusText,
-  ].forEach((el) => attachAutoSave(el, scheduleAutoSave));
-
-  f.layoutMode?.forEach(r => attachAutoSave(r, scheduleAutoSave));
-
-  if (f.enableLinkCategories) {
-    f.enableLinkCategories.addEventListener('change', () => {
-      if (f.enableLinkCategories.checked) {
-        f.categoriesContainer.classList.remove('hidden');
-        if (f.addCategory) f.addCategory.classList.remove('hidden');
-        if (f.categoriesDisabledMsg) f.categoriesDisabledMsg.classList.add('hidden');
-        if (f.categoriesHint) f.categoriesHint.classList.remove('hidden');
-
-        renderCategories({
-          container: f.categoriesContainer,
-          addBtn: f.addCategory,
-          categories: state.categories,
-          links: state.links,
-          scheduleAutoSave,
-          onUpdate: () => {
-            renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave });
+        btns.forEach(b => {
+          if (b === btn) {
+            b.classList.add('bg-white', 'shadow', 'text-slate-900');
+            b.classList.remove('text-slate-400', 'hover:bg-white/[0.12]', 'hover:text-white');
+          } else {
+            b.classList.remove('bg-white', 'shadow', 'text-slate-900');
+            b.classList.add('text-slate-400', 'hover:bg-white/[0.12]', 'hover:text-white');
           }
         });
-      } else {
-        f.categoriesContainer.classList.add('hidden');
-        if (f.addCategory) f.addCategory.classList.add('hidden');
-        if (f.categoriesDisabledMsg) f.categoriesDisabledMsg.classList.remove('hidden');
-        if (f.categoriesHint) f.categoriesHint.classList.add('hidden');
-      }
-    });
-  }
 
-  if (f.status_statusText) f.status_statusText.addEventListener('change', () => updateStatusPreview({ elements: f }));
-  f.status_text?.addEventListener('input', () => { updateStatusControlsDisabled({ elements: f }); scheduleAutoSave(); });
-
-  if (f.canvaEnable) {
-    f.canvaEnable.addEventListener('change', () => {
-      const canvasLabelEl2 = qs('#selectedCanvasLabel');
-      const canvasPickerBtn2 = qs('#openCanvasPicker');
-      if (canvasPickerBtn2) canvasPickerBtn2.disabled = !f.canvaEnable.checked;
-      if (canvasLabelEl2) canvasLabelEl2.disabled = !f.canvaEnable.checked;
-      if (canvasPreviewEnable) {
-        canvasPreviewEnable.disabled = !f.canvaEnable.checked;
-        if (!f.canvaEnable.checked) canvasPreviewEnable.checked = false;
-      }
-      refreshSelectedCanvasPreview({
-        cfg: window.__PLINKK_CFG__ || {},
-        canvaEnableEl: f.canvaEnable,
-        selectedCanvasIndexEl: f.selectedCanvasIndex,
-        selectedCanvasPreviewOverlay,
-        selectedCanvasPreviewFrame,
-        canvasPreviewEnable,
-      });
-    });
-  }
-  if (canvasPreviewEnable) canvasPreviewEnable.addEventListener('change', () => {
-    refreshSelectedCanvasPreview({
-      cfg: window.__PLINKK_CFG__ || {},
-      canvaEnableEl: f.canvaEnable,
-      selectedCanvasIndexEl: f.selectedCanvasIndex,
-      selectedCanvasPreviewOverlay,
-      selectedCanvasPreviewFrame,
-      canvasPreviewEnable,
-    });
-  });
-
-  (async () => {
-    const cfg = await ensureCfg();
-    const themeBtn = qs('#openThemePicker');
-    const canvasBtn = qs('#openCanvasPicker');
-    const animArticleBtn = qs('#openAnimArticlePicker');
-    const animButtonBtn = qs('#openAnimButtonPicker');
-    const animBgBtn = qs('#openAnimBackgroundPicker');
-    const canvasLabelEl = qs('#selectedCanvasLabel');
-    if (themeBtn && f.selectedThemeIndex) {
-      themeBtn.addEventListener('click', () => openPicker({
-        title: 'Choisir un thème', type: 'theme', items: cfg.themes || [],
-        renderCard: (theme, idx) => {
-          const card = document.createElement('button');
-          card.type = 'button';
-          card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left space-y-2';
-          const head = document.createElement('div'); head.className = 'flex items-center justify-between';
-          const title = document.createElement('div'); title.className = 'font-medium truncate'; title.textContent = `#${idx} · ${theme?.name || 'Thème'}`;
-          const meta = document.createElement('div'); meta.className = 'flex items-center gap-2';
-          const creator = document.createElement('span'); creator.className = 'text-[10px] px-2 py-0.5 rounded border border-slate-700 text-slate-300';
-          if (theme?.author && theme.author.userName) {
-            creator.textContent = `par ${theme.author.userName}`;
+        options.forEach(opt => {
+          if (opt.id === `bg-options-${type}`) {
+            opt.classList.remove('hidden');
           } else {
-            creator.textContent = 'original';
+            opt.classList.add('hidden');
           }
-          const infoBtn = document.createElement('button'); infoBtn.type = 'button'; infoBtn.className = 'size-6 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700'; infoBtn.title = 'Infos';
-          infoBtn.innerHTML = '<svg class="h-3.5 w-3.5 text-slate-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
-          infoBtn.addEventListener('click', (ev) => {
-            ev.stopPropagation();
-            const d = document.createElement('div');
-            d.className = 'z-[80] fixed inset-0';
-            d.innerHTML = `
-              <div class="absolute inset-0 bg-black/60"></div>
-              <div class="relative z-[1] mx-auto mt-20 w-[92vw] max-w-md rounded-lg border border-slate-800 bg-slate-900 shadow-xl p-4 space-y-2">
-                <div class="flex items-center justify-between">
-                  <div class="font-medium">Détails du thème</div>
-                  <button class="h-8 w-8 rounded bg-slate-800 hover:bg-slate-700" data-close>✕</button>
-                </div>
-                <div class="text-sm text-slate-300"><b>${theme?.name || ''}</b></div>
-                ${theme?.description ? `<div class="text-xs text-slate-400">${theme.description}</div>` : ''}
-                ${theme?.author && theme.author.id ? `<div class="text-xs">Créateur: <a class="text-indigo-400 hover:underline" href="${window.__PLINKK_FRONTEND_URL__}/${theme.author.id}" target="_blank">@${theme.author.userName || theme.author.id}</a></div>` : '<div class="text-xs text-slate-400">Créateur: original</div>'}
-              </div>`;
-            document.body.appendChild(d);
-            const close = () => d.remove();
-            d.addEventListener('click', (e) => { if (e.target === d.firstElementChild) close(); });
-            d.querySelector('[data-close]')?.addEventListener('click', close);
-          });
-          meta.append(creator, infoBtn);
-          head.append(title, meta);
-          const previewBox = document.createElement('div'); previewBox.className = 'rounded p-3 border border-slate-800';
-          previewBox.style.background = theme?.background || '#111827'; previewBox.style.color = theme?.textColor || '#e5e7eb';
-          const btns = document.createElement('div'); btns.className = 'flex gap-2';
-          const b1 = document.createElement('button'); b1.className = 'px-2 py-1 text-xs rounded'; b1.style.background = theme?.buttonBackground || '#4f46e5'; b1.style.color = theme?.buttonTextColor || '#111827'; b1.textContent = 'Bouton';
-          const b2 = document.createElement('button'); b2.className = 'px-2 py-1 text-xs rounded'; b2.style.background = theme?.hoverColor || '#22c55e'; b2.style.color = theme?.textColor || '#111827'; b2.textContent = 'Hover';
-          btns.append(b1, b2); previewBox.append(btns);
-          card.append(head, previewBox);
-          card.addEventListener('click', () => { window.__DASH_PICKERS__.pickerOnSelect?.(idx); closePicker(); });
-          return card;
-        },
-        onSelect: (i) => { f.selectedThemeIndex.value = String(i); scheduleAutoSave(); },
-      }));
-    }
-
-    function openCanvasPicker() {
-      openPicker({
-        title: 'Choisir un canvas', type: 'canvas', items: cfg.canvaData || [],
-        renderCard: (item, idx) => renderCanvasCard(item, idx, (i) => { window.__DASH_PICKERS__.pickerOnSelect?.(i); }),
-        onSelect: (i) => {
-          f.selectedCanvasIndex.value = String(i);
-          if (canvasLabelEl) {
-            const item = (cfg.canvaData || [])[i];
-            canvasLabelEl.value = item?.animationName ? `#${i} · ${item.animationName}` : `#${i}`;
-          }
-          refreshSelectedCanvasPreview({
-            cfg: window.__PLINKK_CFG__ || {},
-            canvaEnableEl: f.canvaEnable,
-            selectedCanvasIndexEl: f.selectedCanvasIndex,
-            selectedCanvasPreviewOverlay,
-            selectedCanvasPreviewFrame,
-            canvasPreviewEnable,
-          });
-          scheduleAutoSave();
-        },
+        });
       });
-    }
-    if (canvasBtn && f.selectedCanvasIndex) canvasBtn.addEventListener('click', openCanvasPicker);
-    if (canvasLabelEl) {
-      canvasLabelEl.addEventListener('click', openCanvasPicker);
-      canvasLabelEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCanvasPicker(); } });
-    }
-    f.selectedCanvasIndex?.addEventListener('change', () => refreshSelectedCanvasPreview({
-      cfg: window.__PLINKK_CFG__ || {},
-      canvaEnableEl: f.canvaEnable,
-      selectedCanvasIndexEl: f.selectedCanvasIndex,
-      selectedCanvasPreviewOverlay,
-      selectedCanvasPreviewFrame,
-      canvasPreviewEnable,
-    }));
-
-    function ensureAnimationLoops(animStr) {
-      if (!animStr) return '';
-      return /\binfinite\b/.test(animStr) ? animStr : `${animStr} infinite`;
-    }
-
-    function renderAnimCard(item, idx) {
-      const card = document.createElement('button');
-      card.type = 'button';
-      card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left space-y-2';
-      const head = document.createElement('div'); head.className = 'flex items-center justify-between';
-      const title = document.createElement('div'); title.className = 'font-medium truncate'; title.textContent = `#${idx} · ${item?.name || 'Animation'}`;
-      const small = document.createElement('div'); small.className = 'text-xs text-slate-400'; small.textContent = item?.keyframes || '';
-      head.append(title, small);
-      const previewBox = document.createElement('div');
-      previewBox.className = 'rounded border border-slate-800 p-4 flex items-center justify-center';
-      const dot = document.createElement('div');
-      dot.className = 'h-6 w-6 rounded-full bg-indigo-400';
-      dot.style.animation = ensureAnimationLoops(item?.keyframes || '');
-      previewBox.append(dot);
-      card.append(head, previewBox);
-      card.addEventListener('click', () => { window.__DASH_PICKERS__.pickerOnSelect?.(idx); closePicker(); });
-      return card;
-    }
-
-    function renderAnimBgCard(item, idx) {
-      const card = document.createElement('button');
-      card.type = 'button';
-      card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left space-y-2';
-      const head = document.createElement('div'); head.className = 'flex items-center justify-between';
-      const title = document.createElement('div'); title.className = 'font-medium truncate'; title.textContent = `#${idx} · ${item?.name || 'Anim BG'}`;
-      const small = document.createElement('div'); small.className = 'text-xs text-slate-400'; small.textContent = item?.keyframes || '';
-      head.append(title, small);
-      const preview = document.createElement('div');
-      preview.className = 'rounded border border-slate-800 h-20';
-      preview.style.backgroundImage = 'linear-gradient(45deg, #1f2937 0%, #0f172a 100%)';
-      preview.style.backgroundSize = '200% 200%';
-      preview.style.animation = ensureAnimationLoops(item?.keyframes || '');
-      card.append(head, preview);
-      card.addEventListener('click', () => { window.__DASH_PICKERS__.pickerOnSelect?.(idx); closePicker(); });
-      return card;
-    }
-
-    const cfgReady = window.__PLINKK_CFG__ || await ensureCfg();
-    const anims = cfgReady.animations || [];
-    const animBgs = cfgReady.animationBackground || [];
-
-    function setAnimLabel(inputEl, items, idx) {
-      if (!inputEl) return;
-      idx = Number(idx || 0) || 0;
-      const it = items[idx];
-      inputEl.value = it?.name ? `#${idx} · ${it.name}` : `#${idx}`;
-    }
-
-    const animArticleLabel = qs('#selectedAnimationLabel');
-    const animButtonLabel = qs('#selectedAnimationButtonLabel');
-    const animBgLabel = qs('#selectedAnimationBackgroundLabel');
-
-    setAnimLabel(animArticleLabel, anims, f.selectedAnimationIndex?.value);
-    setAnimLabel(animButtonLabel, anims, f.selectedAnimationButtonIndex?.value);
-    setAnimLabel(animBgLabel, animBgs, f.selectedAnimationBackgroundIndex?.value);
-
-    if (animArticleBtn && f.selectedAnimationIndex) {
-      animArticleBtn.addEventListener('click', () => openPicker({
-        title: "Choisir l'animation d'article", type: 'anim', items: anims,
-        renderCard: (it, i) => renderAnimCard(it, i),
-        onSelect: (i) => {
-          f.selectedAnimationIndex.value = String(i);
-          setAnimLabel(animArticleLabel, anims, i);
-          scheduleAutoSave();
-        },
-      }));
-      animArticleLabel?.addEventListener('click', () => animArticleBtn.click());
-      animArticleLabel?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); animArticleBtn.click(); } });
-    }
-    if (animButtonBtn && f.selectedAnimationButtonIndex) {
-      animButtonBtn.addEventListener('click', () => openPicker({
-        title: "Choisir l'animation de bouton", type: 'anim', items: anims,
-        renderCard: (it, i) => renderAnimCard(it, i),
-        onSelect: (i) => {
-          f.selectedAnimationButtonIndex.value = String(i);
-          setAnimLabel(animButtonLabel, anims, i);
-          scheduleAutoSave();
-        },
-      }));
-      animButtonLabel?.addEventListener('click', () => animButtonBtn.click());
-      animButtonLabel?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); animButtonBtn.click(); } });
-    }
-    if (animBgBtn && f.selectedAnimationBackgroundIndex) {
-      animBgBtn.addEventListener('click', () => openPicker({
-        title: "Choisir l'animation d'arrière‑plan", type: 'anim-bg', items: animBgs,
-        renderCard: (it, i) => renderAnimBgCard(it, i),
-        onSelect: (i) => {
-          f.selectedAnimationBackgroundIndex.value = String(i);
-          setAnimLabel(animBgLabel, animBgs, i);
-          scheduleAutoSave();
-        },
-      }));
-      animBgLabel?.addEventListener('click', () => animBgBtn.click());
-      animBgLabel?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); animBgBtn.click(); } });
-    }
-  })();
-
-  document.querySelectorAll('.picker-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const targetId = btn.dataset.pickerFor;
-      if (!targetId) return;
-      const targetInput = document.getElementById(targetId);
-      if (!targetInput) return;
-
-      openIconModal((val) => {
-        const replaced = (val.startsWith('http://') || val.startsWith('https://'))
-          ? val
-          : `https://cdn.plinkk.fr/icons/${val}.svg`;
-
-        targetInput.value = replaced;
-        targetInput.dispatchEvent(new Event('input', { bubbles: true }));
-        scheduleAutoSave();
-      }, targetId);
     });
-  });
+  }
 
-  setStatus('Chargement...');
-  renderSkeletons(f.socialList, 2);
-  renderSkeletons(f.linksList, 4);
-  renderSkeletons(f.layoutList, 5);
+  async initCanvasSelection() {
+    const list = document.getElementById('canvas-list');
+    if (!list) return;
 
-  fetchConfig().then((cfg) => { fillForm(cfg); setStatus('Prêt — sauvegarde auto activée', 'success'); }).catch((e) => { setStatus('Impossible de charger: ' + (e?.message || ''), 'error'); });
-})();
+    try {
+      const canvases = canvaData || [];
+      const currentIdx = parseInt(document.getElementById('selectedCanvasIndex')?.value || 0);
+
+      list.innerHTML = canvases.map((c, i) => `
+        <button type="button" data-canvas-index="${i}" 
+          class="canvas-item group relative flex items-center gap-3 p-3 rounded-xl border ${i === currentIdx ? 'border-violet-500 bg-violet-900/10' : 'border-slate-800 bg-slate-950'} hover:border-slate-700 transition-all text-left">
+          <div class="size-10 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 group-hover:text-violet-400 transition-colors">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="text-sm font-medium ${i === currentIdx ? 'text-violet-400' : 'text-slate-200'}">${c.animationName}</div>
+            ${c.author ? `<div class="text-[10px] text-slate-500">par ${c.author}</div>` : ''}
+          </div>
+          ${i === currentIdx ? `
+            <div class="ml-auto">
+              <div class="size-2 rounded-full bg-violet-500 shadow-lg shadow-violet-500/50"></div>
+            </div>
+          ` : ''}
+        </button>
+      `).join('');
+
+      list.querySelectorAll('[data-canvas-index]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.canvasIndex);
+          const hiddenInput = document.getElementById('selectedCanvasIndex');
+          if (hiddenInput) hiddenInput.value = idx;
+
+          list.querySelectorAll('.canvas-item').forEach(item => {
+            const itemIdx = parseInt(item.dataset.canvasIndex);
+            if (itemIdx === idx) {
+              item.classList.add('border-violet-500', 'bg-violet-900/10');
+              item.classList.remove('border-slate-800', 'bg-slate-950');
+            } else {
+              item.classList.remove('border-violet-500', 'bg-violet-900/10');
+              item.classList.add('border-slate-800', 'bg-slate-950');
+            }
+          });
+
+          this.saveSetting('selectedCanvasIndex', idx);
+        });
+      });
+    } catch (e) {
+      console.error('Failed to init canvas selection:', e);
+    }
+  }
+
+  async saveSetting(key, value) {
+    try {
+      if (window.__PLINKK_SHOW_SAVING__) window.__PLINKK_SHOW_SAVING__();
+      const res = await fetch(`/api/me/plinkks/${this.plinkkId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [key]: value })
+      });
+      if (res.ok && window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
+      if (window.refreshPreview) window.refreshPreview();
+    } catch (e) {
+      console.error('Save failed', e);
+      if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
+    }
+  }
+
+  debouncedSaveSetting(key, value) {
+    if (this.saveTimeout) clearTimeout(this.saveTimeout);
+    this.saveTimeout = setTimeout(() => this.saveSetting(key, value), 1000);
+  }
+}
+
+// Instantiate and Init
+const dashboard = new DashboardUI();
+document.addEventListener('DOMContentLoaded', () => dashboard.init());
+
+// Export for debugging
+window.DashboardUI = dashboard;

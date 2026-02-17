@@ -5,6 +5,7 @@ import { requireAuthRedirect } from "../../middleware/auth";
 import {
   getPlinkksByUserId,
   getSelectedPlinkk,
+  getPlinkkWithDetails,
   formatPlinkkForView,
   formatPagesForView,
 } from "../../services/plinkkService";
@@ -18,12 +19,22 @@ export function dashboardEditRoutes(fastify: FastifyInstance) {
 
     const q = request.query as { plinkkId: string };
     const pages = await getPlinkksByUserId(userId);
-    const selected = getSelectedPlinkk(pages, q?.plinkkId);
+    const selectedSimple = getSelectedPlinkk(pages, q?.plinkkId);
+    const selected = await getPlinkkWithDetails(selectedSimple.id, userId);
+
+    if (!selected) {
+      return reply.redirect("/dashboard");
+    }
+
     const selectedForView = formatPlinkkForView(selected);
     const autoOpenPlinkkModal = !q?.plinkkId && pages.length > 1;
 
-    const [linksCount] = await Promise.all([
+    const [linksCount, categories] = await Promise.all([
       prisma.link.count({ where: { userId } }),
+      prisma.category.findMany({
+        where: { plinkkId: selected.id },
+        orderBy: { order: "asc" },
+      }),
     ]);
     const maxLinks = getUserLimits(userInfo).maxLinks;
 
@@ -41,6 +52,7 @@ export function dashboardEditRoutes(fastify: FastifyInstance) {
       linksCount,
       maxLinks,
       gravatarUrl,
+      categories,
     });
   });
 }

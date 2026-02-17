@@ -1,0 +1,66 @@
+<div class="mb-6 pb-4 border-b border-slate-800">
+    <h3 class="text-lg font-semibold text-white">Catégories</h3>
+    <p class="text-sm text-slate-400">Organise tes liens par thèmes.</p>
+</div>
+
+<div class="space-y-4">
+    <div id="categoriesList" class="space-y-3 min-h-[50px]">
+        <% if (categories && categories.length> 0) { %>
+            <% categories.forEach(function(category) { %>
+                <div class="group relative bg-slate-950 border border-slate-800 rounded-xl p-4 transition-all hover:border-slate-700"
+                    data-id="<%= category.id %>">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="flex-1 flex items-center gap-3">
+                            <div class="cursor-move text-slate-600 hover:text-slate-400 p-1">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="9" cy="12" r="1"></circle>
+                                    <circle cx="9" cy="5" r="1"></circle>
+                                    <circle cx="9" cy="19" r="1"></circle>
+                                    <circle cx="15" cy="12" r="1"></circle>
+                                    <circle cx="15" cy="5" r="1"></circle>
+                                    <circle cx="15" cy="19" r="1"></circle>
+                                </svg>
+                            </div>
+                            <input type="text" value="<%= category.name %>"
+                                class="bg-transparent text-slate-200 font-medium focus:outline-none w-full" readonly />
+                        </div>
+                        <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="p-2 text-slate-400 hover:text-white transition-colors edit-category-trigger"
+                                data-id="<%= category.id %>">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7">
+                                    </path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z">
+                                    </path>
+                                </svg>
+                            </button>
+                            <button
+                                class="p-2 text-slate-400 hover:text-red-400 transition-colors delete-category-trigger"
+                                data-id="<%= category.id %>">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path
+                                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                    </path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+                    <% } else { %>
+                        <div class="text-center py-8 text-slate-500 text-sm italic">
+                            Aucune catégorie créée via l'API pour le moment.
+                        </div>
+                        <% } %>
+    </div>
+
+    <button id="addCategory"
+        class="w-full py-3 border-2 border-dashed border-slate-700 rounded-xl text-slate-400 hover:text-white hover:border-slate-500 hover:bg-slate-800/50 transition-all flex items-center justify-center gap-2 text-sm font-medium group">
+        <span class="bg-slate-800 group-hover:bg-slate-700 p-1 rounded transition-colors">+</span>
+        Nouvelle catégorie
+    </button>
+</div>

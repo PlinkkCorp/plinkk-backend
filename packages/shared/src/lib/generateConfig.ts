@@ -61,9 +61,15 @@ export function generateProfileConfig(
       formData: l.formData,
       clicks: l.clicks,
       // @ts-ignore
-      scheduledAt: l.scheduledAt,
-      // @ts-ignore
       expiresAt: l.expiresAt,
+      // @ts-ignore
+      gridX: l.gridX,
+      // @ts-ignore
+      gridY: l.gridY,
+      // @ts-ignore
+      gridW: l.gridW,
+      // @ts-ignore
+      gridH: l.gridH,
     }))
   )},
         categories: ${JSON.stringify(

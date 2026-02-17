@@ -62,6 +62,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     try {
         window.profileData = parsedProfileData;
         window.__PLINKK_PROFILE_DATA__ = parsedProfileData;
+        if (parsedProfileData.layoutMode === 'BENTO') {
+            document.body.classList.add('layout-bento');
+        }
     }
     catch (e) {
         // ignore if window is not writable for some reason

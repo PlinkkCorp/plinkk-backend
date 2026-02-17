@@ -1,0 +1,59 @@
+<div class="mb-6 pb-4 border-b border-slate-800">
+    <h3 class="text-lg font-semibold text-white">Status</h3>
+    <p class="text-sm text-slate-400">Affiche un message temporaire ou ton état actuel.</p>
+</div>
+
+<div class="space-y-6">
+    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
+        <div>
+            <span class="block text-sm font-medium text-slate-200">Afficher le
+                status</span>
+            <span class="block text-xs text-slate-500">Rend le message visible sur ton
+                profil.</span>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="showStatus" class="sr-only peer" <%=plinkk.statusVisible ? 'checked' : '' %>>
+            <div
+                class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600">
+            </div>
+        </label>
+    </div>
+
+    <div class="<%= plinkk.statusVisible ? '' : 'opacity-50 pointer-events-none' %> transition-opacity"
+        id="statusFields">
+        <label class="block text-sm font-medium text-slate-300 mb-2">Message</label>
+        <div class="flex gap-2">
+            <div class="relative w-16 shrink-0">
+                <button type="button" data-picker-for="status_emoji"
+                    class="picker-btn w-full h-[46px] rounded-xl bg-slate-950 border border-slate-800 text-xl flex items-center justify-center hover:bg-slate-900 transition-colors">
+                    <%= plinkk.statusEmoji || '👋' %>
+                </button>
+                <input type="hidden" id="status_emoji" value="<%= plinkk.statusEmoji || '👋' %>">
+            </div>
+            <div class="flex-1">
+                <input type="text" id="status_text"
+                    class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200"
+                    placeholder="En ligne..." value="<%= plinkk.statusText || '' %>">
+            </div>
+        </div>
+        <div class="mt-2 flex justify-end">
+            <button type="button" id="clearStatus"
+                class="text-xs text-slate-500 hover:text-red-400 transition-colors">Effacer</button>
+        </div>
+    </div>
+
+    <input type="hidden" id="status_statusText" value="<%= plinkk.statusText %>" />
+
+    <div class="mt-8 pt-6 border-t border-slate-800 hidden">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h4 class="font-medium text-white">Labels</h4>
+                <p class="text-xs text-slate-400">Badges affichés sous votre profil.</p>
+            </div>
+            <button id="addLabel" type="button"
+                class="px-3 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">+
+                Ajouter</button>
+        </div>
+        <div id="labelsList" class="space-y-3"></div>
+    </div>
+</div>

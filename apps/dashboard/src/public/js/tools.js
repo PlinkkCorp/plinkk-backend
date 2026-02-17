@@ -923,7 +923,7 @@ export function createLinkBoxes(profileData) {
                     card.onmouseenter = () => card.style.filter = 'brightness(1.1)';
                     card.onmouseleave = () => card.style.filter = '';
                     const icon = document.createElement('img');
-                    icon.src = 'https://cdn.jsdelivr.net/gh/nicklvh/cdn@main/discord-mark-white.svg';
+                    icon.src = 'https://cdn.simpleicons.org/discord/white';
                     icon.alt = 'Discord';
                     icon.style.cssText = 'width:40px;height:40px;flex-shrink:0;';
                     const textWrap = document.createElement('div');

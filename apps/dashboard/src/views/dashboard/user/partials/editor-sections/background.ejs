@@ -1,0 +1,139 @@
+<div class="mb-6 pb-4 border-b border-slate-800">
+    <h3 class="text-lg font-semibold text-white">Arrière-plan</h3>
+    <p class="text-sm text-slate-400">Choisis une couleur unie, un dégradé ou une image.</p>
+</div>
+
+<div class="space-y-6">
+    <div>
+        <label class="block text-sm font-medium text-slate-300 mb-3">Type
+            d'arrière-plan</label>
+        <div class="flex p-1 bg-slate-950 rounded-xl mb-4">
+            <button type="button" data-bg-type="color"
+                class="bg-type-btn flex-1 py-2 text-sm font-medium rounded-lg transition-all bg-white shadow text-slate-900 border border-transparent">
+                Couleur
+            </button>
+            <button type="button" data-bg-type="gradient"
+                class="bg-type-btn flex-1 py-2 text-sm font-medium rounded-lg transition-all text-slate-400 hover:bg-white/[0.12] hover:text-white border border-transparent">
+                Dégradé
+            </button>
+            <button type="button" data-bg-type="image"
+                class="bg-type-btn flex-1 py-2 text-sm font-medium rounded-lg transition-all text-slate-400 hover:bg-white/[0.12] hover:text-white border border-transparent">
+                Image
+            </button>
+            <button type="button" data-bg-type="canvas"
+                class="bg-type-btn flex-1 py-2 text-sm font-medium rounded-lg transition-all text-slate-400 hover:bg-white/[0.12] hover:text-white border border-transparent">
+                Canvas
+            </button>
+        </div>
+
+        <div id="bg-options-color" class="bg-options space-y-4">
+            <label class="block text-sm font-medium text-slate-400">Couleur
+                unie</label>
+            <div class="flex items-center gap-3">
+                <input type="color" id="bgColor" value="<%= plinkk.backgroundColor || '#0f172a' %>"
+                    class="h-10 w-20 rounded bg-transparent cursor-pointer" />
+                <input type="text" id="bgColorText" value="<%= plinkk.backgroundColor || '#0f172a' %>"
+                    class="px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 text-sm w-32 focus:border-violet-500 outline-none" />
+            </div>
+        </div>
+
+        <!-- NEW CANVAS OPTIONS -->
+        <div id="bg-options-canvas" class="bg-options space-y-6 hidden">
+            <div class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
+                <div>
+                    <span class="block text-sm font-medium text-slate-200">Activer l'animation</span>
+                    <span class="block text-xs text-slate-500">Remplace le fond par une animation intéractive.</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="canvaEnable" class="sr-only peer" <%=plinkk.canvaEnable ? 'checked' : ''
+                        %>>
+                    <div
+                        class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600">
+                    </div>
+                </label>
+            </div>
+
+            <div class="space-y-4">
+                <label class="block text-sm font-medium text-slate-300">Choisir une animation</label>
+                <input type="hidden" id="selectedCanvasIndex" value="<%= plinkk.selectedCanvasIndex || 0 %>">
+                <div id="canvas-list" class="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto pr-2 scrollbar-hide">
+                    <!-- Populated by index.js -->
+                </div>
+            </div>
+        </div>
+
+        <div id="bg-options-gradient" class="bg-options space-y-4 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-400 mb-2">Couleur
+                        1</label>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="gradColor1" value="<%= plinkk.gradientColor1 || '#0f172a' %>"
+                            class="h-10 w-full rounded bg-transparent cursor-pointer" />
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-400 mb-2">Couleur
+                        2</label>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="gradColor2" value="<%= plinkk.gradientColor2 || '#1e293b' %>"
+                            class="h-10 w-full rounded bg-transparent cursor-pointer" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-800">
+                <label class="block text-sm font-medium text-slate-400 mb-4">Angle du dégradé</label>
+                <div class="flex items-center gap-6">
+                    <div class="relative w-[72px] h-[72px] flex-shrink-0">
+                        <div id="degDial" class="deg-dial" tabindex="0" role="slider" aria-label="Angle du dégradé"
+                            aria-valuemin="0" aria-valuemax="360" aria-valuenow="<%= plinkk.gradientDegree || 135 %>">
+                            <div class="deg-dial-dot"></div>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <input type="number" id="degBackgroundColor" value="<%= plinkk.gradientDegree || 135 %>"
+                                min="0" max="360"
+                                class="w-20 px-3 py-2 text-center rounded-lg bg-slate-950 border border-slate-800 text-white font-mono text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none" />
+                            <span class="text-slate-400 text-sm">degrés</span>
+                        </div>
+                        <p class="text-xs text-slate-500">Maintiens et glisse sur le cercle ou saisis une valeur.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="bg-options-image" class="bg-options space-y-4 hidden">
+            <label class="block text-sm font-medium text-slate-400">URL de
+                l'image</label>
+            <div class="flex items-center gap-2">
+                <input type="url" id="bgImage" value="<%= plinkk.backgroundImage || '' %>"
+                    class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200"
+                    placeholder="https://..." />
+                <input type="file" id="uploadBgImage" accept="image/*" class="hidden" />
+                <button type="button" data-picker-for="bgImage"
+                    class="picker-btn shrink-0 px-3 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors"
+                    title="Choisir une image">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                </button>
+                <button type="button" data-upload-for="bgImage" data-field="bgImage"
+                    class="upload-btn shrink-0 px-3 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-colors"
+                    title="Uploader une image">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

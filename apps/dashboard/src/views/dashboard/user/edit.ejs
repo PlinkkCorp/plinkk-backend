@@ -1,5 +1,60 @@
 <%- include('partials/head.ejs', { title: 'Tableau de bord - Édition' ,
     description: 'Configure les sections, apparence et arrière‑plan de ta page.' , robots: 'noindex,nofollow' }) %>
+    <link href="https://cdn.jsdelivr.net/npm/gridstack@7.2.3/dist/gridstack.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/gridstack@7.2.3/dist/gridstack-all.js"></script>
+    <style>
+        .grid-stack-item-content {
+            background-color: #1e293b;
+            color: #fff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            cursor: grab;
+        }
+
+        .grid-stack-item-content:active {
+            cursor: grabbing;
+        }
+
+        .grid-stack-item-content .item-label {
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            padding: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
     <%- include('partials/header-dash.ejs', { user: user }) %>
 
         <div id="mobileEditNotice"
@@ -21,25 +76,6 @@
             </div>
         </div>
 
-        <script>
-            (function () {
-                const notice = document.getElementById('mobileEditNotice');
-                const closeBtn = document.getElementById('mobileEditNoticeClose');
-                const main = document.querySelector('main');
-
-                if (!notice) return;
-
-                if (main) main.classList.add('hidden');
-
-                if (closeBtn) {
-                    closeBtn.addEventListener('click', () => {
-                        notice.classList.add('hidden');
-                        if (main) main.classList.remove('hidden');
-                    });
-                }
-            })();
-        </script>
-
         <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
             <%- include('partials/asside_dash.ejs', { active: 'edit' }) %>
 
@@ -60,7 +96,12 @@
                                         </span>
                                         <% } %>
                                 </h1>
-                                <div id="status" class="text-xs text-emerald-400 mt-2 font-medium h-4"></div>
+                                <div id="save-status-container"
+                                    class="flex items-center gap-2 text-xs font-medium py-1 px-3 bg-slate-800/50 border border-slate-700/50 rounded-full w-fit mt-2 transition-all duration-300">
+                                    <span id="status-dot"
+                                        class="size-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                                    <span id="status-text" class="text-slate-300">Modifications enregistrées</span>
+                                </div>
                             </div>
 
                             <div class="flex items-center gap-3">
@@ -145,813 +186,194 @@
                                     <button data-target="#section-layout"
                                         class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
                                         <svg class="size-4" viewBox="0 0 24 24" fill="white">
-                                            <path d="M4 5h16v2H4zM4 11h10v2H4zM4 17h13v2H4z" />
+                                            <path d="M4 5h16v2H4zM4 11h10v2H4zM4 11h10v2H4zM4 17h13v2H4z" />
                                         </svg>
                                         Agencement
                                     </button>
                                 </li>
-
-
+                                <li>
+                                    <button data-target="#section-history"
+                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                                        <svg class="size-4" viewBox="0 0 24 24" fill="white">
+                                            <path
+                                                d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z" />
+                                        </svg>
+                                        Historique
+                                    </button>
+                                </li>
                             </ul>
                         </nav>
 
                         <div class="space-y-6">
                             <div id="section-profile"
                                 class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg animate-slide-up">
-                                <div class="mb-6 pb-4 border-b border-slate-800">
-                                    <h3 class="text-lg font-semibold text-white">Profil</h3>
-                                    <p class="text-sm text-slate-400">Informations de base affichées publiquement.</p>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Lien du
-                                            profil <span class="info-i"
-                                                title="Lien externe vers ton profil principal">i</span></span>
-                                        <input id="profileLink" type="url"
-                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 placeholder-slate-600"
-                                            placeholder="https://..." />
-                                    </label>
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Texte
-                                            du site <span class="info-i"
-                                                title="Texte court affiché à côté du lien">i</span></span>
-                                        <div class="relative">
-                                            <input id="profileSiteText" data-maskable="true" type="text"
-                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
-                                            <button type="button" data-target="profileSiteText"
-                                                class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-                                                <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24"
-                                                    fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round">
-                                                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
-                                                    <circle cx="12" cy="12" r="3"></circle>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </label>
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Nom
-                                            affiché <span class="info-i"
-                                                title="Nom public visible sur ta page">i</span></span>
-                                        <input id="userName" type="text"
-                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
-                                    </label>
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Email
-                                            <span class="info-i" title="Adresse e‑mail de contact">i</span></span>
-                                        <div class="relative">
-                                            <input id="email" data-maskable="true" type="email"
-                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
-                                            <button type="button" data-target="email"
-                                                class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-                                                <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24"
-                                                    fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round">
-                                                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
-                                                    <circle cx="12" cy="12" r="3"></circle>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </label>
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Image
-                                            de profil (URL) <span class="info-i"
-                                                title="URL d’une image carrée">i</span></span>
-                                        <div class="flex items-center gap-2">
-                                            <input id="profileImage" type="url"
-                                                class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
-                                            <input type="file" id="uploadProfileImage" accept="image/*"
-                                                class="hidden" />
-                                            <button type="button" data-picker-for="profileImage"
-                                                class="picker-btn shrink-0 px-3 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors"
-                                                title="Choisir une icône">
-                                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <rect x="3" y="3" width="7" height="7"></rect>
-                                                    <rect x="14" y="3" width="7" height="7"></rect>
-                                                    <rect x="14" y="14" width="7" height="7"></rect>
-                                                    <rect x="3" y="14" width="7" height="7"></rect>
-                                                </svg>
-                                            </button>
-                                            <button type="button" data-upload-for="profileImage"
-                                                data-field="profileImage"
-                                                class="upload-btn shrink-0 px-3 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-colors"
-                                                title="Uploader une image">
-                                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                                    <polyline points="17 8 12 3 7 8" />
-                                                    <line x1="12" y1="3" x2="12" y2="15" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </label>
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Icône
-                                            de profil (URL) <span class="info-i"
-                                                title="Petite icône affichée près de ton nom">i</span></span>
-                                        <div class="flex items-center gap-2">
-                                            <div class="relative flex-1">
-                                                <input id="profileIcon" data-maskable="true" type="url"
-                                                    class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
-                                                <button type="button" data-target="profileIcon"
-                                                    class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-                                                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24"
-                                                        fill="none" stroke="white" stroke-width="2"
-                                                        stroke-linecap="round" stroke-linejoin="round">
-                                                        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
-                                                        <circle cx="12" cy="12" r="3"></circle>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                            <input type="file" id="uploadProfileIcon" accept="image/*" class="hidden" />
-                                            <button type="button" data-picker-for="profileIcon"
-                                                class="picker-btn shrink-0 px-3 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors"
-                                                title="Choisir une icône">
-                                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <rect x="3" y="3" width="7" height="7"></rect>
-                                                    <rect x="14" y="3" width="7" height="7"></rect>
-                                                    <rect x="14" y="14" width="7" height="7"></rect>
-                                                    <rect x="3" y="14" width="7" height="7"></rect>
-                                                </svg>
-                                            </button>
-                                            <button type="button" data-upload-for="profileIcon" data-field="profileIcon"
-                                                class="upload-btn shrink-0 px-3 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-colors"
-                                                title="Uploader une image">
-                                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                                    <polyline points="17 8 12 3 7 8" />
-                                                    <line x1="12" y1="3" x2="12" y2="15" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </label>
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Icône
-                                            d’onglet (URL) <span class="info-i"
-                                                title="Favicon affichée dans l’onglet">i</span></span>
-                                        <div class="flex items-center gap-2">
-                                            <div class="relative flex-1">
-                                                <input id="iconUrl" data-maskable="true" type="url"
-                                                    class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
-                                                <button type="button" data-target="iconUrl"
-                                                    class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-                                                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24"
-                                                        fill="none" stroke="white" stroke-width="2"
-                                                        stroke-linecap="round" stroke-linejoin="round">
-                                                        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
-                                                        <circle cx="12" cy="12" r="3"></circle>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                            <input type="file" id="uploadIconUrl" accept="image/*" class="hidden" />
-                                            <button type="button" data-picker-for="iconUrl"
-                                                class="picker-btn shrink-0 px-3 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors"
-                                                title="Choisir une icône">
-                                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <rect x="3" y="3" width="7" height="7"></rect>
-                                                    <rect x="14" y="3" width="7" height="7"></rect>
-                                                    <rect x="14" y="14" width="7" height="7"></rect>
-                                                    <rect x="3" y="14" width="7" height="7"></rect>
-                                                </svg>
-                                            </button>
-                                            <button type="button" data-upload-for="iconUrl" data-field="iconUrl"
-                                                class="upload-btn shrink-0 px-3 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-colors"
-                                                title="Uploader une image">
-                                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white"
-                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                                    <polyline points="17 8 12 3 7 8" />
-                                                    <line x1="12" y1="3" x2="12" y2="15" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </label>
-                                    <label class="block space-y-2 md:col-span-2">
-                                        <span
-                                            class="text-sm font-medium text-slate-300 flex items-center gap-2">Description
-                                            <span class="info-i" title="Courte bio affichée sur ta page">i</span></span>
-                                        <div class="relative">
-                                            <textarea id="description" data-maskable="true" rows="3"
-                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 resize-none"></textarea>
-                                            <button type="button" data-target="description"
-                                                class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-                                                <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24"
-                                                    fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round">
-                                                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
-                                                    <circle cx="12" cy="12" r="3"></circle>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </label>
-                                </div>
+                                <%- include('./partials/editor-sections/profile.ejs') %>
                             </div>
-
-
 
                             <div id="section-appearance"
                                 class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                                <div class="mb-6 pb-4 border-b border-slate-800">
-                                    <h3 class="text-lg font-semibold text-white">Apparence</h3>
-                                    <p class="text-sm text-slate-400">Couleurs et options d’affichage.</p>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Couleur
-                                            hover <span class="info-i" title="Couleur au survol">i</span></span>
-                                        <div class="flex items-center gap-3">
-                                            <input id="profileHoverColor" type="color"
-                                                class="h-12 w-20 rounded-lg bg-slate-950 border border-slate-800 p-1 cursor-pointer" />
-                                            <span class="text-xs text-slate-500">Cliquez pour changer</span>
-                                        </div>
-                                    </label>
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Thème
-                                            <span class="info-i" title="Palette de couleurs prédéfinie">i</span></span>
-                                        <div class="flex items-center gap-2">
-                                            <select id="selectedThemeIndex"
-                                                class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none"></select>
-                                            <button id="openThemePicker" type="button"
-                                                class="px-4 py-3 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-medium shadow-lg shadow-fuchsia-900/20 transition-colors">Choisir</button>
-                                        </div>
-                                    </label>
-                                    <label
-                                        class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                                        <input id="buttonThemeEnable" type="checkbox"
-                                            class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50" />
-                                        <span class="text-sm font-medium text-slate-300">Activer thème des
-                                            boutons</span>
-                                    </label>
-                                    <% if (user.isVerified) { %>
-                                        <label
-                                            class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                                            <input id="showVerifiedBadge" type="checkbox"
-                                                class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50" />
-                                            <span class="text-sm font-medium text-slate-300">Afficher badge
-                                                Vérifié</span>
-                                        </label>
-                                        <% } %>
-                                            <% if (user.isPartner) { %>
-                                                <label
-                                                    class="flex items-center gap-3 p-4 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
-                                                    <input id="showPartnerBadge" type="checkbox"
-                                                        class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50" />
-                                                    <span class="text-sm font-medium text-slate-300">Afficher badge
-                                                        Partenaire</span>
-                                                </label>
-                                                <% } %>
-                                </div>
-
-                                <div class="mt-8 pt-6 border-t border-slate-800">
-                                    <div
-                                        class="relative rounded-2xl border border-slate-800 bg-slate-950/50 overflow-hidden group">
-                                        <div
-                                            class="absolute inset-0 bg-gradient-to-br from-fuchsia-500/5 to-violet-500/5">
-                                        </div>
-                                        <div class="p-6 flex items-center justify-between opacity-40">
-                                            <div>
-                                                <h4 class="font-medium text-white">Couleurs Néon</h4>
-                                                <p class="text-xs text-slate-400 mt-1">Personnalisation avancée des
-                                                    effets lumineux</p>
-                                            </div>
-                                            <button disabled
-                                                class="px-4 py-2 rounded-lg bg-slate-800 text-slate-400 text-sm">Bientôt</button>
-                                        </div>
-                                        <div
-                                            class="absolute inset-0 flex items-center justify-center backdrop-blur-[1px]">
-                                            <div
-                                                class="px-6 py-3 rounded-full bg-slate-900/90 border border-slate-700 shadow-xl flex items-center gap-3">
-                                                <span
-                                                    class="flex h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse"></span>
-                                                <span class="text-sm font-medium text-slate-200">En cours de
-                                                    développement</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <%- include('./partials/editor-sections/appearance.ejs') %>
                             </div>
 
                             <div id="section-background"
                                 class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                                <div class="mb-6 pb-4 border-b border-slate-800 flex items-center justify-between">
-                                    <div>
-                                        <h3 class="text-lg font-semibold text-white">Arrière‑plan</h3>
-                                        <p class="text-sm text-slate-400">Dégradés et animations.</p>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <button id="invertBackgroundColors" type="button"
-                                            class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">Inverser</button>
-                                        <button id="addBackgroundColor" type="button"
-                                            class="px-3 py-2 text-xs font-medium rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-900/20 transition-colors">+
-                                            Couleur</button>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Angle
-                                            du dégradé <span class="info-i"
-                                                title="Orientation en degrés">i</span></span>
-                                        <div
-                                            class="flex items-center gap-4 bg-slate-950 p-3 rounded-xl border border-slate-800">
-                                            <input id="degBackgroundColor" type="number"
-                                                class="w-20 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-center text-white font-mono" />
-                                            <div id="degDial" class="deg-dial shrink-0" tabindex="0" role="slider"
-                                                aria-label="Angle">
-                                                <div class="deg-dial-dot"></div>
-                                            </div>
-                                            <span class="text-xs text-slate-500">Faites tourner pour ajuster</span>
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <div id="backgroundList" class="space-y-2 mb-8" role="list"></div>
-
-                                <div class="pt-6 border-t border-slate-800">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <div>
-                                            <h4 class="font-medium text-white">Canvas Animé</h4>
-                                            <p class="text-xs text-slate-400">Effets d'arrière-plan dynamiques.</p>
-                                        </div>
-                                        <label class="flex items-center gap-3 cursor-pointer">
-                                            <span class="text-sm font-medium text-slate-300">Activer</span>
-                                            <div class="relative inline-flex items-center cursor-pointer">
-                                                <input id="canvaEnable" type="checkbox" class="sr-only peer">
-                                                <div
-                                                    class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600">
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div class="md:col-span-2 space-y-2">
-                                            <label class="text-sm font-medium text-slate-300">Animation</label>
-                                            <div class="relative">
-                                                <select id="selectedCanvasIndex" class="hidden"></select>
-                                                <input id="selectedCanvasLabel" type="text"
-                                                    class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer"
-                                                    placeholder="Choisir une animation..." readonly />
-                                                <button id="openCanvasPicker" type="button"
-                                                    class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-medium transition-colors">Parcourir</button>
-                                            </div>
-                                        </div>
-
-                                        <div class="md:col-span-2 space-y-2">
-                                            <div class="flex items-center justify-between">
-                                                <label
-                                                    class="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
-                                                    <input id="canvasPreviewEnable" type="checkbox"
-                                                        class="rounded border-slate-700 bg-slate-900 text-cyan-600 focus:ring-cyan-600/50" />
-                                                    Afficher l'aperçu
-                                                </label>
-                                            </div>
-                                            <div id="selectedCanvasPreview"
-                                                class="relative rounded-2xl border border-slate-800 overflow-hidden bg-slate-950 aspect-video flex items-center justify-center">
-                                                <div id="selectedCanvasPreviewOverlay"
-                                                    class="absolute inset-0 bg-slate-950/80 flex items-center justify-center text-slate-500 text-sm hidden">
-                                                    Aperçu désactivé</div>
-                                                <div id="selectedCanvasPreviewFrame" class="w-full h-full"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <%- include('./partials/editor-sections/background.ejs') %>
                             </div>
 
                             <div id="section-links"
                                 class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                                <div class="mb-6 flex items-center justify-between">
-                                    <div>
-                                        <h3 class="text-lg font-semibold text-white">Réseaux Sociaux</h3>
-                                        <p class="text-sm text-slate-400">Vos profils sociaux (Instagram, X, etc.)</p>
-                                    </div>
-                                    <button id="addSocial" type="button"
-                                        class="px-4 py-2 text-sm font-medium rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-white shadow-lg shadow-fuchsia-900/20 transition-colors flex items-center gap-2">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white"
-                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                                        </svg>
-                                        Ajouter
-                                    </button>
-                                </div>
-                                <div id="socialList" class="space-y-3 mb-8 min-h-[50px]"></div>
-
-                                <div class="border-t border-slate-800 my-6"></div>
-
-                                <div class="mb-6 flex flex-col gap-4">
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <h3 class="text-lg font-semibold text-white">Liens</h3>
-                                            <p class="text-sm text-slate-400">Vos liens principaux.</p>
-                                        </div>
-                                        <% if (typeof linksCount !=='undefined' && typeof maxLinks !=='undefined' &&
-                                            linksCount>= maxLinks) { %>
-                                            <a href="/premium"
-                                                class="px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-700 transition-colors flex items-center gap-2 cursor-pointer">
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                    stroke="white" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round">
-                                                    <path
-                                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                                </svg>
-                                                Limite atteinte (<%= maxLinks %>)
-                                            </a>
-                                            <% } else { %>
-                                                <button id="addLink" type="button"
-                                                    class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors flex items-center gap-2">
-                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                        stroke="white" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round">
-                                                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                                                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                                                    </svg>
-                                                    Ajouter un lien
-                                                </button>
-                                                <% } %>
-                                    </div>
-
-                                    <% if (typeof linksCount !=='undefined' && typeof maxLinks !=='undefined' &&
-                                        linksCount>= maxLinks) { %>
-                                        <div
-                                            class="bg-gradient-to-r from-violet-900/40 to-fuchsia-900/40 border border-violet-500/30 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 mb-4">
-                                            <div class="flex items-center gap-3">
-                                                <div class="p-2 bg-violet-600/20 rounded-lg text-violet-300">
-                                                    <svg class="w-5 h-5" fill="none" stroke="white" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <h3 class="font-bold text-white text-sm">Débloquez plus de liens
-                                                    </h3>
-                                                    <p class="text-slate-300 text-xs">Passez Premium pour ajouter
-                                                        jusqu'à <%= typeof maxLinks !=='undefined' ? maxLinks * 2
-                                                            : 'plus' %> liens.</p>
-                                                </div>
-                                            </div>
-                                            <a href="/premium"
-                                                class="px-4 py-2 bg-white text-violet-900 font-bold rounded-lg hover:bg-slate-200 transition-colors shadow-lg text-xs whitespace-nowrap">
-                                                Passer Premium
-                                            </a>
-                                        </div>
-                                        <% } else { %>
-                                            <div class="flex items-center gap-3 mt-3">
-                                                <input id="quickAddInput" type="text" placeholder="Titre | https://..."
-                                                    class="flex-1 px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 placeholder-slate-600" />
-                                                <span class="info-i"
-                                                    title="Format: 'Titre | https://...' ou uniquement l'URL">?</span>
-                                                <button id="quickAddBtn" type="button"
-                                                    class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-sm">Ajouter</button>
-                                                <button id="openAddModalBtn" type="button"
-                                                    class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm">Avancé</button>
-                                            </div>
-                                            <% } %>
-
-                                                <div id="linksList" class="space-y-3 min-h-[50px]"></div>
-                                </div>
+                                <%- include('./partials/editor-sections/links.ejs') %>
                             </div>
 
                             <div id="section-categories"
                                 class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                                <div class="mb-6 flex items-center justify-between">
-                                    <div>
-                                        <h3 class="text-lg font-semibold text-white">Catégories</h3>
-                                        <p class="text-sm text-slate-400">Organisez vos liens dans des dossiers.</p>
-                                    </div>
-                                    <button id="addCategory" type="button"
-                                        class="px-4 py-2 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors flex items-center gap-2 hidden">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white"
-                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                                        </svg>
-                                        Ajouter une catégorie
-                                    </button>
-                                </div>
-
-                                <div
-                                    class="flex items-center justify-between bg-slate-950 p-4 rounded-xl border border-slate-800 mb-6">
-                                    <div class="flex items-center gap-3">
-                                        <input id="enableLinkCategories" type="checkbox"
-                                            class="size-5 rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-600/50" />
-                                        <div>
-                                            <span class="block text-sm font-medium text-slate-300">Activer les
-                                                catégories</span>
-                                            <span class="block text-xs text-slate-500">Si désactivé, tous les liens
-                                                seront affichés en liste simple.</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div id="categoriesHint"
-                                    class="hidden mb-6 p-4 rounded-xl bg-violet-900/20 border border-violet-900/50 text-violet-200 text-sm flex items-start gap-3">
-                                    <svg class="w-5 h-5 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="white"
-                                        stroke-width="2">
-                                        <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <div>
-                                        <p class="font-medium">Comment ajouter des liens ?</p>
-                                        <p class="text-violet-300/80 mt-1">Pour placer un lien dans une catégorie, allez
-                                            dans l'onglet <strong>Liens</strong>. Un menu déroulant apparaîtra sur
-                                            chaque lien pour choisir sa catégorie.</p>
-                                    </div>
-                                </div>
-
-                                <div id="categoriesContainer" class="space-y-4 hidden">
-                                </div>
-
-                                <div id="categoriesDisabledMsg" class="text-center py-12 text-slate-500">
-                                    <svg class="w-12 h-12 mx-auto mb-3 opacity-50" viewBox="0 0 24 24" fill="none"
-                                        stroke="white" stroke-width="1.5">
-                                        <path
-                                            d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
-                                    </svg>
-                                    <p>Activez les catégories pour commencer à organiser vos liens.</p>
-                                </div>
+                                <%- include('./partials/editor-sections/categories.ejs') %>
                             </div>
 
                             <div id="section-animations"
                                 class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                                <div class="mb-6 pb-4 border-b border-slate-800">
-                                    <h3 class="text-lg font-semibold text-white">Animations</h3>
-                                    <p class="text-sm text-slate-400">Dynamisez votre page.</p>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300">Apparition des éléments</span>
-                                        <div class="relative">
-                                            <select id="selectedAnimationIndex" class="hidden"></select>
-                                            <input id="selectedAnimationLabel" type="text"
-                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer"
-                                                readonly />
-                                            <button id="openAnimArticlePicker" type="button"
-                                                class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium transition-colors">Choisir</button>
-                                        </div>
-                                    </label>
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300">Animation des boutons</span>
-                                        <div class="relative">
-                                            <select id="selectedAnimationButtonIndex" class="hidden"></select>
-                                            <input id="selectedAnimationButtonLabel" type="text"
-                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer"
-                                                readonly />
-                                            <button id="openAnimButtonPicker" type="button"
-                                                class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium transition-colors">Choisir</button>
-                                        </div>
-                                    </label>
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300">Animation de fond</span>
-                                        <div class="relative">
-                                            <select id="selectedAnimationBackgroundIndex" class="hidden"></select>
-                                            <input id="selectedAnimationBackgroundLabel" type="text"
-                                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 cursor-pointer"
-                                                readonly />
-                                            <button id="openAnimBackgroundPicker" type="button"
-                                                class="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium transition-colors">Choisir</button>
-                                        </div>
-                                    </label>
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300">Durée anim background
-                                            (s)</span>
-                                        <input id="animationDurationBackground" type="number"
-                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
-                                    </label>
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300">Délai anim bouton (s)</span>
-                                        <input id="delayAnimationButton" step="0.01" type="number"
-                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
-                                    </label>
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300">Taille background (%)</span>
-                                        <input id="backgroundSize" type="number"
-                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
-                                    </label>
-                                </div>
+                                <%- include('./partials/editor-sections/animations.ejs') %>
                             </div>
 
                             <div id="section-statusbar"
                                 class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                                <div class="mb-6 pb-4 border-b border-slate-800">
-                                    <h3 class="text-lg font-semibold text-white">Barre de statut</h3>
-                                    <p class="text-sm text-slate-400">Message et état affichés sous le profil.</p>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <label class="block space-y-2 md:col-span-2">
-                                        <span class="text-sm font-medium text-slate-300">Message de statut</span>
-                                        <input id="status_text" type="text"
-                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 placeholder-slate-600"
-                                            placeholder="Ex: En train de coder..." />
-                                    </label>
-                                    <label class="block space-y-2">
-                                        <span class="text-sm font-medium text-slate-300">Couleur du texte (0=clair,
-                                            1=foncé)</span>
-                                        <input id="status_fontTextColor" type="number" min="0" max="1"
-                                            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200" />
-                                    </label>
-                                    <div class="space-y-2">
-                                        <span class="text-sm font-medium text-slate-300 block">État</span>
-                                        <div class="relative inline-block w-full" id="statusDropdown">
-                                            <button id="statusDropdownBtn" type="button"
-                                                class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 hover:bg-slate-900 transition-colors">
-                                                <div class="flex items-center gap-3">
-                                                    <span class="size-3 rounded-full bg-slate-500 shadow-sm"></span>
-                                                    <span class="status-current-label">Hors‑ligne</span>
-                                                </div>
-                                                <svg class="size-4 text-slate-500" viewBox="0 0 20 20" fill="white">
-                                                    <path fill-rule="evenodd"
-                                                        d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.23 8.29a.75.75 0 01.02-1.08z"
-                                                        clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
-                                            <div id="statusDropdownPanel"
-                                                class="absolute z-20 mt-2 w-full rounded-xl border border-slate-800 bg-slate-900 shadow-xl p-1 hidden">
-                                                <button type="button"
-                                                    class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200"
-                                                    data-value="online">
-                                                    <span
-                                                        class="size-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
-                                                    En ligne
-                                                </button>
-                                                <button type="button"
-                                                    class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200"
-                                                    data-value="busy">
-                                                    <span
-                                                        class="size-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span>
-                                                    Occupé
-                                                </button>
-                                                <button type="button"
-                                                    class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200"
-                                                    data-value="away">
-                                                    <span
-                                                        class="size-2.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></span>
-                                                    Absent
-                                                </button>
-                                                <button type="button"
-                                                    class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-slate-800 text-slate-200"
-                                                    data-value="offline">
-                                                    <span class="size-2.5 rounded-full bg-slate-500"></span> Hors‑ligne
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <input type="hidden" id="status_statusText" />
-                                    </div>
-                                </div>
-
-                                <div class="mt-8 pt-6 border-t border-slate-800 hidden">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <div>
-                                            <h4 class="font-medium text-white">Labels</h4>
-                                            <p class="text-xs text-slate-400">Badges affichés sous votre profil.</p>
-                                        </div>
-                                        <button id="addLabel" type="button"
-                                            class="px-3 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">+
-                                            Ajouter</button>
-                                    </div>
-                                    <div id="labelsList" class="space-y-3"></div>
-                                </div>
+                                <%- include('./partials/editor-sections/statusbar.ejs') %>
                             </div>
 
                             <div id="section-layout"
                                 class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
                                 <div class="mb-6 pb-4 border-b border-slate-800">
                                     <h3 class="text-lg font-semibold text-white">Agencement</h3>
-                                    <p class="text-sm text-slate-400">Réordonnez les sections par glisser-déposer.</p>
+                                    <p class="text-sm text-slate-400">Choisis comment tes liens s'affichent.</p>
                                 </div>
-                                <div class="mb-6 bg-slate-950 p-4 rounded-xl border border-slate-800">
-                                    <label class="block text-sm font-medium text-slate-300 mb-3">Mode
-                                        d'affichage</label>
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="layoutMode" value="LIST" class="peer sr-only">
+
+                                <div class="grid grid-cols-2 gap-4" id="layoutList">
+                                    <label class="cursor-pointer group relative">
+                                        <input type="radio" name="layoutMode" value="LIST" class="peer sr-only">
+                                        <div
+                                            class="p-4 rounded-xl border border-slate-700 bg-slate-800 hover:border-violet-500 peer-checked:border-violet-500 peer-checked:bg-violet-900/10 transition-all">
+                                            <div class="font-medium text-white mb-2">Liste</div>
                                             <div
-                                                class="p-4 rounded-xl border border-slate-700 bg-slate-900 peer-checked:border-violet-500 peer-checked:bg-violet-500/10 peer-checked:text-violet-400 text-slate-400 hover:border-slate-600 transition-all flex flex-col items-center gap-2">
-                                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2">
-                                                    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path>
-                                                </svg>
-                                                <span class="text-sm font-medium">Liste</span>
+                                                class="h-24 bg-slate-900/50 rounded-lg flex flex-col gap-2 p-2 overflow-hidden">
+                                                <div class="h-6 bg-slate-700 rounded w-full"></div>
+                                                <div class="h-6 bg-slate-700 rounded w-full"></div>
+                                                <div class="h-6 bg-slate-700 rounded w-full"></div>
                                             </div>
-                                        </label>
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="layoutMode" value="BENTO" class="peer sr-only">
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer group relative">
+                                        <input type="radio" name="layoutMode" value="BENTO" class="peer sr-only">
+                                        <div
+                                            class="p-4 rounded-xl border border-slate-700 bg-slate-800 hover:border-violet-500 peer-checked:border-violet-500 peer-checked:bg-violet-900/10 transition-all">
+                                            <div class="font-medium text-white mb-2">Bento Grid</div>
                                             <div
-                                                class="p-4 rounded-xl border border-slate-700 bg-slate-900 peer-checked:border-violet-500 peer-checked:bg-violet-500/10 peer-checked:text-violet-400 text-slate-400 hover:border-slate-600 transition-all flex flex-col items-center gap-2">
-                                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2">
-                                                    <rect x="3" y="3" width="7" height="7"></rect>
-                                                    <rect x="14" y="3" width="7" height="7"></rect>
-                                                    <rect x="14" y="14" width="7" height="7"></rect>
-                                                    <rect x="3" y="14" width="7" height="7"></rect>
-                                                </svg>
-                                                <span class="text-sm font-medium">Bento</span>
+                                                class="h-24 bg-slate-900/50 rounded-lg grid grid-cols-2 gap-2 p-2 overflow-hidden">
+                                                <div class="h-full bg-slate-700 rounded col-span-1"></div>
+                                                <div class="h-10 bg-slate-700 rounded col-span-1"></div>
+                                                <div class="h-10 bg-slate-700 rounded col-span-1"></div>
                                             </div>
-                                        </label>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div id="bentoEditor" class="hidden mt-6">
+                                    <div class="mb-2 flex justify-between items-center">
+                                        <span class="text-xs text-slate-400">Glissez-déposez pour réorganiser.</span>
+                                        <button id="saveBentoLayout" type="button"
+                                            class="text-xs bg-violet-600 hover:bg-violet-500 text-white px-3 py-1 rounded">Enregistrer
+                                            la grille</button>
+                                    </div>
+                                    <div
+                                        class="grid-stack bg-slate-950/50 border border-slate-800 rounded-xl min-h-[300px] p-2">
                                     </div>
                                 </div>
-                                <div class="space-y-3" id="layoutList" role="list"></div>
                             </div>
 
+                            <div id="section-history"
+                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                                <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-white">Historique & Sauvegardes</h3>
+                                        <p class="text-sm text-slate-400">Restaurez une version précédente de votre
+                                            page.</p>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button id="refreshHistory"
+                                            class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                                            title="Actualiser">
+                                            <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
 
+                                <div class="flex p-1 bg-slate-950 rounded-xl mb-6">
+                                    <button id="tab-history-auto"
+                                        class="flex-1 py-2 text-sm font-medium rounded-lg transition-all bg-white shadow text-slate-900">
+                                        Automatique
+                                    </button>
+                                    <button id="tab-history-manual"
+                                        class="flex-1 py-2 text-sm font-medium rounded-lg transition-all text-slate-400 hover:bg-white/[0.12] hover:text-white">
+                                        Manuelle
+                                    </button>
+                                </div>
+
+                                <div id="manual-backup-actions"
+                                    class="hidden mb-6 p-4 bg-slate-950 rounded-xl border border-slate-800">
+                                    <h4 class="text-sm font-medium text-white mb-3">Créer une sauvegarde</h4>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="backupName"
+                                            placeholder="Nom de la sauvegarde (optionnel)"
+                                            class="flex-1 px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 outline-none">
+                                        <button onclick="createBackup()"
+                                            class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-lg transition-colors">
+                                            Sauvegarder
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="historyList" class="space-y-3 min-h-[100px]"></div>
+                            </div>
                         </div>
                     </section>
 
-                    <aside class="xl:col-span-5 space-y-6">
-                        <div class="sticky top-24">
+                    <aside class="hidden xl:block xl:col-span-5 relative">
+                        <div class="sticky top-8">
                             <div
-                                class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-6 shadow-2xl shadow-black/50 relative overflow-hidden">
+                                class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-4 shadow-2xl relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-full bg-slate-950 opacity-50 z-0"></div>
                                 <div
-                                    class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-violet-900/10 to-transparent pointer-events-none">
+                                    class="relative z-10 bg-black rounded-[2rem] overflow-hidden border-[6px] border-slate-800 shadow-inner aspect-[9/19] max-h-[85vh] mx-auto">
+                                    <iframe id="preview"
+                                        src="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>?preview=1"
+                                        class="w-full h-full bg-white" frameborder="0"></iframe>
                                 </div>
-
-                                <div class="flex items-center justify-between mb-6 relative z-10">
-                                    <div class="flex p-1 bg-slate-950/50 rounded-xl border border-slate-800">
-                                        <button id="toggle-sidebar-live"
-                                            class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all bg-white shadow text-slate-900"
-                                            onclick="switchSidebarMode('live')">Direct</button>
-                                        <button id="toggle-sidebar-history"
-                                            class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all text-slate-400 hover:text-white"
-                                            onclick="switchSidebarMode('history')">Historique</button>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <button id="refreshSidebar"
-                                            class="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-                                            title="Rafraîchir" onclick="handleSidebarRefresh()">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white"
-                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <div
+                                    class="absolute bottom-8 left-0 right-0 flex justify-center z-20 pointer-events-none">
+                                    <div
+                                        class="bg-slate-900/90 backdrop-blur px-4 py-2 rounded-full border border-slate-700 flex items-center gap-4 pointer-events-auto transform translate-y-12 transition-transform hover:translate-y-0 shadow-xl">
+                                        <button class="text-slate-400 hover:text-white transition-colors"
+                                            onclick="document.getElementById('preview')?.contentWindow?.location.reload()"
+                                            title="Recharger">
+                                            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2">
+                                                <path d="M23 4v6h-6M1 20v-6h6" />
                                                 <path
-                                                    d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
+                                                    d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 1 20.49 15" />
                                             </svg>
                                         </button>
                                         <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>"
-                                            target="_blank"
-                                            class="p-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors"
+                                            target="_blank" class="text-slate-400 hover:text-white transition-colors"
                                             title="Ouvrir">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white"
-                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6">
-                                                </path>
-                                                <polyline points="15 3 21 3 21 9"></polyline>
-                                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                                            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2">
+                                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                                <polyline points="15 3 21 3 21 9" />
+                                                <line x1="10" y1="14" x2="21" y2="3" />
                                             </svg>
                                         </a>
-                                    </div>
-                                </div>
-
-                                <div id="preview-sidebar-container" class="space-y-6">
-                                    <div
-                                        class="relative mx-auto border-slate-950 bg-slate-950 border-[10px] rounded-[3rem] h-[650px] w-[320px] shadow-xl ring-1 ring-slate-800">
-                                        <div
-                                            class="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-slate-950 rounded-b-2xl z-20">
-                                        </div>
-
-                                        <div
-                                            class="w-full h-full rounded-[2.3rem] overflow-hidden bg-white relative z-10">
-                                            <iframe id="preview"
-                                                src="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %>?preview=1<% } else { %>/<%= user.id %>?preview=1<% } %>"
-                                                class="w-full h-full border-0" title="Preview"></iframe>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-6 flex justify-center gap-2">
-                                        <button type="button" data-view="mobile"
-                                            class="px-3 py-1.5 text-xs font-medium rounded-full bg-slate-800 text-white border border-slate-700">Mobile</button>
-                                        <button type="button" data-view="desktop"
-                                            class="px-3 py-1.5 text-xs font-medium rounded-full bg-slate-900 text-slate-400 border border-slate-800 hover:bg-slate-800">Desktop</button>
-                                    </div>
-                                </div>
-
-                                <div id="history-sidebar-container"
-                                    class="hidden animate-slide-up space-y-4 relative z-10">
-                                    <div class="flex space-x-1 rounded-xl bg-slate-950/50 p-1">
-                                        <button onclick="switchHistoryTab('auto')" id="tab-history-auto"
-                                            class="w-full rounded-lg py-2 text-xs font-medium transition-all bg-white shadow text-slate-900 border border-transparent">
-                                            Automatique
-                                        </button>
-                                        <button onclick="switchHistoryTab('manual')" id="tab-history-manual"
-                                            class="w-full rounded-lg py-2 text-xs font-medium transition-all text-slate-400 hover:bg-white/5 hover:text-white border border-transparent">
-                                            Sauvegardes
-                                        </button>
-                                    </div>
-
-                                    <div id="manual-backup-actions" class="hidden">
-                                        <div class="flex gap-2">
-                                            <input type="text" id="backupName" placeholder="Nom de la sauvegarde..."
-                                                class="flex-1 px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-violet-500 transition-colors">
-                                            <button onclick="createBackup()"
-                                                class="px-3 py-2 text-xs bg-violet-600 hover:bg-violet-500 text-white rounded-lg font-medium transition-colors shadow-lg shadow-violet-900/20 whitespace-nowrap">
-                                                Sauvegarder
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div id="historyList"
-                                        class="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                                        <div class="text-center py-8 text-slate-500 text-sm">Chargement...</div>
                                     </div>
                                 </div>
                             </div>
@@ -966,298 +388,102 @@
                     <script>
                         window.__PLINKK_USER_ID__ = "<%= user.id %>";
                         window.__PLINKK_SELECTED_ID__ = "<%= plinkk.id %>";
+                        window.__USER_EMAIL__ = "<%= user.email %>";
+
+                        // Auto-save Visual Feedback Functions
+                        window.__PLINKK_SHOW_SAVING__ = function () {
+                            const dot = document.getElementById('status-dot');
+                            const text = document.getElementById('status-text');
+                            if (dot && text) {
+                                dot.className = 'size-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)] transition-all';
+                                text.textContent = 'Enregistrement...';
+                            }
+                        };
+
+                        window.__PLINKK_SHOW_SAVED__ = function () {
+                            const dot = document.getElementById('status-dot');
+                            const text = document.getElementById('status-text');
+                            if (dot && text) {
+                                dot.className = 'size-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all';
+                                text.textContent = 'Modifications enregistrées';
+                            }
+                        };
+
+                        window.__PLINKK_SHOW_ERROR__ = function () {
+                            const dot = document.getElementById('status-dot');
+                            const text = document.getElementById('status-text');
+                            if (dot && text) {
+                                dot.className = 'size-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)] transition-all';
+                                text.textContent = 'Erreur d\'enregistrement';
+                            }
+                        };
+                    </script>
+
+                    <script type="application/json"
+                        id="pages-data"><%- JSON.stringify(typeof pages !== 'undefined' ? pages : []) %></script>
+                    <script type="application/json"
+                        id="autoopen-data"><%= (typeof autoOpenPlinkkModal !== 'undefined' && autoOpenPlinkkModal) ? 'true' : 'false' %></script>
+
+                    <script>
+                        // Mobile Notice Logic
                         (function () {
-                            const btns = Array.from(document.querySelectorAll('.tab-btn'));
-                            const sections = Array.from(document.querySelectorAll('[id^="section-"]'));
+                            const notice = document.getElementById('mobileEditNotice');
+                            const closeBtn = document.getElementById('mobileEditNoticeClose');
+                            const main = document.querySelector('main');
 
-                            // History State
-                            let currentHistoryTab = 'auto'; // 'auto' | 'manual'
-                            let historyData = { versions: [], backups: [] };
-
-                            const selectTab = (target) => {
-                                sections.forEach(s => s.classList.toggle('hidden', `#${s.id}` !== target));
-                                btns.forEach(b => b.setAttribute('aria-selected', b.dataset.target === target ? 'true' : 'false'));
-                                if (target === '#section-history') loadHistory();
-                                if (history.replaceState) {
-                                    history.replaceState(null, '', target);
-                                } else {
-                                    location.hash = target;
-                                }
-                            };
-
-                            window.switchHistoryTab = (tab) => {
-                                currentHistoryTab = tab;
-                                const btnAuto = document.getElementById('tab-history-auto');
-                                const btnManual = document.getElementById('tab-history-manual');
-                                const manualActions = document.getElementById('manual-backup-actions');
-
-                                if (tab === 'auto') {
-                                    btnAuto.classList.add('bg-white', 'shadow', 'text-slate-900');
-                                    btnAuto.classList.remove('text-slate-400', 'hover:bg-white/[0.12]', 'hover:text-white');
-
-                                    btnManual.classList.remove('bg-white', 'shadow', 'text-slate-900');
-                                    btnManual.classList.add('text-slate-400', 'hover:bg-white/[0.12]', 'hover:text-white');
-
-                                    manualActions.classList.add('hidden');
-                                } else {
-                                    btnManual.classList.add('bg-white', 'shadow', 'text-slate-900');
-                                    btnManual.classList.remove('text-slate-400', 'hover:bg-white/[0.12]', 'hover:text-white');
-
-                                    btnAuto.classList.remove('bg-white', 'shadow', 'text-slate-900');
-                                    btnAuto.classList.add('text-slate-400', 'hover:bg-white/[0.12]', 'hover:text-white');
-
-                                    manualActions.classList.remove('hidden');
-                                }
-                                renderHistoryList();
-                            };
-
-                            // Skeleton Loader
-                            const getSkeletonHtml = () => Array(5).fill(0).map(() => `
-                                <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 animate-pulse">
-                                    <div class="flex items-center justify-between">
-                                        <div class="space-y-2 flex-1">
-                                            <div class="h-4 bg-slate-800 rounded w-1/3"></div>
-                                            <div class="h-3 bg-slate-800/60 rounded w-1/4"></div>
-                                        </div>
-                                        <div class="flex gap-2">
-                                            <div class="h-8 w-16 bg-slate-800 rounded-lg"></div>
-                                            <div class="h-8 w-20 bg-slate-800 rounded-lg"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            `).join('');
-
-                            async function loadHistory() {
-                                const list = document.getElementById('historyList');
-                                if (!list) return;
-
-                                // Show skeleton only if empty or explicitly reloading
-                                if (!historyData.versions.length && !historyData.backups.length) {
-                                    list.innerHTML = getSkeletonHtml();
-                                }
-
-                                try {
-                                    console.log('Fetching history for:', window.__PLINKK_SELECTED_ID__);
-                                    const res = await fetch(`/api/me/plinkks/${window.__PLINKK_SELECTED_ID__}/history`);
-                                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                                    const data = await res.json();
-                                    console.log('History data:', data);
-                                    historyData = data; // { versions: [], backups: [] }
-                                    renderHistoryList();
-                                } catch (e) {
-                                    console.error('History fetch error:', e);
-                                    list.innerHTML = '<div class="text-center py-8 text-red-400">Erreur lors du chargement de l\'historique.</div>';
-                                }
-                            }
-
-                            function renderHistoryList() {
-                                const list = document.getElementById('historyList');
-                                const items = currentHistoryTab === 'auto' ? historyData.versions : historyData.backups;
-
-                                if (items && items.length > 0) {
-                                    list.innerHTML = items.map(v => {
-                                        const dateStr = new Date(v.createdAt).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-                                        // Enhanced change rendering
-                                        const renderChange = (c) => {
-                                            if (typeof c === 'string') return `<div>• ${c}</div>`;
-
-                                            const keyLabel = c.key.replace('.', ' ').replace(/([A-Z])/g, ' $1').toLowerCase();
-                                            const type = c.type || 'updated';
-
-                                            let diffHtml = '';
-                                            if (type === 'added') {
-                                                diffHtml = `<span class="text-emerald-400 font-medium">Nouveau:</span> <span class="text-slate-200">${c.new}</span>`;
-                                            } else if (type === 'removed') {
-                                                diffHtml = `<span class="text-rose-400 font-medium">Supprimé:</span> <span class="text-slate-400 line-through">${c.old}</span>`;
-                                            } else if (type === 'reordered') {
-                                                diffHtml = `<span class="text-violet-400 font-medium">Réorganisé</span>`;
-                                            } else { // updated
-                                                // Handle array/object previews if needed, for now strings
-                                                const oldVal = typeof c.old === 'object' ? '...' : c.old;
-                                                const newVal = typeof c.new === 'object' ? '...' : c.new;
-                                                diffHtml = `<span class="text-slate-400 line-through">${oldVal}</span> <span class="mx-1">→</span> <span class="text-emerald-400">${newVal}</span>`;
-                                            }
-
-                                            return `<div class="flex flex-col mb-1 last:mb-0">
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400 uppercase font-bold tracking-tight">${keyLabel}</span>
-                                                        <span class="text-[11px] text-slate-300">${diffHtml}</span>
-                                                    </div>
-                                                </div>`;
-                                        };
-
-                                        const detailsHtml = v.changes && v.changes.length > 0
-                                            ? `<div class="mt-3 pl-3 border-l-2 border-violet-500/30 text-xs space-y-2" id="details-${v.id}">
-                                                    ${v.changes.map(c => renderChange(c)).join('')}
-                                                   </div>`
-                                            : '';
-                                        const expandBtn = '';
-
-                                        return `
-                                            <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition-all group">
-                                                <div class="flex items-start justify-between mb-2">
-                                                    <div class="min-w-0 flex-1">
-                                                        <div class="flex items-center">
-                                                            <div class="font-medium text-slate-200 truncate">${v.label || (currentHistoryTab === 'auto' ? 'Modification' : 'Sauvegarde')}</div>
-                                                            ${expandBtn}
-                                                        </div>
-                                                        <div class="text-xs text-slate-500">${dateStr}</div>
-                                                    </div>
-                                                </div>
-                                                ${detailsHtml}
-                                                <div class="flex items-center gap-2 mt-3 justify-end">
-                                                    <button onclick="previewVersion('${v.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-colors border border-slate-700">Aperçu</button>
-                                                    <button onclick="restoreVersion('${v.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-colors shadow-lg shadow-violet-900/20">Restaurer</button>
-                                                </div>
-                                            </div>
-                                        `}).join('');
-                                } else {
-                                    list.innerHTML = '<div class="text-center py-8 text-slate-500">Aucun élément disponible.</div>';
-                                }
-                            }
-
-                            window.toggleDetails = (id) => {
-                                const el = document.getElementById(`details-${id}`);
-                                if (el) el.classList.toggle('hidden');
-                            }
-
-                            window.createBackup = async () => {
-                                const nameInput = document.getElementById('backupName');
-                                const name = nameInput.value;
-
-                                const btn = document.querySelector('#manual-backup-actions button');
-                                const originalText = btn.innerText;
-                                btn.innerText = 'Création...';
-                                btn.disabled = true;
-
-                                try {
-                                    const res = await fetch(`/api/me/plinkks/${window.__PLINKK_SELECTED_ID__}/history`, {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ name })
-                                    });
-                                    const data = await res.json();
-                                    if (data.ok) {
-                                        nameInput.value = '';
-                                        loadHistory(); // Reloads and re-renders
+                            function checkMobile() {
+                                if (!notice || !main) return;
+                                // Only hide main content if the notice is visible (mobile)
+                                if (window.getComputedStyle(notice).display !== 'none') {
+                                    main.classList.add('hidden');
+                                    if (notice.classList.contains('hidden')) {
+                                        // If notice was manually dismissed, show main
+                                        main.classList.remove('hidden');
                                     } else {
-                                        alert('Erreur: ' + (data.error || 'Impossible de créer la sauvegarde'));
+                                        notice.classList.remove('hidden'); // ensure it's shown if mobile
                                     }
-                                } catch (e) {
-                                    alert('Erreur lors de la création de la sauvegarde');
-                                } finally {
-                                    btn.innerText = originalText;
-                                    btn.disabled = false;
+                                } else {
+                                    main.classList.remove('hidden');
+                                    notice.classList.add('hidden'); // hide notice on desktop
                                 }
                             }
 
-                            window.restoreVersion = async (versionId) => {
-                                if (!confirm('Êtes-vous sûr de vouloir restaurer cette version ? Votre configuration actuelle sera sauvegardée dans une nouvelle version avant la restauration.')) return;
-                                try {
-                                    const res = await fetch(`/api/me/plinkks/${window.__PLINKK_SELECTED_ID__}/history/${versionId}/restore`, { method: 'POST' });
-                                    const data = await res.json();
-                                    if (data.ok) {
-                                        window.location.reload();
-                                    } else {
-                                        alert('Erreur: ' + (data.error || 'Impossible de restaurer'));
-                                    }
-                                } catch (e) {
-                                    alert('Erreur lors de la communication avec le serveur');
-                                }
+                            if (closeBtn) {
+                                closeBtn.addEventListener('click', () => {
+                                    notice.classList.add('hidden');
+                                    if (main) main.classList.remove('hidden');
+                                });
                             }
 
-                            window.handleSidebarRefresh = () => {
-                                const historyCont = document.getElementById('history-sidebar-container');
-                                const isHistory = !historyCont?.classList.contains('hidden');
-
-                                if (isHistory) {
-                                    loadHistory();
-                                } else {
-                                    const frame = document.getElementById('preview');
-                                    if (!frame) return;
-                                    try {
-                                        const url = new URL(frame.src);
-                                        url.searchParams.set('t', Date.now());
-                                        frame.src = url.toString();
-                                    } catch (e) {
-                                        frame.src = frame.src;
-                                    }
-                                }
-
-                                // Add spin animation
-                                const btn = document.getElementById('refreshSidebar');
-                                const svg = btn?.querySelector('svg');
-                                if (svg) {
-                                    svg.classList.add('animate-spin');
-                                    setTimeout(() => svg.classList.remove('animate-spin'), 1000);
-                                }
-                            };
-
-                            window.switchSidebarMode = (mode) => {
-                                const previewCont = document.getElementById('preview-sidebar-container');
-                                const historyCont = document.getElementById('history-sidebar-container');
-                                const btnLive = document.getElementById('toggle-sidebar-live');
-                                const btnHist = document.getElementById('toggle-sidebar-history');
-
-                                if (mode === 'live') {
-                                    previewCont?.classList.remove('hidden');
-                                    historyCont?.classList.add('hidden');
-                                    btnLive?.classList.add('bg-white', 'shadow', 'text-slate-900');
-                                    btnLive?.classList.remove('text-slate-400', 'hover:text-white');
-                                    btnHist?.classList.remove('bg-white', 'shadow', 'text-slate-900');
-                                    btnHist?.classList.add('text-slate-400', 'hover:text-white');
-                                } else {
-                                    previewCont?.classList.add('hidden');
-                                    historyCont?.classList.remove('hidden');
-                                    btnHist?.classList.add('bg-white', 'shadow', 'text-slate-900');
-                                    btnHist?.classList.remove('text-slate-400', 'hover:text-white');
-                                    btnLive?.classList.remove('bg-white', 'shadow', 'text-slate-900');
-                                    btnLive?.classList.add('text-slate-400', 'hover:text-white');
-                                    loadHistory();
-                                }
-                            };
-
-                            window.previewVersion = (versionId) => {
-                                const frame = document.getElementById('preview');
-                                if (!frame) return;
-                                try {
-                                    const url = new URL(frame.src);
-                                    if (versionId) {
-                                        url.searchParams.set('versionId', versionId);
-                                    } else {
-                                        url.searchParams.delete('versionId');
-                                    }
-                                    url.searchParams.set('t', Date.now()); // Force refresh
-                                    frame.src = url.toString();
-                                    // Optionally switch back to live preview view to see the result
-                                    switchSidebarMode('live');
-                                } catch (e) {
-                                    console.error("Preview error", e);
-                                }
-                            };
-
-                            document.getElementById('refreshHistory')?.addEventListener('click', loadHistory);
-                            btns.forEach(b => b.addEventListener('click', () => selectTab(b.dataset.target)));
-
-                            // Initialize
-                            const initial = location.hash && sections.some(s => `#${s.id}` === location.hash) ? location.hash : '#section-profile';
-                            selectTab(initial);
-                            // Preload history immediately if we are on the history tab or just in the background
-                            loadHistory();
+                            window.addEventListener('resize', checkMobile);
+                            checkMobile();
                         })();
                     </script>
+
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+                    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                    <script type="application/json"
+                        id="plinkk-data"><%- JSON.stringify(typeof plinkk !== 'undefined' && plinkk ? plinkk : {}) %></script>
+                    <script>
+                        try {
+                            window.__INITIAL_STATE__ = JSON.parse(document.getElementById('plinkk-data').textContent);
+                        } catch (e) {
+                            console.error('Failed to parse initial state:', e);
+                            window.__INITIAL_STATE__ = {};
+                        }
+                    </script>
+
+                    <script type="module" src="/public/js/dashboard-ui/index.js"></script>
+
                     <style>
+                        /* UI Utils Styles */
                         .masked-field {
                             background-color: rgba(100, 100, 100, 0.12) !important;
                             opacity: 0.65;
                             cursor: not-allowed;
                         }
 
-                        .masked-field:disabled {
-                            color: inherit;
-                        }
-
+                        .masked-field:disabled,
                         .masked-field[readonly] {
                             color: inherit;
                         }
@@ -1331,320 +557,6 @@
                             cursor: grabbing;
                         }
                     </style>
-                    <script>
-                        (function () {
-                            const USER_ID = window.__PLINKK_USER_ID__ || 'self';
-                            const PLINKK_ID = window.__PLINKK_SELECTED_ID__ || 'default';
-                            const LS_PREFIX = 'PLK_MASK:';
+                    </body>
 
-                            function lsGet(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } }
-                            function lsSet(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch { } }
-                            function lsDel(key) { try { localStorage.removeItem(key); } catch { } }
-                            function getKey(inputId) { return `${LS_PREFIX}${USER_ID}:${PLINKK_ID}:${inputId}`; }
-
-                            function applyMaskedState(input, btn, saved) {
-                                if (!input || !btn) return;
-                                const isMasked = !!(saved && saved.masked);
-
-                                btn.setAttribute('title', 'Masquer / afficher le champ');
-                                btn.setAttribute('aria-pressed', isMasked ? 'true' : 'false');
-
-                                if (isMasked) {
-                                    if (saved && typeof saved.value !== 'undefined') {
-                                        input.value = saved.value;
-                                    }
-                                    input.dataset._originalValue = input.value ?? '';
-                                    input.readOnly = true;
-                                    input.disabled = true;
-                                    input.classList.add('masked-field');
-                                    btn.innerHTML = '<svg class="icon-eye-off" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a20.81 20.81 0 0 1 5.06-6.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.82 20.82 0 0 1-4.87 6.82M1 1l22 22"/></svg>';
-                                } else {
-                                    if (typeof input.dataset._originalValue !== 'undefined') {
-                                        input.value = input.dataset._originalValue;
-                                        delete input.dataset._originalValue;
-                                    }
-                                    input.readOnly = false;
-                                    input.disabled = false;
-                                    input.classList.remove('masked-field');
-                                    btn.innerHTML = '<svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
-                                }
-                            }
-
-                            const buttons = Array.from(document.querySelectorAll('.mask-toggle'));
-                            buttons.forEach(btn => {
-                                const targetId = btn.getAttribute('data-target');
-                                if (!targetId) return;
-                                const input = document.getElementById(targetId);
-                                if (!input) return;
-
-                                const key = getKey(targetId);
-                                const saved = lsGet(key);
-                                applyMaskedState(input, btn, saved);
-
-                                btn.addEventListener('click', () => {
-                                    const currentlyMasked = btn.getAttribute('aria-pressed') === 'true';
-                                    if (!currentlyMasked) {
-                                        const value = input.value ?? '';
-                                        lsSet(key, { masked: true, value });
-                                        applyMaskedState(input, btn, { masked: true, value });
-                                    } else {
-                                        lsDel(key);
-                                        applyMaskedState(input, btn, { masked: false });
-                                    }
-                                    if (window.__DASH_TRIGGER_SAVE__) {
-                                        window.__DASH_TRIGGER_SAVE__();
-                                    }
-                                });
-                            });
-
-                            function clearMaskedValues() {
-                                document.querySelectorAll('[data-maskable]')
-                                    .forEach(inp => {
-                                        const key = getKey(inp.id);
-                                        const saved = lsGet(key);
-                                        const isMasked = (typeof inp.dataset._originalValue !== 'undefined') || inp.classList.contains('masked-field') || (saved && saved.masked);
-                                        if (isMasked) {
-                                            inp.value = '';
-                                        }
-                                    });
-                            }
-
-                            document.addEventListener('click', (e) => {
-                                const saveBtn = e.target.closest && e.target.closest('#saveBtn, #saveBtn--mobile, #saveBtn--fab');
-                                if (saveBtn) {
-                                    clearMaskedValues();
-                                }
-                            }, true);
-
-                            (function attachFormInterceptor() {
-                                const sample = document.querySelector('[data-maskable]');
-                                if (!sample) return;
-                                const form = sample.closest('form');
-                                if (!form) return;
-                                form.addEventListener('submit', (ev) => {
-                                    clearMaskedValues();
-                                });
-                            })();
-                        })();
-                    </script>
-                    <script type="module">
-                        import canvaData from '/public/config/canvaConfig.js';
-                        import { animations, animationBackground } from '/public/config/animationConfig.js';
-                        import btnIconThemeConfig from '/public/config/btnIconThemeConfig.js';
-                        import labelPresets from '/public/config/labelPresets.js';
-                        try {
-                            const res = await fetch(`/themes.json?userId=${encodeURIComponent("<%= user.id %>")}`);
-                            let builtIns = [];
-                            let community = [];
-                            if (res.ok) {
-                                const payload = await res.json();
-                                builtIns = Array.isArray(payload.builtIns) ? payload.builtIns : [];
-                                community = Array.isArray(payload.theme) ? payload.theme : [];
-                            }
-                            const mergedThemes = builtIns.concat(community);
-                            window.__PLINKK_CFG__ = { themes: mergedThemes, canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
-                        } catch (e) {
-                            window.__PLINKK_CFG__ = { themes: [], canvaData, animations, animationBackground, btnIconThemeConfig, labelPresets };
-                        }
-                    </script>
-                    <script>
-                        (function () {
-                            const input = document.getElementById('degBackgroundColor');
-                            const dial = document.getElementById('degDial');
-                            const dot = dial ? dial.querySelector('.deg-dial-dot') : null;
-                            if (!input || !dial || !dot) return;
-
-                            function clampDeg(n) { n = Math.round(Number(n) || 0); n %= 360; if (n < 0) n += 360; return n; }
-                            function setAria(val) { dial.setAttribute('aria-valuenow', String(val)); }
-                            function setDot(val) { dot.style.transform = `translate(-50%, -50%) rotate(${val - 90}deg) translate(26px, 0)`; }
-                            function syncFromInput() { const v = clampDeg(input.value); setDot(v); setAria(v); }
-                            function syncFromDeg(val) { const v = clampDeg(val); input.value = String(v); setDot(v); setAria(v); if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); }
-
-                            setTimeout(syncFromInput, 0);
-
-                            input.addEventListener('input', () => syncFromInput());
-                            input.addEventListener('change', () => { if (window.__DASH_TRIGGER_SAVE__) window.__DASH_TRIGGER_SAVE__(); });
-
-                            function posToDeg(clientX, clientY) {
-                                const rect = dial.getBoundingClientRect();
-                                const cx = rect.left + rect.width / 2; const cy = rect.top + rect.height / 2;
-                                const dx = clientX - cx; const dy = clientY - cy;
-                                let angle = Math.atan2(dy, dx) * 180 / Math.PI;
-                                angle = (angle + 360) % 360;
-                                angle = (angle + 90) % 360;
-                                return Math.round(angle);
-                            }
-
-                            let dragging = false;
-                            function onPointerMove(e) {
-                                if (!dragging) return;
-                                const pt = e.touches?.[0] || e;
-                                syncFromDeg(posToDeg(pt.clientX, pt.clientY));
-                                e.preventDefault();
-                            }
-                            function onPointerUp() {
-                                dragging = false;
-                                dial.classList.remove('is-dragging');
-                                window.removeEventListener('mousemove', onPointerMove, { passive: false });
-                                window.removeEventListener('mouseup', onPointerUp);
-                                window.removeEventListener('touchmove', onPointerMove);
-                                window.removeEventListener('touchend', onPointerUp);
-                            }
-                            function startDrag(e) {
-                                e.preventDefault();
-                                dragging = true;
-                                dial.classList.add('is-dragging');
-                                const pt = e.touches?.[0] || e;
-                                syncFromDeg(posToDeg(pt.clientX, pt.clientY));
-                                window.addEventListener('mousemove', onPointerMove, { passive: false });
-                                window.addEventListener('mouseup', onPointerUp);
-                                window.addEventListener('touchmove', onPointerMove, { passive: false });
-                                window.addEventListener('touchend', onPointerUp);
-                                dial.focus();
-                            }
-
-                            dial.addEventListener('mousedown', startDrag);
-                            dial.addEventListener('touchstart', startDrag, { passive: false });
-
-                            dial.addEventListener('wheel', (e) => {
-                                if (document.activeElement !== dial) return;
-                                e.preventDefault();
-                                const delta = e.deltaY || e.deltaX || 0;
-                                const step = e.shiftKey ? 10 : 1;
-                                const dir = delta > 0 ? -step : step;
-                                const val = clampDeg((Number(input.value) || 0) + dir);
-                                syncFromDeg(val);
-                            }, { passive: false });
-
-                            dial.addEventListener('keydown', (e) => {
-                                const step = (e.shiftKey ? 10 : 1);
-                                let val = clampDeg(input.value);
-                                if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { val = clampDeg(val + step); syncFromDeg(val); e.preventDefault(); }
-                                if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { val = clampDeg(val - step); syncFromDeg(val); e.preventDefault(); }
-                                if (e.key === 'Home') { syncFromDeg(0); e.preventDefault(); }
-                                if (e.key === 'End') { syncFromDeg(359); e.preventDefault(); }
-                            });
-                        })();
-                    </script>
-                    <script type="application/json"
-                        id="pages-data"><%- JSON.stringify(typeof pages !== 'undefined' ? pages : []) %></script>
-                    <script type="application/json"
-                        id="autoopen-data"><%= (typeof autoOpenPlinkkModal !== 'undefined' && autoOpenPlinkkModal) ? 'true' : 'false' %></script>
-                    <script>window.__USER_EMAIL__ = "<%= user.email %>";</script>
-                    <% if (typeof plinkk !=='undefined' && plinkk) { %>
-                        <script>window.__PLINKK_SELECTED_ID__ = "<%= plinkk.id %>";</script>
-                        <% } %>
-                            <script type="module" src="/public/js/dashboard-ui/index.js"></script>
-                            <script>
-                                (function () {
-                                    const frame = document.getElementById('preview');
-                                    const wrap = frame && frame.parentElement;
-                                    if (!frame || !wrap) return;
-                                    const setMobile = (on) => {
-                                        if (on) { frame.style.width = '390px'; frame.style.margin = '0 auto'; }
-                                        else { frame.style.width = '100%'; frame.style.margin = '0'; }
-                                    };
-                                    document.querySelectorAll('[data-view]')?.forEach(btn => {
-                                        btn.addEventListener('click', () => setMobile(btn.getAttribute('data-view') === 'mobile'));
-                                    });
-                                })();
-                                (function () {
-                                    try {
-                                        const nameInput = document.getElementById('userName');
-                                        const headerName = document.getElementById('headerPlinkkName');
-                                        if (nameInput && headerName) {
-                                            nameInput.addEventListener('input', () => {
-                                                const v = nameInput.value || '';
-                                                headerName.textContent = v || headerName.getAttribute('data-original') || '';
-                                            });
-                                            headerName.setAttribute('data-original', headerName.textContent || '');
-                                        }
-                                    } catch (e) { }
-                                })();
-                                (function () {
-                                    const autoOpenRaw = document.getElementById('autoopen-data')?.textContent || 'false';
-                                    const autoOpen = String(autoOpenRaw).trim() === 'true';
-                                    if (autoOpen) {
-                                        const modal = document.getElementById('plinkkSelectorModal');
-                                        if (modal) modal.classList.remove('hidden');
-                                    }
-                                })();
-
-                                // ─── Upload button handlers ───
-                                (function () {
-                                    document.querySelectorAll('.upload-btn[data-upload-for]').forEach(function (btn) {
-                                        var targetId = btn.getAttribute('data-upload-for');
-                                        var field = btn.getAttribute('data-field');
-                                        var fileInput = document.getElementById('upload' + targetId.charAt(0).toUpperCase() + targetId.slice(1));
-                                        var urlInput = document.getElementById(targetId);
-                                        if (!fileInput || !urlInput) return;
-
-                                        btn.addEventListener('click', function () { fileInput.click(); });
-
-                                        fileInput.addEventListener('change', function () {
-                                            var file = fileInput.files[0];
-                                            if (!file) return;
-
-                                            var originalHTML = btn.innerHTML;
-                                            btn.disabled = true;
-                                            btn.classList.add('opacity-60');
-                                            btn.innerHTML = '<svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="15"/></svg>';
-
-                                            var formData = new FormData();
-                                            formData.append('file', file);
-
-                                            function resetBtn() {
-                                                btn.disabled = false;
-                                                btn.classList.remove('opacity-60');
-                                                fileInput.value = '';
-                                            }
-
-                                            function showSuccess() {
-                                                btn.innerHTML = '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
-                                                btn.classList.remove('bg-violet-600', 'hover:bg-violet-500');
-                                                btn.classList.add('bg-emerald-600');
-                                                setTimeout(function () {
-                                                    btn.innerHTML = originalHTML;
-                                                    btn.classList.remove('bg-emerald-600');
-                                                    btn.classList.add('bg-violet-600', 'hover:bg-violet-500');
-                                                }, 1500);
-                                            }
-
-                                            function showError(err) {
-                                                btn.innerHTML = '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-                                                btn.classList.remove('bg-violet-600', 'hover:bg-violet-500');
-                                                btn.classList.add('bg-red-600');
-                                                setTimeout(function () {
-                                                    btn.innerHTML = originalHTML;
-                                                    btn.classList.remove('bg-red-600');
-                                                    btn.classList.add('bg-violet-600', 'hover:bg-violet-500');
-                                                }, 2000);
-                                                console.error('Upload error:', err);
-                                            }
-
-                                            fetch('/api/me/upload?field=' + encodeURIComponent(field), {
-                                                method: 'POST',
-                                                body: formData,
-                                            })
-                                                .then(function (res) { return res.json(); })
-                                                .then(function (data) {
-                                                    if (data.ok && data.url) {
-                                                        urlInput.value = data.url;
-                                                        urlInput.dispatchEvent(new Event('input', { bubbles: true }));
-                                                        showSuccess();
-                                                    } else {
-                                                        showError(data.error || 'Erreur');
-                                                    }
-                                                    resetBtn();
-                                                })
-                                                .catch(function (err) {
-                                                    showError(err);
-                                                    resetBtn();
-                                                });
-                                        });
-                                    });
-                                })();
-                            </script>
-                            </body>
-
-                            </html>
+                    </html>

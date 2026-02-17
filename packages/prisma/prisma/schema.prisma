@@ -242,6 +242,11 @@ model Link {
   androidUrl     String?
   forceAppOpen   Boolean? @default(false)
   index      Int       @default(0)
+  // Bento Grid Support
+  gridX      Int       @default(0)
+  gridY      Int       @default(0)
+  gridW      Int       @default(12) // Assuming 12 columns grid
+  gridH      Int       @default(1)
   type       String?   @default("LINK") // LINK, FORM, EMBED, HEADER, MUSIC
   clickLimit Int?
   embedData  Json?

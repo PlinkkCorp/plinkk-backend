@@ -76,7 +76,7 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       neonColors: neonColors.map((c) => c.color),
       labels: labels.map((l) => ({ data: l.data, color: l.color, fontColor: l.fontColor })),
       socialIcon: socialIcon.map((s) => ({ url: s.url, icon: s.icon })),
-      links: links.map((l) => ({
+      links: links.map((l: any) => ({
         id: l.id,
         icon: l.icon,
         url: l.url,
@@ -94,6 +94,10 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
         forceAppOpen: l.forceAppOpen,
         clickLimit: l.clickLimit,
         buttonTheme: l.buttonTheme,
+        gridX: l.gridX,
+        gridY: l.gridY,
+        gridW: l.gridW,
+        gridH: l.gridH,
       })),
       categories: categories.map((c) => ({ id: c.id, name: c.name, order: c.order })),
       statusbar: statusbar
@@ -362,4 +366,5 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
 
     return reply.send({ ok: true });
   });
+
 }

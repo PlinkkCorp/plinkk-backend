@@ -65,6 +65,53 @@ export function plinkksCrudRoutes(fastify: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
+  fastify.put("/:id", async (request, reply) => {
+    const userId = request.session.get("data") as string | undefined;
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+    const { id } = request.params as { id: string };
+    const p = await prisma.plinkk.findUnique({ where: { id } });
+    if (!p || p.userId !== userId)
+      return reply.code(404).send({ error: "not_found" });
+    const body = request.body as { isPublic: boolean; isDefault: boolean };
+    const patch: { isPublic?: boolean; visibility?: "PUBLIC" | "PRIVATE" } = {};
+    if (typeof body.isPublic === "boolean") {
+      patch.isPublic = Boolean(body.isPublic);
+      patch.visibility = body.isPublic ? "PUBLIC" : "PRIVATE";
+    }
+    if (body.isDefault === true && !p.isDefault) {
+      const prev = await prisma.plinkk.findFirst({
+        where: { userId, isDefault: true },
+      });
+      await prisma.$transaction([
+        ...(prev
+          ? [
+            prisma.plinkk.update({
+              where: { id: prev.id },
+              data: { isDefault: false, index: Math.max(1, prev.index || 1) },
+            }),
+          ]
+          : []),
+        prisma.plinkk.update({
+          where: { id },
+          data: { isDefault: true, index: 0 },
+        }),
+      ]);
+      await reindexNonDefault(prisma, userId);
+    }
+    const updated = await prisma.plinkk.findUnique({ where: { id } });
+    const actions: string[] = [];
+    if (typeof body.isPublic === "boolean") actions.push(body.isPublic ? "Made Public" : "Made Private");
+    if (body.isDefault === true) actions.push("Set as Default");
+
+    const formattedAction = actions.length > 0 ? actions.join(", ") : "Updated details";
+
+    await logDetailedAction(userId, "UPDATE_PLINKK", id, p, updated || {}, request.ip, {
+      formatted: `Updated Plinkk '${updated?.name}': ${formattedAction}`
+    });
+
+    return reply.send({ ok: true });
+  });
+
   fastify.delete("/:id", async (request, reply) => {
     const userId = request.session.get("data") as string | undefined;
     if (!userId) return reply.code(401).send({ error: "unauthorized" });

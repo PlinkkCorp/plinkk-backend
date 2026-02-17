@@ -1,0 +1,177 @@
+<div class="mb-6 pb-4 border-b border-slate-800">
+    <h3 class="text-lg font-semibold text-white">Profil</h3>
+    <p class="text-sm text-slate-400">Informations de base affichées publiquement.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <label class="block space-y-2">
+        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Lien du
+            profil <span class="info-i" title="Lien externe vers ton profil principal">i</span></span>
+        <input id="profileLink" type="url"
+            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 placeholder-slate-600"
+            placeholder="https://..." />
+    </label>
+    <label class="block space-y-2">
+        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Texte
+            du site <span class="info-i" title="Texte court affiché à côté du lien">i</span></span>
+        <div class="relative">
+            <input id="profileSiteText" data-maskable="true" type="text"
+                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+            <button type="button" data-target="profileSiteText"
+                class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            </button>
+        </div>
+    </label>
+    <label class="block space-y-2">
+        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Nom
+            affiché <span class="info-i" title="Nom public visible sur ta page">i</span></span>
+        <input id="userName" type="text"
+            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+    </label>
+    <label class="block space-y-2">
+        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Email
+            <span class="info-i" title="Adresse e‑mail de contact">i</span></span>
+        <div class="relative">
+            <input id="email" data-maskable="true" type="email"
+                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+            <button type="button" data-target="email"
+                class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            </button>
+        </div>
+    </label>
+    <label class="block space-y-2">
+        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Image
+            de profil (URL) <span class="info-i" title="URL d’une image carrée">i</span></span>
+        <div class="flex items-center gap-2">
+            <input id="profileImage" type="url"
+                class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+            <input type="file" id="uploadProfileImage" accept="image/*" class="hidden" />
+            <button type="button" data-picker-for="profileImage"
+                class="picker-btn shrink-0 px-3 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors"
+                title="Choisir une icône">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+            </button>
+            <button type="button" data-upload-for="profileImage" data-field="profileImage"
+                class="upload-btn shrink-0 px-3 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-colors"
+                title="Uploader une image">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+            </button>
+        </div>
+    </label>
+    <label class="block space-y-2">
+        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Icône
+            de profil (URL) <span class="info-i" title="Petite icône affichée près de ton nom">i</span></span>
+        <div class="flex items-center gap-2">
+            <div class="relative flex-1">
+                <input id="profileIcon" data-maskable="true" type="url"
+                    class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                <button type="button" data-target="profileIcon"
+                    class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </button>
+            </div>
+            <input type="file" id="uploadProfileIcon" accept="image/*" class="hidden" />
+            <button type="button" data-picker-for="profileIcon"
+                class="picker-btn shrink-0 px-3 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors"
+                title="Choisir une icône">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+            </button>
+            <button type="button" data-upload-for="profileIcon" data-field="profileIcon"
+                class="upload-btn shrink-0 px-3 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-colors"
+                title="Uploader une image">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+            </button>
+        </div>
+    </label>
+    <label class="block space-y-2">
+        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Icône
+            d’onglet (URL) <span class="info-i" title="Favicon affichée dans l’onglet">i</span></span>
+        <div class="flex items-center gap-2">
+            <div class="relative flex-1">
+                <input id="iconUrl" data-maskable="true" type="url"
+                    class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200" />
+                <button type="button" data-target="iconUrl"
+                    class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                    <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </button>
+            </div>
+            <input type="file" id="uploadIconUrl" accept="image/*" class="hidden" />
+            <button type="button" data-picker-for="iconUrl"
+                class="picker-btn shrink-0 px-3 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors"
+                title="Choisir une icône">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+            </button>
+            <button type="button" data-upload-for="iconUrl" data-field="iconUrl"
+                class="upload-btn shrink-0 px-3 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-colors"
+                title="Uploader une image">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+            </button>
+        </div>
+    </label>
+    <label class="block space-y-2 md:col-span-2">
+        <span class="text-sm font-medium text-slate-300 flex items-center gap-2">Description
+            <span class="info-i" title="Courte bio affichée sur ta page">i</span></span>
+        <div class="relative">
+            <textarea id="description" data-maskable="true" rows="3"
+                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200 resize-none"></textarea>
+            <button type="button" data-target="description"
+                class="mask-toggle absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            </button>
+        </div>
+    </label>
+</div>
