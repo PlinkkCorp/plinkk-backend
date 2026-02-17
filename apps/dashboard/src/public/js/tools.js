@@ -694,78 +694,333 @@ export function createLinkBoxes(profileData) {
             container.style.overflow = "hidden";
             container.style.display = "flex";
             container.style.flexDirection = "column";
-            container.style.borderRadius = "12px"; // slightly more rounded for embeds
+            container.style.borderRadius = "12px";
             container.style.border = "1px solid rgba(255,255,255,0.1)";
 
             if (link.embedData.url) {
                 let embedUrl = link.embedData.url;
-                let isSpotify = false;
-                let isYouTube = false;
+                let embedType = 'generic';
 
                 // --- SMART EMBED LOGIC ---
                 try {
                     const urlObj = new URL(embedUrl);
+                    const host = urlObj.hostname.toLowerCase();
 
                     // 1. YouTube
-                    if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
-                        isYouTube = true;
+                    if (host.includes('youtube.com') || host.includes('youtu.be')) {
+                        embedType = 'youtube';
                         let videoId = null;
-                        if (urlObj.hostname.includes('youtu.be')) {
+                        if (host.includes('youtu.be')) {
                             videoId = urlObj.pathname.slice(1);
                         } else if (urlObj.pathname.includes('/watch')) {
                             videoId = urlObj.searchParams.get('v');
                         } else if (urlObj.pathname.includes('/embed/')) {
                             videoId = urlObj.pathname.split('/embed/')[1];
+                        } else if (urlObj.pathname.includes('/shorts/')) {
+                            videoId = urlObj.pathname.split('/shorts/')[1];
                         }
-
                         if (videoId) {
+                            videoId = videoId.split(/[?&#]/)[0];
                             embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
                         }
                     }
 
                     // 2. Spotify
-                    if (urlObj.hostname.includes('spotify.com')) {
-                        isSpotify = true;
-                        // open.spotify.com/track/ID -> open.spotify.com/embed/track/ID
+                    else if (host.includes('spotify.com')) {
+                        embedType = 'spotify';
                         if (!urlObj.pathname.includes('/embed')) {
-                            // Handle standard web player links
-                            embedUrl = `https://open.spotify.com/embed${urlObj.pathname}`;
+                            let cleanPath = urlObj.pathname;
+                            const intlMatch = cleanPath.match(/^\/intl-[^/]+(\/.*)/);
+                            if (intlMatch) cleanPath = intlMatch[1];
+                            embedUrl = `https://open.spotify.com/embed${cleanPath}`;
                         }
                     }
 
-                    // 3. SoundCloud (basic iframe support usually requires their widget API, but check for visual player param)
-                    if (urlObj.hostname.includes('soundcloud.com')) {
-                        // SoundCloud usually needs oEmbed to get the widget URL from a track URL.
-                        // For now we assume the user might paste the widget URL or we leave it as is.
-                        // Improving this would require a backend proxy or client-side fetch if possible.
+                    // 3. SoundCloud
+                    else if (host.includes('soundcloud.com')) {
+                        embedType = 'soundcloud';
+                        if (!host.includes('w.soundcloud.com')) {
+                            embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(embedUrl)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true`;
+                        }
+                    }
+
+                    // 4. Apple Music
+                    else if (host.includes('music.apple.com')) {
+                        embedType = 'apple-music';
+                        if (!urlObj.pathname.includes('/embed')) {
+                            embedUrl = embedUrl.replace('music.apple.com', 'embed.music.apple.com');
+                        }
+                    }
+
+                    // 5. Deezer
+                    else if (host.includes('deezer.com')) {
+                        embedType = 'deezer';
+                        const deezerMatch = urlObj.pathname.match(/\/(track|album|playlist|artist)\/(\d+)/);
+                        if (deezerMatch) {
+                            embedUrl = `https://widget.deezer.com/widget/dark/${deezerMatch[1]}/${deezerMatch[2]}`;
+                        }
+                    }
+
+                    // 6. Twitch
+                    else if (host.includes('twitch.tv')) {
+                        embedType = 'twitch';
+                        const parentHost = window.location.hostname || 'plinkk.fr';
+                        const channelMatch = urlObj.pathname.match(/^\/([a-zA-Z0-9_]+)\/?$/);
+                        const videoMatch = urlObj.pathname.match(/\/videos\/(\d+)/);
+                        if (videoMatch) {
+                            embedUrl = `https://player.twitch.tv/?video=${videoMatch[1]}&parent=${parentHost}`;
+                        } else if (channelMatch && !['directory', 'videos', 'settings', 'subscriptions', 'inventory', 'wallet'].includes(channelMatch[1])) {
+                            embedUrl = `https://player.twitch.tv/?channel=${channelMatch[1]}&parent=${parentHost}`;
+                        }
+                    }
+
+                    // 7. TikTok
+                    else if (host.includes('tiktok.com')) {
+                        embedType = 'tiktok';
+                        const tiktokMatch = urlObj.pathname.match(/\/video\/(\d+)/);
+                        if (tiktokMatch) {
+                            embedUrl = `https://www.tiktok.com/embed/v2/${tiktokMatch[1]}`;
+                        }
+                    }
+
+                    // 8. Discord (server widget or invite card)
+                    else if (host.includes('discord.gg') || host.includes('discord.com')) {
+                        const serverIdParam = urlObj.searchParams.get('id');
+                        if (serverIdParam || urlObj.pathname.includes('/widget')) {
+                            embedType = 'discord';
+                            if (serverIdParam) {
+                                embedUrl = `https://discord.com/widget?id=${serverIdParam}&theme=dark`;
+                            }
+                        } else {
+                            // Invite links (discord.gg/xxx) — can't iframe, render as styled card
+                            embedType = 'discord-invite';
+                        }
+                    }
+
+                    // 9. Calendly
+                    else if (host.includes('calendly.com')) {
+                        embedType = 'calendly';
+                        if (!embedUrl.includes('embed_type=')) {
+                            embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'embed_type=Inline&embed_domain=1';
+                        }
+                    }
+
+                    // 10. Typeform
+                    else if (host.includes('typeform.com')) {
+                        embedType = 'typeform';
+                        const typeformMatch = urlObj.pathname.match(/\/to\/([a-zA-Z0-9]+)/);
+                        if (typeformMatch) {
+                            embedUrl = `https://form.typeform.com/to/${typeformMatch[1]}?typeform-embed=embed-widget`;
+                        }
+                    }
+
+                    // 11. Tally
+                    else if (host.includes('tally.so')) {
+                        embedType = 'tally';
+                        const tallyMatch = urlObj.pathname.match(/\/(r|forms?)\/([a-zA-Z0-9]+)/);
+                        if (tallyMatch) {
+                            embedUrl = `https://tally.so/embed/${tallyMatch[2]}?alignLeft=1&hideTitle=1&dynamicHeight=1`;
+                        }
+                    }
+
+                    // 12. Google Maps
+                    else if ((host.includes('google.com') && urlObj.pathname.includes('/maps')) || host.includes('maps.google.com') || host.includes('goo.gl')) {
+                        embedType = 'google-maps';
+                        if (!embedUrl.includes('/embed')) {
+                            const q = urlObj.searchParams.get('q') || urlObj.pathname.replace('/maps/place/', '').replace('/maps/', '');
+                            if (q && q !== '/') {
+                                embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
+                            } else {
+                                embedUrl = link.embedData.url.replace('/maps/', '/maps/embed?');
+                            }
+                        }
+                    }
+
+                    // 13. Buy Me a Coffee
+                    else if (host.includes('buymeacoffee.com')) {
+                        embedType = 'buymeacoffee';
+                        const bmcUser = urlObj.pathname.replace(/^\//, '').split('/')[0];
+                        if (bmcUser) {
+                            embedUrl = `https://www.buymeacoffee.com/widget/page/${bmcUser}?description=&color=%235F7FFF`;
+                        }
+                    }
+
+                    // 14. Ko-fi
+                    else if (host.includes('ko-fi.com')) {
+                        embedType = 'kofi';
+                        const kofiUser = urlObj.pathname.replace(/^\//, '').split('/')[0];
+                        if (kofiUser) {
+                            embedUrl = `https://ko-fi.com/${kofiUser}/?hidefeed=true&widget=true&embed=true`;
+                        }
+                    }
+
+                    // 15. Gumroad
+                    else if (host.includes('gumroad.com')) {
+                        embedType = 'gumroad';
+                        if (!embedUrl.includes('wanted=true')) {
+                            embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'wanted=true';
+                        }
+                    }
+
+                    // 16. Substack
+                    else if (host.includes('substack.com')) {
+                        embedType = 'substack';
+                        if (!urlObj.pathname.includes('/embed')) {
+                            embedUrl = `https://${host}/embed`;
+                        }
+                    }
+
+                    // 17. Pinterest
+                    else if (host.includes('pinterest.com') || host.includes('pin.it')) {
+                        embedType = 'pinterest';
+                        const pinMatch = urlObj.pathname.match(/\/pin\/(\d+)/);
+                        if (pinMatch) {
+                            embedUrl = `https://assets.pinterest.com/ext/embed.html?id=${pinMatch[1]}`;
+                        }
+                    }
+
+                    // 18. Dailymotion
+                    else if (host.includes('dailymotion.com') || host.includes('dai.ly')) {
+                        embedType = 'dailymotion';
+                        let dmVideoId = null;
+                        if (host.includes('dai.ly')) {
+                            dmVideoId = urlObj.pathname.slice(1);
+                        } else {
+                            const dmMatch = urlObj.pathname.match(/\/video\/([a-zA-Z0-9]+)/);
+                            if (dmMatch) dmVideoId = dmMatch[1];
+                        }
+                        if (dmVideoId) {
+                            embedUrl = `https://www.dailymotion.com/embed/video/${dmVideoId}`;
+                        }
+                    }
+
+                    // 19. Vimeo
+                    else if (host.includes('vimeo.com')) {
+                        embedType = 'vimeo';
+                        const vimeoMatch = urlObj.pathname.match(/\/(\d+)/);
+                        if (vimeoMatch) {
+                            embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+                        }
+                    }
+
+                    // 20. Figma
+                    else if (host.includes('figma.com')) {
+                        embedType = 'figma';
+                        embedUrl = `https://www.figma.com/embed?embed_host=plinkk&url=${encodeURIComponent(embedUrl)}`;
                     }
 
                 } catch (e) {
-                    // Invalid URL, ignore smart transformation
                     console.warn("Invalid embed URL:", embedUrl);
                 }
 
-                const iframe = document.createElement("iframe");
-                iframe.src = embedUrl;
-                iframe.style.width = "100%";
-                iframe.style.border = "none";
-
-                // Adjust height based on type
-                if (isSpotify) {
-                    iframe.style.height = "152px"; // Standard Spotify compact embed height (80 or 152)
-                    iframe.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
-                } else if (isYouTube) {
-                    iframe.style.aspectRatio = "16/9";
-                    iframe.style.height = "auto";
-                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+                // --- Discord invite: styled card instead of iframe ---
+                if (embedType === 'discord-invite') {
+                    const card = document.createElement('a');
+                    card.href = link.embedData.url;
+                    card.target = '_blank';
+                    card.rel = 'noopener noreferrer';
+                    card.style.cssText = 'display:flex;align-items:center;gap:12px;padding:16px;background:#5865F2;border-radius:12px;text-decoration:none;color:#fff;transition:filter 0.2s;';
+                    card.onmouseenter = () => card.style.filter = 'brightness(1.1)';
+                    card.onmouseleave = () => card.style.filter = '';
+                    const icon = document.createElement('img');
+                    icon.src = 'https://cdn.jsdelivr.net/gh/nicklvh/cdn@main/discord-mark-white.svg';
+                    icon.alt = 'Discord';
+                    icon.style.cssText = 'width:40px;height:40px;flex-shrink:0;';
+                    const textWrap = document.createElement('div');
+                    textWrap.style.cssText = 'display:flex;flex-direction:column;gap:2px;min-width:0;';
+                    const title = document.createElement('span');
+                    title.style.cssText = 'font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+                    title.textContent = link.text || 'Rejoindre le serveur Discord';
+                    const sub = document.createElement('span');
+                    sub.style.cssText = 'font-size:12px;opacity:0.8;';
+                    sub.textContent = 'Cliquer pour rejoindre';
+                    textWrap.appendChild(title);
+                    textWrap.appendChild(sub);
+                    card.appendChild(icon);
+                    card.appendChild(textWrap);
+                    container.appendChild(card);
+                    container.style.border = 'none';
                 } else {
-                    iframe.style.height = "100%";
-                    iframe.style.minHeight = "200px";
+                    const iframe = document.createElement("iframe");
+                    iframe.src = embedUrl;
+                    iframe.style.width = "100%";
+                    iframe.style.border = "none";
+                    iframe.loading = "lazy";
+
+                    // --- Per-platform sizing & permissions ---
+                    switch (embedType) {
+                        case 'youtube':
+                        case 'twitch':
+                        case 'dailymotion':
+                        case 'vimeo':
+                            iframe.style.aspectRatio = "16/9";
+                            iframe.style.height = "auto";
+                            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen";
+                            iframe.allowFullscreen = true;
+                            break;
+                        case 'spotify':
+                            iframe.style.height = "152px";
+                            iframe.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+                            break;
+                        case 'soundcloud':
+                            iframe.style.height = "166px";
+                            iframe.allow = "autoplay";
+                            break;
+                        case 'apple-music':
+                            iframe.style.height = "175px";
+                            iframe.allow = "autoplay; encrypted-media; fullscreen";
+                            iframe.sandbox = "allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation";
+                            break;
+                        case 'deezer':
+                            iframe.style.height = "300px";
+                            iframe.allow = "autoplay; encrypted-media";
+                            break;
+                        case 'tiktok':
+                            iframe.style.height = "740px";
+                            iframe.style.maxWidth = "325px";
+                            iframe.style.margin = "0 auto";
+                            break;
+                        case 'discord':
+                            iframe.style.height = "400px";
+                            break;
+                        case 'calendly':
+                            iframe.style.height = "630px";
+                            break;
+                        case 'typeform':
+                        case 'tally':
+                            iframe.style.height = "500px";
+                            break;
+                        case 'google-maps':
+                            iframe.style.height = "300px";
+                            iframe.style.borderRadius = "8px";
+                            break;
+                        case 'buymeacoffee':
+                            iframe.style.height = "600px";
+                            break;
+                        case 'kofi':
+                            iframe.style.height = "712px";
+                            break;
+                        case 'gumroad':
+                            iframe.style.height = "600px";
+                            break;
+                        case 'substack':
+                            iframe.style.height = "320px";
+                            break;
+                        case 'pinterest':
+                            iframe.style.height = "500px";
+                            break;
+                        case 'figma':
+                            iframe.style.aspectRatio = "16/9";
+                            iframe.style.height = "auto";
+                            iframe.allowFullscreen = true;
+                            break;
+                        default:
+                            iframe.style.height = "100%";
+                            iframe.style.minHeight = "200px";
+                    }
+
+                    container.appendChild(iframe);
                 }
-
-                iframe.loading = "lazy";
-
-                container.appendChild(iframe);
             } else {
                 container.textContent = "Contenu intégré invalide";
                 container.style.padding = "16px";
@@ -774,6 +1029,14 @@ export function createLinkBoxes(profileData) {
             }
             return container;
         }
+
+
+
+
+
+
+
+
 
         // --- 4. Standard Link (with OS Redirection) ---
         const discordBox = document.createElement("div");
