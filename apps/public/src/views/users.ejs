@@ -89,8 +89,8 @@
               bannerStyle = `background-image: url('${bannerUrl}')`;
               } else if (banner && banner !== 'none') {
               if (banner === 'gradient-emerald') bannerStyle = 'background: linear-gradient(135deg, #064e3b, #10b981)';
-              else if (banner === 'gradient-fuchsia') bannerStyle = 'background: linear-gradient(135deg, #701a75,
-              #d946ef)';
+              else if (banner === 'gradient-fuchsia') bannerStyle = `background: linear-gradient(135deg, #701a75,
+              #d946ef)`;
               else if (banner === 'cosmos') bannerStyle = 'background: linear-gradient(to right, #0f172a, #312e81)';
               else bannerStyle = 'background: #1e293b';
               } else {
@@ -98,12 +98,12 @@
               }
 
               let frameStyle = '';
-              if (frame === 'neon') frameStyle = 'box-shadow: 0 0 0 2px rgba(139,92,246,0.8), 0 0 15px
-              rgba(139,92,246,0.6), inset 0 0 10px rgba(139,92,246,0.4); border-radius: 12px;';
-              else if (frame === 'glow') frameStyle = 'box-shadow: 0 0 0 2px rgba(16,185,129,0.8), 0 0 15px
-              rgba(16,185,129,0.6); border-radius: 12px;';
-              else if (frame === 'gold') frameStyle = 'box-shadow: 0 0 0 2px rgba(234,179,8,0.8), 0 0 15px
-              rgba(234,179,8,0.4); border-radius: 12px;';
+              if (frame === 'neon') frameStyle = `box-shadow: 0 0 0 2px rgba(139,92,246,0.8), 0 0 15px
+              rgba(139,92,246,0.6), inset 0 0 10px rgba(139,92,246,0.4); border-radius: 12px;`;
+              else if (frame === 'glow') frameStyle = `box-shadow: 0 0 0 2px rgba(16,185,129,0.8), 0 0 15px
+              rgba(16,185,129,0.6); border-radius: 12px;`;
+              else if (frame === 'gold') frameStyle = `box-shadow: 0 0 0 2px rgba(234,179,8,0.8), 0 0 15px
+              rgba(234,179,8,0.4); border-radius: 12px;`;
 
               let cardBgStyle = '';
               if (gradientType === 'linear') {
@@ -122,8 +122,8 @@
               const safeCardBg = cardBgStyle ? `style="${cardBgStyle.replace(/"/g, '&quot;')}"` : '';
               let safeBanner = '';
               if (bannerStyle) {
-              safeBanner = 'style="' + bannerStyle.replace(/"/g, '&quot;') + '; mask-image: linear-gradient(to bottom,
-              black, transparent); -webkit-mask-image: linear-gradient(to bottom, black, transparent);"';
+              safeBanner = `style="${bannerStyle.replace(/"/g, '&quot;')}; mask-image: linear-gradient(to bottom, black,
+              transparent); -webkit-mask-image: linear-gradient(to bottom, black, transparent);"`;
               }
 
               const safeFrameStyle = frameStyle ? 'style="' + frameStyle.replace(/"/g, '&quot;') + '"' : '';
