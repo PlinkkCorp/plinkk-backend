@@ -552,34 +552,41 @@ export function createLinkBoxes(profileData) {
             const formContent = document.createElement("div");
             formContent.className = "form-content hidden"; // Hidden by default
             formContent.style.width = "100%";
-            formContent.style.padding = "12px";
-            formContent.style.marginTop = "8px";
-            formContent.style.backgroundColor = "rgba(0,0,0,0.2)";
-            formContent.style.borderRadius = "8px";
+            formContent.style.padding = "20px";
+            formContent.style.marginTop = "12px";
+            formContent.style.backgroundColor = "rgba(255, 255, 255, 0.03)";
+            formContent.style.backdropFilter = "blur(12px)";
+            formContent.style.borderRadius = "16px";
+            formContent.style.border = "1px solid rgba(255, 255, 255, 0.1)";
+            formContent.style.boxShadow = "inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 10px 30px rgba(0, 0, 0, 0.2)";
 
             // Build inputs from formData fields
             const inputs = [];
             const fields = link.formData.fields || [];
             fields.forEach(field => {
                 const wrapper = document.createElement("div");
-                wrapper.style.marginBottom = "8px";
+                wrapper.style.marginBottom = "16px";
 
                 const label = document.createElement("label");
                 label.textContent = field.label;
                 label.style.display = "block";
-                label.style.fontSize = "0.8rem";
-                label.style.marginBottom = "4px";
-                label.style.opacity = "0.8";
+                label.style.fontSize = "0.75rem";
+                label.style.fontWeight = "600";
+                label.style.marginBottom = "6px";
+                label.style.opacity = "0.6";
+                label.style.textTransform = "uppercase";
+                label.style.letterSpacing = "0.05em";
 
                 let input;
                 if (field.type === 'textarea') {
                     input = document.createElement("textarea");
                     input.rows = 3;
+                    input.style.resize = "none";
                 } else {
                     input = document.createElement("input");
                     input.type = field.type || "text";
                 }
-                input.className = "w-full p-2 rounded bg-white/10 border border-white/20 focus:border-white/50 outline-none transition-colors";
+                input.className = "w-full p-3 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 focus:border-white/40 focus:bg-white/10 outline-none transition-all duration-300 placeholder-white/30 text-white";
                 input.placeholder = field.placeholder || "";
                 input.name = field.name || field.label; // Simple name mapping
                 input.required = field.required !== false;
@@ -594,10 +601,11 @@ export function createLinkBoxes(profileData) {
             // Submit Button
             const submitBtn = document.createElement("button");
             submitBtn.textContent = link.formData.buttonText || "Envoyer";
-            submitBtn.className = "w-full p-2 mt-2 rounded bg-white/20 hover:bg-white/30 transition-colors font-medium";
+            submitBtn.className = "w-full py-3.5 px-6 mt-4 rounded-xl bg-white/10 hover:bg-white/20 active:scale-[0.98] border border-white/10 transition-all duration-300 font-bold text-white shadow-lg";
+            submitBtn.style.cursor = "pointer";
 
             const statusMsg = document.createElement("div");
-            statusMsg.className = "mt-2 text-center text-sm hidden";
+            statusMsg.className = "mt-3 text-center text-sm font-medium hidden";
 
             submitBtn.onclick = async (e) => {
                 e.preventDefault();
@@ -702,10 +710,13 @@ export function createLinkBoxes(profileData) {
                     // 2. Spotify
                     if (urlObj.hostname.includes('spotify.com')) {
                         isSpotify = true;
-                        // open.spotify.com/track/ID -> open.spotify.com/embed/track/ID
                         if (!urlObj.pathname.includes('/embed')) {
-                            // Handle standard web player links
-                            embedUrl = `https://open.spotify.com/embed${urlObj.pathname}`;
+                            let cleanPath = urlObj.pathname;
+                            const intlMatch = cleanPath.match(/^\/intl-[^/]+(\/.*)/);
+                            if (intlMatch) {
+                                cleanPath = intlMatch[1];
+                            }
+                            embedUrl = `https://open.spotify.com/embed${cleanPath}`;
                         }
                     }
 

@@ -241,10 +241,11 @@ model Link {
   iosUrl         String?
   androidUrl     String?
   forceAppOpen   Boolean? @default(false)
-  type           String?  @default("LINK") // LINK, FORM, EMBED, HEADER, MUSIC
-  clickLimit     Int?
-  embedData      Json?
-  formData       Json?
+  index      Int       @default(0)
+  type       String?   @default("LINK") // LINK, FORM, EMBED, HEADER, MUSIC
+  clickLimit Int?
+  embedData  Json?
+  formData   Json?
 
   // Scheduled links (premium) : programmation d'activation/désactivation
   scheduledAt  DateTime?  // Date à partir de laquelle le lien est visible

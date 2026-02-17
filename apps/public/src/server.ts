@@ -217,7 +217,7 @@ fastify.addHook("onRequest", async (request, reply) => {
           prisma.label.findMany({ where: { plinkkId: resolved.page.id } }),
           prisma.socialIcon.findMany({ where: { plinkkId: resolved.page.id } }),
           prisma.plinkkStatusbar.findUnique({ where: { plinkkId: resolved.page.id } }),
-          prisma.link.findMany({ where: { plinkkId: resolved.page.id } }),
+          prisma.link.findMany({ where: { plinkkId: resolved.page.id }, orderBy: { index: "asc" } }),
           prisma.category.findMany({ where: { plinkkId: resolved.page.id }, orderBy: { order: "asc" } }),
         ]);
 
@@ -321,6 +321,7 @@ fastify.addHook("onRequest", async (request, reply) => {
           }),
           prisma.link.findMany({
             where: { userId: page.user.id, plinkkId: page.id },
+            orderBy: { index: "asc" },
           }),
           prisma.plinkkStatusbar.findUnique({ where: { plinkkId: page.id } }),
           prisma.category.findMany({

@@ -224,6 +224,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
             const allLinks = await prisma.link.findMany({
               where: { plinkkId: resolved.page.id, userId: resolved.user.id },
+              orderBy: { index: "asc" },
             });
             // Filtrer les liens schedulés (ne montrer que ceux actuellement actifs)
             const links = filterScheduledLinks(allLinks);
@@ -386,6 +387,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
         const allLinks = await prisma.link.findMany({
           where: { plinkkId: resolved.page.id, userId: resolved.user.id },
+          orderBy: { index: "asc" },
         });
         // Filtrer les liens schedulés (ne montrer que ceux actuellement actifs)
         const links = filterScheduledLinks(allLinks);
@@ -603,6 +605,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         }),
         prisma.link.findMany({
           where: { userId: page.user.id, plinkkId: page.id },
+          orderBy: { index: "asc" },
         }),
         prisma.plinkkStatusbar.findUnique({ where: { plinkkId: page.id } }),
         prisma.category.findMany({

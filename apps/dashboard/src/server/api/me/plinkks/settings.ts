@@ -221,6 +221,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           androidUrl: l.androidUrl ?? null,
           forceAppOpen: l.forceAppOpen ?? false,
           type: l.type || "LINK",
+          index: typeof l.index === 'number' ? l.index : 0,
           clickLimit: l.clickLimit ?? null,
           embedData: l.embedData ?? null,
           formData: l.formData ?? null,
