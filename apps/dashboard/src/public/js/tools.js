@@ -753,11 +753,14 @@ export function createLinkBoxes(profileData) {
                     }
 
                     // 5. Deezer
-                    else if (host.includes('deezer.com')) {
-                        embedType = 'deezer';
+                    else if (host.includes('deezer.com') || host.includes('deezer.page.link') || host.includes('link.deezer.com')) {
                         const deezerMatch = urlObj.pathname.match(/\/(track|album|playlist|artist)\/(\d+)/);
                         if (deezerMatch) {
+                            embedType = 'deezer';
                             embedUrl = `https://widget.deezer.com/widget/dark/${deezerMatch[1]}/${deezerMatch[2]}`;
+                        } else {
+                            // Shortlinks (link.deezer.com) or others -> Styled Card
+                            embedType = 'deezer-card';
                         }
                     }
 
@@ -838,11 +841,8 @@ export function createLinkBoxes(profileData) {
 
                     // 13. Buy Me a Coffee
                     else if (host.includes('buymeacoffee.com')) {
-                        embedType = 'buymeacoffee';
-                        const bmcUser = urlObj.pathname.replace(/^\//, '').split('/')[0];
-                        if (bmcUser) {
-                            embedUrl = `https://www.buymeacoffee.com/widget/page/${bmcUser}?description=&color=%235F7FFF`;
-                        }
+                        embedType = 'buymeacoffee-card';
+                        // Keep original URL for the card link
                     }
 
                     // 14. Ko-fi
@@ -940,6 +940,71 @@ export function createLinkBoxes(profileData) {
                     card.appendChild(textWrap);
                     container.appendChild(card);
                     container.style.border = 'none';
+                } else if (embedType === 'buymeacoffee-card') {
+                    // --- Buy Me a Coffee: Custom Styled Card ---
+                    const card = document.createElement('a');
+                    card.href = link.embedData.url;
+                    card.target = '_blank';
+                    card.rel = 'noopener noreferrer';
+                    card.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;background:#FFDD00;border-radius:12px;text-decoration:none;color:#000000;font-family:"Cookie", cursive, sans-serif;transition:transform 0.2s;';
+                    card.onmouseenter = () => card.style.transform = 'scale(1.02)';
+                    card.onmouseleave = () => card.style.transform = 'scale(1)';
+
+                    const icon = document.createElement('img');
+                    icon.src = 'https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg';
+                    icon.alt = 'BMC';
+                    icon.style.cssText = 'width:35px;height:auto;flex-shrink:0;';
+
+                    const text = document.createElement('span');
+                    text.style.cssText = 'font-weight:700;font-size:20px;letter-spacing:0.5px;';
+                    text.textContent = link.text || 'Buy me a coffee';
+
+                    card.appendChild(icon);
+                    card.appendChild(text);
+                    container.appendChild(card);
+                    container.style.border = 'none';
+
+                } else if (embedType === 'deezer-card') {
+                    // --- Deezer: Styled Card Fallback ---
+                    const card = document.createElement('a');
+                    card.href = link.embedData.url;
+                    card.target = '_blank';
+                    card.rel = 'noopener noreferrer';
+                    card.style.cssText = 'display:flex;align-items:center;gap:16px;padding:16px;background:linear-gradient(90deg, #323232 0%, #191414 100%);border-radius:12px;text-decoration:none;color:#fff;transition:opacity 0.2s;';
+                    card.onmouseenter = () => card.style.opacity = '0.9';
+                    card.onmouseleave = () => card.style.opacity = '1';
+
+                    const iconWrapper = document.createElement('div');
+                    iconWrapper.style.cssText = 'width:48px;height:48px;background:#EF5466;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+
+                    // Simple equalizer icon simulation
+                    const icon = document.createElement('div');
+                    icon.style.cssText = 'display:flex;gap:2px;align-items:center;height:20px;';
+                    ['12px', '20px', '16px', '24px'].forEach(h => {
+                        const bar = document.createElement('div');
+                        bar.style.cssText = `width:4px;height:${h};background:#fff;border-radius:2px;`;
+                        icon.appendChild(bar);
+                    });
+                    iconWrapper.appendChild(icon);
+
+                    const textWrap = document.createElement('div');
+                    textWrap.style.cssText = 'display:flex;flex-direction:column;gap:4px;min-width:0;';
+
+                    const title = document.createElement('span');
+                    title.style.cssText = 'font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+                    title.textContent = link.text || 'Ecouter sur Deezer';
+
+                    const sub = document.createElement('span');
+                    sub.style.cssText = 'font-size:13px;opacity:0.7;';
+                    sub.textContent = 'Ouvrir tracks/playlists';
+
+                    textWrap.appendChild(title);
+                    textWrap.appendChild(sub);
+                    card.appendChild(iconWrapper);
+                    card.appendChild(textWrap);
+                    container.appendChild(card);
+                    container.style.border = 'none';
+
                 } else {
                     const iframe = document.createElement("iframe");
                     iframe.src = embedUrl;
