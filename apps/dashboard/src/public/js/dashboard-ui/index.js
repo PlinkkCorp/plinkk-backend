@@ -5,7 +5,7 @@ import { ensureCanvasPreviewModal, openCanvasInlinePreview, buildCanvasPreviewUr
 import { setupStatusDropdown, updateStatusControlsDisabled, updateStatusPreview } from './status.js';
 
 // Expose some picker helpers for renderers (simple bridge without global namespace pollution ideally)
-  window.__DASH_PICKERS__ = { openPicker, renderPickerGrid, renderBtnThemeCard, pickerOnSelect: (i) => pickerSelect(i) };
+window.__DASH_PICKERS__ = { openPicker, renderPickerGrid, renderBtnThemeCard, pickerOnSelect: (i) => pickerSelect(i) };
 window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().open(platform, cb);
 
 (function () {
@@ -70,7 +70,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     statusDropdownPanel: qs('#statusDropdownPanel'),
     backgroundList: qs('#backgroundList'),
     addBackgroundColor: qs('#addBackgroundColor'),
-  invertBackgroundColors: qs('#invertBackgroundColors'),
+    invertBackgroundColors: qs('#invertBackgroundColors'),
     neonList: qs('#neonList'),
     addNeonColor: qs('#addNeonColor'),
     labelsList: qs('#labelsList'),
@@ -80,6 +80,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     linksList: qs('#linksList'),
     addLink: qs('#addLink'),
     layoutList: qs('#layoutList'),
+    layoutMode: document.querySelectorAll('input[name="layoutMode"]'),
   };
 
   const setStatus = (text, kind = '') => {
@@ -90,7 +91,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
 
   // Expose un déclencheur global pour l’autosave depuis le template (ex: lors d’un clic sur le bouton de masquage)
   window.__DASH_TRIGGER_SAVE__ = () => {
-    try { scheduleAutoSave(); } catch {}
+    try { scheduleAutoSave(); } catch { }
   };
   const schedulePreviewRefresh = () => {
     // Debounce: repousser si ça tape vite
@@ -100,13 +101,13 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       const elapsed = now - lastPreviewAt;
       // Throttle: au plus 1 refresh/s
       if (elapsed >= PREVIEW_MIN_INTERVAL) {
-        try { refreshPreview(); } catch {}
+        try { refreshPreview(); } catch { }
         lastPreviewAt = Date.now();
         previewQueued = false;
       } else if (!previewQueued) {
         previewQueued = true;
         setTimeout(() => {
-          try { refreshPreview(); } catch {}
+          try { refreshPreview(); } catch { }
           lastPreviewAt = Date.now();
           previewQueued = false;
         }, PREVIEW_MIN_INTERVAL - elapsed);
@@ -137,37 +138,37 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     let sectionsAPIFunction = []
     switch (hash) {
       case "appearance":
-        sectionsAPI = [ "plinkk", "neonColor" ]
-        sectionsAPIFunction = [ collectPayloadPlinkk, collectPayloadNeonColor ]
+        sectionsAPI = ["plinkk", "neonColor"]
+        sectionsAPIFunction = [collectPayloadPlinkk, collectPayloadNeonColor]
         break;
       case "background":
-        sectionsAPI = [ "background", "plinkk" ]
-        sectionsAPIFunction = [ collectPayloadBackground, collectPayloadPlinkk ]
+        sectionsAPI = ["background", "plinkk"]
+        sectionsAPIFunction = [collectPayloadBackground, collectPayloadPlinkk]
         break;
 
       case "links":
-        sectionsAPI = [ "socialIcon", "links", "plinkk" ]
-        sectionsAPIFunction = [ collectPayloadSocialIcon, collectPayloadLinks, collectPayloadPlinkk ]
+        sectionsAPI = ["socialIcon", "links", "plinkk"]
+        sectionsAPIFunction = [collectPayloadSocialIcon, collectPayloadLinks, collectPayloadPlinkk]
         break;
       case "categories":
-        sectionsAPI = [ "categories", "plinkk" ]
-        sectionsAPIFunction = [ collectPayloadCategories, collectPayloadPlinkk ]
+        sectionsAPI = ["categories", "plinkk"]
+        sectionsAPIFunction = [collectPayloadCategories, collectPayloadPlinkk]
         break;
       case "animations":
-        sectionsAPI = [ "plinkk" ]
-        sectionsAPIFunction = [ collectPayloadPlinkk ]
+        sectionsAPI = ["plinkk"]
+        sectionsAPIFunction = [collectPayloadPlinkk]
         break;
       case "statusbar":
-        sectionsAPI = [ "statusBar" ]
-        sectionsAPIFunction = [ collectPayloadStatusBar ]
+        sectionsAPI = ["statusBar"]
+        sectionsAPIFunction = [collectPayloadStatusBar]
         break;
       case "layout":
-        sectionsAPI = [ "layout" ]
-        sectionsAPIFunction = [ collectPayloadLayout ]
+        sectionsAPI = ["layout"]
+        sectionsAPIFunction = [collectPayloadLayout]
         break;
       default:
-        sectionsAPI = [ "plinkk" ]
-        sectionsAPIFunction = [ collectPayloadPlinkk ]
+        sectionsAPI = ["plinkk"]
+        sectionsAPIFunction = [collectPayloadPlinkk]
         break;
     }
     setStatus('Enregistrement...');
@@ -177,31 +178,31 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
         const payloadFn = sectionsAPIFunction[i];
         const payload = typeof payloadFn === 'function' ? payloadFn() : payloadFn;
         const res = await putConfig(section, payload);
-        
+
         if (section === 'categories' && res.categories && Array.isArray(res.categories)) {
-            state.categories = res.categories;
-            state.links.forEach(l => {
-                const cat = state.categories.find(c => c.name === l.categoryId || c.id === l.categoryId);
-                if (cat) {
-                    l.categoryId = cat.id;
-                }
-            });
-             renderCategories({ 
-              container: f.categoriesContainer, 
-              addBtn: f.addCategory, 
-              categories: state.categories, 
-              scheduleAutoSave,
-              onUpdate: () => {
-                renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave });
-              }
-            });
+          state.categories = res.categories;
+          state.links.forEach(l => {
+            const cat = state.categories.find(c => c.name === l.categoryId || c.id === l.categoryId);
+            if (cat) {
+              l.categoryId = cat.id;
+            }
+          });
+          renderCategories({
+            container: f.categoriesContainer,
+            addBtn: f.addCategory,
+            categories: state.categories,
+            scheduleAutoSave,
+            onUpdate: () => {
+              renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave });
+            }
+          });
         }
 
         if (section === 'links' && res.links && Array.isArray(res.links)) {
           // Attempt to reconcile IDs for new links
           const dbLinks = res.links;
           const usedDbIds = new Set();
-          
+
           // First pass: mark IDs that are already known
           state.links.forEach(l => {
             if (l.id && dbLinks.find(d => d.id === l.id)) {
@@ -213,9 +214,9 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
           state.links.forEach(l => {
             if (!l.id) {
               // Try to find a matching link in DB response that hasn't been matched yet
-              const match = dbLinks.find(d => 
-                !usedDbIds.has(d.id) && 
-                d.url === l.url && 
+              const match = dbLinks.find(d =>
+                !usedDbIds.has(d.id) &&
+                d.url === l.url &&
                 d.text === l.text &&
                 d.name === l.name
               );
@@ -232,9 +233,9 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     } catch (e) {
       let msg = e?.message || '';
       try {
-         const json = JSON.parse(msg);
-         if (json.error) msg = json.error;
-      } catch {}
+        const json = JSON.parse(msg);
+        if (json.error) msg = json.error;
+      } catch { }
       setStatus('Erreur: ' + msg, 'error');
     } finally {
       saving = false;
@@ -269,7 +270,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     try {
       f.degBackgroundColor.dispatchEvent(new Event('input', { bubbles: true }));
       f.degBackgroundColor.dispatchEvent(new Event('change', { bubbles: true }));
-    } catch {}
+    } catch { }
     f.buttonThemeEnable.checked = (cfg.buttonThemeEnable ?? 1) === 1;
     f.canvaEnable.checked = (cfg.canvaEnable ?? 1) === 1;
     if (f.showVerifiedBadge) f.showVerifiedBadge.checked = (cfg.showVerifiedBadge ?? true);
@@ -277,9 +278,14 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     // if (f.enableVCard) f.enableVCard.checked = (cfg.enableVCard ?? true);
     if (f.publicPhone) f.publicPhone.value = cfg.publicPhone || '';
     if (f.enableLinkCategories) f.enableLinkCategories.checked = (cfg.enableLinkCategories ?? false);
-    
+
+    if (f.layoutMode) {
+      const mode = cfg.layoutMode || 'LIST';
+      f.layoutMode.forEach(r => { r.checked = r.value === mode; });
+    }
+
     f.categoriesHint = qs('#categoriesHint');
-    
+
     if (f.enableLinkCategories) {
       if (f.enableLinkCategories.checked) {
         f.categoriesContainer.classList.remove('hidden');
@@ -346,28 +352,28 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     state.background = Array.isArray(cfg.background) ? [...cfg.background] : [];
     state.neonColors = Array.isArray(cfg.neonColors) ? [...cfg.neonColors] : [];
     state.labels = Array.isArray(cfg.labels) ? cfg.labels.map((x) => ({ ...x })) : [];
-  state.socialIcon = Array.isArray(cfg.socialIcon) ? cfg.socialIcon.map((x) => ({ ...x })) : [];
-  state.links = Array.isArray(cfg.links) ? cfg.links.map((x) => ({ ...x })) : [];
-  state.categories = Array.isArray(cfg.categories) ? cfg.categories.map((x) => ({ ...x })) : [];
-  const DEFAULT_LAYOUT = ['profile','username','social','email','links'];
-  state.layoutOrder = Array.isArray(cfg.layoutOrder) ? [...cfg.layoutOrder].filter(x => x !== 'labels') : [...DEFAULT_LAYOUT];
+    state.socialIcon = Array.isArray(cfg.socialIcon) ? cfg.socialIcon.map((x) => ({ ...x })) : [];
+    state.links = Array.isArray(cfg.links) ? cfg.links.map((x) => ({ ...x })) : [];
+    state.categories = Array.isArray(cfg.categories) ? cfg.categories.map((x) => ({ ...x })) : [];
+    const DEFAULT_LAYOUT = ['profile', 'username', 'social', 'email', 'links'];
+    state.layoutOrder = Array.isArray(cfg.layoutOrder) ? [...cfg.layoutOrder].filter(x => x !== 'labels') : [...DEFAULT_LAYOUT];
 
     renderBackground({ container: f.backgroundList, addBtn: f.addBackgroundColor, colors: state.background, scheduleAutoSave });
     renderNeon({ container: f.neonList, addBtn: f.addNeonColor, colors: state.neonColors, neonEnableEl: f.neonEnable, scheduleAutoSave });
     // renderLabels({ container: f.labelsList, addBtn: f.addLabel, labels: state.labels, scheduleAutoSave });
     try { renderSocial({ container: f.socialList, addBtn: f.addSocial, socials: state.socialIcon, scheduleAutoSave }); } catch (e) { console.error('renderSocial error', e); setStatus('Erreur affichage socials', 'error'); }
     try { renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave }); } catch (e) { console.error('renderLinks initial error', e); setStatus('Erreur affichage liens', 'error'); }
-    renderCategories({ 
-      container: f.categoriesContainer, 
-      addBtn: f.addCategory, 
-      categories: state.categories, 
+    renderCategories({
+      container: f.categoriesContainer,
+      addBtn: f.addCategory,
+      categories: state.categories,
       links: state.links,
       scheduleAutoSave,
       onUpdate: () => {
         renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave });
       }
     });
-  renderLayout({ container: f.layoutList, order: state.layoutOrder, scheduleAutoSave });
+    renderLayout({ container: f.layoutList, order: state.layoutOrder, scheduleAutoSave });
 
     if (f.invertBackgroundColors) {
       f.invertBackgroundColors.addEventListener('click', () => {
@@ -458,8 +464,10 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
   }
 
   function collectPayloadLayout() {
+    const mode = Array.from(f.layoutMode || []).find(r => r.checked)?.value || 'LIST';
     return {
       layoutOrder: state.layoutOrder,
+      layoutMode: mode,
     };
   }
 
@@ -505,23 +513,25 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     f.status_text, f.status_fontTextColor, f.status_statusText,
   ].forEach((el) => attachAutoSave(el, scheduleAutoSave));
 
-    if (f.enableLinkCategories) {
+  f.layoutMode?.forEach(r => attachAutoSave(r, scheduleAutoSave));
+
+  if (f.enableLinkCategories) {
     f.enableLinkCategories.addEventListener('change', () => {
       if (f.enableLinkCategories.checked) {
         f.categoriesContainer.classList.remove('hidden');
         if (f.addCategory) f.addCategory.classList.remove('hidden');
         if (f.categoriesDisabledMsg) f.categoriesDisabledMsg.classList.add('hidden');
         if (f.categoriesHint) f.categoriesHint.classList.remove('hidden');
-        
-        renderCategories({ 
-            container: f.categoriesContainer, 
-            addBtn: f.addCategory, 
-            categories: state.categories, 
-            links: state.links,
-            scheduleAutoSave,
-            onUpdate: () => {
-                renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave });
-            }
+
+        renderCategories({
+          container: f.categoriesContainer,
+          addBtn: f.addCategory,
+          categories: state.categories,
+          links: state.links,
+          scheduleAutoSave,
+          onUpdate: () => {
+            renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, categories: state.categories, scheduleAutoSave });
+          }
         });
       } else {
         f.categoriesContainer.classList.add('hidden');
@@ -681,14 +691,14 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       previewBox.className = 'rounded border border-slate-800 p-4 flex items-center justify-center';
       const dot = document.createElement('div');
       dot.className = 'h-6 w-6 rounded-full bg-indigo-400';
-  dot.style.animation = ensureAnimationLoops(item?.keyframes || '');
+      dot.style.animation = ensureAnimationLoops(item?.keyframes || '');
       previewBox.append(dot);
       card.append(head, previewBox);
       card.addEventListener('click', () => { window.__DASH_PICKERS__.pickerOnSelect?.(idx); closePicker(); });
       return card;
     }
 
-  function renderAnimBgCard(item, idx) {
+    function renderAnimBgCard(item, idx) {
       const card = document.createElement('button');
       card.type = 'button';
       card.className = 'p-3 rounded border border-slate-800 bg-slate-900 hover:bg-slate-800 text-left space-y-2';
@@ -700,7 +710,7 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       preview.className = 'rounded border border-slate-800 h-20';
       preview.style.backgroundImage = 'linear-gradient(45deg, #1f2937 0%, #0f172a 100%)';
       preview.style.backgroundSize = '200% 200%';
-  preview.style.animation = ensureAnimationLoops(item?.keyframes || '');
+      preview.style.animation = ensureAnimationLoops(item?.keyframes || '');
       card.append(head, preview);
       card.addEventListener('click', () => { window.__DASH_PICKERS__.pickerOnSelect?.(idx); closePicker(); });
       return card;
@@ -772,15 +782,15 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       if (!targetId) return;
       const targetInput = document.getElementById(targetId);
       if (!targetInput) return;
-      
+
       openIconModal((val) => {
-          const replaced = (val.startsWith('http://') || val.startsWith('https://')) 
-            ? val 
-            : `https://cdn.plinkk.fr/icons/${val}.svg`;
-            
-          targetInput.value = replaced;
-          targetInput.dispatchEvent(new Event('input', { bubbles: true }));
-          scheduleAutoSave();
+        const replaced = (val.startsWith('http://') || val.startsWith('https://'))
+          ? val
+          : `https://cdn.plinkk.fr/icons/${val}.svg`;
+
+        targetInput.value = replaced;
+        targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+        scheduleAutoSave();
       }, targetId);
     });
   });
@@ -789,6 +799,6 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
   renderSkeletons(f.socialList, 2);
   renderSkeletons(f.linksList, 4);
   renderSkeletons(f.layoutList, 5);
-  
+
   fetchConfig().then((cfg) => { fillForm(cfg); setStatus('Prêt — sauvegarde auto activée', 'success'); }).catch((e) => { setStatus('Impossible de charger: ' + (e?.message || ''), 'error'); });
 })();

@@ -1,108 +1,252 @@
 <div id="linkModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" tabindex="-1">
     <div class="absolute inset-0 bg-black/60 animate-fade-in"></div>
     <div
-        class="relative mx-auto mt-12 w-[92vw] max-w-2xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in p-4">
-        <div class="flex items-center justify-between px-2 py-1 border-b border-slate-800 mb-4">
-            <h3 id="linkModalTitle" class="font-semibold">Modifier le lien</h3>
-            <button id="linkModalClose" class="size-8 rounded bg-slate-800 hover:bg-slate-700">✕</button>
+        class="relative mx-auto mt-12 w-[92vw] max-w-2xl rounded-lg border border-slate-800 bg-slate-900 shadow-xl animate-pop-in p-0 overflow-hidden flex flex-col max-h-[85vh]">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-900 shrink-0">
+            <h3 id="linkModalTitleHeader" class="font-semibold text-slate-200">Ajouter un élément</h3>
+            <button id="linkModalClose"
+                class="size-8 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">✕</button>
         </div>
-        <div class="space-y-3">
-            <label class="block space-y-1">
-                <span class="text-sm text-slate-300">Titre <span class="info-i"
-                        title="Texte affiché sur le bouton ; court et descriptif">?</span></span>
-                <input id="linkModalTitleInput" type="text"
-                    class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
-            </label>
-            <label class="block space-y-1">
-                <span class="text-sm text-slate-300">URL <span class="info-i"
-                        title="Adresse complète (le préfixe https:// est ajouté automatiquement)">?</span></span>
-                <div class="relative flex">
-                    <button id="linkModalSchemeBtn" type="button"
-                        class="inline-flex items-center px-3 rounded-l-lg bg-slate-800 border border-r-0 border-slate-800 text-slate-300">
-                        <span id="linkModalSchemeLabel">https://</span>
-                        <svg class="ml-2" width="10" height="10" viewBox="0 0 10 10" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1 3l4 4 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
+
+        <!-- Scrollable Content -->
+        <div class="p-4 overflow-y-auto custom-scrollbar flex-1 space-y-5">
+
+            <!-- 1. Type Selector (Cards) -->
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Type
+                    d'élément</label>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <button type="button" data-type-select="LINK"
+                        class="type-card group relative flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-800 bg-slate-800/30 hover:bg-slate-800 transition-all text-slate-400 hover:text-white ring-2 ring-transparent data-[active=true]:ring-emerald-500 data-[active=true]:bg-emerald-500/10 data-[active=true]:text-emerald-400">
+                        <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke-linecap="round"
                                 stroke-linejoin="round" />
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                                stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
+                        <span class="text-xs font-medium">Lien</span>
                     </button>
-                    <div id="linkModalSchemeMenu"
-                        class="hidden absolute left-0 mt-10 w-40 rounded bg-slate-900 border border-slate-800 shadow-lg z-50">
-                        <button type="button" data-scheme="https"
-                            class="w-full text-left px-3 py-2 hover:bg-slate-800">https://</button>
-                        <button type="button" data-scheme="http"
-                            class="w-full text-left px-3 py-2 hover:bg-slate-800">http://</button>
-                    </div>
-                    <input id="linkModalUrlInput" type="text"
-                        class="flex-1 px-3 py-2 rounded-r-lg bg-slate-900 border border-slate-800"
-                        placeholder="example.com/chemin" />
+                    <button type="button" data-type-select="HEADER"
+                        class="type-card group relative flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-800 bg-slate-800/30 hover:bg-slate-800 transition-all text-slate-400 hover:text-white ring-2 ring-transparent data-[active=true]:ring-emerald-500 data-[active=true]:bg-emerald-500/10 data-[active=true]:text-emerald-400">
+                        <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 6h16M4 12h16M4 18h8" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <span class="text-xs font-medium">Titre</span>
+                    </button>
+                    <button type="button" data-type-select="EMBED"
+                        class="type-card group relative flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-800 bg-slate-800/30 hover:bg-slate-800 transition-all text-slate-400 hover:text-white ring-2 ring-transparent data-[active=true]:ring-emerald-500 data-[active=true]:bg-emerald-500/10 data-[active=true]:text-emerald-400">
+                        <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                            <line x1="8" y1="21" x2="16" y2="21" />
+                            <line x1="12" y1="17" x2="12" y2="21" />
+                        </svg>
+                        <span class="text-xs font-medium">Embed</span>
+                    </button>
+                    <button type="button" data-type-select="FORM"
+                        class="type-card group relative flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-800 bg-slate-800/30 hover:bg-slate-800 transition-all text-slate-400 hover:text-white ring-2 ring-transparent data-[active=true]:ring-emerald-500 data-[active=true]:bg-emerald-500/10 data-[active=true]:text-emerald-400">
+                        <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                            <path d="M8 21h8" />
+                            <path d="M12 17v4" />
+                        </svg>
+                        <span class="text-xs font-medium">Contact</span>
+                    </button>
                 </div>
-            </label>
-            <label class="block space-y-1">
-                <span class="text-sm text-slate-300">Icône <span class="info-i"
-                        title="Bibliothèque = icône prédéfinie (non modifiable), URL = coller l'adresse, Importer = uploader un fichier (SVG/PNG)">?</span></span>
-                <div class="flex items-center gap-3">
-                    <select id="linkModalIconSource"
-                        class="px-3 py-2 rounded bg-slate-900 border border-slate-800 text-sm w-40">
-                        <option value="catalog">Bibliothèque</option>
-                        <option value="url">URL</option>
-                        <option value="upload">Importer</option>
-                    </select>
-                    <div class="flex-1">
-                        <div id="linkModalIconPickerWrap" class="hidden">
-                            <div class="flex items-center gap-2">
-                                <input id="linkModalIconInput" type="text"
-                                    class="flex-1 px-3 py-2 rounded bg-slate-900 border border-slate-800"
-                                    placeholder="Cliquer pour choisir" readonly />
-                                <button id="linkModalPickIconBtn" type="button"
-                                    class="px-3 py-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">Choisir</button>
+                <!-- Hidden Select for Logic Compatibility -->
+                <select id="linkModalType" class="hidden">
+                    <option value="LINK">LINK</option>
+                    <option value="HEADER">HEADER</option>
+                    <option value="EMBED">EMBED</option>
+                    <option value="FORM">FORM</option>
+                </select>
+            </div>
+
+            <!-- 2. Main Config (Dynamic) -->
+            <div id="modalConfigSection" class="space-y-4">
+
+                <!-- Common: Title (Always visible except maybe for pure embeds if we wanted, but good for labeling) -->
+                <div id="field-title">
+                    <label class="block space-y-1">
+                        <span class="text-sm text-slate-300">Titre / Label</span>
+                        <input id="linkModalTitleInput" type="text"
+                            class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all outline-none"
+                            placeholder="Mon super lien" />
+                    </label>
+                </div>
+
+                <!-- LINK / EMBED: URL Input -->
+                <div id="field-url" class="group-field">
+                    <label class="block space-y-1">
+                        <span class="text-sm text-slate-300">Destination URL</span>
+                        <div class="relative flex">
+                            <!-- Scheme Button (Optional/Fancy) -->
+                            <button id="linkModalSchemeBtn" type="button"
+                                class="hidden sm:inline-flex items-center px-3 rounded-l-lg bg-slate-800 border border-r-0 border-slate-800 text-slate-300 text-xs font-mono">
+                                <span id="linkModalSchemeLabel">https://</span>
+                            </button>
+                            <input id="linkModalUrlInput" type="text"
+                                class="flex-1 px-3 py-2 rounded-lg sm:rounded-l-none bg-slate-900 border border-slate-800 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all outline-none"
+                                placeholder="example.com/page" />
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1 helper-text-link">L'adresse vers laquelle le bouton
+                            redirige.</p>
+                        <p class="text-xs text-slate-500 mt-1 helper-text-embed hidden">Lien de la vidéo YouTube, track
+                            Spotify, ou page à intégrer.</p>
+                    </label>
+                </div>
+
+                <!-- Icon Picker (Visible for LINK and FORM, hidden for HEADER/EMBED usually) -->
+                <div id="field-icon" class="group-field">
+                    <label class="block space-y-1">
+                        <span class="text-sm text-slate-300">Icône</span>
+                        <div class="flex items-center gap-2">
+                            <!-- Simple Source Select -->
+                            <select id="linkModalIconSource"
+                                class="px-2 py-2 rounded-lg bg-slate-900 border border-slate-800 text-sm w-32 focus:border-emerald-500/50 outline-none">
+                                <option value="catalog">Catalogue</option>
+                                <option value="url">Lien brut</option>
+                                <option value="upload">Upload</option>
+                            </select>
+
+                            <div class="flex-1 relative">
+                                <!-- Catalog -->
+                                <div id="linkModalIconPickerWrap" class="">
+                                    <div class="flex gap-2">
+                                        <input id="linkModalIconInput" type="text"
+                                            class="flex-1 px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-sm focus:border-emerald-500/50 outline-none"
+                                            placeholder="Nom de l'icône" readonly />
+                                        <button id="linkModalPickIconBtn" type="button"
+                                            class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm transition-colors">Choisir</button>
+                                    </div>
+                                </div>
+                                <!-- URL -->
+                                <div id="linkModalIconUrlWrap" class="hidden">
+                                    <input id="linkModalIconInputUrl" type="url"
+                                        class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-sm focus:border-emerald-500/50 outline-none"
+                                        placeholder="https://..." />
+                                </div>
+                                <!-- Upload -->
+                                <div id="linkModalIconUploadWrap" class="hidden">
+                                    <input id="linkModalIconUpload" type="file" accept="image/*"
+                                        class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-slate-800 file:text-slate-300 hover:file:bg-slate-700" />
+                                </div>
                             </div>
                         </div>
-                        <div id="linkModalIconUrlWrap" class="hidden">
-                            <input id="linkModalIconInputUrl" type="url"
-                                class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-800"
-                                placeholder="https://exemple.com/icone.svg" />
+                    </label>
+                </div>
+
+                <!-- FORM Specifics -->
+                <div id="field-form-config"
+                    class="group-field hidden space-y-3 p-4 rounded-xl bg-slate-800/20 border border-slate-800/50">
+                    <label class="block space-y-1">
+                        <span class="text-sm text-slate-300">Texte du bouton d'action</span>
+                        <input id="linkModalFormBtnText" type="text"
+                            class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:border-emerald-500/50 outline-none"
+                            placeholder="Envoyer le message" />
+                    </label>
+                    <label class="block space-y-1">
+                        <span class="text-sm text-slate-300">Message de succès</span>
+                        <input id="linkModalFormSuccessMsg" type="text"
+                            class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:border-emerald-500/50 outline-none"
+                            placeholder="Merci, nous avons bien reçu votre demande !" />
+                    </label>
+                </div>
+
+            </div>
+
+            <!-- 3. Advanced Settings (Collapsible) -->
+            <!-- Hidden for HEADER type -->
+            <div id="advancedSettingsWrap" class="border-t border-slate-800 pt-2">
+                <details class="group">
+                    <summary
+                        class="flex items-center justify-between cursor-pointer py-2 text-slate-400 hover:text-slate-200 font-medium select-none">
+                        <span>Paramètres avancés</span>
+                        <svg class="size-4 transform transition-transform group-open:rotate-180" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor">
+                            <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                        </svg>
+                    </summary>
+                    <div class="pt-3 space-y-4 animate-fade-in-down">
+
+                        <!-- Category & New Tab (Standard stuffs) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div id="field-category">
+                                <label
+                                    class="block text-xs uppercase tracking-wider text-slate-500 mb-1">Catégorie</label>
+                                <select id="linkModalCategory"
+                                    class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-sm focus:border-emerald-500/50 outline-none"></select>
+                            </div>
+                            <div class="flex items-end pb-2">
+                                <label class="flex items-center gap-3 cursor-pointer select-none">
+                                    <input id="linkModalNewTab" type="checkbox"
+                                        class="size-4 rounded border-slate-700 bg-slate-900 text-emerald-600 focus:ring-emerald-600/50" />
+                                    <span class="text-sm text-slate-300">Ouvrir dans un nouvel onglet</span>
+                                </label>
+                            </div>
                         </div>
-                        <div id="linkModalIconUploadWrap" class="hidden">
-                            <input id="linkModalIconUpload" type="file" accept="image/*,image/svg+xml"
-                                class="block w-full text-sm text-slate-300" />
+
+                        <!-- Description -->
+                        <label class="block space-y-1">
+                            <span class="text-xs uppercase tracking-wider text-slate-500">Sous-titre /
+                                Description</span>
+                            <input id="linkModalDescInput" type="text"
+                                class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 focus:border-emerald-500/50 outline-none"
+                                placeholder="Petit texte sous le titre" />
+                        </label>
+
+                        <!-- Redirection (OS / DeepLink) - Only for LINK -->
+                        <div id="advanced-redirection" class="space-y-3 pt-3 border-t border-slate-800 border-dashed">
+                            <h4 class="text-sm font-medium text-slate-300">Redirection Mobile</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <input id="linkModalIosUrl" type="url"
+                                    class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-sm focus:border-emerald-500/50 outline-none"
+                                    placeholder="App Store URL (iOS)" />
+                                <input id="linkModalAndroidUrl" type="url"
+                                    class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-sm focus:border-emerald-500/50 outline-none"
+                                    placeholder="Play Store URL (Android)" />
+                            </div>
+                            <label class="flex items-center gap-2 cursor-pointer select-none">
+                                <input id="linkModalForceAppOpen" type="checkbox"
+                                    class="size-4 rounded border-slate-700 bg-slate-900 text-emerald-600 focus:ring-emerald-600/50" />
+                                <span class="text-sm text-slate-400">Forcer l'ouverture de l'application (Deep
+                                    Link)</span>
+                            </label>
                         </div>
+
+                        <!-- Limits -->
+                        <div class="space-y-3 pt-3 border-t border-slate-800 border-dashed">
+                            <h4 class="text-sm font-medium text-slate-300">Limites</h4>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm text-slate-400">Désactiver après :</span>
+                                <input id="linkModalClickLimit" type="number" min="1"
+                                    class="w-24 px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-sm focus:border-emerald-500/50 outline-none"
+                                    placeholder="∞" />
+                                <span class="text-sm text-slate-400">clics</span>
+                            </div>
+                        </div>
+
+                        <!-- Helper hidden inputs for buttonTheme if needed, or put it here -->
+                        <div class="hidden">
+                            <select id="linkModalTheme">
+                                <option value="system">System</option>
+                            </select>
+                        </div>
+
                     </div>
-                </div>
-            </label>
-            <label class="block space-y-1">
-                <span class="text-sm text-slate-300">Thème du bouton <span class="info-i"
-                        title="Style visuel spécifique pour ce bouton (ex: Amazon, Discord...)">?</span></span>
-                <select id="linkModalTheme"
-                    class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-800 text-sm">
-                    <option value="system">Thème par défaut (Système)</option>
-                </select>
-            </label>
-            <label class="block space-y-1">
-                <span class="text-sm text-slate-300">Description (optionnelle) <span class="info-i"
-                        title="Texte court affiché sous le titre, optionnel">?</span></span>
-                <input id="linkModalDescInput" type="text"
-                    class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-800" />
-            </label>
-            <div class="flex items-center justify-between gap-3">
-                <div class="flex-1">
-                    <label class="block text-sm text-slate-300">Catégorie <span class="info-i"
-                            title="Attribuez ce lien à une catégorie pour l'organisation">?</span></label>
-                    <select id="linkModalCategory"
-                        class="w-full px-3 py-2 rounded bg-slate-900 border border-slate-800 text-sm"></select>
-                </div>
-                <div class="w-40">
-                    <label class="block text-sm text-slate-300">Ouvrir dans un nouvel onglet <span class="info-i"
-                            title="Ouvre le lien dans un nouvel onglet si coché">?</span></label>
-                    <input id="linkModalNewTab" type="checkbox" class="size-5 mt-2" />
-                </div>
+                </details>
             </div>
-            <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-800 mt-4">
-                <button id="linkModalCancel"
-                    class="px-4 py-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-300">Annuler</button>
-                <button id="linkModalSave"
-                    class="px-4 py-2 rounded bg-emerald-700 hover:bg-emerald-600 text-white">Enregistrer</button>
-            </div>
+
         </div>
+
+        <!-- Footer Actions -->
+        <div class="flex items-center justify-end gap-3 px-4 py-3 border-t border-slate-800 bg-slate-900 shrink-0">
+            <button id="linkModalCancel"
+                class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">Annuler</button>
+            <button id="linkModalSave"
+                class="px-6 py-2 rounded-lg text-sm font-medium bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-all hover:scale-[1.02] active:scale-[0.98]">Enregistrer</button>
+        </div>
+
     </div>
 </div>

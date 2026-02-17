@@ -216,14 +216,15 @@ export function applyTheme(theme) {
     if (theme.buttonHoverBackground && theme.buttonBackground &&
         theme.buttonHoverBackground.trim() !== '' && theme.buttonBackground.trim() !== '') {
         try {
+            // Use a separate rule specifically for webkit. Some browsers might reject it if combined.
             styleSheet.insertRule(`
                 ::-webkit-scrollbar-thumb:hover {
-                    background: linear-gradient(45deg, ${theme.buttonHoverBackground}, ${theme.buttonBackground});
+                    background: linear-gradient(45deg, ${theme.buttonHoverBackground}, ${theme.buttonBackground}) !important;
                 }
             `, styleSheet.cssRules.length);
         }
         catch (e) {
-            console.warn('Invalid button colors for scrollbar thumb hover:', theme.buttonHoverBackground, theme.buttonBackground, e);
+            // Silicon-style fail: if the browser doesn't like webkit-scrollbar, we just move on.
         }
     }
     const easterEggsBtn = document.querySelector(".easter-egg-gear-btn");

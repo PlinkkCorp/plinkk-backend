@@ -13,7 +13,7 @@ import {
 } from "@plinkk/prisma";
 
 export function generateProfileConfig(
-  profile: User & PlinkkSettings & { cosmetics?: Cosmetic | null },
+  profile: User & PlinkkSettings & { cosmetics?: Cosmetic | null, layoutMode?: string },
   links: Link[],
   backgroundColors: BackgroundColor[],
   labels: Label[],
@@ -45,6 +45,25 @@ export function generateProfileConfig(
       categoryId: l.categoryId,
       // @ts-ignore
       buttonTheme: l.buttonTheme,
+      // @ts-ignore
+      iosUrl: l.iosUrl,
+      // @ts-ignore
+      androidUrl: l.androidUrl,
+      // @ts-ignore
+      forceAppOpen: l.forceAppOpen,
+      // @ts-ignore
+      type: l.type,
+      // @ts-ignore
+      clickLimit: l.clickLimit,
+      // @ts-ignore
+      embedData: l.embedData,
+      // @ts-ignore
+      formData: l.formData,
+      clicks: l.clicks,
+      // @ts-ignore
+      scheduledAt: l.scheduledAt,
+      // @ts-ignore
+      expiresAt: l.expiresAt,
     }))
   )},
         categories: ${JSON.stringify(
@@ -108,6 +127,7 @@ export function generateProfileConfig(
         enableVCard: ${profile.enableVCard ?? false},
         publicPhone: ${JSON.stringify(profile.publicPhone || "")},
         enableLinkCategories: ${profile.enableLinkCategories ?? false},
+        layoutMode: ${JSON.stringify((profile).layoutMode || "LIST")},
     };
     export default profileData;
     `;

@@ -10,6 +10,7 @@ type ArrayDiff<T> = {
     removed: T[];
     updated: {
         id: string;
+        item: T;
         changes: ObjectDiff;
     }[];
     reordered: boolean;
@@ -97,7 +98,7 @@ export function calculateArrayDiff<T extends Record<string, any>>(
         } else {
             const changes = calculateObjectDiff(oldItem, newItem, ignoredFields);
             if (Object.keys(changes).length > 0) {
-                updated.push({ id, changes });
+                updated.push({ id, item: newItem, changes });
             }
         }
     }

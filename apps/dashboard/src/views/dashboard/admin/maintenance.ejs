@@ -6,7 +6,6 @@
             <%- include('partials/admin-nav.ejs', { user: user, active: 'maintenance' }) %>
 
                 <main class="col-span-12 lg:col-span-10 space-y-8 relative">
-                    <!-- Header -->
                     <div
                         class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-violet-900 to-slate-900 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
                         <div
@@ -19,9 +18,7 @@
                         </div>
                     </div>
 
-                    <!-- Main Controls -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Global State -->
                         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6">
                             <h2 class="text-xl font-bold text-white flex items-center gap-2">
                                 <svg class="w-5 h-5 text-violet-400" viewBox="0 0 24 24" fill="none"
@@ -33,7 +30,6 @@
                                 État Général
                             </h2>
 
-                            <!-- Global Toggle -->
                             <div
                                 class="flex items-center justify-between p-4 bg-slate-950 rounded-xl border border-slate-800">
                                 <div>
@@ -50,7 +46,6 @@
                                 </label>
                             </div>
 
-                            <!-- Dashboard Toggle -->
                             <div
                                 class="flex items-center justify-between p-4 bg-slate-950 rounded-xl border border-slate-800">
                                 <div>
@@ -67,7 +62,6 @@
                                 </label>
                             </div>
 
-                            <!-- Reason -->
                             <div class="space-y-2">
                                 <label class="text-sm font-medium text-slate-400">Raison / Message affiché</label>
                                 <textarea id="maintReason" rows="3"
@@ -76,7 +70,6 @@
                             </div>
                         </div>
 
-                        <!-- Scheduling -->
                         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6">
                             <h2 class="text-xl font-bold text-white flex items-center gap-2">
                                 <svg class="w-5 h-5 text-violet-400" viewBox="0 0 24 24" fill="none"

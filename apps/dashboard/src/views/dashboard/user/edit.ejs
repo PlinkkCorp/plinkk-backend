@@ -1,4 +1,5 @@
-<%- include('partials/head.ejs', { title: 'Tableau de bord - Édition', description: 'Configure les sections, apparence et arrière‑plan de ta page.', robots: 'noindex,nofollow' }) %>
+<%- include('partials/head.ejs', { title: 'Tableau de bord - Édition' ,
+    description: 'Configure les sections, apparence et arrière‑plan de ta page.' , robots: 'noindex,nofollow' }) %>
     <%- include('partials/header-dash.ejs', { user: user }) %>
 
         <div id="mobileEditNotice"
@@ -820,6 +821,37 @@
                                 <div class="mb-6 pb-4 border-b border-slate-800">
                                     <h3 class="text-lg font-semibold text-white">Agencement</h3>
                                     <p class="text-sm text-slate-400">Réordonnez les sections par glisser-déposer.</p>
+                                </div>
+                                <div class="mb-6 bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                    <label class="block text-sm font-medium text-slate-300 mb-3">Mode
+                                        d'affichage</label>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <label class="cursor-pointer">
+                                            <input type="radio" name="layoutMode" value="LIST" class="peer sr-only">
+                                            <div
+                                                class="p-4 rounded-xl border border-slate-700 bg-slate-900 peer-checked:border-violet-500 peer-checked:bg-violet-500/10 peer-checked:text-violet-400 text-slate-400 hover:border-slate-600 transition-all flex flex-col items-center gap-2">
+                                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2">
+                                                    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path>
+                                                </svg>
+                                                <span class="text-sm font-medium">Liste</span>
+                                            </div>
+                                        </label>
+                                        <label class="cursor-pointer">
+                                            <input type="radio" name="layoutMode" value="BENTO" class="peer sr-only">
+                                            <div
+                                                class="p-4 rounded-xl border border-slate-700 bg-slate-900 peer-checked:border-violet-500 peer-checked:bg-violet-500/10 peer-checked:text-violet-400 text-slate-400 hover:border-slate-600 transition-all flex flex-col items-center gap-2">
+                                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2">
+                                                    <rect x="3" y="3" width="7" height="7"></rect>
+                                                    <rect x="14" y="3" width="7" height="7"></rect>
+                                                    <rect x="14" y="14" width="7" height="7"></rect>
+                                                    <rect x="3" y="14" width="7" height="7"></rect>
+                                                </svg>
+                                                <span class="text-sm font-medium">Bento</span>
+                                            </div>
+                                        </label>
+                                    </div>
                                 </div>
                                 <div class="space-y-3" id="layoutList" role="list"></div>
                             </div>

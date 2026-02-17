@@ -1,4 +1,3 @@
-/* Reset & Modern Foundation */
 * {
     margin: 0;
     padding: 0;
@@ -26,7 +25,6 @@ body {
     background-attachment: fixed;
 }
 
-/* Profile Avatar Theme Fixes */
 .light-theme .plinkk-av-img {
     background: #f1f5f9 !important;
     color: #475569 !important;
@@ -38,8 +36,6 @@ body {
     color: #ffffff !important;
 }
 
-/* Conteneur principal ultra-moderne */
-/* Icon inversion system */
 .bi-invert {
     filter: invert(1) brightness(2) grayscale(1);
     transition: filter 0.3s ease;
@@ -77,9 +73,15 @@ body {
     filter: invert(1) brightness(0) grayscale(1) !important;
 }
 
-/* Fallback for cases where theme class might be on body */
 body:not(.dark-theme) .icon-cdn {
     filter: invert(1) brightness(0) grayscale(1) !important;
+}
+
+.dark-theme img[src*="cdn.jsdelivr.net"],
+[data-theme="dark"] img[src*="cdn.jsdelivr.net"],
+body.dark-theme img[src*="cdn.jsdelivr.net"], .iconGrid img[src*="cdn.jsdelivr.net"] {
+    filter: brightness(0) invert(1) !important;
+    opacity: 1 !important;
 }
 
 body:not(.dark-theme) .bi-invert {
@@ -146,7 +148,6 @@ article:hover {
         0 0 60px rgba(120, 119, 198, 0.25);
 }
 
-/* Typographie futuriste */
 h1 {
     font-size: 2rem;
     font-weight: 700;
@@ -188,7 +189,6 @@ p {
 
 
 
-/* Conteneur profile ultra-moderne avec système logo préservé */
 .profile-container {
     position: relative;
     width: 140px;
@@ -210,7 +210,6 @@ p {
     aspect-ratio: 1 / 1;
 }
 
-/* Wrapper pour le système de logo */
 .profile-pic-wrapper {
     width: 140px;
     height: 140px;
@@ -223,7 +222,6 @@ p {
     aspect-ratio: 1 / 1;
 }
 
-/* Image de profil sans animation */
 .profile-pic {
     width: 100%;
     height: 100%;
@@ -240,7 +238,6 @@ p {
     z-index: 3;
 }
 
-/* Système d'éclairage neon préservé */
 .profile-pic-wrapper::after {
     content: '';
     position: absolute;
@@ -275,13 +272,11 @@ p {
     transition: opacity 0.6s ease;
 }
 
-/* Intensification du neon au survol */
 .profile-container:hover .profile-pic-wrapper::after,
 .profile-container:hover .profile-pic-wrapper::before {
     opacity: 1;
 }
 
-/* Effet de pivot ultra-fluide */
 .profile-link {
     width: 100%;
     height: 100%;
@@ -347,7 +342,6 @@ p {
     color: #7c3aed;
 }
 
-/* Effet de pivot ultra-fluide */
 .profile-pic,
 .profile-link {
     width: 100%;
@@ -1418,7 +1412,6 @@ input:checked+.slider:before {
     display: block;
 }
 
-/* Footer responsive adjustments */
 @media (max-width: 480px) {
     footer {
         left: 50%;
@@ -1427,4 +1420,22 @@ input:checked+.slider:before {
         max-width: none;
         box-sizing: border-box;
     }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(30, 41, 59, 0.5);
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(71, 85, 105, 0.8);
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 1);
 }

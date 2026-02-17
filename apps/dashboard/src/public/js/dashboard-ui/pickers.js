@@ -272,6 +272,7 @@ export async function populateIconGrid(filterText) {
       const img = document.createElement('img');
       img.src = i.url || `https://cdn.plinkk.fr/icons/${i.slug}.svg`;
       img.alt = i.displayName;
+      img.loading = 'lazy';
       img.className = 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + getIconClass(img.src);
       img.onload = () => {
         img.classList.remove('opacity-0');
@@ -379,6 +380,7 @@ export function renderBtnThemeCard(item, idx) {
   const iconUrl = (item.icon || '') //.replace('{{username}}', `/${window.__PLINKK_USER_ID__}`);
   img.src = iconUrl;
   img.alt = item.name || '';
+  img.loading = 'lazy';
   img.className = 'h-full w-full object-contain opacity-0 transition-opacity duration-300';
 
   img.onload = () => {

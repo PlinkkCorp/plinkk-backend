@@ -93,7 +93,16 @@ document.addEventListener("DOMContentLoaded", async function () {
             email: () => article.appendChild(createEmailAndDescription(profileData)),
             links: () => {
                 const linkBoxes = createLinkBoxes(profileData);
-                (linkBoxes || []).forEach((box) => article.appendChild(box));
+                if (linkBoxes && linkBoxes.length) {
+                    if (profileData.layoutMode === 'BENTO') {
+                        const grid = document.createElement('div');
+                        grid.className = 'bento-grid';
+                        linkBoxes.forEach((box) => grid.appendChild(box));
+                        article.appendChild(grid);
+                    } else {
+                        linkBoxes.forEach((box) => article.appendChild(box));
+                    }
+                }
             },
         };
         filtered.forEach(key => { try { renderers[key] && renderers[key](); } catch (e) { /* ignore */ } });
@@ -154,13 +163,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     // Si les liens n'ont pas été rendus par l'ordre ci-dessus (par ex. fallback), rendre maintenant
     try {
-        const hasLinksRendered = !!document.querySelector('#profile-article .discord-box, #profile-article .button');
+        const hasLinksRendered = !!document.querySelector('#profile-article .discord-box, #profile-article .button, #profile-article .bento-grid');
         if (!hasLinksRendered) {
             const linkBoxes = createLinkBoxes(profileData);
             if (!linkBoxes || !linkBoxes.length) {
                 console.warn("No link boxes created.");
             } else {
-                linkBoxes.forEach((box) => article.appendChild(box));
+                if (profileData.layoutMode === 'BENTO') {
+                    const grid = document.createElement('div');
+                    grid.className = 'bento-grid';
+                    linkBoxes.forEach((box) => grid.appendChild(box));
+                    article.appendChild(grid);
+                } else {
+                    linkBoxes.forEach((box) => article.appendChild(box));
+                }
             }
         }
     } catch (_) { }
@@ -177,7 +193,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!isPreview) {
         const footer = document.createElement("footer");
         const themeIndex = profileData.selectedThemeIndex % themes.length;
-        footer.innerHTML = `Design with ❤️ by <a href="http://plinkk.fr" target="_blank" rel="noopener noreferrer"><p style="color:${((_a = themes[themeIndex]) === null || _a === void 0 ? void 0 : _a.buttonTextColor) || 'defaultColor'};display:inline;padding:2px 2px 2px 4px;border-radius:5px;background-color:${((_b = themes[themeIndex]) === null || _b === void 0 ? void 0 : _b.buttonBackground) || 'defaultColor'};">PlinkkCorp©</p></a>`;
+        footer.innerHTML = `Design with ❤️ by <a href="http://plinkk.fr" target="_blank" rel="noopener noreferrer"><p style="color:${((_a = themes[themeIndex]) === null || _a === void 0 ? void 0 : _a.buttonTextColor) || 'defaultColor'};display:inline;padding:2px 2px 2px 4px;border-radius:5px;background-color:${((_b = themes[themeIndex]) === null || _b === void 0 ? void 0 : _b.buttonBackground) || 'defaultColor'};">Plinkk©</p></a>`;
         footer.style.zIndex = "9999";
         document.body.appendChild(footer);
     }

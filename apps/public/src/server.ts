@@ -282,21 +282,6 @@ fastify.addHook("onRequest", async (request, reply) => {
           isOwner,
           links: displayLinks,
           publicPath,
-          // Pass other display variables to view if needed, 
-          // though show.ejs typically fetches them via /config.js or bundles them?
-          // Actually show.ejs usually relies on client-side fetching from /config.js for dynamic stuff,
-          // OR it renders server-side.
-          // Looking at line 219, /config.js exists.
-          // If show.ejs uses SSR variables for initial render, we need to pass them.
-          // But based on current code, show.ejs receives 'page', 'userId', etc.
-          // Let's assume show.ejs or its scripts use these passed variables or fetch config.js.
-          // Since we are modifying the server logic for the main page load, we should ensure
-          // that if the template uses them, they are correct.
-          // However, the original code only passed 'page', 'userId', 'username', 'isOwner', 'links', 'publicPath'.
-          // It seems the preview logic (versionId) primarily affects 'displayPage' and 'displayLinks' for the server-rendered part.
-          // The visual settings (background, neon, etc.) are likely handled by /config.js which we ALSO modified in previous steps.
-          // So for THIS route (the HTML serve), we just need to ensure displayPage and displayLinks are correct.
-          // We fetched everything to be safe and consistent with /config.js logic.
         });
       } else if (request.url === "/css/styles.css") {
         return reply.sendFile(`css/styles.css`);
@@ -518,8 +503,8 @@ fastify.addHook("onRequest", async (request, reply) => {
           }
         } catch (e) { }
 
-        const pageProfile: User & PlinkkSettings = {
-          plinkkId: null,
+        const pageProfile: any = {
+          plinkkId: finalSettings?.plinkkId ?? page.id,
           ...page.user,
           profileLink: finalSettings?.profileLink ?? "",
           profileImage: finalSettings?.profileImage ?? "",
@@ -559,6 +544,7 @@ fastify.addHook("onRequest", async (request, reply) => {
           showPartnerBadge: finalSettings?.showPartnerBadge ?? true,
           enableVCard: finalSettings?.enableVCard ?? false,
           enableLinkCategories: finalSettings?.enableLinkCategories ?? false,
+          layoutMode: finalSettings?.layoutMode ?? "LINKTREE",
         };
 
         const generated = generateProfileConfig(

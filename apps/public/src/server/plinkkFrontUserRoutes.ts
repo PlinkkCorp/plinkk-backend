@@ -88,6 +88,48 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     },
   );
 
+  fastify.post(
+    "/api/lead",
+    { config: { rateLimit: { max: 20, timeWindow: "1 minute" } } },
+    async function (request, reply) {
+      const body = request.body as {
+        linkId: string;
+        data: any;
+      };
+
+      if (!body.linkId || !body.data) {
+        return reply.code(400).send({ error: "Missing linkId or data" });
+      }
+
+      try {
+        const link = await prisma.link.findUnique({
+          where: { id: body.linkId },
+          select: { id: true, plinkkId: true, userId: true }
+        });
+
+        if (!link) return reply.code(404).send({ error: "Link not found" });
+
+        // Enregistrer le lead dans PageStat (eventType=LEAD)
+        await prisma.pageStat.create({
+          data: {
+            plinkkId: link.plinkkId || "",
+            eventType: "LEAD",
+            ip: String(request.ip || request.headers?.["x-forwarded-for"] || ""),
+            meta: {
+              linkId: link.id,
+              formData: body.data
+            }
+          }
+        });
+
+        return reply.send({ ok: true });
+      } catch (e) {
+        request.log.error(e);
+        return reply.code(500).send({ error: "Internal Server Error" });
+      }
+    }
+  );
+
   fastify.get(
     "/:username",
     { config: { rateLimit: false } },

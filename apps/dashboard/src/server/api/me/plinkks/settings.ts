@@ -208,7 +208,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
         await prisma.link.deleteMany({ where: { id: { in: toDelete } } });
 
       for (const l of body.links) {
-        const linkData = {
+        const baseLinkData = {
           icon: l.icon ?? undefined,
           url: l.url,
           text: l.text ?? undefined,
@@ -216,16 +216,36 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           description: l.description ?? undefined,
           showDescriptionOnHover: l.showDescriptionOnHover ?? undefined,
           showDescription: l.showDescription ?? undefined,
-          categoryId: l.categoryId ?? null,
-          // @ts-ignore - Field added to schema but client generation might be pending
-          // buttonTheme: l.buttonTheme || "system",
+          buttonTheme: l.buttonTheme || "system",
+          iosUrl: l.iosUrl ?? null,
+          androidUrl: l.androidUrl ?? null,
+          forceAppOpen: l.forceAppOpen ?? false,
+          type: l.type || "LINK",
+          clickLimit: l.clickLimit ?? null,
+          embedData: l.embedData ?? null,
+          formData: l.formData ?? null,
         };
 
         if (l.id && existingIds.has(l.id)) {
-          await prisma.link.update({ where: { id: l.id }, data: linkData });
+          await prisma.link.update({
+            where: { id: l.id },
+            data: {
+              ...baseLinkData,
+              category: l.categoryId
+                ? { connect: { id: l.categoryId } }
+                : { disconnect: true },
+            },
+          });
         } else {
           await prisma.link.create({
-            data: { ...linkData, userId, plinkkId: id },
+            data: {
+              ...baseLinkData,
+              userId,
+              plinkkId: id,
+              category: l.categoryId
+                ? { connect: { id: l.categoryId } }
+                : undefined,
+            },
           });
         }
       }
@@ -247,7 +267,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           structuredChanges.push({ key: 'link', old: l.text || l.url, type: 'removed' as const });
         });
         diff.updated.forEach((u: any) => {
-          const keys = Object.keys(u.diff).join(', ');
+          const keys = Object.keys(u.changes).join(', ');
           changes.push(`Updated Link '${u.item.text || u.item.url}': ${keys}`);
           structuredChanges.push({ key: 'link', old: u.item.text || u.item.url, new: u.item.text || u.item.url, type: 'updated' as const, detail: keys });
         });
@@ -281,6 +301,13 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
             showDescriptionOnHover: l.showDescriptionOnHover,
             showDescription: l.showDescription,
             categoryId: l.categoryId,
+            type: l.type,
+            embedData: l.embedData,
+            formData: l.formData,
+            iosUrl: l.iosUrl,
+            androidUrl: l.androidUrl,
+            forceAppOpen: l.forceAppOpen,
+            clickLimit: l.clickLimit,
             // @ts-ignore
             buttonTheme: l.buttonTheme,
           })),

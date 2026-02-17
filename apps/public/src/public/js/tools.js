@@ -489,6 +489,272 @@ export function createLinkBoxes(profileData) {
 
     // Helper to create a single link box
     const createBox = (link) => {
+        if (link.type === 'EMBED') {
+        }
+        // --- 0. Schedule & Expiration Check (Client-side) ---
+        const now = new Date();
+        if (link.scheduledAt && new Date(link.scheduledAt) > now) {
+            return document.createComment(`Link ${link.id} hidden due to schedule`);
+        }
+        if (link.expiresAt && new Date(link.expiresAt) < now) {
+            return document.createComment(`Link ${link.id} hidden due to expiration`);
+        }
+
+        // --- 1. Ephemeral Link Check (Client-side) ---
+        if (link.clickLimit > 0 && typeof link.clicks === 'number' && link.clicks >= link.clickLimit) {
+            return document.createComment(`Link ${link.id} hidden due to click limit`);
+        }
+
+        if (link.type === 'HEADER') {
+            const header = document.createElement('h3');
+            header.className = 'link-header';
+            header.textContent = link.text;
+            header.style.color = profileData.textColor || '#fff';
+            header.style.marginTop = '16px';
+            header.style.marginBottom = '8px';
+            header.style.textAlign = 'center';
+            header.style.width = '100%';
+            header.style.fontSize = '1.2rem';
+            return header;
+        }
+
+        // --- 2. Lead/Form Handling ---
+        if (link.type === 'FORM' && link.formData) {
+            const container = document.createElement("div");
+            container.className = "discord-box form-box";
+            if (profileData.buttonThemeEnable === 1 && link.buttonTheme && link.buttonTheme !== 'system') {
+                // Apply button theme styles if needed, or keep generic form style
+                // For forms, we might want a distinct look or just the toggle button to look like a link
+            }
+
+            // Create toggle button (looks like a link)
+            const toggle = document.createElement("button");
+            toggle.className = "form-toggle-btn w-full h-full flex items-center justify-center gap-2";
+            toggle.style.background = "transparent";
+            toggle.style.border = "none";
+            toggle.style.color = "inherit";
+            toggle.style.cursor = "pointer";
+            toggle.style.padding = "0";
+
+            const icon = document.createElement("img");
+            icon.src = link.icon || 'https://cdn.plinkk.fr/icons/mail.svg'; // Default mail icon
+            icon.className = "w-6 h-6 object-contain";
+            icon.loading = "lazy";
+
+            const text = document.createElement("span");
+            text.textContent = link.text || "Contactez-nous";
+            text.style.fontWeight = "500";
+
+            toggle.appendChild(icon);
+            toggle.appendChild(text);
+
+            // Form Content Container
+            const formContent = document.createElement("div");
+            formContent.className = "form-content hidden"; // Hidden by default
+            formContent.style.width = "100%";
+            formContent.style.padding = "12px";
+            formContent.style.marginTop = "8px";
+            formContent.style.backgroundColor = "rgba(0,0,0,0.2)";
+            formContent.style.borderRadius = "8px";
+
+            // Build inputs from formData fields
+            const inputs = [];
+            const fields = link.formData.fields || [];
+            fields.forEach(field => {
+                const wrapper = document.createElement("div");
+                wrapper.style.marginBottom = "8px";
+
+                const label = document.createElement("label");
+                label.textContent = field.label;
+                label.style.display = "block";
+                label.style.fontSize = "0.8rem";
+                label.style.marginBottom = "4px";
+                label.style.opacity = "0.8";
+
+                let input;
+                if (field.type === 'textarea') {
+                    input = document.createElement("textarea");
+                    input.rows = 3;
+                } else {
+                    input = document.createElement("input");
+                    input.type = field.type || "text";
+                }
+                input.className = "w-full p-2 rounded bg-white/10 border border-white/20 focus:border-white/50 outline-none transition-colors";
+                input.placeholder = field.placeholder || "";
+                input.name = field.name || field.label; // Simple name mapping
+                input.required = field.required !== false;
+
+                inputs.push({ name: field.name, element: input });
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(input);
+                formContent.appendChild(wrapper);
+            });
+
+            // Submit Button
+            const submitBtn = document.createElement("button");
+            submitBtn.textContent = link.formData.buttonText || "Envoyer";
+            submitBtn.className = "w-full p-2 mt-2 rounded bg-white/20 hover:bg-white/30 transition-colors font-medium";
+
+            const statusMsg = document.createElement("div");
+            statusMsg.className = "mt-2 text-center text-sm hidden";
+
+            submitBtn.onclick = async (e) => {
+                e.preventDefault();
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Envoi...";
+
+                // Collect data
+                const data = {};
+                let valid = true;
+                inputs.forEach(item => {
+                    data[item.name] = item.element.value;
+                    if (item.element.required && !item.element.value) valid = false;
+                });
+
+                if (!valid) {
+                    statusMsg.textContent = "Veuillez remplir tous les champs obligatoires.";
+                    statusMsg.className = "mt-2 text-center text-sm text-red-400";
+                    statusMsg.classList.remove("hidden");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = link.formData.buttonText || "Envoyer";
+                    return;
+                }
+
+                try {
+                    const res = await fetch("/api/lead", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ linkId: link.id, data })
+                    });
+
+                    if (res.ok) {
+                        statusMsg.textContent = link.formData.successMessage || "Envoyé avec succès !";
+                        statusMsg.className = "mt-2 text-center text-sm text-green-400";
+                        // Clear inputs
+                        inputs.forEach(i => i.element.value = "");
+                        setTimeout(() => {
+                            formContent.classList.add("hidden");
+                        }, 2000);
+                    } else {
+                        throw new Error("Erreur serveur");
+                    }
+                } catch (err) {
+                    statusMsg.textContent = "Une erreur est survenue. Réessayez.";
+                    statusMsg.className = "mt-2 text-center text-sm text-red-400";
+                } finally {
+                    statusMsg.classList.remove("hidden");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = link.formData.buttonText || "Envoyer";
+                }
+            };
+
+            formContent.appendChild(submitBtn);
+            formContent.appendChild(statusMsg);
+
+            // Toggle logic
+            toggle.onclick = () => {
+                formContent.classList.toggle("hidden");
+            };
+
+            container.appendChild(toggle);
+            container.appendChild(formContent);
+            return container;
+        }
+
+        // --- 3. Embed Handling ---
+        if (link.type === 'EMBED' && link.embedData) {
+            const container = document.createElement("div");
+            container.className = "discord-box embed-box";
+            container.style.padding = "0";
+            container.style.overflow = "hidden";
+            container.style.display = "flex";
+            container.style.flexDirection = "column";
+            container.style.borderRadius = "12px"; // slightly more rounded for embeds
+            container.style.border = "1px solid rgba(255,255,255,0.1)";
+
+            if (link.embedData.url) {
+                let embedUrl = link.embedData.url;
+                let isSpotify = false;
+                let isYouTube = false;
+
+                // --- SMART EMBED LOGIC ---
+                try {
+                    const urlObj = new URL(embedUrl);
+
+                    // 1. YouTube
+                    if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
+                        isYouTube = true;
+                        let videoId = null;
+                        if (urlObj.hostname.includes('youtu.be')) {
+                            videoId = urlObj.pathname.slice(1);
+                        } else if (urlObj.pathname.includes('/watch')) {
+                            videoId = urlObj.searchParams.get('v');
+                        } else if (urlObj.pathname.includes('/embed/')) {
+                            videoId = urlObj.pathname.split('/embed/')[1];
+                        }
+
+                        if (videoId) {
+                            embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+                        }
+                    }
+
+                    // 2. Spotify
+                    if (urlObj.hostname.includes('spotify.com')) {
+                        isSpotify = true;
+                        // open.spotify.com/track/ID -> open.spotify.com/embed/track/ID
+                        if (!urlObj.pathname.includes('/embed')) {
+                            // Handle standard web player links
+                            embedUrl = `https://open.spotify.com/embed${urlObj.pathname}`;
+                        }
+                    }
+
+                    // 3. SoundCloud (basic iframe support usually requires their widget API, but check for visual player param)
+                    if (urlObj.hostname.includes('soundcloud.com')) {
+                        // SoundCloud usually needs oEmbed to get the widget URL from a track URL.
+                        // For now we assume the user might paste the widget URL or we leave it as is.
+                        // Improving this would require a backend proxy or client-side fetch if possible.
+                    }
+
+                } catch (e) {
+                    // Invalid URL, ignore smart transformation
+                    console.warn("Invalid embed URL:", embedUrl);
+                }
+
+                const iframe = document.createElement("iframe");
+                iframe.src = embedUrl;
+                iframe.style.position = "relative";
+                iframe.style.zIndex = "2";
+                iframe.style.width = "100%";
+                iframe.style.border = "none";
+
+                // Adjust height based on type
+                if (isSpotify) {
+                    iframe.style.height = "152px"; // Standard Spotify compact embed height (80 or 152)
+                    iframe.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+                } else if (isYouTube) {
+                    iframe.style.aspectRatio = "16/9";
+                    iframe.style.height = "auto";
+                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen";
+                } else {
+                    iframe.style.height = "100%";
+                    iframe.style.minHeight = "200px";
+                }
+
+                iframe.loading = "lazy";
+                iframe.allowFullscreen = true;
+
+                container.appendChild(iframe);
+            } else {
+                container.textContent = "Contenu intégré invalide";
+                container.style.padding = "16px";
+                container.style.textAlign = "center";
+                container.style.opacity = "0.7";
+            }
+            return container;
+        }
+
+        // --- 4. Standard Link (with OS Redirection) ---
         const discordBox = document.createElement("div");
         const iconWrapper = document.createElement("div");
         iconWrapper.className = "link-icon-wrapper animate-pulse bg-white/5 rounded flex items-center justify-center shrink-0";
@@ -506,10 +772,35 @@ export function createLinkBoxes(profileData) {
             iconWrapper.classList.remove('animate-pulse', 'bg-white/5');
         };
 
-        // Créer le lien principal qui englobe tout le contenu
         const discordLink = document.createElement("a");
-        if (isSafeUrl(link.url)) {
-            discordLink.href = window.location.hostname === "plinkk.fr" ? "/click/" + link.id : link.url;
+
+        // --- OS Redirection & Direct Link Logic ---
+        let finalUrl = link.url;
+        try {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+            const isAndroid = /android/i.test(ua);
+
+            if (isIOS && link.iosUrl && link.iosUrl.trim()) {
+                finalUrl = link.iosUrl;
+            } else if (isAndroid && link.androidUrl && link.androidUrl.trim()) {
+                finalUrl = link.androidUrl;
+            }
+        } catch (e) { }
+
+        if (isSafeUrl(finalUrl)) {
+            // Apply redirection
+            // If forceAppOpen is true, use finalUrl directly (bypass tracking for deep links to ensure app opening)
+            // Otherwise, use /click/ tracking unless user is on localhost/preview
+
+            const isDirect = link.forceAppOpen || finalUrl !== link.url;
+
+            if (isDirect) {
+                discordLink.href = finalUrl;
+            } else {
+                discordLink.href = window.location.hostname === "plinkk.fr" ? "/click/" + link.id : finalUrl;
+            }
+
             discordLink.id = link.id
             discordLink.target = "_blank";
             discordLink.rel = "noopener noreferrer";
@@ -518,6 +809,7 @@ export function createLinkBoxes(profileData) {
             discordLink.href = "#";
             discordLink.title = "Lien non valide";
         }
+
         if (profileData.buttonThemeEnable === 1) {
             let themeConfig = null;
             if (link.buttonTheme && link.buttonTheme !== 'system') {
@@ -711,36 +1003,24 @@ export function createLinkBoxes(profileData) {
         });
 
         profileData.categories.forEach(cat => {
-            const catLinks = linksByCat[cat.id];
-            if (catLinks && catLinks.length > 0) {
-                const header = document.createElement('h3');
-                header.className = 'category-header';
-                header.textContent = cat.name;
-                header.style.color = profileData.textColor || '#fff'; // Fallback color
-                header.style.marginTop = '20px';
-                header.style.marginBottom = '10px';
-                header.style.textAlign = 'center';
-                header.style.width = '100%';
-                elements.push(header);
-                catLinks.forEach(l => elements.push(createBox(l)));
+            const header = document.createElement('h3');
+            header.className = 'link-header';
+            header.textContent = cat.name;
+            header.style.color = profileData.textColor || '#fff';
+            header.style.marginTop = '16px';
+            header.style.marginBottom = '8px';
+            header.style.textAlign = 'center';
+            header.style.width = '100%';
+            header.style.fontSize = '1.2rem';
+            elements.push(header);
+
+            if (linksByCat[cat.id]) {
+                linksByCat[cat.id].forEach(l => elements.push(createBox(l)));
             }
         });
 
-        if (otherLinks.length > 0) {
-            if (elements.length > 0) {
-                const header = document.createElement('h3');
-                header.className = 'category-header';
-                header.textContent = 'Autres';
-                header.style.color = profileData.textColor || '#fff';
-                header.style.marginTop = '20px';
-                header.style.marginBottom = '10px';
-                header.style.textAlign = 'center';
-                header.style.width = '100%';
-                elements.push(header);
-            }
-            otherLinks.forEach(l => elements.push(createBox(l)));
-        }
-        return elements.slice(0, maxLinkNumber + profileData.categories.length + 1); // Rough limit
+        otherLinks.forEach(l => elements.push(createBox(l)));
+        return elements.slice(0, maxLinkNumber + profileData.categories.length + 5);
     } else {
         return profileData.links.slice(0, maxLinkNumber).map(createBox);
     }

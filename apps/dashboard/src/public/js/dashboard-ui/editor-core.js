@@ -160,27 +160,125 @@ function renderPlinkk(config) {
 
     // Render link
     function renderLink(link, index) {
-        const linkIcon = link.icon || DEFAULT_LINK_ICON;
-        const linkText = link.text || link.name || link.url || 'Lien';
         const isHidden = link.hidden ? ' opacity-50' : '';
+        const linkId = link.id;
 
-        return `
-            <div class="link-item${isHidden}" data-link-id="${link.id}" data-index="${index}" draggable="true">
-                <div class="link-content">
-                    <img src="${linkIcon}" alt="" class="link-icon" onerror="this.style.opacity=0.5"/>
-                    <span class="link-text editable-inline" data-field="text" data-type="link" data-id="${link.id}">${escapeHtml(linkText)}</span>
-                </div>
-                <p class="link-desc editable-inline editable-multiline" data-field="description" data-type="link" data-id="${link.id}">${escapeHtml(link.description || '')}</p>
-                <div class="link-actions">
-                    <button class="action-btn edit-link-btn" data-id="${link.id}" title="Modifier">
+        // --- HEADER ---
+        if (link.type === 'HEADER') {
+            return `
+            <div class="link-item${isHidden} link-item-header" data-link-id="${linkId}" data-index="${index}" draggable="true" style="background:transparent;border:none;box-shadow:none;display:block;">
+                <h3 class="link-header editable-inline" data-field="text" data-type="link" data-id="${linkId}" style="color:${textColor};margin:16px 0 8px;text-align:center;width:100%;font-size:1.2rem;font-weight:700;">${escapeHtml(link.text || 'Titre')}</h3>
+                <div class="link-actions" style="justify-content:center;">
+                    <button class="action-btn edit-link-btn" data-id="${linkId}" title="Modifier">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
-                    <button class="action-btn toggle-link-btn" data-id="${link.id}" data-hidden="${link.hidden ? 'true' : 'false'}" title="${link.hidden ? 'Afficher' : 'Masquer'}">
+                    <button class="action-btn delete-link-btn" data-id="${linkId}" title="Supprimer">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                </div>
+            </div>`;
+        }
+
+        // --- EMBED ---
+        if (link.type === 'EMBED' && link.embedData) {
+            let embedHtml = '<div style="padding:20px;text-align:center;opacity:0.6;">Contenu intégré vide</div>';
+            if (link.embedData.url) {
+                let embedUrl = link.embedData.url;
+                let isSpotify = false;
+                let isYouTube = false;
+                try {
+                    const urlObj = new URL(embedUrl);
+                    if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
+                        isYouTube = true;
+                        let videoId = null;
+                        if (urlObj.hostname.includes('youtu.be')) videoId = urlObj.pathname.slice(1);
+                        else if (urlObj.pathname.includes('/watch')) videoId = urlObj.searchParams.get('v');
+                        else if (urlObj.pathname.includes('/embed/')) videoId = urlObj.pathname.split('/embed/')[1];
+                        if (videoId) embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+                    }
+                    if (urlObj.hostname.includes('spotify.com')) {
+                        isSpotify = true;
+                        if (!urlObj.pathname.includes('/embed')) embedUrl = `https://open.spotify.com/embed${urlObj.pathname}`;
+                    }
+                } catch (e) { }
+
+                let style = 'width:100%;border:none;display:block;';
+                if (isSpotify) style += 'height:152px;';
+                else if (isYouTube) style += 'aspect-ratio:16/9;height:auto;';
+                else style += 'height:300px;';
+
+                embedHtml = `<iframe src="${embedUrl}" style="${style}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+            }
+
+            return `
+            <div class="link-item${isHidden}" data-link-id="${linkId}" data-index="${index}" draggable="true" style="flex-direction:column;padding:0;overflow:hidden;">
+                <div style="width:100%;position:relative;">
+                    ${embedHtml}
+                    <div style="position:absolute;inset:0;z-index:10;pointer-events:none;border:1px solid rgba(255,255,255,0.1);border-radius:inherit;"></div>
+                </div>
+                <div class="link-actions" style="width:100%;justify-content:flex-end;padding:8px;background:rgba(0,0,0,0.3);">
+                    <div style="margin-right:auto;padding-left:8px;font-size:0.8rem;opacity:0.7;">${escapeHtml(link.text || 'Embed')}</div>
+                    <button class="action-btn edit-link-btn" data-id="${linkId}" title="Modifier">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="action-btn toggle-link-btn" data-id="${linkId}" data-hidden="${link.hidden ? 'true' : 'false'}" title="${link.hidden ? 'Afficher' : 'Masquer'}">
+                        ${link.hidden
+                    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+                    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'}
+                    </button>
+                    <button class="action-btn delete-link-btn" data-id="${linkId}" title="Supprimer">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                </div>
+            </div>`;
+        }
+
+        // --- FORM ---
+        if (link.type === 'FORM') {
+            const linkIcon = link.icon || 'https://cdn.plinkk.fr/icons/mail.svg';
+            return `
+            <div class="link-item${isHidden}" data-link-id="${linkId}" data-index="${index}" draggable="true">
+                <div class="link-content">
+                    <img src="${linkIcon}" alt="" class="link-icon" onerror="this.style.opacity=0.5"/>
+                    <span class="link-text">${escapeHtml(link.text || 'Contact')}</span>
+                </div>
+                <div class="link-actions">
+                    <button class="action-btn edit-link-btn" data-id="${linkId}" title="Modifier">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="action-btn toggle-link-btn" data-id="${linkId}" data-hidden="${link.hidden ? 'true' : 'false'}" title="${link.hidden ? 'Afficher' : 'Masquer'}">
+                        ${link.hidden
+                    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+                    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'}
+                    </button>
+                    <button class="action-btn delete-link-btn" data-id="${linkId}" title="Supprimer">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                </div>
+            </div>`;
+        }
+
+        // --- STANDARD LINK (Default) ---
+        const linkIcon = link.icon || DEFAULT_LINK_ICON;
+        const linkText = link.text || link.name || link.url || 'Lien';
+
+        return `
+            <div class="link-item${isHidden}" data-link-id="${linkId}" data-index="${index}" draggable="true">
+                <div class="link-content">
+                    <img src="${linkIcon}" alt="" class="link-icon" onerror="this.style.opacity=0.5"/>
+                    <span class="link-text editable-inline" data-field="text" data-type="link" data-id="${linkId}">${escapeHtml(linkText)}</span>
+                </div>
+                <p class="link-desc editable-inline editable-multiline" data-field="description" data-type="link" data-id="${linkId}">${escapeHtml(link.description || '')}</p>
+                <div class="link-actions">
+                    <button class="action-btn edit-link-btn" data-id="${linkId}" title="Modifier">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="action-btn toggle-link-btn" data-id="${linkId}" data-hidden="${link.hidden ? 'true' : 'false'}" title="${link.hidden ? 'Afficher' : 'Masquer'}">
                         ${link.hidden
                 ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
                 : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'}
                     </button>
-                    <button class="action-btn delete-link-btn" data-id="${link.id}" title="Supprimer">
+                    <button class="action-btn delete-link-btn" data-id="${linkId}" title="Supprimer">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     </button>
                 </div>

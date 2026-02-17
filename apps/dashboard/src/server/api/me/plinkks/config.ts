@@ -70,6 +70,8 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       canvaEnable: settings?.canvaEnable ?? 0,
       selectedCanvasIndex: settings?.selectedCanvasIndex ?? null,
       layoutOrder: settings?.layoutOrder ?? null,
+      // @ts-ignore
+      layoutMode: settings?.layoutMode ?? "LIST",
       background: background.map((c) => c.color),
       neonColors: neonColors.map((c) => c.color),
       labels: labels.map((l) => ({ data: l.data, color: l.color, fontColor: l.fontColor })),
@@ -84,6 +86,14 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
         showDescriptionOnHover: l.showDescriptionOnHover,
         showDescription: l.showDescription,
         categoryId: l.categoryId,
+        type: l.type,
+        embedData: l.embedData,
+        formData: l.formData,
+        iosUrl: l.iosUrl,
+        androidUrl: l.androidUrl,
+        forceAppOpen: l.forceAppOpen,
+        clickLimit: l.clickLimit,
+        buttonTheme: l.buttonTheme,
       })),
       categories: categories.map((c) => ({ id: c.id, name: c.name, order: c.order })),
       statusbar: statusbar
@@ -300,39 +310,54 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
     if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
 
     const currentSettings = await prisma.plinkkSettings.findUnique({ where: { plinkkId: id } });
-    const body = request.body as { layoutOrder?: string[] };
+    const body = request.body as { layoutOrder?: string[], layoutMode?: string };
 
-    if (body?.layoutOrder !== undefined) {
+    let changed = false;
+    const updates: any = {};
+    const changesLog: any[] = [];
+
+    if (body.layoutOrder !== undefined) {
       const oldOrder = currentSettings?.layoutOrder;
       const newOrder = body.layoutOrder;
+      const orderChanged = JSON.stringify(oldOrder) !== JSON.stringify(newOrder);
 
-      let changed = false;
-      if (!oldOrder && newOrder) changed = true;
-      else if (oldOrder && !newOrder) changed = true; // Unlikely if body.layoutOrder is defined
-      else if (oldOrder && newOrder) {
-        if (JSON.stringify(oldOrder) !== JSON.stringify(newOrder)) changed = true;
-      }
-
-      if (changed) {
-        const oldData = { layoutOrder: oldOrder };
-        const newData = { layoutOrder: newOrder };
-
-        await prisma.plinkkSettings.upsert({
-          where: { plinkkId: id },
-          create: { plinkkId: id, layoutOrder: body.layoutOrder },
-          update: { layoutOrder: body.layoutOrder },
-        });
-
-        await logDetailedAction(userId as string, "UPDATE_PLINKK_LAYOUT", id, oldData, newData, request.ip);
-
-        // Capture snapshot for history
-        createPlinkkVersion(id, userId as string, "Réorganisation des sections", false, [{
+      if (orderChanged) {
+        updates.layoutOrder = newOrder;
+        changed = true;
+        changesLog.push({
           key: 'layoutOrder',
           old: oldOrder,
           new: newOrder,
           type: 'reordered' as const
-        }]).catch(err => request.log.error(err));
+        });
       }
+    }
+
+    if (body.layoutMode !== undefined) {
+      // @ts-ignore
+      const oldMode = currentSettings?.layoutMode || 'LIST';
+      if (oldMode !== body.layoutMode) {
+        updates.layoutMode = body.layoutMode;
+        changed = true;
+        changesLog.push({
+          key: 'layoutMode',
+          old: oldMode,
+          new: body.layoutMode,
+          type: 'updated' as const
+        });
+      }
+    }
+
+    if (changed) {
+      await prisma.plinkkSettings.upsert({
+        where: { plinkkId: id },
+        create: { plinkkId: id, ...updates },
+        update: updates,
+      });
+
+      await logDetailedAction(String(userId), "UPDATE_PLINKK_LAYOUT", id, currentSettings, updates, request.ip);
+
+      createPlinkkVersion(id, String(userId), "Mise à jour agencement", false, changesLog).catch(err => request.log.error(err));
     }
 
     return reply.send({ ok: true });

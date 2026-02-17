@@ -237,6 +237,15 @@ model Link {
   buttonTheme            String?  @default("system")
   clicks                 Int      @default(0)
 
+  // Advanced Link Features
+  iosUrl         String?
+  androidUrl     String?
+  forceAppOpen   Boolean? @default(false)
+  type           String?  @default("LINK") // LINK, FORM, EMBED, HEADER, MUSIC
+  clickLimit     Int?
+  embedData      Json?
+  formData       Json?
+
   // Scheduled links (premium) : programmation d'activation/désactivation
   scheduledAt  DateTime?  // Date à partir de laquelle le lien est visible
   expiresAt    DateTime?  // Date à laquelle le lien disparaît
@@ -465,6 +474,9 @@ model PlinkkSettings {
   selectedCanvasIndex              Int?
   // Ordre d'agencement des sections (déplacement visuel dans le dashboard)
   layoutOrder                      Json?   @default("[\"profile\",\"username\",\"statusbar\",\"labels\",\"social\",\"email\",\"links\"]")
+
+  // Portfolio / Bento mode
+  layoutMode                       String? @default("LIST") // LIST, BENTO
 }
 
 model PlinkkEvent {

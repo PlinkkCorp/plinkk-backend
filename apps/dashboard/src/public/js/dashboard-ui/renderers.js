@@ -482,7 +482,10 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
   function openLinkModal(idx) {
     if (!modal) return;
     editingIndex = (typeof idx === 'number') ? idx : null;
-    const l = (editingIndex !== null) ? links[editingIndex] : { url: '', text: '', icon: '', description: '', categoryId: null, buttonTheme: 'system', newTab: false };
+    const l = (editingIndex !== null) ? links[editingIndex] : {
+      url: '', text: '', icon: '', description: '', categoryId: null, buttonTheme: 'system', newTab: false,
+      iosUrl: '', androidUrl: '', forceAppOpen: false, type: 'LINK', clickLimit: null, embedData: null, formData: null // defaults
+    };
     fillCategorySelect();
     fillThemeSelect();
     modalTitle.value = l.text || '';
@@ -587,6 +590,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
                   card.className = 'p-3 rounded border border-slate-700 bg-slate-900 hover:bg-slate-800 text-left flex items-center gap-3';
                   const img = document.createElement('img');
                   img.src = `https://cdn.plinkk.fr/icons/${item.iconSlug}.svg`;
+                  img.loading = 'lazy';
                   img.className = 'h-8 w-8 rounded bg-slate-800';
                   const col = document.createElement('div');
                   const title = document.createElement('div');
@@ -638,7 +642,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
           const grid = el('div', { class: 'grid grid-cols-6 gap-2 w-full' });
           platforms.slice(0, 24).forEach((plat) => {
             const btn = el('button', { type: 'button', class: 'flex flex-col items-center gap-1 p-2 rounded border border-slate-700 bg-gradient-to-b from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-center text-xs transition', title: plat.name });
-            const img = el('img', { src: `https://cdn.plinkk.fr/icons/${plat.iconSlug}.svg`, class: 'h-7 w-7' });
+            const img = el('img', { src: `https://cdn.plinkk.fr/icons/${plat.iconSlug}.svg`, class: 'h-7 w-7', loading: 'lazy' });
             const label = el('div', { class: 'text-xs text-slate-300 truncate w-full', text: plat.name });
             btn.append(imgContainer, label);
             btn.addEventListener('click', () => {
@@ -681,6 +685,40 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
     modalCat.value = l.categoryId || '';
     if (modalTheme) modalTheme.value = l.buttonTheme || 'system';
     modalNewTab.checked = !!l.newTab;
+
+    // Advanced fields
+    try {
+      const ios = document.getElementById('linkModalIosUrl');
+      const android = document.getElementById('linkModalAndroidUrl');
+      const force = document.getElementById('linkModalForceAppOpen');
+      const clickLim = document.getElementById('linkModalClickLimit');
+      const typeSel = document.getElementById('linkModalType');
+
+      if (ios) ios.value = l.iosUrl || '';
+      if (android) android.value = l.androidUrl || '';
+      if (force) force.checked = !!l.forceAppOpen;
+      if (clickLim) clickLim.value = l.clickLimit || '';
+      if (typeSel) typeSel.value = l.type || 'LINK';
+
+      const formBtn = document.getElementById('linkModalFormBtnText');
+      const formMsg = document.getElementById('linkModalFormSuccessMsg');
+      if (formBtn) formBtn.value = (l.formData && l.formData.buttonText) || '';
+      if (formMsg) formMsg.value = (l.formData && l.formData.successMessage) || '';
+
+      if (typeSel) typeSel.dispatchEvent(new Event('change'));
+    } catch (e) { }
+
+    // Set active type and trigger UI update
+    try {
+      const currentType = l.type || 'LINK';
+      const typeBtn = modal.querySelector(`button[data-type-select="${currentType}"]`);
+      if (typeBtn) typeBtn.click();
+      else {
+        // Fallback if no type matches (shouldn't happen)
+        const first = modal.querySelector('button[data-type-select="LINK"]');
+        if (first) first.click();
+      }
+    } catch (e) { }
     // Persist editing index on modal element so the save handler (bound once) can read it
     try { if (editingIndex !== null) modal.dataset.editingIndex = String(editingIndex); else delete modal.dataset.editingIndex; } catch { }
     // If icon source is catalog, ensure the input is readonly (cannot edit the stored library link)
@@ -939,6 +977,84 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
 
   // Initialize modal buttons only once
   if (modal && !modal._initialized) {
+    // Type Selector Logic (Cards)
+    try {
+      const typeBtns = modal.querySelectorAll('button[data-type-select]');
+      const typeInput = document.getElementById('linkModalType');
+
+      // Field Containers
+      const fieldUrl = document.getElementById('field-url');
+      const fieldIcon = document.getElementById('field-icon');
+      const fieldForm = document.getElementById('field-form-config');
+      const advancedWrap = document.getElementById('advancedSettingsWrap');
+      const advancedRedirect = document.getElementById('advanced-redirection');
+      const helperLink = document.querySelector('.helper-text-link');
+      const helperEmbed = document.querySelector('.helper-text-embed');
+
+      const updateUI = (type) => {
+        // Update active state of buttons
+        typeBtns.forEach(btn => {
+          if (btn.dataset.typeSelect === type) {
+            btn.dataset.active = "true";
+          } else {
+            delete btn.dataset.active;
+          }
+        });
+
+        // Update hidden input
+        if (typeInput) typeInput.value = type;
+
+        // Show/Hide fields based on type
+        // LINK: Title, URL, Icon, Advanced(All)
+        // HEADER: Title, Advanced(Partial - no redirect)
+        // EMBED: Title, URL, Advanced(Partial - no redirect)
+        // FORM: Title, Icon, FormConfig, Advanced(Partial - no redirect)
+
+        if (fieldUrl) {
+          if (type === 'LINK' || type === 'EMBED') fieldUrl.classList.remove('hidden');
+          else fieldUrl.classList.add('hidden');
+        }
+
+        if (fieldIcon) {
+          if (type === 'LINK' || type === 'FORM') fieldIcon.classList.remove('hidden');
+          else fieldIcon.classList.add('hidden');
+        }
+
+        if (fieldForm) {
+          if (type === 'FORM') fieldForm.classList.remove('hidden');
+          else fieldForm.classList.add('hidden');
+        }
+
+        if (advancedWrap) {
+          if (type === 'HEADER') advancedWrap.classList.add('hidden');
+          else advancedWrap.classList.remove('hidden');
+        }
+
+        if (advancedRedirect) {
+          if (type === 'LINK') advancedRedirect.classList.remove('hidden');
+          else advancedRedirect.classList.add('hidden');
+        }
+
+        // Helpers
+        if (helperLink && helperEmbed) {
+          if (type === 'EMBED') {
+            helperLink.classList.add('hidden');
+            helperEmbed.classList.remove('hidden');
+          } else {
+            helperLink.classList.remove('hidden');
+            helperEmbed.classList.add('hidden');
+          }
+        }
+      };
+
+      typeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const type = btn.dataset.typeSelect;
+          updateUI(type);
+        });
+      });
+
+    } catch (e) { console.error(e); }
     // scheme menu toggle and selection handlers
     if (modalSchemeBtn && modalSchemeMenu && !modalSchemeBtn._bound) {
       modalSchemeBtn.addEventListener('click', (e) => {
@@ -981,6 +1097,26 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       });
       modalUrl._schemeBound = true;
     }
+
+    // Type selector logic
+    const typeSel = document.getElementById('linkModalType');
+    if (typeSel && !typeSel._bound) {
+      typeSel.addEventListener('change', () => {
+        const val = typeSel.value;
+        const embedSet = document.getElementById('embed-settings');
+        const formSet = document.getElementById('form-settings');
+        const urlInput = document.getElementById('linkModalUrlInput');
+        const urlLabel = urlInput ? urlInput.closest('label') : null;
+
+        if (embedSet) embedSet.classList.toggle('hidden', val !== 'EMBED');
+        if (formSet) formSet.classList.toggle('hidden', val !== 'FORM');
+
+        // Hide URL input for FORM type
+        if (urlLabel) urlLabel.style.display = (val === 'FORM') ? 'none' : '';
+      });
+      typeSel._bound = true;
+    }
+
     if (modalSaveBtn) modalSaveBtn.addEventListener('click', () => {
       // determine icon based on selected source
       const iconSourceEl = document.getElementById('linkModalIconSource');
@@ -1006,8 +1142,32 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
         description: modalDesc.value.trim() || '',
         categoryId: modalCat.value || null,
         buttonTheme: modalTheme ? modalTheme.value : 'system',
-        newTab: !!modalNewTab.checked
+        newTab: !!modalNewTab.checked,
+        // New fields
+        iosUrl: document.getElementById('linkModalIosUrl')?.value || null,
+        androidUrl: document.getElementById('linkModalAndroidUrl')?.value || null,
+        forceAppOpen: document.getElementById('linkModalForceAppOpen')?.checked || false,
+        clickLimit: document.getElementById('linkModalClickLimit')?.value ? parseInt(document.getElementById('linkModalClickLimit').value) : null,
+        type: document.getElementById('linkModalType')?.value || 'LINK',
       };
+
+      // Handle specific data for types
+      if (payload.type === 'FORM') {
+        payload.formData = {
+          buttonText: document.getElementById('linkModalFormBtnText')?.value || 'Envoyer',
+          successMessage: document.getElementById('linkModalFormSuccessMsg')?.value || 'Message envoyé !',
+          fields: [{ type: 'text', label: 'Nom' }, { type: 'email', label: 'Email' }, { type: 'textarea', label: 'Message' }]
+        };
+        payload.url = ''; // Form doesn't use URL
+      } else {
+        payload.formData = null;
+      }
+
+      if (payload.type === 'EMBED') {
+        payload.embedData = { url: fullUrl };
+      } else {
+        payload.embedData = null;
+      }
 
       // If an external save handler was provided (via window.__OPEN_LINK_MODAL__), call it instead
       try {
@@ -1103,12 +1263,47 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
     iconImg.onload = () => { iconImg.classList.remove('opacity-0'); iconContainer.classList.remove('animate-pulse'); };
     iconImg.onerror = () => { iconContainer.classList.remove('animate-pulse'); };
     iconContainer.appendChild(iconImg);
-    if (l.icon) iconImg.src = l.icon;
 
-    const textWrap = el('div', { class: 'min-w-0' });
+    // Set default icon based on type if l.icon is missing
+    let displayIcon = l.icon;
+    if (!displayIcon) {
+      const type = l.type || 'LINK';
+      if (type === 'EMBED') {
+        const url = (l.url || '').toLowerCase();
+        if (url.includes('youtube.com') || url.includes('youtu.be')) displayIcon = 'https://cdn.plinkk.fr/icons/youtube-alt.svg';
+        else if (url.includes('spotify.com')) displayIcon = 'https://cdn.plinkk.fr/icons/spotify.svg';
+        else displayIcon = 'https://cdn.plinkk.fr/icons/video.svg'; // fallback
+      } else if (type === 'FORM') {
+        displayIcon = 'https://cdn.plinkk.fr/icons/messenger.svg'; // Or a mail icon
+      } else if (type === 'HEADER') {
+        displayIcon = 'https://cdn.plinkk.fr/icons/list.svg';
+      }
+    }
+
+    if (displayIcon) iconImg.src = displayIcon;
+
+    const textWrap = el('div', { class: 'min-w-0 flex-1' });
+    const titleRow = el('div', { class: 'flex items-center gap-2 mb-0.5' });
     const title = el('div', { class: 'text-sm font-medium text-slate-200 truncate' }); title.textContent = l.text || l.name || '';
-    const small = el('div', { class: 'text-xs text-slate-400 truncate' }); small.textContent = l.url || '';
-    textWrap.append(title, small);
+
+    // Type Badge
+    const type = l.type || 'LINK';
+    const badges = {
+      LINK: { text: 'Lien', class: 'bg-slate-800 text-slate-400' },
+      HEADER: { text: 'Titre', class: 'bg-blue-500/10 text-blue-400 border border-blue-500/20' },
+      EMBED: { text: 'Embed', class: 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' },
+      FORM: { text: 'Formulaire', class: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' }
+    };
+    const b = badges[type] || badges.LINK;
+    const badge = el('span', { class: `px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${b.class}`, text: b.text });
+
+    titleRow.append(title, badge);
+
+    const small = el('div', { class: 'text-xs text-slate-400 truncate opacity-60' });
+    small.textContent = type === 'FORM' ? 'Collecte de leads' : (l.url || '');
+    if (type === 'HEADER') small.textContent = 'Séparateur de section';
+
+    textWrap.append(titleRow, small);
 
     left.append(grip, iconContainer, textWrap);
 
