@@ -3,11 +3,15 @@ import { store as state } from './state.js';
 export class CategoryManager {
     constructor() {
         this.plinkkId = window.__PLINKK_SELECTED_ID__;
-        this.listContainer = document.getElementById('categoriesList');
-        this.addButton = document.getElementById('addCategory');
+        this.listContainer = null;
+        this.addButton = null;
     }
 
     init() {
+        console.log('Category Manager Initializing...');
+        this.listContainer = document.getElementById('categoriesList');
+        this.addButton = document.getElementById('addCategory');
+
         if (!this.listContainer) return;
         this.setupListeners();
     }

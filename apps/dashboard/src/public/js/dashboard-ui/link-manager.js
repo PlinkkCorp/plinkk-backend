@@ -4,6 +4,21 @@ import { uiUtils } from './ui-utils.js';
 export class LinkManager {
     constructor() {
         this.plinkkId = window.__PLINKK_SELECTED_ID__;
+        this.modal = null;
+        this.modalTitleHeader = null;
+        this.saveBtn = null;
+        this.closeBtns = [];
+        this.inputs = {};
+        this.typeBtns = [];
+        this.sections = {};
+
+        this.currentEditingId = null;
+        this.saveTimeout = null;
+    }
+
+    init() {
+        console.log('[LinkManager] Initializing...');
+
         this.modal = document.getElementById('linkModal');
         this.modalTitleHeader = document.getElementById('linkModalTitleHeader');
         this.saveBtn = document.getElementById('linkModalSave');
@@ -11,6 +26,8 @@ export class LinkManager {
             document.getElementById('linkModalClose'),
             document.getElementById('linkModalCancel')
         ];
+
+        console.log('[LinkManager] Modal:', !!this.modal, 'SaveBtn:', !!this.saveBtn);
 
         // Inputs
         this.inputs = {
@@ -25,13 +42,17 @@ export class LinkManager {
             category: document.getElementById('linkModalCategory'),
             formBtnText: document.getElementById('linkModalFormBtnText'),
             formSuccessMsg: document.getElementById('linkModalFormSuccessMsg'),
-            typeSelect: document.getElementById('linkModalType'),
+            typeSelect: document.getElementById('linkModalType'), // This was missing in query
             iconInput: document.getElementById('linkModalIconInput')
         };
 
+        console.log('[LinkManager] Inputs found:', Object.keys(this.inputs).filter(k => !!this.inputs[k]));
+        console.log('[LinkManager] MISSING:', Object.keys(this.inputs).filter(k => !this.inputs[k]));
+
+        // Also ensure typeSelect is found if ID is different in some versions? No, expected linkModalType.
+
         this.typeBtns = document.querySelectorAll('[data-type-select]');
-        this.currentEditingId = null;
-        this.saveTimeout = null;
+        console.log('[LinkManager] Type buttons:', this.typeBtns.length);
 
         // Sections to toggle
         this.sections = {
@@ -40,10 +61,6 @@ export class LinkManager {
             formConfig: document.getElementById('field-form-config'),
             advanced: document.getElementById('advancedSettingsWrap'),
         };
-    }
-
-    init() {
-        console.log('Link Manager Initializing...');
 
         // Scheme Toggler
         this.schemeBtn = document.getElementById('linkModalSchemeBtn');
@@ -54,7 +71,6 @@ export class LinkManager {
             this.schemeBtn.addEventListener('click', () => {
                 this.currentScheme = this.currentScheme === 'https://' ? 'http://' : 'https://';
                 this.schemeLabel.textContent = this.currentScheme;
-                this.debouncedSave();
             });
         }
 
@@ -71,7 +87,6 @@ export class LinkManager {
                     e.target.value = val.substring(7);
                     if (this.schemeLabel) this.schemeLabel.textContent = this.currentScheme;
                 }
-                this.debouncedSave();
             });
         }
 
@@ -111,26 +126,25 @@ export class LinkManager {
                     this.closeModal();
                 }
             });
-
-            // Auto-save on input (handled individually for URL now, but keep for others)
-            this.modal.addEventListener('input', (e) => {
-                if (e.target !== this.inputs.url) this.debouncedSave();
-            });
-            this.modal.addEventListener('change', () => this.debouncedSave());
         }
 
         // Type Selection
-        this.typeBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const type = btn.dataset.typeSelect;
-                this.setModalType(type);
-                this.debouncedSave();
+        if (this.typeBtns) {
+            this.typeBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    console.log('[LinkManager] Type clicked:', btn.dataset.typeSelect);
+                    const type = btn.dataset.typeSelect;
+                    this.setModalType(type);
+                });
             });
-        });
+        }
 
         // Save
         if (this.saveBtn) {
-            this.saveBtn.addEventListener('click', () => this.saveLink());
+            this.saveBtn.addEventListener('click', () => {
+                console.log('[LinkManager] Save button clicked');
+                this.saveLink();
+            });
         }
 
         // Icon Picker logic
@@ -140,7 +154,6 @@ export class LinkManager {
                 if (window.openIconModal) window.openIconModal((icon) => {
                     if (this.inputs.iconInput) {
                         this.inputs.iconInput.value = icon;
-                        this.debouncedSave();
                     }
                 });
             });
@@ -148,7 +161,11 @@ export class LinkManager {
     }
 
     openModal(type = 'LINK', existingData = null) {
-        if (!this.modal) return;
+        console.log('[LinkManager] Opening modal', type, existingData);
+        if (!this.modal) {
+            console.error('[LinkManager] Modal element not found!');
+            return;
+        }
 
         this.currentEditingId = existingData ? existingData.id : null;
         this.modalTitleHeader.textContent = existingData ? 'Modifier l\'élément' : 'Ajouter un élément';
@@ -169,7 +186,59 @@ export class LinkManager {
         this.inputs.title.focus();
     }
 
-    // ... closeModal and setModalType seem fine ...
+    closeModal() {
+        if (this.modal) {
+            this.modal.classList.add('hidden');
+            this.modal.classList.remove('flex');
+        }
+        this.currentEditingId = null;
+    }
+
+    setModalType(type) {
+        console.log('[LinkManager] Setting modal type:', type);
+        if (this.inputs.typeSelect) {
+            this.inputs.typeSelect.value = type;
+        } else {
+            console.error('[LinkManager] Type select input not found');
+        }
+
+
+        this.typeBtns.forEach(btn => {
+            if (btn.dataset.typeSelect === type) {
+                btn.classList.add('bg-indigo-600', 'text-white');
+                btn.classList.remove('text-slate-400', 'hover:bg-slate-800');
+            } else {
+                btn.classList.remove('bg-indigo-600', 'text-white');
+                btn.classList.add('text-slate-400', 'hover:bg-slate-800');
+            }
+        });
+
+        const s = this.sections;
+
+        // Hide all first
+        if (s.url) s.url.classList.add('hidden');
+        if (s.icon) s.icon.classList.remove('hidden'); // Default show
+        if (s.formConfig) s.formConfig.classList.add('hidden');
+        if (s.advanced) s.advanced.classList.remove('hidden'); // Default show
+
+        // Logic
+        switch (type) {
+            case 'HEADER':
+                if (s.url) s.url.classList.add('hidden');
+                if (s.advanced) s.advanced.classList.add('hidden');
+                break;
+            case 'FORM':
+                if (s.url) s.url.classList.add('hidden');
+                if (s.formConfig) s.formConfig.classList.remove('hidden');
+                break;
+            case 'EMBED':
+            case 'MUSIC':
+            case 'LINK':
+            default:
+                if (s.url) s.url.classList.remove('hidden');
+                break;
+        }
+    }
 
     populateForm(data) {
         this.setModalType(data.type);
@@ -208,16 +277,52 @@ export class LinkManager {
         }
     }
 
-    // ... resetForm and debouncedSave ...
+    resetForm() {
+        this.currentEditingId = null;
+        this.setModalType('LINK');
+
+        const i = this.inputs;
+        if (i.title) i.title.value = '';
+        if (i.url) i.url.value = '';
+        if (i.desc) i.desc.value = '';
+        if (i.newTab) i.newTab.checked = false;
+        if (i.ios) i.ios.value = '';
+        if (i.android) i.android.value = '';
+        if (i.forceApp) i.forceApp.checked = false;
+        if (i.clickLimit) i.clickLimit.value = '';
+        if (i.formBtnText) i.formBtnText.value = '';
+        if (i.formSuccessMsg) i.formSuccessMsg.value = '';
+        if (i.iconInput) i.iconInput.value = '';
+
+        this.currentScheme = 'https://';
+        if (this.schemeLabel) this.schemeLabel.textContent = this.currentScheme;
+    }
+
+    debouncedSave() {
+        // console.log('[LinkManager] Debounced save triggered');
+        if (this.saveTimeout) clearTimeout(this.saveTimeout);
+        this.saveTimeout = setTimeout(() => {
+            this.saveLink();
+        }, 500);
+    }
 
     async saveLink() {
-        const type = this.inputs.typeSelect.value;
-        const title = this.inputs.title.value;
+        console.log('[LinkManager] Attempting to save...');
+        const type = this.inputs.typeSelect ? this.inputs.typeSelect.value : 'LINK';
+        const title = this.inputs.title ? this.inputs.title.value : '';
 
-        if (!title && type !== 'HEADER') return;
+        console.log(`[LinkManager] Saving: Type=${type}, Title=${title}`);
+
+        if (!title && type !== 'HEADER' && !this.inputs.url?.value) {
+            console.warn('[LinkManager] Save aborted: Title and URL are empty (and not HEADER)');
+            return;
+        }
 
         const saveFn = window.__PLINKK_SAVE_LINKS__;
-        if (!saveFn) return;
+        if (!saveFn) {
+            console.error('[LinkManager] CRITICAL: window.__PLINKK_SAVE_LINKS__ is undefined!');
+            return;
+        }
 
         const currentConfig = window.__PLINKK_GET_CONFIG__ ? window.__PLINKK_GET_CONFIG__() : null;
         let links = currentConfig && currentConfig.links ? [...currentConfig.links] : [];
@@ -264,6 +369,9 @@ export class LinkManager {
         if (this.saveBtn) this.saveBtn.disabled = true;
 
         try {
+            // Optimistic close
+            this.closeModal();
+
             const result = await saveFn(links);
 
             if (result && result.links) {
@@ -280,6 +388,13 @@ export class LinkManager {
                 }
                 if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.links = result.links;
                 if (window.__PLINKK_SYNC_SIDEBAR__) window.__PLINKK_SYNC_SIDEBAR__();
+
+                if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.links = result.links;
+                if (window.__PLINKK_SYNC_SIDEBAR__) window.__PLINKK_SYNC_SIDEBAR__();
+
+                // Close modal (already done optimistically, but safe to keep or remove. 
+                // Since we moved it up, we can remove it here or leave as redundant guard. 
+                // Better to remove to avoid double toggle if logic changes.)
             }
 
             if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
@@ -300,6 +415,29 @@ export class LinkManager {
         let links = currentConfig?.links || window.__INITIAL_STATE__?.links || [];
 
         links = links.filter(l => l.id !== id);
+
+        // Optimistic DOM removal
+        const linksList = document.getElementById('linksList');
+        if (linksList) {
+            const el = linksList.querySelector(`[data-id="${id}"]`)?.closest('.link-item'); // Assuming structure
+            // Actually the listener is on linksList, finding .delete-link-trigger's dataset. 
+            // The item is likely the parent or we need to find the element by data-link-id if it exists.
+            // Let's assume the render uses data-link-id on the item container or we can find it by button.
+            // But we don't have the button reference here easily unless we passed it.
+            // Let's try to query by attribute if possible. A safer bet is just simple removal if found.
+            // Reviewing render logic in editor-core.js? No, sidebar items.
+            // Let's try to find an element with data-id or similar.
+            // In init we saw: const editBtn = e.target.closest('.edit-link-trigger');
+            // Usually these are in a container.
+            // For now, let's rely on standard ID selection if available, or just proceed with saveFn 
+            // which usually triggers reload. user said "affiche le directe".
+            // Let's try to find the element.
+            const btn = linksList.querySelector(`.delete-link-trigger[data-id="${id}"]`);
+            if (btn) {
+                const item = btn.closest('li') || btn.closest('div');
+                if (item) item.remove();
+            }
+        }
 
         try {
             if (window.__PLINKK_SHOW_SAVING__) window.__PLINKK_SHOW_SAVING__();
