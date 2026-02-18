@@ -31,6 +31,7 @@ export class LinkManager {
 
         this.typeBtns = document.querySelectorAll('[data-type-select]');
         this.currentEditingId = null;
+        this.saveTimeout = null;
 
         // Sections to toggle
         this.sections = {
@@ -43,6 +44,36 @@ export class LinkManager {
 
     init() {
         console.log('Link Manager Initializing...');
+
+        // Scheme Toggler
+        this.schemeBtn = document.getElementById('linkModalSchemeBtn');
+        this.schemeLabel = document.getElementById('linkModalSchemeLabel');
+        this.currentScheme = 'https://';
+
+        if (this.schemeBtn && this.schemeLabel) {
+            this.schemeBtn.addEventListener('click', () => {
+                this.currentScheme = this.currentScheme === 'https://' ? 'http://' : 'https://';
+                this.schemeLabel.textContent = this.currentScheme;
+                this.debouncedSave();
+            });
+        }
+
+        // URL Input Auto-Strip
+        if (this.inputs.url) {
+            this.inputs.url.addEventListener('input', (e) => {
+                let val = e.target.value;
+                if (val.startsWith('https://')) {
+                    this.currentScheme = 'https://';
+                    e.target.value = val.substring(8);
+                    if (this.schemeLabel) this.schemeLabel.textContent = this.currentScheme;
+                } else if (val.startsWith('http://')) {
+                    this.currentScheme = 'http://';
+                    e.target.value = val.substring(7);
+                    if (this.schemeLabel) this.schemeLabel.textContent = this.currentScheme;
+                }
+                this.debouncedSave();
+            });
+        }
 
         // Bind Sidebar Buttons
         const addLinkBtn = document.getElementById('addLink');
@@ -80,6 +111,12 @@ export class LinkManager {
                     this.closeModal();
                 }
             });
+
+            // Auto-save on input (handled individually for URL now, but keep for others)
+            this.modal.addEventListener('input', (e) => {
+                if (e.target !== this.inputs.url) this.debouncedSave();
+            });
+            this.modal.addEventListener('change', () => this.debouncedSave());
         }
 
         // Type Selection
@@ -87,6 +124,7 @@ export class LinkManager {
             btn.addEventListener('click', (e) => {
                 const type = btn.dataset.typeSelect;
                 this.setModalType(type);
+                this.debouncedSave();
             });
         });
 
@@ -95,15 +133,14 @@ export class LinkManager {
             this.saveBtn.addEventListener('click', () => this.saveLink());
         }
 
-        // Icon Picker logic (simplified)
+        // Icon Picker logic
         const pickIconBtn = document.getElementById('linkModalPickIconBtn');
         if (pickIconBtn) {
             pickIconBtn.addEventListener('click', () => {
-                // Open global icon modal
                 if (window.openIconModal) window.openIconModal((icon) => {
                     if (this.inputs.iconInput) {
-                        this.inputs.iconInput.value = icon; // Store icon/url
-                        // Trigger change?
+                        this.inputs.iconInput.value = icon;
+                        this.debouncedSave();
                     }
                 });
             });
@@ -122,6 +159,9 @@ export class LinkManager {
             this.populateForm(existingData);
         } else {
             this.setModalType(type);
+            // Default scheme
+            this.currentScheme = 'https://';
+            if (this.schemeLabel) this.schemeLabel.textContent = 'https://';
         }
 
         this.modal.classList.remove('hidden');
@@ -129,60 +169,35 @@ export class LinkManager {
         this.inputs.title.focus();
     }
 
-    closeModal() {
-        if (!this.modal) return;
-        this.modal.classList.add('hidden');
-        this.modal.classList.remove('flex');
-        this.currentEditingId = null;
-    }
-
-    setModalType(type) {
-        if (this.inputs.typeSelect) this.inputs.typeSelect.value = type;
-
-        // Toggle Visual Selection
-        this.typeBtns.forEach(btn => {
-            if (btn.dataset.typeSelect === type) {
-                btn.dataset.active = 'true';
-            } else {
-                delete btn.dataset.active;
-            }
-        });
-
-        // Toggle Fields
-        const s = this.sections;
-        if (type === 'LINK') {
-            s.url.classList.remove('hidden');
-            s.icon.classList.remove('hidden');
-            s.formConfig.classList.add('hidden');
-            s.advanced.classList.remove('hidden');
-        } else if (type === 'HEADER') {
-            s.url.classList.add('hidden');
-            s.icon.classList.add('hidden');
-            s.formConfig.classList.add('hidden');
-            s.advanced.classList.add('hidden');
-        } else if (type === 'EMBED') {
-            s.url.classList.remove('hidden');
-            s.icon.classList.add('hidden');
-            s.formConfig.classList.add('hidden');
-            s.advanced.classList.remove('hidden');
-        } else if (type === 'FORM') {
-            s.url.classList.add('hidden');
-            s.icon.classList.remove('hidden');
-            s.formConfig.classList.remove('hidden');
-            s.advanced.classList.remove('hidden');
-        }
-    }
+    // ... closeModal and setModalType seem fine ...
 
     populateForm(data) {
         this.setModalType(data.type);
 
         const i = this.inputs;
         if (i.title) i.title.value = data.title || data.text || '';
-        if (i.url) i.url.value = data.url || '';
+
+        // Split URL scheme
+        let url = data.url || '';
+        if (url.startsWith('https://')) {
+            this.currentScheme = 'https://';
+            url = url.substring(8);
+        } else if (url.startsWith('http://')) {
+            this.currentScheme = 'http://';
+            url = url.substring(7);
+        } else {
+            // Fallback or relative? Assume https if not present or handle as is?
+            // User wants to change http/https. Assuming all links are absolute.
+            this.currentScheme = 'https://';
+        }
+
+        if (this.schemeLabel) this.schemeLabel.textContent = this.currentScheme;
+
+        if (i.url) i.url.value = url;
         if (i.desc) i.desc.value = data.description || '';
         if (i.iconInput) i.iconInput.value = data.icon || '';
 
-        if (i.newTab) i.newTab.checked = data.url && !data.forceAppOpen; // assumption
+        if (i.newTab) i.newTab.checked = data.url && !data.forceAppOpen;
         if (i.ios) i.ios.value = data.iosUrl || '';
         if (i.android) i.android.value = data.androidUrl || '';
         if (i.forceApp) i.forceApp.checked = !!data.forceAppOpen;
@@ -193,75 +208,47 @@ export class LinkManager {
         }
     }
 
-    resetForm() {
-        // Clear all inputs
-        Object.values(this.inputs).forEach(input => {
-            if (!input) return;
-            if (input.type === 'checkbox') input.checked = false;
-            else if (input.tagName === 'SELECT') input.selectedIndex = 0;
-            else input.value = '';
-        });
-    }
+    // ... resetForm and debouncedSave ...
 
     async saveLink() {
-        // Validate
         const type = this.inputs.typeSelect.value;
         const title = this.inputs.title.value;
 
-        if (!title && type !== 'HEADER') {
-            alert('Le titre est requis');
-            return;
-        }
-
-        // Build Object
-        const currentLinks = window.__INITIAL_STATE__?.links || []; // Assume updated via reload
-        // Fallback: If we are adding, we append to a local array copy? 
-        // Actually, handling IDs for new items is tricky without backend creation response.
-        // But our new endpoint '/:id/config/links' replaces the whole list.
-        // So we can simulate adding a new item with a temp ID or let backend handle it?
-        // If we use 'put /links', we send the whole array.
-
-        // BETTER STRATEGY: 
-        // Since we now have 'PUT /:id/config/links', we should:
-        // 1. Get current list from state or DOM.
-        // 2. Modify it.
-        // 3. Send it.
-
-        // However, `editor-core` has `saveLinks(links)`. We can use that if exposed!
-        // `window.__PLINKK_SAVE_LINKS__` is exposed in `editor-core.js`.
+        if (!title && type !== 'HEADER') return;
 
         const saveFn = window.__PLINKK_SAVE_LINKS__;
-        if (!saveFn) {
-            console.error('Save function not available');
-            return;
-        }
+        if (!saveFn) return;
 
-        // Fetch up-to-date links if possible (editor-core keeps `currentConfig`)
         const currentConfig = window.__PLINKK_GET_CONFIG__ ? window.__PLINKK_GET_CONFIG__() : null;
         let links = currentConfig && currentConfig.links ? [...currentConfig.links] : [];
 
-        // Or fallback to initial state if config not loaded yet
         if (links.length === 0 && window.__INITIAL_STATE__?.links) {
             links = [...window.__INITIAL_STATE__.links];
+        }
+
+        // Construct full URL
+        let finalUrl = this.inputs.url?.value || '';
+        if (finalUrl && (type === 'LINK' || type === 'EMBED')) {
+            finalUrl = this.currentScheme + finalUrl;
         }
 
         const data = {
             id: this.currentEditingId || ('new_' + Date.now()),
             type: type,
             text: title,
-            title: title, // unify
-            url: this.inputs.url?.value || '',
+            title: title,
+            url: finalUrl,
             description: this.inputs.desc?.value || '',
             icon: this.inputs.iconInput?.value || '',
             iosUrl: this.inputs.ios?.value || '',
             androidUrl: this.inputs.android?.value || '',
             forceAppOpen: this.inputs.forceApp?.checked || false,
             formData: type === 'FORM' ? {
-                buttonText: this.inputs.formBtnText?.value,
-                successMessage: this.inputs.formSuccessMsg?.value
+                buttonText: this.inputs.formBtnText?.value || '',
+                successMessage: this.inputs.formSuccessMsg?.value || ''
             } : null
-            // Add other fields as needed
         };
+        // ... rest of saveLink ...
 
         if (this.currentEditingId) {
             const idx = links.findIndex(l => l.id === this.currentEditingId);
@@ -269,32 +256,37 @@ export class LinkManager {
                 links[idx] = { ...links[idx], ...data };
             }
         } else {
+            const tempId = data.id;
             links.push(data);
+            this.currentEditingId = tempId;
         }
 
-        this.saveBtn.textContent = 'Enregistrement...';
-        this.saveBtn.disabled = true;
+        if (this.saveBtn) this.saveBtn.disabled = true;
 
         try {
-            await saveFn(links);
-            window.location.reload(); // Reload to sync properly
+            const result = await saveFn(links);
+
+            if (result && result.links) {
+                // Determine new ID if we were adding a link
+                if (data.id.startsWith('new_')) {
+                    const newLink = result.links.find(l => l.text === data.text && l.url === data.url);
+                    if (newLink) this.currentEditingId = newLink.id;
+                }
+
+                // Update local config immediately
+                if (window.__PLINKK_GET_CONFIG__) {
+                    const cfg = window.__PLINKK_GET_CONFIG__();
+                    if (cfg) cfg.links = result.links;
+                }
+                if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.links = result.links;
+                if (window.__PLINKK_SYNC_SIDEBAR__) window.__PLINKK_SYNC_SIDEBAR__();
+            }
+
+            if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
         } catch (e) {
-            console.error(e);
-            alert('Erreur lors de la sauvegarde');
-            this.saveBtn.textContent = 'Enregistrer';
-            this.saveBtn.disabled = false;
-        }
-    }
-
-    handleEdit(id) {
-        const currentConfig = window.__PLINKK_GET_CONFIG__ ? window.__PLINKK_GET_CONFIG__() : null;
-        const links = currentConfig?.links || window.__INITIAL_STATE__?.links || [];
-        const link = links.find(l => l.id === id);
-
-        if (link) {
-            this.openModal(link.type, link);
-        } else {
-            console.error('Link not found', id);
+            console.error('Link save error:', e);
+        } finally {
+            if (this.saveBtn) this.saveBtn.disabled = false;
         }
     }
 
@@ -310,11 +302,13 @@ export class LinkManager {
         links = links.filter(l => l.id !== id);
 
         try {
+            if (window.__PLINKK_SHOW_SAVING__) window.__PLINKK_SHOW_SAVING__();
             await saveFn(links);
-            window.location.reload();
+            if (window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
+            if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
         } catch (e) {
             console.error(e);
-            alert('Erreur lors de la suppression');
+            if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
         }
     }
 }

@@ -834,6 +834,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         enableVCard: finalSettings?.enableVCard ?? true,
         publicPhone: finalSettings?.publicPhone ?? "",
         enableLinkCategories: finalSettings?.enableLinkCategories ?? false,
+        layoutMode: finalSettings?.layoutMode ?? "LIST",
       };
 
       const generated = generateProfileConfig(

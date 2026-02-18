@@ -225,6 +225,10 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           clickLimit: l.clickLimit ?? null,
           embedData: l.embedData ?? null,
           formData: l.formData ?? null,
+          gridX: typeof l.gridX === 'number' ? l.gridX : undefined,
+          gridY: typeof l.gridY === 'number' ? l.gridY : undefined,
+          gridW: typeof l.gridW === 'number' ? l.gridW : undefined,
+          gridH: typeof l.gridH === 'number' ? l.gridH : undefined,
         };
 
         if (l.id && existingIds.has(l.id)) {

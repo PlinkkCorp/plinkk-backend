@@ -135,26 +135,6 @@ class DashboardUI {
       if (r.checked) toggleEditor(r.value);
     });
 
-    const saveBtn = document.getElementById('saveBentoLayout');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', async () => {
-        const originalText = saveBtn.innerText;
-        saveBtn.innerText = 'Enregistrement...';
-        saveBtn.disabled = true;
-        try {
-          await bentoManager.saveLayout();
-          saveBtn.innerText = 'Enregistré !';
-          setTimeout(() => {
-            saveBtn.innerText = originalText;
-            saveBtn.disabled = false;
-          }, 2000);
-        } catch (e) {
-          console.error(e);
-          saveBtn.innerText = 'Erreur';
-          saveBtn.disabled = false;
-        }
-      });
-    }
   }
 
   initStatusLogic() {
@@ -421,7 +401,8 @@ class DashboardUI {
         body: JSON.stringify({ [key]: value })
       });
       if (res.ok && window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
-      if (window.refreshPreview) window.refreshPreview();
+      if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+      else if (window.refreshPreview) window.refreshPreview();
     } catch (e) {
       console.error('Save failed', e);
       if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();

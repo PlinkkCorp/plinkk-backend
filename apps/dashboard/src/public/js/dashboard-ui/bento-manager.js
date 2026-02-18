@@ -105,6 +105,9 @@ export class BentoManager {
         const updates = this.getLayoutUpdates();
         const currentLinks = store.get().links;
 
+        console.log('[Bento] Updates:', updates);
+        console.log('[Bento] Current store links:', currentLinks);
+
         const updatedLinks = currentLinks.map(link => {
             const update = updates.find(u => u.id === link.id);
             if (update) {
@@ -112,6 +115,8 @@ export class BentoManager {
             }
             return link;
         });
+
+        console.log('[Bento] Final updated links to save:', updatedLinks);
 
         // Use the global save function provided in editor-core.js
         if (window.__PLINKK_SAVE_LINKS__) {
@@ -125,8 +130,30 @@ export class BentoManager {
 
     debouncedSave() {
         if (this.saveTimeout) clearTimeout(this.saveTimeout);
-        this.saveTimeout = setTimeout(() => {
-            this.saveLayout().catch(err => console.error('Auto-save bento error:', err));
+        this.saveTimeout = setTimeout(async () => {
+            const indicator = document.getElementById('bentoAutoSaveIndicator');
+            if (indicator) {
+                indicator.textContent = 'Enregistrement...';
+                indicator.classList.remove('hidden', 'text-emerald-500');
+                indicator.classList.add('text-amber-500');
+            }
+
+            try {
+                await this.saveLayout();
+                if (indicator) {
+                    indicator.textContent = 'Enregistré';
+                    indicator.classList.remove('text-amber-500');
+                    indicator.classList.add('text-emerald-500');
+                    setTimeout(() => indicator.classList.add('hidden'), 2000);
+                }
+            } catch (e) {
+                console.error('Auto-save bento error:', e);
+                if (indicator) {
+                    indicator.textContent = 'Erreur';
+                    indicator.classList.remove('text-emerald-500');
+                    indicator.classList.add('text-rose-500');
+                }
+            }
         }, 1000);
     }
 }

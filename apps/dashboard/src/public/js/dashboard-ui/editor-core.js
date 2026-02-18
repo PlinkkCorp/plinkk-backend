@@ -15,6 +15,7 @@ const userId = window.__PLINKK_USER_ID__ || '';
 
 // État global
 let currentConfig = null;
+let inlineSaveTimeout = null;
 
 // ===== UTILITAIRES =====
 
@@ -52,10 +53,51 @@ async function saveConfig(endpoint, data) {
 }
 
 async function savePlinkk(data) { return saveConfig('plinkk', data); }
-async function saveLinks(links) { return saveConfig('links', { links: links }); }
-async function saveLabels(labels) { return saveConfig('labels', { labels: labels }); }
-async function saveSocialIcons(socialIcon) { return saveConfig('socialIcon', { socialIcon: socialIcon }); }
-async function saveStatusBar(statusbar) { return saveConfig('statusBar', { statusbar: statusbar }); }
+
+async function saveLinks(links) {
+    const res = await saveConfig('links', { links: links });
+    if (res && res.links) {
+        if (currentConfig) currentConfig.links = res.links;
+        if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.links = res.links;
+        if (window.__EDITOR_STORE__) window.__EDITOR_STORE__.set({ links: res.links });
+    }
+    return res;
+}
+
+async function saveLabels(labels) {
+    const res = await saveConfig('labels', { labels: labels });
+    if (res && res.labels) {
+        if (currentConfig) currentConfig.labels = res.labels;
+        if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.labels = res.labels;
+        if (window.__EDITOR_STORE__) window.__EDITOR_STORE__.set({ labels: res.labels });
+    }
+    return res;
+}
+
+async function saveSocialIcons(socialIcon) {
+    const res = await saveConfig('socialIcon', { socialIcon: socialIcon });
+    if (res && res.socialIcon) {
+        if (currentConfig) currentConfig.socialIcon = res.socialIcon;
+        if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.socialIcon = res.socialIcon;
+        if (window.__EDITOR_STORE__) window.__EDITOR_STORE__.set({ socials: res.socialIcon }); // Note: state uses 'socials'
+    }
+    return res;
+}
+
+async function saveStatusBar(statusbar) {
+    const res = await saveConfig('statusBar', { statusbar: statusbar });
+    // Statusbar might need custom handling if it returns the object
+    if (res && res.ok && statusbar && currentConfig) {
+        // Optimistic update as backend might only return {ok:true}
+        if (!currentConfig.statusbar) currentConfig.statusbar = {};
+        Object.assign(currentConfig.statusbar, statusbar);
+        if (window.__INITIAL_STATE__) {
+            if (!window.__INITIAL_STATE__.statusbar) window.__INITIAL_STATE__.statusbar = {};
+            Object.assign(window.__INITIAL_STATE__.statusbar, statusbar);
+        }
+    }
+    return res;
+}
 
 // Exposer pour les handlers globaux
 window.__PLINKK_SAVE_LINKS__ = saveLinks;
@@ -940,43 +982,69 @@ function setupInlineEditing() {
             input.focus();
             input.select();
 
-            const save = async () => {
-                const newValue = input.value.trim();
-                el.classList.remove('editing');
-                el.textContent = newValue || originalText;
+            let lastSavedValue = originalText;
+            const performSave = async (newValue) => {
+                if (newValue === lastSavedValue) return;
+                lastSavedValue = newValue;
 
-                if (newValue !== originalText) {
-                    try {
-                        if (type === 'plinkk') {
-                            await savePlinkk({ [field]: newValue });
-                        } else if (type === 'link' && id) {
-                            const links = (currentConfig.links || []).map(l => {
-                                if (l.id === id) l[field] = newValue;
-                                return l;
-                            });
-                            await saveLinks(links);
-                        } else if (type === 'label' && index !== undefined) {
-                            const labels = (currentConfig.labels || []).map((l, i) => {
-                                if (i === parseInt(index)) l[field] = newValue;
-                                return l;
-                            });
-                            await saveLabels(labels);
-                        } else if (type === 'social' && index !== undefined) {
-                            const socialIcon = (currentConfig.socialIcon || []).map((s, i) => {
-                                if (i === parseInt(index)) s[field] = newValue;
-                                return s;
-                            });
-                            await saveSocialIcons(socialIcon);
-                        } else if (type === 'statusbar') {
-                            await saveStatusBar({ text: newValue });
-                        }
-                    } catch (err) {
-                        console.error('Save error:', err);
+                try {
+                    let res = null;
+                    if (type === 'plinkk') {
+                        res = await savePlinkk({ [field]: newValue });
+                        if (res && res.ok && currentConfig) currentConfig[field] = newValue;
+                    } else if (type === 'link' && id) {
+                        const links = (currentConfig.links || []).map(l => {
+                            if (l.id === id) l[field] = newValue;
+                            return l;
+                        });
+                        res = await saveLinks(links);
+                        if (res && res.links) currentConfig.links = res.links;
+                    } else if (type === 'label' && index !== undefined) {
+                        const labels = (currentConfig.labels || []).map((l, i) => {
+                            if (i === parseInt(index)) l[field] = newValue;
+                            return l;
+                        });
+                        res = await saveLabels(labels);
+                        if (res && res.labels) currentConfig.labels = res.labels;
+                    } else if (type === 'social' && index !== undefined) {
+                        const socialIcon = (currentConfig.socialIcon || []).map((s, i) => {
+                            if (i === parseInt(index)) s[field] = newValue;
+                            return s;
+                        });
+                        res = await saveSocialIcons(socialIcon);
+                        if (res && res.socialIcon) currentConfig.socialIcon = res.socialIcon;
+                    } else if (type === 'statusbar') {
+                        res = await saveStatusBar({ text: newValue });
+                        if (res && res.ok && currentConfig.statusbar) currentConfig.statusbar.text = newValue;
                     }
+
+                    // Sync to global initial state for sidebar modules
+                    if (window.__INITIAL_STATE__ && currentConfig) {
+                        Object.assign(window.__INITIAL_STATE__, currentConfig);
+                    }
+                    // Sync sidebar UI
+                    if (window.__PLINKK_SYNC_SIDEBAR__) window.__PLINKK_SYNC_SIDEBAR__();
+
+                } catch (err) {
+                    console.error('Save error:', err);
                 }
             };
 
+            const save = async () => {
+                if (inlineSaveTimeout) clearTimeout(inlineSaveTimeout);
+                const newValue = input.value.trim();
+                el.classList.remove('editing');
+                el.textContent = newValue || originalText;
+                await performSave(newValue);
+            };
+
             input.addEventListener('blur', save);
+            input.addEventListener('input', () => {
+                if (inlineSaveTimeout) clearTimeout(inlineSaveTimeout);
+                inlineSaveTimeout = setTimeout(() => {
+                    performSave(input.value.trim());
+                }, 1000);
+            });
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !isMultiline) {
                     e.preventDefault();
