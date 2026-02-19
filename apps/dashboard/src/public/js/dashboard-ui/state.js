@@ -12,7 +12,6 @@ class EditorState {
             profile: {},
             appearance: {},
 
-            layoutMode: 'LIST', // 'LIST' | 'BENTO'
             activeSection: 'profile',
             isSaving: false,
             isDirty: false,
@@ -64,10 +63,6 @@ class EditorState {
         this.set({ links });
     }
 
-    setLayoutMode(mode) {
-        if (mode !== 'LIST' && mode !== 'BENTO') return;
-        this.set({ layoutMode: mode });
-    }
 }
 
 export const store = new EditorState();

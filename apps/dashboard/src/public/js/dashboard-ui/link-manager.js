@@ -366,22 +366,21 @@ export class LinkManager {
             this.currentEditingId = tempId;
         }
 
+        this.renderLinksList(links);
+
         if (this.saveBtn) this.saveBtn.disabled = true;
 
         try {
-            // Optimistic close
             this.closeModal();
 
             const result = await saveFn(links);
 
             if (result && result.links) {
-                // Determine new ID if we were adding a link
                 if (data.id.startsWith('new_')) {
                     const newLink = result.links.find(l => l.text === data.text && l.url === data.url);
                     if (newLink) this.currentEditingId = newLink.id;
                 }
 
-                // Update local config immediately
                 if (window.__PLINKK_GET_CONFIG__) {
                     const cfg = window.__PLINKK_GET_CONFIG__();
                     if (cfg) cfg.links = result.links;
@@ -392,14 +391,16 @@ export class LinkManager {
                 if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.links = result.links;
                 if (window.__PLINKK_SYNC_SIDEBAR__) window.__PLINKK_SYNC_SIDEBAR__();
 
-                // Close modal (already done optimistically, but safe to keep or remove. 
-                // Since we moved it up, we can remove it here or leave as redundant guard. 
-                // Better to remove to avoid double toggle if logic changes.)
+                this.renderLinksList(result.links);
             }
 
             if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
         } catch (e) {
             console.error('Link save error:', e);
+            if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
+
+            const originalLinks = window.__PLINKK_GET_CONFIG__ && window.__PLINKK_GET_CONFIG__() ? window.__PLINKK_GET_CONFIG__().links : (window.__INITIAL_STATE__?.links || []);
+            this.renderLinksList(originalLinks);
         } finally {
             if (this.saveBtn) this.saveBtn.disabled = false;
         }
@@ -416,28 +417,7 @@ export class LinkManager {
 
         links = links.filter(l => l.id !== id);
 
-        // Optimistic DOM removal
-        const linksList = document.getElementById('linksList');
-        if (linksList) {
-            const el = linksList.querySelector(`[data-id="${id}"]`)?.closest('.link-item'); // Assuming structure
-            // Actually the listener is on linksList, finding .delete-link-trigger's dataset. 
-            // The item is likely the parent or we need to find the element by data-link-id if it exists.
-            // Let's assume the render uses data-link-id on the item container or we can find it by button.
-            // But we don't have the button reference here easily unless we passed it.
-            // Let's try to query by attribute if possible. A safer bet is just simple removal if found.
-            // Reviewing render logic in editor-core.js? No, sidebar items.
-            // Let's try to find an element with data-id or similar.
-            // In init we saw: const editBtn = e.target.closest('.edit-link-trigger');
-            // Usually these are in a container.
-            // For now, let's rely on standard ID selection if available, or just proceed with saveFn 
-            // which usually triggers reload. user said "affiche le directe".
-            // Let's try to find the element.
-            const btn = linksList.querySelector(`.delete-link-trigger[data-id="${id}"]`);
-            if (btn) {
-                const item = btn.closest('li') || btn.closest('div');
-                if (item) item.remove();
-            }
-        }
+        this.renderLinksList(links);
 
         try {
             if (window.__PLINKK_SHOW_SAVING__) window.__PLINKK_SHOW_SAVING__();
@@ -447,7 +427,69 @@ export class LinkManager {
         } catch (e) {
             console.error(e);
             if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
+
+            const originalLinks = window.__PLINKK_GET_CONFIG__ && window.__PLINKK_GET_CONFIG__() ? window.__PLINKK_GET_CONFIG__().links : (window.__INITIAL_STATE__?.links || []);
+            this.renderLinksList(originalLinks);
         }
+    }
+
+    renderLinksList(links) {
+        const list = document.getElementById('linksList');
+        if (!list) return;
+
+        if (!links || links.length === 0) {
+            list.innerHTML = '<div class="text-center py-8 text-slate-500 text-sm italic">Aucun lien créé.</div>';
+            return;
+        }
+
+        list.innerHTML = links.map(link => {
+            const text = link.text || link.name || 'Sans titre';
+            const url = link.url || '';
+            const id = link.id;
+
+            return `
+                <div class="group relative bg-slate-950 border border-slate-800 rounded-xl p-4 transition-all hover:border-slate-700" data-id="${id}">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="flex-1 flex items-center gap-3">
+                            <div class="cursor-move text-slate-600 hover:text-slate-400 p-1">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle>
+                                    <circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-medium text-slate-200">${this.escapeHtml(text)}</h4>
+                                <p class="text-xs text-slate-500 truncate">${this.escapeHtml(url)}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="p-2 text-slate-400 hover:text-white transition-colors edit-link-trigger" data-id="${id}">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                            <button class="p-2 text-slate-400 hover:text-red-400 transition-colors delete-link-trigger" data-id="${id}">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    escapeHtml(text) {
+        if (!text) return '';
+        return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 }
 

@@ -225,10 +225,6 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           clickLimit: l.clickLimit ?? null,
           embedData: l.embedData ?? null,
           formData: l.formData ?? null,
-          gridX: typeof l.gridX === 'number' ? l.gridX : undefined,
-          gridY: typeof l.gridY === 'number' ? l.gridY : undefined,
-          gridW: typeof l.gridW === 'number' ? l.gridW : undefined,
-          gridH: typeof l.gridH === 'number' ? l.gridH : undefined,
         };
 
         if (l.id && existingIds.has(l.id)) {
@@ -395,48 +391,6 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
         ok: true,
         categories: updatedCategories.map((c) => ({ id: c.id, name: c.name, order: c.order })),
       });
-    }
-
-    return reply.send({ ok: true });
-  });
-
-  fastify.put("/:id/config/links/layout", async (request, reply) => {
-    const userId = request.session.get("data") as string | undefined;
-    if (!userId) return reply.code(401).send({ error: "Unauthorized" });
-    const { id } = request.params as { id: string };
-    if (!(await validatePlinkkOwnership(userId, id)))
-      return reply.code(404).send({ error: "Plinkk introuvable" });
-
-    const body = request.body as { layoutMode: string; updates: { id: string; gridX: number; gridY: number; gridW: number; gridH: number }[] };
-
-    // Update layout mode first if provided
-    if (body.layoutMode) {
-      await prisma.plinkkSettings.upsert({
-        where: { plinkkId: id },
-        create: { plinkkId: id, layoutMode: body.layoutMode },
-        update: { layoutMode: body.layoutMode }
-      });
-    }
-
-    if (Array.isArray(body.updates)) {
-      // Use transaction to update all links
-      await prisma.$transaction(
-        body.updates.map(u =>
-          prisma.link.update({
-            where: { id: u.id },
-            data: {
-              gridX: u.gridX,
-              gridY: u.gridY,
-              gridW: u.gridW,
-              gridH: u.gridH
-            }
-          })
-        )
-      );
-
-      await logUserAction(userId, "UPDATE_PLINKK_LAYOUT", id, {
-        formatted: `Updated Bento Layout for ${body.updates.length} links`
-      }, request.ip);
     }
 
     return reply.send({ ok: true });

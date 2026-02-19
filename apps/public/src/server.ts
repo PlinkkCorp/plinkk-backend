@@ -196,7 +196,8 @@ fastify.addHook("onRequest", async (request, reply) => {
         const query = (request.query as { versionId?: string });
         const versionId = query.versionId;
 
-        // Default values from resolved page
+        // Default values// Force restart to apply view changes
+        // 2026-02-18T21:30:00Z
         let displayPage = resolved.page;
         let displayUser = resolved.user;
 
@@ -545,7 +546,6 @@ fastify.addHook("onRequest", async (request, reply) => {
           showPartnerBadge: finalSettings?.showPartnerBadge ?? true,
           enableVCard: finalSettings?.enableVCard ?? false,
           enableLinkCategories: finalSettings?.enableLinkCategories ?? false,
-          layoutMode: finalSettings?.layoutMode ?? "LINKTREE",
         };
 
         const generated = generateProfileConfig(

@@ -1434,15 +1434,6 @@ export function createLinkBoxes(profileData) {
             discordBox.style.display = "none";
         }
 
-        // Apply Bento Grid coordinates if enabled
-        if (profileData.layoutMode === 'BENTO') {
-            discordBox.classList.add('bento-item');
-            if (typeof link.gridX === 'number') {
-                discordBox.style.gridColumn = `${link.gridX + 1} / span ${link.gridW || 1}`;
-                discordBox.style.gridRow = `${link.gridY + 1} / span ${link.gridH || 1}`;
-            }
-        }
-
         return discordBox;
     };
 
@@ -1470,9 +1461,6 @@ export function createLinkBoxes(profileData) {
             header.style.textAlign = 'center';
             header.style.width = '100%';
             header.style.fontSize = '1.2rem';
-            if (profileData.layoutMode === 'BENTO') {
-                header.style.gridColumn = '1 / span 12';
-            }
             elements.push(header);
 
             if (linksByCat[cat.id]) {

@@ -13,7 +13,7 @@ import {
 } from "@plinkk/prisma";
 
 export function generateProfileConfig(
-  profile: User & PlinkkSettings & { cosmetics?: Cosmetic | null, layoutMode?: string },
+  profile: User & PlinkkSettings & { cosmetics?: Cosmetic | null },
   links: Link[],
   backgroundColors: BackgroundColor[],
   labels: Label[],
@@ -62,14 +62,6 @@ export function generateProfileConfig(
       clicks: l.clicks,
       // @ts-ignore
       expiresAt: l.expiresAt,
-      // @ts-ignore
-      gridX: l.gridX,
-      // @ts-ignore
-      gridY: l.gridY,
-      // @ts-ignore
-      gridW: l.gridW,
-      // @ts-ignore
-      gridH: l.gridH,
     }))
   )},
         categories: ${JSON.stringify(
@@ -133,7 +125,6 @@ export function generateProfileConfig(
         enableVCard: ${profile.enableVCard ?? false},
         publicPhone: ${JSON.stringify(profile.publicPhone || "")},
         enableLinkCategories: ${profile.enableLinkCategories ?? false},
-        layoutMode: ${JSON.stringify((profile).layoutMode || "LIST")},
     };
     export default profileData;
     `;

@@ -161,8 +161,15 @@ export async function restorePlinkkVersion(plinkkId: string, versionId: string, 
 
         // 2. Restore Settings
         if (snapshot.settings) {
-            // Remove ID/relation fields from data
-            const { id, plinkkId: _pid, ...rest } = snapshot.settings;
+            // Remove ID/relation fields AND removed Bento fields from data
+            const {
+                id,
+                plinkkId: _pid,
+                // @ts-ignore - removed fields might still be in snapshots
+                layoutMode: _lm,
+                ...rest
+            } = snapshot.settings;
+
             await tx.plinkkSettings.upsert({
                 where: { plinkkId },
                 create: { plinkkId, ...rest },

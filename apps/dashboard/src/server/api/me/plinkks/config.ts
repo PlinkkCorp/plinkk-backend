@@ -70,8 +70,6 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       canvaEnable: settings?.canvaEnable ?? 0,
       selectedCanvasIndex: settings?.selectedCanvasIndex ?? null,
       layoutOrder: settings?.layoutOrder ?? null,
-      // @ts-ignore
-      layoutMode: settings?.layoutMode ?? "LIST",
       background: background.map((c) => c.color),
       neonColors: neonColors.map((c) => c.color),
       labels: labels.map((l) => ({ data: l.data, color: l.color, fontColor: l.fontColor })),
@@ -94,10 +92,6 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
         forceAppOpen: l.forceAppOpen,
         clickLimit: l.clickLimit,
         buttonTheme: l.buttonTheme,
-        gridX: l.gridX,
-        gridY: l.gridY,
-        gridW: l.gridW,
-        gridH: l.gridH,
       })),
       categories: categories.map((c) => ({ id: c.id, name: c.name, order: c.order })),
       statusbar: statusbar
@@ -185,7 +179,6 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       delayAnimationButton: body.delayAnimationButton,
       canvaEnable: body.canvaEnable,
       selectedCanvasIndex: body.selectedCanvasIndex,
-      layoutOrder: body.layoutOrder,
     });
 
     // Construct oldData for detailed logging
@@ -314,7 +307,7 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
     if (!page) return reply.code(404).send({ error: "Plinkk introuvable" });
 
     const currentSettings = await prisma.plinkkSettings.findUnique({ where: { plinkkId: id } });
-    const body = request.body as { layoutOrder?: string[], layoutMode?: string };
+    const body = request.body as { layoutOrder?: string[] };
 
     let changed = false;
     const updates: any = {};
@@ -337,20 +330,6 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       }
     }
 
-    if (body.layoutMode !== undefined) {
-      // @ts-ignore
-      const oldMode = currentSettings?.layoutMode || 'LIST';
-      if (oldMode !== body.layoutMode) {
-        updates.layoutMode = body.layoutMode;
-        changed = true;
-        changesLog.push({
-          key: 'layoutMode',
-          old: oldMode,
-          new: body.layoutMode,
-          type: 'updated' as const
-        });
-      }
-    }
 
     if (changed) {
       await prisma.plinkkSettings.upsert({

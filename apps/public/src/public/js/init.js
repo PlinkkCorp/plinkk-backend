@@ -62,9 +62,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     try {
         window.profileData = parsedProfileData;
         window.__PLINKK_PROFILE_DATA__ = parsedProfileData;
-        if (parsedProfileData.layoutMode === 'BENTO') {
-            document.body.classList.add('layout-bento');
-        }
+
     }
     catch (e) {
         // ignore if window is not writable for some reason
@@ -97,14 +95,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             links: () => {
                 const linkBoxes = createLinkBoxes(profileData);
                 if (linkBoxes && linkBoxes.length) {
-                    if (profileData.layoutMode === 'BENTO') {
-                        const grid = document.createElement('div');
-                        grid.className = 'bento-grid';
-                        linkBoxes.forEach((box) => grid.appendChild(box));
-                        article.appendChild(grid);
-                    } else {
-                        linkBoxes.forEach((box) => article.appendChild(box));
-                    }
+                    linkBoxes.forEach((box) => article.appendChild(box));
                 }
             },
         };
@@ -172,14 +163,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             if (!linkBoxes || !linkBoxes.length) {
                 console.warn("No link boxes created.");
             } else {
-                if (profileData.layoutMode === 'BENTO') {
-                    const grid = document.createElement('div');
-                    grid.className = 'bento-grid';
-                    linkBoxes.forEach((box) => grid.appendChild(box));
-                    article.appendChild(grid);
-                } else {
-                    linkBoxes.forEach((box) => article.appendChild(box));
-                }
+                linkBoxes.forEach((box) => article.appendChild(box));
             }
         }
     } catch (_) { }

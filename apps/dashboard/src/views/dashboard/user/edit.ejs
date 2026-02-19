@@ -1,60 +1,6 @@
 <%- include('partials/head.ejs', { title: 'Tableau de bord - Édition' ,
     description: 'Configure les sections, apparence et arrière‑plan de ta page.' , robots: 'noindex,nofollow' }) %>
-    <link href="https://cdn.jsdelivr.net/npm/gridstack@7.2.3/dist/gridstack.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/gridstack@7.2.3/dist/gridstack-all.js"></script>
-    <style>
-        .grid-stack-item-content {
-            background-color: #1e293b;
-            color: #fff;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #334155;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            cursor: grab;
-        }
 
-        .grid-stack-item-content:active {
-            cursor: grabbing;
-        }
-
-        .grid-stack-item-content .item-label {
-            font-size: 12px;
-            font-weight: 500;
-            text-align: center;
-            padding: 4px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            width: 100%;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-slide-up {
-            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
     <%- include('partials/header-dash.ejs', { user: user }) %>
 
         <div id="mobileEditNotice"
@@ -182,15 +128,7 @@
                                         Status
                                     </button>
                                 </li>
-                                <li>
-                                    <button data-target="#section-layout"
-                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
-                                        <svg class="size-4" viewBox="0 0 24 24" fill="white">
-                                            <path d="M4 5h16v2H4zM4 11h10v2H4zM4 11h10v2H4zM4 17h13v2H4z" />
-                                        </svg>
-                                        Agencement
-                                    </button>
-                                </li>
+
                                 <li>
                                     <button data-target="#section-history"
                                         class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
@@ -240,53 +178,7 @@
                                 <%- include('./partials/editor-sections/statusbar.ejs') %>
                             </div>
 
-                            <div id="section-layout"
-                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                                <div class="mb-6 pb-4 border-b border-slate-800">
-                                    <h3 class="text-lg font-semibold text-white">Agencement</h3>
-                                    <p class="text-sm text-slate-400">Choisis comment tes liens s'affichent.</p>
-                                </div>
 
-                                <div class="grid grid-cols-2 gap-4" id="layoutList">
-                                    <label class="cursor-pointer group relative">
-                                        <input type="radio" name="layoutMode" value="LIST" class="peer sr-only">
-                                        <div
-                                            class="p-4 rounded-xl border border-slate-700 bg-slate-800 hover:border-violet-500 peer-checked:border-violet-500 peer-checked:bg-violet-900/10 transition-all">
-                                            <div class="font-medium text-white mb-2">Liste</div>
-                                            <div
-                                                class="h-24 bg-slate-900/50 rounded-lg flex flex-col gap-2 p-2 overflow-hidden">
-                                                <div class="h-6 bg-slate-700 rounded w-full"></div>
-                                                <div class="h-6 bg-slate-700 rounded w-full"></div>
-                                                <div class="h-6 bg-slate-700 rounded w-full"></div>
-                                            </div>
-                                        </div>
-                                    </label>
-                                    <label class="cursor-pointer group relative">
-                                        <input type="radio" name="layoutMode" value="BENTO" class="peer sr-only">
-                                        <div
-                                            class="p-4 rounded-xl border border-slate-700 bg-slate-800 hover:border-violet-500 peer-checked:border-violet-500 peer-checked:bg-violet-900/10 transition-all">
-                                            <div class="font-medium text-white mb-2">Bento Grid</div>
-                                            <div
-                                                class="h-24 bg-slate-900/50 rounded-lg grid grid-cols-2 gap-2 p-2 overflow-hidden">
-                                                <div class="h-full bg-slate-700 rounded col-span-1"></div>
-                                                <div class="h-10 bg-slate-700 rounded col-span-1"></div>
-                                                <div class="h-10 bg-slate-700 rounded col-span-1"></div>
-                                            </div>
-                                        </div>
-                                    </label>
-                                </div>
-
-                                <div id="bentoEditor" class="hidden mt-6">
-                                    <div class="mb-2 flex justify-between items-center">
-                                        <span class="text-xs text-slate-400">Glissez-déposez pour réorganiser.</span>
-                                        <span class="text-xs text-emerald-500 animate-pulse hidden"
-                                            id="bentoAutoSaveIndicator">Enregistré</span>
-                                    </div>
-                                    <div
-                                        class="grid-stack bg-slate-950/50 border border-slate-800 rounded-xl min-h-[300px] p-2">
-                                    </div>
-                                </div>
-                            </div>
 
                             <div id="section-history"
                                 class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
@@ -352,15 +244,16 @@
                                 <div
                                     class="absolute bottom-8 left-0 right-0 flex justify-center z-20 pointer-events-none">
                                     <div
-                                        class="bg-slate-900/90 backdrop-blur px-4 py-2 rounded-full border border-slate-700 flex items-center gap-4 pointer-events-auto transform translate-y-12 transition-transform hover:translate-y-0 shadow-xl">
+                                        class="bg-slate-900/90 backdrop-blur px-4 py-2 rounded-full border border-slate-700 flex items-center gap-4 pointer-events-auto shadow-xl">
                                         <button class="text-slate-400 hover:text-white transition-colors"
-                                            onclick="document.getElementById('preview')?.contentWindow?.location.reload()"
+                                            onclick="const p = document.getElementById('preview'); p.src = p.src;"
                                             title="Recharger">
                                             <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                stroke-width="2">
-                                                <path d="M23 4v6h-6M1 20v-6h6" />
-                                                <path
-                                                    d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 1 20.49 15" />
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                                <path d="M3 3v5h5" />
+                                                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                                                <path d="M16 21h5v-5" />
                                             </svg>
                                         </button>
                                         <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>"

@@ -1363,74 +1363,6 @@ input:checked+.slider:before {
   }
 }
 
-/* Bento Grid Layout */
-.bento-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 16px;
-  width: 100%;
-  margin-top: 16px;
-}
-
-.bento-grid .discord-box,
-.bento-grid .button {
-  height: 100%;
-  min-height: 140px;
-  margin-top: 0;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-}
-
-.bento-grid .discord-box a,
-.bento-grid .button a {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  align-items: center !important;
-  text-align: center !important;
-  height: 100%;
-  padding: 12px !important;
-}
-
-.bento-grid .discord-box>a>div:first-child,
-.bento-grid .button>a>div:first-child {
-  flex-direction: column !important;
-  gap: 8px !important;
-}
-
-.bento-grid .discord-box img,
-.bento-grid .button img,
-.bento-grid .discord-box .link-icon,
-.bento-grid .button .icon {
-  width: 48px !important;
-  height: 48px !important;
-  margin-bottom: 4px;
-}
-
-.bento-grid .discord-box span,
-.bento-grid .button span {
-  font-size: 0.95em;
-}
-
-.bento-grid .link-header,
-.bento-grid .category-header {
-  grid-column: 1 / -1;
-  width: 100%;
-}
-
-@media (max-width: 480px) {
-  .bento-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-
-  .bento-grid .discord-box,
-  .bento-grid .button {
-    min-height: 120px;
-  }
-}
-
 /* Form and Embed Box Styles */
 .form-box,
 .embed-box {
@@ -1644,39 +1576,4 @@ input:checked+.slider:before {
   color: #f87171;
   background: rgba(248, 113, 113, 0.08);
   border: 1px solid rgba(248, 113, 113, 0.2);
-}
-
-/* Bento Grid Layout */
-.bento-grid {
-  display: grid !important;
-  grid-template-columns: repeat(12, 1fr) !important;
-  gap: 12px !important;
-  width: 100% !important;
-  margin: 20px 0 !important;
-  padding: 0 !important;
-}
-
-/* Ensure article can expand for bento */
-body.layout-bento article {
-  max-width: 800px !important;
-  width: 90% !important;
-}
-
-/* Bento Item Base */
-.bento-item {
-  margin-top: 0 !important;
-  /* Reset margin from .discord-box */
-  height: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-@media (max-width: 768px) {
-  body.layout-bento article {
-    width: 95% !important;
-  }
-
-  .bento-grid {
-    gap: 8px !important;
-  }
 }

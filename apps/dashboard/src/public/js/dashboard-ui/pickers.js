@@ -35,6 +35,8 @@ try {
     };
     window.__DASH_PICKERS__.openPicker = openPicker;
     window.__DASH_PICKERS__.closePicker = closePicker;
+    window.__DASH_PICKERS__.openIconModal = openIconModal;
+    window.__DASH_PICKERS__.closeIconModal = closeIconModal;
     window.__DASH_PICKERS__.renderPickerGrid = renderPickerGrid;
     window.__DASH_PICKERS__.refreshUploads = () => {
       userUploadsCache = null;

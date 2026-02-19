@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -13,117 +7,76 @@ datasource db {
   provider = "postgresql"
 }
 
-enum ThemeStatus {
-  DRAFT
-  SUBMITTED
-  APPROVED
-  REJECTED
-  ARCHIVED
-}
-
-enum Visibility {
-  PUBLIC
-  PRIVATE
-}
-
-enum PlinkkEventType {
-  CREATED
-  DELETED
-}
-
-enum GravatarSource {
-  PRIMARY
-  PUBLIC
-}
-
 model User {
-  id                 String  @id @unique
-  userName           String
-  password           String
-  email              String  @unique
-  publicEmail        String?
-  gravatarEmailSource GravatarSource @default(PRIMARY)
-  mustChangePassword Boolean @default(false)
-  twoFactorEnabled   Boolean @default(false)
-  twoFactorSecret    String?
-
-  name          String
-  emailVerified Boolean  @default(false)
-  image         String?
-  lastLogin     DateTime @default(now())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @default(now()) @updatedAt
-
-  roleId        String?
-  role          Role?     @relation(fields: [roleId], references: [id])
-  rankScore     Int       @default(0)
-  bumpedAt      DateTime?
-  bumpExpiresAt DateTime?
-  bumpPaidUntil DateTime?
-
-  cosmetics Cosmetic?
-  isPublic  Boolean   @default(true)
-  views     Int       @default(0)
-  isVerified Boolean  @default(false)
-  isPartner  Boolean  @default(false)
-
-  isPremium  Boolean  @default(false)
-  showPremiumUi Boolean @default(true)
-  premiumUntil DateTime?
-  premiumSource String? // "STRIPE" | "MANUAL" | null
-  stripeCustomerId String? @unique
-  extraPlinkks     Int     @default(0)
-  extraRedirects   Int     @default(0)
-
-  hasPassword Boolean @default(true)
-
-  themes       Theme[]
-  announcement AnnouncementTarget[]
-
-  // Thème personnalisé sélectionné pour usage privé
+  id                    String               @id @unique
+  userName              String
+  password              String
+  email                 String               @unique
+  publicEmail           String?
+  mustChangePassword    Boolean              @default(false)
+  twoFactorEnabled      Boolean              @default(false)
+  twoFactorSecret       String?
+  name                  String
+  emailVerified         Boolean              @default(false)
+  image                 String?
+  lastLogin             DateTime             @default(now())
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @default(now()) @updatedAt
+  roleId                String?
+  rankScore             Int                  @default(0)
+  bumpedAt              DateTime?
+  bumpExpiresAt         DateTime?
+  bumpPaidUntil         DateTime?
+  isPublic              Boolean              @default(true)
+  views                 Int                  @default(0)
+  isVerified            Boolean              @default(false)
+  isPartner             Boolean              @default(false)
   selectedCustomThemeId String?
-
-  plinkks          Plinkk[]
-  // Relations vers d'autres modèles
-  links            Link[]
-  labels           Label[]
-  socialIcons      SocialIcon[]
-  backgroundColors BackgroundColor[]
-  neonColors       NeonColor[]
-  statusbar        Statusbar?
-
-  slags Json @default("[]")
-
-  // Relations pour les signalements
-  reportsMade     Report[] @relation("Reporter")
-  reportsReceived Report[] @relation("ReportedUser")
-  
-  // Relations pour les sessions
-  sessions        Session[]
-  connections     Connection[]
-  redirects       Redirect[]
-  purchases       Purchase[]
-  userLogs        UserLog[]
-
-  apiKey          String? @unique
+  slags                 Json                 @default("[]")
+  apiKey                String?              @unique
+  hasPassword           Boolean              @default(true)
+  isPremium             Boolean              @default(false)
+  premiumUntil          DateTime?
+  extraPlinkks          Int                  @default(0)
+  extraRedirects        Int                  @default(0)
+  stripeCustomerId      String?              @unique
+  showPremiumUi         Boolean              @default(true)
+  premiumSource         String?
+  gravatarEmailSource   GravatarSource       @default(PRIMARY)
+  announcement          AnnouncementTarget[]
+  backgroundColors      BackgroundColor[]
+  connections           Connection[]
+  cosmetics             Cosmetic?
+  labels                Label[]
+  links                 Link[]
+  neonColors            NeonColor[]
+  plinkks               Plinkk[]
+  purchases             Purchase[]
+  redirects             Redirect[]
+  reportsReceived       Report[]             @relation("ReportedUser")
+  reportsMade           Report[]             @relation("Reporter")
+  sessions              Session[]
+  socialIcons           SocialIcon[]
+  statusbar             Statusbar?
+  themes                Theme[]
+  role                  Role?                @relation(fields: [roleId], references: [id])
+  userLogs              UserLog[]
 }
 
 model Connection {
-  id           String   @id @default(nanoid(16))
-  provider     String   // "google", "discord", "github", "spotify"
+  id           String    @id @default(nanoid(16))
+  provider     String
   providerId   String
   email        String?
   name         String?
-  accessToken  String?  @db.Text
-  refreshToken String?  @db.Text
+  accessToken  String?
+  refreshToken String?
   expiresAt    DateTime?
-  isIdentity   Boolean  @default(false) 
-
   userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now()) @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+  isIdentity   Boolean   @default(false)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerId])
   @@unique([provider, userId])
@@ -137,77 +90,68 @@ model MagicLink {
 }
 
 model Session {
-  id        String   @id @default(nanoid(16))
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  ip        String?
-  userAgent String?
-  currentPath String?
+  id           String   @id @default(nanoid(16))
+  userId       String
+  ip           String?
+  userAgent    String?
+  currentPath  String?
   lastActiveAt DateTime @default(now())
-  createdAt DateTime @default(now())
-  expiresAt DateTime
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Report {
-  id        String   @id @default(nanoid(16))
-  reason    String
-  message   String?
-  status    String   @default("PENDING") // PENDING, RESOLVED, DISMISSED
-
-  reporterId String
-  reporter   User   @relation("Reporter", fields: [reporterId], references: [id])
-
-  // Cibles optionnelles
-  reportedUserId String?
-  reportedUser   User?   @relation("ReportedUser", fields: [reportedUserId], references: [id])
-
+  id               String   @id @default(nanoid(16))
+  reason           String
+  message          String?
+  status           String   @default("PENDING")
+  reporterId       String
+  reportedUserId   String?
   reportedPlinkkId String?
-  reportedPlinkk   Plinkk? @relation(fields: [reportedPlinkkId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now()) @updatedAt
+  reportedPlinkk   Plinkk?  @relation(fields: [reportedPlinkkId], references: [id])
+  reportedUser     User?    @relation("ReportedUser", fields: [reportedUserId], references: [id])
+  reporter         User     @relation("Reporter", fields: [reporterId], references: [id])
 }
 
 model Role {
-  id          String @id @default(nanoid(16))
-  name        String @unique
-  users       User[]
-  isStaff     Boolean @default(false)
-  priority    Int     @default(0) // pour l'ordre d'affichage
-  color       String?            // couleur d'accent éventuelle
-  maxPlinkks  Int?    @default(1)
-  maxThemes   Int?    @default(0)
-  maxRedirects Int?   @default(5)
-  limits      Json?              // structure libre pour futures quotas
-  meta        Json?              // infos supplémentaires (badges, etc.)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
-
-  permissions RolePermission[]
+  id                     String                   @id @default(nanoid(16))
+  name                   String                   @unique
+  isStaff                Boolean                  @default(false)
+  priority               Int                      @default(0)
+  color                  String?
+  maxPlinkks             Int?                     @default(1)
+  maxThemes              Int?                     @default(0)
+  limits                 Json?
+  meta                   Json?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @default(now()) @updatedAt
+  maxRedirects           Int?                     @default(5)
   AnnouncementRoleTarget AnnouncementRoleTarget[]
+  permissions            RolePermission[]
+  users                  User[]
 }
 
 /// Définition d'une permission atomique, modulaire, catégorisée.
 model Permission {
-  key        String @id            // identifiant unique (ex: MANAGE_USERS)
-  category   String                // catégorie ergonomique (ex: Administration)
-  description String?              // description lisible
-  system     Boolean @default(true) // true: fournie par le code, false: personnalisée
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
-
-  roles RolePermission[]
+  key         String           @id
+  category    String
+  description String?
+  system      Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @default(now()) @updatedAt
+  roles       RolePermission[]
 }
 
 /// Table de jointure N-N entre Role et Permission
 model RolePermission {
   roleId        String
   permissionKey String
-
-  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionKey], references: [key], onDelete: Cascade)
-
-  grantedAt DateTime @default(now())
+  grantedAt     DateTime   @default(now())
+  permission    Permission @relation(fields: [permissionKey], references: [key], onDelete: Cascade)
+  role          Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([roleId, permissionKey])
 }
@@ -220,49 +164,37 @@ model Cosmetic {
   bannerUrl String? @default("")
   banner    String? @default("")
   data      Json?
-
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Link {
-  id                     String   @id @default(nanoid(16))
-  icon                   String?  @default("https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png")
-  url                    String   @default("https://github.com/link")
-  text                   String?  @default("Link")
-  name                   String?  @default("Github")
-  description            String?  @default("Ma description")
-  showDescriptionOnHover Boolean? @default(true)
-  showDescription        Boolean? @default(true)
-  buttonTheme            String?  @default("system")
-  clicks                 Int      @default(0)
-
-  // Advanced Link Features
-  iosUrl         String?
-  androidUrl     String?
-  forceAppOpen   Boolean? @default(false)
-  index      Int       @default(0)
-  // Bento Grid Support
-  gridX      Int       @default(0)
-  gridY      Int       @default(0)
-  gridW      Int       @default(12) // Assuming 12 columns grid
-  gridH      Int       @default(1)
-  type       String?   @default("LINK") // LINK, FORM, EMBED, HEADER, MUSIC
-  clickLimit Int?
-  embedData  Json?
-  formData   Json?
-
-  // Scheduled links (premium) : programmation d'activation/désactivation
-  scheduledAt  DateTime?  // Date à partir de laquelle le lien est visible
-  expiresAt    DateTime?  // Date à laquelle le lien disparaît
-
-  userId   String
-  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plinkkId String?
-  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
-
-  categoryId String?
-  category   Category? @relation(fields: [categoryId], references: [id])
+  id                     String    @id @default(nanoid(16))
+  icon                   String?   @default("https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png")
+  url                    String    @default("https://github.com/link")
+  text                   String?   @default("Link")
+  name                   String?   @default("Github")
+  description            String?   @default("Ma description")
+  showDescriptionOnHover Boolean?  @default(true)
+  showDescription        Boolean?  @default(true)
+  clicks                 Int       @default(0)
+  userId                 String
+  plinkkId               String?
+  categoryId             String?
+  expiresAt              DateTime?
+  scheduledAt            DateTime?
+  buttonTheme            String?   @default("system")
+  androidUrl             String?
+  clickLimit             Int?
+  embedData              Json?
+  forceAppOpen           Boolean?  @default(false)
+  formData               Json?
+  iosUrl                 String?
+  type                   String?   @default("LINK")
+  index                  Int       @default(0)
+  category               Category? @relation(fields: [categoryId], references: [id])
+  plinkk                 Plinkk?   @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+  user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Category {
@@ -270,63 +202,57 @@ model Category {
   name      String
   order     Int      @default(0)
   plinkkId  String
-  plinkk    Plinkk   @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
-  links     Link[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+  plinkk    Plinkk   @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+  links     Link[]
 }
 
 model Host {
   id          String  @id
   verified    Boolean @default(false)
   verifyToken String  @unique
-
-  plinkkId String @unique
-  plinkk   Plinkk @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+  plinkkId    String  @unique
+  plinkk      Plinkk  @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
 }
 
 model Label {
-  id        String @id @default(nanoid(16))
-  data      String @default("Developer")
-  color     String @default("#FF6384")
-  fontColor String @default("#FFFFFF")
-
-  userId   String
-  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plinkkId String?
-  plinkk   Plinkk? @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+  id        String  @id @default(nanoid(16))
+  data      String  @default("Developer")
+  color     String  @default("#FF6384")
+  fontColor String  @default("#FFFFFF")
+  userId    String
+  plinkkId  String?
+  plinkk    Plinkk? @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model SocialIcon {
-  id   String @id @default(nanoid(16))
-  url  String @default("https://github.com")
-  icon String @default("Github")
-
+  id       String  @id @default(nanoid(16))
+  url      String  @default("https://github.com")
+  icon     String  @default("Github")
   userId   String
-  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   plinkkId String?
   plinkk   Plinkk? @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model BackgroundColor {
-  id    String @id @default(nanoid(16))
-  color String @default("#FF5733")
-
+  id       String  @id @default(nanoid(16))
+  color    String  @default("#FF5733")
   userId   String
-  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   plinkkId String?
   plinkk   Plinkk? @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model NeonColor {
-  id    String @id @default(nanoid(16))
-  color String @default("#7289DA")
-
+  id       String  @id @default(nanoid(16))
+  color    String  @default("#7289DA")
   userId   String
-  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   plinkkId String?
   plinkk   Plinkk? @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Statusbar {
@@ -336,9 +262,8 @@ model Statusbar {
   colorText     String? @default("#cccccc")
   fontTextColor Int?    @default(1)
   statusText    String? @default("busy")
-
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String  @unique
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PlinkkStatusbar {
@@ -348,33 +273,30 @@ model PlinkkStatusbar {
   colorText     String? @default("#cccccc")
   fontTextColor Int?    @default(1)
   statusText    String? @default("busy")
-
-  plinkkId String @unique
-  plinkk   Plinkk @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+  plinkkId      String  @unique
+  plinkk        Plinkk  @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
 }
 
 model Announcement {
-  id          String    @id @default(nanoid(16))
-  level       String    @default("info")
+  id          String                   @id @default(nanoid(16))
+  level       String                   @default("info")
   text        String
-  dismissible Boolean   @default(true)
+  dismissible Boolean                  @default(true)
   startAt     DateTime?
   endAt       DateTime?
-  createdAt   DateTime  @default(now())
-  global      Boolean   @default(false)
-  displayType String    @default("banner") // banner | notification | popup
-  platform    String    @default("all")    // dashboard | public | all
-
-  targets     AnnouncementTarget[]
+  createdAt   DateTime                 @default(now())
+  global      Boolean                  @default(false)
+  displayType String                   @default("banner")
+  platform    String                   @default("all")
   roleTargets AnnouncementRoleTarget[]
+  targets     AnnouncementTarget[]
 }
 
 model AnnouncementTarget {
   announcementId String
   userId         String
-
-  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([announcementId, userId])
 }
@@ -382,71 +304,63 @@ model AnnouncementTarget {
 model AnnouncementRoleTarget {
   announcementId String
   roleId         String
-  role           Role   @relation(fields: [roleId], references: [id])
-
-  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  role           Role         @relation(fields: [roleId], references: [id])
 
   @@id([announcementId, roleId])
 }
 
 model Theme {
-  id          String      @id @default(nanoid(16))
-  name        String
-  description String?
-  data        Json
-  status      ThemeStatus @default(DRAFT)
-  isPrivate   Boolean     @default(false)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @default(now()) @updatedAt
-
+  id                   String      @id @default(nanoid(16))
+  name                 String
+  description          String?
+  data                 Json
+  status               ThemeStatus @default(DRAFT)
+  isPrivate            Boolean     @default(false)
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @default(now()) @updatedAt
   pendingUpdate        Json?
   pendingUpdateAt      DateTime?
   pendingUpdateMessage String?
-
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId             String
+  author               User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
 
 model Plinkk {
-  id     String @id @default(nanoid(16))
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  id           String            @id @default(nanoid(16))
+  userId       String
   name         String
   slug         String
-  index        Int        @default(0)
-  isDefault    Boolean    @default(false)
-  isPublic     Boolean    @default(true)
-  visibility   Visibility @default(PUBLIC)
-  isActive     Boolean    @default(true)
-  views        Int        @default(0)
-  passwordHash String?    // Mot de passe pour accès protégé (premium)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @default(now()) @updatedAt
-
-  links       Link[]
-  categories  Category[]
-  labels      Label[]
-  socialIcons SocialIcon[]
-  background  BackgroundColor[]
-  neonColors  NeonColor[]
-  statusbar   PlinkkStatusbar?
-  settings    PlinkkSettings?
-  pageStats   PageStat[]        @relation("PageStats")
-  reports     Report[]
-  versions    PlinkkVersion[]
-
-  host Host?
+  index        Int               @default(0)
+  isDefault    Boolean           @default(false)
+  isPublic     Boolean           @default(true)
+  visibility   Visibility        @default(PUBLIC)
+  isActive     Boolean           @default(true)
+  views        Int               @default(0)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @default(now()) @updatedAt
+  passwordHash String?
+  background   BackgroundColor[]
+  categories   Category[]
+  host         Host?
+  labels       Label[]
+  links        Link[]
+  neonColors   NeonColor[]
+  pageStats    PageStat[]        @relation("PageStats")
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  settings     PlinkkSettings?
+  statusbar    PlinkkStatusbar?
+  versions     PlinkkVersion[]
+  reports      Report[]
+  socialIcons  SocialIcon[]
 
   @@unique([userId, slug])
   @@unique([userId, index])
 }
 
 model PlinkkSettings {
-  id       String @id @default(nanoid(16))
-  plinkkId String @unique
-  plinkk   Plinkk @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
-
+  id                               String  @id @default(nanoid(16))
+  plinkkId                         String  @unique
   profileLink                      String?
   profileImage                     String?
   profileIcon                      String?
@@ -455,14 +369,12 @@ model PlinkkSettings {
   iconUrl                          String?
   description                      String?
   profileHoverColor                String?
-  // affichageEmail spécifique à cette Plinkk (email affiché publiquement pour cette page)
   affichageEmail                   String?
   publicPhone                      String?
   showVerifiedBadge                Boolean @default(true)
   showPartnerBadge                 Boolean @default(true)
   enableVCard                      Boolean @default(true)
   enableLinkCategories             Boolean @default(false)
-
   degBackgroundColor               Int?
   neonEnable                       Int?
   buttonThemeEnable                Int?
@@ -478,11 +390,8 @@ model PlinkkSettings {
   delayAnimationButton             Float?
   canvaEnable                      Int?
   selectedCanvasIndex              Int?
-  // Ordre d'agencement des sections (déplacement visuel dans le dashboard)
-  layoutOrder                      Json?   @default("[\"profile\",\"username\",\"statusbar\",\"labels\",\"social\",\"email\",\"links\"]")
-
-  // Portfolio / Bento mode
-  layoutMode                       String? @default("LIST") // LIST, BENTO
+  layoutOrder                      Json?   @default("[\"profile\", \"username\", \"statusbar\", \"labels\", \"social\", \"email\", \"links\"]")
+  plinkk                           Plinkk  @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
 }
 
 model PlinkkEvent {
@@ -523,11 +432,11 @@ model PlinkkViewDaily {
 model PageStat {
   id        String   @id @default(nanoid(16))
   plinkkId  String
-  plinkk    Plinkk   @relation("PageStats", fields: [plinkkId], references: [id], onDelete: Cascade)
   eventType String
   meta      Json?
   ip        String?
   createdAt DateTime @default(now())
+  plinkk    Plinkk   @relation("PageStats", fields: [plinkkId], references: [id], onDelete: Cascade)
 
   @@index([plinkkId, eventType, createdAt])
 }
@@ -566,91 +475,99 @@ model UserLog {
   details   Json?
   createdAt DateTime @default(now())
   ip        String?
-
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
 model PlinkkVersion {
   id        String   @id @default(nanoid(16))
   plinkkId  String
-  plinkk    Plinkk   @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
   snapshot  Json
   label     String?
   createdAt DateTime @default(now())
+  plinkk    Plinkk   @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
 
   @@index([plinkkId])
   @@index([createdAt])
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Redirections (plinkk.fr/r/slug)
-// ─────────────────────────────────────────────────────────────────────────────
-
 model Redirect {
-  id          String   @id @default(nanoid(16))
-  slug        String   @unique
+  id          String               @id @default(nanoid(16))
+  slug        String               @unique
   targetUrl   String
   title       String?
   description String?
-  clicks      Int      @default(0)
-  isActive    Boolean  @default(true)
-  
+  clicks      Int                  @default(0)
+  isActive    Boolean              @default(true)
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @default(now()) @updatedAt
   expiresAt   DateTime?
-  
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   dailyStats  RedirectClickDaily[]
-  
+
   @@index([userId])
   @@index([slug])
 }
 
 model RedirectClickDaily {
   redirectId String
-  redirect   Redirect @relation(fields: [redirectId], references: [id], onDelete: Cascade)
   date       DateTime @default(now())
   count      Int
-  
+  redirect   Redirect @relation(fields: [redirectId], references: [id], onDelete: Cascade)
+
   @@id([redirectId, date])
   @@map("RedirectClickDaily")
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Achats Stripe (plinkks et redirections supplémentaires)
-// ─────────────────────────────────────────────────────────────────────────────
-
 model Purchase {
   id              String   @id @default(nanoid(16))
   userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type            String   // "extra_plinkk", "extra_redirects"
-  amount          Int      @default(100) // montant en centimes
+  type            String
+  amount          Int      @default(100)
   quantity        Int      @default(1)
   stripeSessionId String?  @unique
   stripePaymentId String?
   createdAt       DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Maintenance
-// ─────────────────────────────────────────────────────────────────────────────
-
 model Maintenance {
-  id             String    @id @default("config")
-  global         Boolean   @default(false) // Maintenance globale
-  dashboard      Boolean   @default(false) // Maintenance dashboard uniquement
-  activePages    String[]  @default([])    // Pages spécifiques en exceptions (Allowlist)
-  maintenancePages String[] @default([])   // Pages spécifiques en maintenance (Blocklist)
-  reason         String?
-  scheduledStart DateTime?
-  scheduledEnd   DateTime?
-  allowedIps     String[]  @default([])
-  allowedRoles   String[]  @default([])
-  updatedAt      DateTime  @updatedAt
+  id               String    @id @default("config")
+  global           Boolean   @default(false)
+  dashboard        Boolean   @default(false)
+  activePages      String[]  @default([])
+  reason           String?
+  updatedAt        DateTime  @updatedAt
+  allowedIps       String[]  @default([])
+  allowedRoles     String[]  @default([])
+  scheduledEnd     DateTime?
+  scheduledStart   DateTime?
+  maintenancePages String[]  @default([])
+}
+
+enum ThemeStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  ARCHIVED
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum PlinkkEventType {
+  CREATED
+  DELETED
+}
+
+enum GravatarSource {
+  PRIMARY
+  PUBLIC
 }

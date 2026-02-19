@@ -60,6 +60,7 @@ async function saveLinks(links) {
         if (currentConfig) currentConfig.links = res.links;
         if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.links = res.links;
         if (window.__EDITOR_STORE__) window.__EDITOR_STORE__.set({ links: res.links });
+        renderPlinkk(currentConfig); // Refresh preview
     }
     return res;
 }
@@ -70,6 +71,7 @@ async function saveLabels(labels) {
         if (currentConfig) currentConfig.labels = res.labels;
         if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.labels = res.labels;
         if (window.__EDITOR_STORE__) window.__EDITOR_STORE__.set({ labels: res.labels });
+        renderPlinkk(currentConfig);
     }
     return res;
 }
@@ -80,6 +82,7 @@ async function saveSocialIcons(socialIcon) {
         if (currentConfig) currentConfig.socialIcon = res.socialIcon;
         if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.socialIcon = res.socialIcon;
         if (window.__EDITOR_STORE__) window.__EDITOR_STORE__.set({ socials: res.socialIcon }); // Note: state uses 'socials'
+        renderPlinkk(currentConfig);
     }
     return res;
 }
@@ -95,6 +98,7 @@ async function saveStatusBar(statusbar) {
             if (!window.__INITIAL_STATE__.statusbar) window.__INITIAL_STATE__.statusbar = {};
             Object.assign(window.__INITIAL_STATE__.statusbar, statusbar);
         }
+        renderPlinkk(currentConfig);
     }
     return res;
 }
@@ -278,6 +282,7 @@ function renderPlinkk(config) {
         // --- FORM ---
         if (link.type === 'FORM') {
             const linkIcon = link.icon || 'https://cdn.plinkk.fr/icons/mail.svg';
+
             return `
             <div class="link-item${isHidden}" data-link-id="${linkId}" data-index="${index}" draggable="true">
                 <div class="link-content">
@@ -303,6 +308,7 @@ function renderPlinkk(config) {
         // --- STANDARD LINK (Default) ---
         const linkIcon = link.icon || DEFAULT_LINK_ICON;
         const linkText = link.text || link.name || link.url || 'Lien';
+
 
         return `
             <div class="link-item${isHidden}" data-link-id="${linkId}" data-index="${index}" draggable="true">

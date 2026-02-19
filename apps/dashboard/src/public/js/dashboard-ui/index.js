@@ -1,5 +1,4 @@
 import { store as state } from './state.js';
-import { bentoManager } from './bento-manager.js';
 import { historyManager } from './history-manager.js';
 import { uiUtils } from './ui-utils.js';
 import { linkManager } from './link-manager.js';
@@ -46,7 +45,6 @@ class DashboardUI {
     }
 
     state.init(initialState);
-    bentoManager.init();
     historyManager.init();
     uiUtils.init();
     linkManager.init();
@@ -54,13 +52,13 @@ class DashboardUI {
     categoryManager.init();
 
     this.initTabs();
-    this.initLayoutToggles();
     this.initStatusLogic();
     this.initLabelsLogic();
     this.initBackgroundTypeToggles();
     this.initCanvasSelection();
     this.initAnimationModals();
     this.initSocials();
+    this.initGeneralPickers();
 
     if (window.initSortable) {
       this.onTabChange = (targetId) => {
@@ -111,31 +109,31 @@ class DashboardUI {
       location.hash = targetId;
     }
   }
+  initGeneralPickers() {
+    const buttons = document.querySelectorAll('.picker-btn[data-picker-for]');
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-picker-for');
+        const input = document.getElementById(targetId);
+        if (!input) return;
 
-  initLayoutToggles() {
-    const radios = document.getElementsByName('layoutMode');
-    const layoutList = document.getElementById('layoutList');
-    const bentoEditor = document.getElementById('bentoEditor');
-
-    const toggleEditor = (mode) => {
-      if (mode === 'BENTO') {
-        bentoManager.initGrid();
-        bentoEditor.classList.remove('hidden');
-      } else {
-        bentoEditor.classList.add('hidden');
-      }
-
-      state.setLayoutMode(mode);
-
-      this.saveSetting('layoutMode', mode);
-    };
-
-    Array.from(radios).forEach(r => {
-      r.addEventListener('change', (e) => toggleEditor(e.target.value));
-      if (r.checked) toggleEditor(r.value);
+        const { openIconModal } = window.__DASH_PICKERS__ || {};
+        if (openIconModal) {
+          openIconModal((url) => {
+            input.value = url;
+            // Update button visual if it's an emoji picker (e.g. status)
+            if (targetId === 'status_emoji') {
+              btn.innerText = url;
+            }
+            // Trigger input event to notify settingsManager and other listeners
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+          }, targetId);
+        }
+      });
     });
-
   }
+
 
   initStatusLogic() {
     const showStatus = document.getElementById('showStatus');

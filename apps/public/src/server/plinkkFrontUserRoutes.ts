@@ -792,7 +792,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       }
 
       // Fusionner les réglages de page (PlinkkSettings) avec les valeurs par défaut du compte
-      const pageProfile: User & PlinkkSettings = {
+      const pageProfile: any = {
         plinkkId: null,
         ...page.user,
         profileLink: finalSettings?.profileLink ?? "",
@@ -834,7 +834,6 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         enableVCard: finalSettings?.enableVCard ?? true,
         publicPhone: finalSettings?.publicPhone ?? "",
         enableLinkCategories: finalSettings?.enableLinkCategories ?? false,
-        layoutMode: finalSettings?.layoutMode ?? "LIST",
       };
 
       const generated = generateProfileConfig(
