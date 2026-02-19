@@ -411,7 +411,8 @@ export function renderCategories({ container, addBtn, categories, links, schedul
       gripBtn.appendChild(createGripSVG(16));
 
       const contentWrap = el('div', { class: 'flex-1 flex flex-col gap-1' });
-      const nameInput = el('input', { type: 'text', value: c.name || '', class: 'w-full bg-transparent border-none focus:ring-0 text-sm font-medium text-slate-200 placeholder-slate-600 p-0', placeholder: 'Nom de la catégorie' });
+      const catName = c.name || c.text || c.title || '';
+      const nameInput = el('input', { type: 'text', value: catName, class: 'w-full bg-transparent border-none focus:ring-0 text-sm font-medium text-slate-200 placeholder-slate-600 p-0', placeholder: 'Nom de la catégorie' });
       nameInput.addEventListener('input', () => { c.name = nameInput.value; triggerUpdate(); });
 
       const count = links ? links.filter(l => l.categoryId === c.id || (c.name && l.categoryId === c.name)).length : 0;
@@ -464,7 +465,10 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
     if (!modalCat) return;
     modalCat.innerHTML = '';
     modalCat.append(el('option', { value: '', text: 'Aucune catégorie' }));
-    (categories || []).forEach(c => modalCat.append(el('option', { value: c.id || c.name, text: c.name })));
+    (categories || []).forEach(c => {
+      const catName = c.name || c.text || c.title || 'Sans nom';
+      modalCat.append(el('option', { value: c.id || c.name, text: catName }));
+    });
   }
 
   function fillThemeSelect() {

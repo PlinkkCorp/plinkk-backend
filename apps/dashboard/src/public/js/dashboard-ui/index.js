@@ -22,7 +22,6 @@ class DashboardUI {
     document.addEventListener('keydown', function (e) {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
-        // Show saved feedback
         const statusEl = document.getElementById('status');
         if (statusEl) {
           statusEl.textContent = 'Sauvegardé !';
@@ -31,14 +30,10 @@ class DashboardUI {
             statusEl.classList.add('opacity-0');
           }, 2000);
         }
-        // Optional: Trigger a save if there's a pending state,
-        // but since we auto-save on input, this is mostly for UX reassurance.
       }
     });
 
-    // Initialize Sub-Modules
     const initialState = window.__INITIAL_STATE__ || {};
-    // Ensure we pass plinkkId if present in state or fallback
     if (!initialState.plinkkId && this.plinkkId) {
       initialState.plinkkId = this.plinkkId;
     }
@@ -51,7 +46,6 @@ class DashboardUI {
     categoryManager.init();
 
     window.initSortable = () => {
-      // Logic for links
       const linksList = document.getElementById('linksList');
       if (linksList && window.Sortable) {
         if (linksList._sortable) linksList._sortable.destroy();
@@ -63,7 +57,6 @@ class DashboardUI {
         });
       }
 
-      // Logic for categories
       const categoriesList = document.getElementById('categoriesList');
       if (categoriesList && window.Sortable) {
         if (categoriesList._sortable) categoriesList._sortable.destroy();

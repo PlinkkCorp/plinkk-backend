@@ -104,7 +104,7 @@
                                     <button data-target="#section-categories"
                                         class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
                                         <svg class="size-4" viewBox="0 0 24 24" fill="white">
-                                            <path <path
+                                            <path
                                                 d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                                         </svg>
                                         Catégories
@@ -311,8 +311,7 @@
                         };
                     </script>
 
-                    <script type="application/json"
-                        id="pages-data"><%- JSON.stringify(typeof pages !== 'undefined' ? pages : []) %></script>
+                    <script type="application/json" id="pages-data"><%- JSON.stringify(locals.pages || []) %></script>
                     <script type="application/json"
                         id="autoopen-data"><%= (typeof autoOpenPlinkkModal !== 'undefined' && autoOpenPlinkkModal) ? 'true' : 'false' %></script>
 
@@ -354,14 +353,17 @@
 
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
                     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                    <script type="application/json"
-                        id="plinkk-data"><%- JSON.stringify(typeof plinkk !== 'undefined' && plinkk ? plinkk : {}) %></script>
+                    <script type="application/json" id="plinkk-data"><%- JSON.stringify(locals.plinkk || {}) %></script>
                     <script>
                         try {
-                            window.__INITIAL_STATE__ = JSON.parse(document.getElementById('plinkk-data').textContent);
+                            const rawData = JSON.parse(document.getElementById('plinkk-data').textContent);
+                            window.__INITIAL_STATE__ = {
+                                ...rawData,
+                                categories: <%- JSON.stringify(locals.categories || []) %>
+                            };
                         } catch (e) {
                             console.error('Failed to parse initial state:', e);
-                            window.__INITIAL_STATE__ = {};
+                            window.__INITIAL_STATE__ = { categories: [] };
                         }
                     </script>
 
@@ -369,7 +371,6 @@
                     <script type="module" src="/public/js/dashboard-ui/index.js"></script>
 
                     <style>
-                        /* UI Utils Styles */
                         .masked-field {
                             background-color: rgba(100, 100, 100, 0.12) !important;
                             opacity: 0.65;

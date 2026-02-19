@@ -151,6 +151,11 @@ export class LinkManager {
                 });
             });
         }
+
+        // Exposed Sync
+        window.__PLINKK_SYNC_SIDEBAR__ = () => {
+            this.updateCategoryDropdown();
+        };
     }
 
     openModal(type = 'LINK', existingData = null) {
@@ -161,6 +166,7 @@ export class LinkManager {
         this.currentEditingId = existingData ? existingData.id : null;
         this.modalTitleHeader.textContent = existingData ? 'Modifier l\'élément' : 'Ajouter un élément';
 
+        this.updateCategoryDropdown();
         this.resetForm();
 
         if (existingData) {
@@ -175,6 +181,20 @@ export class LinkManager {
         this.modal.classList.remove('hidden');
         this.modal.classList.add('flex');
         this.inputs.title.focus();
+    }
+
+    updateCategoryDropdown() {
+        const select = this.inputs.category;
+        if (!select) return;
+
+        const categories = window.__INITIAL_STATE__?.categories || [];
+        const currentVal = select.value;
+
+        select.innerHTML = '<option value="">(Aucune)</option>' +
+            categories.map(c => `<option value="${c.id}">${this.escapeHtml(c.name || c.text || c.title || 'Sans nom')}</option>`).join('');
+
+        // Restore value if still exists
+        if (currentVal) select.value = currentVal;
     }
 
     closeModal() {
@@ -255,6 +275,7 @@ export class LinkManager {
         if (i.url) i.url.value = url;
         if (i.desc) i.desc.value = data.description || '';
         if (i.iconInput) i.iconInput.value = data.icon || '';
+        if (i.category) i.category.value = data.categoryId || '';
 
         if (i.newTab) i.newTab.checked = data.url && !data.forceAppOpen;
         if (i.ios) i.ios.value = data.iosUrl || '';
@@ -283,6 +304,7 @@ export class LinkManager {
         if (i.formBtnText) i.formBtnText.value = '';
         if (i.formSuccessMsg) i.formSuccessMsg.value = '';
         if (i.iconInput) i.iconInput.value = '';
+        if (i.category) i.category.value = '';
 
         this.currentScheme = 'https://';
         if (this.schemeLabel) this.schemeLabel.textContent = this.currentScheme;
@@ -327,6 +349,7 @@ export class LinkManager {
             url: finalUrl,
             description: this.inputs.desc?.value || '',
             icon: this.inputs.iconInput?.value || '',
+            categoryId: this.inputs.category?.value || null,
             iosUrl: this.inputs.ios?.value || '',
             androidUrl: this.inputs.android?.value || '',
             forceAppOpen: this.inputs.forceApp?.checked || false,
