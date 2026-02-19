@@ -8,7 +8,6 @@ export class CategoryManager {
     }
 
     init() {
-        console.log('Category Manager Initializing...');
         this.listContainer = document.getElementById('categoriesList');
         this.addButton = document.getElementById('addCategory');
         this.saveTimeout = null;
@@ -140,7 +139,6 @@ export class CategoryManager {
             if (window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
             if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
         } catch (err) {
-            console.error('Category save error:', err);
             if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
         }
     }
@@ -176,6 +174,8 @@ export class CategoryManager {
                 </div>
             </div>
         `).join('');
+
+        if (window.initSortable) window.initSortable();
     }
 
     escapeHtml(text) {

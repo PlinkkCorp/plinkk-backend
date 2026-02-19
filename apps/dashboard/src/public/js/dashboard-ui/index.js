@@ -17,7 +17,6 @@ class DashboardUI {
   }
 
   init() {
-    console.log('Dashboard UI Initializing...');
 
     // Ctrl+S / Cmd+S Handler
     document.addEventListener('keydown', function (e) {
@@ -51,6 +50,43 @@ class DashboardUI {
     settingsManager.init();
     categoryManager.init();
 
+    window.initSortable = () => {
+      // Logic for links
+      const linksList = document.getElementById('linksList');
+      if (linksList && window.Sortable) {
+        if (linksList._sortable) linksList._sortable.destroy();
+        linksList._sortable = new Sortable(linksList, {
+          handle: '.cursor-move',
+          animation: 150,
+          ghostClass: 'bg-slate-800/20',
+          onEnd: () => linkManager.saveNewOrder()
+        });
+      }
+
+      // Logic for categories
+      const categoriesList = document.getElementById('categoriesList');
+      if (categoriesList && window.Sortable) {
+        if (categoriesList._sortable) categoriesList._sortable.destroy();
+        categoriesList._sortable = new Sortable(categoriesList, {
+          handle: '.cursor-move',
+          animation: 150,
+          ghostClass: 'bg-slate-800/20',
+          onEnd: () => categoryManager.saveAll(categoryManager.getCurrentCategories())
+        });
+      }
+    };
+
+    this.onTabChange = (targetId) => {
+      if (targetId === '#section-links') {
+        setTimeout(() => {
+          if (window.initSortable) window.initSortable();
+        }, 100);
+      }
+      if (targetId === '#section-history') {
+        historyManager.loadHistory();
+      }
+    };
+
     this.initTabs();
     this.initStatusLogic();
     this.initLabelsLogic();
@@ -60,16 +96,8 @@ class DashboardUI {
     this.initSocials();
     this.initGeneralPickers();
 
-    if (window.initSortable) {
-      this.onTabChange = (targetId) => {
-        if (targetId === '#section-links') {
-          setTimeout(() => window.initSortable(), 100);
-        }
-        if (targetId === '#section-history') {
-          historyManager.loadHistory();
-        }
-      };
-    }
+    // Initial check
+    if (window.initSortable) window.initSortable();
   }
 
   initTabs() {
@@ -386,7 +414,6 @@ class DashboardUI {
         });
       });
     } catch (e) {
-      console.error('Failed to init canvas selection:', e);
     }
   }
 
@@ -402,7 +429,6 @@ class DashboardUI {
       if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
       else if (window.refreshPreview) window.refreshPreview();
     } catch (e) {
-      console.error('Save failed', e);
       if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
     }
   }

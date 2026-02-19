@@ -21,7 +21,6 @@ export class SettingsManager {
     }
 
     init() {
-        console.log('SettingsManager Initializing...');
         this.populateFields();
         this.setupListeners();
         window.__PLINKK_SYNC_SIDEBAR__ = () => this.populateFields();

@@ -18,16 +18,16 @@ const preview = () => qs('#preview');
  */
 export function initIframeCommunication(options = {}) {
   const { onFieldChange, onLinkEdit, onSocialEdit, onReady } = options;
-  
+
   onFieldChangeCallback = onFieldChange;
   onLinkEditCallback = onLinkEdit;
   onSocialEditCallback = onSocialEdit;
-  
+
   // Écouter les messages de l'iframe
   window.addEventListener('message', (event) => {
     handleIframeMessage(event, { onReady });
   });
-  
+
   // Attendre que l'iframe soit chargée
   const iframe = preview();
   if (iframe) {
@@ -38,8 +38,8 @@ export function initIframeCommunication(options = {}) {
       }, 500);
     });
   }
-  
-  console.log('[Dashboard] Communication iframe initialisée');
+
+  // console.log('[Dashboard] Communication iframe initialisée');
 }
 
 /**
@@ -48,46 +48,42 @@ export function initIframeCommunication(options = {}) {
 function handleIframeMessage(event, options = {}) {
   const data = event.data;
   if (!data || typeof data !== 'object') return;
-  
+
   switch (data.type) {
     case 'plinkk:iframe-ready':
       iframeReady = true;
-      console.log('[Dashboard] Iframe prête');
       if (options.onReady) options.onReady();
       // Activer automatiquement le mode édition
       if (editModeEnabled) {
         sendToIframe({ type: 'plinkk:enable-edit' });
       }
       break;
-      
+
     case 'plinkk:edit-mode-enabled':
-      console.log('[Dashboard] Mode édition activé dans l\'iframe');
       break;
-      
+
     case 'plinkk:edit-mode-disabled':
-      console.log('[Dashboard] Mode édition désactivé dans l\'iframe');
       break;
-      
+
     case 'plinkk:field-changed':
       if (onFieldChangeCallback) {
         onFieldChangeCallback(data.field, data.value, data.realtime);
       }
       break;
-      
+
     case 'plinkk:edit-link':
       if (onLinkEditCallback) {
         onLinkEditCallback(data.index, data.currentText, data.currentUrl);
       }
       break;
-      
+
     case 'plinkk:edit-social':
       if (onSocialEditCallback) {
         onSocialEditCallback(data.index, data.currentUrl);
       }
       break;
-      
+
     case 'plinkk:current-values':
-      console.log('[Dashboard] Valeurs actuelles reçues:', data.values);
       break;
   }
 }

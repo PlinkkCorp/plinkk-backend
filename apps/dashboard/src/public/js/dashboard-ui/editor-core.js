@@ -46,7 +46,6 @@ async function saveConfig(endpoint, data) {
         if (window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
         return await res.json();
     } catch (e) {
-        console.error('Save error:', e);
         if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
         return null;
     }
@@ -134,7 +133,6 @@ async function loadPlinkkPage() {
         currentConfig = await response.json();
         renderPlinkk(currentConfig);
     } catch (error) {
-        console.error('Error loading plinkk:', error);
         plinkkRenderer.innerHTML = `
             <div class="flex flex-col items-center justify-center h-full min-h-[400px] text-slate-500">
                 <svg class="w-16 h-16 mb-4 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1032,7 +1030,6 @@ function setupInlineEditing() {
                     if (window.__PLINKK_SYNC_SIDEBAR__) window.__PLINKK_SYNC_SIDEBAR__();
 
                 } catch (err) {
-                    console.error('Save error:', err);
                 }
             };
 
@@ -1438,13 +1435,11 @@ function initCanvas(canvasFileName) {
                         runCanvasAnimation(canvas.getContext('2d'), canvas);
                     }
                 } catch (e) {
-                    console.error('Error running canvas animation:', e);
                 }
             };
-            script.onerror = (e) => console.error('Failed to load canvas file', canvasFileName, e);
+            script.onerror = (e) => { };
             document.head.appendChild(script);
         } catch (err) {
-            console.error('Error loading canvas extensions:', err);
             // fallback: still try to load the main script
             const script = document.createElement('script');
             script.src = '/public/canvaAnimation/' + canvasFileName;

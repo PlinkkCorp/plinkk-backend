@@ -17,7 +17,6 @@ export class LinkManager {
     }
 
     init() {
-        console.log('[LinkManager] Initializing...');
 
         this.modal = document.getElementById('linkModal');
         this.modalTitleHeader = document.getElementById('linkModalTitleHeader');
@@ -27,7 +26,6 @@ export class LinkManager {
             document.getElementById('linkModalCancel')
         ];
 
-        console.log('[LinkManager] Modal:', !!this.modal, 'SaveBtn:', !!this.saveBtn);
 
         // Inputs
         this.inputs = {
@@ -46,13 +44,10 @@ export class LinkManager {
             iconInput: document.getElementById('linkModalIconInput')
         };
 
-        console.log('[LinkManager] Inputs found:', Object.keys(this.inputs).filter(k => !!this.inputs[k]));
-        console.log('[LinkManager] MISSING:', Object.keys(this.inputs).filter(k => !this.inputs[k]));
 
         // Also ensure typeSelect is found if ID is different in some versions? No, expected linkModalType.
 
         this.typeBtns = document.querySelectorAll('[data-type-select]');
-        console.log('[LinkManager] Type buttons:', this.typeBtns.length);
 
         // Sections to toggle
         this.sections = {
@@ -132,7 +127,6 @@ export class LinkManager {
         if (this.typeBtns) {
             this.typeBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    console.log('[LinkManager] Type clicked:', btn.dataset.typeSelect);
                     const type = btn.dataset.typeSelect;
                     this.setModalType(type);
                 });
@@ -142,7 +136,6 @@ export class LinkManager {
         // Save
         if (this.saveBtn) {
             this.saveBtn.addEventListener('click', () => {
-                console.log('[LinkManager] Save button clicked');
                 this.saveLink();
             });
         }
@@ -161,9 +154,7 @@ export class LinkManager {
     }
 
     openModal(type = 'LINK', existingData = null) {
-        console.log('[LinkManager] Opening modal', type, existingData);
         if (!this.modal) {
-            console.error('[LinkManager] Modal element not found!');
             return;
         }
 
@@ -195,7 +186,6 @@ export class LinkManager {
     }
 
     setModalType(type) {
-        console.log('[LinkManager] Setting modal type:', type);
         if (this.inputs.typeSelect) {
             this.inputs.typeSelect.value = type;
         } else {
@@ -299,7 +289,6 @@ export class LinkManager {
     }
 
     debouncedSave() {
-        // console.log('[LinkManager] Debounced save triggered');
         if (this.saveTimeout) clearTimeout(this.saveTimeout);
         this.saveTimeout = setTimeout(() => {
             this.saveLink();
@@ -307,20 +296,13 @@ export class LinkManager {
     }
 
     async saveLink() {
-        console.log('[LinkManager] Attempting to save...');
-        const type = this.inputs.typeSelect ? this.inputs.typeSelect.value : 'LINK';
-        const title = this.inputs.title ? this.inputs.title.value : '';
-
-        console.log(`[LinkManager] Saving: Type=${type}, Title=${title}`);
 
         if (!title && type !== 'HEADER' && !this.inputs.url?.value) {
-            console.warn('[LinkManager] Save aborted: Title and URL are empty (and not HEADER)');
             return;
         }
 
         const saveFn = window.__PLINKK_SAVE_LINKS__;
         if (!saveFn) {
-            console.error('[LinkManager] CRITICAL: window.__PLINKK_SAVE_LINKS__ is undefined!');
             return;
         }
 
@@ -396,7 +378,6 @@ export class LinkManager {
 
             if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
         } catch (e) {
-            console.error('Link save error:', e);
             if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
 
             const originalLinks = window.__PLINKK_GET_CONFIG__ && window.__PLINKK_GET_CONFIG__() ? window.__PLINKK_GET_CONFIG__().links : (window.__INITIAL_STATE__?.links || []);
@@ -425,11 +406,44 @@ export class LinkManager {
             if (window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
             if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
         } catch (e) {
-            console.error(e);
             if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
 
             const originalLinks = window.__PLINKK_GET_CONFIG__ && window.__PLINKK_GET_CONFIG__() ? window.__PLINKK_GET_CONFIG__().links : (window.__INITIAL_STATE__?.links || []);
             this.renderLinksList(originalLinks);
+        }
+    }
+
+    async saveNewOrder() {
+        const list = document.getElementById('linksList');
+        if (!list) return;
+
+        const ids = Array.from(list.querySelectorAll('[data-id]')).map(el => el.dataset.id);
+        const currentConfig = window.__PLINKK_GET_CONFIG__ ? window.__PLINKK_GET_CONFIG__() : null;
+        let links = currentConfig && currentConfig.links ? [...currentConfig.links] : (window.__INITIAL_STATE__?.links || []);
+
+        if (links.length === 0) return;
+
+        // Reorder links based on ids
+        const newLinks = ids.map(id => links.find(l => l.id === id)).filter(Boolean);
+
+        const saveFn = window.__PLINKK_SAVE_LINKS__;
+        if (saveFn) {
+            try {
+                if (window.__PLINKK_SHOW_SAVING__) window.__PLINKK_SHOW_SAVING__();
+                const result = await saveFn(newLinks);
+                if (result && result.links) {
+                    if (window.__PLINKK_GET_CONFIG__) {
+                        const cfg = window.__PLINKK_GET_CONFIG__();
+                        if (cfg) cfg.links = result.links;
+                    }
+                    if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.links = result.links;
+                    if (window.__PLINKK_SYNC_SIDEBAR__) window.__PLINKK_SYNC_SIDEBAR__();
+                }
+                if (window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
+                if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+            } catch (e) {
+                if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
+            }
         }
     }
 
@@ -480,6 +494,8 @@ export class LinkManager {
                 </div>
             `;
         }).join('');
+
+        if (window.initSortable) window.initSortable();
     }
 
     escapeHtml(text) {

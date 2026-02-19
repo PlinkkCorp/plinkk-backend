@@ -1054,7 +1054,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
         });
       });
 
-    } catch (e) { console.error(e); }
+    } catch (e) { }
     // scheme menu toggle and selection handlers
     if (modalSchemeBtn && modalSchemeMenu && !modalSchemeBtn._bound) {
       modalSchemeBtn.addEventListener('click', (e) => {
