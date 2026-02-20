@@ -6,6 +6,12 @@ import { isUserPremium } from "@plinkk/shared";
 // @ts-ignore
 import { logUserAction } from "../../../../lib/userLogger";
 
+// snapshot shape used in history entries
+interface PlinkkSnapshot {
+    meta?: { changes?: unknown[] };
+}
+
+
 export function plinkksHistoryRoutes(fastify: FastifyInstance) {
 
     // Get History
@@ -24,12 +30,12 @@ export function plinkksHistoryRoutes(fastify: FastifyInstance) {
         });
 
         const mappedVersions = versions.map(v => {
-            const snap = v.snapshot as any;
+            const snap = v.snapshot as PlinkkSnapshot;
             return {
                 id: v.id,
                 label: v.label,
                 createdAt: v.createdAt,
-                isManual: v.label?.startsWith("[BACKUP]") || (v as any).isManual, // Assuming we might add an isManual field later, or use label convention
+                isManual: v.label?.startsWith("[BACKUP]"),
                 // Extract changes from meta
                 changes: snap?.meta?.changes || []
             };

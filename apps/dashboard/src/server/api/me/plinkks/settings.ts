@@ -436,12 +436,15 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
       // But here we already calculated 'changes' with calculateObjectDiff.
       // So we just wrap it manually.
       if (Object.keys(changes).length > 0) {
-        const structuredChanges = Object.keys(changes).map(key => ({
-          key: `statusbar.${key} `,
-          old: (oldStatus as any)?.[key],
-          new: (body.statusbar as any)?.[key],
-          type: 'updated' as const
-        }));
+        const structuredChanges = Object.keys(changes).map(key => {
+          const k = key as keyof PlinkkStatusbar;
+          return {
+            key: `statusbar.${k}`,
+            old: oldStatus?.[k],
+            new: body.statusbar?.[k],
+            type: 'updated' as const
+          };
+        });
 
         await logUserAction(userId, "UPDATE_PLINKK_STATUSBAR", id, {
           diff: changes,

@@ -2,6 +2,15 @@
 import { prisma, Prisma } from '@plinkk/prisma';
 import { logUserAction } from '../lib/userLogger';
 
+// helper types for log restoration
+interface DiffObject { [key: string]: unknown; }
+interface LogDetails { diff?: DiffObject; }
+
+function isLogDetails(d: unknown): d is LogDetails {
+    return d !== null && typeof d === 'object' && 'diff' in d;
+}
+
+
 /**
  * Restore a Plinkk (or related entity) to the state of a specific log entry
  * by undoing all subsequent changes.
@@ -47,8 +56,8 @@ export async function restoreUserLogState(logId: string, userId: string, ip?: st
 
     // 3. Process each log to undo it
     for (const log of subsequentLogs) {
-        const details = log.details as any;
-        if (!details || !details.diff) continue;
+        const details = log.details;
+        if (!isLogDetails(details) || !details.diff) continue;
 
         const diff = details.diff;
 
@@ -118,11 +127,11 @@ export async function restoreUserLogState(logId: string, userId: string, ip?: st
 // Helpers
 // ----------------------------------------------------------------------
 
-async function revertFlatUpdate(modelName: string, where: any, diff: any) {
-    const patch: any = {};
+async function revertFlatUpdate(modelName: string, where: any, diff: DiffObject) {
+    const patch: Record<string, unknown> = {};
     for (const [key, change] of Object.entries(diff)) {
-        if (change && typeof change === 'object' && 'old' in (change as any)) {
-            patch[key] = (change as any).old;
+        if (change && typeof change === 'object' && 'old' in change) {
+            patch[key] = (change as { old: unknown }).old;
         }
     }
     if (Object.keys(patch).length > 0) {

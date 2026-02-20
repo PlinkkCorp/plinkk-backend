@@ -1,6 +1,36 @@
 
-import { prisma, Plinkk, User } from "@plinkk/prisma";
+import {
+    prisma,
+    Plinkk,
+    User,
+    Prisma,
+    BackgroundColor,
+    NeonColor,
+    Label,
+    SocialIcon,
+    PlinkkStatusbar,
+    Link,
+    Category,
+    PlinkkSettings
+} from "@plinkk/prisma";
 import { isUserPremium } from "@plinkk/shared";
+
+// structure of the JSON snapshot stored in PlinkkVersion
+interface PlinkkSnapshot {
+    meta?: {
+        timestamp?: string;
+        changes?: (string | Change)[];
+    };
+    plinkk?: Partial<Pick<Plinkk, 'name' | 'slug' | 'isDefault' | 'isPublic' | 'visibility'>>;
+    settings?: Partial<PlinkkSettings>;
+    background?: BackgroundColor[];
+    neonColors?: NeonColor[];
+    labels?: Label[];
+    socialIcons?: SocialIcon[];
+    statusbar?: PlinkkStatusbar | null;
+    links?: Link[];
+    categories?: Category[];
+}
 
 const MAX_VERSIONS_FREE = 5;
 const MAX_VERSIONS_PREMIUM = 50;
@@ -116,7 +146,7 @@ export async function createPlinkkVersion(
         await prisma.plinkkVersion.create({
             data: {
                 plinkkId,
-                snapshot: snapshot as any, // Store the full snapshot
+                snapshot: JSON.parse(JSON.stringify(snapshot)) as Prisma.JsonValue, // Store the full snapshot
                 label: changeLabel,
             }
         });
@@ -139,7 +169,7 @@ export async function restorePlinkkVersion(plinkkId: string, versionId: string, 
         throw new Error("Version not found");
     }
 
-    const snapshot = version.snapshot as any;
+    const snapshot = version.snapshot as PlinkkSnapshot;
     if (!snapshot) throw new Error("Corrupted snapshot");
 
     // Transaction to atomic restore
@@ -181,7 +211,7 @@ export async function restorePlinkkVersion(plinkkId: string, versionId: string, 
         await tx.backgroundColor.deleteMany({ where: { plinkkId } });
         if (snapshot.background?.length) {
             await tx.backgroundColor.createMany({
-                data: snapshot.background.map((b: any) => ({
+                data: snapshot.background.map((b) => ({
                     color: b.color,
                     userId,
                     plinkkId
@@ -193,7 +223,7 @@ export async function restorePlinkkVersion(plinkkId: string, versionId: string, 
         await tx.neonColor.deleteMany({ where: { plinkkId } });
         if (snapshot.neonColors?.length) {
             await tx.neonColor.createMany({
-                data: snapshot.neonColors.map((n: any) => ({
+                data: snapshot.neonColors.map((n) => ({
                     color: n.color,
                     userId,
                     plinkkId
@@ -205,7 +235,7 @@ export async function restorePlinkkVersion(plinkkId: string, versionId: string, 
         await tx.label.deleteMany({ where: { plinkkId } });
         if (snapshot.labels?.length) {
             await tx.label.createMany({
-                data: snapshot.labels.map((l: any) => ({
+                data: snapshot.labels.map((l) => ({
                     data: l.data,
                     color: l.color,
                     fontColor: l.fontColor,
@@ -219,7 +249,7 @@ export async function restorePlinkkVersion(plinkkId: string, versionId: string, 
         await tx.socialIcon.deleteMany({ where: { plinkkId } });
         if (snapshot.socialIcons?.length) {
             await tx.socialIcon.createMany({
-                data: snapshot.socialIcons.map((s: any) => ({
+                data: snapshot.socialIcons.map((s) => ({
                     url: s.url,
                     icon: s.icon,
                     userId,
@@ -230,7 +260,7 @@ export async function restorePlinkkVersion(plinkkId: string, versionId: string, 
 
         // 7. Restore Statusbar
         if (snapshot.statusbar) {
-            const { id, plinkkId: _pid, userId: _uid, ...rest } = snapshot.statusbar;
+            const { id, plinkkId: _pid, ...rest } = snapshot.statusbar;
             await tx.plinkkStatusbar.upsert({
                 where: { plinkkId },
                 create: { plinkkId, ...rest },
@@ -268,7 +298,7 @@ export async function restorePlinkkVersion(plinkkId: string, versionId: string, 
         await tx.link.deleteMany({ where: { plinkkId } });
         if (snapshot.links?.length) {
             await tx.link.createMany({
-                data: snapshot.links.map((l: any) => ({
+                data: snapshot.links.map((l) => ({
                     icon: l.icon,
                     url: l.url,
                     text: l.text,

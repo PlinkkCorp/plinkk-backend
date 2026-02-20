@@ -1,6 +1,13 @@
 import { prisma, Prisma } from '@plinkk/prisma';
 import { logAdminAction } from '../lib/adminLogger';
 
+interface DiffObject { [key: string]: unknown; }
+interface LogDetails { diff?: DiffObject; }
+function isLogDetails(d: unknown): d is LogDetails {
+    return d !== null && typeof d === 'object' && 'diff' in d;
+}
+
+
 /**
  * Maps an action string to a Prisma model name.
  */
@@ -68,14 +75,14 @@ export async function restoreLogState(logId: string, adminId: string, ip?: strin
     // So yes, iterating Newest -> Oldest (Log 3 then Log 2) and setting field = old works.
 
     for (const log of subsequentLogs) {
-        const details = log.details as any;
-        if (!details || !details.diff) continue;
+        const details = log.details;
+        if (!isLogDetails(details) || !details.diff) continue;
 
         const diff = details.diff;
         for (const [key, change] of Object.entries(diff)) {
-            if (change && typeof change === 'object' && 'old' in (change as any)) {
+            if (change && typeof change === 'object' && 'old' in change) {
                 // We apply the 'old' value to revert this change
-                restorePatch[key] = (change as any).old;
+                restorePatch[key] = (change as { old: unknown }).old;
             }
         }
         logsProcessed.push(log.id);
@@ -95,15 +102,15 @@ export async function restoreLogState(logId: string, adminId: string, ip?: strin
 
     // 4. Apply the patch
     // @ts-ignore - dynamic prisma model access
-    const modelDelegate = prisma[modelName.toLowerCase()]; // conventional prisma client mapping is lowercase
+    const modelDelegate = (prisma as unknown as Record<string, unknown>)[modelName.toLowerCase()]; // conventional prisma client mapping is lowercase
     if (!modelDelegate) {
-        const delegate = (prisma as any)[modelName]; // try exact match if lowercase failed (e.g. User vs user)
+        const delegate = (prisma as unknown as Record<string, unknown>)[modelName]; // try exact match if lowercase failed (e.g. User vs user)
         if (!delegate) throw new Error(`Prisma delegate not found for model: ${modelName}`);
     }
 
     // Need to handle lowercase model name convention of Prisma Client
     const delegateKey = modelName.charAt(0).toLowerCase() + modelName.slice(1);
-    const delegate = (prisma as any)[delegateKey];
+    const delegate = (prisma as unknown as Record<string, unknown>)[delegateKey];
 
     if (!delegate) throw new Error(`Prisma delegate not found for ${delegateKey}`);
 

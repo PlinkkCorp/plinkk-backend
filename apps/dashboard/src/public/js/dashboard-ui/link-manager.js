@@ -234,11 +234,12 @@ export class LinkManager {
             return;
         }
 
+        this.resetForm();
+
         this.currentEditingId = existingData ? existingData.id : null;
         this.modalTitleHeader.textContent = existingData ? 'Modifier l\'élément' : 'Ajouter un élément';
 
         this.updateCategoryDropdown();
-        this.resetForm();
 
         if (existingData) {
             this.populateForm(existingData);

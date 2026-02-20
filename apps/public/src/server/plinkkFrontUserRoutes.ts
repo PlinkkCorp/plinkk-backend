@@ -14,6 +14,7 @@ import { coerceThemeData } from "../lib/theme";
 import { generateBundle } from "../lib/generateBundle";
 import { generateTheme } from "../lib/generateTheme";
 import { roundedRect, wrapText } from "../lib/fileUtils";
+import { PlinkkSnapshot } from "../types/plinkk";
 
 type CanvasMod = typeof import("canvas") | null;
 let _canvasMod: CanvasMod = null;
@@ -246,16 +247,16 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             }
 
             // HISTORY PREVIEW LOGIC
-            const versionId = (request.query as { versionId?: string }).versionId;
+            const { versionId } = request.query as unknown as { versionId?: string };
             let displayPage = resolved.page;
             let displayLinks = links;
 
             if (versionId) {
               const version = await prisma.plinkkVersion.findUnique({ where: { id: versionId } });
               if (version && version.plinkkId === resolved.page.id) {
-                const snap = version.snapshot as any;
-                if (snap.plinkk) displayPage = { ...displayPage, ...snap.plinkk };
-                if (snap.links) displayLinks = snap.links;
+                const snap = version.snapshot as PlinkkSnapshot;
+                if (snap?.plinkk) displayPage = { ...displayPage, ...snap.plinkk };
+                if (snap?.links) displayLinks = snap.links;
                 console.log(`[Preview] Applied version ${versionId} to server-render for ${resolved.page.id}`);
               }
             }
@@ -409,16 +410,16 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         }
 
         // HISTORY PREVIEW LOGIC
-        const versionId = (request.query as { versionId?: string }).versionId;
+        const { versionId } = request.query as unknown as { versionId?: string };
         let displayPage = resolved.page;
         let displayLinks = links;
 
         if (versionId) {
           const version = await prisma.plinkkVersion.findUnique({ where: { id: versionId } });
           if (version && version.plinkkId === resolved.page.id) {
-            const snap = version.snapshot as any;
-            if (snap.plinkk) displayPage = { ...displayPage, ...snap.plinkk };
-            if (snap.links) displayLinks = snap.links;
+            const snap = version.snapshot as PlinkkSnapshot;
+            if (snap?.plinkk) displayPage = { ...displayPage, ...snap.plinkk };
+            if (snap?.links) displayLinks = snap.links;
             console.log(`[Preview] Applied version ${versionId} to server-render (fallback) for ${resolved.page.id}`);
           }
         }
@@ -616,7 +617,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
       // HISTORY PREVIEW LOGIC
       // Check referer for versionId (if loaded in iframe) or query
-      let versionIdArg: string | null = (request.query as any).versionId || null;
+      const { versionId: tmpVersion } = request.query as unknown as { versionId?: string };
+      let versionIdArg: string | null = tmpVersion || null;
       if (!versionIdArg) {
         try {
           const referer = request.headers.referer;
@@ -639,10 +641,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       if (versionIdArg) {
         const version = await prisma.plinkkVersion.findUnique({ where: { id: versionIdArg } });
         if (version && version.plinkkId === page.id) {
-          const snap = version.snapshot as any;
-          console.log(`[Config.js] Loaded version ${versionIdArg} for ${page.id}`);
-
-          if (snap.settings) finalSettings = { ...finalSettings, ...snap.settings };
+          const snap = version.snapshot as PlinkkSnapshot;
           if (snap.background) finalBackground = snap.background;
           if (snap.neonColors) finalNeon = snap.neonColors;
           if (snap.labels) finalLabels = snap.labels;

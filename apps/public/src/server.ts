@@ -13,7 +13,17 @@ import {
   Role,
   User,
   PlinkkVersion,
+  BackgroundColor,
+  NeonColor,
+  Label,
+  SocialIcon,
+  PlinkkStatusbar,
+  Link,
+  Category,
 } from "@plinkk/prisma";
+import { PlinkkSnapshot } from "./types/plinkk";
+
+// snapshot type imported from ./types/plinkk
 import { prisma } from "@plinkk/prisma";
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
@@ -252,34 +262,34 @@ fastify.addHook("onRequest", async (request, reply) => {
           const version = await prisma.plinkkVersion.findUnique({ where: { id: versionId } });
 
           if (version && version.plinkkId === resolved.page.id) {
-            const snapshot = version.snapshot as any;
-            console.log(`[Preview] Snapshot loaded. Keys: ${Object.keys(snapshot).join(', ')}`);
+            const snapshot = version.snapshot as PlinkkSnapshot;
+            console.log(`[Preview] Snapshot loaded. Keys: ${Object.keys(snapshot || {}).join(', ')}`);
 
-            if (snapshot.plinkk) {
+            if (snapshot?.plinkk) {
               displayPage = { ...displayPage, ...snapshot.plinkk };
             }
-            if (snapshot.settings) {
+            if (snapshot?.settings) {
               displaySettings = { ...displaySettings, ...snapshot.settings };
             }
-            if (snapshot.background) {
+            if (snapshot?.background) {
               displayBackground = snapshot.background;
             }
-            if (snapshot.neonColors) {
+            if (snapshot?.neonColors) {
               displayNeonColors = snapshot.neonColors;
             }
-            if (snapshot.labels) {
+            if (snapshot?.labels) {
               displayLabels = snapshot.labels;
             }
-            if (snapshot.socialIcon) {
+            if (snapshot?.socialIcon) {
               displaySocialIcons = snapshot.socialIcon;
             }
-            if (snapshot.statusbar) {
+            if (snapshot?.statusbar) {
               displayStatusbar = snapshot.statusbar;
             }
-            if (snapshot.links) {
+            if (snapshot?.links) {
               displayLinks = snapshot.links;
             }
-            if (snapshot.categories) {
+            if (snapshot?.categories) {
               displayCategories = snapshot.categories;
             }
           } else {
@@ -368,7 +378,7 @@ fastify.addHook("onRequest", async (request, reply) => {
         if (versionIdArg) {
           const version = await prisma.plinkkVersion.findUnique({ where: { id: versionIdArg } });
           if (version && version.plinkkId === page.id) {
-            const snap = version.snapshot as any;
+            const snap = version.snapshot as PlinkkSnapshot;
             console.log(`[Config.js] Loaded version ${versionIdArg} for ${page.id}`);
 
             // Override with snapshot data

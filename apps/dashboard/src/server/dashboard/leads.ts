@@ -3,6 +3,12 @@ import { prisma } from "@plinkk/prisma";
 import { replyView } from "../../lib/replyView";
 import { requireAuthRedirect, requireAuth } from "../../middleware/auth";
 
+
+interface LeadMeta {
+    linkId?: string;
+    formData?: Record<string, unknown>;
+}
+
 export function dashboardLeadsRoutes(fastify: FastifyInstance) {
     // Page: view leads
     fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
@@ -32,10 +38,10 @@ export function dashboardLeadsRoutes(fastify: FastifyInstance) {
         // Enrich leads with link text from the meta.linkId
         const linkIds = leads
             .map((l) => {
-                const meta = l.meta as any;
+                const meta = l.meta as unknown as LeadMeta | null;
                 return meta?.linkId;
             })
-            .filter(Boolean);
+            .filter(Boolean) as string[];
 
         const links = linkIds.length
             ? await prisma.link.findMany({
@@ -47,7 +53,7 @@ export function dashboardLeadsRoutes(fastify: FastifyInstance) {
         const linkMap = new Map(links.map((l) => [l.id, l]));
 
         const enrichedLeads = leads.map((lead) => {
-            const meta = lead.meta as any;
+            const meta = lead.meta as unknown as LeadMeta | null;
             const link = meta?.linkId ? linkMap.get(meta.linkId) : null;
             return {
                 ...lead,

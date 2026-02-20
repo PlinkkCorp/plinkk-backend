@@ -6,8 +6,8 @@ import { logAdminAction } from "../../../lib/adminLogger";
 import { requireAuthRedirect, requireAuth } from "../../../middleware/auth";
 
 interface LogsQuery {
-  page?: number;
-  limit?: number;
+  page?: string;
+  limit?: string;
   adminId?: string;
   targetId?: string;
   action?: string;
@@ -62,11 +62,11 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
     });
   });
 
-  fastify.get<{ Querystring: any }>("/api", { preHandler: [requireAuth] }, async function (request, reply) {
+  fastify.get<{ Querystring: LogsQuery }>("/api", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_ADMIN_LOGS");
     if (!ok) return;
 
-    const query = request.query as any;
+    const query = request.query;
     const page = parseInt(query.page) || 1;
     const limit = parseInt(query.limit) || 50;
     const skip = (page - 1) * limit;
@@ -143,11 +143,11 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
     return reply.send({ logs: enriched, total });
   });
 
-  fastify.get<{ Querystring: any }>("/user-api", { preHandler: [requireAuth] }, async function (request, reply) {
+  fastify.get<{ Querystring: LogsQuery }>("/user-api", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_ADMIN_LOGS");
     if (!ok) return;
 
-    const query = request.query as any;
+    const query = request.query;
     const page = parseInt(query.page) || 1;
     const limit = parseInt(query.limit) || 50;
     const skip = (page - 1) * limit;
