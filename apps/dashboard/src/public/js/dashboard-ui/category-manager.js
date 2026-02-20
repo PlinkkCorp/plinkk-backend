@@ -11,18 +11,15 @@ export class CategoryManager {
     init() {
         this.listContainer = document.getElementById('categoriesList');
         this.addButton = document.getElementById('addCategory');
+        if (this.addButton) this.addButton.innerHTML = '<span class="bg-slate-800 p-1 rounded transition-colors">+</span> Nouvelle catégorie (JS Active)';
 
         if (!this.listContainer) return;
         this.setupListeners();
 
-        // Robust re-render if data is in window.__INITIAL_STATE__
+        // Always render from state to ensure consistency
         const categories = window.__INITIAL_STATE__?.categories || [];
         if (categories.length > 0) {
-            // Check if we should render (either container is empty, or only has the "empty" message)
-            const isEmptyMessage = this.listContainer.querySelector('.text-center.italic');
-            if (this.listContainer.children.length === 0 || isEmptyMessage) {
-                this.renderList(categories);
-            }
+            this.renderList(categories);
         }
     }
 
@@ -168,8 +165,8 @@ export class CategoryManager {
         }
 
         this.listContainer.innerHTML = categories.map(category => {
-            const name = category.name || category.text || category.title || '';
-            const id = category.id || '';
+            const name = category.name || category.text || category.title || '(Sans nom JS)';
+            // console.log('[CategoryManager] Rendering category:', category.id, name, category);
             return `
                 <div class="group relative bg-slate-950 border border-slate-800 rounded-xl p-4 transition-all hover:border-slate-700" data-id="${id}">
                     <div class="flex items-center justify-between gap-4">

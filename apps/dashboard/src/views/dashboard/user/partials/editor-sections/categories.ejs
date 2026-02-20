@@ -22,7 +22,9 @@
                                     <circle cx="15" cy="19" r="1"></circle>
                                 </svg>
                             </div>
-                            <% const catName=category.name || category.text || category.title || '' %>
+                            <!-- DEBUG: EJS Rendering -->
+                            <div style="display:none" data-debug-category-raw='<%- JSON.stringify(category) %>'></div>
+                            <% const catName=category.name || category.text || category.title || '(Sans nom EJS)' %>
                                 <input type="text" value="<%= catName %>"
                                     class="bg-transparent text-slate-200 font-medium focus:outline-none w-full cursor-text"
                                     placeholder="Nom de la catégorie..." />

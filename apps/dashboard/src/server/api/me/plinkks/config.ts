@@ -115,39 +115,14 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
 
     const body = request.body as PlinkkSettings;
 
-    // Suppression de la vérification premium pour les effets visuels (Néon, Canva, Animations)
-    // Selon la demande utilisateur ces éléments doivent être gratuits.
-
-    /*
-    // Vérification premium pour les effets visuels
-    const hasVisualEffectFields = (
-      body.EnableAnimationArticle != null ||
-      body.EnableAnimationButton != null ||
-      body.EnableAnimationBackground != null ||
-      body.selectedAnimationIndex != null ||
-      body.selectedAnimationButtonIndex != null ||
-      body.selectedAnimationBackgroundIndex != null ||
-      body.canvaEnable != null ||
-      body.selectedCanvasIndex != null ||
-      body.neonEnable != null
-    );
-
-    if (hasVisualEffectFields) {
-      const user = await prisma.user.findUnique({
-        where: { id: String(userId) },
-        include: { role: true },
-      });
-      if (!canUseVisualEffects(user)) {
-        return reply.code(403).send({
-          error: "premium_required",
-          feature: "visual_effects",
-          message: "Les effets visuels nécessitent un abonnement premium",
-        });
-      }
-    }
-    */
-
     const currentSettings = await prisma.plinkkSettings.findUnique({ where: { plinkkId: id } });
+
+    const toInt = (v: any) => { 
+      if (v === undefined || v === null || v === "") return null;
+      if (typeof v === 'boolean') return v ? 1 : 0;
+      const parsed = parseInt(v);
+      return isNaN(parsed) ? null : parsed;
+    };
 
     const data = pickDefined({
       profileLink: body.profileLink,
@@ -164,21 +139,21 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       iconUrl: body.iconUrl,
       description: body.description,
       profileHoverColor: body.profileHoverColor,
-      degBackgroundColor: body.degBackgroundColor,
-      neonEnable: body.neonEnable,
-      buttonThemeEnable: body.buttonThemeEnable,
-      EnableAnimationArticle: body.EnableAnimationArticle,
-      EnableAnimationButton: body.EnableAnimationButton,
-      EnableAnimationBackground: body.EnableAnimationBackground,
-      backgroundSize: body.backgroundSize,
-      selectedThemeIndex: body.selectedThemeIndex,
-      selectedAnimationIndex: body.selectedAnimationIndex,
-      selectedAnimationButtonIndex: body.selectedAnimationButtonIndex,
-      selectedAnimationBackgroundIndex: body.selectedAnimationBackgroundIndex,
-      animationDurationBackground: body.animationDurationBackground,
+      degBackgroundColor: toInt(body.degBackgroundColor),
+      neonEnable: toInt(body.neonEnable),
+      buttonThemeEnable: toInt(body.buttonThemeEnable),
+      EnableAnimationArticle: toInt(body.EnableAnimationArticle),
+      EnableAnimationButton: toInt(body.EnableAnimationButton),
+      EnableAnimationBackground: toInt(body.EnableAnimationBackground),
+      backgroundSize: toInt(body.backgroundSize),
+      selectedThemeIndex: toInt(body.selectedThemeIndex),
+      selectedAnimationIndex: toInt(body.selectedAnimationIndex),
+      selectedAnimationButtonIndex: toInt(body.selectedAnimationButtonIndex),
+      selectedAnimationBackgroundIndex: toInt(body.selectedAnimationBackgroundIndex),
+      animationDurationBackground: toInt(body.animationDurationBackground),
       delayAnimationButton: body.delayAnimationButton,
-      canvaEnable: body.canvaEnable,
-      selectedCanvasIndex: body.selectedCanvasIndex,
+      canvaEnable: toInt(body.canvaEnable),
+      selectedCanvasIndex: toInt(body.selectedCanvasIndex),
     });
 
     // Construct oldData for detailed logging

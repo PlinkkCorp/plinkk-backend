@@ -36,6 +36,7 @@ export function dashboardEditRoutes(fastify: FastifyInstance) {
         orderBy: { order: "asc" },
       }),
     ]);
+    console.log('[EDIT] Fetched categories:', JSON.stringify(categories, null, 2));
     const maxLinks = getUserLimits(userInfo).maxLinks;
 
     const emailHash = crypto
