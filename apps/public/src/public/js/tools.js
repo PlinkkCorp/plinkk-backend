@@ -489,6 +489,20 @@ export function createLinkBoxes(profileData) {
 
     // Helper to create a single link box
     const createBox = (link) => {
+        // --- 0. Schedule & Expiration Check (Client-side) ---
+        const now = new Date();
+        if (link.scheduledAt && new Date(link.scheduledAt) > now) {
+            return document.createComment(`Link ${link.id} hidden due to schedule`);
+        }
+        if (link.expiresAt && new Date(link.expiresAt) < now) {
+            return document.createComment(`Link ${link.id} hidden due to expiration`);
+        }
+
+        // --- 1. Ephemeral Link Check (Client-side) ---
+        if (link.clickLimit > 0 && typeof link.clicks === 'number' && link.clicks >= link.clickLimit) {
+            return document.createComment(`Link ${link.id} hidden due to click limit`);
+        }
+
         if (link.type === 'EMBED' && link.embedData) {
             const container = document.createElement("div");
             container.className = "discord-box embed-box";
@@ -895,19 +909,6 @@ export function createLinkBoxes(profileData) {
             }
             return container;
         }
-        // --- 0. Schedule & Expiration Check (Client-side) ---
-        const now = new Date();
-        if (link.scheduledAt && new Date(link.scheduledAt) > now) {
-            return document.createComment(`Link ${link.id} hidden due to schedule`);
-        }
-        if (link.expiresAt && new Date(link.expiresAt) < now) {
-            return document.createComment(`Link ${link.id} hidden due to expiration`);
-        }
-
-        // --- 1. Ephemeral Link Check (Client-side) ---
-        if (link.clickLimit > 0 && typeof link.clicks === 'number' && link.clicks >= link.clickLimit) {
-            return document.createComment(`Link ${link.id} hidden due to click limit`);
-        }
 
         if (link.type === 'HEADER') {
             const header = document.createElement('h3');
@@ -998,7 +999,7 @@ export function createLinkBoxes(profileData) {
                 input.name = field.name || field.label;
                 input.required = field.required !== false;
 
-                inputs.push({ name: field.name, element: input });
+                inputs.push({ name: field.name || field.label, element: input });
 
                 wrapper.appendChild(label);
                 wrapper.appendChild(input);
@@ -1107,100 +1108,6 @@ export function createLinkBoxes(profileData) {
             return container;
         }
 
-        // --- 3. Embed Handling ---
-        if (link.type === 'EMBED' && link.embedData) {
-            const container = document.createElement("div");
-            container.className = "discord-box embed-box";
-            container.style.padding = "0";
-            container.style.overflow = "hidden";
-            container.style.display = "flex";
-            container.style.flexDirection = "column";
-            container.style.borderRadius = "12px"; // slightly more rounded for embeds
-            container.style.border = "1px solid rgba(255,255,255,0.1)";
-
-            if (link.embedData.url) {
-                let embedUrl = link.embedData.url;
-                let isSpotify = false;
-                let isYouTube = false;
-
-                // --- SMART EMBED LOGIC ---
-                try {
-                    const urlObj = new URL(embedUrl);
-
-                    // 1. YouTube
-                    if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
-                        isYouTube = true;
-                        let videoId = null;
-                        if (urlObj.hostname.includes('youtu.be')) {
-                            videoId = urlObj.pathname.slice(1);
-                        } else if (urlObj.pathname.includes('/watch')) {
-                            videoId = urlObj.searchParams.get('v');
-                        } else if (urlObj.pathname.includes('/embed/')) {
-                            videoId = urlObj.pathname.split('/embed/')[1];
-                        }
-
-                        if (videoId) {
-                            embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
-                        }
-                    }
-
-                    // 2. Spotify
-                    if (urlObj.hostname.includes('spotify.com')) {
-                        isSpotify = true;
-                        if (!urlObj.pathname.includes('/embed')) {
-                            let cleanPath = urlObj.pathname;
-                            const intlMatch = cleanPath.match(/^\/intl-[^/]+(\/.*)/);
-                            if (intlMatch) {
-                                cleanPath = intlMatch[1];
-                            }
-                            embedUrl = `https://open.spotify.com/embed${cleanPath}`;
-                        }
-                    }
-
-                    // 3. SoundCloud (basic iframe support usually requires their widget API, but check for visual player param)
-                    if (urlObj.hostname.includes('soundcloud.com')) {
-                        // SoundCloud usually needs oEmbed to get the widget URL from a track URL.
-                        // For now we assume the user might paste the widget URL or we leave it as is.
-                        // Improving this would require a backend proxy or client-side fetch if possible.
-                    }
-
-                } catch (e) {
-                    // Invalid URL, ignore smart transformation
-                    console.warn("Invalid embed URL:", embedUrl);
-                }
-
-                const iframe = document.createElement("iframe");
-                iframe.src = embedUrl;
-                iframe.style.position = "relative";
-                iframe.style.zIndex = "2";
-                iframe.style.width = "100%";
-                iframe.style.border = "none";
-
-                // Adjust height based on type
-                if (isSpotify) {
-                    iframe.style.height = "152px"; // Standard Spotify compact embed height (80 or 152)
-                    iframe.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
-                } else if (isYouTube) {
-                    iframe.style.aspectRatio = "16/9";
-                    iframe.style.height = "auto";
-                    iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen";
-                } else {
-                    iframe.style.height = "100%";
-                    iframe.style.minHeight = "200px";
-                }
-
-                iframe.loading = "lazy";
-                iframe.allowFullscreen = true;
-
-                container.appendChild(iframe);
-            } else {
-                container.textContent = "Contenu intégré invalide";
-                container.style.padding = "16px";
-                container.style.textAlign = "center";
-                container.style.opacity = "0.7";
-            }
-            return container;
-        }
 
         // --- 4. Standard Link (with OS Redirection) ---
         const discordBox = document.createElement("div");
