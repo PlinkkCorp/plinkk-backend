@@ -168,7 +168,7 @@ export class CategoryManager {
             const name = category.name || category.text || category.title || '(Sans nom JS)';
             // console.log('[CategoryManager] Rendering category:', category.id, name, category);
             return `
-                <div class="group relative bg-slate-950 border border-slate-800 rounded-xl p-4 transition-all hover:border-slate-700" data-id="${id}">
+                <div class="group relative bg-slate-950 border border-slate-800 rounded-xl p-4 transition-all hover:border-slate-700" data-id="${category.id}">
                     <div class="flex items-center justify-between gap-4">
                         <div class="flex-1 flex items-center gap-3">
                             <div class="cursor-move text-slate-600 hover:text-slate-400 p-1">
@@ -180,7 +180,7 @@ export class CategoryManager {
                             <input type="text" value="${this.escapeHtml(name)}" class="bg-transparent text-slate-200 font-medium focus:outline-none w-full cursor-text" placeholder="Nom de la catégorie..." />
                         </div>
                         <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button class="p-2 text-slate-400 hover:text-red-400 transition-colors delete-category-trigger" data-id="${id}">
+                            <button class="p-2 text-slate-400 hover:text-red-400 transition-colors delete-category-trigger" data-id="${category.id}">
                                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="3 6 5 6 21 6"></polyline>
                                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>

@@ -117,10 +117,16 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
 
     const currentSettings = await prisma.plinkkSettings.findUnique({ where: { plinkkId: id } });
 
-    const toInt = (v: any) => { 
+    const toInt = (v: any) => {
       if (v === undefined || v === null || v === "") return null;
       if (typeof v === 'boolean') return v ? 1 : 0;
       const parsed = parseInt(v);
+      return isNaN(parsed) ? null : parsed;
+    };
+
+    const toFloat = (v: any) => {
+      if (v === undefined || v === null || v === "") return null;
+      const parsed = parseFloat(v);
       return isNaN(parsed) ? null : parsed;
     };
 
@@ -151,7 +157,7 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       selectedAnimationButtonIndex: toInt(body.selectedAnimationButtonIndex),
       selectedAnimationBackgroundIndex: toInt(body.selectedAnimationBackgroundIndex),
       animationDurationBackground: toInt(body.animationDurationBackground),
-      delayAnimationButton: body.delayAnimationButton,
+      delayAnimationButton: toFloat(body.delayAnimationButton),
       canvaEnable: toInt(body.canvaEnable),
       selectedCanvasIndex: toInt(body.selectedCanvasIndex),
     });
