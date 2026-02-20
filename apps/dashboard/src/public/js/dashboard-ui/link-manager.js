@@ -41,7 +41,10 @@ export class LinkManager {
             formBtnText: document.getElementById('linkModalFormBtnText'),
             formSuccessMsg: document.getElementById('linkModalFormSuccessMsg'),
             typeSelect: document.getElementById('linkModalType'), // This was missing in query
-            iconInput: document.getElementById('linkModalIconInput')
+            iconInput: document.getElementById('linkModalIconInput'),
+            iconSource: document.getElementById('linkModalIconSource'),
+            iconInputUrl: document.getElementById('linkModalIconInputUrl'),
+            iconUpload: document.getElementById('linkModalIconUpload')
         };
 
 
@@ -55,6 +58,9 @@ export class LinkManager {
             icon: document.getElementById('field-icon'),
             formConfig: document.getElementById('field-form-config'),
             advanced: document.getElementById('advancedSettingsWrap'),
+            iconPickerWrap: document.getElementById('linkModalIconPickerWrap'),
+            iconUrlWrap: document.getElementById('linkModalIconUrlWrap'),
+            iconUploadWrap: document.getElementById('linkModalIconUploadWrap'),
         };
 
         // Scheme Toggler
@@ -133,6 +139,47 @@ export class LinkManager {
             });
         }
 
+        if (this.inputs.iconSource) {
+            this.inputs.iconSource.addEventListener('change', () => {
+                this.updateIconSourceUI(this.inputs.iconSource.value);
+            });
+        }
+
+        // Icon Upload
+        if (this.inputs.iconUpload) {
+            this.inputs.iconUpload.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const originalText = this.inputs.iconInput?.value || '';
+                if (this.inputs.iconInput) this.inputs.iconInput.value = 'Chargement...';
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const res = await fetch('/api/me/upload?field=iconUrl', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+
+                    if (data.ok && data.url) {
+                        if (this.inputs.iconInputUrl) this.inputs.iconInputUrl.value = data.url;
+                        // We also update iconInput for consistency or if switching back to catalog
+                        if (this.inputs.iconInput) this.inputs.iconInput.value = data.url;
+                        this.inputs.iconSource.value = 'url';
+                        this.updateIconSourceUI('url');
+                    } else {
+                        if (this.inputs.iconInput) this.inputs.iconInput.value = originalText;
+                    }
+                } catch (err) {
+                    console.error('[LinkManager] Upload failed:', err);
+                    if (this.inputs.iconInput) this.inputs.iconInput.value = originalText;
+                }
+            });
+        }
+
         // Save
         if (this.saveBtn) {
             this.saveBtn.addEventListener('click', () => {
@@ -156,6 +203,21 @@ export class LinkManager {
         window.__PLINKK_SYNC_SIDEBAR__ = () => {
             this.updateCategoryDropdown();
         };
+    }
+
+    updateIconSourceUI(source) {
+        const s = this.sections;
+        if (!s.iconPickerWrap || !s.iconUrlWrap || !s.iconUploadWrap) return;
+
+        s.iconPickerWrap.classList.toggle('hidden', source !== 'catalog');
+        s.iconUrlWrap.classList.toggle('hidden', source !== 'url');
+        s.iconUploadWrap.classList.toggle('hidden', source !== 'upload');
+
+        if (source === 'catalog' && this.inputs.iconInput) {
+            this.inputs.iconInput.setAttribute('readonly', 'true');
+        } else if (this.inputs.iconInput) {
+            this.inputs.iconInput.removeAttribute('readonly');
+        }
     }
 
     openModal(type = 'LINK', existingData = null) {
@@ -274,7 +336,26 @@ export class LinkManager {
 
         if (i.url) i.url.value = url;
         if (i.desc) i.desc.value = data.description || '';
-        if (i.iconInput) i.iconInput.value = data.icon || '';
+
+        let icon = data.icon || '';
+        let source = 'catalog';
+
+        if (icon) {
+            if (icon.startsWith('http://') || icon.startsWith('https://') || icon.startsWith('data:')) {
+                source = 'url';
+                if (i.iconInputUrl) i.iconInputUrl.value = icon;
+            } else {
+                source = 'catalog';
+                if (i.iconInput) i.iconInput.value = icon;
+            }
+        } else {
+            if (i.iconInput) i.iconInput.value = '';
+            if (i.iconInputUrl) i.iconInputUrl.value = '';
+        }
+
+        if (i.iconSource) i.iconSource.value = source;
+        this.updateIconSourceUI(source);
+
         if (i.category) i.category.value = data.categoryId || '';
 
         if (i.newTab) i.newTab.checked = data.url && !data.forceAppOpen;
@@ -304,6 +385,11 @@ export class LinkManager {
         if (i.formBtnText) i.formBtnText.value = '';
         if (i.formSuccessMsg) i.formSuccessMsg.value = '';
         if (i.iconInput) i.iconInput.value = '';
+        if (i.iconInputUrl) i.iconInputUrl.value = '';
+        if (i.iconSource) {
+            i.iconSource.value = 'catalog';
+            this.updateIconSourceUI('catalog');
+        }
         if (i.category) i.category.value = '';
 
         this.currentScheme = 'https://';
@@ -343,6 +429,14 @@ export class LinkManager {
             finalUrl = this.currentScheme + finalUrl;
         }
 
+        let finalIcon = '';
+        const iconSource = this.inputs.iconSource?.value;
+        if (iconSource === 'url') {
+            finalIcon = this.inputs.iconInputUrl?.value || '';
+        } else {
+            finalIcon = this.inputs.iconInput?.value || '';
+        }
+
         const data = {
             id: this.currentEditingId || ('new_' + Date.now()),
             type: type,
@@ -350,7 +444,7 @@ export class LinkManager {
             title: title,
             url: finalUrl,
             description: this.inputs.desc?.value || '',
-            icon: this.inputs.iconInput?.value || '',
+            icon: finalIcon,
             categoryId: this.inputs.category?.value || null,
             iosUrl: this.inputs.ios?.value || '',
             androidUrl: this.inputs.android?.value || '',
