@@ -13,8 +13,7 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { ListObjectsV2Command, ListObjectsV2CommandOutput, S3Client, _Object } from "@aws-sdk/client-s3";
 import { getS3Client } from "../../lib/fileUtils";
 import sharp from "sharp"
-import { logUserAction, logDetailedAction } from "../../lib/userLogger";
-import { calculateObjectDiff } from "../../lib/diffUtils";
+import { logUserAction } from "../../lib/userLogger";
 
 interface S3ClientWithSend {
   send(command: ListObjectsV2Command): Promise<ListObjectsV2CommandOutput>;
@@ -36,7 +35,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.get("/dashboard-summary", async (request, reply) => {
     const userId = request.session.get("data") as string | { id: string } | null | undefined;
     let id: string | undefined;
-
+    
     if (typeof userId === "string") {
       id = userId;
     } else if (userId && typeof userId === "object" && "id" in userId) {
@@ -95,7 +94,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       select: { apiKey: true },
     });
 
-    await logUserAction(userId, "CREATE_API_KEY", null, { prefix: newKey.substring(0, 8) + "..." }, request.ip);
+    await logUserAction(userId, "CREATE_API_KEY", null, {}, request.ip);
 
     return reply.send({ apiKey: updated.apiKey });
   });
@@ -105,19 +104,12 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) throw new UnauthorizedError();
     const { isPublic } = (request.body as { isPublic: string }) ?? {};
-    const oldUser = await prisma.user.findUnique({
-      where: { id: userId as string },
-      select: { isPublic: true },
-    });
-
     const updated = await prisma.user.update({
       where: { id: userId as string },
       data: { isPublic: Boolean(isPublic) },
       select: { id: true, isPublic: true },
     });
-    await logDetailedAction(userId as string, "UPDATE_VISIBILITY", null, oldUser, updated, request.ip, {
-      formatted: `Changed visibility to ${updated.isPublic ? "Public" : "Private"}`
-    });
+    await logUserAction(userId as string, "UPDATE_VISIBILITY", null, { isPublic: Boolean(isPublic) }, request.ip);
     return reply.send(updated);
   });
 
@@ -131,19 +123,12 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       throw new BadRequestError("Le nom d'utilisateur doit contenir au moins 3 caractères");
     }
 
-    const oldUser = await prisma.user.findUnique({
-      where: { id: userId as string },
-      select: { userName: true },
-    });
-
     const updated = await prisma.user.update({
       where: { id: userId as string },
       data: { userName: username.trim() },
       select: { id: true, userName: true },
     });
-    await logDetailedAction(userId as string, "UPDATE_USERNAME", null, oldUser, updated, request.ip, {
-      formatted: `Changed username from '${oldUser?.userName}' to '${updated.userName}'`
-    });
+    await logUserAction(userId as string, "UPDATE_USERNAME", null, { username: username.trim() }, request.ip);
     return reply.send(updated);
   });
 
@@ -162,19 +147,12 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       select: { id: true },
     });
     if (exists) throw new ConflictError("Email déjà utilisé");
-    const oldUser = await prisma.user.findUnique({
-      where: { id: userId as string },
-      select: { email: true },
-    });
-
     const updated = await prisma.user.update({
       where: { id: userId as string },
       data: { email },
       select: { id: true, email: true },
     });
-    await logDetailedAction(userId as string, "UPDATE_EMAIL", null, oldUser, updated, request.ip, {
-      formatted: `Changed email from '${oldUser?.email}' to '${updated.email}'`
-    });
+    await logUserAction(userId as string, "UPDATE_EMAIL", null, { email }, request.ip);
     return reply.send(updated);
   });
 
@@ -209,21 +187,15 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       if (!ok) return reply.code(403).send({ error: "Mot de passe actuel incorrect" });
     }
 
-    return reply
-      .code(400)
-      .send({ error: "Nouveau mot de passe identique à l'actuel" });
-
-    // We don't log the actual password hash diff, but we can log that it changed.
+    if (await bcrypt.compare(newPassword, user.password))
+      return reply
+        .code(400)
+        .send({ error: "Nouveau mot de passe identique à l'actuel" });
     const hashed = await bcrypt.hash(newPassword, 10);
-
     await prisma.user.update({
       where: { id: userId as string },
       data: { password: hashed, hasPassword: true },
-    });
-
-    // Manually construct a "safe" diff for password change
-    await logDetailedAction(userId as string, "UPDATE_PASSWORD", null, { password: "***" }, { password: "CHANGED" }, request.ip, { method: "PASSWORD_CHANGE" });
-    return reply.send({ ok: true });
+    });    await logUserAction(userId as string, "UPDATE_PASSWORD", null, {}, request.ip);    return reply.send({ ok: true });
   });
 
   fastify.post("/delete", async (request, reply) => {
@@ -283,17 +255,12 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const newPublicEmail = Boolean(isEmailPublic)
       ? me.publicEmail || me.email
       : null;
-
-    const oldUser = { publicEmail: me.publicEmail }; // derived from 'me' fetched above
-
     const updated = await prisma.user.update({
       where: { id: userId as string },
       data: { publicEmail: newPublicEmail },
       select: { id: true, publicEmail: true },
     });
-    await logDetailedAction(userId as string, "UPDATE_EMAIL_VISIBILITY", null, oldUser, updated, request.ip, {
-      formatted: `Changed email visibility to ${updated.publicEmail ? "Public" : "Private"}`
-    });
+    await logUserAction(userId as string, "UPDATE_EMAIL_VISIBILITY", null, { isEmailPublic: Boolean(updated.publicEmail) }, request.ip);
     return reply.send({
       id: updated.id,
       isEmailPublic: Boolean(updated.publicEmail),
@@ -306,18 +273,12 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     if (!userId) throw new UnauthorizedError();
     const { enabled } = (request.body as { enabled?: boolean }) || {};
     if (typeof enabled !== "boolean") throw new BadRequestError("Valeur invalide");
-    const oldUser = await prisma.user.findUnique({
-      where: { id: userId as string },
-      select: { showPremiumUi: true },
-    });
     const updated = await prisma.user.update({
       where: { id: userId as string },
       data: { showPremiumUi: enabled },
       select: { showPremiumUi: true },
     });
-    await logDetailedAction(userId as string, "UPDATE_PREMIUM_UI", null, oldUser, updated, request.ip, {
-      formatted: `${updated.showPremiumUi ? "Enabled" : "Disabled"} Premium UI`
-    });
+    await logUserAction(userId as string, "UPDATE_PREMIUM_UI", null, { enabled }, request.ip);
     return reply.send(updated);
   });
 
@@ -325,25 +286,19 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const sessionData = request.session.get("data");
     const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) throw new UnauthorizedError();
-
+    
     const { source } = (request.body as { source?: string }) || {};
     if (source !== "PRIMARY" && source !== "PUBLIC") {
       throw new BadRequestError("Source Gravatar invalide");
     }
 
-    const oldUser = await prisma.user.findUnique({
-      where: { id: userId as string },
-      select: { gravatarEmailSource: true },
-    });
     const updated = await prisma.user.update({
       where: { id: userId as string },
-      data: { gravatarEmailSource: source as "PRIMARY" | "PUBLIC" },
+      data: { gravatarEmailSource: source },
       select: { gravatarEmailSource: true },
     });
-    await logDetailedAction(userId as string, "UPDATE_GRAVATAR_SOURCE", null, oldUser, updated, request.ip, {
-      formatted: `Changed Gravatar source to ${updated.gravatarEmailSource}`
-    });
-
+    await logUserAction(userId as string, "UPDATE_GRAVATAR_SOURCE", null, { source }, request.ip);
+    
     return reply.send(updated);
   });
 
@@ -390,7 +345,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       where: { id: userId },
       data: { twoFactorSecret: "", twoFactorEnabled: false },
     });
-    await logUserAction(userId, "DISABLE_2FA", null, { status: "DISABLED" }, request.ip);
+    await logUserAction(userId, "DISABLE_2FA", null, {}, request.ip);
     return { successful: true };
   });
 
@@ -422,7 +377,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       data: { twoFactorSecret: pending.secret, twoFactorEnabled: true },
     });
     pending2fa.delete(userId as string);
-    await logUserAction(userId, "ENABLE_2FA", null, { status: "ENABLED" }, request.ip);
+    await logUserAction(userId, "ENABLE_2FA", null, {}, request.ip);
     return reply.send({ successful: true });
   });
 
@@ -440,11 +395,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       data.userName = body.userName.trim();
     if (typeof body.name === "string" && body.name.trim())
       data.name = body.name.trim();
-    const oldData = await prisma.user.findUnique({
-      where: { id: userId as string },
-      select: { id: true, name: true, userName: true }
-    });
-
     const updated = await prisma.user.update({
       where: { id: userId as string },
       data,
@@ -471,9 +421,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       request.log?.warn({ e }, "sync default plinkk name failed");
     }
 
-    await logDetailedAction(userId as string, "UPDATE_PROFILE", null, oldData || {}, updated, request.ip, {
-      formatted: "Updated profile details"
-    });
+    await logUserAction(userId as string, "UPDATE_PROFILE", null, { name: updated.name, userName: updated.userName }, request.ip);
 
     return reply.send(updated);
   });
@@ -607,21 +555,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       }
     }
 
-    const oldUser = await prisma.user.findUnique({
-      where: { id: userId as string },
-      select: {
-        cosmetics: {
-          select: {
-            frame: true,
-            theme: true,
-            bannerUrl: true,
-            banner: true,
-            data: true
-          }
-        }
-      }
-    });
-
     const updated = await prisma.user.update({
       where: { id: userId as string },
       data: {
@@ -658,13 +591,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
         },
       },
     });
-
-    const oldCosmetics = oldUser?.cosmetics || {};
-    const newCosmetics = updated.cosmetics || {};
-
-    await logDetailedAction(userId as string, "UPDATE_COSMETICS", null, oldCosmetics, newCosmetics, request.ip, {
-      formatted: "Updated cosmetics (theme/banner/frame)"
-    });
+    await logUserAction(userId as string, "UPDATE_COSMETICS", null, { frame: body.frame, theme: body.theme }, request.ip);
     return reply.send({ id: updated.id, cosmetics: updated.cosmetics });
   });
 
@@ -731,9 +658,9 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       where: { id: me.id },
       data: { image: up.Location },
     });
-    await logUserAction(userId as string, "UPDATE_AVATAR", null, { url: up.Location }, request.ip);
+await logUserAction(userId as string, "UPDATE_AVATAR", null, { url: up.Location }, request.ip);
 
-
+    
     return reply.send({ ok: true, file: dedupName, url: up.Location });
   });
 
@@ -747,7 +674,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     } else if (userId && typeof userId === "object" && "id" in userId) {
       id = (userId as { id: string }).id;
     }
-
+    
     if (!id) return reply.code(401).send({ error: "Unauthorized" });
 
     // Use local interface to ensure access to .send() without using 'any'
@@ -774,17 +701,17 @@ export function apiMeRoutes(fastify: FastifyInstance) {
 
     const results = await Promise.all(promises);
     const allFiles: _Object[] = results.flat();
-
+    
     const uniqueFiles = Array.from(new Map(allFiles.map((item) => [item.Key, item])).values());
-
+    
     const uploads = uniqueFiles.map((o) => ({
-      url: `https://cdn.plinkk.fr/${o.Key}`,
+      url: `https://s3.marvideo.fr/plinkk-image/${o.Key}`,
       key: o.Key,
       name: o.Key?.split('/').pop(),
       lastModified: o.LastModified
     }));
 
-    uploads.sort((a, b) => (b.lastModified?.getTime() || 0) - (a.lastModified?.getTime() || 0));
+    uploads.sort((a,b) => (b.lastModified?.getTime() || 0) - (a.lastModified?.getTime() || 0));
 
     return { uploads };
   });

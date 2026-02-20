@@ -15,8 +15,6 @@ import { generateTheme } from "./lib/generateTheme";
 import { registerOAuth2 } from "./config/fastifyOAuth2";
 import { AppError } from "@plinkk/shared";
 
-import { getMaintenanceStatus, isMaintenanceActive } from "./services/maintenance.service";
-
 const fastify = Fastify({ logger: true, trustProxy: true });
 
 const PORT = 3001;
@@ -28,43 +26,6 @@ async function bootstrap() {
 
   registerReservedRootsHook(fastify);
   registerSessionValidator(fastify);
-
-  // Maintenance Middleware
-  fastify.addHook("preHandler", async (request, reply) => {
-    // Skip static assets and specific system paths if needed
-    if (request.url.startsWith("/public") || request.url.startsWith("/assets") || request.url.startsWith("/js/") || request.url.startsWith("/css/")) return;
-
-    // Skip if it is the maintenance API itself (to allow admins to turn it off)
-    if (request.url.startsWith("/api/admin/maintenance")) return;
-
-    const status = await getMaintenanceStatus();
-    // Dashboard is "isDashboard = true"
-    if (!isMaintenanceActive(status, request.url, true)) return;
-
-    // Check if user has permission to bypass
-    const sessionData = request.session.get("data");
-    const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
-
-    if (currentUserId) {
-      const user = await prisma.user.findUnique({
-        where: { id: currentUserId },
-        include: { role: { include: { permissions: true } } }
-      });
-
-      // Check for ACCESS_MAINTENANCE permission specifically or generic admin access if we want to be safe
-      // But user specified ACCESS_MAINTENANCE.
-      // Permissions are in user.role.permissions (RolePermission[]).
-      const hasPermission = user?.role?.permissions.some(rp => rp.permissionKey === "ACCESS_MAINTENANCE");
-      if (hasPermission) return;
-    }
-
-    // Return 503
-    return reply.code(503).view("erreurs/503.ejs", {
-      reason: status.reason || "Maintenance en cours",
-      currentUser: null, // Force logged out view or just minimal
-      global: status.global // To show different message if global vs dashboard?
-    });
-  });
 
   fastify.register(apiRoutes, { prefix: "/api" });
   fastify.register(dashboardRoutes);
@@ -109,7 +70,7 @@ async function bootstrap() {
 
     const sessionData = request.session.get("data");
     let currentUserId: string | undefined;
-
+    
     if (typeof sessionData === "object") {
       currentUserId = sessionData?.id;
     } else {
@@ -121,9 +82,9 @@ async function bootstrap() {
 
     const currentUser = currentUserId
       ? await prisma.user.findUnique({
-        where: { id: currentUserId },
-        include: { role: true },
-      })
+          where: { id: currentUserId },
+          include: { role: true },
+        })
       : null;
 
     if (!currentUser) {
@@ -181,9 +142,9 @@ async function bootstrap() {
 
     if (error instanceof AppError) {
       if (request.raw.url?.startsWith("/api")) {
-        return reply.code(error.statusCode).send({
+        return reply.code(error.statusCode).send({ 
           error: error.code.toLowerCase(),
-          message: error.message
+          message: error.message 
         });
       }
       const sessionData = request.session.get("data");
@@ -217,5 +178,3 @@ async function bootstrap() {
 }
 
 bootstrap();
-// Force restart to apply view changes
-// 2026-02-18T21:30:00Z

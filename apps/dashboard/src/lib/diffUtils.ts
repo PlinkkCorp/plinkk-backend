@@ -86,7 +86,8 @@ export function calculateArrayDiff<T extends Record<string, any>>(
 
     const added: T[] = [];
     const removed: T[] = [];
-    const updated: { id: string; changes: ObjectDiff }[] = [];
+    // include the entire item when tracking updates to match ArrayDiff<T>
+    const updated: { id: string; item: T; changes: ObjectDiff }[] = [];
 
     // Identify added and updated items
     for (const newItem of newArr) {
@@ -98,6 +99,7 @@ export function calculateArrayDiff<T extends Record<string, any>>(
         } else {
             const changes = calculateObjectDiff(oldItem, newItem, ignoredFields);
             if (Object.keys(changes).length > 0) {
+                // store full item so callers can access the new object alongside its diffs
                 updated.push({ id, item: newItem, changes });
             }
         }

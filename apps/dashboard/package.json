@@ -1,11 +1,10 @@
 {
   "name": "@plinkk/dashboard",
-  "version": "2.5.2",
+  "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "dev:ts-node": "ts-node-dev src/server.ts",
+    "dev": "ts-node-dev src/server.ts",
     "dev:tsx": "tsx watch src/server.ts",
     "init": "pnpm install && pnpm prisma:init && pnpm run create-key && pnpm run dev",
     "create-key": "pnpx @fastify/secure-session > src/secret-key",
@@ -19,7 +18,7 @@
     "migrate:plinkks": "node ../../scripts/migrate-plinkks.cjs",
     "delete_inactive": "node ../../scripts/delete_inactive_user.js ",
     "seed:role": "ts-node prisma/seed.ts",
-    "prisma:generate": "prisma generate --schema=../../packages/prisma/prisma/schema.prisma --generator=dashboard"
+    "prisma:generate": "prisma generate --schema=../../prisma/schema.prisma --generator=dashboard"
   },
   "keywords": [],
   "author": "",
@@ -42,7 +41,7 @@
     "@otplib/preset-default": "^12.0.1",
     "@plinkk/prisma": "workspace:*",
     "@plinkk/shared": "workspace:*",
-    "@prisma/client": "^7.3.0",
+    "@prisma/client": "^7.0.0",
     "@types/archiver": "^6.0.3",
     "@types/uglify-js": "^3.17.5",
     "archiver": "^7.0.1",
@@ -66,11 +65,11 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@prisma/adapter-pg": "^7.3.0",
+    "@prisma/adapter-pg": "^7.1.0",
     "@types/ejs": "^3.1.5",
     "@types/node": "^24.8.1",
     "pg": "^8.18.0",
-    "prisma": "^7.3.0",
+    "prisma": "^7.0.0",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"

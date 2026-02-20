@@ -134,7 +134,6 @@ model Role {
   users                  User[]
 }
 
-/// Définition d'une permission atomique, modulaire, catégorisée.
 model Permission {
   key         String           @id
   category    String
@@ -145,7 +144,6 @@ model Permission {
   roles       RolePermission[]
 }
 
-/// Table de jointure N-N entre Role et Permission
 model RolePermission {
   roleId        String
   permissionKey String

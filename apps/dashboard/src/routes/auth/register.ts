@@ -226,8 +226,9 @@ export async function createDefaultPlinkk(req: any, userId: string, username: st
         const l = exampleLinks[0];
         await prisma.link.create({
           data: {
-            userId: userId,
-            plinkkId: createdPlinkk.id,
+            // connect relations instead of scalar keys to satisfy Prisma's checked input type
+            user: { connect: { id: userId } },
+            plinkk: { connect: { id: createdPlinkk.id } },
             icon: l.icon || profileConfig.profileIcon || undefined,
             url: l.url || profileConfig.profileLink || "https://example.com",
             text: l.text || "Mon lien",

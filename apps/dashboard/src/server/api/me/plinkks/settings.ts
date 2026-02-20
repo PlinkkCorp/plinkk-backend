@@ -241,8 +241,9 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
           await prisma.link.create({
             data: {
               ...baseLinkData,
-              userId,
-              plinkkId: id,
+              // use nested connects so we can also set category reliably
+              user: { connect: { id: userId } },
+              plinkk: { connect: { id } },
               category: l.categoryId
                 ? { connect: { id: l.categoryId } }
                 : undefined,

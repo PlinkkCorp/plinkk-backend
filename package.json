@@ -15,8 +15,6 @@
   },
   "devDependencies": {
     "@prisma/adapter-pg": "^7.3.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
     "pg": "^8.18.0",
     "prisma": "^7.3.0"
   },
@@ -28,8 +26,5 @@
   "prisma": {
     "schema": "packages/prisma/prisma/schema.prisma"
   },
-  "private": true,
-  "lint-staged": {
-    "*": "node scripts/version-patch.js"
-  }
+  "private": true
 }

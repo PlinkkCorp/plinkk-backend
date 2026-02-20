@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { prisma, Prisma, AdminLog, UserLog } from "@plinkk/prisma";
+import { prisma, Prisma } from "@plinkk/prisma";
 import { logUserAction } from "../../lib/userLogger";
 import {
   verifyRoleIsStaff,
@@ -79,27 +79,27 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
 
     const data: Prisma.UserUpdateInput = {};
     if (typeof userName === 'string') {
-      const uName = userName.trim();
-      if (uName.length < 3 || uName.length > 50) return reply.code(400).send({ error: 'Username invalid length' });
-      const exists = await prisma.user.findFirst({ where: { userName: { equals: uName, mode: 'insensitive' }, id: { not: id } } });
-      if (exists) return reply.code(409).send({ error: 'Username taken' });
-      data.userName = uName;
+        const uName = userName.trim();
+        if (uName.length < 3 || uName.length > 50) return reply.code(400).send({ error: 'Username invalid length' });
+        const exists = await prisma.user.findFirst({ where: { userName: { equals: uName, mode: 'insensitive' }, id: { not: id } } });
+        if (exists) return reply.code(409).send({ error: 'Username taken' });
+        data.userName = uName;
     }
     if (typeof email === 'string') {
-      const mail = email.trim();
-      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!re.test(mail)) return reply.code(400).send({ error: 'Email invalid' });
-      const exists = await prisma.user.findFirst({ where: { email: { equals: mail, mode: 'insensitive' }, id: { not: id } } });
-      if (exists) return reply.code(409).send({ error: 'Email taken' });
-      data.email = mail;
+        const mail = email.trim();
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!re.test(mail)) return reply.code(400).send({ error: 'Email invalid' });
+        const exists = await prisma.user.findFirst({ where: { email: { equals: mail, mode: 'insensitive' }, id: { not: id } } });
+        if (exists) return reply.code(409).send({ error: 'Email taken' });
+        data.email = mail;
     }
 
     if (Object.keys(data).length > 0) {
-      const u = await prisma.user.update({ where: { id }, data });
-      await logAdminAction(meId, 'UPDATE_USER_PROFILE', id, data, request.ip);
-      /* @ts-ignore */
-      await logUserAction(id, "ADMIN_UPDATE_PROFILE", meId, data, request.ip);
-      return reply.send({ id: u.id, userName: u.userName, email: u.email });
+        const u = await prisma.user.update({ where: { id }, data });
+        await logAdminAction(meId, 'UPDATE_USER_PROFILE', id, data, request.ip);
+        /* @ts-ignore */
+        await logUserAction(id, "ADMIN_UPDATE_PROFILE", meId, data, request.ip);
+        return reply.send({ id: u.id, userName: u.userName, email: u.email });
     }
     return reply.send({ ok: true });
   });
@@ -126,8 +126,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       until:
         ban && typeof ban.time === "number" && ban.time! > 0
           ? new Date(
-            new Date(ban.createdAt).getTime() + (ban.time || 0) * 60 * 1000
-          ).toISOString()
+              new Date(ban.createdAt).getTime() + (ban.time || 0) * 60 * 1000
+            ).toISOString()
           : null,
     });
   });
@@ -520,7 +520,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     await logAdminAction(userId, 'UNBAN_EMAIL', undefined, { email: target }, request.ip);
     const targetUser = await prisma.user.findFirst({ where: { email: target }, select: { id: true } });
     if (targetUser) {
-      await logUserAction(targetUser.id, "UNBANNED_EMAIL", userId, { email: target }, request.ip);
+        await logUserAction(targetUser.id, "UNBANNED_EMAIL", userId, { email: target }, request.ip);
     }
     return reply.send({ ok: true, count: res.count });
   });
@@ -740,132 +740,5 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     }, request.ip);
 
     return reply.send({ ok: true, data });
-  });
-
-  interface LogQuery {
-    page?: string;
-    limit?: string;
-    source?: string;
-    search?: string;
-    from?: string;
-    to?: string;
-  }
-
-  fastify.get<{ Querystring: LogQuery }>("/:id/logs", async (request, reply) => {
-    const sessionData = request.session.get("data");
-    const meId = (typeof sessionData === "object" ? (sessionData as { id: string })?.id : sessionData) as string | undefined;
-    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
-    const ok = await ensurePermission(request, reply, "MANAGE_USERS");
-    if (!ok) return;
-
-    const { id } = request.params as { id: string };
-    const query = request.query;
-    const page = Math.max(1, parseInt(query.page || "1") || 1);
-    const limit = Math.max(1, Math.min(100, parseInt(query.limit || "20") || 20));
-    const source = (query.source || "ALL").toUpperCase(); // ALL, ADMIN, USER
-    const search = (query.search || "").trim();
-    const from = query.from ? new Date(query.from) : null;
-    const to = query.to ? new Date(query.to) : null;
-
-    // Common Date Filter
-    const dateFilter: { gte?: Date; lte?: Date } = {};
-    if (from && !isNaN(from.getTime())) dateFilter.gte = from;
-    if (to && !isNaN(to.getTime())) dateFilter.lte = to;
-
-    // Admin Logs Query Construction
-    const adminWhere: Prisma.AdminLogWhereInput = {
-      OR: [{ adminId: id }, { targetId: id }],
-    };
-    if (Object.keys(dateFilter).length > 0) adminWhere.createdAt = dateFilter;
-    if (search) {
-      adminWhere.AND = {
-        OR: [
-          { action: { contains: search, mode: "insensitive" } },
-        ]
-      };
-    }
-
-    // User Logs Query Construction
-    const userWhere: Prisma.UserLogWhereInput = {
-      OR: [{ userId: id }, { targetId: id }],
-    };
-    if (Object.keys(dateFilter).length > 0) userWhere.createdAt = dateFilter;
-    if (search) {
-      userWhere.AND = {
-        OR: [
-          { action: { contains: search, mode: "insensitive" } },
-        ]
-      };
-    }
-
-    // Execution strategy: Fetch (page * limit) from permitted sources, merge, sort, slice.
-    const fetchLimit = page * limit;
-
-    let adminLogs: AdminLog[] = [];
-    let userLogs: UserLog[] = [];
-
-    if (source === "ALL" || source === "ADMIN") {
-      adminLogs = await prisma.adminLog.findMany({
-        where: adminWhere,
-        take: fetchLimit,
-        orderBy: { createdAt: "desc" },
-      });
-    }
-
-    if (source === "ALL" || source === "USER") {
-      userLogs = await prisma.userLog.findMany({
-        where: userWhere,
-        take: fetchLimit,
-        orderBy: { createdAt: "desc" },
-      });
-    }
-
-    // Normalize and Merge
-    const combined = [
-      ...adminLogs.map(l => ({ ...l, type: 'ADMIN', actorId: l.adminId })),
-      ...userLogs.map(l => ({ ...l, type: 'USER', actorId: l.userId }))
-    ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
-    // Pagination slice
-    const startIndex = (page - 1) * limit;
-    const paginated = combined.slice(startIndex, startIndex + limit);
-
-    // Enrich with Actor Names
-    const actorIds = new Set<string>();
-    paginated.forEach(l => {
-      if (l.actorId && l.actorId !== id) actorIds.add(l.actorId);
-      if (l.targetId && l.targetId !== id) actorIds.add(l.targetId);
-    });
-
-    const actors = await prisma.user.findMany({
-      where: { id: { in: Array.from(actorIds) } },
-      select: { id: true, userName: true, image: true, role: { select: { name: true } } }
-    });
-    const actorMap = new Map(actors.map(a => [a.id, a]));
-
-    const enriched = paginated.map(l => {
-      const actorObj = actorMap.get(l.actorId);
-      const targetObj = actorMap.get(l.targetId || '');
-
-      const actorName = l.actorId === id ? 'Cet utilisateur' : (actorObj?.userName || l.actorId);
-      const actorRole = l.actorId === id ? null : actorObj?.role?.name;
-      const targetName = l.targetId === id ? 'Cet utilisateur' : (targetObj?.userName || l.targetId);
-
-      return {
-        ...l,
-        actorName,
-        actorRole,
-        targetName,
-      };
-    });
-
-    return reply.send({
-      logs: enriched,
-      meta: {
-        page,
-        limit,
-        hasMore: combined.length > startIndex + limit
-      }
-    });
   });
 }

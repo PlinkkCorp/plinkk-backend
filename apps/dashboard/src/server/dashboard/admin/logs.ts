@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { Prisma, prisma } from "@plinkk/prisma";
 import { replyView } from "../../../lib/replyView";
 import { ensurePermission } from "../../../lib/permissions";
-import { restoreLogState } from "../../../services/adminLogService";
+import { logAdminAction } from "../../../lib/adminLogger";
 import { requireAuthRedirect, requireAuth } from "../../../middleware/auth";
 
 interface LogsQuery {
@@ -62,17 +62,17 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
     });
   });
 
-  fastify.get<{ Querystring: LogsQuery }>("/api", { preHandler: [requireAuth] }, async function (request, reply) {
+  fastify.get<{ Querystring: any }>("/api", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_ADMIN_LOGS");
     if (!ok) return;
 
-    const query = request.query;
-    const page = Number(query.page) || 1;
-    const limit = Number(query.limit) || 50;
+    const query = request.query as any;
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 50;
     const skip = (page - 1) * limit;
     const sortOrder = query.sort === "asc" ? "asc" : "desc";
 
-    const where: Prisma.AdminLogWhereInput = {};
+    const where: any = {};
     if (query.adminId && typeof query.adminId === 'string' && query.adminId.trim()) {
       where.adminId = query.adminId.trim();
     }
@@ -82,9 +82,9 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
     if (query.action && typeof query.action === 'string' && query.action.trim()) {
       where.action = query.action.trim();
     }
-
+    
     if (query.from || query.to) {
-      const dateFilter: Prisma.DateTimeFilter = {};
+      const dateFilter: any = {};
       if (query.from) {
         const d = new Date(query.from);
         if (!isNaN(d.getTime())) dateFilter.gte = d;
@@ -120,13 +120,13 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
       })
     ]);
 
-    const adminMap = new Map<string, { id: string, userName: string, image: string | null }>(admins.map((a) => [a.id, a]));
-    const targetMap = new Map<string, { id: string, userName: string, email: string, image: string | null }>(targetUsers.map((u) => [u.id, u]));
+    const adminMap = new Map<string, any>(admins.map((a) => [a.id, a]));
+    const targetMap = new Map<string, any>(targetUsers.map((u) => [u.id, u]));
 
     const enriched: EnrichedAdminLog[] = logs.map((l) => {
       const admin = adminMap.get(l.adminId);
       const targetUser = l.targetId ? targetMap.get(l.targetId) : null;
-
+      
       return {
         ...l,
         adminName: admin?.userName || l.adminId,
@@ -143,13 +143,13 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
     return reply.send({ logs: enriched, total });
   });
 
-  fastify.get<{ Querystring: LogsQuery }>("/user-api", { preHandler: [requireAuth] }, async function (request, reply) {
+  fastify.get<{ Querystring: any }>("/user-api", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_ADMIN_LOGS");
     if (!ok) return;
 
-    const query = request.query;
-    const page = Number(query.page) || 1;
-    const limit = Number(query.limit) || 50;
+    const query = request.query as any;
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 50;
     const skip = (page - 1) * limit;
     const sortOrder = query.sort === "asc" ? "asc" : "desc";
 
@@ -158,17 +158,17 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
     if (adminIdInput) {
       where.userId = adminIdInput;
     }
-
+    
     const targetIdInput = query.targetId && typeof query.targetId === 'string' ? query.targetId.trim() : null;
     if (targetIdInput) {
       where.targetId = targetIdInput;
     }
-
+    
     const actionInput = query.action && typeof query.action === 'string' ? query.action.trim() : null;
     if (actionInput) {
       where.action = actionInput;
     }
-
+    
     if (query.from || query.to) {
       const dateFilter: Prisma.DateTimeFilter<"UserLog"> = {};
       if (query.from) {
@@ -209,13 +209,13 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
         })
       ]);
 
-      const userMap = new Map<string, { id: string, userName: string, image: string | null }>(users.map((u) => [u.id, u]));
-      const targetMap = new Map<string, { id: string, userName: string, email: string, image: string | null }>(targetUsers.map((u) => [u.id, u]));
+      const userMap = new Map<string, any>(users.map((u) => [u.id, u]));
+      const targetMap = new Map<string, any>(targetUsers.map((u) => [u.id, u]));
 
       const enriched: EnrichedUserLog[] = logs.map((l) => {
         const user = userMap.get(l.userId);
         const targetUser = l.targetId ? targetMap.get(l.targetId) : null;
-
+        
         return {
           ...l,
           userName: user?.userName || l.userId,
@@ -234,23 +234,6 @@ export function adminLogsRoutes(fastify: FastifyInstance) {
       console.error("Erreur critique /user-api:", err);
       const errorMessage = err instanceof Error ? err.stack || err.message : String(err);
       return reply.code(500).send({ error: "INTERNAL_SERVER_ERROR", message: errorMessage });
-    }
-  });
-  fastify.post<{ Params: { id: string } }>("/restore/:id", { preHandler: [requireAuth] }, async function (request, reply) {
-    const ok = await ensurePermission(request, reply, "VIEW_ADMIN_LOGS");
-    if (!ok) return;
-
-    const { id } = request.params;
-    const adminId = request.userId!;
-    const adminIp = request.ip;
-
-    try {
-      const result = await restoreLogState(id, adminId, adminIp);
-      return reply.send(result);
-    } catch (err) {
-      console.error("Erreur restore log:", err);
-      const errorMessage = err instanceof Error ? err.stack || err.message : String(err);
-      return reply.code(400).send({ error: "BAD_REQUEST", message: errorMessage });
     }
   });
 }

@@ -946,17 +946,35 @@ export function createLinkBoxes(profileData) {
             text.style.position = "relative";
             text.style.zIndex = "5";
 
+            const actionContainer = document.createElement("div");
+            actionContainer.style.marginLeft = "auto";
+            actionContainer.style.display = "flex";
+            actionContainer.style.alignItems = "center";
+            actionContainer.style.gap = "6px";
+            actionContainer.style.background = "rgba(255, 255, 255, 0.08)";
+            actionContainer.style.padding = "4px 12px";
+            actionContainer.style.borderRadius = "20px";
+            actionContainer.style.border = "1px solid rgba(255, 255, 255, 0.1)";
+            actionContainer.style.transition = "all 0.3s ease";
+            actionContainer.style.position = "relative";
+            actionContainer.style.zIndex = "5";
+
+            const actionText = document.createElement("span");
+            actionText.textContent = "Ouvrir";
+            actionText.style.fontSize = "0.75rem";
+            actionText.style.fontWeight = "600";
+
             const chevron = document.createElement("div");
-            chevron.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
-            chevron.style.marginLeft = "auto";
-            chevron.style.opacity = "0.5";
-            chevron.style.transition = "transform 0.3s ease";
-            chevron.style.position = "relative";
-            chevron.style.zIndex = "5";
+            chevron.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
+            chevron.style.display = "flex";
+            chevron.style.transition = "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)";
+
+            actionContainer.appendChild(actionText);
+            actionContainer.appendChild(chevron);
 
             toggle.appendChild(icon);
             toggle.appendChild(text);
-            toggle.appendChild(chevron);
+            toggle.appendChild(actionContainer);
 
             // Form Content Container
             const formContent = document.createElement("div");
@@ -1095,6 +1113,8 @@ export function createLinkBoxes(profileData) {
                 if (isHidden) {
                     formContent.classList.remove("hidden");
                     chevron.style.transform = "rotate(180deg)";
+                    actionText.textContent = "Fermer";
+                    actionContainer.style.background = "rgba(255, 255, 255, 0.15)";
                     setTimeout(() => {
                         formContent.style.opacity = "1";
                         formContent.style.transform = "translateY(0)";
@@ -1103,6 +1123,8 @@ export function createLinkBoxes(profileData) {
                     formContent.style.opacity = "0";
                     formContent.style.transform = "translateY(8px)";
                     chevron.style.transform = "rotate(0deg)";
+                    actionText.textContent = "Ouvrir";
+                    actionContainer.style.background = "rgba(255, 255, 255, 0.08)";
                     setTimeout(() => {
                         formContent.classList.add("hidden");
                     }, 400);
