@@ -190,18 +190,27 @@ export class LinkManager {
         // Icon Picker logic
         const pickIconBtn = document.getElementById('linkModalPickIconBtn');
         if (pickIconBtn) {
-            pickIconBtn.addEventListener('click', () => {
-                if (window.openIconModal) window.openIconModal((icon) => {
+            pickIconBtn.onclick = () => {
+                const openIconModal = window.openIconModal || window.__DASH_PICKERS__?.openIconModal;
+                if (openIconModal) openIconModal((icon) => {
                     if (this.inputs.iconInput) {
                         this.inputs.iconInput.value = icon;
+                        this.inputs.iconInput.dispatchEvent(new Event('input', { bubbles: true }));
                     }
-                });
-            });
+                }, 'linkModalIconInput');
+            };
         }
+
+        // Initial Render
+        const initialLinks = window.__INITIAL_STATE__?.links || [];
+        this.renderLinksList(initialLinks);
 
         // Exposed Sync
         window.__PLINKK_SYNC_SIDEBAR__ = () => {
             this.updateCategoryDropdown();
+            // Also re-render list if categories changed to update badges
+            const currentLinks = window.__PLINKK_GET_CONFIG__?.()?.links || window.__INITIAL_STATE__?.links || [];
+            this.renderLinksList(currentLinks);
         };
     }
 
@@ -277,10 +286,10 @@ export class LinkManager {
 
         this.typeBtns.forEach(btn => {
             if (btn.dataset.typeSelect === type) {
-                btn.classList.add('bg-indigo-600', 'text-white');
+                btn.classList.add('bg-emerald-600', 'text-white');
                 btn.classList.remove('text-slate-400', 'hover:bg-slate-800');
             } else {
-                btn.classList.remove('bg-indigo-600', 'text-white');
+                btn.classList.remove('bg-emerald-600', 'text-white');
                 btn.classList.add('text-slate-400', 'hover:bg-slate-800');
             }
         });
@@ -302,8 +311,16 @@ export class LinkManager {
             case 'FORM':
                 if (s.url) s.url.classList.add('hidden');
                 if (s.formConfig) s.formConfig.classList.remove('hidden');
+                if (!this.currentEditingId && this.inputs.iconInput && !this.inputs.iconInput.value) {
+                    this.inputs.iconInput.value = 'https://cdn.plinkk.fr/icons/form.png';
+                }
                 break;
             case 'EMBED':
+                if (s.url) s.url.classList.remove('hidden');
+                if (!this.currentEditingId && this.inputs.iconInput && !this.inputs.iconInput.value) {
+                    this.inputs.iconInput.value = 'https://cdn.plinkk.fr/icons/embed.png';
+                }
+                break;
             case 'MUSIC':
             case 'LINK':
             default:
@@ -449,9 +466,15 @@ export class LinkManager {
             iosUrl: this.inputs.ios?.value || '',
             androidUrl: this.inputs.android?.value || '',
             forceAppOpen: this.inputs.forceApp?.checked || false,
+            embedData: type === 'EMBED' ? { url: finalUrl } : null,
             formData: type === 'FORM' ? {
-                buttonText: this.inputs.formBtnText?.value || '',
-                successMessage: this.inputs.formSuccessMsg?.value || ''
+                buttonText: this.inputs.formBtnText?.value || 'Envoyer',
+                successMessage: this.inputs.formSuccessMsg?.value || 'Message envoyé avec succès !',
+                fields: (this.currentEditingId ? (links.find(l => l.id === this.currentEditingId)?.formData?.fields) : null) || [
+                    { label: 'Nom', type: 'text', required: true, name: 'name', placeholder: 'Votre nom' },
+                    { label: 'Email', type: 'email', required: true, name: 'email', placeholder: 'votre@email.com' },
+                    { label: 'Message', type: 'textarea', required: true, name: 'message', placeholder: 'Votre message...' }
+                ]
             } : null
         };
 
@@ -580,10 +603,25 @@ export class LinkManager {
             return;
         }
 
+        const categories = state.get().categories || window.__INITIAL_STATE__?.categories || [];
+
         list.innerHTML = links.map(link => {
             const text = link.text || link.name || 'Sans titre';
             const url = link.url || '';
             const id = link.id;
+            const type = link.type || 'LINK';
+            const category = categories.find(c => c.id === link.categoryId);
+
+            let typeBadge = '';
+            switch (type) {
+                case 'HEADER': typeBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 uppercase tracking-wider">Titre</span>'; break;
+                case 'EMBED': typeBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-400 uppercase tracking-wider">Embed</span>'; break;
+                case 'MUSIC': typeBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-pink-500/20 text-pink-400 uppercase tracking-wider">Musique</span>'; break;
+                case 'FORM': typeBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 uppercase tracking-wider">Formulaire</span>'; break;
+                default: typeBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400 uppercase tracking-wider">Lien</span>'; break;
+            }
+
+            const categoryBadge = category ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-800/50 text-slate-500 uppercase tracking-wider border border-slate-800">${this.escapeHtml(category.name)}</span>` : '';
 
             return `
                 <div class="group relative bg-slate-950 border border-slate-800 rounded-xl p-4 transition-all hover:border-slate-700" data-id="${id}">
@@ -596,7 +634,11 @@ export class LinkManager {
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <h4 class="text-sm font-medium text-slate-200">${this.escapeHtml(text)}</h4>
+                                <div class="flex items-center gap-2 mb-0.5">
+                                    <h4 class="text-sm font-medium text-slate-200">${this.escapeHtml(text)}</h4>
+                                    ${typeBadge}
+                                    ${categoryBadge}
+                                </div>
                                 <p class="text-xs text-slate-500 truncate">${this.escapeHtml(url)}</p>
                             </div>
                         </div>
