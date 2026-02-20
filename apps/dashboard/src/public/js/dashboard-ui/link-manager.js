@@ -312,7 +312,7 @@ export class LinkManager {
                 if (s.url) s.url.classList.add('hidden');
                 if (s.formConfig) s.formConfig.classList.remove('hidden');
                 if (!this.currentEditingId && this.inputs.iconInput && !this.inputs.iconInput.value) {
-                    this.inputs.iconInput.value = 'https://cdn.plinkk.fr/icons/form.png';
+                    this.inputs.iconInput.value = 'https://cdn.plinkk.fr/icons/mail.svg';
                 }
                 break;
             case 'EMBED':

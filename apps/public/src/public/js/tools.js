@@ -537,7 +537,7 @@ export function createLinkBoxes(profileData) {
                         }
                         if (videoId) {
                             videoId = videoId.split(/[?&#]/)[0];
-                            embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+                            embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1`;
                         }
                     }
 
@@ -835,7 +835,7 @@ export function createLinkBoxes(profileData) {
                         case 'vimeo':
                             iframe.style.aspectRatio = "16/9";
                             iframe.style.height = "auto";
-                            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen";
+                            iframe.allow = "autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; fullscreen";
                             iframe.allowFullscreen = true;
                             break;
                         case 'spotify':

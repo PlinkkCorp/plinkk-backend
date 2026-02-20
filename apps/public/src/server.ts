@@ -113,6 +113,20 @@ fastify.register(fastifyHttpProxy, {
   },
 });
 
+fastify.register(fastifyHttpProxy, {
+  upstream: "https://analytics.plinkk.fr/",
+  prefix: "/api/send",
+  rewritePrefix: "/api/send",
+  replyOptions: {
+    rewriteRequestHeaders: (req, headers) => {
+      return {
+        ...headers,
+        host: "analytics.plinkk.fr",
+      };
+    },
+  },
+});
+
 fastify.register(redirectRoutes);
 fastify.register(staticPagesRoutes);
 fastify.register(plinkkFrontUserRoutes);
