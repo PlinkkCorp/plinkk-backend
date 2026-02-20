@@ -318,6 +318,8 @@ export class LinkManager {
     }
 
     async saveLink() {
+        const title = this.inputs.title?.value;
+        const type = this.inputs.typeSelect?.value;
 
         if (!title && type !== 'HEADER' && !this.inputs.url?.value) {
             return;
@@ -358,7 +360,6 @@ export class LinkManager {
                 successMessage: this.inputs.formSuccessMsg?.value || ''
             } : null
         };
-        // ... rest of saveLink ...
 
         if (this.currentEditingId) {
             const idx = links.findIndex(l => l.id === this.currentEditingId);
@@ -393,9 +394,6 @@ export class LinkManager {
                 if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.links = result.links;
                 if (window.__PLINKK_SYNC_SIDEBAR__) window.__PLINKK_SYNC_SIDEBAR__();
 
-                if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.links = result.links;
-                if (window.__PLINKK_SYNC_SIDEBAR__) window.__PLINKK_SYNC_SIDEBAR__();
-
                 this.renderLinksList(result.links);
             }
 
@@ -407,6 +405,15 @@ export class LinkManager {
             this.renderLinksList(originalLinks);
         } finally {
             if (this.saveBtn) this.saveBtn.disabled = false;
+        }
+    }
+
+    handleEdit = (id) => {
+        const currentConfig = window.__PLINKK_GET_CONFIG__ ? window.__PLINKK_GET_CONFIG__() : null;
+        const links = currentConfig?.links || window.__INITIAL_STATE__?.links || [];
+        const link = links.find(l => l.id === id);
+        if (link) {
+            this.openModal(link.type || 'LINK', link);
         }
     }
 
