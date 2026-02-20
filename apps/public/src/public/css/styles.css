@@ -1572,8 +1572,4 @@ input:checked+.slider:before {
   border: 1px solid rgba(52, 211, 153, 0.2);
 }
 
-.form-status.error {
-  color: #f87171;
-  background: rgba(248, 113, 113, 0.08);
-  border: 1px solid rgba(248, 113, 113, 0.2);
-}
+background: rgba(0, 0, 0, 0

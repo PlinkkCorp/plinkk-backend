@@ -1213,37 +1213,21 @@ export function createLinkBoxes(profileData) {
 
         // Créer un conteneur pour le contenu principal (icône + texte)
         const mainContent = document.createElement("div");
-        mainContent.style.display = "flex";
-        mainContent.style.alignItems = "center";
-        mainContent.style.gap = "12px";
+        mainContent.className = "link-content-header";
+        mainContent.style.padding = "0 4px";
+
         // Ajouter l'icône au conteneur principal
         iconWrapper.appendChild(discordIcon);
         mainContent.appendChild(iconWrapper);
+
         // Créer un span pour le texte
         const textSpan = document.createElement("span");
-        textSpan.style.position = "relative";
-        textSpan.style.left = "50%";
-        textSpan.style.transform = "translateX(-50%)";
+        textSpan.className = "link-text-centered";
         textSpan.textContent = link.text;
+        mainContent.appendChild(textSpan);
+
         // Gérer les descriptions
         if (link.description && link.description.trim() !== "" && link.showDescription) {
-            // Create the arrow emoji element
-            const arrow = document.createElement("span");
-            arrow.className = "desc-arrow";
-            arrow.style.display = "inline-flex";
-            arrow.style.alignItems = "center";
-            arrow.style.justifyContent = "center";
-            arrow.style.transition = "opacity 0.7s cubic-bezier(0.4,0,0.2,1)";
-            arrow.style.opacity = "1";
-            arrow.style.marginLeft = "5px";
-            arrow.innerHTML = `
-            <svg width="20" height="20" viewBox="0 0 16 16" fill="none" 
-                xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto;">
-                <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1" 
-                stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            `;
-            textSpan.appendChild(arrow);
             // Créer la description
             const desc = document.createElement("div");
             desc.className = "link-description";
@@ -1252,134 +1236,141 @@ export function createLinkBoxes(profileData) {
             desc.style.overflow = "hidden";
             desc.style.maxHeight = "0";
             desc.style.opacity = "0";
-            desc.style.backgroundColor = "rgba(255, 255, 255, 0.2)";
-            desc.style.padding = "0 8px";
-            desc.style.borderRadius = "5px";
-            desc.style.border = "1px solid rgba(255, 255, 255, 0.5)";
+            desc.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
+            desc.style.padding = "0 12px";
+            desc.style.borderRadius = "12px";
+            desc.style.border = "1px solid rgba(255, 255, 255, 0.05)";
             desc.style.marginTop = "0";
             desc.style.marginBottom = "0";
             desc.style.display = "block";
             desc.style.width = "100%";
-            desc.style.fontSize = "0.9em";
-            discordIcon.style.transition = "transform 0.7s cubic-bezier(0.4,0,0.2,1)";
-            if (profileData.buttonThemeEnable === 1) {
-                discordIcon.style.transform = "translateY(3px)";
-            }
-            arrow.style.transform = "translateY(3px)";
+            desc.style.fontSize = "0.85em";
+            desc.style.lineHeight = "1.6";
+            desc.style.color = "rgba(255, 255, 255, 0.7)";
+
             if (isTouchDevice) {
                 // Sur mobile/tactile : bouton pour afficher/masquer la description
                 const showDescBtn = document.createElement("button");
-                showDescBtn.textContent = "Afficher la description";
                 showDescBtn.className = "show-desc-btn";
-                showDescBtn.style.marginLeft = "10px";
-                showDescBtn.style.fontSize = "0.9em";
-                showDescBtn.style.padding = "2px 8px";
-                showDescBtn.style.borderRadius = "6px";
-                showDescBtn.style.border = "none";
-                showDescBtn.style.background = "#eee";
-                showDescBtn.style.cursor = "pointer";
-                showDescBtn.style.transition = "background 0.2s";
-                showDescBtn.style.pointerEvents = "auto";
+                showDescBtn.innerHTML = `
+                    <span>Détails</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                `;
+
                 let descVisible = false;
                 showDescBtn.addEventListener("click", (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     descVisible = !descVisible;
+
                     if (descVisible) {
-                        desc.style.maxHeight = "200px";
+                        desc.style.maxHeight = "300px";
                         desc.style.opacity = "1";
-                        desc.style.marginTop = "8px";
-                        desc.style.marginBottom = "0";
-                        desc.style.padding = "8px";
-                        arrow.style.opacity = "0";
-                        showDescBtn.textContent = "Masquer la description";
+                        desc.style.marginTop = "12px";
+                        desc.style.padding = "12px";
+                        showDescBtn.classList.add("active");
+                        showDescBtn.querySelector('span').textContent = "Moins";
                     }
                     else {
                         desc.style.maxHeight = "0";
                         desc.style.opacity = "0";
                         desc.style.marginTop = "0";
-                        desc.style.marginBottom = "0";
-                        desc.style.padding = "0 8px";
-                        arrow.style.opacity = "1";
-                        showDescBtn.textContent = "Afficher la description";
+                        desc.style.padding = "0 12px";
+                        showDescBtn.classList.remove("active");
+                        showDescBtn.querySelector('span').textContent = "Détails";
                     }
                 });
-                // Ajouter le bouton au conteneur principal au lieu du discordBox
+
                 mainContent.appendChild(showDescBtn);
             }
             else {
-                // Desktop : hover classique sur le lien entier
+                // Desktop : indicator + hover
+                const arrowIndicator = document.createElement("div");
+                arrowIndicator.style.marginLeft = "auto";
+                arrowIndicator.style.opacity = "0.4";
+                arrowIndicator.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                `;
+                mainContent.appendChild(arrowIndicator);
+
                 discordLink.addEventListener("mouseenter", () => {
-                    desc.style.maxHeight = "200px";
+                    desc.style.maxHeight = "300px";
                     desc.style.opacity = "1";
-                    desc.style.marginTop = "8px";
-                    desc.style.marginBottom = "0";
-                    desc.style.padding = "8px";
-                    arrow.style.opacity = "0";
+                    desc.style.marginTop = "12px";
+                    desc.style.padding = "12px";
+                    arrowIndicator.style.transform = "rotate(180deg)";
+                    arrowIndicator.style.opacity = "0.8";
                 });
                 discordLink.addEventListener("mouseleave", () => {
                     desc.style.maxHeight = "0";
                     desc.style.opacity = "0";
                     desc.style.marginTop = "0";
-                    desc.style.marginBottom = "0";
-                    desc.style.padding = "0 8px";
-                    arrow.style.opacity = "1";
+                    desc.style.padding = "0 12px";
+                    arrowIndicator.style.transform = "rotate(0deg)";
+                    arrowIndicator.style.opacity = "0.4";
                 });
             }
-            // Ajouter la description au lien (en bas)
-            mainContent.appendChild(textSpan);
+
             discordLink.appendChild(mainContent);
             discordLink.appendChild(desc);
         }
         else {
             // Sans description, structure simple
-            mainContent.appendChild(textSpan);
             discordLink.appendChild(mainContent);
         }
-        discordBox.appendChild(discordLink);
-        if (!link.text.trim()) {
-            discordBox.style.display = "none";
-        }
-
-        return discordBox;
-    };
-
-    if (profileData.enableLinkCategories && profileData.categories && profileData.categories.length > 0) {
-        const elements = [];
-        const linksByCat = {};
-        const otherLinks = [];
-
-        profileData.links.forEach(l => {
-            if (l.categoryId) {
-                if (!linksByCat[l.categoryId]) linksByCat[l.categoryId] = [];
-                linksByCat[l.categoryId].push(l);
-            } else {
-                otherLinks.push(l);
-            }
-        });
-
-        profileData.categories.forEach(cat => {
-            const header = document.createElement('h3');
-            header.className = 'link-header';
-            header.textContent = cat.name;
-            header.style.color = profileData.textColor || '#fff';
-            header.style.marginTop = '16px';
-            header.style.marginBottom = '8px';
-            header.style.textAlign = 'center';
-            header.style.width = '100%';
-            header.style.fontSize = '1.2rem';
-            elements.push(header);
-
-            if (linksByCat[cat.id]) {
-                linksByCat[cat.id].forEach(l => elements.push(createBox(l)));
-            }
-        });
-
-        otherLinks.forEach(l => elements.push(createBox(l)));
-        return elements.slice(0, maxLinkNumber + profileData.categories.length + 5);
-    } else {
-        return profileData.links.slice(0, maxLinkNumber).map(createBox);
+        else {
+        // Sans description, structure simple
+        mainContent.appendChild(textSpan);
+        discordLink.appendChild(mainContent);
     }
+    discordBox.appendChild(discordLink);
+    if (!link.text.trim()) {
+        discordBox.style.display = "none";
+    }
+
+    return discordBox;
+};
+
+if (profileData.enableLinkCategories && profileData.categories && profileData.categories.length > 0) {
+    const elements = [];
+    const linksByCat = {};
+    const otherLinks = [];
+
+    profileData.links.forEach(l => {
+        if (l.categoryId) {
+            if (!linksByCat[l.categoryId]) linksByCat[l.categoryId] = [];
+            linksByCat[l.categoryId].push(l);
+        } else {
+            otherLinks.push(l);
+        }
+    });
+
+    profileData.categories.forEach(cat => {
+        const header = document.createElement('h3');
+        header.className = 'link-header';
+        header.textContent = cat.name;
+        header.style.color = profileData.textColor || '#fff';
+        header.style.marginTop = '16px';
+        header.style.marginBottom = '8px';
+        header.style.textAlign = 'center';
+        header.style.width = '100%';
+        header.style.fontSize = '1.2rem';
+        elements.push(header);
+
+        if (linksByCat[cat.id]) {
+            linksByCat[cat.id].forEach(l => elements.push(createBox(l)));
+        }
+    });
+
+    otherLinks.forEach(l => elements.push(createBox(l)));
+    return elements.slice(0, maxLinkNumber + profileData.categories.length + 5);
+} else {
+    return profileData.links.slice(0, maxLinkNumber).map(createBox);
+}
 }
 export function validateProfileConfig(profileData, themes, btnIconThemeConfig, canvaData, animationBackground) {
     const errors = [];
