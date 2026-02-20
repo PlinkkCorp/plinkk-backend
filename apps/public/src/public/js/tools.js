@@ -967,7 +967,13 @@ export function createLinkBoxes(profileData) {
 
             // Build inputs from formData fields
             const inputs = [];
-            const fields = link.formData.fields || [];
+            const defaultFields = [
+                { label: 'Nom', type: 'text', required: true, name: 'name', placeholder: 'Votre nom' },
+                { label: 'Email', type: 'email', required: true, name: 'email', placeholder: 'votre@email.com' },
+                { label: 'Message', type: 'textarea', required: true, name: 'message', placeholder: 'Votre message...' }
+            ];
+            const fields = (link.formData.fields && link.formData.fields.length > 0) ? link.formData.fields : defaultFields;
+
             fields.forEach(field => {
                 const wrapper = document.createElement("div");
                 wrapper.className = "form-field-wrapper";
@@ -1214,7 +1220,9 @@ export function createLinkBoxes(profileData) {
         // Créer un conteneur pour le contenu principal (icône + texte)
         const mainContent = document.createElement("div");
         mainContent.className = "link-content-header";
-        mainContent.style.padding = "0 4px";
+        mainContent.style.padding = "0";
+        mainContent.style.display = "flex";
+        mainContent.style.alignItems = "center";
 
         // Ajouter l'icône au conteneur principal
         iconWrapper.appendChild(discordIcon);
