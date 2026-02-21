@@ -82,14 +82,14 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
         showDescription: l.showDescription,
         categoryId: l.categoryId,
       })),
-      categories: categories.map((c) => ({ id: c.id, name: c.name, order: c.order })),
+      categories: categories.map((c) => ({ id: c.id, name: c.name, order: c.order, isActive: c.isActive })),
       statusbar: statusbar
         ? {
-            text: statusbar.text,
-            colorBg: statusbar.colorBg,
-            fontTextColor: statusbar.fontTextColor,
-            statusText: statusbar.statusText,
-          }
+          text: statusbar.text,
+          colorBg: statusbar.colorBg,
+          fontTextColor: statusbar.fontTextColor,
+          statusText: statusbar.statusText,
+        }
         : null,
     };
     return reply.send(cfg);

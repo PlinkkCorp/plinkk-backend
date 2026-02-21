@@ -37,7 +37,7 @@
     "@fastify/view": "^11.1.1",
     "@plinkk/prisma": "workspace:*",
     "@plinkk/shared": "workspace:*",
-    "@prisma/client": "^7.0.0",
+    "@prisma/client": "^7.3.0",
     "@types/archiver": "^6.0.3",
     "@types/uglify-js": "^3.17.5",
     "archiver": "^7.0.1",
@@ -59,7 +59,7 @@
   "devDependencies": {
     "@types/ejs": "^3.1.5",
     "@types/node": "^24.7.0",
-    "prisma": "^7.0.0",
+    "prisma": "^7.3.0",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"

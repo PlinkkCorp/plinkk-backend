@@ -634,9 +634,12 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       let finalLabels = labels;
       let finalNeon = neonColors;
       let finalSocial = socialIcons;
-      let finalLinks = links;
       let finalStatusbar = pageStatusbar;
       let finalCategories = categories;
+
+      // Filter links by active categories
+      const activeCategoryIds = new Set(finalCategories.filter(c => c.isActive !== false).map(c => c.id));
+      let finalLinks = links.filter(l => !l.categoryId || activeCategoryIds.has(l.categoryId));
 
       if (versionIdArg) {
         const version = await prisma.plinkkVersion.findUnique({ where: { id: versionIdArg } });
@@ -941,10 +944,18 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       }
     }
 
-    const allLinks = await prisma.link.findMany({
-      where: { plinkkId: resolved.page.id, userId: resolved.user.id },
-    });
-    const links = filterScheduledLinks(allLinks);
+    const [allLinks, categories] = await Promise.all([
+      prisma.link.findMany({
+        where: { plinkkId: resolved.page.id, userId: resolved.user.id },
+      }),
+      prisma.category.findMany({
+        where: { plinkkId: resolved.page.id },
+      })
+    ]);
+
+    // Filter by schedule and active categories
+    const activeCategoryIds = new Set(categories.filter(c => c.isActive !== false).map(c => c.id));
+    const links = filterScheduledLinks(allLinks).filter(l => !l.categoryId || activeCategoryIds.has(l.categoryId));
     const sessionData = request.session.get("data");
     const isOwner =
       ((typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined) === resolved.user.id;
@@ -1001,10 +1012,18 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       }
     }
 
-    const allLinks = await prisma.link.findMany({
-      where: { plinkkId: resolved.page.id, userId: resolved.user.id },
-    });
-    const links = filterScheduledLinks(allLinks);
+    const [allLinks, categories] = await Promise.all([
+      prisma.link.findMany({
+        where: { plinkkId: resolved.page.id, userId: resolved.user.id },
+      }),
+      prisma.category.findMany({
+        where: { plinkkId: resolved.page.id },
+      })
+    ]);
+
+    // Filter by schedule and active categories
+    const activeCategoryIds = new Set(categories.filter(c => c.isActive !== false).map(c => c.id));
+    const links = filterScheduledLinks(allLinks).filter(l => !l.categoryId || activeCategoryIds.has(l.categoryId));
 
     const sessionData = request.session.get("data");
     const isOwner =

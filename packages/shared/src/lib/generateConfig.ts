@@ -33,7 +33,11 @@ export function generateProfileConfig(
         userName: ${JSON.stringify(profile.userName || "User")},
         email: ${JSON.stringify(profile.publicEmail || "")},
         links: ${JSON.stringify(
-    links.map((l) => ({
+    links.filter(l => {
+      if (!l.categoryId) return true;
+      const cat = categories.find(c => c.id === l.categoryId);
+      return !cat || cat.isActive !== false;
+    }).map((l) => ({
       icon: l.icon,
       url: l.url,
       id: l.id,
@@ -68,7 +72,8 @@ export function generateProfileConfig(
     categories.map(c => ({
       id: c.id,
       name: c.name,
-      order: c.order
+      order: c.order,
+      isActive: c.isActive !== false
     }))
   )},
         background: ${JSON.stringify(backgroundColors.map((c) => c.color))},

@@ -252,7 +252,10 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
         }
       }
 
-      const updatedLinks = await prisma.link.findMany({ where: { userId, plinkkId: id } });
+      const updatedLinks = await prisma.link.findMany({
+        where: { userId, plinkkId: id },
+        orderBy: { index: 'asc' },
+      });
 
       // Calculate diff using the fully populated old and new lists
       const diff = calculateArrayDiff(existing, updatedLinks, "id", ["userId", "plinkkId", "createdAt", "updatedAt", "clicks"]);
@@ -304,6 +307,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
             showDescription: l.showDescription,
             categoryId: l.categoryId,
             type: l.type,
+            index: l.index,
             embedData: l.embedData,
             formData: l.formData,
             iosUrl: l.iosUrl,
@@ -327,7 +331,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
     if (!(await validatePlinkkOwnership(userId, id)))
       return reply.code(404).send({ error: "Plinkk introuvable" });
 
-    const body = request.body as { categories: { id?: string; name: string; order: number }[] };
+    const body = request.body as { categories: { id?: string; name: string; order: number; isActive: boolean }[] };
 
     if (Array.isArray(body.categories)) {
       const existing = await prisma.category.findMany({
@@ -344,11 +348,11 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
         if (c.id && existingIds.has(c.id)) {
           await prisma.category.update({
             where: { id: c.id },
-            data: { name: c.name, order: c.order },
+            data: { name: c.name, order: c.order, isActive: c.isActive },
           });
         } else {
           await prisma.category.create({
-            data: { name: c.name, order: c.order, plinkkId: id },
+            data: { name: c.name, order: c.order, isActive: c.isActive, plinkkId: id },
           });
         }
       }
@@ -390,7 +394,7 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
 
       return reply.send({
         ok: true,
-        categories: updatedCategories.map((c) => ({ id: c.id, name: c.name, order: c.order })),
+        categories: updatedCategories.map((c) => ({ id: c.id, name: c.name, order: c.order, isActive: c.isActive })),
       });
     }
 

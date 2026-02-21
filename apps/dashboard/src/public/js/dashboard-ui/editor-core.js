@@ -157,8 +157,12 @@ function renderPlinkk(config) {
     if (!plinkkRenderer) return;
 
     const plinkk = config || {};
-    const links = config.links || [];
     const categories = config.categories || [];
+    const activeCategoryIds = new Set(categories.filter(c => c.isActive !== false).map(c => c.id));
+
+    const links = (config.links || [])
+        .filter(l => !l.categoryId || activeCategoryIds.has(l.categoryId))
+        .sort((a, b) => (a.index || 0) - (b.index || 0));
     const labels = config.labels || [];
     const socialIcon = config.socialIcon || [];
     const statusbar = config.statusbar || null;

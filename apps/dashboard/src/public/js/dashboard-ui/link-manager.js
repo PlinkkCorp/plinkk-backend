@@ -13,6 +13,7 @@ export class LinkManager {
         this.sections = {};
 
         this.currentEditingId = null;
+        this.isSaving = false;
         this.saveTimeout = null;
     }
 
@@ -422,6 +423,8 @@ export class LinkManager {
     }
 
     async saveLink() {
+        if (this.isSaving) return;
+
         const title = this.inputs.title?.value;
         const type = this.inputs.typeSelect?.value;
 
@@ -433,6 +436,9 @@ export class LinkManager {
         if (!saveFn) {
             return;
         }
+
+        this.isSaving = true;
+        const editingId = this.currentEditingId;
 
         const currentConfig = window.__PLINKK_GET_CONFIG__ ? window.__PLINKK_GET_CONFIG__() : null;
         let links = currentConfig && currentConfig.links ? [...currentConfig.links] : [];
@@ -456,7 +462,7 @@ export class LinkManager {
         }
 
         const data = {
-            id: this.currentEditingId || ('new_' + Date.now()),
+            id: editingId || ('new_' + Date.now()),
             type: type,
             text: title,
             title: title,
@@ -464,6 +470,7 @@ export class LinkManager {
             description: this.inputs.desc?.value || '',
             icon: finalIcon,
             categoryId: this.inputs.category?.value || null,
+            index: editingId ? (links.find(l => l.id === editingId)?.index || 0) : (links.length > 0 ? Math.max(...links.map(l => l.index || 0)) + 1 : 0),
             iosUrl: this.inputs.ios?.value || '',
             androidUrl: this.inputs.android?.value || '',
             forceAppOpen: this.inputs.forceApp?.checked || false,
@@ -471,7 +478,7 @@ export class LinkManager {
             formData: type === 'FORM' ? {
                 buttonText: this.inputs.formBtnText?.value || 'Envoyer',
                 successMessage: this.inputs.formSuccessMsg?.value || 'Message envoyé avec succès !',
-                fields: (this.currentEditingId ? (links.find(l => l.id === this.currentEditingId)?.formData?.fields) : null) || [
+                fields: (editingId ? (links.find(l => l.id === editingId)?.formData?.fields) : null) || [
                     { label: 'Nom', type: 'text', required: true, name: 'name', placeholder: 'Votre nom' },
                     { label: 'Email', type: 'email', required: true, name: 'email', placeholder: 'votre@email.com' },
                     { label: 'Message', type: 'textarea', required: true, name: 'message', placeholder: 'Votre message...' }
@@ -479,8 +486,8 @@ export class LinkManager {
             } : null
         };
 
-        if (this.currentEditingId) {
-            const idx = links.findIndex(l => l.id === this.currentEditingId);
+        if (editingId) {
+            const idx = links.findIndex(l => l.id === editingId);
             if (idx !== -1) {
                 links[idx] = { ...links[idx], ...data };
             }
@@ -522,6 +529,7 @@ export class LinkManager {
             const originalLinks = window.__PLINKK_GET_CONFIG__ && window.__PLINKK_GET_CONFIG__() ? window.__PLINKK_GET_CONFIG__().links : (window.__INITIAL_STATE__?.links || []);
             this.renderLinksList(originalLinks);
         } finally {
+            this.isSaving = false;
             if (this.saveBtn) this.saveBtn.disabled = false;
         }
     }
@@ -571,14 +579,20 @@ export class LinkManager {
 
         if (links.length === 0) return;
 
-        // Reorder links based on ids
-        const newLinks = ids.map(id => links.find(l => l.id === id)).filter(Boolean);
+        // Reorder links based on ids and update indices
+        const sortedLinks = ids.map((id, index) => {
+            const link = links.find(l => l.id === id);
+            if (link) {
+                return { ...link, index: index };
+            }
+            return null;
+        }).filter(Boolean);
 
         const saveFn = window.__PLINKK_SAVE_LINKS__;
         if (saveFn) {
             try {
                 if (window.__PLINKK_SHOW_SAVING__) window.__PLINKK_SHOW_SAVING__();
-                const result = await saveFn(newLinks);
+                const result = await saveFn(sortedLinks);
                 if (result && result.links) {
                     if (window.__PLINKK_GET_CONFIG__) {
                         const cfg = window.__PLINKK_GET_CONFIG__();
@@ -606,7 +620,10 @@ export class LinkManager {
 
         const categories = state.get().categories || window.__INITIAL_STATE__?.categories || [];
 
-        list.innerHTML = links.map(link => {
+        // Sort by index
+        const sortedLinks = [...links].sort((a, b) => (a.index || 0) - (b.index || 0));
+
+        list.innerHTML = sortedLinks.map(link => {
             const text = link.text || link.name || 'Sans titre';
             const url = link.url || '';
             const id = link.id;
