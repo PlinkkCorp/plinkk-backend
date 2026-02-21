@@ -74,7 +74,7 @@
                 window.__PLINKK_IDENTIFIER__ = JSON.parse(s || '""');
             } catch (_) { }
         })();
-        window.__PLINKK_EXPORT_MODE__ = <%- JSON.stringify(!!(locals.isExport)) %>;
+        window.__PLINKK_EXPORT_MODE__ = <%- !!(locals.isExport) %>;
         window.__PLINKK_IS_PREVIEW__ = (new URLSearchParams(location.search).get('preview') === '1');
         if (!window.__PLINKK_IDENTIFIER__) {
             try {

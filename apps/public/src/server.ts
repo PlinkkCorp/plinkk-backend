@@ -87,6 +87,12 @@ fastify.register(fastifyStatic, {
   prefix: "/public/",
 });
 
+fastify.register(fastifyStatic, {
+  root: path.join(__dirname, "public", "images", "icons"),
+  prefix: "/icons/",
+  decorateReply: false,
+});
+
 fastify.register(fastifyFormbody);
 fastify.register(fastifyMultipart, {
   limits: {
@@ -147,6 +153,7 @@ fastify.addHook("preHandler", async (request, reply) => {
     request.url.startsWith("/js/") ||
     request.url.startsWith("/css/") ||
     request.url.startsWith("/umami_script.js") ||
+    request.url.startsWith("/api/send") ||
     request.url.startsWith("/icons/")
   ) return;
 

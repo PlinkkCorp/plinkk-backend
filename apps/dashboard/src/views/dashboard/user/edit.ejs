@@ -154,11 +154,6 @@
                                 <%- include('./partials/editor-sections/links.ejs') %>
                             </div>
 
-                            <div id="section-categories"
-                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                                <%- include('./partials/editor-sections/categories.ejs') %>
-                            </div>
-
                             <div id="section-animations"
                                 class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
                                 <%- include('./partials/editor-sections/animations.ejs') %>
@@ -350,7 +345,7 @@
                             const rawData = JSON.parse(document.getElementById('plinkk-data').textContent);
                             window.__INITIAL_STATE__ = {
                                 ...rawData,
-                                categories: <% - JSON.stringify(locals.categories || []) %>
+                                categories: <%- JSON.stringify(locals.categories || []) %>
                             };
                         } catch (e) {
                             console.error('Failed to parse initial state:', e);

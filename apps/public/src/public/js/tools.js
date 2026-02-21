@@ -1353,14 +1353,14 @@ export function createLinkBoxes(profileData) {
             discordLink.appendChild(mainContent);
         }
         discordBox.appendChild(discordLink);
-        if (!link.text.trim()) {
+        if (!link.text || !link.text.trim()) {
             discordBox.style.display = "none";
         }
 
         return discordBox;
     };
 
-    const createLinkBoxes = (profileData, maxLinkNumber, createBox) => {
+    const renderLinks = (profileData, maxLinkNumber, createBox) => {
         if (!profileData.links || profileData.links.length === 0) return [];
 
         const elements = [];
@@ -1388,6 +1388,8 @@ export function createLinkBoxes(profileData) {
 
         return elements.slice(0, maxLinkNumber + 20); // Extra buffer for headers
     };
+
+    return renderLinks(profileData, maxLinkNumber, createBox);
 }
 export function validateProfileConfig(profileData, themes, btnIconThemeConfig, canvaData, animationBackground) {
     const errors = [];
