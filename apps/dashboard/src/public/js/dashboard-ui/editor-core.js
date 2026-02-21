@@ -64,6 +64,17 @@ async function saveLinks(links) {
     return res;
 }
 
+async function saveLayout(order) {
+    const res = await saveConfig('plinkk', { layoutOrder: order });
+    if (res && res.layoutOrder) {
+        if (currentConfig) currentConfig.layoutOrder = res.layoutOrder;
+        if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.layoutOrder = res.layoutOrder;
+        if (window.__EDITOR_STORE__) window.__EDITOR_STORE__.set({ layoutOrder: res.layoutOrder });
+        renderPlinkk(currentConfig);
+    }
+    return res;
+}
+
 async function saveLabels(labels) {
     const res = await saveConfig('labels', { labels: labels });
     if (res && res.labels) {
@@ -410,7 +421,7 @@ function renderPlinkk(config) {
     // Description & Email
     let descEmailHTML = '';
     if (email || description) {
-        descEmailHTML = '<div class="desc-email-container">';
+        descEmailHTML = '<div class="desc-email-container" data-section="email" draggable="true">';
         if (email) {
             descEmailHTML += `
                 <div class="email-row">
@@ -434,6 +445,9 @@ function renderPlinkk(config) {
     // CSS du rendu
     const css = `
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* make it obvious that sections can be dragged */
+        #plinkkRenderer [draggable] { cursor: grab; }
+        #plinkkRenderer [draggable].dragging { cursor: grabbing; }
         #plinkkRenderer { 
             font-family: "Inter", "Satoshi", -apple-system, BlinkMacSystemFont, sans-serif;
             display: flex; justify-content: center; align-items: flex-start;
@@ -732,58 +746,74 @@ function renderPlinkk(config) {
         .popover-btn.delete:hover { background: rgba(239,68,68,0.25); }
     `;
 
-    // HTML final
-    plinkkRenderer.innerHTML = `
-        <style>${css}</style>
-        ${canvasHTML}
-        <article class="plinkk-article">
-            <div class="profile-section">
-                <div class="profile-pic-container">
-                    ${pfp
-            ? `<img src="${pfp}" alt="${name}" class="profile-pic" onerror="this.outerHTML='<span class=profile-initial>${initial}</span>'"/>`
-            : `<span class="profile-initial">${initial}</span>`}
-                    <div class="profile-upload-overlay">
-                        <label title="Changer l'image">
-                            <input type="file" id="pfpUploadInline" accept="image/*" style="display:none"/>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                        </label>
-                        ${pfp ? `<button type="button" id="deletePfpInline" title="Supprimer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>` : ''}
-                    </div>
-                </div>
-                <h1 class="profile-name editable-inline" data-field="userName" data-type="plinkk">${escapeHtml(name)}</h1>
-            </div>
-            
-            ${statusbarHTML}
-            
-            <div class="labels-section">
-                ${labelsHTML}
-                <button class="add-btn-inline" id="addLabelInline">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Label
-                </button>
-            </div>
-            
-            <div class="socials-section">
-                ${socialsHTML}
-                <button class="add-btn-inline" id="addSocialInline">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Social
-                </button>
-            </div>
-            
-            ${descEmailHTML}
-            
-            <div class="links-section">
-                ${linksHTML}
-                <div style="text-align:center;margin-top:16px;">
-                    <button class="add-btn-inline" id="addLinkInline">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        Lien
-                    </button>
+    const DEFAULT_LAYOUT = ['profile','username','statusbar','labels','social','email','links'];
+    let layout = Array.isArray(plinkk.layoutOrder) ? plinkk.layoutOrder.slice() : DEFAULT_LAYOUT.slice();
+    const KNOWN = new Set(DEFAULT_LAYOUT);
+    const seen = new Set();
+    const normalized = [];
+    layout.forEach(k => { if (KNOWN.has(k) && !seen.has(k)) { seen.add(k); normalized.push(k); } });
+    DEFAULT_LAYOUT.forEach(k => { if (!seen.has(k)) normalized.push(k); });
+    layout.splice(0, layout.length, ...normalized); // update reference if used elsewhere
+
+    // prepare section snippets
+    const profilePicHTML = `
+        <div class="profile-section" data-section="profile" draggable="true">
+            <div class="profile-pic-container">
+                ${pfp
+        ? `<img src="${pfp}" alt="${name}" class="profile-pic" onerror="this.outerHTML='<span class=profile-initial>${initial}</span>'"/>`
+        : `<span class="profile-initial">${initial}</span>`}
+                <div class="profile-upload-overlay">
+                    <label title="Changer l'image">
+                        <input type="file" id="pfpUploadInline" accept="image/*" style="display:none"/>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    </label>
+                    ${pfp ? `<button type="button" id="deletePfpInline" title="Supprimer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>` : ''}
                 </div>
             </div>
-        </article>
-    `;
+        </div>`;
+    const profileNameHTML = `<h1 class="profile-name editable-inline" data-field="userName" data-type="plinkk" data-section="username" draggable="true">${escapeHtml(name)}</h1>`;
+    const statusSectionHTML = statusbarHTML ? `<div data-section="statusbar" draggable="true">${statusbarHTML}</div>` : '';
+    const labelsSectionHTML = `
+        <div class="labels-section" data-section="labels" draggable="true">
+            ${labelsHTML}
+            <button class="add-btn-inline" id="addLabelInline">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Label
+            </button>
+        </div>`;
+    const socialSectionHTML = `
+        <div class="socials-section" data-section="social" draggable="true">
+            ${socialsHTML}
+            <button class="add-btn-inline" id="addSocialInline">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Social
+            </button>
+        </div>`;
+    const linksSectionHTML = `
+        <div class="links-section" data-section="links" draggable="true">
+            ${linksHTML}
+            <div style="text-align:center;margin-top:16px;">
+                <button class="add-btn-inline" id="addLinkInline">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Lien
+                </button>
+            </div>
+        </div>`;
+
+    let html = `<style>${css}</style>${canvasHTML}<article class="plinkk-article">`;
+    normalized.forEach((key) => {
+        switch (key) {
+            case 'profile': html += profilePicHTML; break;
+            case 'username': html += profileNameHTML; break;
+            case 'statusbar': html += statusSectionHTML; break;
+            case 'labels': html += labelsSectionHTML; break;
+            case 'social': html += socialSectionHTML; break;
+            case 'email': html += descEmailHTML; break;
+            case 'links': html += linksSectionHTML; break;
+        }
+    });
+    html += '</article>';
+    plinkkRenderer.innerHTML = html;
 
     // Attacher les handlers
     setupEventHandlers();
@@ -807,8 +837,8 @@ function setupEventHandlers() {
     plinkkRenderer.addEventListener('click', handleClick);
 
     // Enable drag & drop reordering for links, socials and labels
-    function getDragAfterElement(container, y) {
-        const draggableElements = [...container.querySelectorAll('[data-index]:not(.dragging)')];
+    function getDragAfterElement(container, y, selector = '[data-index]:not(.dragging)') {
+        const draggableElements = [...container.querySelectorAll(selector)];
         return draggableElements.reduce((closest, child) => {
             const box = child.getBoundingClientRect();
             const offset = y - box.top - box.height / 2;
@@ -864,6 +894,45 @@ function setupEventHandlers() {
     enableReorder('.links-section', 'links', saveLinks);
     enableReorder('.socials-section', 'socialIcon', saveSocialIcons);
     enableReorder('.labels-section', 'labels', saveLabels);
+
+    function enableReorderSections(containerSelector, saveFn) {
+        const container = qs(containerSelector);
+        if (!container) return;
+
+        container.addEventListener('dragstart', (e) => {
+            const item = e.target.closest('[draggable][data-section]');
+            if (!item) return;
+            e.dataTransfer.setData('text/plain', item.dataset.section || '');
+            e.dataTransfer.effectAllowed = 'move';
+            item.classList.add('dragging');
+        });
+
+        container.addEventListener('dragend', (e) => {
+            const item = e.target.closest('[draggable][data-section]');
+            if (item) item.classList.remove('dragging');
+        });
+
+        container.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const after = getDragAfterElement(container, e.clientY, '[data-section]:not(.dragging)');
+            const dragging = container.querySelector('.dragging');
+            if (!dragging) return;
+            if (!after) container.appendChild(dragging);
+            else container.insertBefore(dragging, after);
+        });
+
+        container.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            const items = Array.from(container.querySelectorAll('[data-section]'));
+            const newOrder = items.map(it => it.dataset.section).filter(Boolean);
+            if (newOrder.length) {
+                await saveFn(newOrder);
+                loadPlinkkPage();
+            }
+        });
+    }
+
+    enableReorderSections('.plinkk-article', saveLayout);
 }
 
 function handleClick(e) {

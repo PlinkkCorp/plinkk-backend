@@ -192,6 +192,10 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
 
   async function fillForm(cfg) {
     suspendAutoSave = true;
+    // ensure we have a reference to the layout list element in case it was
+    // missing when the script initially ran (order of execution can vary)
+    f.layoutList = qs('#layoutList');
+
     f.profileLink.value = cfg.profileLink || '';
     f.profileSiteText.value = cfg.profileSiteText || '';
     f.userName.value = cfg.userName || '';
@@ -273,18 +277,9 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
     renderLabels({ container: f.labelsList, addBtn: f.addLabel, labels: state.labels, scheduleAutoSave });
     renderSocial({ container: f.socialList, addBtn: f.addSocial, socials: state.socialIcon, scheduleAutoSave });
   renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, scheduleAutoSave });
-  // Rendu de l'agencement
-  renderLayout({ container: f.layoutList, order: state.layoutOrder, scheduleAutoSave });
-
-    // Inverser l'ordre des couleurs de background (bouton ajouté dans template)
-    if (f.invertBackgroundColors) {
-      f.invertBackgroundColors.addEventListener('click', () => {
-        state.background.reverse();
-        renderBackground({ container: f.backgroundList, addBtn: f.addBackgroundColor, colors: state.background, scheduleAutoSave });
-        // On enregistre et on laissera le rafraîchissement se faire après save (pour éviter les doubles reload)
-        scheduleAutoSave();
-      });
-    }
+  // Rendu de l'agencement - always query the element again in case it changed
+  const layoutContainer = qs('#layoutList');
+  renderLayout({ container: layoutContainer, order: state.layoutOrder, scheduleAutoSave });
 
     const hasNeonColors = state.neonColors.length > 0;
     if (f.neonEnable) {

@@ -104,6 +104,15 @@
                                     </button>
                                 </li>
                                 <li>
+                                    <button data-target="#section-layout"
+                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                                        <svg class="size-4" viewBox="0 0 24 24" fill="white">
+                                            <path d="M4 6h16v2H4zM4 11h16v2H4zM4 16h16v2H4z" />
+                                        </svg>
+                                        Disposition
+                                    </button>
+                                </li>
+                                <li>
                                     <button data-target="#section-animations"
                                         class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
                                         <svg class="size-4" viewBox="0 0 24 24" fill="white">
@@ -145,6 +154,11 @@
                             <div id="section-links"
                                 class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
                                 <%- include('./partials/editor-sections/links.ejs') %>
+                            </div>
+
+                            <div id="section-layout"
+                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                                <%- include('./partials/editor-sections/layout.ejs') %>
                             </div>
 
                             <div id="section-animations"
@@ -257,6 +271,14 @@
         <%- include('./edit/link-modal.ejs') %>
             <%- include('./edit/icon-modal.ejs') %>
                 <%- include('./edit/picker-modal.ejs') %>
+
+        <div id="statusModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 hidden" role="dialog" aria-modal="true">
+            <div class="relative w-full max-w-md bg-slate-800 rounded-lg p-6 text-center text-white">
+                <button id="statusModalClose" class="absolute right-3 top-3 size-8 rounded bg-slate-800 hover:bg-slate-700 text-white">✕</button>
+                <h2 class="text-xl font-semibold mb-2">En cours de refonte</h2>
+                <p class="text-sm text-slate-300">La section <strong>Statut</strong> est actuellement en cours de refonte et n'est pas disponible pour le moment.</p>
+            </div>
+        </div>
 
                     <script>
                         window.__PLINKK_USER_ID__ = "<%= user.id %>";
@@ -386,6 +408,26 @@
                                     }, 1800);
                                 } catch (e) { /* ignore */ }
                             };
+                        })();
+
+                        (function () {
+                            const statusBtn = document.querySelector('[data-target="#section-statusbar"]');
+                            const modal = document.getElementById('statusModal');
+                            const closeBtn = document.getElementById('statusModalClose');
+
+                            if (statusBtn && modal) {
+                                statusBtn.addEventListener('click', (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    e.stopImmediatePropagation();
+                                    modal.classList.remove('hidden');
+                                });
+                            }
+                            if (closeBtn && modal) {
+                                closeBtn.addEventListener('click', () => {
+                                    modal.classList.add('hidden');
+                                });
+                            }
                         })();
                     </script>
 

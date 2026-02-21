@@ -114,7 +114,8 @@ export async function restoreLogState(logId: string, adminId: string, ip?: strin
 
     if (!delegate) throw new Error(`Prisma delegate not found for ${delegateKey}`);
 
-    await delegate.update({
+    // delegate is typed as unknown; cast to any to call update
+    await (delegate as any).update({
         where: { id: targetLog.targetId },
         data: restorePatch
     });

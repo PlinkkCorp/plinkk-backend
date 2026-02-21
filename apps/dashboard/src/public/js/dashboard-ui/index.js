@@ -75,6 +75,23 @@ class DashboardUI {
           if (window.initSortable) window.initSortable();
         }, 100);
       }
+      if (targetId === '#section-layout') {
+        // the layout panel may have been populated before the element existed,
+        // also ensure drag handles are attached again
+        setTimeout(() => {
+          const layoutContainer = qs('#layoutList');
+          if (typeof renderLayout === 'function') {
+            renderLayout({ container: layoutContainer, order: state.layoutOrder, scheduleAutoSave });
+          } else {
+            console.warn('renderLayout not defined when activating layout tab, dynamic import');
+            import('./renderers.js').then(m => {
+              if (m.renderLayout) {
+                m.renderLayout({ container: layoutContainer, order: state.layoutOrder, scheduleAutoSave });
+              }
+            }).catch(e => console.error('Failed to import renderers.js', e));
+          }
+        }, 50);
+      }
     }
 // after setting up onTabChange, call other initialization helpers
     this.initTabs();
@@ -112,6 +129,12 @@ initTabs() {
 }
 
 switchTab(targetId) {
+  if (targetId === '#section-statusbar') {
+    const modal = document.getElementById('statusModal');
+    if (modal) modal.classList.remove('hidden');
+    return;
+  }
+
   this.sections.forEach(s => {
     s.classList.toggle('hidden', `#${s.id}` !== targetId);
   });
