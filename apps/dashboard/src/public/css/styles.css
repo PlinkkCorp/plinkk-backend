@@ -1648,3 +1648,49 @@ input:checked+.slider:before {
     background: rgba(248, 113, 113, 0.08);
     border: 1px solid rgba(248, 113, 113, 0.2);
 }
+
+/* Nested Links Styles */
+.nested-links {
+    margin-left: 2rem;
+    padding-left: 1rem;
+    border-left: 2px solid rgba(148, 163, 184, 0.1);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.nested-links:hover {
+    border-left-color: rgba(99, 102, 241, 0.3);
+}
+
+.header-group-wrapper {
+    position: relative;
+    margin-bottom: 1.5rem !important;
+}
+
+.header-group-wrapper>.group {
+    background: rgba(30, 41, 59, 0.3) !important;
+    border-color: rgba(148, 163, 184, 0.2) !important;
+}
+
+.nested-links .group {
+    margin-bottom: 0.5rem !important;
+    transform: scale(0.98);
+}
+
+.nested-links:empty::after {
+    content: 'Dépose des liens ici...';
+    display: block;
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.8rem;
+    color: rgba(148, 163, 184, 0.4);
+    font-style: italic;
+    border: 2px dashed rgba(148, 163, 184, 0.1);
+    border-radius: 0.75rem;
+}
+
+.sortable-ghost {
+    opacity: 0.4;
+    background: rgba(99, 102, 241, 0.1) !important;
+    border: 2px dashed rgba(99, 102, 241, 0.3) !important;
+}

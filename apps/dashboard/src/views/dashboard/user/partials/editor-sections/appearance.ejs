@@ -82,10 +82,10 @@
         </div>
     </div>
 
-    <div>
-        <label class="block text-sm font-medium text-slate-300 mb-3">Style des
-            boutons</label>
-        <div class="grid grid-cols-3 gap-3">
+    <!-- Styles des boutons (rounded, pill, sharp) -->
+    <div class="space-y-4">
+        <label class="block text-xs uppercase tracking-wider text-slate-500 mb-2">Style des boutons</label>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <% const btnStyles=[ { id: 'rounded' , name: 'Arrondi' , cls: 'rounded-xl' }, { id: 'pill' , name: 'Pilule'
                 , cls: 'rounded-full' }, { id: 'sharp' , name: 'Carré' , cls: 'rounded-none' } ]; %>
                 <% btnStyles.forEach(s=> { %>
@@ -99,6 +99,22 @@
                     </label>
                     <% }); %>
         </div>
+    </div>
+
+    <!-- Toggle for Button Themes -->
+    <div class="p-4 rounded-xl border border-slate-800 bg-slate-900/50 flex items-center justify-between gap-4">
+        <div class="space-y-1">
+            <label for="buttonThemeEnable" class="text-sm font-medium text-slate-200">Thèmes de boutons</label>
+            <p class="text-xs text-slate-500">Permettre aux thèmes spécifiques (Amazon, Spotify, etc.) de s'appliquer
+                aux liens.</p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="buttonThemeEnable" class="sr-only peer" <%=plinkk.buttonThemeEnable !==0
+                ? 'checked' : '' %>>
+            <div
+                class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500">
+            </div>
+        </label>
     </div>
 
     <div class="grid grid-cols-2 gap-4">

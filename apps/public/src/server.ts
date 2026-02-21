@@ -146,7 +146,8 @@ fastify.addHook("preHandler", async (request, reply) => {
     request.url.startsWith("/assets") ||
     request.url.startsWith("/js/") ||
     request.url.startsWith("/css/") ||
-    request.url.startsWith("/umami_script.js")
+    request.url.startsWith("/umami_script.js") ||
+    request.url.startsWith("/icons/")
   ) return;
 
   const maintenance = await prisma.maintenance.findUnique({ where: { id: "config" } });
@@ -315,8 +316,6 @@ fastify.addHook("onRequest", async (request, reply) => {
       } else if (request.url.startsWith("/js/")) {
         const jsFile = request.url.replace("/js/", "");
         return reply.sendFile(`js/${jsFile}`);
-      } else if (request.url === "/umami_script.js") {
-        return reply.sendFile(`https://analytics.plinkk.fr/script.js`);
       } else if (request.url.startsWith("/config.js")) {
         const page = hostDb.plinkk;
         if (!page) return reply.code(404).send({ error: "Page introuvable" });

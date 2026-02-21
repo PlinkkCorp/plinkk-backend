@@ -511,9 +511,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       return reply.redirect(userIcon);
     }
 
-    return reply.sendFile(
-      userIcon || "https://cdn.plinkk.fr/default_profile.png",
-    );
+    return reply.redirect("https://cdn.plinkk.fr/default_profile.png");
   });
 
   fastify.get(

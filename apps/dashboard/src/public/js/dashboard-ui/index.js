@@ -3,7 +3,6 @@ import { historyManager } from './history-manager.js';
 import { uiUtils } from './ui-utils.js';
 import { linkManager } from './link-manager.js';
 import { settingsManager } from './settings-manager.js';
-import { categoryManager } from './category-manager.js';
 import { renderSocial } from './renderers.js';
 import { animations, animationBackground } from '../../config/animationConfig.js';
 import { canvaData } from '../../config/canvaConfig.js';
@@ -43,7 +42,6 @@ class DashboardUI {
     uiUtils.init();
     linkManager.init();
     settingsManager.init();
-    categoryManager.init();
 
     window.initSortable = () => {
       const linksList = document.getElementById('linksList');
@@ -53,18 +51,21 @@ class DashboardUI {
           handle: '.cursor-move',
           animation: 150,
           ghostClass: 'bg-slate-800/20',
+          group: 'nested-links',
           onEnd: () => linkManager.saveNewOrder()
         });
-      }
 
-      const categoriesList = document.getElementById('categoriesList');
-      if (categoriesList && window.Sortable) {
-        if (categoriesList._sortable) categoriesList._sortable.destroy();
-        categoriesList._sortable = new Sortable(categoriesList, {
-          handle: '.cursor-move',
-          animation: 150,
-          ghostClass: 'bg-slate-800/20',
-          onEnd: () => categoryManager.saveAll(categoryManager.getCurrentCategories())
+        // Initialize nested sortables for each header group
+        linksList.querySelectorAll('.nested-links').forEach(el => {
+          if (el._sortable) el._sortable.destroy();
+          el._sortable = new Sortable(el, {
+            group: 'nested-links',
+            animation: 150,
+            ghostClass: 'bg-slate-800/20',
+            fallbackOnBody: true,
+            swapThreshold: 0.65,
+            onEnd: () => linkManager.saveNewOrder()
+          });
         });
       }
     };

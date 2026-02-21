@@ -1,0 +1,333 @@
+/* Button Theme Previews for Dashboard */
+
+.button-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: 1px solid transparent;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.button-preview .preview-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    object-fit: contain;
+}
+
+/* Brand-Specific Styles adapted from public/button.css */
+
+.button-amazon {
+    color: #000000;
+    background-color: #FFFFFF;
+    border-color: #212121;
+}
+
+.button-amazon-music {
+    color: #000000;
+    background-color: #25D1DA;
+}
+
+.button-appstore {
+    color: #FFFFFF;
+    background-color: #000000;
+    border-color: #FFFFFF;
+}
+
+.button-apple-music {
+    color: #ffffff;
+    background-color: #000000;
+    border-color: #FFFFFF;
+}
+
+.button-apple-music-alt {
+    color: #ffffff;
+    background: linear-gradient(to bottom, #FB5C74, #FA233B);
+}
+
+.button-apple-podcasts {
+    color: #ffffff;
+    background-color: #000000;
+    border-color: #FFFFFF;
+}
+
+.button-apple-podcasts-alt {
+    color: #ffffff;
+    background: linear-gradient(to bottom, #F452FF, #832BC1);
+}
+
+.button-bandcamp {
+    color: #ffffff;
+    background-color: #1d9fc3;
+}
+
+.button-behance {
+    color: #ffffff;
+    background-color: #0057FF;
+    border-color: #FFFFFF;
+}
+
+.button-bluesky {
+    color: #FFFFFF;
+    background-color: #1185FE;
+}
+
+.button-bluesky-alt {
+    color: #000000;
+    background-color: #FFFFFF;
+    border-color: #000000;
+}
+
+.button-coffee {
+    color: #000000;
+    background-color: #ffdd00;
+}
+
+.button-cal {
+    color: #FFFFFF;
+    background-color: #292929;
+    border-color: #FFFFFF;
+}
+
+.button-calendly {
+    color: #FFFFFF;
+    background-color: #006BFF;
+}
+
+.button-cash-app {
+    color: #ffffff;
+    background: linear-gradient(to bottom, #00d64b, #00c244);
+}
+
+.button-dev-to {
+    color: #000000;
+    background-color: #f5f5f5;
+    border-color: #212121;
+}
+
+.button-discogs {
+    color: #000000;
+    background-color: #FFFFFF;
+    border-color: #000000;
+}
+
+.button-discogs-alt {
+    color: #FFFFFF;
+    background-color: #000000;
+    border-color: #FFFFFF;
+}
+
+.button-discord {
+    color: #ffffff;
+    background-color: #5865F2;
+}
+
+.button-dribbble {
+    color: #000000;
+    background-color: #FFFFFF;
+    border-color: #212121;
+}
+
+.button-etsy {
+    color: #ffffff;
+    background-color: #F45800;
+}
+
+.button-faceb {
+    color: #ffffff;
+    background-color: #1877f2;
+}
+
+.button-messenger {
+    color: #ffffff;
+    background: linear-gradient(25deg, #0099ff, #5f5dff, #a033ff, #c740cc, #ff5280, #ff7061);
+}
+
+.button-figma {
+    color: #ffffff;
+    background-color: #000000;
+    border-color: #FFFFFF;
+}
+
+.button-fiverr {
+    color: #ffffff;
+    background-color: #1DBF73;
+}
+
+.button-flickr {
+    color: #ffffff;
+    background-color: #000000;
+    border-color: #FFFFFF;
+}
+
+.button-github {
+    color: #ffffff;
+    background-color: #000000;
+    border-color: #FFFFFF;
+}
+
+.button-gitlab {
+    color: #ffffff;
+    background-color: #6151b2;
+}
+
+.button-gofundme {
+    color: #ffffff;
+    background-color: #02A95C;
+}
+
+.button-goodreads {
+    color: #333333;
+    background-color: #f3f1e6;
+    border-color: #212121;
+}
+
+.button-google {
+    color: #FFFFFF;
+    background: linear-gradient(90deg, #4285F4, #34A853, #FBBC05, #EA4335);
+}
+
+.button-google-black {
+    color: #FFFFFF;
+    background-color: #000000;
+    border-color: #FFFFFF;
+}
+
+.button-playstore {
+    color: #FFFFFF;
+    background-color: #000000;
+    border-color: #FFFFFF;
+}
+
+.button-instagram {
+    color: #ffffff;
+    background: linear-gradient(-135deg, #1400c8, #b900b4, #f50000);
+}
+
+.button-kick {
+    color: #ffffff;
+    background-color: #000000;
+    border-color: #ffffff;
+}
+
+.button-kick-alt {
+    color: #000000;
+    background-color: #01e701;
+}
+
+.button-ko-fi {
+    color: #ffffff;
+    background-color: #000000;
+    border-color: #FFFFFF;
+}
+
+.button-linked {
+    color: #ffffff;
+    background-color: #2867b2;
+}
+
+.button-onlyfans {
+    color: #ffffff;
+    background-color: #00AEEF;
+}
+
+.button-patreon {
+    color: #ffffff;
+    background-color: #000000;
+    border-color: #FFFFFF;
+}
+
+.button-paypal {
+    color: #ffffff;
+    background-color: #002991;
+    border-color: #FFFFFF;
+}
+
+.button-pinterest {
+    color: #000000;
+    background-color: #ffffff;
+    border-color: #212121;
+}
+
+.button-reddit {
+    color: #FFFFFF;
+    background-color: #FF4500;
+}
+
+.button-snapchat {
+    color: #000000;
+    background-color: #fffc00;
+}
+
+.button-soundcloud {
+    color: #ffffff;
+    background-color: #ff5500;
+}
+
+.button-spotify {
+    color: #191414;
+    background-color: #1db954;
+}
+
+.button-spotify-alt {
+    color: #FFFFFF;
+    background-color: #191414;
+    border-color: #FFFFFF;
+}
+
+.button-steam {
+    color: #ffffff;
+    background: linear-gradient(90deg, #08BBFF, #2B75FF);
+}
+
+.button-telegram {
+    color: #ffffff;
+    background-color: #3faee8;
+}
+
+.button-threads {
+    color: #FFFFFF;
+    background-color: #000000;
+    border-color: #FFFFFF;
+}
+
+.button-tiktok {
+    color: #ffffff;
+    background-color: #000000;
+    border-color: #FFFFFF;
+}
+
+.button-twitch {
+    color: #ffffff;
+    background-color: #9146ff;
+}
+
+.button-whatsapp {
+    color: #ffffff;
+    background-color: #455a64;
+}
+
+.button-x {
+    color: #FFFFFF;
+    background-color: #000000;
+    border-color: #FFFFFF;
+}
+
+.button-yt {
+    color: #ffffff;
+    background-color: #282828;
+    border-color: #FFFFFF;
+}
+
+.button-yt-alt {
+    color: #ffffff;
+    background-color: #FF0000;
+}

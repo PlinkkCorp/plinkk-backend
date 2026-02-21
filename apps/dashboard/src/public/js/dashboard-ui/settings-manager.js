@@ -11,7 +11,7 @@ export class SettingsManager {
             'selectedAnimationIndex', 'selectedAnimationButtonIndex', 'selectedAnimationBackgroundIndex'
         ];
         this.checkboxes = [
-            'showStatus', 'enableLinkCategories', 'canvaEnable',
+            'showStatus', 'enableLinkCategories', 'canvaEnable', 'buttonThemeEnable',
             'EnableAnimationArticle', 'EnableAnimationButton', 'EnableAnimationBackground'
         ];
         this.radios = [

@@ -1,5 +1,6 @@
 <%- include('partials/head.ejs', { title: 'Tableau de bord - Édition' ,
-    description: 'Configure les sections, apparence et arrière‑plan de ta page.' , robots: 'noindex,nofollow' }) %>
+    description: 'Configure les sections, apparence et arrière‑plan de ta page.' , robots: 'noindex,nofollow' ,
+    extraHead: '<link rel="stylesheet" href="/public/css/button-themes.css">' }) %>
 
     <%- include('partials/header-dash.ejs', { user: user }) %>
 
@@ -98,16 +99,6 @@
                                                 d="M10.59 13.41L9.17 12l4.24-4.24 1.41 1.41L10.59 13.41zm2.82-2.82L14.83 12 10.59 16.24 9.17 14.83 13.41 10.59z" />
                                         </svg>
                                         Liens
-                                    </button>
-                                </li>
-                                <li>
-                                    <button data-target="#section-categories"
-                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
-                                        <svg class="size-4" viewBox="0 0 24 24" fill="white">
-                                            <path
-                                                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                                        </svg>
-                                        Catégories
                                     </button>
                                 </li>
                                 <li>
@@ -359,7 +350,7 @@
                             const rawData = JSON.parse(document.getElementById('plinkk-data').textContent);
                             window.__INITIAL_STATE__ = {
                                 ...rawData,
-                                categories: <%- JSON.stringify(locals.categories || []) %>
+                                categories: <% - JSON.stringify(locals.categories || []) %>
                             };
                         } catch (e) {
                             console.error('Failed to parse initial state:', e);

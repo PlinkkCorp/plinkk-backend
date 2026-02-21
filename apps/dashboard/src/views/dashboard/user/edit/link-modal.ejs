@@ -228,10 +228,17 @@
                             </div>
                         </div>
 
-                        <!-- Helper hidden inputs for buttonTheme if needed, or put it here -->
-                        <div class="hidden">
-                            <select id="linkModalTheme">
-                                <option value="system">System</option>
+                        <!-- Button Theme Selection -->
+                        <div id="field-button-theme" class="space-y-3 pt-3 border-t border-slate-800 border-dashed">
+                            <label class="block text-xs uppercase tracking-wider text-slate-500 mb-1">Thème du
+                                bouton</label>
+                            <div id="buttonThemeContainer"
+                                class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto custom-scrollbar p-1">
+                                <!-- Populated via JS -->
+                            </div>
+                            <!-- Hidden Select for Logic Compatibility -->
+                            <select id="linkModalTheme" class="hidden">
+                                <option value="system">System (Défaut)</option>
                             </select>
                         </div>
 

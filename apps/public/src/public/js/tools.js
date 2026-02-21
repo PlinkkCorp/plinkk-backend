@@ -1360,42 +1360,34 @@ export function createLinkBoxes(profileData) {
         return discordBox;
     };
 
-    if (profileData.enableLinkCategories && profileData.categories && profileData.categories.length > 0) {
+    const createLinkBoxes = (profileData, maxLinkNumber, createBox) => {
+        if (!profileData.links || profileData.links.length === 0) return [];
+
         const elements = [];
-        const linksByCat = {};
-        const otherLinks = [];
+        let currentHeader = null;
 
-        profileData.links.forEach(l => {
-            if (l.categoryId) {
-                if (!linksByCat[l.categoryId]) linksByCat[l.categoryId] = [];
-                linksByCat[l.categoryId].push(l);
+        // Sort by index if present, though they should be sorted already
+        const sortedLinks = [...profileData.links].sort((a, b) => (a.index || 0) - (b.index || 0));
+
+        sortedLinks.forEach(link => {
+            if (link.type === 'HEADER') {
+                const header = document.createElement('h3');
+                header.className = 'link-header';
+                header.textContent = link.text || link.name || '';
+                header.style.color = profileData.textColor || '#fff';
+                header.style.marginTop = '16px';
+                header.style.marginBottom = '8px';
+                header.style.textAlign = 'center';
+                header.style.width = '100%';
+                header.style.fontSize = '1.2rem';
+                elements.push(header);
             } else {
-                otherLinks.push(l);
+                elements.push(createBox(link));
             }
         });
 
-        profileData.categories.forEach(cat => {
-            const header = document.createElement('h3');
-            header.className = 'link-header';
-            header.textContent = cat.name;
-            header.style.color = profileData.textColor || '#fff';
-            header.style.marginTop = '16px';
-            header.style.marginBottom = '8px';
-            header.style.textAlign = 'center';
-            header.style.width = '100%';
-            header.style.fontSize = '1.2rem';
-            elements.push(header);
-
-            if (linksByCat[cat.id]) {
-                linksByCat[cat.id].forEach(l => elements.push(createBox(l)));
-            }
-        });
-
-        otherLinks.forEach(l => elements.push(createBox(l)));
-        return elements.slice(0, maxLinkNumber + profileData.categories.length + 5);
-    } else {
-        return profileData.links.slice(0, maxLinkNumber).map(createBox);
-    }
+        return elements.slice(0, maxLinkNumber + 20); // Extra buffer for headers
+    };
 }
 export function validateProfileConfig(profileData, themes, btnIconThemeConfig, canvaData, animationBackground) {
     const errors = [];
@@ -1520,7 +1512,7 @@ export function createIconList(profileData) {
         if (/^(https?:\/\/|\/|data:)/i.test(iconVal)) {
             iconImg.src = iconVal;
         } else {
-            iconImg.src = `https://cdn.plinkk.fr/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
+            iconImg.src = `/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
         }
         iconImg.onload = () => {
             iconImg.classList.remove('opacity-0');

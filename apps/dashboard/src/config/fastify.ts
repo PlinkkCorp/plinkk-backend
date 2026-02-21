@@ -12,6 +12,7 @@ import { FastifyInstance } from "fastify";
 import path from "path";
 import ejs from "ejs";
 import { readFileSync } from "fs";
+import fastifyHttpProxy from "@fastify/http-proxy";
 
 export async function registerPlugins(fastify: FastifyInstance) {
   await fastify.register(fastifyRateLimit, {
@@ -86,4 +87,36 @@ export async function registerPlugins(fastify: FastifyInstance) {
   });
 
   await fastify.register(fastifyCors, { origin: true });
+
+  await fastify.register(fastifyHttpProxy, {
+    upstream: "https://analytics.plinkk.fr/",
+    prefix: "/umami_script.js",
+    rewritePrefix: "/script.js",
+    replyOptions: {
+      rewriteRequestHeaders: (req, headers: any) => {
+        return {
+          ...headers,
+          host: "analytics.plinkk.fr",
+          "x-forwarded-for": (req as any).ip || headers["x-forwarded-for"],
+          "x-real-ip": (req as any).ip || headers["x-real-ip"],
+        };
+      },
+    },
+  });
+
+  await fastify.register(fastifyHttpProxy, {
+    upstream: "https://analytics.plinkk.fr/",
+    prefix: "/api/send",
+    rewritePrefix: "/api/send",
+    replyOptions: {
+      rewriteRequestHeaders: (req, headers: any) => {
+        return {
+          ...headers,
+          host: "analytics.plinkk.fr",
+          "x-forwarded-for": (req as any).ip || headers["x-forwarded-for"],
+          "x-real-ip": (req as any).ip || headers["x-real-ip"],
+        };
+      },
+    },
+  });
 }

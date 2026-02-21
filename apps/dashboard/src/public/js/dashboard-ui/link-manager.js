@@ -11,6 +11,7 @@ export class LinkManager {
         this.inputs = {};
         this.typeBtns = [];
         this.sections = {};
+        this.themeContainer = null;
 
         this.currentEditingId = null;
         this.isSaving = false;
@@ -38,7 +39,6 @@ export class LinkManager {
             android: document.getElementById('linkModalAndroidUrl'),
             forceApp: document.getElementById('linkModalForceAppOpen'),
             clickLimit: document.getElementById('linkModalClickLimit'),
-            category: document.getElementById('linkModalCategory'),
             formBtnText: document.getElementById('linkModalFormBtnText'),
             formSuccessMsg: document.getElementById('linkModalFormSuccessMsg'),
             typeSelect: document.getElementById('linkModalType'), // This was missing in query
@@ -63,6 +63,9 @@ export class LinkManager {
             iconUrlWrap: document.getElementById('linkModalIconUrlWrap'),
             iconUploadWrap: document.getElementById('linkModalIconUploadWrap'),
         };
+
+        this.themeContainer = document.getElementById('buttonThemeContainer');
+        this.inputs.theme = document.getElementById('linkModalTheme');
 
         // Scheme Toggler
         this.schemeBtn = document.getElementById('linkModalSchemeBtn');
@@ -208,11 +211,68 @@ export class LinkManager {
 
         // Exposed Sync
         window.__PLINKK_SYNC_SIDEBAR__ = () => {
-            this.updateCategoryDropdown();
             // Also re-render list if categories changed to update badges
             const currentLinks = window.__PLINKK_GET_CONFIG__?.()?.links || window.__INITIAL_STATE__?.links || [];
             this.renderLinksList(currentLinks);
         };
+
+        this.initThemePicker();
+    }
+
+    async initThemePicker() {
+        if (!this.themeContainer) return;
+
+        try {
+            // Import dynamically since it's a module
+            const { btnIconThemeConfig } = await import('../../config/btnIconThemeConfig.js');
+            if (!btnIconThemeConfig) return;
+
+            // Clear and add "System" default
+            this.themeContainer.innerHTML = `
+                <button type="button" data-theme-value="system" 
+                    class="theme-card group relative flex flex-col items-center gap-2 p-2 rounded-lg border border-slate-800 bg-slate-800/30 hover:bg-slate-800 transition-all ring-2 ring-transparent data-[active=true]:ring-violet-500 data-[active=true]:bg-violet-500/10">
+                    <div class="w-full h-8 rounded bg-slate-700 flex items-center justify-center text-[10px] text-slate-400 font-medium">Auto</div>
+                    <span class="text-[10px] font-medium text-slate-300">System</span>
+                </button>
+            `;
+
+            btnIconThemeConfig.forEach(theme => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.dataset.themeValue = theme.themeClass;
+                btn.className = 'theme-card group relative flex flex-col items-center gap-2 p-2 rounded-lg border border-slate-800 bg-slate-800/30 hover:bg-slate-800 transition-all ring-2 ring-transparent data-[active=true]:ring-violet-500 data-[active=true]:bg-violet-500/10';
+
+                btn.innerHTML = `
+                    <div class="button-preview ${theme.themeClass} h-8 !py-0 !px-2 !text-[10px] !rounded pointer-events-none">
+                        ${theme.icon ? `<img src="${theme.icon}" class="preview-icon !mr-1 !w-3 !h-3">` : ''}
+                        ${theme.name}
+                    </div>
+                `;
+
+                btn.onclick = () => this.setButtonTheme(theme.themeClass);
+                this.themeContainer.appendChild(btn);
+            });
+
+            // Set default click for system
+            const systemBtn = this.themeContainer.querySelector('[data-theme-value="system"]');
+            if (systemBtn) systemBtn.onclick = () => this.setButtonTheme('system');
+
+        } catch (err) {
+            console.error('[LinkManager] Failed to init theme picker:', err);
+        }
+    }
+
+    setButtonTheme(themeClass) {
+        if (this.inputs.theme) {
+            this.inputs.theme.value = themeClass;
+        }
+
+        // Update UI
+        if (this.themeContainer) {
+            this.themeContainer.querySelectorAll('[data-theme-value]').forEach(btn => {
+                btn.dataset.active = (btn.dataset.themeValue === themeClass).toString();
+            });
+        }
     }
 
     updateIconSourceUI(source) {
@@ -256,19 +316,6 @@ export class LinkManager {
         this.inputs.title.focus();
     }
 
-    updateCategoryDropdown() {
-        const select = this.inputs.category;
-        if (!select) return;
-
-        const categories = window.__INITIAL_STATE__?.categories || [];
-        const currentVal = select.value;
-
-        select.innerHTML = '<option value="">(Aucune)</option>' +
-            categories.map(c => `<option value="${c.id}">${this.escapeHtml(c.name || c.text || c.title || 'Sans nom')}</option>`).join('');
-
-        // Restore value if still exists
-        if (currentVal) select.value = currentVal;
-    }
 
     closeModal() {
         if (this.modal) {
@@ -375,12 +422,12 @@ export class LinkManager {
         if (i.iconSource) i.iconSource.value = source;
         this.updateIconSourceUI(source);
 
-        if (i.category) i.category.value = data.categoryId || '';
-
         if (i.newTab) i.newTab.checked = data.url && !data.forceAppOpen;
         if (i.ios) i.ios.value = data.iosUrl || '';
         if (i.android) i.android.value = data.androidUrl || '';
         if (i.forceApp) i.forceApp.checked = !!data.forceAppOpen;
+
+        this.setButtonTheme(data.buttonTheme || 'system');
 
         if (data.formData) {
             if (i.formBtnText) i.formBtnText.value = data.formData.buttonText || '';
@@ -409,7 +456,8 @@ export class LinkManager {
             i.iconSource.value = 'catalog';
             this.updateIconSourceUI('catalog');
         }
-        if (i.category) i.category.value = '';
+
+        this.setButtonTheme('system');
 
         this.currentScheme = 'https://';
         if (this.schemeLabel) this.schemeLabel.textContent = this.currentScheme;
@@ -469,7 +517,6 @@ export class LinkManager {
             url: finalUrl,
             description: this.inputs.desc?.value || '',
             icon: finalIcon,
-            categoryId: this.inputs.category?.value || null,
             index: editingId ? (links.find(l => l.id === editingId)?.index || 0) : (links.length > 0 ? Math.max(...links.map(l => l.index || 0)) + 1 : 0),
             iosUrl: this.inputs.ios?.value || '',
             androidUrl: this.inputs.android?.value || '',
@@ -483,7 +530,8 @@ export class LinkManager {
                     { label: 'Email', type: 'email', required: true, name: 'email', placeholder: 'votre@email.com' },
                     { label: 'Message', type: 'textarea', required: true, name: 'message', placeholder: 'Votre message...' }
                 ]
-            } : null
+            } : null,
+            buttonTheme: this.inputs.theme?.value || 'system'
         };
 
         if (editingId) {
@@ -573,7 +621,8 @@ export class LinkManager {
         const list = document.getElementById('linksList');
         if (!list) return;
 
-        const ids = Array.from(list.querySelectorAll('[data-id]')).map(el => el.dataset.id);
+        // Flatten all links across any nested structures to capture visual order
+        const ids = Array.from(list.querySelectorAll('.group[data-id]')).map(el => el.dataset.id);
         const currentConfig = window.__PLINKK_GET_CONFIG__ ? window.__PLINKK_GET_CONFIG__() : null;
         let links = currentConfig && currentConfig.links ? [...currentConfig.links] : (window.__INITIAL_STATE__?.links || []);
 
@@ -618,46 +667,80 @@ export class LinkManager {
             return;
         }
 
-        const categories = state.get().categories || window.__INITIAL_STATE__?.categories || [];
-
         // Sort by index
         const sortedLinks = [...links].sort((a, b) => (a.index || 0) - (b.index || 0));
 
-        list.innerHTML = sortedLinks.map(link => {
-            const text = link.text || link.name || 'Sans titre';
-            const url = link.url || '';
-            const id = link.id;
-            const type = link.type || 'LINK';
-            const category = categories.find(c => c.id === link.categoryId);
+        let html = '';
+        let currentHeaderGroup = null;
 
-            let typeBadge = '';
-            switch (type) {
-                case 'HEADER': typeBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 uppercase tracking-wider">Titre</span>'; break;
-                case 'EMBED': typeBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-400 uppercase tracking-wider">Embed</span>'; break;
-                case 'MUSIC': typeBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-pink-500/20 text-pink-400 uppercase tracking-wider">Musique</span>'; break;
-                case 'FORM': typeBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 uppercase tracking-wider">Formulaire</span>'; break;
-                default: typeBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400 uppercase tracking-wider">Lien</span>'; break;
+        sortedLinks.forEach(link => {
+            const isHeader = link.type === 'HEADER';
+
+            if (isHeader) {
+                // If we were in a header group, close it (not really needed for visual, but for Sortable)
+                if (currentHeaderGroup) {
+                    html += `</div></div>`; // Close nested-links and current header div
+                }
+
+                currentHeaderGroup = link.id;
+                html += `
+                    <div class="header-group-wrapper mb-4" data-id="${link.id}">
+                        ${this.getLinkItemHtml(link)}
+                        <div class="nested-links ml-8 mt-2 space-y-2 min-h-[40px] border-l-2 border-slate-800/50 pl-4" data-header-id="${link.id}">
+                `;
+            } else {
+                if (currentHeaderGroup) {
+                    html += this.getLinkItemHtml(link);
+                } else {
+                    html += this.getLinkItemHtml(link);
+                }
             }
+        });
 
-            const categoryBadge = category ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-800/50 text-slate-500 uppercase tracking-wider border border-slate-800">${this.escapeHtml(category.name)}</span>` : '';
+        if (currentHeaderGroup) {
+            html += `</div></div>`;
+        }
 
-            return `
-                <div class="group relative bg-slate-950 border border-slate-800 rounded-xl p-4 transition-all hover:border-slate-700" data-id="${id}">
-                    <div class="flex items-center justify-between gap-4">
-                        <div class="flex-1 flex items-center gap-3">
-                            <div class="cursor-move text-slate-600 hover:text-slate-400 p-1">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle>
-                                    <circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-0.5">
-                                    <h4 class="text-sm font-medium text-slate-200">${this.escapeHtml(text)}</h4>
-                                    ${typeBadge}
-                                    ${categoryBadge}
-                                </div>
-                                <p class="text-xs text-slate-500 truncate">${this.escapeHtml(url)}</p>
+        list.innerHTML = html;
+
+        if (window.initSortable) window.initSortable();
+    }
+
+    getLinkItemHtml(link) {
+        const text = link.text || link.name || 'Sans titre';
+        const url = link.url || '';
+        const id = link.id;
+        const type = link.type || 'LINK';
+
+        let typeBadge = '';
+        switch (type) {
+            case 'HEADER': typeBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 uppercase tracking-wider">Titre</span>'; break;
+            case 'EMBED': typeBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-400 uppercase tracking-wider">Embed</span>'; break;
+            case 'MUSIC': typeBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-pink-500/20 text-pink-400 uppercase tracking-wider">Musique</span>'; break;
+            case 'FORM': typeBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 uppercase tracking-wider">Formulaire</span>'; break;
+            default: typeBadge = '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400 uppercase tracking-wider">Lien</span>'; break;
+        }
+        const themeBadge = (link.buttonTheme && link.buttonTheme !== 'system') ? `<span class="px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 text-[10px] font-medium border border-violet-500/20">${link.buttonTheme.replace('button-', '')}</span>` : '';
+
+        return `
+            <div class="group relative bg-slate-950 border border-slate-800 rounded-xl p-4 transition-all hover:border-slate-700" data-id="${id}">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="flex-1 flex items-center gap-3">
+                        <div class="cursor-move text-slate-600 hover:text-slate-400 p-1">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle>
+                                <circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-0.5">
+                                <h4 class="text-sm font-medium text-slate-200">${this.escapeHtml(text)}</h4>
+                               <div class="flex items-center gap-1.5 mt-1">
+                        ${typeBadge}
+                        ${themeBadge}
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500 truncate">${this.escapeHtml(url)}</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -676,10 +759,8 @@ export class LinkManager {
                         </div>
                     </div>
                 </div>
-            `;
-        }).join('');
-
-        if (window.initSortable) window.initSortable();
+            </div>
+        `;
     }
 
     escapeHtml(text) {
