@@ -468,7 +468,7 @@
                             const rawData = JSON.parse(document.getElementById('plinkk-data').textContent);
                             window.__INITIAL_STATE__ = {
                                 ...rawData,
-                                categories: <% - JSON.stringify(locals.categories || []) %>
+                                categories: <%- JSON.stringify(locals.categories || []) %>
                             };
                         } catch (e) {
                             console.error('Failed to parse initial state:', e);
@@ -507,19 +507,14 @@
                                     btnH.classList.remove('bg-slate-700', 'text-slate-200');
                                     btnP.classList.add('bg-slate-700', 'text-slate-200');
                                     btnP.classList.remove('bg-violet-600', 'text-white');
-                                    // make sure history has been loaded
-                                    if (window.historyManager) {
-                                        window.historyManager.loadHistory();
-                                    }
+                                    if (window.historyManager) window.historyManager.loadHistory();
                                 }
                                 btnP.addEventListener('click', showPreview);
                                 btnH.addEventListener('click', showHistory);
-                                // bind refresh button if present
                                 const refreshBtn = document.getElementById('refreshHistory');
                                 refreshBtn?.addEventListener('click', () => {
                                     if (window.historyManager) window.historyManager.loadHistory();
                                 });
-                                // default state
                                 showPreview();
                             }
                         })();

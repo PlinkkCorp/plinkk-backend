@@ -1399,18 +1399,18 @@ export function renderLayout({ container, order, scheduleAutoSave, cfg = {} }) {
       if (key === 'social') {
         const possible = ['socialIcon', 'socialIcons', 'socials'];
         for (const p of possible) {
-          if (Array.isArray(src[p]) && src[p].length > 0) { console.log(`[VISIBLE] social found in src.${p}`); return true; }
-          if (Array.isArray(settings[p]) && settings[p].length > 0) { console.log(`[VISIBLE] social found in settings.${p}`); return true; }
+          if (Array.isArray(src[p]) && src[p].length > 0) return true;
+          if (Array.isArray(settings[p]) && settings[p].length > 0) return true;
         }
       } else if (key === 'labels') {
-        if (Array.isArray(src.labels) && src.labels.length > 0) { console.log(`[VISIBLE] labels found in src`); return true; }
-        if (Array.isArray(settings.labels) && settings.labels.length > 0) { console.log(`[VISIBLE] labels found in settings`); return true; }
+        if (Array.isArray(src.labels) && src.labels.length > 0) return true;
+        if (Array.isArray(settings.labels) && settings.labels.length > 0) return true;
       } else if (key === 'links') {
-        if (Array.isArray(src.links) && src.links.length > 0) { console.log(`[VISIBLE] links found in src`); return true; }
-        if (Array.isArray(settings.links) && settings.links.length > 0) { console.log(`[VISIBLE] links found in settings`); return true; }
+        if (Array.isArray(src.links) && src.links.length > 0) return true;
+        if (Array.isArray(settings.links) && settings.links.length > 0) return true;
       } else if (key === 'email') {
-        if (src.email || src.publicEmail || src.description) { console.log(`[VISIBLE] email found in src`); return true; }
-        if (settings.affichageEmail || settings.publicEmail || settings.description) { console.log(`[VISIBLE] email found in settings`); return true; }
+        if (src.email || src.publicEmail || src.description) return true;
+        if (settings.affichageEmail || settings.publicEmail || settings.description) return true;
       }
     }
     return false;

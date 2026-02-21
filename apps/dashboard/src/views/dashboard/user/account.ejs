@@ -1,77 +1,110 @@
 <%- include('partials/head.ejs', { title: 'Tableau de bord - Mon compte' ,
   description: 'Gère ton email, mot de passe et confidentialité du profil.' , robots: 'noindex,nofollow' }) %>
   <%- include('partials/header-dash.ejs') %>
-    
+
     <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
       <%- include('partials/asside_dash.ejs', { active: 'account' }) %>
 
         <main class="col-span-12 lg:col-span-10 space-y-6">
           <!-- Header -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl">
             <div>
               <h1 class="text-2xl font-bold text-white">Mon compte</h1>
               <p class="text-sm text-slate-400 mt-1">Gérez vos informations personnelles et votre sécurité.</p>
             </div>
-            <a href="/cosmetics" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
+            <a href="/cosmetics"
+              class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
               <span>Cosmétiques</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
             </a>
           </div>
 
           <div id="accountRoot"
             data-twofactor="<%= !!(user && ((user.totpSecret && user.totpSecret !== '') || user.twoFactorEnabled)) %>"
-            data-has-password="<%= user.hasPassword !== false %>"
-            data-user-email="<%= user.email %>">
-            
+            data-has-password="<%= user.hasPassword !== false %>" data-user-email="<%= user.email %>">
+
             <!-- Tabs -->
             <nav class="bg-slate-900 border border-slate-800 p-2 rounded-2xl mb-6 overflow-x-auto scrollbar-hide">
               <ul class="flex gap-2 min-w-max" role="tablist" aria-label="Sections du compte">
                 <li>
-                  <button class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
+                  <button
+                    class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
                     data-tab="profile" aria-selected="true">
-                    <svg class="size-4" viewBox="0 0 24 24" fill="white"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-3.33 0-8 1.67-8 5v1h16v-1c0-3.33-4.67-5-8-5z"/></svg>
+                    <svg class="size-4" viewBox="0 0 24 24" fill="white">
+                      <path
+                        d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-3.33 0-8 1.67-8 5v1h16v-1c0-3.33-4.67-5-8-5z" />
+                    </svg>
                     Profil
                   </button>
                 </li>
                 <li>
-                  <button class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
+                  <button
+                    class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
                     data-tab="security" aria-selected="false">
-                    <svg class="size-4" viewBox="0 0 24 24" fill="white"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                    <svg class="size-4" viewBox="0 0 24 24" fill="white">
+                      <path
+                        d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
+                    </svg>
                     Confidentialité &amp; Sécurité
                   </button>
                 </li>
                 <li>
-                  <button class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
+                  <button
+                    class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
                     data-tab="settings" aria-selected="false">
-                    <svg class="size-4" viewBox="0 0 24 24" fill="white"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.58 1.62-.94l2.39.96c.21.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                    <svg class="size-4" viewBox="0 0 24 24" fill="white">
+                      <path
+                        d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.58 1.62-.94l2.39.96c.21.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+                    </svg>
                     Paramètres
                   </button>
                 </li>
                 <li>
-                  <button class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
+                  <button
+                    class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
                     data-tab="preferences" aria-selected="false">
-                    <svg class="size-4" viewBox="0 0 24 24" fill="white"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                    <svg class="size-4" viewBox="0 0 24 24" fill="white">
+                      <path
+                        d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
+                    </svg>
                     Préférences
                   </button>
                 </li>
                 <li>
-                  <button class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
+                  <button
+                    class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
                     data-tab="developer" aria-selected="false">
-                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="16 18 22 12 16 6"></polyline>
+                      <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
                     Développeur
                   </button>
                 </li>
                 <li>
-                  <button class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
+                  <button
+                    class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
                     data-tab="subscription" aria-selected="false">
-                    <svg class="size-4" viewBox="0 0 24 24" fill="white"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                    <svg class="size-4" viewBox="0 0 24 24" fill="white">
+                      <path
+                        d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
+                    </svg>
                     Abonnement
                   </button>
                 </li>
-                                <li>
-                  <button class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
+                <li>
+                  <button
+                    class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2"
                     data-tab="connections" aria-selected="false">
-                    <svg class="size-4" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                    <svg class="size-4" viewBox="0 0 24 24" fill="white">
+                      <path
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+                    </svg>
                     Connexions
                   </button>
                 </li>
@@ -80,143 +113,183 @@
 
             <!-- Content Panels -->
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg">
-              
+
               <!-- Profile Panel -->
               <div id="panel-profile" class="tab-panel animate-slide-up space-y-6">
-                <% 
-                  const _u_role = user.role ? (user.role.name || user.role.id) : null;
-                  const _u_isStaff = ['ADMIN','DEVELOPER','MODERATOR'].includes(_u_role);
-                  const _u_pu = user.premiumUntil ? new Date(user.premiumUntil) : null;
-                  const _u_activePrem = user.isPremium && (!_u_pu || _u_pu > new Date());
+                <% const _u_role=user.role ? (user.role.name || user.role.id) : null; const
+                  _u_isStaff=['ADMIN','DEVELOPER','MODERATOR'].includes(_u_role); const _u_pu=user.premiumUntil ? new
+                  Date(user.premiumUntil) : null; const _u_activePrem=user.isPremium && (!_u_pu || _u_pu> new Date());
                   const _u_showPrem = (_u_isStaff || user.isPartner || _u_activePrem) && user.showPremiumUi !== false;
-                %>
-                
-                <!-- Discord-style Banner & Header -->
-                <div class="rounded-2xl overflow-hidden bg-slate-950 border border-slate-800">
-                  <div class="h-32 bg-gradient-to-r from-violet-600 to-indigo-600 relative"></div>
-                  <div class="px-6 pb-6 relative">
-                    <div class="flex flex-col sm:flex-row items-end -mt-12 mb-4 gap-4">
-                      <div class="relative group">
-                        <div class="h-24 w-24 rounded-full <%= _u_showPrem ? '' : 'border-4 border-slate-950 overflow-hidden' %> bg-slate-800 shadow-xl" id="avatarPreview" data-avatar>
-                           <%- include('partials/avatar.ejs', { user: user }) %>
-                        </div>
-                        <div class="absolute inset-0 rounded-full border-4 border-transparent bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10" onclick="document.getElementById('avatarInput').click()">
-                            <svg class="text-white size-8" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                        </div>
-                        <input id="avatarInput" type="file" accept="image/*" class="hidden" />
-                      </div>
-                      <div class="flex-1 pt-2">
-                        <div class="flex items-center gap-2">
-                           <h2 class="text-2xl font-bold text-white"><%= user.userName %></h2>
-                           <span class="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20">#<%= stats.rank %></span>
-                        </div>
-                        <p class="text-slate-400 text-sm">Membre depuis le <%= new Date(user.createdAt).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
-                      </div>
-                      <div class="flex gap-2">
-                         <button onclick="document.getElementById('modal-edit-profile').classList.remove('hidden')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-xl transition-colors shadow-lg shadow-indigo-900/20">
-                            Modifier le profil
-                         </button>
-                      </div>
-                    </div>
+                  %>
 
-                    <!-- Detailed Stats Grid -->
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-800/50">
+                  <!-- Discord-style Banner & Header -->
+                  <div class="rounded-2xl overflow-hidden bg-slate-950 border border-slate-800">
+                    <div class="h-32 bg-gradient-to-r from-violet-600 to-indigo-600 relative"></div>
+                    <div class="px-6 pb-6 relative">
+                      <div class="flex flex-col sm:flex-row items-end -mt-12 mb-4 gap-4">
+                        <div class="relative group">
+                          <div
+                            class="h-24 w-24 rounded-full <%= _u_showPrem ? '' : 'border-4 border-slate-950 overflow-hidden' %> bg-slate-800 shadow-xl"
+                            id="avatarPreview" data-avatar>
+                            <%- include('partials/avatar.ejs', { user: user }) %>
+                          </div>
+                          <div
+                            class="absolute inset-0 rounded-full border-4 border-transparent bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10"
+                            onclick="document.getElementById('avatarInput').click()">
+                            <svg class="text-white size-8" viewBox="0 0 24 24" fill="none" stroke="white"
+                              stroke-width="2">
+                              <path
+                                d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                              <circle cx="12" cy="13" r="4" />
+                            </svg>
+                          </div>
+                          <input id="avatarInput" type="file" accept="image/*" class="hidden" />
+                        </div>
+                        <div class="flex-1 pt-2">
+                          <div class="flex items-center gap-2">
+                            <h2 class="text-2xl font-bold text-white">
+                              <%= user.userName %>
+                            </h2>
+                            <span
+                              class="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20">#
+                              <%= stats.rank %></span>
+                          </div>
+                          <p class="text-slate-400 text-sm">Membre depuis le <%= new
+                              Date(user.createdAt).toLocaleDateString('fr-FR', { year: 'numeric' , month: 'long' ,
+                              day: 'numeric' }) %>
+                          </p>
+                        </div>
+                        <div class="flex gap-2">
+                          <button onclick="document.getElementById('modal-edit-profile').classList.remove('hidden')"
+                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-xl transition-colors shadow-lg shadow-indigo-900/20">
+                            Modifier le profil
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Detailed Stats Grid -->
+                      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-800/50">
                         <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                            <p class="text-xs text-slate-400 uppercase font-bold mb-1">Vues Totales</p>
-                            <div class="text-2xl font-bold text-white"><%= stats.totalViews %></div>
-                            <p class="text-xs text-slate-500 mt-1">Cumulé sur tous les plinkks</p>
+                          <p class="text-xs text-slate-400 uppercase font-bold mb-1">Vues Totales</p>
+                          <div class="text-2xl font-bold text-white">
+                            <%= stats.totalViews %>
+                          </div>
+                          <p class="text-xs text-slate-500 mt-1">Cumulé sur tous les plinkks</p>
                         </div>
                         <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                             <p class="text-xs text-slate-400 uppercase font-bold mb-1">Total Clics</p>
-                             <div class="text-2xl font-bold text-white"><%= stats.totalLinkClicks %></div>
-                             <p class="text-xs text-slate-500 mt-1">Liens & Redirections: <%= stats.totalRedirectClicks %></p>
+                          <p class="text-xs text-slate-400 uppercase font-bold mb-1">Total Clics</p>
+                          <div class="text-2xl font-bold text-white">
+                            <%= stats.totalLinkClicks %>
+                          </div>
+                          <p class="text-xs text-slate-500 mt-1">Liens & Redirections: <%= stats.totalRedirectClicks %>
+                          </p>
                         </div>
                         <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                             <p class="text-xs text-slate-400 uppercase font-bold mb-1">Taux de clic (CTR)</p>
-                             <div class="text-2xl font-bold text-white"><%= stats.ctr %>%</div>
-                             <p class="text-xs text-slate-500 mt-1">Performances moyennes</p>
+                          <p class="text-xs text-slate-400 uppercase font-bold mb-1">Taux de clic (CTR)</p>
+                          <div class="text-2xl font-bold text-white">
+                            <%= stats.ctr %>%
+                          </div>
+                          <p class="text-xs text-slate-500 mt-1">Performances moyennes</p>
                         </div>
                         <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-                             <p class="text-xs text-slate-400 uppercase font-bold mb-1">Sessions Actives</p>
-                             <div class="text-2xl font-bold text-white"><%= stats.sessionCount %></div>
-                             <p class="text-xs text-slate-500 mt-1">Dernière: <%= new Date(user.lastLogin).toLocaleDateString('fr-FR') %></p>
+                          <p class="text-xs text-slate-400 uppercase font-bold mb-1">Sessions Actives</p>
+                          <div class="text-2xl font-bold text-white">
+                            <%= stats.sessionCount %>
+                          </div>
+                          <p class="text-xs text-slate-500 mt-1">Dernière: <%= new
+                              Date(user.lastLogin).toLocaleDateString('fr-FR') %>
+                          </p>
                         </div>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <!-- Per-Plinkk Stats Quick View -->
-                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6">
+                  <!-- Per-Plinkk Stats Quick View -->
+                  <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6">
                     <h3 class="text-lg font-bold text-white mb-4">Mes Plinkks</h3>
                     <div class="space-y-3">
-                        <% plinkks.forEach(plinkk => { %>
-                        <div class="flex items-center justify-between p-4 bg-slate-900 rounded-xl border border-slate-800 hover:border-slate-700 transition-colors">
-                            <div class="flex items-center gap-4">
-                                <div class="h-10 w-10 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 font-bold">
-                                    <%= plinkk.name.charAt(0).toUpperCase() %>
-                                </div>
-                                <div>
-                                    <div class="text-white font-medium flex items-center gap-2">
-                                        <%= plinkk.name %>
-                                        <% if(plinkk.isDefault) { %>
-                                            <span class="text-xs bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20">Principal</span>
-                                        <% } %>
-                                    </div>
-                                    <div class="text-xs text-slate-500">/<%= plinkk.slug %> • <%= plinkk.views || 0 %> vues</div>
-                                </div>
+                      <% plinkks.forEach(plinkk=> { %>
+                        <div
+                          class="flex items-center justify-between p-4 bg-slate-900 rounded-xl border border-slate-800 hover:border-slate-700 transition-colors">
+                          <div class="flex items-center gap-4">
+                            <div
+                              class="h-10 w-10 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 font-bold">
+                              <%= plinkk.name.charAt(0).toUpperCase() %>
                             </div>
-                            <div class="flex items-center gap-3">
-                                <a href="/edit?plinkkId=<%= plinkk.id %>" class="px-3 py-1.5 text-xs font-medium bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors">Modifier</a>
+                            <div>
+                              <div class="text-white font-medium flex items-center gap-2">
+                                <%= plinkk.name %>
+                                  <% if(plinkk.isDefault) { %>
+                                    <span
+                                      class="text-xs bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20">Principal</span>
+                                    <% } %>
+                              </div>
+                              <div class="text-xs text-slate-500">/<%= plinkk.slug %> • <%= plinkk.views || 0 %> vues
+                              </div>
                             </div>
+                          </div>
+                          <div class="flex items-center gap-3">
+                            <a href="/edit?plinkkId=<%= plinkk.id %>"
+                              class="px-3 py-1.5 text-xs font-medium bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors">Modifier</a>
+                          </div>
                         </div>
                         <% }) %>
                     </div>
-                </div>
+                  </div>
               </div>
 
               <!-- Edit Profile Modal -->
               <div id="modal-edit-profile" class="hidden fixed inset-0 z-50 rounded-none">
-                 <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="this.parentElement.classList.add('hidden')"></div>
-                 <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
-                    <h3 class="text-xl font-bold text-white mb-4">Modifier mon profil</h3>
-                    <form id="formUpdateProfile" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-400 mb-1">Pseudo (Username)</label>
-                            <input type="text" name="username" value="<%= user.userName %>" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-indigo-500" required minlength="3">
-                        </div>
-                        <!-- Provide instruction for Name vs Username if needed -->
-                        <div>
-                             <label class="block text-sm font-medium text-slate-400 mb-1">Nom d'affichage</label>
-                             <input type="text" name="name" value="<%= user.name %>" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-indigo-500" disabled title="Modification via Plinkk principal pour l'instant">
-                             <p class="text-xs text-slate-500 mt-1">Le nom d'affichage est géré via vos Plinkks.</p>
-                        </div>
-                        <div class="flex justify-end gap-2 mt-6">
-                            <button type="button" onclick="document.getElementById('modal-edit-profile').classList.add('hidden')" class="px-4 py-2 text-slate-300 hover:text-white">Annuler</button>
-                            <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl">Enregistrer</button>
-                        </div>
-                    </form>
-                    <script>
-                        document.getElementById('formUpdateProfile').addEventListener('submit', async (e) => {
-                            e.preventDefault();
-                            const username = e.target.username.value;
-                            try {
-                                const res = await fetch('/api/me/username', {
-                                    method: 'POST',
-                                    headers: {'Content-Type': 'application/json'},
-                                    body: JSON.stringify({ username })
-                                });
-                                if(res.ok) {
-                                    window.location.reload();
-                                } else {
-                                    const err = await res.json();
-                                    alert(err.error || 'Erreur lors de la mise à jour');
-                                }
-                            } catch(err) {
-                                alert('Erreur réseau');
-                            }
+                <div class="fixed inset-0 bg-black/80 backdrop-blur-sm"
+                  onclick="this.parentElement.classList.add('hidden')"></div>
+                <div
+                  class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+                  <h3 class="text-xl font-bold text-white mb-4">Modifier mon profil</h3>
+                  <form id="formUpdateProfile" class="space-y-4">
+                    <div>
+                      <label class="block text-sm font-medium text-slate-400 mb-1">Pseudo (Username)</label>
+                      <input type="text" name="username" value="<%= user.userName %>"
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-indigo-500"
+                        required minlength="3">
+                    </div>
+                    <!-- Provide instruction for Name vs Username if needed -->
+                    <div>
+                      <label class="block text-sm font-medium text-slate-400 mb-1">Nom d'affichage</label>
+                      <input type="text" name="name" value="<%= user.name %>"
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-white focus:outline-none focus:border-indigo-500"
+                        disabled title="Modification via Plinkk principal pour l'instant">
+                      <p class="text-xs text-slate-500 mt-1">Le nom d'affichage est géré via vos Plinkks.</p>
+                    </div>
+                    <div class="flex justify-end gap-2 mt-6">
+                      <button type="button"
+                        onclick="document.getElementById('modal-edit-profile').classList.add('hidden')"
+                        class="px-4 py-2 text-slate-300 hover:text-white">Annuler</button>
+                      <button type="submit"
+                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl">Enregistrer</button>
+                    </div>
+                  </form>
+                  <script>
+                    document.getElementById('formUpdateProfile').addEventListener('submit', async (e) => {
+                      e.preventDefault();
+                      const username = e.target.username.value;
+                      try {
+                        const res = await fetch('/api/me/username', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ username })
                         });
-                    </script>
-                 </div>
+                        if (res.ok) {
+                          window.location.reload();
+                        } else {
+                          const err = await res.json();
+                          alert(err.error || 'Erreur lors de la mise à jour');
+                        }
+                      } catch (err) {
+                        alert('Erreur réseau');
+                      }
+                    });
+                  </script>
+                </div>
               </div>
 
 
@@ -224,167 +297,209 @@
               <!-- Security Panel -->
               <div id="panel-security" class="tab-panel hidden animate-slide-up">
                 <% const tfEnabled=(user && (user.twoFactorEnabled)) %>
-                <% const hostEnabled=(user && (user.host !==null)) %>
-                
-                <div class="space-y-8">
-                  <!-- Privacy Section -->
-                  <div>
-                    <div class="mb-4 pb-4 border-b border-slate-800">
-                      <h4 class="text-lg font-semibold text-white">Confidentialité</h4>
-                      <p class="text-sm text-slate-400">Gérez la visibilité de vos informations.</p>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                      <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-slate-300 mb-2">Sélectionne le Plinkk</label>
-                        <select id="privacyPlinkkSelect" class="w-full md:w-1/2 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none"></select>
-                      </div>
-                    </div>
+                  <% const hostEnabled=(user && (user.host !==null)) %>
 
-                    <div class="space-y-4">
-                      <div class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
-                        <div>
-                          <p class="text-sm font-medium text-white">Profil public</p>
-                          <p class="text-xs text-slate-400">Autoriser l'apparition dans la page Utilisateurs.</p>
+                    <div class="space-y-8">
+                      <!-- Privacy Section -->
+                      <div>
+                        <div class="mb-4 pb-4 border-b border-slate-800">
+                          <h4 class="text-lg font-semibold text-white">Confidentialité</h4>
+                          <p class="text-sm text-slate-400">Gérez la visibilité de vos informations.</p>
                         </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                          <input id="togglePublic" type="checkbox" class="sr-only peer" <%=user.isPublic ? 'checked' : '' %> />
-                          <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                        </label>
-                      </div>
-                      
-                      <div class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
-                        <div>
-                          <p class="text-sm font-medium text-white">Afficher mon email</p>
-                          <p class="text-xs text-slate-400">Rendre l'email visible sur la page Utilisateurs.</p>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                          <input id="toggleEmailPublic" type="checkbox" class="sr-only peer" <%=isEmailPublic ? 'checked' : '' %> />
-                          <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
 
-                  <!-- Security Section -->
-                  <div>
-                    <div class="mb-4 pb-4 border-b border-slate-800">
-                      <h4 class="text-lg font-semibold text-white">Sécurité</h4>
-                      <p class="text-sm text-slate-400">Protégez votre compte.</p>
-                    </div>
-
-                    <div class="p-6 rounded-xl bg-slate-950 border border-slate-800 mb-6">
-                      <div class="flex items-center justify-between mb-4">
-                        <div>
-                          <h4 class="font-medium text-white flex items-center gap-2">
-                            Authentification à 2 facteurs (A2F)
-                            <% if (tfEnabled) { %>
-                              <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs border border-emerald-500/20">Activée</span>
-                            <% } else { %>
-                              <span class="px-2 py-0.5 rounded-full bg-slate-700 text-slate-400 text-xs">Désactivée</span>
-                            <% } %>
-                          </h4>
-                          <p class="text-xs text-slate-400 mt-1">Ajoute une couche de sécurité supplémentaire à votre compte.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                          <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Sélectionne le Plinkk</label>
+                            <select id="privacyPlinkkSelect"
+                              class="w-full md:w-1/2 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none"></select>
+                          </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                          <button id="btnLearn2fa" class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">Info</button>
-                          <% if (!tfEnabled) { %>
-                            <button id="btnEnable2fa" class="px-3 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">Activer</button>
-                          <% } else { %>
-                            <button id="btnDisable2fa" class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">Désactiver</button>
-                          <% } %>
+
+                        <div class="space-y-4">
+                          <div
+                            class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
+                            <div>
+                              <p class="text-sm font-medium text-white">Profil public</p>
+                              <p class="text-xs text-slate-400">Autoriser l'apparition dans la page Utilisateurs.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input id="togglePublic" type="checkbox" class="sr-only peer" <%=user.isPublic ? 'checked'
+                                : '' %> />
+                              <div
+                                class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500">
+                              </div>
+                            </label>
+                          </div>
+
+                          <div
+                            class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
+                            <div>
+                              <p class="text-sm font-medium text-white">Afficher mon email</p>
+                              <p class="text-xs text-slate-400">Rendre l'email visible sur la page Utilisateurs.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                              <input id="toggleEmailPublic" type="checkbox" class="sr-only peer" <%=isEmailPublic
+                                ? 'checked' : '' %> />
+                              <div
+                                class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500">
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Security Section -->
+                      <div>
+                        <div class="mb-4 pb-4 border-b border-slate-800">
+                          <h4 class="text-lg font-semibold text-white">Sécurité</h4>
+                          <p class="text-sm text-slate-400">Protégez votre compte.</p>
+                        </div>
+
+                        <div class="p-6 rounded-xl bg-slate-950 border border-slate-800 mb-6">
+                          <div class="flex items-center justify-between mb-4">
+                            <div>
+                              <h4 class="font-medium text-white flex items-center gap-2">
+                                Authentification à 2 facteurs (A2F)
+                                <% if (tfEnabled) { %>
+                                  <span
+                                    class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs border border-emerald-500/20">Activée</span>
+                                  <% } else { %>
+                                    <span
+                                      class="px-2 py-0.5 rounded-full bg-slate-700 text-slate-400 text-xs">Désactivée</span>
+                                    <% } %>
+                              </h4>
+                              <p class="text-xs text-slate-400 mt-1">Ajoute une couche de sécurité supplémentaire à
+                                votre compte.</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                              <button id="btnLearn2fa"
+                                class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors">Info</button>
+                              <% if (!tfEnabled) { %>
+                                <button id="btnEnable2fa"
+                                  class="px-3 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">Activer</button>
+                                <% } else { %>
+                                  <button id="btnDisable2fa"
+                                    class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">Désactiver</button>
+                                  <% } %>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t border-slate-800">
+                          <h4 class="font-medium text-rose-400 mb-2">Zone de danger</h4>
+                          <div
+                            class="p-4 rounded-xl border border-rose-900/30 bg-rose-950/10 flex items-center justify-between">
+                            <div>
+                              <p class="text-sm font-medium text-rose-200">Supprimer le compte</p>
+                              <p class="text-xs text-rose-300/60">Cette action est irréversible et supprimera toutes vos
+                                données.</p>
+                            </div>
+                            <button id="btnShowDelete"
+                              class="px-4 py-2 text-sm font-medium rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">Supprimer</button>
+                          </div>
                         </div>
                       </div>
                     </div>
-
-                    <div class="mt-8 pt-6 border-t border-slate-800">
-                      <h4 class="font-medium text-rose-400 mb-2">Zone de danger</h4>
-                      <div class="p-4 rounded-xl border border-rose-900/30 bg-rose-950/10 flex items-center justify-between">
-                        <div>
-                          <p class="text-sm font-medium text-rose-200">Supprimer le compte</p>
-                          <p class="text-xs text-rose-300/60">Cette action est irréversible et supprimera toutes vos données.</p>
-                        </div>
-                        <button id="btnShowDelete" class="px-4 py-2 text-sm font-medium rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">Supprimer</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
 
               <!-- Settings Panel -->
               <div id="panel-settings" class="tab-panel hidden animate-slide-up">
                 <div class="space-y-8">
-                  <% const roleName = user && user.role ? (user.role.id || user.role.name) : null; %>
-                  <% const isPremiumUser = !!(user && (user.isPremium || user.isPartner || (roleName && ['ADMIN','DEVELOPER','MODERATOR'].includes(roleName)))); %>
-                  <form id="formEmail">
-                    <div class="mb-4 pb-4 border-b border-slate-800">
-                      <h4 class="text-lg font-semibold text-white">Email</h4>
-                      <p class="text-sm text-slate-400">Adresse de contact et de connexion.</p>
-                    </div>
-                    <div class="flex flex-col md:flex-row gap-4 items-end">
-                      <div class="w-full">
-                        <label class="block text-sm font-medium text-slate-300 mb-2">Adresse email</label>
-                        <% if (user.hasPassword !== false) { %>
-                           <input name="email" type="email" value="<%= user.email %>" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
-                        <% } else { %>
-                           <input type="email" value="<%= user.email %>" disabled class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-500 cursor-not-allowed opacity-70" title="Vous devez définir un mot de passe pour changer votre email." />
-                           <p class="mt-1 text-xs text-amber-500">Définissez un mot de passe ci-dessous pour modifier votre email.</p>
-                        <% } %>
-                      </div>
-                      <% if (user.hasPassword !== false) { %>
-                        <button class="px-6 py-3 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors whitespace-nowrap" type="submit">Mettre à jour</button>
-                      <% } else { %>
-                        <button disabled class="px-6 py-3 text-sm font-medium rounded-xl bg-slate-800 text-slate-500 cursor-not-allowed whitespace-nowrap">Mettre à jour</button>
-                      <% } %>
-                    </div>
-                  </form>
-
-                  <form id="formPassword">
-                    <div class="mb-4 pb-4 border-b border-slate-800">
-                      <h4 class="text-lg font-semibold text-white"><%= (user.hasPassword !== false) ? 'Mot de passe' : 'Créer un mot de passe' %></h4>
-                      <p class="text-sm text-slate-400"><%= (user.hasPassword !== false) ? 'Changez votre mot de passe régulièrement.' : 'Sécurisez votre compte en ajoutant un mot de passe.' %></p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <% if (user.hasPassword !== false) { %>
-                        <div class="md:col-span-2">
-                          <label class="block text-sm font-medium text-slate-300 mb-2">Mot de passe actuel</label>
-                          <input name="currentPassword" type="password" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
+                  <% const roleName=user && user.role ? (user.role.id || user.role.name) : null; %>
+                    <% const isPremiumUser=!!(user && (user.isPremium || user.isPartner || (roleName &&
+                      ['ADMIN','DEVELOPER','MODERATOR'].includes(roleName)))); %>
+                      <form id="formEmail">
+                        <div class="mb-4 pb-4 border-b border-slate-800">
+                          <h4 class="text-lg font-semibold text-white">Email</h4>
+                          <p class="text-sm text-slate-400">Adresse de contact et de connexion.</p>
                         </div>
-                      <% } %>
-                      <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-2">Nouveau mot de passe</label>
-                        <input name="newPassword" type="password" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
-                      </div>
-                      <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-2">Confirmer le mot de passe</label>
-                        <input name="confirmPassword" type="password" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
-                      </div>
-                      <div class="md:col-span-2 flex justify-end">
-                        <button class="px-6 py-3 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors" type="submit">
-                          <%= (user.hasPassword !== false) ? 'Changer le mot de passe' : 'Définir un mot de passe' %>
-                        </button>
-                      </div>
-                    </div>
-                  </form>
+                        <div class="flex flex-col md:flex-row gap-4 items-end">
+                          <div class="w-full">
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Adresse email</label>
+                            <% if (user.hasPassword !==false) { %>
+                              <input name="email" type="email" value="<%= user.email %>"
+                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
+                              <% } else { %>
+                                <input type="email" value="<%= user.email %>" disabled
+                                  class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-500 cursor-not-allowed opacity-70"
+                                  title="Vous devez définir un mot de passe pour changer votre email." />
+                                <p class="mt-1 text-xs text-amber-500">Définissez un mot de passe ci-dessous pour
+                                  modifier votre email.</p>
+                                <% } %>
+                          </div>
+                          <% if (user.hasPassword !==false) { %>
+                            <button
+                              class="px-6 py-3 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors whitespace-nowrap"
+                              type="submit">Mettre à jour</button>
+                            <% } else { %>
+                              <button disabled
+                                class="px-6 py-3 text-sm font-medium rounded-xl bg-slate-800 text-slate-500 cursor-not-allowed whitespace-nowrap">Mettre
+                                à jour</button>
+                              <% } %>
+                        </div>
+                      </form>
 
-                  <div class="pt-8 border-t border-slate-800">
-                    <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
-                      <div class="flex items-center gap-3">
-                        <svg class="w-5 h-5 text-violet-400" viewBox="0 0 24 24" fill="white">
-                          <path d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2z"/>
-                        </svg>
-                        <div class="flex-1">
-                          <p class="text-sm font-medium text-white">Gestion de l'abonnement</p>
-                          <p class="text-xs text-slate-400 mt-0.5">
-                            La gestion de votre abonnement a été déplacée vers l'onglet
-                            <button onclick="document.querySelector('[data-tab=subscription]').click()" class="text-violet-400 hover:text-violet-300 font-medium underline">
-                              Abonnement
-                            </button>
+                      <form id="formPassword">
+                        <div class="mb-4 pb-4 border-b border-slate-800">
+                          <h4 class="text-lg font-semibold text-white">
+                            <%= (user.hasPassword !==false) ? 'Mot de passe' : 'Créer un mot de passe' %>
+                          </h4>
+                          <p class="text-sm text-slate-400">
+                            <%= (user.hasPassword !==false) ? 'Changez votre mot de passe régulièrement.'
+                              : 'Sécurisez votre compte en ajoutant un mot de passe.' %>
                           </p>
                         </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <% if (user.hasPassword !==false) { %>
+                            <div class="md:col-span-2">
+                              <label class="block text-sm font-medium text-slate-300 mb-2">Mot de passe actuel</label>
+                              <input name="currentPassword" type="password"
+                                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
+                            </div>
+                            <% } %>
+                              <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Nouveau mot de
+                                  passe</label>
+                                <input name="newPassword" type="password"
+                                  class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
+                              </div>
+                              <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Confirmer le mot de
+                                  passe</label>
+                                <input name="confirmPassword" type="password"
+                                  class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
+                              </div>
+                              <div class="md:col-span-2 flex justify-end">
+                                <button
+                                  class="px-6 py-3 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors"
+                                  type="submit">
+                                  <%= (user.hasPassword !==false) ? 'Changer le mot de passe'
+                                    : 'Définir un mot de passe' %>
+                                </button>
+                              </div>
+                        </div>
+                      </form>
+
+                      <div class="pt-8 border-t border-slate-800">
+                        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+                          <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-violet-400" viewBox="0 0 24 24" fill="white">
+                              <path
+                                d="M13 9h-2V7h2m0 10h-2v-6h2m-1-9A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2z" />
+                            </svg>
+                            <div class="flex-1">
+                              <p class="text-sm font-medium text-white">Gestion de l'abonnement</p>
+                              <p class="text-xs text-slate-400 mt-0.5">
+                                La gestion de votre abonnement a été déplacée vers l'onglet
+                                <button onclick="document.querySelector('[data-tab=subscription]').click()"
+                                  class="text-violet-400 hover:text-violet-300 font-medium underline">
+                                  Abonnement
+                                </button>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
 
 
 
@@ -395,485 +510,569 @@
               <div id="panel-preferences" class="tab-panel hidden animate-slide-up">
                 <div class="space-y-8">
                   <div class="mb-4 pb-4 border-b border-slate-800">
-                      <h4 class="text-lg font-semibold text-white">Préférences</h4>
-                      <p class="text-sm text-slate-400">Personnalisez votre expérience du tableau de bord.</p>
+                    <h4 class="text-lg font-semibold text-white">Préférences</h4>
+                    <p class="text-sm text-slate-400">Personnalisez votre expérience du tableau de bord.</p>
                   </div>
 
-                  <% 
-                    const roleNamePref = user && user.role ? (user.role.id || user.role.name) : null; 
-                    const isPremiumUserPref = !!(user && (user.isPremium || user.isPartner || (roleNamePref && ['ADMIN','DEVELOPER','MODERATOR'].includes(roleNamePref))));
-                  %>
+                  <% const roleNamePref=user && user.role ? (user.role.id || user.role.name) : null; const
+                    isPremiumUserPref=!!(user && (user.isPremium || user.isPartner || (roleNamePref &&
+                    ['ADMIN','DEVELOPER','MODERATOR'].includes(roleNamePref)))); %>
 
-                  <% if (isPremiumUserPref) { %>
-                    <div class="">
-                      <div class="mb-4">
-                        <h4 class="text-lg font-semibold text-white">Experience Premium</h4>
-                        <p class="text-sm text-slate-400">Options visuelles exclusives aux membres Premium.</p>
-                      </div>
-                      <div class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
-                        <div>
-                          <p class="text-sm font-medium text-white">UI Premium</p>
-                          <p class="text-xs text-slate-400">Active les effets, badges et le cadre de profil (le rond autour de l'avatar).</p>
+                    <% if (isPremiumUserPref) { %>
+                      <div class="">
+                        <div class="mb-4">
+                          <h4 class="text-lg font-semibold text-white">Experience Premium</h4>
+                          <p class="text-sm text-slate-400">Options visuelles exclusives aux membres Premium.</p>
                         </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                          <input id="togglePremiumUi" type="checkbox" class="sr-only peer" <%= user.showPremiumUi !== false ? 'checked' : '' %> />
-                          <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                        </label>
-                      </div>
-                    </div>
-                  <% } else { %>
-                    <div class="p-6 rounded-xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 text-center">
-                        <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mx-auto mb-4 text-slate-500">
-                             <svg class="size-8" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <div
+                          class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
+                          <div>
+                            <p class="text-sm font-medium text-white">UI Premium</p>
+                            <p class="text-xs text-slate-400">Active les effets, badges et le cadre de profil (le rond
+                              autour de l'avatar).</p>
+                          </div>
+                          <label class="relative inline-flex items-center cursor-pointer">
+                            <input id="togglePremiumUi" type="checkbox" class="sr-only peer" <%=user.showPremiumUi
+                              !==false ? 'checked' : '' %> />
+                            <div
+                              class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500">
+                            </div>
+                          </label>
                         </div>
-                        <h3 class="text-xl font-bold text-white mb-2">Fonctionnalités Premium</h3>
-                        <p class="text-slate-400 mb-6 max-w-md mx-auto">Débloquez les options de personnalisation avancées, le cadre de profil et bien plus encore avec Plinkk Premium.</p>
-                        <a href="/premium" class="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold shadow-lg shadow-violet-900/20 hover:scale-[1.02] transition-transform">
+                      </div>
+                      <% } else { %>
+                        <div
+                          class="p-6 rounded-xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 text-center">
+                          <div
+                            class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mx-auto mb-4 text-slate-500">
+                            <svg class="size-8" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                              <path
+                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg>
+                          </div>
+                          <h3 class="text-xl font-bold text-white mb-2">Fonctionnalités Premium</h3>
+                          <p class="text-slate-400 mb-6 max-w-md mx-auto">Débloquez les options de personnalisation
+                            avancées, le cadre de profil et bien plus encore avec Plinkk Premium.</p>
+                          <a href="/premium"
+                            class="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold shadow-lg shadow-violet-900/20 hover:scale-[1.02] transition-transform">
                             Découvrir Premium
-                        </a>
-                    </div>
-                  <% } %>
+                          </a>
+                        </div>
+                        <% } %>
 
-                  <div class="mt-8 pt-6 border-t border-slate-800">
-                    <div class="mb-4">
-                      <h4 class="text-lg font-semibold text-white">Avatar Gravatar</h4>
-                      <p class="text-sm text-slate-400">Choisissez quel email utiliser pour votre Gravatar (si aucune image personnalisée n'est définie).</p>
-                    </div>
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800 gap-4">
-                      <div>
-                        <p class="text-sm font-medium text-white">Source de l'email Gravatar</p>
-                        <p class="text-xs text-slate-400 mt-1">Sert à générer votre avatar automatiquement via Gravatar.</p>
-                      </div>
-                      <select id="gravatarSourceSelect" class="bg-slate-900 border border-slate-700 text-white text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block p-2.5 outline-none min-w-[200px]">
-                        <option value="PRIMARY" <%= user.gravatarEmailSource === 'PRIMARY' ? 'selected' : '' %>>Email du compte</option>
-                        <option value="PUBLIC" <%= user.gravatarEmailSource === 'PUBLIC' ? 'selected' : '' %>>Email d'affichage</option>
-                      </select>
-                    </div>
-                    <p class="mt-2 text-[11px] text-slate-500">Note : L'email d'affichage est celui que vous avez configuré comme étant public sur votre profil.</p>
-                  </div>
+                          <div class="mt-8 pt-6 border-t border-slate-800">
+                            <div class="mb-4">
+                              <h4 class="text-lg font-semibold text-white">Avatar Gravatar</h4>
+                              <p class="text-sm text-slate-400">Choisissez quel email utiliser pour votre Gravatar (si
+                                aucune image personnalisée n'est définie).</p>
+                            </div>
+                            <div
+                              class="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800 gap-4">
+                              <div>
+                                <p class="text-sm font-medium text-white">Source de l'email Gravatar</p>
+                                <p class="text-xs text-slate-400 mt-1">Sert à générer votre avatar automatiquement via
+                                  Gravatar.</p>
+                              </div>
+                              <select id="gravatarSourceSelect"
+                                class="bg-slate-900 border border-slate-700 text-white text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block p-2.5 outline-none min-w-[200px]">
+                                <option value="PRIMARY" <%=user.gravatarEmailSource==='PRIMARY' ? 'selected' : '' %>
+                                  >Email du compte</option>
+                                <option value="PUBLIC" <%=user.gravatarEmailSource==='PUBLIC' ? 'selected' : '' %>>Email
+                                  d'affichage</option>
+                              </select>
+                            </div>
+                            <p class="mt-2 text-[11px] text-slate-500">Note : L'email d'affichage est celui que vous
+                              avez configuré comme étant public sur votre profil.</p>
+                          </div>
                 </div>
               </div>
 
               <!-- Developer Panel -->
               <div id="panel-developer" class="tab-panel hidden animate-slide-up">
                 <div class="space-y-6">
-                    <div class="mb-4 pb-4 border-b border-slate-800">
-                        <h4 class="text-lg font-semibold text-white">Développeur</h4>
-                        <p class="text-sm text-slate-400">Accès API et outils techniques.</p>
-                    </div>
-                    <!-- (Content remains same) -->
-                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
-                        <label class="block space-y-2">
-                            <span class="text-sm font-medium text-slate-300">Clé API Personnelle</span>
-                            <div class="flex items-center gap-2">
-                                <div class="relative flex-1">
-                                    <input id="apiKeyField" type="text" readonly value="<%= user.apiKey || 'Aucune clé générée' %>" class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 font-mono text-sm" />
-                                    <button id="copyApiKeyBtn" type="button" class="absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" title="Copier">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                    </button>
-                                </div>
-                                <button id="regenerateApiKeyBtn" type="button" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium border border-slate-700 transition-colors">
-                                    Générer
-                                </button>
-                            </div>
-                            <p class="text-xs text-slate-500">Cette clé donne accès complet à votre compte via l'API. Ne la partagez jamais.</p>
-                        </label>
-                    </div>
+                  <div class="mb-4 pb-4 border-b border-slate-800">
+                    <h4 class="text-lg font-semibold text-white">Développeur</h4>
+                    <p class="text-sm text-slate-400">Accès API et outils techniques.</p>
+                  </div>
+                  <!-- (Content remains same) -->
+                  <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                    <label class="block space-y-2">
+                      <span class="text-sm font-medium text-slate-300">Clé API Personnelle</span>
+                      <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                          <input id="apiKeyField" type="text" readonly
+                            value="<%= user.apiKey || 'Aucune clé générée' %>"
+                            class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 font-mono text-sm" />
+                          <button id="copyApiKeyBtn" type="button"
+                            class="absolute right-2 top-2 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                            title="Copier">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                              stroke-linecap="round" stroke-linejoin="round">
+                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                          </button>
+                        </div>
+                        <button id="regenerateApiKeyBtn" type="button"
+                          class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium border border-slate-700 transition-colors">
+                          Générer
+                        </button>
+                      </div>
+                      <p class="text-xs text-slate-500">Cette clé donne accès complet à votre compte via l'API. Ne la
+                        partagez jamais.</p>
+                    </label>
+                  </div>
 
-                    <div class="space-y-4 pt-6 border-t border-slate-800">
-                      <h4 class="font-medium text-white">Domaines personnalisés</h4>
-                      <p class="text-sm text-slate-400">Associe un nom de domaine à l'un de tes Plinkks.</p>
-                      
-                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-slate-950 border border-slate-800">
-                        <div class="space-y-2">
-                          <label class="text-xs font-medium text-slate-300">Sélectionne le Plinkk</label>
-                          <select id="domainPlinkkSelect" class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:border-violet-500 outline-none"></select>
-                        </div>
-                        <div class="space-y-2">
-                          <label class="text-xs font-medium text-slate-300">Nom de domaine</label>
-                          <input id="domainHostname" class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:border-violet-500 outline-none" placeholder="plinkk.example.fr" />
-                        </div>
-                        <div class="md:col-span-2 flex flex-wrap items-center gap-2 pt-2">
-                          <button id="btnDomainSave" class="px-3 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">Activer / Mettre à jour</button>
-                          <button id="btnDomainVerify" class="px-3 py-2 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/20 transition-colors">Vérifier DNS</button>
-                          <button id="btnDomainDelete" class="px-3 py-2 text-xs font-medium rounded-lg bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/20 transition-colors">Désactiver</button>
-                        </div>
-                        
-                        <div id="domainDnsHints" class="hidden md:col-span-2 space-y-3 mt-2 p-3 rounded-lg bg-slate-900/50 border border-slate-800">
-                          <div>
-                            <label class="block text-xs text-slate-400 mb-1">Enregistrement TXT (vérification)</label>
-                            <div class="flex items-center gap-2">
-                              <input id="domainTXT" readonly class="flex-1 px-3 py-2 rounded bg-slate-950 border border-slate-800 text-xs text-slate-300 font-mono" />
-                              <button class="p-2 rounded bg-slate-800 text-slate-400 hover:text-white" onclick="navigator.clipboard.writeText(document.getElementById('domainTXT').value)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
-                            </div>
+                  <div class="space-y-4 pt-6 border-t border-slate-800">
+                    <h4 class="font-medium text-white">Domaines personnalisés</h4>
+                    <p class="text-sm text-slate-400">Associe un nom de domaine à l'un de tes Plinkks.</p>
+
+                    <div
+                      class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-slate-950 border border-slate-800">
+                      <div class="space-y-2">
+                        <label class="text-xs font-medium text-slate-300">Sélectionne le Plinkk</label>
+                        <select id="domainPlinkkSelect"
+                          class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:border-violet-500 outline-none"></select>
+                      </div>
+                      <div class="space-y-2">
+                        <label class="text-xs font-medium text-slate-300">Nom de domaine</label>
+                        <input id="domainHostname"
+                          class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:border-violet-500 outline-none"
+                          placeholder="plinkk.example.fr" />
+                      </div>
+                      <div class="md:col-span-2 flex flex-wrap items-center gap-2 pt-2">
+                        <button id="btnDomainSave"
+                          class="px-3 py-2 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">Activer
+                          / Mettre à jour</button>
+                        <button id="btnDomainVerify"
+                          class="px-3 py-2 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/20 transition-colors">Vérifier
+                          DNS</button>
+                        <button id="btnDomainDelete"
+                          class="px-3 py-2 text-xs font-medium rounded-lg bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/20 transition-colors">Désactiver</button>
+                      </div>
+
+                      <div id="domainDnsHints"
+                        class="hidden md:col-span-2 space-y-3 mt-2 p-3 rounded-lg bg-slate-900/50 border border-slate-800">
+                        <div>
+                          <label class="block text-xs text-slate-400 mb-1">Enregistrement TXT (vérification)</label>
+                          <div class="flex items-center gap-2">
+                            <input id="domainTXT" readonly
+                              class="flex-1 px-3 py-2 rounded bg-slate-950 border border-slate-800 text-xs text-slate-300 font-mono" />
+                            <button class="p-2 rounded bg-slate-800 text-slate-400 hover:text-white"
+                              onclick="navigator.clipboard.writeText(document.getElementById('domainTXT').value)"><svg
+                                width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                              </svg></button>
                           </div>
-                          <div>
-                            <label class="block text-xs text-slate-400 mb-1">Enregistrement CNAME</label>
-                            <div class="flex items-center gap-2">
-                              <input id="domainCNAME" readonly class="flex-1 px-3 py-2 rounded bg-slate-950 border border-slate-800 text-xs text-slate-300 font-mono" />
-                              <button class="p-2 rounded bg-slate-800 text-slate-400 hover:text-white" onclick="navigator.clipboard.writeText(document.getElementById('domainCNAME').value)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
-                            </div>
-                          </div>
-                          <p class="text-[11px] text-slate-500">La propagation DNS peut prendre jusqu'à 15 minutes.</p>
                         </div>
+                        <div>
+                          <label class="block text-xs text-slate-400 mb-1">Enregistrement CNAME</label>
+                          <div class="flex items-center gap-2">
+                            <input id="domainCNAME" readonly
+                              class="flex-1 px-3 py-2 rounded bg-slate-950 border border-slate-800 text-xs text-slate-300 font-mono" />
+                            <button class="p-2 rounded bg-slate-800 text-slate-400 hover:text-white"
+                              onclick="navigator.clipboard.writeText(document.getElementById('domainCNAME').value)"><svg
+                                width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                              </svg></button>
+                          </div>
+                        </div>
+                        <p class="text-[11px] text-slate-500">La propagation DNS peut prendre jusqu'à 15 minutes.</p>
                       </div>
                     </div>
-                    
-                    <div>
-                        <a href="/docs/api" target="_blank" class="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 transition-colors text-sm font-medium">
-                            Voir la documentation API
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                        </a>
-                    </div>
+                  </div>
+
+                  <div>
+                    <a href="/docs/api" target="_blank"
+                      class="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 transition-colors text-sm font-medium">
+                      Voir la documentation API
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                      </svg>
+                    </a>
+                  </div>
                 </div>
               </div>
 
               <!-- Subscription Panel -->
               <div id="panel-subscription" class="tab-panel hidden animate-slide-up">
-                <%
-                  const userRole = (user.role?.name || user.role?.id);
-                  const isStaff = ['ADMIN','DEVELOPER','MODERATOR'].includes(userRole);
-                  const hasStripeSub = user.premiumSource === 'STRIPE';
-                  const hasManualPremium = user.premiumSource === 'MANUAL';
-                  const showCancelButton = hasStripeSub && !isStaff;
-                  const premiumActive = user.isPremium && (!user.premiumUntil || new Date(user.premiumUntil) > new Date());
-                %>
+                <% const userRole=(user.role?.name || user.role?.id); const
+                  isStaff=['ADMIN','DEVELOPER','MODERATOR'].includes(userRole); const
+                  hasStripeSub=user.premiumSource==='STRIPE' ; const hasManualPremium=user.premiumSource==='MANUAL' ;
+                  const showCancelButton=hasStripeSub && !isStaff; const premiumActive=user.isPremium &&
+                  (!user.premiumUntil || new Date(user.premiumUntil)> new Date());
+                  %>
 
-                <div class="space-y-8">
-                  <!-- Header -->
-                  <div class="mb-4 pb-4 border-b border-slate-800">
-                    <h4 class="text-lg font-semibold text-white">Abonnement</h4>
-                    <p class="text-sm text-slate-400">Gérez votre abonnement Premium et vos options.</p>
-                  </div>
+                  <div class="space-y-8">
+                    <!-- Header -->
+                    <div class="mb-4 pb-4 border-b border-slate-800">
+                      <h4 class="text-lg font-semibold text-white">Abonnement</h4>
+                      <p class="text-sm text-slate-400">Gérez votre abonnement Premium et vos options.</p>
+                    </div>
 
-                  <!-- Status Card -->
-                  <div class="p-6 rounded-2xl <%= premiumActive ? 'bg-gradient-to-br from-violet-900/20 to-fuchsia-900/20 border-violet-500/30' : 'bg-slate-950' %> border border-slate-800">
-                    <div class="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                          <% if (premiumActive) { %>
-                            <svg class="w-6 h-6 text-amber-400" viewBox="0 0 24 24" fill="white">
-                              <path d="M12 2l2.7 5.48 6.05.88-4.38 4.27 1.03 6.02L12 15.9 6.6 18.65l1.03-6.02L3.25 8.36l6.05-.88L12 2z"/>
-                            </svg>
-                            Plinkk Premium
-                          <% } else { %>
-                            Plan Gratuit
+                    <!-- Status Card -->
+                    <div
+                      class="p-6 rounded-2xl <%= premiumActive ? 'bg-gradient-to-br from-violet-900/20 to-fuchsia-900/20 border-violet-500/30' : 'bg-slate-950' %> border border-slate-800">
+                      <div class="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                            <% if (premiumActive) { %>
+                              <svg class="w-6 h-6 text-amber-400" viewBox="0 0 24 24" fill="white">
+                                <path
+                                  d="M12 2l2.7 5.48 6.05.88-4.38 4.27 1.03 6.02L12 15.9 6.6 18.65l1.03-6.02L3.25 8.36l6.05-.88L12 2z" />
+                              </svg>
+                              Plinkk Premium
+                              <% } else { %>
+                                Plan Gratuit
+                                <% } %>
+                          </h3>
+                          <% if (premiumActive && user.premiumSource) { %>
+                            <div class="flex items-center gap-2 mt-1">
+                              <span
+                                class="text-xs px-2 py-0.5 rounded-full <%= hasStripeSub ? 'bg-violet-500/20 text-violet-300' : 'bg-amber-500/20 text-amber-300' %> border <%= hasStripeSub ? 'border-violet-500/30' : 'border-amber-500/30' %>">
+                                <%= hasStripeSub ? 'Abonnement Stripe' : 'Accordé manuellement' %>
+                              </span>
+                            </div>
+                            <% } %>
+                        </div>
+                        <% if (premiumActive) { %>
+                          <div class="text-right">
+                            <p class="text-xs text-slate-400">Statut</p>
+                            <p class="text-sm font-medium text-emerald-400">Actif</p>
+                          </div>
                           <% } %>
-                        </h3>
-                        <% if (premiumActive && user.premiumSource) { %>
-                          <div class="flex items-center gap-2 mt-1">
-                            <span class="text-xs px-2 py-0.5 rounded-full <%= hasStripeSub ? 'bg-violet-500/20 text-violet-300' : 'bg-amber-500/20 text-amber-300' %> border <%= hasStripeSub ? 'border-violet-500/30' : 'border-amber-500/30' %>">
-                              <%= hasStripeSub ? 'Abonnement Stripe' : 'Accordé manuellement' %>
+                      </div>
+
+                      <% if (premiumActive && user.premiumUntil) { %>
+                        <div class="pt-4 border-t border-slate-700/50">
+                          <div class="flex items-center justify-between">
+                            <span class="text-sm text-slate-300">
+                              <%= hasStripeSub ? 'Prochaine facturation' : 'Valide jusqu\' au' %>
+                            </span>
+                            <span class="text-sm font-medium text-white">
+                              <%= new Date(user.premiumUntil).toLocaleDateString('fr-FR', { year: 'numeric' ,
+                                month: 'long' , day: 'numeric' }) %>
                             </span>
                           </div>
+                        </div>
                         <% } %>
+                    </div>
+
+                    <!-- Actions -->
+                    <div
+                      class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-slate-950 border border-slate-800">
+                      <div>
+                        <p class="text-sm font-medium text-white">Gestion de l'abonnement</p>
+                        <p class="text-xs text-slate-400">
+                          <%= premiumActive ? 'Modifiez votre offre ou résiliez à tout moment.'
+                            : 'Découvrez les avantages Premium.' %>
+                        </p>
                       </div>
-                      <% if (premiumActive) { %>
-                        <div class="text-right">
-                          <p class="text-xs text-slate-400">Statut</p>
-                          <p class="text-sm font-medium text-emerald-400">Actif</p>
+                      <div class="flex flex-wrap items-center gap-2">
+                        <% if (premiumActive) { %>
+                          <a href="/premium"
+                            class="px-4 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
+                            Gérer l'offre
+                          </a>
+
+                          <% if (showCancelButton) { %>
+                            <button id="btnCancelSubscriptionTab"
+                              class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">
+                              Résilier
+                            </button>
+                            <% } %>
+                              <% } else { %>
+                                <a href="/premium"
+                                  class="px-4 py-2 text-xs font-medium rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-900/20 transition-colors">
+                                  Passer à Premium
+                                </a>
+                                <% } %>
+                      </div>
+                    </div>
+
+                    <!-- Staff Notice -->
+                    <% if (isStaff && hasStripeSub) { %>
+                      <div class="p-4 rounded-xl bg-violet-500/10 border border-violet-500/20">
+                        <div class="flex items-start gap-3">
+                          <svg class="w-5 h-5 text-violet-400 mt-0.5" fill="white" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                              clip-rule="evenodd" />
+                          </svg>
+                          <div>
+                            <p class="text-sm font-medium text-violet-300">Information pour le personnel</p>
+                            <p class="text-xs text-violet-400 mt-1">
+                              En tant que membre de l'équipe, veuillez gérer votre abonnement via le panneau
+                              d'administration.
+                            </p>
+                          </div>
                         </div>
+                      </div>
                       <% } %>
-                    </div>
 
-                    <% if (premiumActive && user.premiumUntil) { %>
-                      <div class="pt-4 border-t border-slate-700/50">
-                        <div class="flex items-center justify-between">
-                          <span class="text-sm text-slate-300">
-                            <%= hasStripeSub ? 'Prochaine facturation' : 'Valide jusqu\'au' %>
-                          </span>
-                          <span class="text-sm font-medium text-white">
-                            <%= new Date(user.premiumUntil).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) %>
-                          </span>
-                        </div>
-                      </div>
-                    <% } %>
+                        <!-- Manual Premium Notice -->
+                        <% if (hasManualPremium) { %>
+                          <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                            <div class="flex items-start gap-3">
+                              <svg class="w-5 h-5 text-amber-400 mt-0.5" fill="white" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                  clip-rule="evenodd" />
+                              </svg>
+                              <div>
+                                <p class="text-sm font-medium text-amber-300">Premium accordé par l'équipe</p>
+                                <p class="text-xs text-amber-400 mt-1">
+                                  Votre accès Premium a été accordé manuellement. Pour toute modification, veuillez
+                                  contacter l'équipe via le support.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <% } %>
                   </div>
-
-                  <!-- Actions -->
-                  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-slate-950 border border-slate-800">
-                    <div>
-                      <p class="text-sm font-medium text-white">Gestion de l'abonnement</p>
-                      <p class="text-xs text-slate-400">
-                        <%= premiumActive ? 'Modifiez votre offre ou résiliez à tout moment.' : 'Découvrez les avantages Premium.' %>
-                      </p>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2">
-                      <% if (premiumActive) { %>
-                        <a href="/premium" class="px-4 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">
-                          Gérer l'offre
-                        </a>
-
-                        <% if (showCancelButton) { %>
-                          <button id="btnCancelSubscriptionTab" class="px-4 py-2 text-xs font-medium rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">
-                            Résilier
-                          </button>
-                        <% } %>
-                      <% } else { %>
-                        <a href="/premium" class="px-4 py-2 text-xs font-medium rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-900/20 transition-colors">
-                          Passer à Premium
-                        </a>
-                      <% } %>
-                    </div>
-                  </div>
-
-                  <!-- Staff Notice -->
-                  <% if (isStaff && hasStripeSub) { %>
-                    <div class="p-4 rounded-xl bg-violet-500/10 border border-violet-500/20">
-                      <div class="flex items-start gap-3">
-                        <svg class="w-5 h-5 text-violet-400 mt-0.5" fill="white" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                        </svg>
-                        <div>
-                          <p class="text-sm font-medium text-violet-300">Information pour le personnel</p>
-                          <p class="text-xs text-violet-400 mt-1">
-                            En tant que membre de l'équipe, veuillez gérer votre abonnement via le panneau d'administration.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  <% } %>
-
-                  <!-- Manual Premium Notice -->
-                  <% if (hasManualPremium) { %>
-                    <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                      <div class="flex items-start gap-3">
-                        <svg class="w-5 h-5 text-amber-400 mt-0.5" fill="white" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                        </svg>
-                        <div>
-                          <p class="text-sm font-medium text-amber-300">Premium accordé par l'équipe</p>
-                          <p class="text-xs text-amber-400 mt-1">
-                            Votre accès Premium a été accordé manuellement. Pour toute modification, veuillez contacter l'équipe via le support.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  <% } %>
-                </div>
               </div>
 
               <!-- Connections Panel -->
               <div id="panel-connections" class="tab-panel hidden animate-slide-up">
                 <div class="mb-4 pb-4 border-b border-slate-800">
                   <h4 class="text-lg font-semibold text-white">Connexions</h4>
-                  <p class="text-sm text-slate-400">Gérez vos comptes liés (Google, Discord, etc.) pour vous connecter plus facilement.</p>
+                  <p class="text-sm text-slate-400">Gérez vos comptes liés (Google, Discord, etc.) pour vous connecter
+                    plus facilement.</p>
                 </div>
-                
+
                 <div class="space-y-4">
                   <!-- Google Connection -->
-                  <% 
-                    const googleConn = (connections && connections.find(c => c.provider === 'google'));
-                  %>
-                  <div class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
-                    <div class="flex items-center gap-4">
-                      <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center p-2">
-                        <svg class="w-full h-full" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84z" fill="#FBBC05"/>
-                          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <h4 class="font-medium text-white">Google</h4>
-                        <% if (googleConn) { %>
-                          <p class="text-xs text-emerald-400">Connecté en tant que <%= googleConn.email || googleConn.name %></p>
-                        <% } else { %>
-                          <p class="text-xs text-rose-400/80 font-medium italic">Compte non lié - Lie ton compte pour une connexion simplifiée</p>
-                        <% } %>
-                      </div>
-                    </div>
-                    <div>
-                      <% if (googleConn) { %>
-                        <button onclick="unlinkProvider('google', '<%= googleConn.email %>')" class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">
-                          Déconnecter
-                        </button>
-                      <% } else { %>
-                        <div class="flex flex-col items-center gap-2">
-                            <div id="g_id_onload"
-                                data-client_id="<%= googleClientId %>"
-                                data-callback="handleGoogleResponse"
-                                data-context="signin"
-                                data-ux_mode="popup"
-                                data-auto_prompt="false">
-                            </div>
-                            <div class="g_id_signin"
-                                data-type="standard"
-                                data-shape="pill"
-                                data-theme="outline"
-                                data-text="signin"
-                                data-size="medium"
-                                data-logo_alignment="left">
-                            </div>
-                            <p class="text-[10px] text-slate-500">Lier mon compte Google</p>
+                  <% const googleConn=(connections && connections.find(c=> c.provider === 'google'));
+                    %>
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800">
+                      <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center p-2">
+                          <svg class="w-full h-full" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                              fill="#4285F4" />
+                            <path
+                              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                              fill="#34A853" />
+                            <path
+                              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84z"
+                              fill="#FBBC05" />
+                            <path
+                              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                              fill="#EA4335" />
+                          </svg>
                         </div>
-                      <% } %>
-                    </div>
-                  </div>
-
-                  <!-- Discord Placeholder -->
-                  <div class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800 opacity-60">
-                    <div class="flex items-center gap-4">
-                      <div class="w-10 h-10 rounded-full bg-[#5865F2] flex items-center justify-center p-2">
-                        <svg class="w-full h-full text-white" viewBox="0 0 127.14 96.36"><path fill="white" d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.89,105.89,0,0,0,126.6,80.22c1.24-23.25-3.28-47.25-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg>
+                        <div>
+                          <h4 class="font-medium text-white">Google</h4>
+                          <% if (googleConn) { %>
+                            <p class="text-xs text-emerald-400">Connecté en tant que <%= googleConn.email ||
+                                googleConn.name %>
+                            </p>
+                            <% } else { %>
+                              <p class="text-xs text-rose-400/80 font-medium italic">Compte non lié - Lie ton compte
+                                pour une connexion simplifiée</p>
+                              <% } %>
+                        </div>
                       </div>
                       <div>
-                        <h4 class="font-medium text-white">Discord</h4>
-                        <p class="text-xs text-slate-400">Bientôt disponible</p>
+                        <% if (googleConn) { %>
+                          <button onclick="unlinkProvider('google', '<%= googleConn.email %>')"
+                            class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">
+                            Déconnecter
+                          </button>
+                          <% } else { %>
+                            <div class="flex flex-col items-center gap-2">
+                              <div id="g_id_onload" data-client_id="<%= googleClientId %>"
+                                data-callback="handleGoogleResponse" data-context="signin" data-ux_mode="popup"
+                                data-auto_prompt="false">
+                              </div>
+                              <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline"
+                                data-text="signin" data-size="medium" data-logo_alignment="left">
+                              </div>
+                              <p class="text-[10px] text-slate-500">Lier mon compte Google</p>
+                            </div>
+                            <% } %>
                       </div>
                     </div>
-                    <button disabled class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800 text-slate-500 cursor-not-allowed">Connecter</button>
-                  </div>
-                  
-                  <!-- GitHub Placeholder -->
-                  <div class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800 opacity-60">
-                    <div class="flex items-center gap-4">
-                       <div class="w-10 h-10 rounded-full bg-[#181717] flex items-center justify-center p-2">
-                           <svg viewBox="0 0 24 24" class="w-full h-full text-white" fill="white"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-                       </div>
-                       <div>
-                         <h4 class="font-medium text-white">GitHub</h4>
-                         <p class="text-xs text-slate-400">Bientôt disponible</p>
-                       </div>
-                    </div>
-                    <button disabled class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800 text-slate-500 cursor-not-allowed">Connecter</button>
-                  </div>
 
-                  <div class="mt-4 p-4 rounded-xl border border-dashed border-slate-800 bg-slate-900/30">
-                    <p class="text-xs text-slate-500 text-center">D'autres méthodes de connexion (Spotify, Apple, etc.) seront bientôt disponibles pour sécuriser et faciliter l'accès à votre compte.</p>
-                  </div>
+                    <!-- Discord Placeholder -->
+                    <div
+                      class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800 opacity-60">
+                      <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-[#5865F2] flex items-center justify-center p-2">
+                          <svg class="w-full h-full text-white" viewBox="0 0 127.14 96.36">
+                            <path fill="white"
+                              d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.89,105.89,0,0,0,126.6,80.22c1.24-23.25-3.28-47.25-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 class="font-medium text-white">Discord</h4>
+                          <p class="text-xs text-slate-400">Bientôt disponible</p>
+                        </div>
+                      </div>
+                      <button disabled
+                        class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800 text-slate-500 cursor-not-allowed">Connecter</button>
+                    </div>
+
+                    <!-- GitHub Placeholder -->
+                    <div
+                      class="flex items-center justify-between p-4 rounded-xl bg-slate-950 border border-slate-800 opacity-60">
+                      <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-[#181717] flex items-center justify-center p-2">
+                          <svg viewBox="0 0 24 24" class="w-full h-full text-white" fill="white">
+                            <path
+                              d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 class="font-medium text-white">GitHub</h4>
+                          <p class="text-xs text-slate-400">Bientôt disponible</p>
+                        </div>
+                      </div>
+                      <button disabled
+                        class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800 text-slate-500 cursor-not-allowed">Connecter</button>
+                    </div>
+
+                    <div class="mt-4 p-4 rounded-xl border border-dashed border-slate-800 bg-slate-900/30">
+                      <p class="text-xs text-slate-500 text-center">D'autres méthodes de connexion (Spotify, Apple,
+                        etc.) seront bientôt disponibles pour sécuriser et faciliter l'accès à votre compte.</p>
+                    </div>
                 </div>
 
                 <script>
-                   async function unlinkProvider(provider, email = null) {
-                     const ok = await showConfirm('Êtes-vous sûr de vouloir supprimer cette connexion ? Vous ne pourrez plus vous connecter avec ce compte.', 'Supprimer');
-                     if(!ok) return;
-                     
-                     try {
-                        const res = await fetch('/account/connections/unlink', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ provider })
-                        });
-                        const j = await res.json().catch(() => ({}));
-                        
-                        if(res.ok) {
-                          // Revoke Google Access on Client Side
-                          if (provider === 'google' && email && window.google) {
-                              google.accounts.id.revoke(email, (resp) => {
-                                  console.log("Google access revoked:", resp);
+                  async function unlinkProvider(provider, email = null) {
+                    const ok = await showConfirm('Êtes-vous sûr de vouloir supprimer cette connexion ? Vous ne pourrez plus vous connecter avec ce compte.', 'Supprimer');
+                    if (!ok) return;
+
+                    try {
+                      const res = await fetch('/account/connections/unlink', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ provider })
+                      });
+                      const j = await res.json().catch(() => ({}));
+
+                      if (res.ok) {
+                        // Revoke Google Access on Client Side
+                        if (provider === 'google' && email && window.google) {
+                          google.accounts.id.revoke(email, (resp) => {
+                            console.log("Google access revoked:", resp);
+                          });
+                        }
+
+                        showAlert('Compte délié avec succès', 'success');
+                        setTimeout(() => {
+                          window.location.hash = 'connections';
+                          window.location.reload();
+                        }, 1000);
+                      } else {
+                        if (j.error === 'LAST_IDENTITY_NO_PASSWORD') {
+                          // Show modal
+                          const modal = document.getElementById('createPasswordModal');
+                          modal.classList.remove('hidden');
+
+                          // Setup form handler
+                          const form = document.getElementById('formCreatePasswordFromModal');
+                          const cancel = document.getElementById('btnCancelCreatePwd');
+
+                          const close = () => {
+                            modal.classList.add('hidden');
+                            form.reset();
+                          };
+
+                          cancel.onclick = close;
+
+                          form.onsubmit = async (e) => {
+                            e.preventDefault();
+                            const fd = new FormData(form);
+                            const payload = Object.fromEntries(fd.entries());
+
+                            // 1. Create password
+                            try {
+                              const pRes = await fetch('/api/me/password', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
                               });
-                          }
+                              if (!pRes.ok) {
+                                const pj = await pRes.json().catch(() => ({}));
+                                showAlert(pj.error || "Erreur lors de la création du mot de passe", 'error');
+                                return;
+                              }
 
-                          showAlert('Compte délié avec succès', 'success');
-                          setTimeout(() => {
-                              window.location.hash = 'connections';
-                              window.location.reload();
-                          }, 1000);
+                              // 2. Retry unlink
+                              const uRes = await fetch('/account/connections/unlink', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ provider })
+                              });
+
+                              if (uRes.ok) {
+                                // Revoke Google Access on Client Side retry
+                                if (provider === 'google' && email && window.google) {
+                                  google.accounts.id.revoke(email, (resp) => {
+                                    console.log("Google access revoked (retry):", resp);
+                                  });
+                                }
+
+                                showAlert('Mot de passe créé et compte délié avec succès', 'success');
+                                setTimeout(() => window.location.reload(), 1500);
+                              } else {
+                                showAlert("Mot de passe créé, mais erreur lors de la déliaison.", 'error');
+                              }
+                              close();
+                            } catch (err) {
+                              console.error(err);
+                              showAlert("Erreur réseau", 'error');
+                            }
+                          };
                         } else {
-                          if (j.error === 'LAST_IDENTITY_NO_PASSWORD') {
-                              // Show modal
-                              const modal = document.getElementById('createPasswordModal');
-                              modal.classList.remove('hidden');
-                              
-                              // Setup form handler
-                              const form = document.getElementById('formCreatePasswordFromModal');
-                              const cancel = document.getElementById('btnCancelCreatePwd');
-                              
-                              const close = () => {
-                                  modal.classList.add('hidden');
-                                  form.reset();
-                              };
-                              
-                              cancel.onclick = close;
-                              
-                              form.onsubmit = async (e) => {
-                                  e.preventDefault();
-                                  const fd = new FormData(form);
-                                  const payload = Object.fromEntries(fd.entries());
-                                  
-                                  // 1. Create password
-                                  try {
-                                      const pRes = await fetch('/api/me/password', {
-                                          method: 'POST',
-                                          headers: { 'Content-Type': 'application/json' },
-                                          body: JSON.stringify(payload)
-                                      });
-                                      if (!pRes.ok) {
-                                          const pj = await pRes.json().catch(() => ({}));
-                                          showAlert(pj.error || "Erreur lors de la création du mot de passe", 'error');
-                                          return;
-                                      }
-                                      
-                                      // 2. Retry unlink
-                                      const uRes = await fetch('/account/connections/unlink', {
-                                          method: 'POST',
-                                          headers: { 'Content-Type': 'application/json' },
-                                          body: JSON.stringify({ provider })
-                                      });
-                                      
-                                      if (uRes.ok) {
-                                          // Revoke Google Access on Client Side retry
-                                          if (provider === 'google' && email && window.google) {
-                                              google.accounts.id.revoke(email, (resp) => {
-                                                  console.log("Google access revoked (retry):", resp);
-                                              });
-                                          }
-
-                                          showAlert('Mot de passe créé et compte délié avec succès', 'success');
-                                          setTimeout(() => window.location.reload(), 1500);
-                                      } else {
-                                           showAlert("Mot de passe créé, mais erreur lors de la déliaison.", 'error');
-                                      }
-                                      close();
-                                  } catch (err) {
-                                      console.error(err);
-                                      showAlert("Erreur réseau", 'error');
-                                  }
-                              };
-                          } else {
-                              showAlert(j.error || 'Erreur lors de la déconnexion', 'error');
-                          }
+                          showAlert(j.error || 'Erreur lors de la déconnexion', 'error');
                         }
-                     } catch(e) {
-                       console.error(e);
-                       showAlert('Erreur réseau', 'error');
-                     }
-                   }
-
-                   // Used by Google Identity Services
-                   console.log("Google Client ID:", "<%= googleClientId %>");
-                   window.handleGoogleResponse = async function(response) {
-                      try {
-                        const res = await fetch('/auth/google/callback', {
-                           method: 'POST',
-                           headers: { 'Content-Type': 'application/json' },
-                           body: JSON.stringify({ credential: response.credential })
-                        });
-                        
-                        if (res.ok) {
-                            showAlert("Compte Google lié avec succès", "success");
-                            setTimeout(() => {
-                                window.location.hash = 'connections';
-                                window.location.reload();
-                            }, 1000);
-                        } else {
-                            const j = await res.json().catch(() => ({}));
-                            showAlert(j.error || "Erreur de liaison Google", 'error');
-                        }
-                      } catch (e) {
-                          console.error(e);
-                          showAlert("Erreur lors de la connexion Google", 'error');
                       }
-                   }
+                    } catch (e) {
+                      console.error(e);
+                      showAlert('Erreur réseau', 'error');
+                    }
+                  }
+
+                  // Used by Google Identity Services
+                  console.log("Google Client ID:", "<%= googleClientId %>");
+                  window.handleGoogleResponse = async function (response) {
+                    try {
+                      const res = await fetch('/auth/google/callback', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ credential: response.credential })
+                      });
+
+                      if (res.ok) {
+                        showAlert("Compte Google lié avec succès", "success");
+                        setTimeout(() => {
+                          window.location.hash = 'connections';
+                          window.location.reload();
+                        }, 1000);
+                      } else {
+                        const j = await res.json().catch(() => ({}));
+                        showAlert(j.error || "Erreur de liaison Google", 'error');
+                      }
+                    } catch (e) {
+                      console.error(e);
+                      showAlert("Erreur lors de la connexion Google", 'error');
+                    }
+                  }
                 </script>
               </div>
             </div>
           </div>
         </main>
     </div>
-    
+
     <!-- Modals (kept mostly same structure but updated classes) -->
     <div id="deleteModal" class="fixed inset-0 hidden z-50 grid place-items-center backdrop-blur-sm">
       <div class="absolute inset-0 bg-black/60 modal-overlay"></div>
@@ -881,7 +1080,12 @@
         <div class="rounded-3xl bg-slate-900 border border-slate-800 p-8 shadow-2xl shadow-black/50">
           <div class="flex items-center gap-4 mb-6">
             <div class="p-3 rounded-full bg-rose-500/10 text-rose-500">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                </path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
             </div>
             <div>
               <h3 class="text-xl font-bold text-white">Supprimer le compte ?</h3>
@@ -889,25 +1093,34 @@
             </div>
           </div>
 
-          <div id="deleteError" class="hidden mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-sm text-rose-400"></div>
+          <div id="deleteError"
+            class="hidden mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-sm text-rose-400"></div>
 
           <form id="formDeleteAccount" autocomplete="off" class="space-y-4">
             <div>
               <label class="block text-xs font-medium text-slate-300 mb-1">Mot de passe</label>
-              <input id="deletePassword" name="password" type="password" required class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-rose-500 outline-none" placeholder="Votre mot de passe" />
+              <input id="deletePassword" name="password" type="password" required
+                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-rose-500 outline-none"
+                placeholder="Votre mot de passe" />
             </div>
 
             <% if (user && user.twoFactorEnabled) { %>
               <div>
                 <label class="block text-xs font-medium text-slate-300 mb-1">Code A2F</label>
-                <input id="deleteOtp" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" required class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-rose-500 outline-none" placeholder="123456" />
+                <input id="deleteOtp" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" required
+                  class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-rose-500 outline-none"
+                  placeholder="123456" />
               </div>
-            <% } %>
+              <% } %>
 
-            <div class="flex items-center justify-end gap-3 mt-6">
-              <button id="btnCancelDelete" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors" type="button">Annuler</button>
-              <button id="btnConfirmDelete" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors" type="submit">Supprimer définitivement</button>
-            </div>
+                <div class="flex items-center justify-end gap-3 mt-6">
+                  <button id="btnCancelDelete"
+                    class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors"
+                    type="button">Annuler</button>
+                  <button id="btnConfirmDelete"
+                    class="px-4 py-2.5 text-sm font-medium rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors"
+                    type="submit">Supprimer définitivement</button>
+                </div>
           </form>
         </div>
       </div>
@@ -919,27 +1132,37 @@
         <div class="rounded-3xl bg-slate-900 border border-slate-800 p-8 shadow-2xl shadow-black/50">
           <div class="flex items-center gap-4 mb-6">
             <div class="p-3 rounded-full bg-amber-500/10 text-amber-500">
-               <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="white">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
             </div>
             <div>
               <h3 class="text-xl font-bold text-white">Création du mot de passe requise</h3>
-              <p class="text-sm text-slate-400">Pour supprimer votre dernière méthode de connexion, vous devez définir un mot de passe.</p>
+              <p class="text-sm text-slate-400">Pour supprimer votre dernière méthode de connexion, vous devez définir
+                un mot de passe.</p>
             </div>
           </div>
 
           <form id="formCreatePasswordFromModal" autocomplete="off" class="space-y-4">
             <div>
               <label class="block text-xs font-medium text-slate-300 mb-1">Nouveau mot de passe</label>
-              <input name="newPassword" type="password" required class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
+              <input name="newPassword" type="password" required
+                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Confirmer</label>
-                <input name="confirmPassword" type="password" required class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
+              <label class="block text-xs font-medium text-slate-300 mb-1">Confirmer</label>
+              <input name="confirmPassword" type="password" required
+                class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:border-violet-500 outline-none" />
             </div>
 
             <div class="flex items-center justify-end gap-3 mt-6">
-              <button id="btnCancelCreatePwd" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors" type="button">Annuler</button>
-              <button class="px-4 py-2.5 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors" type="submit">Créer et dissocier</button>
+              <button id="btnCancelCreatePwd"
+                class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors"
+                type="button">Annuler</button>
+              <button
+                class="px-4 py-2.5 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors"
+                type="submit">Créer et dissocier</button>
             </div>
           </form>
         </div>
@@ -954,24 +1177,35 @@
           <p class="text-sm text-slate-400 mb-6">Scannez le QR avec votre application d'authentification.</p>
 
           <div id="twoFactorQrWrap" class="mb-6 flex justify-center p-4 bg-white rounded-xl"></div>
-          
+
           <div class="mb-4">
             <label class="block text-xs font-medium text-slate-300 mb-1">Clé manuelle</label>
             <div class="flex gap-2">
-              <input id="twoFactorOtpauth" readonly class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono" />
-              <button class="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white" onclick="navigator.clipboard.writeText(document.getElementById('twoFactorOtpauth').value)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+              <input id="twoFactorOtpauth" readonly
+                class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono" />
+              <button class="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+                onclick="navigator.clipboard.writeText(document.getElementById('twoFactorOtpauth').value)"><svg
+                  width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg></button>
             </div>
           </div>
 
           <div class="mb-6">
             <label class="block text-xs font-medium text-slate-300 mb-1">Code de confirmation</label>
-            <input id="twoFactorConfirmOtp" inputmode="numeric" pattern="[0-9]*" maxlength="6" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-center text-lg tracking-widest focus:border-emerald-500 outline-none" placeholder="000000" />
+            <input id="twoFactorConfirmOtp" inputmode="numeric" pattern="[0-9]*" maxlength="6"
+              class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-center text-lg tracking-widest focus:border-emerald-500 outline-none"
+              placeholder="000000" />
           </div>
 
           <div class="flex items-center justify-end gap-3">
-            <button id="btnClose2faModal" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">Fermer</button>
-            <button id="btnConfirm2fa" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">Confirmer</button>
-            <button id="btnReloadAfter2fa" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white hidden">Terminer</button>
+            <button id="btnClose2faModal"
+              class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">Fermer</button>
+            <button id="btnConfirm2fa"
+              class="px-4 py-2.5 text-sm font-medium rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 transition-colors">Confirmer</button>
+            <button id="btnReloadAfter2fa"
+              class="px-4 py-2.5 text-sm font-medium rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white hidden">Terminer</button>
           </div>
         </div>
       </div>
@@ -983,14 +1217,19 @@
         <div class="rounded-3xl bg-slate-900 border border-slate-800 p-8 shadow-2xl shadow-black/50">
           <h3 class="text-xl font-bold text-white mb-2">Désactiver la A2F</h3>
           <p class="text-sm text-slate-400 mb-6">Entrez un code pour confirmer la désactivation.</p>
-          
-          <div id="disable2faError" class="hidden mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-sm text-amber-400"></div>
-          
-          <input id="disable2faOtp" inputmode="numeric" pattern="[0-9]*" maxlength="6" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-center text-lg tracking-widest focus:border-amber-500 outline-none mb-6" placeholder="000000" />
-          
+
+          <div id="disable2faError"
+            class="hidden mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-sm text-amber-400"></div>
+
+          <input id="disable2faOtp" inputmode="numeric" pattern="[0-9]*" maxlength="6"
+            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-center text-lg tracking-widest focus:border-amber-500 outline-none mb-6"
+            placeholder="000000" />
+
           <div class="flex items-center justify-end gap-3">
-            <button id="btnCancelDisable2fa" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">Annuler</button>
-            <button id="btnConfirmDisable2fa" class="px-4 py-2.5 text-sm font-medium rounded-xl bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/20 transition-colors">Désactiver</button>
+            <button id="btnCancelDisable2fa"
+              class="px-4 py-2.5 text-sm font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-colors">Annuler</button>
+            <button id="btnConfirmDisable2fa"
+              class="px-4 py-2.5 text-sm font-medium rounded-xl bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-900/20 transition-colors">Désactiver</button>
           </div>
         </div>
       </div>
@@ -1013,10 +1252,10 @@
                 </div>
                 <h3 class="font-semibold text-lg text-white">Confirmation</h3>
               </div>
-              <p class="text-slate-300 mb-6 text-sm">${message.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
+              <p class="text-slate-300 mb-6 text-sm">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
               <div class="flex justify-end gap-3">
                 <button class="cancelBtn px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium transition-colors">Annuler</button>
-                <button class="confirmBtn px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-colors">${actionText.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</button>
+                <button class="confirmBtn px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-colors">${actionText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</button>
               </div>
             </div>`;
           function cleanup(result) { overlay.remove(); document.removeEventListener('keydown', onKey); resolve(result); }
@@ -1035,10 +1274,10 @@
         if (!container) return console.log(message);
         const el = document.createElement('div');
         el.className = 'pointer-events-auto max-w-sm w-full rounded-xl px-4 py-3 text-sm shadow-lg border flex items-center gap-3 animate-slide-in-right';
-        
+
         let bg = 'bg-slate-900 text-white border-slate-800';
         let icon = '';
-        
+
         if (type === 'success') {
           bg = 'bg-slate-900 text-emerald-400 border-emerald-500/30';
           icon = '<svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
@@ -1046,17 +1285,17 @@
           bg = 'bg-slate-900 text-rose-400 border-rose-500/30';
           icon = '<svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
         }
-        
+
         el.className += ' ' + bg;
         el.innerHTML = `${icon}<span>${message}</span>`;
-        
+
         container.appendChild(el);
-        
+
         const timeout = opts.timeout || 3500;
-        const remove = () => { 
-          el.style.opacity = '0'; 
+        const remove = () => {
+          el.style.opacity = '0';
           el.style.transform = 'translateX(100%)';
-          setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 300); 
+          setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
         };
         el.addEventListener('click', remove);
         setTimeout(remove, timeout);
@@ -1175,12 +1414,12 @@
 
         setActive('profile');
         if (window.location.hash) {
-            const h = window.location.hash.replace('#', '');
-            if (panels[h]) setActive(h);
+          const h = window.location.hash.replace('#', '');
+          if (panels[h]) setActive(h);
         }
 
         tabButtons.forEach(btn => btn.addEventListener('click', () => {
-          const key = btn.getAttribute('data-tab'); if (!key) return; 
+          const key = btn.getAttribute('data-tab'); if (!key) return;
           setActive(key);
           window.location.hash = key;
         }));
@@ -1205,7 +1444,7 @@
                 el.textContent = newEmail;
               });
             }
-          } catch (err) {}
+          } catch (err) { }
         } else {
           showAlert(j.error || 'Erreur', 'error');
         }
@@ -1396,13 +1635,13 @@
             const pwdModal = document.getElementById('createPasswordModal');
             const pwdForm = document.getElementById('formCreatePasswordFromModal');
             const pwdCancel = document.getElementById('btnCancelCreatePwd');
-            
+
             if (pwdModal && pwdForm) {
               pwdModal.classList.remove('hidden');
               pwdForm.reset();
-              
-              if(pwdCancel) pwdCancel.onclick = () => { pwdModal.classList.add('hidden'); };
-              
+
+              if (pwdCancel) pwdCancel.onclick = () => { pwdModal.classList.add('hidden'); };
+
               pwdForm.onsubmit = async (ev) => {
                 ev.preventDefault();
                 const fd = new FormData(pwdForm);
@@ -1416,13 +1655,13 @@
                   }
                   showAlert('Mot de passe créé.', 'success');
                   pwdModal.classList.add('hidden');
-                  
-                  if(root) root.setAttribute('data-has-password', 'true');
+
+                  if (root) root.setAttribute('data-has-password', 'true');
 
                   setTimeout(() => {
                     modal.classList.remove('hidden');
                     const pInput = document.getElementById('deletePassword');
-                    if(pInput) pInput.focus();
+                    if (pInput) pInput.focus();
                   }, 500);
                 } catch (err) { console.error(err); showAlert("Erreur réseau", 'error'); }
               };
@@ -1475,40 +1714,40 @@
             const j = await res.json().catch(() => ({}));
             if (!res.ok) {
               if (j.error === 'ACCOUNT_DELETION_REQUIRES_PASSWORD') {
-                  modal.classList.add('hidden');
-                  
-                  const pwdModal = document.getElementById('createPasswordModal');
-                  const pwdForm = document.getElementById('formCreatePasswordFromModal');
-                  const pwdCancel = document.getElementById('btnCancelCreatePwd');
-                  
-                  if (pwdModal && pwdForm) {
-                      pwdModal.classList.remove('hidden');
-                      pwdForm.reset();
-                      
-                      pwdCancel.onclick = () => { pwdModal.classList.add('hidden'); };
-                      
-                      pwdForm.onsubmit = async (ev) => {
-                          ev.preventDefault();
-                          const fd = new FormData(pwdForm);
-                          const pl = Object.fromEntries(fd.entries());
-                          try {
-                              const pRes = await fetch('/api/me/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pl) });
-                              if (!pRes.ok) {
-                                  const pj = await pRes.json().catch(() => ({}));
-                                  showAlert(pj.error || "Erreur lors de la création", 'error');
-                                  return;
-                              }
-                              showAlert('Mot de passe créé.', 'success');
-                              pwdModal.classList.add('hidden');
-                              setTimeout(() => {
-                                  modal.classList.remove('hidden');
-                                  const pInput = document.getElementById('deletePassword');
-                                  if(pInput) pInput.focus();
-                              }, 500);
-                          } catch (err) { console.error(err); showAlert("Erreur réseau", 'error'); }
-                      };
-                  }
-                  return;
+                modal.classList.add('hidden');
+
+                const pwdModal = document.getElementById('createPasswordModal');
+                const pwdForm = document.getElementById('formCreatePasswordFromModal');
+                const pwdCancel = document.getElementById('btnCancelCreatePwd');
+
+                if (pwdModal && pwdForm) {
+                  pwdModal.classList.remove('hidden');
+                  pwdForm.reset();
+
+                  pwdCancel.onclick = () => { pwdModal.classList.add('hidden'); };
+
+                  pwdForm.onsubmit = async (ev) => {
+                    ev.preventDefault();
+                    const fd = new FormData(pwdForm);
+                    const pl = Object.fromEntries(fd.entries());
+                    try {
+                      const pRes = await fetch('/api/me/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pl) });
+                      if (!pRes.ok) {
+                        const pj = await pRes.json().catch(() => ({}));
+                        showAlert(pj.error || "Erreur lors de la création", 'error');
+                        return;
+                      }
+                      showAlert('Mot de passe créé.', 'success');
+                      pwdModal.classList.add('hidden');
+                      setTimeout(() => {
+                        modal.classList.remove('hidden');
+                        const pInput = document.getElementById('deletePassword');
+                        if (pInput) pInput.focus();
+                      }, 500);
+                    } catch (err) { console.error(err); showAlert("Erreur réseau", 'error'); }
+                  };
+                }
+                return;
               }
               if (errorMsg) { errorMsg.textContent = j.error || 'Suppression impossible'; errorMsg.classList.remove('hidden'); }
               btnConfirm && (btnConfirm.disabled = false);
@@ -1815,7 +2054,7 @@
     </script>
 
     <script>
-      (function() {
+      (function () {
         const copyBtn = document.getElementById('copyApiKeyBtn');
         const regenBtn = document.getElementById('regenerateApiKeyBtn');
         const apiField = document.getElementById('apiKeyField');
@@ -1834,12 +2073,12 @@
           regenBtn.addEventListener('click', async () => {
             const ok = await showConfirm('Générer une nouvelle clé invalidera l\'ancienne. Voulez-vous continuer ?', 'Générer');
             if (!ok) return;
-            
+
             try {
               regenBtn.disabled = true;
               const res = await fetch('/api/me/apikey', { method: 'POST' });
               const data = await res.json();
-              
+
               if (res.ok && data.apiKey) {
                 if (apiField) apiField.value = data.apiKey;
                 showAlert('Nouvelle clé API générée', 'success');
@@ -1858,7 +2097,7 @@
     </script>
 
     <script>
-      (function() {
+      (function () {
         const gravatarSelect = document.getElementById('gravatarSourceSelect');
         if (gravatarSelect) {
           gravatarSelect.addEventListener('change', async () => {
@@ -1885,5 +2124,6 @@
         }
       })();
     </script>
-</body>
-</html>
+    </body>
+
+    </html>
