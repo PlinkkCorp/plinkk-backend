@@ -17,7 +17,7 @@ class DashboardUI {
 
   init() {
 
-    // Ctrl+S / Cmd+S Handler
+    // Ctrl+S / Cmd+S Handler – simply update the status text without hiding it automatically
     document.addEventListener('keydown', function (e) {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
@@ -25,9 +25,7 @@ class DashboardUI {
         if (statusEl) {
           statusEl.textContent = 'Sauvegardé !';
           statusEl.classList.remove('opacity-0');
-          setTimeout(() => {
-            statusEl.classList.add('opacity-0');
-          }, 2000);
+          // leave it visible until another status update occurs
         }
       }
     });

@@ -48,6 +48,8 @@
                                     <span id="status-dot"
                                         class="size-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
                                     <span id="status-text" class="text-slate-300">Modifications enregistrées</span>
+                                    <!-- preview chip always visible here -->
+                                    <span id="statusPreviewChip" class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs opacity-50"></span>
                                 </div>
                             </div>
 
@@ -214,6 +216,8 @@
                                         <button id="btnPreview" class="px-3 py-1 text-sm font-medium rounded-lg bg-violet-600 text-white">Aperçu</button>
                                         <button id="btnHistory" class="px-3 py-1 text-sm font-medium rounded-lg bg-slate-700 text-slate-200">Historique</button>
                                     </div>
+                                    <!-- editor save-status indicator -->
+                                    <div id="status" class="text-xs text-slate-400 opacity-0 transition-opacity mx-auto mb-2"></div>
                                     <div id="previewWrapper" class="relative z-10 bg-black rounded-[2rem] overflow-hidden border-[6px] border-slate-800 shadow-inner aspect-[9/19] max-h-[85vh] mx-auto">
                                         <iframe id="preview"
                                             src="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>?preview=1"
@@ -237,10 +241,6 @@
                                                 <path d="M16 21h5v-5" />
                                             </svg>
                                         </button>
-                                        <!-- status indicator moved inside preview overlay for ergonomic feedback -->
-                                        <div id="status" class="text-xs text-slate-400 opacity-0 transition-opacity">
-                                            <!-- text updated by JS; initially hidden -->
-                                        </div>
                                         <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>"
                                             target="_blank" class="text-slate-400 hover:text-white transition-colors"
                                             title="Ouvrir">

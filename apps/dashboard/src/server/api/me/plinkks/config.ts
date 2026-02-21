@@ -136,6 +136,19 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
     }
     */
 
+    // convert boolean flags to 0/1 integers for the DB schema
+    const boolInt = (v: any) => (v === true ? 1 : v === false ? 0 : undefined);
+    const intOrNull = (v: any) => {
+      if (v === undefined || v === null || v === '') return undefined;
+      const n = parseInt(v);
+      return Number.isNaN(n) ? undefined : n;
+    };
+    const floatOrNull = (v: any) => {
+      if (v === undefined || v === null || v === '') return undefined;
+      const f = parseFloat(v);
+      return Number.isNaN(f) ? undefined : f;
+    };
+
     const data = pickDefined({
       profileLink: body.profileLink,
       profileImage: body.profileImage,
@@ -151,21 +164,21 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       iconUrl: body.iconUrl,
       description: body.description,
       profileHoverColor: body.profileHoverColor,
-      degBackgroundColor: body.degBackgroundColor,
-      neonEnable: body.neonEnable,
-      buttonThemeEnable: body.buttonThemeEnable,
-      EnableAnimationArticle: body.EnableAnimationArticle,
-      EnableAnimationButton: body.EnableAnimationButton,
-      EnableAnimationBackground: body.EnableAnimationBackground,
-      backgroundSize: body.backgroundSize,
-      selectedThemeIndex: body.selectedThemeIndex,
-      selectedAnimationIndex: body.selectedAnimationIndex,
-      selectedAnimationButtonIndex: body.selectedAnimationButtonIndex,
-      selectedAnimationBackgroundIndex: body.selectedAnimationBackgroundIndex,
-      animationDurationBackground: body.animationDurationBackground,
-      delayAnimationButton: body.delayAnimationButton,
-      canvaEnable: body.canvaEnable,
-      selectedCanvasIndex: body.selectedCanvasIndex,
+      degBackgroundColor: intOrNull(body.degBackgroundColor),
+      neonEnable: boolInt(body.neonEnable),
+      buttonThemeEnable: boolInt(body.buttonThemeEnable),
+      EnableAnimationArticle: boolInt(body.EnableAnimationArticle),
+      EnableAnimationButton: boolInt(body.EnableAnimationButton),
+      EnableAnimationBackground: boolInt(body.EnableAnimationBackground),
+      backgroundSize: intOrNull(body.backgroundSize),
+      selectedThemeIndex: intOrNull(body.selectedThemeIndex),
+      selectedAnimationIndex: intOrNull(body.selectedAnimationIndex),
+      selectedAnimationButtonIndex: intOrNull(body.selectedAnimationButtonIndex),
+      selectedAnimationBackgroundIndex: intOrNull(body.selectedAnimationBackgroundIndex),
+      animationDurationBackground: intOrNull(body.animationDurationBackground),
+      delayAnimationButton: floatOrNull(body.delayAnimationButton),
+      canvaEnable: boolInt(body.canvaEnable),
+      selectedCanvasIndex: intOrNull(body.selectedCanvasIndex),
       layoutOrder: body.layoutOrder,
     });
 
