@@ -18,6 +18,31 @@ export class LinkManager {
         this.saveTimeout = null;
     }
 
+    updateCategoryDropdown() {
+        const sel = document.getElementById('linkModalCategory');
+        if (!sel) return;
+
+        // Clear
+        sel.innerHTML = '';
+
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Aucune catégorie';
+        sel.appendChild(opt);
+
+        const cfg = (window.__PLINKK_GET_CONFIG__ && window.__PLINKK_GET_CONFIG__()) || window.__INITIAL_STATE__ || {};
+        const cats = cfg.categories || [];
+
+        if (Array.isArray(cats)) {
+            cats.forEach(c => {
+                const o = document.createElement('option');
+                o.value = c.id || c.name || '';
+                o.textContent = c.name || c.title || c.text || 'Sans nom';
+                sel.appendChild(o);
+            });
+        }
+    }
+
     init() {
 
         this.modal = document.getElementById('linkModal');
@@ -42,6 +67,7 @@ export class LinkManager {
             formBtnText: document.getElementById('linkModalFormBtnText'),
             formSuccessMsg: document.getElementById('linkModalFormSuccessMsg'),
             typeSelect: document.getElementById('linkModalType'), // This was missing in query
+            category: document.getElementById('linkModalCategory'),
             iconInput: document.getElementById('linkModalIconInput'),
             iconSource: document.getElementById('linkModalIconSource'),
             iconInputUrl: document.getElementById('linkModalIconInputUrl'),
@@ -428,6 +454,9 @@ export class LinkManager {
         if (i.forceApp) i.forceApp.checked = !!data.forceAppOpen;
 
         this.setButtonTheme(data.buttonTheme || 'system');
+
+        // Category
+        if (i.category) i.category.value = data.categoryId || '';
 
         if (data.formData) {
             if (i.formBtnText) i.formBtnText.value = data.formData.buttonText || '';

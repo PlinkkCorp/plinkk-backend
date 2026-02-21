@@ -9,12 +9,25 @@ export class HistoryManager {
         this.bindEvents();
         window.switchHistoryTab = (tab) => this.switchTab(tab);
         window.createBackup = () => this.createBackup();
+        // Keep globals for backward compatibility
         window.restoreVersion = (id) => this.restoreVersion(id);
         window.previewVersion = (id) => this.previewVersion(id);
-        window.toggleDetails = (id) => {
-            const el = document.getElementById(`details-${id}`);
-            if (el) el.classList.toggle('hidden');
-        };
+        // We no longer rely on inline toggleDetails; keep noop for compatibility
+        window.toggleDetails = (id) => {};
+
+        // Event delegation for preview / restore buttons inside history list
+        const list = document.getElementById('historyList');
+        if (list) {
+            list.addEventListener('click', (ev) => {
+                const btn = ev.target.closest && ev.target.closest('[data-action]');
+                if (!btn) return;
+                const action = btn.getAttribute('data-action');
+                const id = btn.getAttribute('data-id');
+                if (!action || !id) return;
+                if (action === 'preview') this.previewVersion(id);
+                else if (action === 'restore') this.restoreVersion(id);
+            });
+        }
     }
 
     bindEvents() {
@@ -25,6 +38,12 @@ export class HistoryManager {
 
         btnAuto?.addEventListener('click', () => this.switchTab('auto'));
         btnManual?.addEventListener('click', () => this.switchTab('manual'));
+
+        // Return button in preview controls to clear version preview
+        const returnBtn = document.getElementById('previewReturn');
+        if (returnBtn) {
+            returnBtn.addEventListener('click', () => this.previewVersion(null));
+        }
     }
 
     async loadHistory() {
@@ -59,17 +78,14 @@ export class HistoryManager {
 
     renderItem(v) {
         const dateStr = new Date(v.createdAt).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        // Always show details so diffs are visible by default
         const detailsHtml = v.changes && v.changes.length > 0
-            ? `<div class="mt-3 pl-3 border-l-2 border-violet-500/30 text-xs space-y-2 hidden" id="details-${v.id}">
+            ? `<div class="mt-3 pl-3 border-l-2 border-violet-500/30 text-xs space-y-2" id="details-${v.id}">
                     ${v.changes.map(c => this.renderChange(c)).join('')}
                    </div>`
             : '';
 
-        // Toggle button if changes exist
-        const hasChanges = v.changes && v.changes.length > 0;
-        const expandBtn = hasChanges
-            ? `<button onclick="toggleDetails('${v.id}')" class="ml-2 text-slate-500 hover:text-slate-300"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>`
-            : '';
+        const expandBtn = '';
 
         return `
             <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition-all group">
@@ -84,8 +100,8 @@ export class HistoryManager {
                 </div>
                 ${detailsHtml}
                 <div class="flex items-center gap-2 mt-3 justify-end">
-                    <button onclick="previewVersion('${v.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-colors border border-slate-700">Aperçu</button>
-                    <button onclick="restoreVersion('${v.id}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-colors shadow-lg shadow-violet-900/20">Restaurer</button>
+                    <button data-action="preview" data-id="${v.id}" class="pointer-events-auto px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition-colors border border-slate-700">Aperçu</button>
+                    <button data-action="restore" data-id="${v.id}" class="pointer-events-auto px-3 py-1.5 text-xs font-medium rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-colors shadow-lg shadow-violet-900/20">Restaurer</button>
                 </div>
             </div>
         `;
@@ -179,6 +195,23 @@ export class HistoryManager {
         else url.searchParams.delete('versionId');
         url.searchParams.set('t', Date.now());
         frame.src = url.toString();
+        // Show or hide the return button and animate the control pill when previewing a version
+        try {
+            const returnBtn = document.getElementById('previewReturn');
+            const controlPill = document.querySelector('.control-pill');
+            if (returnBtn) {
+                if (versionId) returnBtn.classList.remove('hidden');
+                else returnBtn.classList.add('hidden');
+            }
+            if (controlPill) {
+                if (versionId) controlPill.classList.add('visible');
+                else controlPill.classList.remove('visible');
+            }
+            if (!versionId && window.showPreviewToast) {
+                // user returned to original view — show a small toast
+                window.showPreviewToast('Retour à la vue originale');
+            }
+        } catch (e) { /* ignore DOM errors */ }
         if (window.switchSidebarMode) window.switchSidebarMode('live');
     }
 

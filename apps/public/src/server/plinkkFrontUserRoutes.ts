@@ -742,10 +742,11 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         if (page.user.selectedCustomThemeId) {
           const t = await prisma.theme.findUnique({
             where: { id: page.user.selectedCustomThemeId },
-            select: { data: true, isPrivate: true, authorId: true },
+            select: { data: true, isPrivate: true, authorId: true, pendingUpdate: true },
           });
           if (t && t.authorId === page.user.id) {
-            const full = coerceThemeData(t.data);
+            const source = t.pendingUpdate || t.data;
+            const full = coerceThemeData(source);
             if (full) {
               const safe = JSON.stringify(full);
               injectedThemeVar = `window.__PLINKK_PRIVATE_THEME__ = ${safe};`;
