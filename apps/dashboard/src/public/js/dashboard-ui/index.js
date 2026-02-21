@@ -80,13 +80,14 @@ class DashboardUI {
         // also ensure drag handles are attached again
         setTimeout(() => {
           const layoutContainer = qs('#layoutList');
+          const opts = { container: layoutContainer, order: state.layoutOrder, scheduleAutoSave: () => {} };
           if (typeof renderLayout === 'function') {
-            renderLayout({ container: layoutContainer, order: state.layoutOrder, scheduleAutoSave });
+            renderLayout(opts);
           } else {
             console.warn('renderLayout not defined when activating layout tab, dynamic import');
             import('./renderers.js').then(m => {
               if (m.renderLayout) {
-                m.renderLayout({ container: layoutContainer, order: state.layoutOrder, scheduleAutoSave });
+                m.renderLayout(opts);
               }
             }).catch(e => console.error('Failed to import renderers.js', e));
           }

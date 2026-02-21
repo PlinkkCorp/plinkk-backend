@@ -272,6 +272,16 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
   const DEFAULT_LAYOUT = ['profile','username','statusbar','labels','social','email','links'];
   state.layoutOrder = Array.isArray(cfg.layoutOrder) ? [...cfg.layoutOrder] : [...DEFAULT_LAYOUT];
 
+  window.__PLINKK_SYNC_LAYOUT__ = (newOrder) => {
+    if (Array.isArray(newOrder)) {
+      state.layoutOrder = [...newOrder];
+      const lc = qs('#layoutList');
+      if (lc && typeof renderLayout === 'function') {
+        renderLayout({ container: lc, order: state.layoutOrder, scheduleAutoSave: () => {} });
+      }
+    }
+  };
+
     renderBackground({ container: f.backgroundList, addBtn: f.addBackgroundColor, colors: state.background, scheduleAutoSave });
     renderNeon({ container: f.neonList, addBtn: f.addNeonColor, colors: state.neonColors, neonEnableEl: f.neonEnable, scheduleAutoSave });
     renderLabels({ container: f.labelsList, addBtn: f.addLabel, labels: state.labels, scheduleAutoSave });

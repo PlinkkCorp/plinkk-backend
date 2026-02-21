@@ -70,6 +70,9 @@ async function saveLayout(order) {
         if (currentConfig) currentConfig.layoutOrder = res.layoutOrder;
         if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.layoutOrder = res.layoutOrder;
         if (window.__EDITOR_STORE__) window.__EDITOR_STORE__.set({ layoutOrder: res.layoutOrder });
+        if (window.__PLINKK_SYNC_LAYOUT__) {
+            try { window.__PLINKK_SYNC_LAYOUT__(res.layoutOrder); } catch {}
+        }
         renderPlinkk(currentConfig);
     }
     return res;
