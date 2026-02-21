@@ -81,7 +81,7 @@ class DashboardUI {
         setTimeout(() => {
           const layoutContainer = qs('#layoutList');
           const cfg = (window.__PLINKK_GET_CONFIG__ && window.__PLINKK_GET_CONFIG__()) || {};
-          const currentOrder = state.get().layoutOrder || ['profile', 'username', 'statusbar', 'labels', 'social', 'email', 'links'];
+          const currentOrder = state.get().layoutOrder || ['profile', 'username', 'labels', 'social', 'email', 'links'];
           const opts = { container: layoutContainer, order: currentOrder, scheduleAutoSave: () => {/* nothing */ }, cfg };
           // provide a layout-specific autosave function if available
           const layoutSave = () => {
@@ -122,7 +122,7 @@ class DashboardUI {
       if (!layoutContainer) return;
 
       const cfg = (window.__PLINKK_GET_CONFIG__ && window.__PLINKK_GET_CONFIG__()) || {};
-      const currentOrder = state.get().layoutOrder || ['profile', 'username', 'statusbar', 'labels', 'social', 'email', 'links'];
+      const currentOrder = state.get().layoutOrder || ['profile', 'username', 'labels', 'social', 'email', 'links'];
       const opts = {
         container: layoutContainer,
         order: currentOrder,

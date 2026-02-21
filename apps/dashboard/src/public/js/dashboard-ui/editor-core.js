@@ -754,7 +754,7 @@ function renderPlinkk(config) {
         .popover-btn.delete:hover { background: rgba(239,68,68,0.25); }
     `;
 
-    const DEFAULT_LAYOUT = ['profile', 'username', 'statusbar', 'labels', 'social', 'email', 'links'];
+    const DEFAULT_LAYOUT = ['profile', 'username', 'labels', 'social', 'email', 'links'];
     let layout = Array.isArray(plinkk.layoutOrder) ? plinkk.layoutOrder.slice() : DEFAULT_LAYOUT.slice();
     const KNOWN = new Set(DEFAULT_LAYOUT);
     const seen = new Set();
@@ -811,9 +811,8 @@ function renderPlinkk(config) {
     let html = `<style>${css}</style>${canvasHTML}<article class="plinkk-article">`;
     normalized.forEach((key) => {
         switch (key) {
-            case 'profile': html += profilePicHTML; break;
+            case 'profile': html += profilePicHTML + statusSectionHTML; break;
             case 'username': html += profileNameHTML; break;
-            case 'statusbar': html += statusSectionHTML; break;
             case 'labels': html += labelsSectionHTML; break;
             case 'social': html += socialSectionHTML; break;
             case 'email': html += descEmailHTML; break;

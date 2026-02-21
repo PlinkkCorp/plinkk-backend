@@ -1358,7 +1358,7 @@ export function renderLayout({ container, order, scheduleAutoSave, cfg = {} }) {
   if (!container) return;
   container.innerHTML = '';
 
-  const KNOWN = ['profile', 'username', 'statusbar', 'labels', 'social', 'email', 'links'];
+  const KNOWN = ['profile', 'username', 'labels', 'social', 'email', 'links'];
 
   if (!Array.isArray(order) || order.length === 0) {
     if (Array.isArray(order)) {
@@ -1380,7 +1380,6 @@ export function renderLayout({ container, order, scheduleAutoSave, cfg = {} }) {
   const LABELS = {
     profile: 'Photo & lien de profil',
     username: 'Nom affiché',
-    statusbar: 'Statut (barre sous le profil)',
     labels: 'Labels (badges)',
     social: 'Icônes sociales',
     email: 'Email & Description',
@@ -1388,25 +1387,42 @@ export function renderLayout({ container, order, scheduleAutoSave, cfg = {} }) {
   };
 
   const dyn = window.__INITIAL_STATE__ || {};
+  const storeState = (window.__EDITOR_STORE__ && window.__EDITOR_STORE__.get()) || {};
+  const current = cfg || {};
+
+  const check = (key) => {
+    const sources = [current, dyn, storeState];
+    for (const src of sources) {
+      if (!src || Object.keys(src).length === 0) continue;
+      const settings = src.settings || {};
+
+      if (key === 'social') {
+        const possible = ['socialIcon', 'socialIcons', 'socials'];
+        for (const p of possible) {
+          if (Array.isArray(src[p]) && src[p].length > 0) { console.log(`[VISIBLE] social found in src.${p}`); return true; }
+          if (Array.isArray(settings[p]) && settings[p].length > 0) { console.log(`[VISIBLE] social found in settings.${p}`); return true; }
+        }
+      } else if (key === 'labels') {
+        if (Array.isArray(src.labels) && src.labels.length > 0) { console.log(`[VISIBLE] labels found in src`); return true; }
+        if (Array.isArray(settings.labels) && settings.labels.length > 0) { console.log(`[VISIBLE] labels found in settings`); return true; }
+      } else if (key === 'links') {
+        if (Array.isArray(src.links) && src.links.length > 0) { console.log(`[VISIBLE] links found in src`); return true; }
+        if (Array.isArray(settings.links) && settings.links.length > 0) { console.log(`[VISIBLE] links found in settings`); return true; }
+      } else if (key === 'email') {
+        if (src.email || src.publicEmail || src.description) { console.log(`[VISIBLE] email found in src`); return true; }
+        if (settings.affichageEmail || settings.publicEmail || settings.description) { console.log(`[VISIBLE] email found in settings`); return true; }
+      }
+    }
+    return false;
+  };
+
   const visible = {
     profile: true,
     username: true,
-    statusbar: !!(
-      (cfg.statusbar && (cfg.statusbar.text || cfg.statusbar.statusText)) ||
-      (dyn.statusbar && (dyn.statusbar.text || dyn.statusbar.statusText))
-    ),
-    labels:
-      (Array.isArray(cfg.labels) && cfg.labels.length > 0) ||
-      (Array.isArray(dyn.labels) && dyn.labels.length > 0),
-    social:
-      (Array.isArray(cfg.socialIcon) && cfg.socialIcon.length > 0) ||
-      (Array.isArray(cfg.socialIcons) && cfg.socialIcons.length > 0) ||
-      (Array.isArray(dyn.socialIcon) && dyn.socialIcon.length > 0) ||
-      (Array.isArray(dyn.socialIcons) && dyn.socialIcons.length > 0),
-    email: !!(cfg.email || cfg.description || dyn.email || dyn.description),
-    links:
-      (Array.isArray(cfg.links) && cfg.links.length > 0) ||
-      (Array.isArray(dyn.links) && dyn.links.length > 0),
+    labels: check('labels'),
+    social: check('social'),
+    email: check('email'),
+    links: check('links'),
   };
 
   normalized.forEach((key, idx) => {
@@ -1417,15 +1433,17 @@ export function renderLayout({ container, order, scheduleAutoSave, cfg = {} }) {
     const gripBtn = el('button', { type: 'button', class: 'h-8 w-8 inline-flex items-center justify-center rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-400 cursor-grab active:cursor-grabbing transition-colors touch-none', title: 'Déplacer', 'aria-label': 'Déplacer', style: 'touch-action: none;' });
     gripBtn.appendChild(createGripSVG(16));
 
-    const label = el('div', { class: 'text-sm font-medium text-slate-200' });
-    label.textContent = LABELS[key] || key;
+    const itemLabel = el('div', { class: 'text-sm font-medium text-slate-200' });
+    itemLabel.textContent = LABELS[key] || key;
+
+    row.append(gripBtn, itemLabel);
+
     if (!isVisible) {
       const note = el('span', { class: 'ml-auto text-xs text-slate-400 italic', text: '(masqué)' });
       row.append(note);
     }
 
-    row.append(gripBtn, label);
-    try { enableDragHandle(gripBtn, row, container, order, () => renderLayout({ container, order, scheduleAutoSave, cfg, cfg }), scheduleAutoSave); } catch { }
+    try { enableDragHandle(gripBtn, row, container, order, () => renderLayout({ container, order, scheduleAutoSave, cfg }), scheduleAutoSave); } catch { }
     container.appendChild(row);
   });
 }

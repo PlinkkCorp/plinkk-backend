@@ -49,7 +49,8 @@
                                         class="size-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
                                     <span id="status-text" class="text-slate-300">Modifications enregistrées</span>
                                     <!-- preview chip always visible here -->
-                                    <span id="statusPreviewChip" class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs opacity-50"></span>
+                                    <span id="statusPreviewChip"
+                                        class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs opacity-50"></span>
                                 </div>
                             </div>
 
@@ -180,49 +181,66 @@
                     <aside class="hidden xl:block xl:col-span-5 relative space-y-6">
                         <!-- preview / history switcher with history controls moved here -->
                         <div class="sticky top-8">
-                            <div
-                                id="previewCard"
+                            <div id="previewCard"
                                 class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-4 shadow-2xl relative overflow-hidden">
-                                <div class="absolute top-0 left-0 w-full h-full bg-slate-950 opacity-50 z-0 pointer-events-none"></div>
+                                <div
+                                    class="absolute top-0 left-0 w-full h-full bg-slate-950 opacity-50 z-0 pointer-events-none">
+                                </div>
                                 <!-- header removed; controls shown only in history view -->
 
                                 <div class="flex justify-center gap-2 mb-2 z-10 relative">
-                                    <button id="btnPreview" class="px-3 py-1 text-sm font-medium rounded-lg bg-violet-600 text-white">Aperçu</button>
-                                    <button id="btnHistory" class="px-3 py-1 text-sm font-medium rounded-lg bg-slate-700 text-slate-200">Historique</button>
+                                    <button id="btnPreview"
+                                        class="px-3 py-1 text-sm font-medium rounded-lg bg-violet-600 text-white">Aperçu</button>
+                                    <button id="btnHistory"
+                                        class="px-3 py-1 text-sm font-medium rounded-lg bg-slate-700 text-slate-200">Historique</button>
                                 </div>
                                 <!-- editor save-status indicator -->
-                                <div id="status" class="text-xs text-slate-400 opacity-0 transition-opacity mx-auto mb-2"></div>
-                                <div id="previewWrapper" class="relative z-10 bg-black rounded-[2rem] overflow-hidden border-[6px] border-slate-800 shadow-inner aspect-[9/19] max-h-[85vh] mx-auto">
+                                <div id="status"
+                                    class="text-xs text-slate-400 opacity-0 transition-opacity mx-auto mb-2"></div>
+                                <div id="previewWrapper"
+                                    class="relative z-10 bg-black rounded-[2rem] overflow-hidden border-[6px] border-slate-800 shadow-inner aspect-[9/19] max-h-[85vh] mx-auto">
                                     <iframe id="preview"
                                         src="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>?preview=1"
                                         class="w-full h-full bg-white" frameborder="0"></iframe>
                                     <!-- small floating controls (reload / open) shown in preview mode -->
-                                    <div id="previewControls" class="absolute bottom-4 left-0 right-0 flex justify-center z-30 pointer-events-none">
+                                    <div id="previewControls"
+                                        class="absolute bottom-4 left-0 right-0 flex justify-center z-30 pointer-events-none">
                                         <div class="pointer-events-auto control-pill flex items-center gap-3 shadow-xl">
                                             <div class="control-actions flex items-center gap-2">
-                                                <button id="previewReload" class="control-btn" title="Recharger" aria-label="Recharger" onclick="document.getElementById('preview').src = document.getElementById('preview').src">
-                                                    <svg class="h-5 w-5 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <button id="previewReload" class="control-btn" title="Recharger"
+                                                    aria-label="Recharger"
+                                                    onclick="document.getElementById('preview').src = document.getElementById('preview').src">
+                                                    <svg class="h-5 w-5 text-slate-300" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round">
                                                         <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                                                         <path d="M3 3v5h5" />
                                                         <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
                                                         <path d="M16 21h5v-5" />
                                                     </svg>
                                                 </button>
-                                                <a id="previewOpen" href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>" target="_blank" class="control-btn" title="Ouvrir" aria-label="Ouvrir">
-                                                    <svg class="h-5 w-5 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                                <a id="previewOpen"
+                                                    href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>"
+                                                    target="_blank" class="control-btn" title="Ouvrir"
+                                                    aria-label="Ouvrir">
+                                                    <svg class="h-5 w-5 text-slate-300" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2">
+                                                        <path
+                                                            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                                                         <polyline points="15 3 21 3 21 9" />
                                                         <line x1="10" y1="14" x2="21" y2="3" />
                                                     </svg>
                                                 </a>
-                                                <button id="previewReturn" class="control-btn hidden" title="Retour à la vue originale" aria-label="Retour">
-                                                    <svg class="h-5 w-5 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <button id="previewReturn" class="control-btn hidden"
+                                                    title="Retour à la vue originale" aria-label="Retour">
+                                                    <svg class="h-5 w-5 text-slate-300" viewBox="0 0 24 24" fill="none"
+                                                        stroke="currentColor" stroke-width="2">
                                                         <path d="M19 12H6" />
                                                         <path d="M12 5l-7 7 7 7" />
                                                     </svg>
                                                 </button>
                                             </div>
-                                            
+
                                         </div>
                                     </div>
                                 </div>
@@ -233,9 +251,14 @@
                                             <p class="text-sm text-slate-400">Restaurez une version précédente.</p>
                                         </div>
                                         <div>
-                                            <button id="refreshHistory" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="Actualiser">
-                                                <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            <button id="refreshHistory"
+                                                class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                                                title="Actualiser">
+                                                <svg class="size-5" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                                 </svg>
                                             </button>
                                         </div>
@@ -251,7 +274,8 @@
                                         </button>
                                     </div>
 
-                                    <div id="manual-backup-actions" class="hidden mb-4 p-3 bg-slate-950 rounded-xl border border-slate-800 z-10 relative">
+                                    <div id="manual-backup-actions"
+                                        class="hidden mb-4 p-3 bg-slate-950 rounded-xl border border-slate-800 z-10 relative">
                                         <div class="flex gap-2">
                                             <input type="text" id="backupName" placeholder="Nom..."
                                                 class="flex-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-xs focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 outline-none">
@@ -262,9 +286,11 @@
                                         </div>
                                     </div>
 
-                                    <div id="historyList" class="space-y-2 max-h-[400px] overflow-y-auto scrollbar-hide" style="-webkit-overflow-scrolling: touch; pointer-events: auto; z-index: 70; position: relative;"></div>
+                                    <div id="historyList" class="space-y-2 max-h-[400px] overflow-y-auto scrollbar-hide"
+                                        style="-webkit-overflow-scrolling: touch; pointer-events: auto; z-index: 70; position: relative;">
+                                    </div>
                                 </div>
-                        </div>
+                            </div>
                     </aside>
                 </main>
         </div>
@@ -272,13 +298,16 @@
             <%- include('./edit/icon-modal.ejs') %>
                 <%- include('./edit/picker-modal.ejs') %>
 
-        <div id="statusModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 hidden" role="dialog" aria-modal="true">
-            <div class="relative w-full max-w-md bg-slate-800 rounded-lg p-6 text-center text-white">
-                <button id="statusModalClose" class="absolute right-3 top-3 size-8 rounded bg-slate-800 hover:bg-slate-700 text-white">✕</button>
-                <h2 class="text-xl font-semibold mb-2">En cours de refonte</h2>
-                <p class="text-sm text-slate-300">La section <strong>Statut</strong> est actuellement en cours de refonte et n'est pas disponible pour le moment.</p>
-            </div>
-        </div>
+                    <div id="statusModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 hidden"
+                        role="dialog" aria-modal="true">
+                        <div class="relative w-full max-w-md bg-slate-800 rounded-lg p-6 text-center text-white">
+                            <button id="statusModalClose"
+                                class="absolute right-3 top-3 size-8 rounded bg-slate-800 hover:bg-slate-700 text-white">✕</button>
+                            <h2 class="text-xl font-semibold mb-2">En cours de refonte</h2>
+                            <p class="text-sm text-slate-300">La section <strong>Statut</strong> est actuellement en
+                                cours de refonte et n'est pas disponible pour le moment.</p>
+                        </div>
+                    </div>
 
                     <script>
                         window.__PLINKK_USER_ID__ = "<%= user.id %>";
@@ -359,7 +388,7 @@
                         })();
                         // Expose a global switch to change sidebar mode (preview / history)
                         (function () {
-                            window.switchSidebarMode = function(mode) {
+                            window.switchSidebarMode = function (mode) {
                                 const previewW = document.getElementById('previewWrapper');
                                 const historyW = document.getElementById('historyWrapper');
                                 const previewControls = document.getElementById('previewControls');
@@ -372,19 +401,19 @@
                                     historyW.classList.add('hidden');
                                     previewControls?.classList.remove('hidden');
                                     previewCard?.classList.remove('max-h-[90vh]');
-                                    btnP.classList.add('bg-violet-600','text-white');
-                                    btnP.classList.remove('bg-slate-700','text-slate-200');
-                                    btnH.classList.add('bg-slate-700','text-slate-200');
-                                    btnH.classList.remove('bg-violet-600','text-white');
+                                    btnP.classList.add('bg-violet-600', 'text-white');
+                                    btnP.classList.remove('bg-slate-700', 'text-slate-200');
+                                    btnH.classList.add('bg-slate-700', 'text-slate-200');
+                                    btnH.classList.remove('bg-violet-600', 'text-white');
                                 } else if (mode === 'history') {
                                     previewW.classList.add('hidden');
                                     historyW.classList.remove('hidden');
                                     previewControls?.classList.add('hidden');
                                     previewCard?.classList.add('max-h-[90vh]');
-                                    btnH.classList.add('bg-violet-600','text-white');
-                                    btnH.classList.remove('bg-slate-700','text-slate-200');
-                                    btnP.classList.add('bg-slate-700','text-slate-200');
-                                    btnP.classList.remove('bg-violet-600','text-white');
+                                    btnH.classList.add('bg-violet-600', 'text-white');
+                                    btnH.classList.remove('bg-slate-700', 'text-slate-200');
+                                    btnP.classList.add('bg-slate-700', 'text-slate-200');
+                                    btnP.classList.remove('bg-violet-600', 'text-white');
                                     if (window.historyManager) window.historyManager.loadHistory();
                                 }
                             };
@@ -439,7 +468,7 @@
                             const rawData = JSON.parse(document.getElementById('plinkk-data').textContent);
                             window.__INITIAL_STATE__ = {
                                 ...rawData,
-                                categories: <%- JSON.stringify(locals.categories || []) %>
+                                categories: <% - JSON.stringify(locals.categories || []) %>
                             };
                         } catch (e) {
                             console.error('Failed to parse initial state:', e);
@@ -449,23 +478,23 @@
 
                     <script>
                         // toggle preview/history view inside editor
-                        (function() {
+                        (function () {
                             const btnP = document.getElementById('btnPreview');
                             const btnH = document.getElementById('btnHistory');
                             const previewW = document.getElementById('previewWrapper');
                             const historyW = document.getElementById('historyWrapper');
-                                if (btnP && btnH && previewW && historyW) {
+                            if (btnP && btnH && previewW && historyW) {
                                 function showPreview() {
                                     previewW.classList.remove('hidden');
                                     historyW.classList.add('hidden');
-                                        const previewControls = document.getElementById('previewControls');
-                                        previewControls?.classList.remove('hidden');
+                                    const previewControls = document.getElementById('previewControls');
+                                    previewControls?.classList.remove('hidden');
                                     const previewCard = document.getElementById('previewCard');
                                     previewCard?.classList.remove('max-h-[90vh]');
-                                    btnP.classList.add('bg-violet-600','text-white');
-                                    btnP.classList.remove('bg-slate-700','text-slate-200');
-                                    btnH.classList.add('bg-slate-700','text-slate-200');
-                                    btnH.classList.remove('bg-violet-600','text-white');
+                                    btnP.classList.add('bg-violet-600', 'text-white');
+                                    btnP.classList.remove('bg-slate-700', 'text-slate-200');
+                                    btnH.classList.add('bg-slate-700', 'text-slate-200');
+                                    btnH.classList.remove('bg-violet-600', 'text-white');
                                 }
                                 function showHistory() {
                                     previewW.classList.add('hidden');
@@ -474,10 +503,10 @@
                                     previewControls?.classList.add('hidden');
                                     const previewCard = document.getElementById('previewCard');
                                     previewCard?.classList.add('max-h-[90vh]');
-                                    btnH.classList.add('bg-violet-600','text-white');
-                                    btnH.classList.remove('bg-slate-700','text-slate-200');
-                                    btnP.classList.add('bg-slate-700','text-slate-200');
-                                    btnP.classList.remove('bg-violet-600','text-white');
+                                    btnH.classList.add('bg-violet-600', 'text-white');
+                                    btnH.classList.remove('bg-slate-700', 'text-slate-200');
+                                    btnP.classList.add('bg-slate-700', 'text-slate-200');
+                                    btnP.classList.remove('bg-violet-600', 'text-white');
                                     // make sure history has been loaded
                                     if (window.historyManager) {
                                         window.historyManager.loadHistory();
@@ -597,10 +626,12 @@
                             opacity: 0;
                             transition: opacity .18s ease, transform .18s ease;
                         }
+
                         .control-pill.visible {
                             transform: translateY(0);
                             opacity: 1;
                         }
+
                         .control-btn {
                             width: 36px;
                             height: 36px;
@@ -613,34 +644,44 @@
                             cursor: pointer;
                             transition: transform .12s ease, background .12s ease, color .12s ease;
                         }
+
                         .control-btn:hover {
                             transform: translateY(-2px);
-                            background: rgba(148,163,184,0.06);
+                            background: rgba(148, 163, 184, 0.06);
                         }
+
                         .control-note {
-                            color: rgba(203,213,225,0.9);
+                            color: rgba(203, 213, 225, 0.9);
                             font-size: 12px;
                             padding-left: 6px;
                         }
-                        #previewControls { transition: opacity .12s ease; }
-                        #previewControls.hidden { opacity: 0; pointer-events: none; }
+
+                        #previewControls {
+                            transition: opacity .12s ease;
+                        }
+
+                        #previewControls.hidden {
+                            opacity: 0;
+                            pointer-events: none;
+                        }
 
                         /* Toast */
                         #previewToast {
                             position: fixed;
                             right: 18px;
                             bottom: 18px;
-                            background: rgba(15,23,42,0.95);
+                            background: rgba(15, 23, 42, 0.95);
                             color: #e6eef8;
                             padding: 10px 14px;
                             border-radius: 10px;
-                            box-shadow: 0 6px 22px rgba(2,6,23,0.6);
+                            box-shadow: 0 6px 22px rgba(2, 6, 23, 0.6);
                             z-index: 60;
                             transform: translateY(8px) scale(.98);
                             opacity: 0;
                             transition: opacity .18s ease, transform .18s ease;
                             font-size: 13px;
                         }
+
                         #previewToast.show {
                             opacity: 1;
                             transform: translateY(0) scale(1);
