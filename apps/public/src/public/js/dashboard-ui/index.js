@@ -24,6 +24,9 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
   let suspendAutoSave = false;
   let saving = false;
   let saveQueued = false;
+  // keep track of which section should be saved (defaults to current tab)
+  let currentSection = 'profile';
+  let pendingSection = null;
   // Délais pour limiter le spam de requêtes et de rafraîchissements
   const AUTO_SAVE_DELAY = 1500; // délai avant PUT auto (1.5s)
   const PREVIEW_REFRESH_DELAY = 1000; // délai avant déclencher un refresh si aucune autre frappe (debounce)
@@ -105,12 +108,36 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       }
     }, PREVIEW_REFRESH_DELAY);
   };
-  const scheduleAutoSave = () => {
+  /**
+   * Schedule an automatic save after a short delay. Optionally specify
+   * a section to save; otherwise we use the currently selected tab.
+   */
+  const scheduleAutoSave = (section) => {
     if (suspendAutoSave) return;
+    // if caller didn't specify, derive section from current hash (replaceState doesn't fire hashchange)
+    if (!section) {
+      const h = location.hash.replace('#section-', '');
+      if (h) currentSection = h;
+    }
+    // refresh layout preview so "masqué" flags update immediately
+    refreshLayout();
+    // remember which section we want to persist
+    pendingSection = section || currentSection;
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
     setStatus('Enregistrement...');
-    autoSaveTimer = setTimeout(() => { saveNow(false); }, AUTO_SAVE_DELAY);
+    autoSaveTimer = setTimeout(() => {
+      saveNow(false, pendingSection);
+      pendingSection = null;
+    }, AUTO_SAVE_DELAY);
   };
+
+  function refreshLayout() {
+    const lc = qs('#layoutList');
+    if (lc && typeof renderLayout === 'function') {
+      const cfg = window.__CURRENT_CFG__ || {};
+      renderLayout({ container: lc, order: state.layoutOrder, scheduleAutoSave: () => scheduleAutoSave('layout'), cfg });
+    }
+  }
 
   function getConfigEndpoint(section) {
     const pid = (window.__PLINKK_SELECTED_ID__ || '').trim();
@@ -120,14 +147,15 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
   const fetchConfig = () => fetch(getConfigEndpoint()).then(async (r) => { if (!r.ok) throw new Error(await r.text()); return r.json(); });
   const putConfig = (section, obj) => fetch(getConfigEndpoint() + `/${section}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(obj) }).then(async (r) => { if (!r.ok) throw new Error(await r.text()); return r.json(); });
 
-  async function saveNow(manual) {
+  async function saveNow(manual, sectionOverride) {
     if (autoSaveTimer) { clearTimeout(autoSaveTimer); autoSaveTimer = null; }
     if (saving) { saveQueued = true; return; }
     saving = true;
-    const hash = location.hash.replace("#section-", "") !== "" ? location.hash.replace("#section-", "") : 'profile'
+    // decide which section we are saving
+    const section = sectionOverride || pendingSection || currentSection || (location.hash.replace("#section-", "") !== "" ? location.hash.replace("#section-", "") : 'profile');
     let sectionsAPI = [];
     let sectionsAPIFunction = []
-    switch (hash) {
+    switch (section) {
       case "appearance":
         sectionsAPI = [ "plinkk", "neonColor" ]
         sectionsAPIFunction = [ collectPayloadPlinkk(), collectPayloadNeonColor() ]
@@ -180,6 +208,8 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
   }
 
   const state = { background: [], neonColors: [], labels: [], socialIcon: [], links: [], layoutOrder: [] };
+  // expose for layout visibility checks
+  window.__LAYOUT_STATE__ = state;
 
   async function ensureCfg(maxWaitMs = 3000) {
     const start = Date.now();
@@ -277,29 +307,19 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
       state.layoutOrder = [...newOrder];
       const lc = qs('#layoutList');
       if (lc && typeof renderLayout === 'function') {
-        renderLayout({ container: lc, order: state.layoutOrder, scheduleAutoSave: () => {} });
+        renderLayout({ container: lc, order: state.layoutOrder, scheduleAutoSave: () => scheduleAutoSave('layout'), cfg });
       }
     }
   };
 
-    renderBackground({ container: f.backgroundList, addBtn: f.addBackgroundColor, colors: state.background, scheduleAutoSave });
-    renderNeon({ container: f.neonList, addBtn: f.addNeonColor, colors: state.neonColors, neonEnableEl: f.neonEnable, scheduleAutoSave });
-    renderLabels({ container: f.labelsList, addBtn: f.addLabel, labels: state.labels, scheduleAutoSave });
-    renderSocial({ container: f.socialList, addBtn: f.addSocial, socials: state.socialIcon, scheduleAutoSave });
-  renderLinks({ container: f.linksList, addBtn: f.addLink, links: state.links, scheduleAutoSave });
-  // Rendu de l'agencement - always query the element again in case it changed
-  const layoutContainer = qs('#layoutList');
-  renderLayout({ container: layoutContainer, order: state.layoutOrder, scheduleAutoSave });
-
-    const hasNeonColors = state.neonColors.length > 0;
-    if (f.neonEnable) {
-      // Forcer désactivation visuelle du néon pour l'instant
-      f.neonEnable.checked = false;
-      f.neonEnable.disabled = true;
-      f.neonEnable.title = 'Néon temporairement désactivé';
-    }
-    suspendAutoSave = false;
+  const hasNeonColors = state.neonColors.length > 0;
+  if (f.neonEnable) {
+    // Forcer désactivation visuelle du néon pour l'instant
+    f.neonEnable.checked = false;
+    f.neonEnable.disabled = true;
+    f.neonEnable.title = 'Néon temporairement désactivé';
   }
+  suspendAutoSave = false;
 
   function isMasked(el) {
     if (!el) return false;
@@ -452,6 +472,8 @@ window.__OPEN_PLATFORM_MODAL__ = (platform, cb) => ensurePlatformEntryModal().op
 
   (async () => {
     const cfg = await ensureCfg();
+    // make config available globally for helpers
+    window.__CURRENT_CFG__ = cfg;
     const themeBtn = qs('#openThemePicker');
     const canvasBtn = qs('#openCanvasPicker');
     const animArticleBtn = qs('#openAnimArticlePicker');

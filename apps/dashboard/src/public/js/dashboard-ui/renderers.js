@@ -1354,11 +1354,11 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
 }
 
 // Agencement: réordonner les grandes sections de la page
-export function renderLayout({ container, order, scheduleAutoSave }) {
+export function renderLayout({ container, order, scheduleAutoSave, cfg = {} }) {
   if (!container) return;
   container.innerHTML = '';
 
-  const KNOWN = ['profile', 'username', 'labels', 'social', 'email', 'links'];
+  const KNOWN = ['profile', 'username', 'statusbar', 'labels', 'social', 'email', 'links'];
 
   if (!Array.isArray(order) || order.length === 0) {
     if (Array.isArray(order)) {
@@ -1380,14 +1380,38 @@ export function renderLayout({ container, order, scheduleAutoSave }) {
   const LABELS = {
     profile: 'Photo & lien de profil',
     username: 'Nom affiché',
+    statusbar: 'Statut (barre sous le profil)',
     labels: 'Labels (badges)',
     social: 'Icônes sociales',
     email: 'Email & Description',
     links: 'Boutons / Liens',
   };
 
+  const dyn = window.__INITIAL_STATE__ || {};
+  const visible = {
+    profile: true,
+    username: true,
+    statusbar: !!(
+      (cfg.statusbar && (cfg.statusbar.text || cfg.statusbar.statusText)) ||
+      (dyn.statusbar && (dyn.statusbar.text || dyn.statusbar.statusText))
+    ),
+    labels:
+      (Array.isArray(cfg.labels) && cfg.labels.length > 0) ||
+      (Array.isArray(dyn.labels) && dyn.labels.length > 0),
+    social:
+      (Array.isArray(cfg.socialIcon) && cfg.socialIcon.length > 0) ||
+      (Array.isArray(cfg.socialIcons) && cfg.socialIcons.length > 0) ||
+      (Array.isArray(dyn.socialIcon) && dyn.socialIcon.length > 0) ||
+      (Array.isArray(dyn.socialIcons) && dyn.socialIcons.length > 0),
+    email: !!(cfg.email || cfg.description || dyn.email || dyn.description),
+    links:
+      (Array.isArray(cfg.links) && cfg.links.length > 0) ||
+      (Array.isArray(dyn.links) && dyn.links.length > 0),
+  };
+
   normalized.forEach((key, idx) => {
-    const row = el('div', { class: 'flex items-center gap-3 w-full rounded-xl border border-slate-800 bg-slate-900/50 px-3 py-3 select-none hover:border-slate-700 transition-colors' });
+    const isVisible = visible[key];
+    const row = el('div', { class: 'flex items-center gap-3 w-full rounded-xl border border-slate-800 bg-slate-900/50 px-3 py-3 select-none hover:border-slate-700 transition-colors' + (isVisible ? '' : ' opacity-50') });
     row.dataset.dragIndex = String(idx);
 
     const gripBtn = el('button', { type: 'button', class: 'h-8 w-8 inline-flex items-center justify-center rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-400 cursor-grab active:cursor-grabbing transition-colors touch-none', title: 'Déplacer', 'aria-label': 'Déplacer', style: 'touch-action: none;' });
@@ -1395,9 +1419,13 @@ export function renderLayout({ container, order, scheduleAutoSave }) {
 
     const label = el('div', { class: 'text-sm font-medium text-slate-200' });
     label.textContent = LABELS[key] || key;
+    if (!isVisible) {
+      const note = el('span', { class: 'ml-auto text-xs text-slate-400 italic', text: '(masqué)' });
+      row.append(note);
+    }
 
     row.append(gripBtn, label);
-    try { enableDragHandle(gripBtn, row, container, order, () => renderLayout({ container, order, scheduleAutoSave }), scheduleAutoSave); } catch { }
+    try { enableDragHandle(gripBtn, row, container, order, () => renderLayout({ container, order, scheduleAutoSave, cfg, cfg }), scheduleAutoSave); } catch { }
     container.appendChild(row);
   });
 }

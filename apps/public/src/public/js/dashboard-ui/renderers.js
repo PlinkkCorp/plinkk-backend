@@ -508,7 +508,7 @@ export function renderLinks({ container, addBtn, links, scheduleAutoSave }) {
 }
 
 // Agencement: réordonner les grandes sections de la page
-export function renderLayout({ container, order, scheduleAutoSave }) {
+export function renderLayout({ container, order, scheduleAutoSave, cfg = {}, cfg = {} }) {
   if (!container) return;
   container.innerHTML = '';
   if (!Array.isArray(order)) order = [];
@@ -531,16 +531,33 @@ export function renderLayout({ container, order, scheduleAutoSave }) {
     links: 'Boutons / Liens',
   };
 
+  // determine which sections are actually visible based on cfg
+  const dyn = window.__LAYOUT_STATE__ || {};
+  const visible = {
+    profile: true,
+    username: true,
+    statusbar: !!((cfg.statusbar && (cfg.statusbar.text || cfg.statusbar.statusText)) || (dyn.statusbar && (dyn.statusbar.text || dyn.statusbar.statusText))),
+    labels: (Array.isArray(cfg.labels) && cfg.labels.length > 0) || (Array.isArray(dyn.labels) && dyn.labels.length > 0),
+    social: (Array.isArray(cfg.socialIcon) && cfg.socialIcon.length > 0) || (Array.isArray(dyn.socialIcon) && dyn.socialIcon.length > 0),
+    email: !!((cfg.email || cfg.description) || (dyn.email || dyn.description)),
+    links: (Array.isArray(cfg.links) && cfg.links.length > 0) || (Array.isArray(dyn.links) && dyn.links.length > 0),
+  };
+
   normalized.forEach((key, idx) => {
-    const row = el('div', { class: 'flex items-center gap-3 w-full rounded-md border border-slate-800 bg-slate-900/50 px-2 py-2' });
+    const isVisible = visible[key];
+    const row = el('div', { class: 'flex items-center gap-3 w-full rounded-md border border-slate-800 bg-slate-900/50 px-2 py-2' + (isVisible ? '' : ' opacity-50') });
     row.dataset.dragIndex = String(idx);
     const gripBtn = el('button', { type: 'button', class: 'h-9 w-9 inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 hover:bg-slate-700', title: 'Déplacer', 'aria-label': 'Déplacer' });
     gripBtn.style.cursor = 'grab';
     gripBtn.appendChild(createGripSVG(18));
     const label = el('div', { class: 'text-sm text-slate-200' });
     label.textContent = LABELS[key] || key;
+    if (!isVisible) {
+      const note = el('span', { class: 'ml-auto text-xs text-slate-400 italic', text: '(masqué)' });
+      row.append(note);
+    }
     row.append(gripBtn, label);
-    try { enableDragHandle(gripBtn, row, container, order, () => renderLayout({ container, order, scheduleAutoSave }), scheduleAutoSave); } catch { }
+    try { enableDragHandle(gripBtn, row, container, order, () => renderLayout({ container, order, scheduleAutoSave, cfg, cfg }), scheduleAutoSave); } catch { }
     container.appendChild(row);
   });
 }

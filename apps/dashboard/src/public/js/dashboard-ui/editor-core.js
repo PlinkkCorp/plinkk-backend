@@ -59,6 +59,7 @@ async function saveLinks(links) {
         if (currentConfig) currentConfig.links = res.links;
         if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.links = res.links;
         if (window.__EDITOR_STORE__) window.__EDITOR_STORE__.set({ links: res.links });
+        if (window.__PLINKK_SYNC_LAYOUT__) window.__PLINKK_SYNC_LAYOUT__();
         renderPlinkk(currentConfig); // Refresh preview
     }
     return res;
@@ -71,7 +72,7 @@ async function saveLayout(order) {
         if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.layoutOrder = res.layoutOrder;
         if (window.__EDITOR_STORE__) window.__EDITOR_STORE__.set({ layoutOrder: res.layoutOrder });
         if (window.__PLINKK_SYNC_LAYOUT__) {
-            try { window.__PLINKK_SYNC_LAYOUT__(res.layoutOrder); } catch {}
+            try { window.__PLINKK_SYNC_LAYOUT__(res.layoutOrder); } catch { }
         }
         renderPlinkk(currentConfig);
     }
@@ -84,6 +85,7 @@ async function saveLabels(labels) {
         if (currentConfig) currentConfig.labels = res.labels;
         if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.labels = res.labels;
         if (window.__EDITOR_STORE__) window.__EDITOR_STORE__.set({ labels: res.labels });
+        if (window.__PLINKK_SYNC_LAYOUT__) window.__PLINKK_SYNC_LAYOUT__();
         renderPlinkk(currentConfig);
     }
     return res;
@@ -95,6 +97,7 @@ async function saveSocialIcons(socialIcon) {
         if (currentConfig) currentConfig.socialIcon = res.socialIcon;
         if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.socialIcon = res.socialIcon;
         if (window.__EDITOR_STORE__) window.__EDITOR_STORE__.set({ socials: res.socialIcon }); // Note: state uses 'socials'
+        if (window.__PLINKK_SYNC_LAYOUT__) window.__PLINKK_SYNC_LAYOUT__();
         renderPlinkk(currentConfig);
     }
     return res;
@@ -111,6 +114,7 @@ async function saveStatusBar(statusbar) {
             if (!window.__INITIAL_STATE__.statusbar) window.__INITIAL_STATE__.statusbar = {};
             Object.assign(window.__INITIAL_STATE__.statusbar, statusbar);
         }
+        if (window.__PLINKK_SYNC_LAYOUT__) window.__PLINKK_SYNC_LAYOUT__();
         renderPlinkk(currentConfig);
     }
     return res;
@@ -120,6 +124,7 @@ async function saveStatusBar(statusbar) {
 window.__PLINKK_SAVE_LINKS__ = saveLinks;
 window.__PLINKK_SAVE_LABELS__ = saveLabels;
 window.__PLINKK_SAVE_SOCIAL__ = saveSocialIcons;
+window.__PLINKK_SAVE_LAYOUT__ = saveLayout;
 window.__PLINKK_GET_CONFIG__ = () => currentConfig;
 
 // ===== CHARGEMENT =====
@@ -749,7 +754,7 @@ function renderPlinkk(config) {
         .popover-btn.delete:hover { background: rgba(239,68,68,0.25); }
     `;
 
-    const DEFAULT_LAYOUT = ['profile','username','statusbar','labels','social','email','links'];
+    const DEFAULT_LAYOUT = ['profile', 'username', 'statusbar', 'labels', 'social', 'email', 'links'];
     let layout = Array.isArray(plinkk.layoutOrder) ? plinkk.layoutOrder.slice() : DEFAULT_LAYOUT.slice();
     const KNOWN = new Set(DEFAULT_LAYOUT);
     const seen = new Set();
@@ -763,8 +768,8 @@ function renderPlinkk(config) {
         <div class="profile-section" data-section="profile" draggable="true">
             <div class="profile-pic-container">
                 ${pfp
-        ? `<img src="${pfp}" alt="${name}" class="profile-pic" onerror="this.outerHTML='<span class=profile-initial>${initial}</span>'"/>`
-        : `<span class="profile-initial">${initial}</span>`}
+            ? `<img src="${pfp}" alt="${name}" class="profile-pic" onerror="this.outerHTML='<span class=profile-initial>${initial}</span>'"/>`
+            : `<span class="profile-initial">${initial}</span>`}
                 <div class="profile-upload-overlay">
                     <label title="Changer l'image">
                         <input type="file" id="pfpUploadInline" accept="image/*" style="display:none"/>
