@@ -120,16 +120,7 @@
                                     </button>
                                 </li>
 
-                                <li>
-                                    <button data-target="#section-history"
-                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
-                                        <svg class="size-4" viewBox="0 0 24 24" fill="white">
-                                            <path
-                                                d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z" />
-                                        </svg>
-                                        Historique
-                                    </button>
-                                </li>
+
                             </ul>
                         </nav>
 
@@ -166,69 +157,73 @@
 
 
 
-                            <div id="section-history"
-                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                                <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                    <div>
-                                        <h3 class="text-lg font-semibold text-white">Historique & Sauvegardes</h3>
-                                        <p class="text-sm text-slate-400">Restaurez une version précédente de votre
-                                            page.</p>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button id="refreshHistory"
-                                            class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-                                            title="Actualiser">
-                                            <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
 
-                                <div class="flex p-1 bg-slate-950 rounded-xl mb-6">
-                                    <button id="tab-history-auto"
-                                        class="flex-1 py-2 text-sm font-medium rounded-lg transition-all bg-white shadow text-slate-900">
-                                        Automatique
-                                    </button>
-                                    <button id="tab-history-manual"
-                                        class="flex-1 py-2 text-sm font-medium rounded-lg transition-all text-slate-400 hover:bg-white/[0.12] hover:text-white">
-                                        Manuelle
-                                    </button>
-                                </div>
-
-                                <div id="manual-backup-actions"
-                                    class="hidden mb-6 p-4 bg-slate-950 rounded-xl border border-slate-800">
-                                    <h4 class="text-sm font-medium text-white mb-3">Créer une sauvegarde</h4>
-                                    <div class="flex gap-2">
-                                        <input type="text" id="backupName"
-                                            placeholder="Nom de la sauvegarde (optionnel)"
-                                            class="flex-1 px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-sm focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 outline-none">
-                                        <button onclick="createBackup()"
-                                            class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-lg transition-colors">
-                                            Sauvegarder
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div id="historyList" class="space-y-3 min-h-[100px]"></div>
-                            </div>
                         </div>
                     </section>
 
-                    <aside class="hidden xl:block xl:col-span-5 relative">
-                        <div class="sticky top-8">
-                            <div
-                                class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-4 shadow-2xl relative overflow-hidden">
-                                <div class="absolute top-0 left-0 w-full h-full bg-slate-950 opacity-50 z-0"></div>
-                                <div
-                                    class="relative z-10 bg-black rounded-[2rem] overflow-hidden border-[6px] border-slate-800 shadow-inner aspect-[9/19] max-h-[85vh] mx-auto">
-                                    <iframe id="preview"
-                                        src="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>?preview=1"
-                                        class="w-full h-full bg-white" frameborder="0"></iframe>
+                    <aside class="hidden xl:block xl:col-span-5 relative space-y-6">
+                        <div id="sidebar-history"
+                            class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-lg animate-slide-up">
+                            <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-white">Historique</h3>
+                                    <p class="text-sm text-slate-400">Restaurez une version précédente.</p>
                                 </div>
+                                <div class="flex gap-2">
+                                    <button id="refreshHistory"
+                                        class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                                        title="Actualiser">
+                                        <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex p-1 bg-slate-950 rounded-xl mb-4">
+                                <button id="tab-history-auto"
+                                    class="flex-1 py-1.5 text-xs font-medium rounded-lg transition-all bg-white shadow text-slate-900">
+                                    Auto
+                                </button>
+                                <button id="tab-history-manual"
+                                    class="flex-1 py-1.5 text-xs font-medium rounded-lg transition-all text-slate-400 hover:bg-white/[0.12] hover:text-white">
+                                    Manuelle
+                                </button>
+                            </div>
+
+                            <div id="manual-backup-actions"
+                                class="hidden mb-4 p-3 bg-slate-950 rounded-xl border border-slate-800">
+                                <div class="flex gap-2">
+                                    <input type="text" id="backupName" placeholder="Nom..."
+                                        class="flex-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-xs focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 outline-none">
+                                    <button onclick="createBackup()"
+                                        class="px-3 py-1.5 bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium rounded-lg transition-colors">
+                                        Sauver
+                                    </button>
+                                </div>
+                            </div>
+
+                            </div> <!-- end manual backup container -->
+                            <!-- preview / history switcher -->
+                            <div class="sticky top-8">
                                 <div
-                                    class="absolute bottom-8 left-0 right-0 flex justify-center z-20 pointer-events-none">
+                                    class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-4 shadow-2xl relative overflow-hidden">
+                                    <div class="absolute top-0 left-0 w-full h-full bg-slate-950 opacity-50 z-0"></div>
+                                    <div class="flex justify-center gap-2 mb-2">
+                                        <button id="btnPreview" class="px-3 py-1 text-sm font-medium rounded-lg bg-violet-600 text-white">Aperçu</button>
+                                        <button id="btnHistory" class="px-3 py-1 text-sm font-medium rounded-lg bg-slate-700 text-slate-200">Historique</button>
+                                    </div>
+                                    <div id="previewWrapper" class="relative z-10 bg-black rounded-[2rem] overflow-hidden border-[6px] border-slate-800 shadow-inner aspect-[9/19] max-h-[85vh] mx-auto">
+                                        <iframe id="preview"
+                                            src="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>?preview=1"
+                                            class="w-full h-full bg-white" frameborder="0"></iframe>
+                                    </div>
+                                    <div id="historyWrapper" class="hidden mt-4">
+                                        <div id="historyList" class="space-y-2 max-h-[250px] overflow-y-auto scrollbar-hide"></div>
+                                    </div>
+                                    <div
+                                        class="absolute bottom-8 left-0 right-0 flex justify-center z-20 pointer-events-none">
                                     <div
                                         class="bg-slate-900/90 backdrop-blur px-4 py-2 rounded-full border border-slate-700 flex items-center gap-4 pointer-events-auto shadow-xl">
                                         <button class="text-slate-400 hover:text-white transition-colors"
@@ -242,6 +237,10 @@
                                                 <path d="M16 21h5v-5" />
                                             </svg>
                                         </button>
+                                        <!-- status indicator moved inside preview overlay for ergonomic feedback -->
+                                        <div id="status" class="text-xs text-slate-400 opacity-0 transition-opacity">
+                                            <!-- text updated by JS; initially hidden -->
+                                        </div>
                                         <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>"
                                             target="_blank" class="text-slate-400 hover:text-white transition-colors"
                                             title="Ouvrir">
@@ -284,6 +283,11 @@
                             if (dot && text) {
                                 dot.className = 'size-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all';
                                 text.textContent = 'Modifications enregistrées';
+                            }
+                            // Refresh preview iframe
+                            const preview = document.getElementById('preview');
+                            if (preview) {
+                                preview.src = preview.src;
                             }
                         };
 
@@ -353,6 +357,37 @@
                         }
                     </script>
 
+                    <script>
+                        // toggle preview/history view inside editor
+                        (function() {
+                            const btnP = document.getElementById('btnPreview');
+                            const btnH = document.getElementById('btnHistory');
+                            const previewW = document.getElementById('previewWrapper');
+                            const historyW = document.getElementById('historyWrapper');
+                            if (btnP && btnH && previewW && historyW) {
+                                function showPreview() {
+                                    previewW.classList.remove('hidden');
+                                    historyW.classList.add('hidden');
+                                    btnP.classList.add('bg-violet-600','text-white');
+                                    btnP.classList.remove('bg-slate-700','text-slate-200');
+                                    btnH.classList.add('bg-slate-700','text-slate-200');
+                                    btnH.classList.remove('bg-violet-600','text-white');
+                                }
+                                function showHistory() {
+                                    previewW.classList.add('hidden');
+                                    historyW.classList.remove('hidden');
+                                    btnH.classList.add('bg-violet-600','text-white');
+                                    btnH.classList.remove('bg-slate-700','text-slate-200');
+                                    btnP.classList.add('bg-slate-700','text-slate-200');
+                                    btnP.classList.remove('bg-violet-600','text-white');
+                                }
+                                btnP.addEventListener('click', showPreview);
+                                btnH.addEventListener('click', showHistory);
+                                // default state
+                                showPreview();
+                            }
+                        })();
+                    </script>
                     <script src="/public/js/dashboard-ui/editor-core.js"></script>
                     <script type="module" src="/public/js/dashboard-ui/index.js"></script>
 
