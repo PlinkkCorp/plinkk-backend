@@ -130,6 +130,8 @@ export function generateProfileConfig(
         enableVCard: ${profile.enableVCard ?? false},
         publicPhone: ${JSON.stringify(profile.publicPhone || "")},
         enableLinkCategories: ${profile.enableLinkCategories ?? false},
+        fontFamily: ${JSON.stringify(profile.fontFamily || "")},
+        buttonStyle: ${JSON.stringify(profile.buttonStyle || "")},
     };
     export default profileData;
     `;

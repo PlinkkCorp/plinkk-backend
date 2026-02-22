@@ -508,6 +508,8 @@ fastify.addHook("onRequest", async (request, reply) => {
             showPartnerBadge: finalSettings?.showPartnerBadge ?? true,
             enableVCard: finalSettings?.enableVCard ?? false,
             enableLinkCategories: finalSettings?.enableLinkCategories ?? false,
+            fontFamily: finalSettings?.fontFamily ?? "",
+            buttonStyle: finalSettings?.buttonStyle ?? "",
           };
 
           const generated = generateProfileConfig(
