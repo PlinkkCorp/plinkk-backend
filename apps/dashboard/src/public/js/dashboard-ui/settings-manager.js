@@ -8,11 +8,13 @@ export class SettingsManager {
             'profileImage', 'profileIcon', 'iconUrl', 'description',
             'publicPhone', 'affichageEmail', 'fontFamily', 'status_text',
             'animationDuration', 'delayAnimationButton',
-            'selectedAnimationIndex', 'selectedAnimationButtonIndex', 'selectedAnimationBackgroundIndex'
+            'selectedAnimationIndex', 'selectedAnimationButtonIndex', 'selectedAnimationBackgroundIndex',
+            'selectedThemeIndex'
         ];
         this.checkboxes = [
             'showStatus', 'enableLinkCategories', 'canvaEnable', 'buttonThemeEnable',
-            'EnableAnimationArticle', 'EnableAnimationButton', 'EnableAnimationBackground'
+            'EnableAnimationArticle', 'EnableAnimationButton', 'EnableAnimationBackground',
+            'showVerifiedBadge', 'showPartnerBadge'
         ];
         this.radios = [
             'theme', 'accentColor', 'buttonStyle'

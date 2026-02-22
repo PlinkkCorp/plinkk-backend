@@ -113,6 +113,7 @@ class DashboardUI {
     this.initAnimationModals();
     this.initSocials();
     this.initGeneralPickers();
+    this.initThemePicker();
 
     // Initial check
     if (window.initSortable) window.initSortable();
@@ -485,6 +486,105 @@ class DashboardUI {
   debouncedSaveSetting(key, value) {
     if (this.saveTimeout) clearTimeout(this.saveTimeout);
     this.saveTimeout = setTimeout(() => this.saveSetting(key, value), 1000);
+  }
+
+  async initThemePicker() {
+    const themeBtn = document.getElementById('openThemePicker');
+    if (!themeBtn) return;
+
+    let themes = [];
+    let builtIns = [];
+    let community = [];
+
+    const updateLabel = () => {
+      const idx = parseInt(document.getElementById('selectedThemeIndex')?.value || 0);
+      const allThemes = [...builtIns, ...community];
+      const selected = allThemes[idx] || allThemes[0];
+
+      const nameEl = document.getElementById('selectedThemeName');
+      if (nameEl) nameEl.textContent = selected?.name || 'Thème par défaut';
+
+      const previewContent = document.getElementById('themePreviewContent');
+      if (previewContent && selected) {
+        previewContent.style.background = selected.background || '#1e293b';
+        previewContent.innerHTML = `
+          <div class="flex flex-col h-full p-1 gap-1">
+            <div class="h-1 w-full rounded-full" style="background: ${selected.buttonBackground || '#8b5cf6'}"></div>
+            <div class="h-1 w-2/3 rounded-full opacity-50" style="background: ${selected.textColor || 'white'}"></div>
+          </div>
+        `;
+      }
+    };
+
+    try {
+      const res = await fetch('/api/themes/list');
+      if (res.ok) {
+        const data = await res.json();
+        builtIns = data.builtIns || [];
+        community = data.theme || [];
+        themes = [...builtIns, ...community];
+        updateLabel();
+      }
+    } catch (e) {
+      console.error('Failed to fetch themes', e);
+    }
+
+    const renderThemeCard = (item, idx) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'group p-3 rounded-xl border border-slate-800 bg-slate-950 hover:bg-slate-900 hover:border-violet-500/50 transition-all text-left flex flex-col gap-2';
+
+      const preview = document.createElement('div');
+      preview.className = 'h-16 w-full rounded-lg border border-slate-800 overflow-hidden relative shadow-inner';
+      preview.style.background = item.background || '#1e293b';
+
+      const mockHeader = document.createElement('div');
+      mockHeader.className = 'absolute inset-x-2 top-2 h-2 rounded-full opacity-40';
+      mockHeader.style.background = item.buttonBackground || '#8b5cf6';
+
+      const mockButton = document.createElement('div');
+      mockButton.className = 'absolute inset-x-4 top-6 h-4 rounded-md shadow-sm';
+      mockButton.style.background = item.buttonBackground || '#8b5cf6';
+
+      preview.append(mockHeader, mockButton);
+
+      const info = document.createElement('div');
+      info.className = 'space-y-0.5';
+      const name = document.createElement('div');
+      name.className = 'text-xs font-semibold text-slate-200 truncate';
+      name.textContent = item.name;
+      const status = document.createElement('div');
+      status.className = 'text-[10px] text-slate-500';
+      status.textContent = item.source === 'mine' ? 'Mon thème' : (item.author ? `par ${item.author.userName}` : 'Officiel');
+
+      info.append(name, status);
+      card.append(preview, info);
+
+      card.onclick = () => {
+        const hiddenInput = document.getElementById('selectedThemeIndex');
+        if (hiddenInput) {
+          hiddenInput.value = idx;
+          hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        updateLabel();
+        this.saveSetting('selectedThemeIndex', idx);
+        window.__DASH_PICKERS__.closePicker();
+      };
+
+      return card;
+    };
+
+    themeBtn.onclick = () => {
+      const { openPicker } = window.__DASH_PICKERS__ || {};
+      if (openPicker) {
+        openPicker({
+          title: 'Séléction du thème',
+          type: 'theme',
+          items: themes,
+          renderCard: (item, idx) => renderThemeCard(item, idx)
+        });
+      }
+    };
   }
 }
 
