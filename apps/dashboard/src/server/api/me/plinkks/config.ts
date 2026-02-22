@@ -67,6 +67,8 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       canvaEnable: settings?.canvaEnable ?? 0,
       selectedCanvasIndex: settings?.selectedCanvasIndex ?? null,
       layoutOrder: settings?.layoutOrder ?? null,
+      fontFamily: settings?.fontFamily ?? "",
+      buttonStyle: settings?.buttonStyle ?? "rounded",
       background: background.map((c) => c.color),
       neonColors: neonColors.map((c) => c.color),
       labels: labels.map((l) => ({ data: l.data, color: l.color, fontColor: l.fontColor })),
@@ -85,11 +87,11 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       categories: categories.map((c) => ({ id: c.id, name: c.name, order: c.order })),
       statusbar: statusbar
         ? {
-            text: statusbar.text,
-            colorBg: statusbar.colorBg,
-            fontTextColor: statusbar.fontTextColor,
-            statusText: statusbar.statusText,
-          }
+          text: statusbar.text,
+          colorBg: statusbar.colorBg,
+          fontTextColor: statusbar.fontTextColor,
+          statusText: statusbar.statusText,
+        }
         : null,
     };
     return reply.send(cfg);
@@ -180,6 +182,8 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       canvaEnable: boolInt(body.canvaEnable),
       selectedCanvasIndex: intOrNull(body.selectedCanvasIndex),
       layoutOrder: body.layoutOrder,
+      fontFamily: body.fontFamily,
+      buttonStyle: body.buttonStyle,
     });
 
     if (Object.keys(data).length > 0) {

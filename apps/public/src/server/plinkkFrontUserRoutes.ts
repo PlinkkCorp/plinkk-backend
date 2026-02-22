@@ -261,6 +261,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
               }
             }
 
+            const settings = await prisma.plinkkSettings.findUnique({ where: { plinkkId: resolved.page.id } });
             return reply.view("plinkk/show.ejs", {
               page: displayPage,
               userId: resolved.user.id,
@@ -268,6 +269,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
               isOwner,
               links: displayLinks,
               publicPath,
+              settings,
             });
           }
           // if page exists but resolve failed (private/inactive), return appropriate status
@@ -424,6 +426,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           }
         }
 
+        const settings = await prisma.plinkkSettings.findUnique({ where: { plinkkId: resolved.page.id } });
         return reply.view("plinkk/show.ejs", {
           page: displayPage,
           userId: resolved.user.id,
@@ -431,6 +434,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           isOwner,
           links: displayLinks,
           publicPath,
+          settings,
         });
       }
     },
@@ -835,6 +839,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         enableVCard: finalSettings?.enableVCard ?? true,
         publicPhone: finalSettings?.publicPhone ?? "",
         enableLinkCategories: finalSettings?.enableLinkCategories ?? false,
+        fontFamily: finalSettings?.fontFamily ?? "",
+        buttonStyle: finalSettings?.buttonStyle ?? "",
       };
 
       const generated = generateProfileConfig(

@@ -290,6 +290,10 @@ export function applyTheme(theme) {
         if (_p.buttonStyle === 'pill') radius = '9999px';
         if (_p.buttonStyle === 'sharp') radius = '0px';
         if (_p.buttonStyle === 'rounded') radius = '16px';
+        if (_p.buttonStyle === 'soft') radius = '8px';
+        if (_p.buttonStyle === 'extra-rounded') radius = '32px';
+        if (_p.buttonStyle === 'leaf') radius = '24px 4px 24px 4px';
+        if (_p.buttonStyle === 'leaf-alt') radius = '4px 24px 4px 24px';
 
         const styleSheetObj = document.styleSheets[document.styleSheets.length - 1] || document.styleSheets[0];
         try {
