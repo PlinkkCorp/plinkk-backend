@@ -1,0 +1,182 @@
+<aside id="adminSidebar" class="hidden lg:flex flex-col col-span-2 sticky top-[68px] h-[calc(100vh-80px)]">
+    <!-- Unified Container -->
+    <div
+        class="flex-1 flex flex-col bg-slate-900/50 backdrop-blur-xl border border-slate-800/50 rounded-3xl p-4 shadow-xl overflow-y-auto no-scrollbar">
+
+        <!-- Profile Section -->
+        <div class="flex flex-col items-center text-center mb-6 pb-6 border-b border-slate-800/50">
+            <div class="relative group cursor-pointer">
+                <div class="p-1 mb-3">
+                    <div class="h-32 w-32 overflow-hidden bg-slate-900 grid place-items-center rounded-full">
+                        <%- include('avatar.ejs', { user: locals.user }) %>
+                    </div>
+                </div>
+            </div>
+            <h3 class="font-bold text-white text-lg">Administration</h3>
+            <p class="text-xs text-slate-400 mt-1">Panneau de contrôle</p>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 space-y-6">
+            <% const isActive=(path)=> (typeof active !== 'undefined' && active === path) || (typeof currentPath !==
+                'undefined' && currentPath === path); %>
+
+                <!-- General -->
+                <div class="space-y-1">
+                    <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Général</p>
+                    <a href="/admin"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('dashboard') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        <span class="font-medium">Tableau de bord</span>
+                    </a>
+                    <a href="/admin/stats"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('stats') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                        <span class="font-medium">Statistiques</span>
+                    </a>
+                </div>
+
+                <!-- Moderation -->
+                <div class="space-y-1">
+                    <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Modération</p>
+                    <a href="/admin/reports"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('reports') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                            <line x1="4" y1="22" x2="4" y2="15"></line>
+                        </svg>
+                        <span class="font-medium">Signalements</span>
+                    </a>
+                    <a href="/admin/sessions"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('sessions') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                        <span class="font-medium">Sessions</span>
+                    </a>
+                    <a href="/admin/bans"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('bans') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                        </svg>
+                        <span class="font-medium">Bannissements</span>
+                    </a>
+                    <a href="/admin/logs"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('logs') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <span class="font-medium">Logs système</span>
+                    </a>
+                    <a href="/admin/message"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('message') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span class="font-medium">Message global</span>
+                    </a>
+                </div>
+
+                <!-- System -->
+                <div class="space-y-1">
+                    <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Système</p>
+                    <a href="/admin/themes"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('themes') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                        </svg>
+                        <span class="font-medium">Thèmes</span>
+                    </a>
+                    <a href="/admin/roles"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('roles') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span class="font-medium">Rôles</span>
+                    </a>
+                    <a href="/admin/system"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('system') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        <span class="font-medium">État Système</span>
+                    </a>
+
+                    <% if (user.role && user.role.permissions && user.role.permissions.some(p=> p.permissionKey ===
+                        'MANAGE_MAINTENANCE')) { %>
+                        <a href="/admin/maintenance"
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('maintenance') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z">
+                                </path>
+                            </svg>
+                            <span class="font-medium">Maintenance</span>
+                        </a>
+                        <% } %>
+                </div>
+        </nav>
+
+        <!-- Footer Actions -->
+        <div class="mt-6 pt-6 border-t border-slate-800/50 space-y-2">
+            <a href="/"
+                class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                <span class="font-medium">Retour au site</span>
+            </a>
+        </div>
+    </div>
+</aside>
+
+<script>
+    (function () {
+        // Simple active state detection if server-side 'active' var isn't enough
+        const path = window.location.pathname;
+        const links = document.querySelectorAll('#adminSidebar nav a');
+        links.forEach(l => {
+            const href = l.getAttribute('href');
+            if (href === path || (href !== '/admin' && path.startsWith(href))) {
+                // Add active classes if not already present (server-side rendering preferred)
+                if (!l.classList.contains('bg-violet-500/10')) {
+                    l.classList.remove('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800/50');
+                    l.classList.add('bg-violet-500/10', 'text-violet-400', 'border', 'border-violet-500/20');
+                }
+            }
+        });
+    })();
+</script>

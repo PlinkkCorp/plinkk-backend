@@ -1,0 +1,49 @@
+<div id="licenseModal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
+  <div class="absolute inset-0 bg-black/60" data-close="true"></div>
+  <div class="relative max-w-3xl w-full bg-slate-900 text-slate-100 rounded-xl shadow-lg overflow-auto" style="max-height:80vh;">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800/60">
+      <h3 class="text-lg font-semibold">Licence</h3>
+      <button type="button" id="closeLicenseModal" class="text-slate-400 hover:text-white">✕</button>
+    </div>
+  <div class="px-6 py-4 text-sm leading-relaxed whitespace-pre-wrap">
+MIT License
+
+Copyright (c) 2025 Plinkk
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var triggers = document.querySelectorAll('.openLicenseModal');
+    var modal = document.getElementById('licenseModal');
+    var closeBtn = document.getElementById('closeLicenseModal');
+    if (!modal) return;
+    function open(){ modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.style.overflow = 'hidden'; }
+    function close(){ modal.classList.remove('flex'); modal.classList.add('hidden'); document.body.style.overflow = ''; }
+    if (triggers && triggers.length) {
+      triggers.forEach(function(t){ t.addEventListener('click', function(e){ e.preventDefault(); open(); }); });
+    }
+    if (closeBtn) closeBtn.addEventListener('click', function(e){ e.preventDefault(); close(); });
+    var backdrop = modal.querySelector('[data-close]'); if (backdrop) backdrop.addEventListener('click', close);
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+  })();
+</script>
