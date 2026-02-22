@@ -10,7 +10,11 @@ export function parseIdentifier(id?: string | null): { kind: 'default' | 'index'
 }
 
 export async function resolvePlinkkPage(prisma: PrismaClient, username: string, identifier: string | undefined, request?: FastifyRequest): Promise<any> {
-  let user = await prisma.user.findUnique({ where: { id: username }, select: { id: true, role: true } });
+  // we also need the public flag so that we can treat pages
+  // as publicly accessible when the owner has flipped their profile
+  // visibility. this helps after migrations where individual plinkks
+  // might still be marked PRIVATE even though the user is now public.
+  let user = await prisma.user.findUnique({ where: { id: username }, select: { id: true, role: true, isPublic: true } });
   if (!user) {
     // Si pas trouvé par ID, on tente par userName (insensible à la casse si possible)
     user = await prisma.user.findFirst({ 
@@ -20,7 +24,7 @@ export async function resolvePlinkkPage(prisma: PrismaClient, username: string, 
           { userName: { equals: username, mode: 'insensitive' } }
         ]
       }, 
-      select: { id: true, role: true } 
+      select: { id: true, role: true, isPublic: true } 
     });
   }
   if (!user) return { status: 404 as const, error: 'user_not_found' };
@@ -43,7 +47,18 @@ export async function resolvePlinkkPage(prisma: PrismaClient, username: string, 
   const isPrivate = page.visibility === Visibility.PRIVATE;
   const sessionUserId = request ? (request.session.get('data') as string | undefined) : undefined;
   const isOwner = !!sessionUserId && sessionUserId === user.id;
-  if (isPrivate && !isOwner) return { status: 403 as const, error: 'forbidden' };
+  // If the page is marked private we normally block non-owners.
+  // However when the user has indicated their *profile* is public we
+  // treat every plinkk as visible regardless of the individual
+  // visibility flag. This avoids situations where pages remain private
+  // after a migration or after toggling the profile setting.
+  if (isPrivate && !isOwner) {
+    if (!user.isPublic) {
+      return { status: 403 as const, error: 'forbidden' };
+    }
+    // otherwise allow through (the consumer will see page.visibility still
+    // be PRIVATE but it won't stop rendering)
+  }
 
   // Plinkk protégé par mot de passe (premium feature)
   const isPasswordProtected = !!page.passwordHash;

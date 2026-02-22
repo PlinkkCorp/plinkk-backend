@@ -18,8 +18,8 @@ export async function generateBundle(basePath?: string) {
     format: "esm",
     write: false,
     banner: {
-      js: "// JavaScript made by PlinkkCorp Dev",
-      css: "/* CSS made by PlinkkCorp Dev */",
+      js: "// JavaScript made by Plinkk - https://plinkk.fr - Copyright 2026",
+      css: "/* CSS made by Plinkk - https://plinkk.fr - Copyright 2026 */",
     },
     legalComments: "eof",
     drop: ["console"],

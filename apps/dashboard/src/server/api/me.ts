@@ -109,6 +109,19 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       data: { isPublic: Boolean(isPublic) },
       select: { id: true, isPublic: true },
     });
+
+    // ensure the visibility flag on existing plinkks stays in sync with
+    // the global profile visibility. previous versions only updated the
+    // user record, so plinkks could remain PRIVATE even after the owner
+    // made their account public – leading to the “access restreint” bug.
+    await prisma.plinkk.updateMany({
+      where: { userId: userId as string },
+      data: {
+        visibility: updated.isPublic ? "PUBLIC" : "PRIVATE",
+        isPublic: updated.isPublic,
+      },
+    });
+
     await logUserAction(userId as string, "UPDATE_VISIBILITY", null, { isPublic: Boolean(isPublic) }, request.ip);
     return reply.send(updated);
   });

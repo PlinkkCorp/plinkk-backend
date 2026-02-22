@@ -23,8 +23,9 @@ import {
 } from "@plinkk/prisma";
 import { PlinkkSnapshot } from "./types/plinkk";
 
-// snapshot type imported from ./types/plinkk
+// Prisma client
 import { prisma } from "@plinkk/prisma";
+
 import fastifyCookie from "@fastify/cookie";
 import fastifyFormbody from "@fastify/formbody";
 import fastifyMultipart from "@fastify/multipart";
@@ -44,22 +45,13 @@ import { minify } from "uglify-js";
 import { coerceThemeData } from "./lib/theme";
 import { generateTheme } from "./lib/generateTheme";
 import { AppError } from "@plinkk/shared";
+import { RESERVED_SLUGS } from "@plinkk/shared";
 
 const fastify = Fastify({
   logger: true,
   trustProxy: true,
 });
 const PORT = 3002;
-
-/*
-declare module "@fastify/secure-session" {
-  interface SessionData {
-    data?: string;
-    returnTo?: string;
-    [key: string]: any;
-  }
-}
-*/
 
 fastify.register(fastifyRateLimit, {
   max: 500,
@@ -68,172 +60,115 @@ fastify.register(fastifyRateLimit, {
 
 fastify.register(fastifyCompress);
 
-const sharedViewsRoot = path.join(__dirname, "..", "..", "..", "packages", "shared", "views");
+fastify.register(fastifyCookie);
+fastify.register(fastifySecureSession, {
+  key: readFileSync(path.join(__dirname, "secret-key")),
+  cookie: {
+    path: "/",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  },
+});
+
+fastify.register(fastifyFormbody);
+fastify.register(fastifyMultipart);
+fastify.register(fastifyCors);
+
+fastify.register(fastifyStatic, {
+  root: path.join(__dirname, "..", "public"),
+  prefix: "/public/",
+});
+
 fastify.register(fastifyView, {
   engine: {
     ejs: ejs,
   },
   root: path.join(__dirname, "views"),
-  options: {
-    views: [
-      path.join(__dirname, "views"),
-      sharedViewsRoot,
-    ],
-  },
 });
 
-fastify.register(fastifyStatic, {
-  root: path.join(__dirname, "public"),
-  prefix: "/public/",
-});
-
-fastify.register(fastifyStatic, {
-  root: path.join(__dirname, "public", "images", "icons"),
-  prefix: "/icons/",
-  decorateReply: false,
-});
-
-fastify.register(fastifyFormbody);
-fastify.register(fastifyMultipart, {
-  limits: {
-    fileSize: 2 * 1024 * 1024, // 2 Mo
-  },
-});
-fastify.register(fastifyCookie);
-
-fastify.register(fastifySecureSession, {
-  sessionName: "session",
-  cookieName: "plinkk-backend",
-  key: readFileSync(path.join(__dirname, "secret-key")),
-  expiry: 24 * 60 * 60,
-  cookie: {
-    path: "/",
-  },
-});
-
-fastify.register(fastifyCors, {
-  origin: true,
-});
-
-fastify.register(fastifyHttpProxy, {
-  upstream: "https://analytics.plinkk.fr/",
-  prefix: "/umami_script.js",
-  rewritePrefix: "/script.js",
-  replyOptions: {
-    rewriteRequestHeaders: (req, headers) => {
-      return {
-        ...headers,
-        host: "analytics.plinkk.fr",
-      };
-    },
-  },
-});
-
-fastify.register(fastifyHttpProxy, {
-  upstream: "https://analytics.plinkk.fr/",
-  prefix: "/api/send",
-  rewritePrefix: "/api/send",
-  replyOptions: {
-    rewriteRequestHeaders: (req, headers) => {
-      return {
-        ...headers,
-        host: "analytics.plinkk.fr",
-      };
-    },
-  },
-});
-
+// Routes
 fastify.register(redirectRoutes);
 fastify.register(staticPagesRoutes);
 fastify.register(plinkkFrontUserRoutes);
 
-fastify.addHook("preHandler", async (request, reply) => {
-  if (request.url.startsWith("/public") ||
-    request.url.startsWith("/assets") ||
-    request.url.startsWith("/js/") ||
-    request.url.startsWith("/css/") ||
-    request.url.startsWith("/umami_script.js") ||
-    request.url.startsWith("/api/send") ||
-    request.url.startsWith("/icons/")
-  ) return;
-
-  const maintenance = await prisma.maintenance.findUnique({ where: { id: "config" } });
-
-  if (maintenance) {
-    let isActive = maintenance.global;
-
-    // Check specific page maintenance (Blocklist) if global is OFF
-    if (!isActive && maintenance.maintenancePages.includes(request.url)) {
-      isActive = true;
-    }
-
-    // Check exceptions (Allowlist) if global is ON
-    if (isActive && maintenance.activePages.includes(request.url)) {
-      isActive = false;
-    }
-
-    if (isActive) {
-      // Check for bypass permission
-      const sessionData = request.session.get("data");
-      const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
-
-      if (currentUserId) {
-        const user = await prisma.user.findUnique({
-          where: { id: currentUserId },
-          include: { role: { include: { permissions: true } } }
-        });
-        const hasPermission = user?.role?.permissions.some(rp => rp.permissionKey === "ACCESS_MAINTENANCE");
-        if (hasPermission) return;
-      }
-
-      return reply.code(503).view("erreurs/503.ejs", {
-        reason: maintenance.reason || "Maintenance en cours",
-        currentUser: null,
-        global: maintenance.global
-      });
-    }
-  }
-});
-
 fastify.addHook("onRequest", async (request, reply) => {
   const host = request.headers.host || "";
+
+  const devHosts = new Set(["127.0.0.1:3002", "localhost:3002"]);
+
+  let effectiveUrl = request.url;
+
+  const bypassPrefixes = [
+    "/css/",
+    "/js/",
+    "/config.js",
+    "/public/",
+    "/icons/",
+    "/canvaAnimation/",
+    "/umami_script.js",
+    "/api/send",
+    "/themes.json",
+  ];
+
+  const effectivePath = effectiveUrl.split("?")[0];
+  if (bypassPrefixes.some(p => effectivePath.startsWith(p))) return;
 
   if (
     host !== "plinkk.fr" &&
     host !== "beta.plinkk.fr" &&
-    host !== "127.0.0.1:3002"
+    !(host === "127.0.0.1:3002" && effectiveUrl.startsWith("/config.js"))
   ) {
-    const hostDb = await prisma.host.findUnique({
-      where: {
-        id: host,
-      },
-      include: { plinkk: { include: { user: true } } },
-    });
+    let hostDb: any = null;
+    const isDevHost = devHosts.has(host);
+
+    if (isDevHost) {
+      const rawSlug = effectiveUrl.replace(/^\/+/, "").split("/")[0].split("?")[0];
+      if (rawSlug && !RESERVED_SLUGS.has(rawSlug)) {
+        const slug = rawSlug.replace(/\.js$/i, "");
+        const plinkk = await prisma.plinkk.findFirst({ where: { slug }, include: { user: true } });
+        if (plinkk) {
+          hostDb = { plinkk, verified: true };
+          if (/\.js$/i.test(rawSlug)) {
+            const js = await generateBundle();
+            return reply.type("application/javascript").send(js);
+          }
+          const remainder = effectiveUrl.slice(rawSlug.length + 1) || "/";
+          effectiveUrl = remainder.startsWith("/") ? remainder : "/" + remainder;
+        }
+      }
+    }
+
+    if (!hostDb) {
+      hostDb = await prisma.host.findUnique({
+        where: { id: host },
+        include: { plinkk: { include: { user: true } } },
+      });
+    }
+
     if (hostDb && hostDb.verified === true) {
-      if (request.url === "/") {
+      if (bypassPrefixes.some(p => effectivePath.startsWith(p))) return;
+
+      if (effectivePath === "/") {
         const userName = hostDb.plinkk.user.userName;
         if (userName === "") {
           reply.code(404).send({ error: "please specify a userName" });
           return;
         }
 
-        const resolved = await resolvePlinkkPage(
-          prisma,
-          userName,
-          undefined,
-          request
-        );
+        const resolved = await resolvePlinkkPage(prisma, userName, undefined, request);
+        if (resolved.status !== 200 || !resolved.page || !resolved.user) {
+          if (resolved.status === 403) {
+            return reply.code(403).view("erreurs/404.ejs", { user: null });
+          }
+          return reply.code(404).view("erreurs/404.ejs", { user: null });
+        }
 
-        // Check for versionId in query for preview
         const query = (request.query as { versionId?: string });
         const versionId = query.versionId;
 
-        // Default values// Force restart to apply view changes
-        // 2026-02-18T21:30:00Z
         let displayPage = resolved.page;
         let displayUser = resolved.user;
 
-        // Fetch additional data for default view
         const [
           settings,
           background,
@@ -254,7 +189,6 @@ fastify.addHook("onRequest", async (request, reply) => {
           prisma.category.findMany({ where: { plinkkId: resolved.page.id }, orderBy: { order: "asc" } }),
         ]);
 
-        // Initialize display variables
         let displaySettings = settings;
         let displayBackground = background;
         let displayNeonColors = neonColors;
@@ -265,43 +199,18 @@ fastify.addHook("onRequest", async (request, reply) => {
         let displayCategories = categories;
 
         if (versionId) {
-          // Try to load snapshot
-          console.log(`[Preview] Loading version ${versionId} for plinkk ${resolved.page.id}`);
           const version = await prisma.plinkkVersion.findUnique({ where: { id: versionId } });
-
           if (version && version.plinkkId === resolved.page.id) {
             const snapshot = version.snapshot as PlinkkSnapshot;
-            console.log(`[Preview] Snapshot loaded. Keys: ${Object.keys(snapshot || {}).join(', ')}`);
-
-            if (snapshot?.plinkk) {
-              displayPage = { ...displayPage, ...snapshot.plinkk };
-            }
-            if (snapshot?.settings) {
-              displaySettings = { ...displaySettings, ...snapshot.settings };
-            }
-            if (snapshot?.background) {
-              displayBackground = snapshot.background;
-            }
-            if (snapshot?.neonColors) {
-              displayNeonColors = snapshot.neonColors;
-            }
-            if (snapshot?.labels) {
-              displayLabels = snapshot.labels;
-            }
-            if (snapshot?.socialIcon) {
-              displaySocialIcons = snapshot.socialIcon;
-            }
-            if (snapshot?.statusbar) {
-              displayStatusbar = snapshot.statusbar;
-            }
-            if (snapshot?.links) {
-              displayLinks = snapshot.links;
-            }
-            if (snapshot?.categories) {
-              displayCategories = snapshot.categories;
-            }
-          } else {
-            console.log(`[Preview] Version not found or mismatch: ${versionId}`);
+            if (snapshot?.plinkk) displayPage = { ...displayPage, ...snapshot.plinkk };
+            if (snapshot?.settings) displaySettings = { ...displaySettings, ...snapshot.settings };
+            if (snapshot?.background) displayBackground = snapshot.background;
+            if (snapshot?.neonColors) displayNeonColors = snapshot.neonColors;
+            if (snapshot?.labels) displayLabels = snapshot.labels;
+            if (snapshot?.socialIcon) displaySocialIcons = snapshot.socialIcon;
+            if (snapshot?.statusbar) displayStatusbar = snapshot.statusbar;
+            if (snapshot?.links) displayLinks = snapshot.links;
+            if (snapshot?.categories) displayCategories = snapshot.categories;
           }
         }
 
@@ -315,17 +224,34 @@ fastify.addHook("onRequest", async (request, reply) => {
           isOwner,
           links: displayLinks,
           publicPath,
+          settings: displaySettings,
         });
-      } else if (request.url === "/css/styles.css") {
+      } else if (effectivePath === "/css/styles.css") {
         return reply.sendFile(`css/styles.css`);
-      } else if (request.url === "/css/button.css") {
+      } else if (effectivePath === "/css/button.css") {
         return reply.sendFile(`css/button.css`);
-      } else if (request.url.startsWith("/js/")) {
-        const jsFile = request.url.replace("/js/", "");
+      } else if (effectivePath.startsWith("/js/")) {
+        const jsFile = effectivePath.replace("/js/", "");
         return reply.sendFile(`js/${jsFile}`);
+
       } else if (request.url.startsWith("/config.js")) {
-        const page = hostDb.plinkk;
-        if (!page) return reply.code(404).send({ error: "Page introuvable" });
+        let page = hostDb?.plinkk;
+        let resolvedUser: any = page?.user;
+        if (!page) {
+          const q = request.query as { username?: string };
+          if (q.username) {
+            const resolved = await resolvePlinkkPage(prisma, q.username.trim(), undefined, request);
+            if (resolved.status === 200) {
+              page = resolved.page;
+              resolvedUser = resolved.user;
+            }
+          }
+        }
+
+        if (!page || !resolvedUser) {
+          return reply.code(404).send({ error: "Page introuvable" });
+        }
+        page.user = resolvedUser;
 
         const [
           settings,
@@ -617,7 +543,7 @@ fastify.addHook("onRequest", async (request, reply) => {
     "logout",
     "register",
   ]);
-  if (request.url in reservedRoots) {
+  if (reservedRoots.has(request.url.replace("/", ""))) {
     reply.redirect(process.env.DASHBOARD_URL + request.url)
   }
 });
@@ -801,7 +727,7 @@ fastify.addHook('onSend', async (request, reply, payload) => {
   if (request.raw.url?.startsWith("/api")) return payload;
 
   const statusCode = reply.statusCode;
-  if ([401, 403, 410, 429, 503, 504].includes(statusCode)) {
+  if ([401, 403, 409, 410, 429, 503, 504].includes(statusCode)) {
     const contentType = reply.getHeader('content-type');
     if (contentType && typeof contentType === 'string' && contentType.includes('application/json')) {
       // Remplacer par la vue d'erreur

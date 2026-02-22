@@ -278,7 +278,36 @@ export function applyTheme(theme) {
         });
     });
 
-    // Fix contrast for Username (h1) and Labels in light themes
+    const _p = getProfileData() || {};
+    if (_p.fontFamily) {
+        document.body.style.fontFamily = `"${_p.fontFamily}", sans-serif`;
+        const articleElement = document.getElementById("profile-article");
+        if (articleElement) articleElement.style.fontFamily = `"${_p.fontFamily}", sans-serif`;
+    }
+
+    if (_p.buttonStyle) {
+        let radius = '16px'; // default
+        if (_p.buttonStyle === 'pill') radius = '9999px';
+        if (_p.buttonStyle === 'sharp') radius = '0px';
+        if (_p.buttonStyle === 'rounded') radius = '16px';
+
+        const styleSheetObj = document.styleSheets[document.styleSheets.length - 1] || document.styleSheets[0];
+        try {
+            styleSheetObj.insertRule(`
+            .discord-box, .label-button, .email, .profile-description, .theme-toggle-button {
+                border-radius: ${radius} !important;
+            }
+        `, styleSheetObj.cssRules.length);
+            styleSheetObj.insertRule(`
+            .discord-box::after {
+                border-radius: ${radius} !important;
+            }
+        `, styleSheetObj.cssRules.length);
+        } catch (e) {
+            console.warn('Error applying button rounding rule:', e);
+        }
+    }
+
     const h1 = document.querySelector("h1");
     if (h1) {
         if (!theme.darkTheme) {
@@ -287,7 +316,6 @@ export function applyTheme(theme) {
             h1.style.background = "none";
             h1.style.textShadow = "none";
         } else {
-            // Restore default CSS gradient behavior for dark themes
             h1.style.color = "";
             h1.style.webkitTextFillColor = "";
             h1.style.background = "";
@@ -300,9 +328,6 @@ export function applyTheme(theme) {
         if (!theme.darkTheme) {
             htmlLabel.style.color = "black";
         } else {
-            // Respect the fontColor from profileData if possible, or fallback to CSS
-            // However, applyTheme only receives the theme object.
-            // For dark themes, we usually want white or the defined theme color.
             htmlLabel.style.color = theme.textColor;
         }
     });
@@ -310,12 +335,10 @@ export function applyTheme(theme) {
 export function setBackgroundStyles(profileData) {
     const _p = profileData || getProfileData() || {};
 
-    // --- Cosmetics Logic (effects only, gradient is independent) ---
     const cosmetics = _p.cosmetics || {};
     const data = cosmetics.data || {};
     const effect = data.effect;
 
-    // Always use Plinkk background (independent from cosmetics)
     const colors = Array.isArray(_p.background) ? _p.background.filter(Boolean) : null;
     const deg = (Number.isFinite(_p.degBackgroundColor) ? _p.degBackgroundColor : 45) || 45;
 
@@ -336,9 +359,7 @@ export function setBackgroundStyles(profileData) {
         document.body.style.background = '';
     }
 
-    // Apply Effects (Overlay) from cosmetics
     if (effect && effect !== 'none') {
-        // Remove existing effect if any
         const existingEffect = document.getElementById('cosmetic-effect-overlay');
         if (existingEffect) existingEffect.remove();
 
@@ -384,10 +405,8 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
         canvas.height = window.innerHeight;
         document.body.id = "container";
         try {
-            // Pour Matrix effect, nous devons charger les dépendances d'abord
             if (canvaData[selectedCanvasIndex].fileNames === 'matrix-effect/app.js') {
                 console.log("Loading Matrix Effect animation...");
-                // Fonction helper pour charger un script
                 const loadScript = (src) => {
                     return new Promise((resolve, reject) => {
                         console.log("Loading script:", src);
@@ -404,7 +423,6 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
                         document.body.appendChild(script);
                     });
                 };
-                // Charger les scripts dans l'ordre
                 loadScript('/canvaAnimation/matrix-effect/effect.js')
                     .then(() => {
                         console.log("Effect.js loaded, checking window.Effect:", typeof window.Effect);
@@ -430,7 +448,6 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
                     });
             }
             else {
-                // Pour les autres animations
                 const script = document.createElement("script");
                 script.src = `/canvaAnimation/${canvaData[selectedCanvasIndex].fileNames}`;
                 document.body.appendChild(script);
@@ -459,7 +476,6 @@ export function applyDynamicStyles(profileData, styleSheet, selectedAnimationBac
     else {
         document.body.style.animation = "none";
     }
-    // Appliquer le neon si activé avec vérifications
     const _p_neon = getProfileData() || {};
     if ((_p_neon.neonEnable) === 0) {
         try {

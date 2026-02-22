@@ -60,6 +60,8 @@ export function plinkksExportRoutes(fastify: FastifyInstance) {
       selectedAnimationBackgroundIndex: settings?.selectedAnimationBackgroundIndex ?? 0,
       animationDurationBackground: settings?.animationDurationBackground ?? 30,
       delayAnimationButton: settings?.delayAnimationButton ?? 0.1,
+      fontFamily: settings?.fontFamily ?? "",
+      buttonStyle: settings?.buttonStyle ?? "",
       affichageEmail: settings?.affichageEmail ?? null,
       publicEmail: settings?.affichageEmail ?? page.user.publicEmail ?? null,
       publicPhone: settings?.publicPhone ?? null,
@@ -116,6 +118,7 @@ export function plinkksExportRoutes(fastify: FastifyInstance) {
         userId: page.userId,
         username: page.userId,
         isExport: true,
+        settings: page.settings,
       }),
       { name: "index.html" }
     );

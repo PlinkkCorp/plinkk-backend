@@ -215,6 +215,14 @@ export async function createPlinkkForUser(
   const slug = await suggestGloballyUniqueSlug(prisma, base, undefined, userId);
   const isFirst = count === 0;
   const index = isFirst ? 0 : await getNextIndex(prisma, userId);
+  // choose a default visibility based on the caller's explicit
+  // preference, or fall back to the user's profile setting. this makes
+  // sure that existing accounts that have kept their profile private
+  // don't accidentally create public pages and also keeps behaviour
+  // consistent with the migration script above.
+  const defaultVis =
+    opts.visibility ?? (me.isPublic ? "PUBLIC" : "PRIVATE");
+
   const created = await prisma.plinkk.create({
     data: {
       userId,
@@ -223,8 +231,8 @@ export async function createPlinkkForUser(
       index,
       isDefault: isFirst,
       isActive: opts.isActive ?? true,
-      visibility: opts.visibility || "PUBLIC",
-      isPublic: (opts.visibility || "PUBLIC") === "PUBLIC",
+      visibility: defaultVis,
+      isPublic: defaultVis === "PUBLIC",
     },
   });
   try {

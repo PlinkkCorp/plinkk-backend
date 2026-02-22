@@ -20,21 +20,30 @@ export function dashboardEditRoutes(fastify: FastifyInstance) {
     const q = request.query as { plinkkId: string };
     const pages = await getPlinkksByUserId(userId);
     const selectedSimple = getSelectedPlinkk(pages, q?.plinkkId);
-    const selected = await getPlinkkWithDetails(selectedSimple.id, userId);
 
-    if (!selected) {
-      return reply.redirect("/dashboard");
+    let selectedForView: any = null;
+    if (selectedSimple) {
+      const selected = await getPlinkkWithDetails(selectedSimple.id, userId);
+      if (selected) {
+        selectedForView = formatPlinkkForView(selected);
+      }
     }
 
-    const selectedForView = formatPlinkkForView(selected);
+    if (!selectedForView) {
+      return reply.redirect('/plinkks');
+    }
+
     const autoOpenPlinkkModal = !q?.plinkkId && pages.length > 1;
 
+    const plinkkId = selectedForView ? selectedForView.id : null;
     const [linksCount, categories] = await Promise.all([
       prisma.link.count({ where: { userId } }),
-      prisma.category.findMany({
-        where: { plinkkId: selected.id },
-        orderBy: { order: "asc" },
-      }),
+      plinkkId
+        ? prisma.category.findMany({
+            where: { plinkkId },
+            orderBy: { order: "asc" },
+          })
+        : Promise.resolve([]),
     ]);
     console.log('[EDIT] Fetched categories:', JSON.stringify(categories, null, 2));
     const maxLinks = getUserLimits(userInfo).maxLinks;
