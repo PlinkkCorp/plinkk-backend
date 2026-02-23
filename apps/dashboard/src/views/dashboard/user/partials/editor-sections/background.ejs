@@ -17,12 +17,12 @@
                 Dégradé
             </button>
             <button type="button" data-bg-type="image"
-                class="bg-type-btn py-2 text-xs font-medium rounded-lg transition-all <%= plinkk.backgroundType === 'image' ? 'bg-white shadow text-slate-900' : 'text-slate-400 hover:text-white hover:bg-slate-800' %>">
-                Image
+                class="bg-type-btn py-2 text-xs font-medium rounded-lg transition-all flex items-center justify-center gap-1.5 <%= plinkk.backgroundType === 'image' ? 'bg-white shadow text-slate-900' : 'text-slate-400 hover:text-white hover:bg-slate-800' %>">
+                Image <span class="text-[8px] bg-slate-800 text-slate-400 px-1 rounded">Bientôt</span>
             </button>
             <button type="button" data-bg-type="video"
-                class="bg-type-btn py-2 text-xs font-medium rounded-lg transition-all <%= plinkk.backgroundType === 'video' ? 'bg-white shadow text-slate-900' : 'text-slate-400 hover:text-white hover:bg-slate-800' %>">
-                Vidéo
+                class="bg-type-btn py-2 text-xs font-medium rounded-lg transition-all flex items-center justify-center gap-1.5 <%= plinkk.backgroundType === 'video' ? 'bg-white shadow text-slate-900' : 'text-slate-400 hover:text-white hover:bg-slate-800' %>">
+                Vidéo <span class="text-[8px] bg-slate-800 text-slate-400 px-1 rounded">Bientôt</span>
             </button>
             <button type="button" data-bg-type="canvas"
                 class="bg-type-btn py-2 text-xs font-medium rounded-lg transition-all <%= plinkk.backgroundType === 'canvas' ? 'bg-white shadow text-slate-900' : 'text-slate-400 hover:text-white hover:bg-slate-800' %>">
@@ -174,7 +174,11 @@
         <!-- Vidéo -->
         <div id="bg-options-video"
             class="bg-options space-y-4 <%= plinkk.backgroundType !== 'video' ? 'hidden' : '' %>">
-            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 relative overflow-hidden">
+                <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                    <span class="px-3 py-1 bg-violet-600 text-white text-xs font-bold rounded-full shadow-lg">Bientôt
+                        disponible</span>
+                </div>
                 <label class="block text-sm font-medium text-slate-400 mb-3">Vidéo d'arrière-plan (.mp4)</label>
                 <div class="flex flex-col gap-3">
                     <div class="flex items-center gap-2">
@@ -199,7 +203,11 @@
         <!-- Image -->
         <div id="bg-options-image"
             class="bg-options space-y-4 <%= plinkk.backgroundType !== 'image' ? 'hidden' : '' %>">
-            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 relative overflow-hidden">
+                <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                    <span class="px-3 py-1 bg-violet-600 text-white text-xs font-bold rounded-full shadow-lg">Bientôt
+                        disponible</span>
+                </div>
                 <label class="block text-sm font-medium text-slate-400 mb-3">Image d'arrière-plan</label>
                 <div class="flex flex-col gap-4">
                     <div class="flex items-center gap-2">
