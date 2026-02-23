@@ -10,13 +10,13 @@ import { apiMePlinkksRoutes } from "./me/plinkks/index";
 import { apiMeRedirectsRoutes } from "./me/redirects";
 import crypto from "crypto";
 import { Upload } from "@aws-sdk/lib-storage";
-import { ListObjectsV2Command, ListObjectsV2CommandOutput, S3Client, _Object } from "@aws-sdk/client-s3";
+import { ListObjectsV2Command, ListObjectsV2CommandOutput, S3Client, _Object, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getS3Client } from "../../lib/fileUtils";
 import sharp from "sharp"
 import { logUserAction } from "../../lib/userLogger";
 
 interface S3ClientWithSend {
-  send(command: ListObjectsV2Command): Promise<ListObjectsV2CommandOutput>;
+  send(command: any): Promise<any>;
 }
 import { canUseGifBanner, getUserLimits, canUseVisualEffects, UnauthorizedError, BadRequestError, ConflictError, NotFoundError } from "@plinkk/shared";
 
@@ -35,7 +35,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.get("/dashboard-summary", async (request, reply) => {
     const userId = request.session.get("data") as string | { id: string } | null | undefined;
     let id: string | undefined;
-    
+
     if (typeof userId === "string") {
       id = userId;
     } else if (userId && typeof userId === "object" && "id" in userId) {
@@ -208,7 +208,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     await prisma.user.update({
       where: { id: userId as string },
       data: { password: hashed, hasPassword: true },
-    });    await logUserAction(userId as string, "UPDATE_PASSWORD", null, {}, request.ip);    return reply.send({ ok: true });
+    }); await logUserAction(userId as string, "UPDATE_PASSWORD", null, {}, request.ip); return reply.send({ ok: true });
   });
 
   fastify.post("/delete", async (request, reply) => {
@@ -299,7 +299,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     const sessionData = request.session.get("data");
     const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) throw new UnauthorizedError();
-    
+
     const { source } = (request.body as { source?: string }) || {};
     if (source !== "PRIMARY" && source !== "PUBLIC") {
       throw new BadRequestError("Source Gravatar invalide");
@@ -311,7 +311,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       select: { gravatarEmailSource: true },
     });
     await logUserAction(userId as string, "UPDATE_GRAVATAR_SOURCE", null, { source }, request.ip);
-    
+
     return reply.send(updated);
   });
 
@@ -655,26 +655,23 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       .webp()
       .toBuffer()
 
-    const upload = new Upload({
-      client: getS3Client(),
-      params: {
-        Bucket: "plinkk-image",
-        Key: "profiles/" + dedupName,
-        Body: img,
-      },
-      partSize: 5 * 1024 * 1024,
+    const command = new PutObjectCommand({
+      Bucket: "plinkk-image",
+      Key: "profiles/" + dedupName,
+      Body: img,
+      ContentType: "image/webp",
     });
 
-    const up = await upload.done()
+    await (getS3Client() as unknown as S3ClientWithSend).send(command);
+    const url = `https://cdn.marvideo.fr/profiles/${dedupName}`;
 
     await prisma.user.update({
       where: { id: me.id },
-      data: { image: up.Location },
+      data: { image: url },
     });
-await logUserAction(userId as string, "UPDATE_AVATAR", null, { url: up.Location }, request.ip);
+    await logUserAction(userId as string, "UPDATE_AVATAR", null, { url }, request.ip);
 
-    
-    return reply.send({ ok: true, file: dedupName, url: up.Location });
+    return reply.send({ ok: true, file: dedupName, url });
   });
 
   // ─── List user uploads ───
@@ -687,7 +684,7 @@ await logUserAction(userId as string, "UPDATE_AVATAR", null, { url: up.Location 
     } else if (userId && typeof userId === "object" && "id" in userId) {
       id = (userId as { id: string }).id;
     }
-    
+
     if (!id) return reply.code(401).send({ error: "Unauthorized" });
 
     // Use local interface to ensure access to .send() without using 'any'
@@ -714,9 +711,9 @@ await logUserAction(userId as string, "UPDATE_AVATAR", null, { url: up.Location 
 
     const results = await Promise.all(promises);
     const allFiles: _Object[] = results.flat();
-    
+
     const uniqueFiles = Array.from(new Map(allFiles.map((item) => [item.Key, item])).values());
-    
+
     const uploads = uniqueFiles.map((o) => ({
       url: `https://s3.marvideo.fr/plinkk-image/${o.Key}`,
       key: o.Key,
@@ -724,7 +721,7 @@ await logUserAction(userId as string, "UPDATE_AVATAR", null, { url: up.Location 
       lastModified: o.LastModified
     }));
 
-    uploads.sort((a,b) => (b.lastModified?.getTime() || 0) - (a.lastModified?.getTime() || 0));
+    uploads.sort((a, b) => (b.lastModified?.getTime() || 0) - (a.lastModified?.getTime() || 0));
 
     return { uploads };
   });
@@ -735,19 +732,31 @@ await logUserAction(userId as string, "UPDATE_AVATAR", null, { url: up.Location 
     const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });
 
-    const field = (request.query as { field?: string }).field || "misc";
-    const allowedFields = ["profileImage", "profileIcon", "iconUrl", "bannerUrl"];
+    const field = (request.query as { field?: string })?.field || "misc";
+    const allowedFields = ["profileImage", "profileIcon", "iconUrl", "bannerUrl", "backgroundImage", "backgroundVideo"];
     if (!allowedFields.includes(field))
       return reply.code(400).send({ error: "Champ non supporté" });
 
     const file = await request.file();
     if (!file) return reply.code(400).send({ error: "Aucun fichier reçu" });
-    if (!file.mimetype.startsWith("image/"))
+
+    const isVideo = file.mimetype.startsWith("video/");
+    const isImage = file.mimetype.startsWith("image/");
+
+    if (!isImage && !isVideo)
       return reply.code(400).send({ error: "Format non supporté" });
 
+    if (field === "backgroundVideo" && !isVideo)
+      return reply.code(400).send({ error: "Le champ backgroundVideo nécessite une vidéo" });
+
+    if (field !== "backgroundVideo" && !isImage)
+      return reply.code(400).send({ error: "Format d'image non supporté" });
+
     const buf = await file.toBuffer();
-    if (buf.byteLength > 5 * 1024 * 1024)
-      return reply.code(413).send({ error: "Image trop lourde (max 5 Mo)" });
+    // Video limit 20MB, Image limit 5MB
+    const limit = isVideo ? 20 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (buf.byteLength > limit)
+      return reply.code(413).send({ error: `Fichier trop lourd (max ${isVideo ? '20' : '5'} Mo)` });
 
     const me = await prisma.user.findUnique({ where: { id: userId as string } });
     if (!me) return reply.code(404).send({ error: "Utilisateur introuvable" });
@@ -756,13 +765,13 @@ await logUserAction(userId as string, "UPDATE_AVATAR", null, { url: up.Location 
     let processed: Buffer;
     let ext: string;
 
-    if (isGif) {
+    if (isGif || isVideo) {
       processed = buf;
-      ext = "gif";
+      ext = isGif ? "gif" : file.mimetype.split("/")[1];
     } else {
-      const size = field === "iconUrl" ? 64 : field === "profileIcon" ? 128 : 512;
+      const size = field === "backgroundImage" ? 1920 : (field === "iconUrl" ? 64 : field === "profileIcon" ? 128 : 512);
       processed = await sharp(buf)
-        .resize({ width: size, height: size, fit: "cover" })
+        .resize({ width: size, height: size, fit: "cover", withoutEnlargement: true })
         .webp()
         .toBuffer();
       ext = "webp";
@@ -771,18 +780,28 @@ await logUserAction(userId as string, "UPDATE_AVATAR", null, { url: up.Location 
     const hash = crypto.randomBytes(8).toString("hex");
     const key = `uploads/${field}/${me.id}-${hash}.${ext}`;
 
-    const upload = new Upload({
-      client: getS3Client(),
-      params: {
-        Bucket: "plinkk-image",
-        Key: key,
-        Body: processed,
-      },
-      partSize: 5 * 1024 * 1024,
+    const command = new PutObjectCommand({
+      Bucket: "plinkk-image",
+      Key: key,
+      Body: processed,
+      ContentType: file.mimetype,
     });
 
-    const up = await upload.done();
-    await logUserAction(userId as string, "UPLOAD_IMAGE", null, { field, url: up.Location }, request.ip);
-    return reply.send({ ok: true, url: up.Location });
+    try {
+      await (getS3Client() as unknown as S3ClientWithSend).send(command);
+    } catch (s3Error) {
+      const error = s3Error as Error;
+      request.log.error({ err: s3Error }, `S3 Upload Error for key: ${key}`);
+      return reply.code(500).send({
+        error: "upload_failed",
+        message: "Erreur lors de l'envoi vers le stockage S3. Vérifiez la configuration de l'endpoint.",
+        details: error.message
+      });
+    }
+
+    const url = `https://cdn.marvideo.fr/${key}`;
+
+    await logUserAction(userId as string, "UPLOAD_IMAGE", null, { field, url }, request.ip);
+    return reply.send({ ok: true, url });
   });
 }

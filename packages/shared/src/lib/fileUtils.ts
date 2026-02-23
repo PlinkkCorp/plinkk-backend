@@ -48,13 +48,19 @@ export function fetchRemoteFile(url: string): Promise<string> {
 }
 
 export function getS3Client() {
+  const endpoint = process.env.S3_ENDPOINT || "https://ue3.marvideo.fr";
+  console.log(`[S3] Initializing client...`);
+  console.log(`[S3]   - Endpoint: ${endpoint}`);
+  console.log(`[S3]   - Region: ${process.env.S3_REGION || "us-east-1"}`);
+  console.log(`[S3]   - ForcePathStyle: ${process.env.S3_FORCE_PATH_STYLE === "true" || true}`);
+
   return new S3Client({
-    region: "us-east-1",
+    region: process.env.S3_REGION || "us-east-1",
     credentials: {
-      accessKeyId: process.env.S3_ACCESS_KEY_ID,
-      secretAccessKey: process.env.S3_SECRET_KEY,
+      accessKeyId: process.env.S3_ACCESS_KEY_ID || "",
+      secretAccessKey: process.env.S3_SECRET_KEY || "",
     },
-    endpoint: "https://cdn.marvideo.fr",
-    forcePathStyle: true
+    endpoint: endpoint,
+    forcePathStyle: process.env.S3_FORCE_PATH_STYLE === "true" || true
   });
 }

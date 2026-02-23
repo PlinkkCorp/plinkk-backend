@@ -70,15 +70,24 @@ export function getSelectedPlinkk(pages: any[], plinkkId?: string) {
 
 export function formatPlinkkForView(plinkk: any) {
   if (!plinkk) return null;
+  const s = plinkk.settings || {};
   return {
     ...plinkk,
-    affichageEmail: plinkk.settings?.affichageEmail ?? null,
+    affichageEmail: s.affichageEmail ?? null,
+    backgroundType: s.backgroundType ?? 'color',
+    backgroundImage: s.backgroundImage ?? '',
+    backgroundVideo: s.backgroundVideo ?? '',
+    canvaEnable: s.canvaEnable ?? 0,
+    selectedCanvasIndex: s.selectedCanvasIndex ?? 0,
+    selectedThemeIndex: s.selectedThemeIndex ?? 0,
+    selectedAnimationIndex: s.selectedAnimationIndex ?? 0,
+    selectedAnimationButtonIndex: s.selectedAnimationButtonIndex ?? 0,
+    selectedAnimationBackgroundIndex: s.selectedAnimationBackgroundIndex ?? 0,
+    fontFamily: s.fontFamily ?? '',
+    buttonStyle: s.buttonStyle ?? 'rounded',
   };
 }
 
 export function formatPagesForView(pages: any[]) {
-  return pages.map((p) => ({
-    ...p,
-    affichageEmail: p.settings?.affichageEmail ?? null,
-  }));
+  return pages.map((p) => formatPlinkkForView(p));
 }

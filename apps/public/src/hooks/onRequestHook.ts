@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { prisma } from "@plinkk/prisma";
+import { prisma, User, PlinkkSettings } from "@plinkk/prisma";
 import { RESERVED_SLUGS } from "@plinkk/shared";
 import { generateBundle } from "../lib/generateBundle";
 import { resolvePlinkkPage } from "../lib/resolvePlinkkPage";
@@ -52,7 +52,10 @@ export default async function onRequestHook(
     const isMainDomain = host === "plinkk.fr" || host === "beta.plinkk.fr";
 
     if (!isMainDomain) {
-      let hostDb: any = null;
+      let hostDb: {
+        plinkk: any; // Simplified for now as it matches what's needed below
+        verified: boolean;
+      } | null = null;
       const isDevHost = devHosts.has(host);
 
       if (isDevHost) {
@@ -183,7 +186,7 @@ export default async function onRequestHook(
       // 2. Handle config.js
       if (effectivePath === "/config.js") {
         let page = hostDb?.plinkk;
-        let resolvedUser: any = page?.user;
+        let resolvedUser: User | null = page?.user;
         if (!page) {
           const q = request.query as { username?: string };
           if (q.username) {
@@ -323,7 +326,7 @@ export default async function onRequestHook(
           }
         } catch (e) { }
 
-        const pageProfile: any = {
+        const pageProfile = {
           plinkkId: finalSettings?.plinkkId ?? page.id,
           ...page.user,
           profileLink: finalSettings?.profileLink ?? "",
@@ -366,10 +369,10 @@ export default async function onRequestHook(
           enableLinkCategories: finalSettings?.enableLinkCategories ?? false,
           fontFamily: finalSettings?.fontFamily ?? "",
           buttonStyle: finalSettings?.buttonStyle ?? "",
-          backgroundType: (finalSettings as any)?.backgroundType ?? "color",
-          backgroundImage: (finalSettings as any)?.backgroundImage ?? "",
-          backgroundVideo: (finalSettings as any)?.backgroundVideo ?? "",
-        };
+          backgroundType: finalSettings?.backgroundType ?? "color",
+          backgroundImage: finalSettings?.backgroundImage ?? "",
+          backgroundVideo: finalSettings?.backgroundVideo ?? "",
+        } as unknown as (User & PlinkkSettings & { cosmetics?: any });
 
         const generated = generateProfileConfig(
           pageProfile,
@@ -388,11 +391,11 @@ export default async function onRequestHook(
 
       // 3. Handle themes.json
       if (effectivePath === "/themes.json") {
-        let userIdToUse = hostDb?.plinkk?.userId || (request.query as any).userId;
+        let userIdToUse = hostDb?.plinkk?.userId || (request.query as { userId?: string }).userId;
 
         // If we still don't have a userId, but have a username, search for it
-        if (!userIdToUse && (request.query as any).username) {
-          const user = await prisma.user.findFirst({ where: { userName: (request.query as any).username } });
+        if (!userIdToUse && (request.query as { username?: string }).username) {
+          const user = await prisma.user.findFirst({ where: { userName: (request.query as { username?: string }).username } });
           if (user) userIdToUse = user.id;
         }
 

@@ -122,9 +122,9 @@ export function generateProfileConfig(
         canvaEnable: ${profile.canvaEnable ?? 1},
         selectedCanvasIndex: ${profile.selectedCanvasIndex ?? 16
     },
-        backgroundType: ${JSON.stringify((profile as any).backgroundType || "color")},
-        backgroundImage: ${JSON.stringify((profile as any).backgroundImage || "")},
-        backgroundVideo: ${JSON.stringify((profile as any).backgroundVideo || "")},
+        backgroundType: ${JSON.stringify(profile.backgroundType || "color")},
+        backgroundImage: ${JSON.stringify(profile.backgroundImage || "")},
+        backgroundVideo: ${JSON.stringify(profile.backgroundVideo || "")},
         layoutOrder: ${JSON.stringify((profile).layoutOrder ?? null)},
         cosmetics: ${JSON.stringify(profile.cosmetics || {})},
         isVerified: ${profile.isVerified ?? false},

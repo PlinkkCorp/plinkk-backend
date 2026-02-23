@@ -66,12 +66,12 @@ fastify.register(fastifyHttpProxy, {
   prefix: "/umami_script.js",
   rewritePrefix: "/script.js",
   replyOptions: {
-    rewriteRequestHeaders: (req, headers: any) => {
+    rewriteRequestHeaders: (req, headers) => {
       return {
         ...headers,
         host: "analytics.plinkk.fr",
-        "x-forwarded-for": (req as any).ip || headers["x-forwarded-for"],
-        "x-real-ip": (req as any).ip || headers["x-real-ip"],
+        "x-forwarded-for": req.ip || (headers["x-forwarded-for"] as string),
+        "x-real-ip": req.ip || (headers["x-real-ip"] as string),
       };
     },
   },
@@ -82,12 +82,12 @@ fastify.register(fastifyHttpProxy, {
   prefix: "/api/send",
   rewritePrefix: "/api/send",
   replyOptions: {
-    rewriteRequestHeaders: (req, headers: any) => {
+    rewriteRequestHeaders: (req, headers) => {
       return {
         ...headers,
         host: "analytics.plinkk.fr",
-        "x-forwarded-for": (req as any).ip || headers["x-forwarded-for"],
-        "x-real-ip": (req as any).ip || headers["x-real-ip"],
+        "x-forwarded-for": req.ip || (headers["x-forwarded-for"] as string),
+        "x-real-ip": req.ip || (headers["x-real-ip"] as string),
         "user-agent": headers["user-agent"] || "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         referer: "https://plinkk.fr/",
         origin: "https://plinkk.fr",

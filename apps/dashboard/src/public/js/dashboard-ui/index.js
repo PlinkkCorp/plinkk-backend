@@ -573,7 +573,7 @@ class DashboardUI {
   async saveSetting(key, value) {
     try {
       if (window.__PLINKK_SHOW_SAVING__) window.__PLINKK_SHOW_SAVING__();
-      const res = await fetch(`/api/me/plinkks/${this.plinkkId}`, {
+      const res = await fetch(`/api/me/plinkks/${this.plinkkId}/config/plinkk`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [key]: value })

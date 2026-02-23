@@ -66,9 +66,9 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       delayAnimationButton: settings?.delayAnimationButton ?? null,
       canvaEnable: settings?.canvaEnable ?? 0,
       selectedCanvasIndex: settings?.selectedCanvasIndex ?? null,
-      backgroundType: (settings as any)?.backgroundType,
-      backgroundImage: (settings as any)?.backgroundImage,
-      backgroundVideo: (settings as any)?.backgroundVideo,
+      backgroundType: settings?.backgroundType,
+      backgroundImage: settings?.backgroundImage,
+      backgroundVideo: settings?.backgroundVideo,
       layoutOrder: settings?.layoutOrder ?? null,
       fontFamily: settings?.fontFamily ?? "",
       buttonStyle: settings?.buttonStyle ?? "rounded",
@@ -142,15 +142,15 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
     */
 
     // convert boolean flags to 0/1 integers for the DB schema
-    const boolInt = (v: any) => (v === true ? 1 : v === false ? 0 : undefined);
-    const intOrNull = (v: any) => {
+    const boolInt = (v: boolean | number | undefined | null) => (v === true ? 1 : v === false ? 0 : undefined);
+    const intOrNull = (v: string | number | undefined | null) => {
       if (v === undefined || v === null || v === '') return undefined;
-      const n = parseInt(v);
+      const n = typeof v === 'string' ? parseInt(v) : v;
       return Number.isNaN(n) ? undefined : n;
     };
-    const floatOrNull = (v: any) => {
+    const floatOrNull = (v: string | number | undefined | null) => {
       if (v === undefined || v === null || v === '') return undefined;
-      const f = parseFloat(v);
+      const f = typeof v === 'string' ? parseFloat(v) : v;
       return Number.isNaN(f) ? undefined : f;
     };
 
@@ -182,11 +182,11 @@ export function plinkksConfigRoutes(fastify: FastifyInstance) {
       selectedAnimationBackgroundIndex: intOrNull(body.selectedAnimationBackgroundIndex),
       animationDurationBackground: intOrNull(body.animationDurationBackground),
       delayAnimationButton: floatOrNull(body.delayAnimationButton),
-      canvaEnable: boolInt(body.canvaEnable),
+      canvaEnable: body.backgroundType === 'canvas' ? 1 : (body.backgroundType ? 0 : boolInt(body.canvaEnable)),
       selectedCanvasIndex: intOrNull(body.selectedCanvasIndex),
-      backgroundType: (body as any).backgroundType || "color",
-      backgroundImage: (body as any).backgroundImage || "",
-      backgroundVideo: (body as any).backgroundVideo || "",
+      backgroundType: body.backgroundType || "color",
+      backgroundImage: body.backgroundImage || "",
+      backgroundVideo: body.backgroundVideo || "",
       layoutOrder: body.layoutOrder,
       fontFamily: body.fontFamily,
       buttonStyle: body.buttonStyle,

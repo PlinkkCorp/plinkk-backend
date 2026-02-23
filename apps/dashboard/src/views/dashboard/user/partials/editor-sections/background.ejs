@@ -156,15 +156,9 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <span class="block text-sm font-medium text-slate-200">Animation Canvas</span>
-                        <span class="block text-xs text-slate-500">Fond d'écran interactif animé.</span>
+                        <span class="block text-xs text-slate-500">Choisissez une animation interactive pour votre fond
+                            d'écran.</span>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="canvaEnable" class="sr-only peer" <%=plinkk.canvaEnable ? 'checked'
-                            : '' %>>
-                        <div
-                            class="w-11 h-6 bg-slate-800 rounded-full peer peer-focus:outline-none peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600">
-                        </div>
-                    </label>
                 </div>
 
                 <div class="space-y-3">
@@ -195,6 +189,7 @@
                                 <line x1="12" y1="3" x2="12" y2="15" />
                             </svg>
                         </button>
+                        <input type="file" id="uploadBackgroundVideo" accept="video/mp4" class="hidden" />
                     </div>
                     <p class="text-[10px] text-slate-500 italic">Prend en charge les liens directs MP4.</p>
                 </div>
@@ -230,6 +225,7 @@
                                 <line x1="12" y1="3" x2="12" y2="15" />
                             </svg>
                         </button>
+                        <input type="file" id="uploadBackgroundImage" accept="image/*" class="hidden" />
                     </div>
                 </div>
             </div>
