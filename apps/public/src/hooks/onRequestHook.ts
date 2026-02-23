@@ -24,11 +24,8 @@ export default async function onRequestHook(
       "/public/",
       "/umami_script.js",
       "/favicon.ico",
+      "/api/",
     ];
-
-    if (effectivePath.startsWith("/api/send")) {
-      return reply.sendFile("/api/send");
-    }
 
     if (effectivePath.startsWith("/canvaAnimation/")) {
       return reply.sendFile(`canvaAnimation/${effectivePath.replace("/canvaAnimation/", "")}`);

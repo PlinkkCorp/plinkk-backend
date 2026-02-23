@@ -62,7 +62,7 @@ fastify.register(fastifyCompress);
 
 // Register proxy BEFORE body-parsers to avoid body consumption
 fastify.register(fastifyHttpProxy, {
-  upstream: "https://analytics.plinkk.fr/",
+  upstream: "https://analytics.plinkk.fr",
   prefix: "/umami_script.js",
   rewritePrefix: "/script.js",
   replyOptions: {
@@ -78,7 +78,7 @@ fastify.register(fastifyHttpProxy, {
 });
 
 fastify.register(fastifyHttpProxy, {
-  upstream: "https://analytics.plinkk.fr/",
+  upstream: "https://analytics.plinkk.fr",
   prefix: "/api/send",
   rewritePrefix: "/api/send",
   replyOptions: {
@@ -135,6 +135,10 @@ fastify.register(fastifyCors, { origin: true });
 import onRequestHook from "./hooks/onRequestHook";
 
 fastify.addHook("onRequest", onRequestHook);
+
+redirectRoutes(fastify);
+staticPagesRoutes(fastify);
+plinkkFrontUserRoutes(fastify);
 
 fastify.get("/", async function (request, reply) {
   const sessionData = request.session.get("data");
