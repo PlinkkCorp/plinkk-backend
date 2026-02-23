@@ -45,7 +45,7 @@ export async function resolvePlinkkPage(prisma: PrismaClient, username: string, 
   if (!page) return { status: 404 as const, error: 'page_not_found' };
   if (!page.isActive) return { status: 403 as const, error: 'page_inactive' };
   const isPrivate = page.visibility === Visibility.PRIVATE;
-  const sessionUserId = request ? (request.session.get('data') as string | undefined) : undefined;
+  const sessionUserId = request && request.session ? (request.session.get('data') as string | undefined) : undefined;
   const isOwner = !!sessionUserId && sessionUserId === user.id;
   // If the page is marked private we normally block non-owners.
   // However when the user has indicated their *profile* is public we

@@ -8,8 +8,10 @@
 
 <% if (isPublic) { %>
 <!-- ═══════════════════ PUBLIC : Style page d'accueil ═══════════════════ -->
-<section id="plans" class="relative py-8">
-    <!-- Ambient glow -->
+
+<div id="plans-bg" class="absolute inset-0 z-0 overflow-hidden"></div>
+
+<section id="plans" class="relative py-8 z-10">
     <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:600px;pointer-events:none;background:radial-gradient(ellipse at 50% 50%, rgba(139,92,246,0.06), transparent 70%);"></div>
 
     <!-- Section header -->
@@ -219,6 +221,87 @@
     </div>
 </section>
 
+<script>
+(function() {
+  const bg = document.getElementById('plans-bg');
+  if (!bg) return;
+  const params = new URLSearchParams(location.search);
+  const type = params.get('bgType') || 'gradient';
+
+  function setGradient(c1, c2, deg) {
+    bg.style.background = `linear-gradient(${deg}deg, ${c1} 0%, ${c2} 100%)`;
+  }
+
+  switch (type) {
+    case 'solid': {
+      const c = params.get('bgColor') || '#0c0c14';
+      bg.style.background = c;
+      break;
+    }
+    case 'image': {
+      const url = params.get('bgUrl');
+      if (url) {
+        bg.style.background = `url('${url}') center/cover no-repeat fixed`;
+      }
+      break;
+    }
+    case 'video': {
+      const src = params.get('bgVideo');
+      if (src) {
+        const video = document.createElement('video');
+        video.src = src;
+        video.autoplay = true;
+        video.loop = true;
+        video.muted = true;
+        video.playsInline = true;
+        video.style.position = 'absolute';
+        video.style.inset = '0';
+        video.style.width = '100%';
+        video.style.height = '100%';
+        video.style.objectFit = 'cover';
+        bg.appendChild(video);
+      }
+      break;
+    }
+    case 'canvas': {
+      const animation = params.get('bgCanvas');
+      if (animation) {
+        const canvas = document.createElement('canvas');
+        canvas.id = 'plans-canvas';
+        canvas.style.position = 'absolute';
+        canvas.style.inset = '0';
+        bg.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        function resize() {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+        // try to load script from /canvaAnimation/<animation>
+        const script = document.createElement('script');
+        script.src = '/canvaAnimation/' + animation;
+        script.onload = () => {
+          if (typeof runCanvasAnimation === 'function') {
+            runCanvasAnimation(ctx, canvas);
+          }
+        };
+        document.body.appendChild(script);
+      }
+      break;
+    }
+    case 'gradient':
+    default: {
+      const c1 = params.get('c1') || '#7c3aed';
+      const c2 = params.get('c2') || '#a78bfa';
+      const deg = params.get('deg') || 135;
+      setGradient(c1, c2, deg);
+      break;
+    }
+  }
+})();
+</script>
+
 <% } else if (isDashPreview) { %>
 <!-- ═══════════════════ DASHBOARD PREVIEW ═══════════════════ -->
 <div id="plans" class="grid md:grid-cols-2 gap-5">
@@ -297,7 +380,6 @@
         </div>
     </div>
 
-    <!-- Premium Annuel -->
     <div class="border border-emerald-500/20 rounded-2xl p-6 flex flex-col relative overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/[0.04] to-teal-500/[0.04] pointer-events-none rounded-2xl"></div>
         <div class="relative z-10 flex flex-col flex-1">
@@ -337,7 +419,6 @@
         </div>
     </div>
 
-    <!-- Lifetime -->
     <div class="border border-amber-500/20 rounded-2xl p-6 flex flex-col relative overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-br from-amber-500/[0.04] to-orange-500/[0.04] pointer-events-none rounded-2xl"></div>
         <div class="relative z-10 flex flex-col flex-1">

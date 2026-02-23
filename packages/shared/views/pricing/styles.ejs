@@ -25,6 +25,15 @@
   }
 
   /* ── Pricing reveal animations (public) ── */
+  /* background container used by pricing page to support dynamic backgrounds */
+  #plans-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1; /* always behind everything */
+    pointer-events: none;
+    background: #0c0c14; /* fallback color */
+  }
+
   .pricing-reveal {
     opacity: 0;
     transform: translateY(30px);

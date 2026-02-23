@@ -97,8 +97,8 @@ export async function registerPlugins(fastify: FastifyInstance) {
         return {
           ...headers,
           host: "analytics.plinkk.fr",
-          "x-forwarded-for": (req as any).ip || headers["x-forwarded-for"],
-          "x-real-ip": (req as any).ip || headers["x-real-ip"],
+          "x-forwarded-for": (req as import('fastify').FastifyRequest).ip || headers["x-forwarded-for"],
+          "x-real-ip": (req as import('fastify').FastifyRequest).ip || headers["x-real-ip"],
         };
       },
     },
@@ -113,8 +113,8 @@ export async function registerPlugins(fastify: FastifyInstance) {
         return {
           ...headers,
           host: "analytics.plinkk.fr",
-          "x-forwarded-for": (req as any).ip || headers["x-forwarded-for"],
-          "x-real-ip": (req as any).ip || headers["x-real-ip"],
+          "x-forwarded-for": (req as import('fastify').FastifyRequest).ip || headers["x-forwarded-for"],
+          "x-real-ip": (req as import('fastify').FastifyRequest).ip || headers["x-real-ip"],
         };
       },
     },
