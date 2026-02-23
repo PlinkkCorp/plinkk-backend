@@ -277,10 +277,14 @@ export function setBackgroundStyles(profileData) {
     if (colors) {
         if (colors.length === 0) {
             document.body.style.background = '';
-        } else if (colors.length === 1) {
-            document.body.style.background = colors[0];
+        } else if (colors.length === 1 || bgType === 'color') {
+            document.body.style.background = typeof colors[0] === 'string' ? colors[0] : colors[0].color;
         } else {
-            document.body.style.background = `linear-gradient(${deg}deg, ${colors.join(", ")})`;
+            const gradientStr = colors.map(c => {
+                if (typeof c === 'string') return c;
+                return `${c.color} ${c.stop !== null && c.stop !== undefined ? c.stop + '%' : ''}`;
+            }).join(", ");
+            document.body.style.background = `linear-gradient(${deg}deg, ${gradientStr})`;
         }
         document.body.style.backgroundSize = "cover";
     } else if (typeof _p.background === 'string' && _p.background.trim() !== '') {

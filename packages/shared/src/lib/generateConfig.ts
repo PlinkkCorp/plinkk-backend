@@ -76,7 +76,8 @@ export function generateProfileConfig(
       isActive: c.isActive !== false
     }))
   )},
-        background: ${JSON.stringify(backgroundColors.map((c) => c.color))},
+        // @ts-ignore
+        background: ${JSON.stringify(backgroundColors.map((c) => ({ color: c.color, stop: c.stop })))},
         degBackgroundColor: ${profile.degBackgroundColor ?? 45
     },
         profileHoverColor: ${JSON.stringify(profile.profileHoverColor)},

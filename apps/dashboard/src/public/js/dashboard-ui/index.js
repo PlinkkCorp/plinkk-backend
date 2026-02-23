@@ -114,6 +114,7 @@ class DashboardUI {
     this.initSocials();
     this.initGeneralPickers();
     this.initThemePicker();
+    this.initGradientLogic();
 
     // Initial check
     if (window.initSortable) window.initSortable();
@@ -390,15 +391,7 @@ class DashboardUI {
     const btns = document.querySelectorAll('.bg-type-btn');
     const options = document.querySelectorAll('.bg-options');
 
-    const initialType = document.getElementById('backgroundType')?.value || 'color';
-
     btns.forEach(btn => {
-      const btnType = btn.dataset.bgType;
-      if (btnType === initialType) {
-        btn.classList.add('bg-white', 'shadow', 'text-slate-900');
-        btn.classList.remove('text-slate-400', 'hover:bg-white/[0.12]', 'hover:text-white');
-      }
-
       btn.addEventListener('click', () => {
         const type = btn.dataset.bgType;
 
@@ -409,12 +402,12 @@ class DashboardUI {
         }
 
         btns.forEach(b => {
-          if (b === btn) {
+          if (b.dataset.bgType === type) {
             b.classList.add('bg-white', 'shadow', 'text-slate-900');
-            b.classList.remove('text-slate-400', 'hover:bg-white/[0.12]', 'hover:text-white');
+            b.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
           } else {
             b.classList.remove('bg-white', 'shadow', 'text-slate-900');
-            b.classList.add('text-slate-400', 'hover:bg-white/[0.12]', 'hover:text-white');
+            b.classList.add('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
           }
         });
 
@@ -425,17 +418,104 @@ class DashboardUI {
             opt.classList.add('hidden');
           }
         });
+
+        this.saveSetting('backgroundType', type);
       });
     });
+  }
 
-    // Show initial options
-    options.forEach(opt => {
-      if (opt.id === `bg-options-${initialType}`) {
-        opt.classList.remove('hidden');
-      } else {
-        opt.classList.add('hidden');
-      }
+  initGradientLogic() {
+    const list = document.getElementById('gradient-colors-list');
+    const addBtn = document.getElementById('addGradientColor');
+    if (!list || !addBtn) return;
+
+    const saveGradient = () => {
+      const entries = list.querySelectorAll('.gradient-color-entry');
+      const colors = Array.from(entries).map(entry => ({
+        color: entry.querySelector('.gradient-color-picker').value,
+        stop: parseInt(entry.querySelector('.gradient-stop-range').value)
+      }));
+
+      this.saveBackgroundColors(colors);
+    };
+
+    addBtn.addEventListener('click', () => {
+      const lastEntry = list.querySelector('.gradient-color-entry:last-child');
+      const lastColor = lastEntry ? lastEntry.querySelector('.gradient-color-picker').value : '#8b5cf6';
+
+      const newEntry = document.createElement('div');
+      newEntry.className = 'gradient-color-entry flex items-center gap-3 p-2 bg-slate-900 rounded-lg border border-slate-800 animate-in fade-in slide-in-from-top-2 duration-300';
+      newEntry.innerHTML = `
+        <input type="color" class="gradient-color-picker h-8 w-12 rounded bg-transparent cursor-pointer border-none" value="${lastColor}">
+        <div class="flex-1 space-y-1">
+            <div class="flex justify-between text-[10px] text-slate-500 font-mono">
+                <span>Position</span>
+                <span class="stop-value-label">100%</span>
+            </div>
+            <input type="range" class="gradient-stop-range w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-violet-500" 
+                   min="0" max="100" value="100">
+        </div>
+        <button type="button" class="remove-gradient-color text-slate-500 hover:text-red-400 transition-colors p-1">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+        </button>
+      `;
+
+      list.appendChild(newEntry);
+      this.attachGradientEntryListeners(newEntry, saveGradient);
+      saveGradient();
     });
+
+    list.querySelectorAll('.gradient-color-entry').forEach(entry => {
+      this.attachGradientEntryListeners(entry, saveGradient);
+    });
+
+    const degInput = document.getElementById('degBackgroundColor');
+    if (degInput) {
+      degInput.addEventListener('input', () => {
+        this.debouncedSaveSetting('degBackgroundColor', parseInt(degInput.value));
+      });
+    }
+  }
+
+  attachGradientEntryListeners(entry, onUpdate) {
+    const picker = entry.querySelector('.gradient-color-picker');
+    const range = entry.querySelector('.gradient-stop-range');
+    const label = entry.querySelector('.stop-value-label');
+    const removeBtn = entry.querySelector('.remove-gradient-color');
+
+    picker.addEventListener('input', onUpdate);
+    range.addEventListener('input', () => {
+      label.textContent = `${range.value}%`;
+      onUpdate();
+    });
+
+    if (removeBtn) {
+      removeBtn.addEventListener('click', () => {
+        const list = document.getElementById('gradient-colors-list');
+        if (list.querySelectorAll('.gradient-color-entry').length > 1) {
+          entry.remove();
+          onUpdate();
+        }
+      });
+    }
+  }
+
+  async saveBackgroundColors(colors) {
+    if (this.saveBgTimeout) clearTimeout(this.saveBgTimeout);
+    this.saveBgTimeout = setTimeout(async () => {
+      try {
+        if (window.__PLINKK_SHOW_SAVING__) window.__PLINKK_SHOW_SAVING__();
+        const res = await fetch(`/api/me/plinkks/${this.plinkkId}/config/background`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ background: colors })
+        });
+        if (res.ok && window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
+        if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+      } catch (e) {
+        if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
+      }
+    }, 500);
   }
 
   async initCanvasSelection() {

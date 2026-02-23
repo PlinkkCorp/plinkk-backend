@@ -47,7 +47,17 @@ export async function getPlinkkConfig(plinkkId: string, userId: string) {
       prisma.category.findMany({ where: { plinkkId }, orderBy: { order: "asc" } }),
     ]);
 
-  return { settings, user, background, neonColors, labels, socialIcon, statusbar, links, categories };
+  return {
+    settings,
+    user,
+    background: background.map((c) => ({ color: c.color, stop: c.stop })),
+    neonColors,
+    labels,
+    socialIcon,
+    statusbar,
+    links,
+    categories,
+  };
 }
 
 export function getSelectedPlinkk(pages: any[], plinkkId?: string) {

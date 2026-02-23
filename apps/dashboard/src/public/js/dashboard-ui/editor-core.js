@@ -228,12 +228,24 @@ function renderPlinkk(config) {
             </video>`;
     } else if (bgType === 'image' && plinkk?.backgroundImage) {
         bgStyle = `background: url('${plinkk.backgroundImage}') center/cover fixed no-repeat;`;
+    } else if (bgType === 'color') {
+        const solidColor = (Array.isArray(plinkk?.background) && plinkk.background.length > 0)
+            ? plinkk.background[0].color
+            : (plinkk?.backgroundColor || '#0c0c0c');
+        bgStyle = `background: ${solidColor};`;
     } else {
         // Gradient fallback
+        let gradientStr = '';
+        if (Array.isArray(plinkk?.background) && plinkk.background.length > 0) {
+            gradientStr = plinkk.background.map(c => `${c.color} ${c.stop !== null ? c.stop + '%' : ''}`).join(', ');
+        } else {
+            gradientStr = `${bgColor} 0%, ${bgColor2} 100%`;
+        }
+
         bgStyle = `background: radial-gradient(circle at 20% 20%, rgba(120,119,198,0.3) 0%, transparent 50%),
                    radial-gradient(circle at 80% 80%, rgba(255,119,198,0.3) 0%, transparent 50%),
                    radial-gradient(circle at 40% 40%, rgba(120,219,226,0.2) 0%, transparent 50%),
-                   linear-gradient(${bgDeg}deg, ${bgColor} 0%, ${bgColor2} 100%);
+                   linear-gradient(${bgDeg}deg, ${gradientStr});
                    background-attachment: fixed;`;
     }
 

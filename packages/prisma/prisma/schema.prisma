@@ -239,6 +239,7 @@ model SocialIcon {
 model BackgroundColor {
   id       String  @id @default(nanoid(16))
   color    String  @default("#FF5733")
+  stop     Int?
   userId   String
   plinkkId String?
   plinkk   Plinkk? @relation(fields: [plinkkId], references: [id], onDelete: Cascade)

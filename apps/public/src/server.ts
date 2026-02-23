@@ -88,6 +88,9 @@ fastify.register(fastifyHttpProxy, {
         host: "analytics.plinkk.fr",
         "x-forwarded-for": (req as any).ip || headers["x-forwarded-for"],
         "x-real-ip": (req as any).ip || headers["x-real-ip"],
+        "user-agent": headers["user-agent"] || "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        referer: "https://plinkk.fr/",
+        origin: "https://plinkk.fr",
       };
     },
   },

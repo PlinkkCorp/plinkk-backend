@@ -19,47 +19,45 @@ export function plinkksSettingsRoutes(fastify: FastifyInstance) {
     if (!(await validatePlinkkOwnership(userId, id)))
       return reply.code(404).send({ error: "Plinkk introuvable" });
 
-    const body = request.body as { background: (string | { color: string })[] };
+    const body = request.body as { background: (string | { color: string; stop?: number })[] };
     const list = Array.isArray(body?.background) ? body.background : [];
     const colors = list
       .map((item) =>
         typeof item === "string"
-          ? item
+          ? { color: item, stop: null }
           : item && typeof item.color === "string"
-            ? item.color
+            ? { color: item.color, stop: typeof item.stop === "number" ? item.stop : null }
             : null
       )
-      .filter((c): c is string => !!c && typeof c === "string" && c.trim() !== "");
+      .filter((c): c is { color: string; stop: number | null } => !!c && typeof c.color === "string" && c.color.trim() !== "");
 
     const existingBg = await prisma.backgroundColor.findMany({ where: { userId, plinkkId: id } });
-    const oldColors = existingBg.map(b => b.color);
-    const newColors = colors;
+    // @ts-ignore
+    const oldColors = existingBg.map(b => `${b.color}:${b.stop}`);
+    const newColors = colors.map(c => `${c.color}:${c.stop}`);
 
     // Simple array diff for primitives
-    const added = newColors.filter(c => !oldColors.includes(c));
-    const removed = oldColors.filter(c => !newColors.includes(c));
+    const addedCount = newColors.filter(c => !oldColors.includes(c)).length;
+    const removedCount = oldColors.filter(c => !newColors.includes(c)).length;
 
     await prisma.backgroundColor.deleteMany({ where: { userId, plinkkId: id } });
     if (colors.length > 0) {
       await prisma.backgroundColor.createMany({
-        data: colors.map((color) => ({ color, userId, plinkkId: id })),
+        // @ts-ignore
+        data: colors.map((c) => ({ color: c.color, stop: c.stop, userId, plinkkId: id })),
       });
     }
 
-    if (added.length > 0 || removed.length > 0) {
+    if (addedCount > 0 || removedCount > 0) {
       const changes: (string | any)[] = [];
-      added.forEach(c => changes.push({ key: 'background', new: c, type: 'added' as const }));
-      removed.forEach(c => changes.push({ key: 'background', old: c, type: 'removed' as const }));
 
       await logUserAction(userId, "UPDATE_PLINKK_BACKGROUND", id, {
-        diff: { background: { added, removed } },
-        changes: changes.map(c => typeof c === 'string' ? c : `${c.type === 'added' ? 'Added' : 'Removed'} background color: ${c.new || c.old}`),
-        formatted: `Updated background: +${added.length} added, -${removed.length} removed`
+        diff: { background: { count: colors.length } },
+        changes: changes.map(c => typeof c === 'string' ? c : `Updated background colors: ${colors.length} total`),
+        formatted: `Updated background colors: ${colors.length} total (+${addedCount}, -${removedCount})`
       }, request.ip);
 
-      const label = added.length > 0 ? `Ajout arrière-plan (${added.length})` :
-        removed.length > 0 ? `Suppression arrière-plan (${removed.length})` :
-          "Mise à jour arrière-plan";
+      const label = `Mise à jour arrière-plan (${colors.length} couleurs)`;
       createPlinkkVersion(id, userId, label, false, changes).catch(err => request.log.error(err));
     }
 

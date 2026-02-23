@@ -9,7 +9,8 @@ export class SettingsManager {
             'publicPhone', 'affichageEmail', 'fontFamily', 'status_text',
             'animationDuration', 'delayAnimationButton',
             'selectedAnimationIndex', 'selectedAnimationButtonIndex', 'selectedAnimationBackgroundIndex',
-            'selectedThemeIndex', 'backgroundImage', 'backgroundVideo', 'backgroundType'
+            'selectedThemeIndex', 'backgroundImage', 'backgroundVideo', 'backgroundType',
+            'backgroundColor', 'degBackgroundColor'
         ];
         this.checkboxes = [
             'showStatus', 'enableLinkCategories', 'canvaEnable', 'buttonThemeEnable',

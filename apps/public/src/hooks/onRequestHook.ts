@@ -22,11 +22,17 @@ export default async function onRequestHook(
 
     const bypassPrefixes = [
       "/public/",
-      "/canvaAnimation/",
       "/umami_script.js",
-      "/api/send",
       "/favicon.ico",
     ];
+
+    if (effectivePath.startsWith("/api/send")) {
+      return reply.sendFile("/api/send");
+    }
+
+    if (effectivePath.startsWith("/canvaAnimation/")) {
+      return reply.sendFile(`canvaAnimation/${effectivePath.replace("/canvaAnimation/", "")}`);
+    }
 
     if (bypassPrefixes.some((p) => effectivePath.startsWith(p))) return;
 
