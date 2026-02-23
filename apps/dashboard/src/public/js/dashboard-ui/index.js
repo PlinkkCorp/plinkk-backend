@@ -390,9 +390,23 @@ class DashboardUI {
     const btns = document.querySelectorAll('.bg-type-btn');
     const options = document.querySelectorAll('.bg-options');
 
+    const initialType = document.getElementById('backgroundType')?.value || 'color';
+
     btns.forEach(btn => {
+      const btnType = btn.dataset.bgType;
+      if (btnType === initialType) {
+        btn.classList.add('bg-white', 'shadow', 'text-slate-900');
+        btn.classList.remove('text-slate-400', 'hover:bg-white/[0.12]', 'hover:text-white');
+      }
+
       btn.addEventListener('click', () => {
         const type = btn.dataset.bgType;
+
+        const hiddenInput = document.getElementById('backgroundType');
+        if (hiddenInput) {
+          hiddenInput.value = type;
+          hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
 
         btns.forEach(b => {
           if (b === btn) {
@@ -412,6 +426,15 @@ class DashboardUI {
           }
         });
       });
+    });
+
+    // Show initial options
+    options.forEach(opt => {
+      if (opt.id === `bg-options-${initialType}`) {
+        opt.classList.remove('hidden');
+      } else {
+        opt.classList.add('hidden');
+      }
     });
   }
 

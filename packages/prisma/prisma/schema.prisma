@@ -392,6 +392,9 @@ model PlinkkSettings {
   fontFamily                       String?
   buttonStyle                      String?
   layoutOrder                      Json?   @default("[\"profile\", \"username\", \"statusbar\", \"labels\", \"social\", \"email\", \"links\"]")
+  backgroundType                   String?
+  backgroundImage                  String?
+  backgroundVideo                  String?
   plinkk                           Plinkk  @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
 }
 

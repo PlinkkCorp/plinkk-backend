@@ -7,6 +7,7 @@
     <div>
         <label class="block text-sm font-medium text-slate-300 mb-3">Type
             d'arrière-plan</label>
+        <input type="hidden" id="backgroundType" value="<%= plinkk.backgroundType || 'color' %>">
         <div class="flex p-1 bg-slate-950 rounded-xl mb-4 border border-slate-800">
             <button type="button" data-bg-type="color"
                 class="bg-type-btn flex-1 py-2.5 text-sm font-medium rounded-lg transition-all bg-white shadow text-slate-900 border border-transparent">
@@ -19,6 +20,10 @@
             <button type="button" data-bg-type="image"
                 class="bg-type-btn flex-1 py-2.5 text-sm font-medium rounded-lg transition-all text-slate-400 hover:text-white hover:bg-slate-800 border border-transparent">
                 Image
+            </button>
+            <button type="button" data-bg-type="video"
+                class="bg-type-btn flex-1 py-2.5 text-sm font-medium rounded-lg transition-all text-slate-400 hover:text-white hover:bg-slate-800 border border-transparent">
+                Vidéo
             </button>
             <button type="button" data-bg-type="canvas"
                 class="bg-type-btn flex-1 py-2.5 text-sm font-medium rounded-lg transition-all text-slate-400 hover:text-white hover:bg-slate-800 border border-transparent">
@@ -104,15 +109,35 @@
             </div>
         </div>
 
+        <div id="bg-options-video" class="bg-options space-y-4 hidden">
+            <label class="block text-sm font-medium text-slate-400">URL de la
+                vidéo (.mp4)</label>
+            <div class="flex items-center gap-2">
+                <input type="url" id="backgroundVideo" value="<%= plinkk.backgroundVideo || '' %>"
+                    class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200"
+                    placeholder="https://..." />
+                <button type="button" data-upload-for="backgroundVideo" data-field="backgroundVideo"
+                    class="upload-btn shrink-0 px-3 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-colors"
+                    title="Uploader une vidéo">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
         <div id="bg-options-image" class="bg-options space-y-4 hidden">
             <label class="block text-sm font-medium text-slate-400">URL de
                 l'image</label>
             <div class="flex items-center gap-2">
-                <input type="url" id="bgImage" value="<%= plinkk.backgroundImage || '' %>"
+                <input type="url" id="backgroundImage" value="<%= plinkk.backgroundImage || '' %>"
                     class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all outline-none text-slate-200"
                     placeholder="https://..." />
                 <input type="file" id="uploadBgImage" accept="image/*" class="hidden" />
-                <button type="button" data-picker-for="bgImage"
+                <button type="button" data-picker-for="backgroundImage"
                     class="picker-btn shrink-0 px-3 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors"
                     title="Choisir une image">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
@@ -123,7 +148,7 @@
                         <rect x="3" y="14" width="7" height="7"></rect>
                     </svg>
                 </button>
-                <button type="button" data-upload-for="bgImage" data-field="bgImage"
+                <button type="button" data-upload-for="backgroundImage" data-field="backgroundImage"
                     class="upload-btn shrink-0 px-3 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-colors"
                     title="Uploader une image">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"

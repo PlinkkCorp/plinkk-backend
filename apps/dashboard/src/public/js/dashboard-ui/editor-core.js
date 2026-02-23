@@ -211,15 +211,30 @@ function renderPlinkk(config) {
     }
 
     // Background
+    const bgType = plinkk?.backgroundType || 'color';
     let bgStyle = '';
-    if (!canvaEnable || !canvasFileName) {
+    let canvasHTML = '';
+    let videoHTML = '';
+
+    if (canvaEnable && canvasFileName) {
+        bgStyle = 'background: black;';
+        canvasHTML = `<canvas id="bg-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;"></canvas>`;
+    } else if (bgType === 'video' && plinkk?.backgroundVideo) {
+        bgStyle = 'background: black;';
+        videoHTML = `
+            <video autoplay loop muted playsinline 
+                style="position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-1;pointer-events:none;">
+                <source src="${plinkk.backgroundVideo}" type="video/mp4">
+            </video>`;
+    } else if (bgType === 'image' && plinkk?.backgroundImage) {
+        bgStyle = `background: url('${plinkk.backgroundImage}') center/cover fixed no-repeat;`;
+    } else {
+        // Gradient fallback
         bgStyle = `background: radial-gradient(circle at 20% 20%, rgba(120,119,198,0.3) 0%, transparent 50%),
                    radial-gradient(circle at 80% 80%, rgba(255,119,198,0.3) 0%, transparent 50%),
                    radial-gradient(circle at 40% 40%, rgba(120,219,226,0.2) 0%, transparent 50%),
                    linear-gradient(${bgDeg}deg, ${bgColor} 0%, ${bgColor2} 100%);
                    background-attachment: fixed;`;
-    } else {
-        bgStyle = 'background: transparent;';
     }
 
     // Icône par défaut
@@ -446,9 +461,9 @@ function renderPlinkk(config) {
     }
 
     // Canvas HTML
-    const canvasHTML = (canvaEnable && canvasFileName)
-        ? '<div class="canvas-bg" id="canvasContainer"><canvas id="animatedCanvas"></canvas></div>'
-        : '';
+    if (canvaEnable && canvasFileName) {
+        canvasHTML = '<div class="canvas-bg" id="canvasContainer"><canvas id="animatedCanvas"></canvas></div>';
+    }
 
     // CSS du rendu
     const css = `
@@ -808,7 +823,7 @@ function renderPlinkk(config) {
             </div>
         </div>`;
 
-    let html = `<style>${css}</style>${canvasHTML}<article class="plinkk-article">`;
+    let html = `<style>${css}</style>${videoHTML}${canvasHTML}<article class="plinkk-article">`;
     normalized.forEach((key) => {
         switch (key) {
             case 'profile': html += profilePicHTML + statusSectionHTML; break;

@@ -60,6 +60,75 @@ fastify.register(fastifyRateLimit, {
 
 fastify.register(fastifyCompress);
 
+// Register proxy BEFORE body-parsers to avoid body consumption
+fastify.register(fastifyHttpProxy, {
+  upstream: "https://analytics.plinkk.fr/",
+  prefix: "/umami_script.js",
+  rewritePrefix: "/script.js",
+  replyOptions: {
+    rewriteRequestHeaders: (req, headers: any) => {
+      return {
+        ...headers,
+        host: "analytics.plinkk.fr",
+        "x-forwarded-for": (req as any).ip || headers["x-forwarded-for"],
+        "x-real-ip": (req as any).ip || headers["x-real-ip"],
+      };
+    },
+  },
+});
+
+fastify.register(fastifyHttpProxy, {
+  upstream: "https://analytics.plinkk.fr/",
+  prefix: "/api/send",
+  rewritePrefix: "/api/send",
+  replyOptions: {
+    rewriteRequestHeaders: (req, headers: any) => {
+      return {
+        ...headers,
+        host: "analytics.plinkk.fr",
+        "x-forwarded-for": (req as any).ip || headers["x-forwarded-for"],
+        "x-real-ip": (req as any).ip || headers["x-real-ip"],
+      };
+    },
+  },
+});
+
+const sharedViewsRoot = path.join(__dirname, "..", "..", "..", "packages", "shared", "views");
+fastify.register(fastifyView, {
+  engine: { ejs },
+  root: path.join(__dirname, "views"),
+  options: {
+    views: [
+      path.join(__dirname, "views"),
+      sharedViewsRoot,
+    ],
+  },
+});
+
+fastify.register(fastifyStatic, {
+  root: path.join(__dirname, "public"),
+  prefix: "/public/",
+});
+
+fastify.register(fastifyFormbody);
+
+fastify.register(fastifyMultipart, {
+  limits: { fileSize: 2 * 1024 * 1024 },
+  attachFieldsToBody: false,
+});
+
+fastify.register(fastifyCookie);
+
+fastify.register(fastifySecureSession, {
+  sessionName: "session",
+  cookieName: "plinkk-backend",
+  key: readFileSync(path.join(__dirname, "secret-key")),
+  expiry: 24 * 60 * 60,
+  cookie: { path: "/" },
+});
+
+fastify.register(fastifyCors, { origin: true });
+
 import onRequestHook from "./hooks/onRequestHook";
 
 fastify.addHook("onRequest", onRequestHook);
@@ -190,7 +259,7 @@ fastify.get("/*", async (request, reply) => {
     return reply.callNotFound();
   }
   const host = request.headers.host || "";
-  if (host !== "plinkk.fr" && host !== "127.0.0.1:3001") {
+  if (host !== "plinkk.fr" && host !== "127.0.0.1:3002") {
     return reply.callNotFound();
   }
   if (/\.[a-zA-Z0-9]+$/.test(url)) {

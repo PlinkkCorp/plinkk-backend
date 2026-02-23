@@ -72,7 +72,10 @@ export function plinkksExportRoutes(fastify: FastifyInstance) {
       canvaEnable: settings?.canvaEnable ?? 1,
       selectedCanvasIndex: settings?.selectedCanvasIndex ?? 16,
       layoutOrder: settings?.layoutOrder ?? null,
-    };
+      backgroundType: (settings as any)?.backgroundType ?? "color",
+      backgroundImage: (settings as any)?.backgroundImage ?? "",
+      backgroundVideo: (settings as any)?.backgroundVideo ?? "",
+    } as any;
 
     const config = await generateProfileConfig(
       pageProfile,

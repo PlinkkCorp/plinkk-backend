@@ -343,24 +343,64 @@ export function setBackgroundStyles(profileData) {
     const data = cosmetics.data || {};
     const effect = data.effect;
 
-    const colors = Array.isArray(_p.background) ? _p.background.filter(Boolean) : null;
-    const deg = (Number.isFinite(_p.degBackgroundColor) ? _p.degBackgroundColor : 45) || 45;
+    const bgType = _p.backgroundType || 'color';
 
-    if (colors) {
-        if (colors.length === 0) {
-            document.body.style.background = '';
-        } else if (colors.length === 1) {
-            document.body.style.background = colors[0];
+    // Remove existing video background if it exists
+    const existingVideo = document.getElementById('background-video');
+    if (existingVideo) existingVideo.remove();
+
+    if (bgType === 'video' && _p.backgroundVideo) {
+        const video = document.createElement('video');
+        video.id = 'background-video';
+        video.src = _p.backgroundVideo;
+        video.autoplay = true;
+        video.loop = true;
+        video.muted = true;
+        video.playsInline = true;
+        video.style.position = 'fixed';
+        video.style.top = '0';
+        video.style.left = '0';
+        video.style.width = '100vw';
+        video.style.height = '100vh';
+        video.style.objectFit = 'cover';
+        video.style.zIndex = '-2';
+        video.style.pointerEvents = 'none';
+
+        const bgContainer = document.querySelector('.background') || document.body;
+        if (bgContainer === document.body) {
+            document.body.prepend(video);
         } else {
-            document.body.style.background = `linear-gradient(${deg}deg, ${colors.join(", ")})`;
+            bgContainer.innerHTML = '';
+            bgContainer.appendChild(video);
         }
+
+        document.body.style.background = 'black'; // Fallback
+    } else if (bgType === 'image' && _p.backgroundImage) {
+        document.body.style.background = `url(${_p.backgroundImage})`;
         document.body.style.backgroundSize = "cover";
         document.body.style.backgroundAttachment = "fixed";
-    } else if (typeof _p.background === 'string' && _p.background.trim() !== '') {
-        document.body.style.background = `url(${_p.background})`;
-        document.body.style.backgroundSize = `${_p.backgroundSize || 100}%`;
+        document.body.style.backgroundPosition = "center";
     } else {
-        document.body.style.background = '';
+        const colors = Array.isArray(_p.background) ? _p.background.filter(Boolean) : null;
+        const deg = (Number.isFinite(_p.degBackgroundColor) ? _p.degBackgroundColor : 45) || 45;
+
+        if (colors) {
+            if (colors.length === 0) {
+                document.body.style.background = '';
+            } else if (colors.length === 1) {
+                document.body.style.background = colors[0];
+            } else {
+                document.body.style.background = `linear-gradient(${deg}deg, ${colors.join(", ")})`;
+            }
+            document.body.style.backgroundSize = "cover";
+            document.body.style.backgroundAttachment = "fixed";
+        } else if (typeof _p.background === 'string' && _p.background.trim() !== '') {
+            document.body.style.background = `url(${_p.background})`;
+            document.body.style.backgroundSize = "cover";
+            document.body.style.backgroundAttachment = "fixed";
+        } else {
+            document.body.style.background = '';
+        }
     }
 
     if (effect && effect !== 'none') {
