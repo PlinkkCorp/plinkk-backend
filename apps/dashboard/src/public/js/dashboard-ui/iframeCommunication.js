@@ -98,6 +98,13 @@ export function sendToIframe(message) {
   }
 }
 
+export function syncConfigToIframe(config) {
+  sendToIframe({
+    type: 'plinkk:sync-config',
+    config: config
+  });
+}
+
 /**
  * Active le mode édition dans l'iframe
  */

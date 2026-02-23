@@ -200,7 +200,7 @@
                                 <div id="previewWrapper"
                                     class="relative z-10 bg-black rounded-[2rem] overflow-hidden border-[6px] border-slate-800 shadow-inner aspect-[9/19] max-h-[85vh] mx-auto">
                                     <iframe id="preview"
-                                        src="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>?preview=1"
+                                        src="<%= (typeof frontendUrl !== 'undefined' && frontendUrl.includes('localhost')) ? frontendUrl : 'http://127.0.0.1:3002' %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>?preview=1"
                                         class="w-full h-full bg-white" frameborder="0"></iframe>
                                     <!-- small floating controls (reload / open) shown in preview mode -->
                                     <div id="previewControls"

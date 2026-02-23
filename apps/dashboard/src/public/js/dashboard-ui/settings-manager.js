@@ -1,4 +1,5 @@
 import { store as state } from './state.js';
+import { syncConfigToIframe } from './iframeCommunication.js';
 
 export class SettingsManager {
     constructor() {
@@ -134,13 +135,11 @@ export class SettingsManager {
 
             if (window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
 
-            // Update local state and sync everything
-            if (window.__INITIAL_STATE__) Object.assign(window.__INITIAL_STATE__, data);
             if (window.__EDITOR_STORE__) window.__EDITOR_STORE__.set(data);
 
-            // If we have an active preview reload function, call it
-            if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
-
+            // Live Sync
+            const fullConfig = { ...(window.__PLINKK_GET_CONFIG__ ? window.__PLINKK_GET_CONFIG__() : {}), ...data };
+            syncConfigToIframe(fullConfig);
         } catch (err) {
             console.error('Settings save error:', err);
             if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();

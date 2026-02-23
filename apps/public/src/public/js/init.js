@@ -56,160 +56,109 @@ document.addEventListener("DOMContentLoaded", async function () {
         console.error("profileData is not defined or is not an object.");
         return;
     }
-    // Expose parsedProfileData as a global to support modules that access
-    // profileData indirectly (e.g. styleTools.js) and to avoid issues from
-    // circular imports. Use a namespaced property to avoid collisions.
+    // Expose parsedProfileData as a global
     try {
         window.profileData = parsedProfileData;
         window.__PLINKK_PROFILE_DATA__ = parsedProfileData;
+    }
+    catch (e) { }
 
-    }
-    catch (e) {
-        // ignore if window is not writable for some reason
-    }
     const article = document.getElementById("profile-article");
-    if (!article) {
-        console.error("Element with id 'profile-article' not found.");
-        return;
-    }
+    if (!article) return;
 
     // Clear skeleton loading if present
     const skeleton = document.getElementById('skeleton-loading');
     if (skeleton) skeleton.remove();
 
-    // Rendu des sections selon l'ordre choisi (layoutOrder) si présent
-    try {
-        const DEFAULT_LAYOUT = ['profile', 'username', 'statusbar', 'labels', 'social', 'email', 'links'];
-        let order = Array.isArray(profileData.layoutOrder) ? profileData.layoutOrder.slice() : DEFAULT_LAYOUT;
-        const KNOWN = new Set(DEFAULT_LAYOUT);
-        // Normaliser: garder seulement les connus puis ajouter les manquants dans l'ordre par défaut
-        const filtered = order.filter(k => KNOWN.has(k));
-        DEFAULT_LAYOUT.forEach(k => { if (!filtered.includes(k)) filtered.push(k); });
-        const renderers = {
-            profile: () => article.appendChild(createProfileContainer(profileData)),
-            username: () => article.appendChild(createUserName(profileData)),
-            statusbar: () => createStatusBar(profileData),
-            labels: () => createLabelButtons(profileData),
-            social: () => createIconList(profileData),
-            email: () => article.appendChild(createEmailAndDescription(profileData)),
-            links: () => {
-                const linkBoxes = createLinkBoxes(profileData);
-                if (linkBoxes && linkBoxes.length) {
-                    linkBoxes.forEach((box) => article.appendChild(box));
+    async function renderPlinkk(profileData) {
+        // Clear existing content except for essential elements if needed
+        article.innerHTML = '';
+
+        // Rendu des sections selon l'ordre choisi (layoutOrder) si présent
+        try {
+            const DEFAULT_LAYOUT = ['profile', 'username', 'statusbar', 'labels', 'social', 'email', 'links'];
+            let order = Array.isArray(profileData.layoutOrder) ? profileData.layoutOrder.slice() : DEFAULT_LAYOUT;
+            const KNOWN = new Set(DEFAULT_LAYOUT);
+            // Normaliser: garder seulement les connus puis ajouter les manquants dans l'ordre par défaut
+            const filtered = order.filter(k => KNOWN.has(k));
+            DEFAULT_LAYOUT.forEach(k => { if (!filtered.includes(k)) filtered.push(k); });
+            const renderers = {
+                profile: () => article.appendChild(createProfileContainer(profileData)),
+                username: () => article.appendChild(createUserName(profileData)),
+                statusbar: () => createStatusBar(profileData),
+                labels: () => createLabelButtons(profileData),
+                social: () => createIconList(profileData),
+                email: () => article.appendChild(createEmailAndDescription(profileData)),
+                links: () => {
+                    const linkBoxes = createLinkBoxes(profileData);
+                    if (linkBoxes && linkBoxes.length) {
+                        linkBoxes.forEach((box) => article.appendChild(box));
+                    }
+                },
+            };
+            filtered.forEach(key => { try { renderers[key] && renderers[key](); } catch (e) { /* ignore */ } });
+        } catch (e) {
+            // Fallback: ordre historique
+            article.appendChild(createProfileContainer(profileData));
+            article.appendChild(createUserName(profileData));
+            createStatusBar(profileData);
+            createLabelButtons(profileData);
+            createIconList(profileData);
+            article.appendChild(createEmailAndDescription(profileData));
+        }
+
+        // Wait for themes
+        try { await themesLoaded; } catch (_) { }
+
+        // Theme handling
+        try {
+            if (injectedTheme && typeof injectedTheme === 'object') {
+                const same = (a, b) => a && b && a.background === b.background && a.buttonBackground === b.buttonBackground && a.textColor === b.textColor;
+                const existing = themes.findIndex(t => same(t, injectedTheme));
+                if (existing === -1) {
+                    themes.unshift(injectedTheme);
+                    profileData.selectedThemeIndex = 0;
+                } else {
+                    profileData.selectedThemeIndex = existing;
                 }
-            },
-        };
-        filtered.forEach(key => { try { renderers[key] && renderers[key](); } catch (e) { /* ignore */ } });
-    } catch (e) {
-        // Fallback: ordre historique
-        article.appendChild(createProfileContainer(profileData));
-        article.appendChild(createUserName(profileData));
-        createStatusBar(profileData);
-        createLabelButtons(profileData);
-        createIconList(profileData);
-        article.appendChild(createEmailAndDescription(profileData));
-    }
-    // Wait for themes to be loaded (built-ins + community). This ensures
-    // selectedThemeIndex refers to the final ordering and that applyFirstTheme
-    // receives a real theme object.
-    try {
-        await themesLoaded;
-    } catch (_) { }
-
-    // If the server exported an injectedTheme in profileConfig.js, insert it
-    // into the themes array (avoid duplicates) and update selectedThemeIndex if needed.
-    try {
-        if (injectedTheme && typeof injectedTheme === 'object') {
-            // Avoid duplicates by shallow compare
-            const same = (a, b) => a && b && a.background === b.background && a.buttonBackground === b.buttonBackground && a.textColor === b.textColor;
-            const existing = themes.findIndex(t => same(t, injectedTheme));
-            if (existing === -1) {
-                // Place injected theme at the start so it has priority
-                themes.unshift(injectedTheme);
-                // If user previously selected a theme by index and it was >=0,
-                // leave it as-is; injectedTheme becomes index 0.
-                profileData.selectedThemeIndex = 0;
-            } else {
-                profileData.selectedThemeIndex = existing;
             }
-        }
-    } catch (e) { console.warn('injectedTheme handling failed', e); }
+        } catch (e) { }
 
-    // Ensure selectedThemeIndex is a valid integer and within the available range
-    try {
-        let idx = Number(profileData.selectedThemeIndex);
-        if (!Number.isFinite(idx) || isNaN(idx)) idx = 0;
-        if (!Array.isArray(themes) || themes.length === 0) {
-            idx = 0;
-        } else {
-            // Normalize to [0 .. themes.length-1]
-            idx = ((Math.floor(idx) % themes.length) + themes.length) % themes.length;
-        }
-        profileData.selectedThemeIndex = idx;
-    } catch (e) {
-        profileData.selectedThemeIndex = 0;
-    }
-    if (!themes || !themes.length) {
-        console.warn("Themes array is empty or not defined.");
-    }
-    else {
-        createToggleThemeButton(themes[profileData.selectedThemeIndex % themes.length]);
-    }
-    // Si les liens n'ont pas été rendus par l'ordre ci-dessus (par ex. fallback), rendre maintenant
-    try {
-        const hasLinksRendered = !!document.querySelector('#profile-article .discord-box, #profile-article .button, #profile-article .bento-grid');
-        if (!hasLinksRendered) {
-            const linkBoxes = createLinkBoxes(profileData);
-            if (!linkBoxes || !linkBoxes.length) {
-                console.warn("No link boxes created.");
-            } else {
-                linkBoxes.forEach((box) => article.appendChild(box));
+        // Ensure valid index
+        try {
+            let idx = parseInt(profileData.selectedThemeIndex) || 0;
+            if (themes.length > 0) {
+                idx = ((idx % themes.length) + themes.length) % themes.length;
             }
+            profileData.selectedThemeIndex = idx;
+        } catch (e) { profileData.selectedThemeIndex = 0; }
+
+        if (themes.length > 0) {
+            createToggleThemeButton(themes[profileData.selectedThemeIndex % themes.length]);
         }
-    } catch (_) { }
-    document.title = profileData.userName ? `${profileData.userName} - Plinkk` : "Plinkk By Klaynight";
-    const link = document.createElement("link");
-    link.rel = "icon";
-    link.href = profileData.iconUrl;
-    if (!profileData.iconUrl) {
-        console.warn("Icon URL is not defined.");
-    }
-    document.head.appendChild(link);
-    // N'ajoute pas le footer en mode aperçu (?preview=1)
-    const isPreview = new URLSearchParams(window.location.search).get('preview') === '1';
-    if (!isPreview) {
-        const footer = document.createElement("footer");
-        const themeIndex = profileData.selectedThemeIndex % themes.length;
-        footer.innerHTML = `Design with ❤️ by <a href="http://plinkk.fr" target="_blank" rel="noopener noreferrer"><p style="color:${((_a = themes[themeIndex]) === null || _a === void 0 ? void 0 : _a.buttonTextColor) || 'defaultColor'};display:inline;padding:2px 2px 2px 4px;border-radius:5px;background-color:${((_b = themes[themeIndex]) === null || _b === void 0 ? void 0 : _b.buttonBackground) || 'defaultColor'};">Plinkk©</p></a>`;
-        footer.style.zIndex = "9999";
-        document.body.appendChild(footer);
-    }
-    initEasterEggs();
 
-    // Réagir aux modifications externes du thème injecté (console / bookmarklet)
-    try {
-        window.addEventListener('plinkk:theme-updated', (ev) => {
-            try {
-                const detail = ev && ev.detail ? ev.detail : null;
-                const idx = detail && typeof detail.index === 'number' ? detail.index : window.__PLINKK_INJECTED_THEME_INDEX__;
-                const theme = (typeof idx === 'number') ? themes[idx % themes.length] : (window.__PLINKK_INJECTED_THEME__ || null);
-                if (theme) {
-                    // Recréation du bouton si nécessaire
-                    try { createToggleThemeButton(theme); } catch (e) { }
-                    try { applyFirstTheme(theme); } catch (e) { }
-                }
-            } catch (e) { }
-        });
-    } catch (e) { }
-    // Désactiver le néon globalement (override temporaire)
+        document.title = profileData.userName ? `${profileData.userName} - Plinkk` : "Plinkk By Klaynight";
 
-    if (!animations || !animations.length) {
-        console.warn("Animations array is empty or not defined.");
+        // Final styles/animations
+        if (animations && animations.length) {
+            applyDynamicStyles(profileData, styleSheet, profileData.selectedAnimationBackgroundIndex % animations.length, !!profileData.EnableAnimationBackground, profileData.animationDurationBackground, !!profileData.canvaEnable, profileData.selectedCanvasIndex % canvaData.length);
+            applyFirstTheme(themes[profileData.selectedThemeIndex % themes.length]);
+            applyAnimation(animations[profileData.selectedAnimationIndex % animations.length], !!profileData.EnableAnimationArticle);
+            applyAnimationButton(animations[profileData.selectedAnimationButtonIndex % animations.length], !!profileData.EnableAnimationButton, profileData.delayAnimationButton);
+        }
     }
-    else {
-        applyDynamicStyles(profileData, styleSheet, profileData.selectedAnimationBackgroundIndex % animations.length, !!profileData.EnableAnimationBackground, profileData.animationDurationBackground, !!profileData.canvaEnable, profileData.selectedCanvasIndex % canvaData.length);
-        applyFirstTheme(themes[profileData.selectedThemeIndex % themes.length]);
-        applyAnimation(animations[profileData.selectedAnimationIndex % animations.length], !!profileData.EnableAnimationArticle);
-        applyAnimationButton(animations[profileData.selectedAnimationButtonIndex % animations.length], !!profileData.EnableAnimationButton, profileData.delayAnimationButton);
-    }
+
+    // Initial render
+    await renderPlinkk(parsedProfileData);
+
+    // Live preview sync listener
+    window.addEventListener('message', async (event) => {
+        if (event.data && event.data.type === 'plinkk:sync-config') {
+            console.log('[Plinkk] Syncing configuration...', event.data.config);
+            const newConfig = event.data.config;
+            window.profileData = newConfig;
+            window.__PLINKK_PROFILE_DATA__ = newConfig;
+            await renderPlinkk(newConfig);
+        }
+    });
 });

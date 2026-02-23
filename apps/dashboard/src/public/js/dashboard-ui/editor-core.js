@@ -198,6 +198,33 @@ function renderPlinkk(config) {
     const description = plinkk?.description || '';
     const email = plinkk?.email || '';
 
+    const fontFamily = plinkk?.fontFamily || '';
+    const buttonStyle = plinkk?.buttonStyle || 'rounded';
+    const isVerified = plinkk?.isVerified || false;
+    const isPartner = plinkk?.isPartner || false;
+    const showVerifiedBadge = plinkk?.showVerifiedBadge || false;
+    const showPartnerBadge = plinkk?.showPartnerBadge || false;
+
+    if (fontFamily) {
+        const fontId = 'google-font-' + fontFamily.replace(/\s+/g, '-').toLowerCase();
+        if (!document.getElementById(fontId)) {
+            const link = document.createElement('link');
+            link.id = fontId;
+            link.rel = 'stylesheet';
+            link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/\s+/g, '+')}:wght@400;500;600;700&display=swap`;
+            document.head.appendChild(link);
+        }
+    }
+
+    let borderRadius = '16px'; // default
+    if (buttonStyle === 'pill') borderRadius = '9999px';
+    else if (buttonStyle === 'sharp') borderRadius = '0px';
+    else if (buttonStyle === 'soft') borderRadius = '10px';
+    else if (buttonStyle === 'extra-rounded') borderRadius = '32px';
+    else if (buttonStyle === 'leaf') borderRadius = '24px 4px 24px 4px';
+    else if (buttonStyle === 'leaf-alt') borderRadius = '4px 24px 4px 24px';
+    else if (buttonStyle === 'rounded-large') borderRadius = '20px';
+
     // Canvas
     const canvaEnable = plinkk?.canvaEnable || false;
     const canvasIndexRaw = plinkk?.selectedCanvasIndex;
@@ -249,19 +276,60 @@ function renderPlinkk(config) {
                    background-attachment: fixed;`;
     }
 
-    // Icône par défaut
+    function isLightTheme(color) {
+        if (!color) return false;
+        let r, g, b;
+        if (color.startsWith('#')) {
+            let hex = color.replace('#', '');
+            if (hex.length === 3 || hex.length === 4) hex = hex.substring(0, 3).split('').map(c => c + c).join('');
+            if (hex.length >= 6) {
+                r = parseInt(hex.substring(0, 2), 16) / 255;
+                g = parseInt(hex.substring(2, 4), 16) / 255;
+                b = parseInt(hex.substring(4, 6), 16) / 255;
+            } else {
+                return false;
+            }
+        } else if (color.startsWith('rgb')) {
+            const match = color.match(/\d+/g);
+            if (match && match.length >= 3) {
+                r = parseInt(match[0]) / 255;
+                g = parseInt(match[1]) / 255;
+                b = parseInt(match[2]) / 255;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+        const a = [r, g, b].map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+        const luminance = 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+        return luminance > 0.5;
+    }
+
+    let actualBgColor = bgColor;
+    if (bgType === 'color' && Array.isArray(plinkk?.background) && plinkk.background.length > 0) {
+        actualBgColor = plinkk.background[0].color;
+    } else if (bgType !== 'color' && Array.isArray(plinkk?.background) && plinkk.background.length > 0) {
+        actualBgColor = plinkk.background[0].color;
+    }
+    const isLight = isLightTheme(actualBgColor);
+    console.log('[DEBUG-PLINKK] bgType:', bgType);
+    console.log('[DEBUG-PLINKK] bgColor:', bgColor);
+    console.log('[DEBUG-PLINKK] actualBgColor:', actualBgColor);
+    console.log('[DEBUG-PLINKK] isLight?', isLight);
+
     const DEFAULT_LINK_ICON = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>');
 
-    // Render link
     function renderLink(link, index) {
         const isHidden = link.hidden ? ' opacity-50' : '';
         const linkId = link.id;
 
-        // --- HEADER ---
         if (link.type === 'HEADER') {
+            const headerTextColor = isLight ? '#000000' : textColor;
+            console.log('[DEBUG-PLINKK] Tying HEADER text color:', headerTextColor);
             return `
             <div class="link-item${isHidden} link-item-header" data-link-id="${linkId}" data-index="${index}" draggable="true" style="background:transparent;border:none;box-shadow:none;display:block;">
-                <h3 class="link-header editable-inline" data-field="text" data-type="link" data-id="${linkId}" style="color:${textColor};margin:16px 0 8px;text-align:center;width:100%;font-size:1.2rem;font-weight:700;">${escapeHtml(link.text || 'Titre')}</h3>
+                <h3 class="link-header editable-inline" data-field="text" data-type="link" data-id="${linkId}" style="color:${headerTextColor};margin:16px 0 8px;text-align:center;width:100%;font-size:1.2rem;font-weight:700;">${escapeHtml(link.text || 'Titre')}</h3>
                 <div class="link-actions" style="justify-content:center;">
                     <button class="action-btn edit-link-btn" data-id="${linkId}" title="Modifier">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -273,7 +341,6 @@ function renderPlinkk(config) {
             </div>`;
         }
 
-        // --- EMBED ---
         if (link.type === 'EMBED' && link.embedData) {
             let embedHtml = '<div style="padding:20px;text-align:center;opacity:0.6;">Contenu intégré vide</div>';
             if (link.embedData.url) {
@@ -330,12 +397,13 @@ function renderPlinkk(config) {
         // --- FORM ---
         if (link.type === 'FORM') {
             const linkIcon = link.icon || 'https://cdn.plinkk.fr/icons/mail.svg';
+            const formTextColor = isLight ? '#000000' : btnText;
 
             return `
             <div class="link-item${isHidden}" data-link-id="${linkId}" data-index="${index}" draggable="true">
                 <div class="link-content">
-                    <img src="${linkIcon}" alt="" class="link-icon" onerror="this.style.opacity=0.5"/>
-                    <span class="link-text">${escapeHtml(link.text || 'Contact')}</span>
+                    <img src="${linkIcon}" alt="" class="link-icon" onerror="this.style.opacity=0.5" ${isLight ? 'style="filter: brightness(0);"' : ''}/>
+                    <span class="link-text" style="color: ${formTextColor};">${escapeHtml(link.text || 'Contact')}</span>
                 </div>
                 <div class="link-actions">
                     <button class="action-btn edit-link-btn" data-id="${linkId}" title="Modifier">
@@ -403,10 +471,11 @@ function renderPlinkk(config) {
 
     // Render label
     function renderLabel(label, index) {
-        const bgClr = label.color || 'rgba(124,58,237,0.3)';
+        const bgClr = label.color ? label.color + '80' : 'rgba(124,58,237,0.3)';
         const fontClr = label.fontColor || '#ffffff';
+        const borderClr = label.color || '#ccc';
         return `
-            <span class="label-item" data-index="${index}" draggable="true" style="background:${bgClr};color:${fontClr};">
+            <span class="label-item" data-index="${index}" draggable="true" style="background:${bgClr}; color:${fontClr}; border: 2px solid ${borderClr};">
                 <span class="label-text editable-inline" data-field="data" data-type="label" data-index="${index}">${escapeHtml(label.data || 'Label')}</span>
                 <button class="label-edit-btn" data-index="${index}" title="Modifier">
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>
@@ -414,7 +483,6 @@ function renderPlinkk(config) {
                 <button class="label-delete-btn" data-index="${index}" title="Supprimer">
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
-                <div class="label-desc editable-inline editable-multiline" data-field="description" data-type="label" data-index="${index}">${escapeHtml(label.description || '')}</div>
             </span>`;
     }
 
@@ -484,7 +552,7 @@ function renderPlinkk(config) {
         #plinkkRenderer [draggable] { cursor: grab; }
         #plinkkRenderer [draggable].dragging { cursor: grabbing; }
         #plinkkRenderer { 
-            font-family: "Inter", "Satoshi", -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: ${fontFamily ? `'${fontFamily}', ` : ''}"Inter", "Satoshi", -apple-system, BlinkMacSystemFont, sans-serif;
             display: flex; justify-content: center; align-items: flex-start;
             position: relative; min-height: 100%; color: ${textColor};
             overflow-y: auto; overflow-x: hidden;
@@ -509,14 +577,15 @@ function renderPlinkk(config) {
         
         /* Profile */
         .profile-section { position: relative; margin-bottom: 16px; }
-        .profile-pic-container {
-            width: 160px; height: 160px; margin: 0 auto;
-            position: relative; border-radius: 50%;
-            filter: drop-shadow(0 8px 24px rgba(0,0,0,0.4));
+        /* User Info */
+        .profile-pic-container { 
+            position: relative; width: 180px; height: 180px; 
+            margin: 0 auto 20px auto; 
+            aspect-ratio: 1 / 1;
         }
-        .profile-pic {
-            width: 100%; height: 100%; border-radius: 50%;
-            object-fit: cover; border: 3px solid rgba(255,255,255,0.15);
+        .profile-pic { 
+            width: 100%; height: 100%; border-radius: 50%; border: 3px solid rgba(255,255,255,0.15);
+            object-fit: cover;
         }
         .profile-initial {
             width: 100%; height: 100%; border-radius: 50%;
@@ -546,17 +615,20 @@ function renderPlinkk(config) {
         /* Name */
         .profile-name {
             font-size: 1.75rem; font-weight: 700; margin: 12px 0 4px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
             background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 30%, #7c3aed 60%, #f59e0b 100%);
             background-size: 300% 300%; background-clip: text;
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             animation: gradientFlow 8s ease-in-out infinite;
         }
+        .verified-badge { color: #3B82F6; display: inline-flex; align-items: center; filter: none; -webkit-text-fill-color: initial; }
+        .partner-badge { color: #A855F7; display: inline-flex; align-items: center; filter: none; -webkit-text-fill-color: initial; }
         @keyframes gradientFlow { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
         
         /* Statusbar */
         .statusbar-wrapper { position: relative; display: inline-flex; margin: 8px 0; }
         .statusbar-content {
-            padding: 6px 16px; border-radius: 20px; font-size: 0.75rem;
+            padding: 6px 16px; border-radius: ${borderRadius}; font-size: 0.75rem;
             display: inline-flex; align-items: center; gap: 6px;
             font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
@@ -577,7 +649,7 @@ function renderPlinkk(config) {
         .labels-section { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 12px 0; }
         .label-item {
             position: relative; display: inline-flex; align-items: center; gap: 4px;
-            padding: 6px 32px 6px 12px; border-radius: 20px;
+            padding: 6px 32px 6px 12px; border-radius: ${borderRadius};
             font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
             letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
@@ -620,7 +692,7 @@ function renderPlinkk(config) {
         
         /* Desc & Email */
         .desc-email-container {
-            background: rgba(44, 47, 51, 0.8); border-radius: 12px;
+            background: rgba(44, 47, 51, 0.8); border-radius: ${borderRadius};
             padding: 12px; margin: 16px 0; text-align: center;
         }
         .email-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -638,7 +710,7 @@ function renderPlinkk(config) {
         .link-item {
             display: flex; align-items: center; margin-top: 12px;
             background: linear-gradient(135deg, ${btnBg} 0%, rgba(255,255,255,0.04) 100%);
-            border-radius: 16px; border: 1px solid rgba(255,255,255,0.12);
+            border-radius: ${borderRadius}; border: 1px solid rgba(255,255,255,0.12);
             backdrop-filter: blur(16px); overflow: hidden;
             box-shadow: 0 4px 16px rgba(0,0,0,0.2);
             transition: all 0.2s;
@@ -806,7 +878,20 @@ function renderPlinkk(config) {
                 </div>
             </div>
         </div>`;
-    const profileNameHTML = `<h1 class="profile-name editable-inline" data-field="userName" data-type="plinkk" data-section="username" draggable="true">${escapeHtml(name)}</h1>`;
+    const profileNameHTML = `
+        <h1 class="profile-name editable-inline" data-field="userName" data-type="plinkk" data-section="username" draggable="true">
+            <span>${escapeHtml(name)}</span>
+            ${isVerified && showVerifiedBadge ? `
+                <span class="verified-badge" title="Vérifié">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.75 12.75L10.25 15.25L16.25 8.75" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+            ` : ''}
+            ${isPartner && showPartnerBadge ? `
+                <span class="partner-badge" title="Partenaire">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+            ` : ''}
+        </h1>`;
     const statusSectionHTML = statusbarHTML ? `<div data-section="statusbar" draggable="true">${statusbarHTML}</div>` : '';
     const labelsSectionHTML = `
         <div class="labels-section" data-section="labels" draggable="true">

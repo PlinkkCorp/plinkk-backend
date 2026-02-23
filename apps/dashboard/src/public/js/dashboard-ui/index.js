@@ -3,6 +3,7 @@ import { historyManager } from './history-manager.js';
 import { uiUtils } from './ui-utils.js';
 import { linkManager } from './link-manager.js';
 import { settingsManager } from './settings-manager.js';
+import { syncConfigToIframe } from './iframeCommunication.js';
 import { renderSocial } from './renderers.js';
 import { animations, animationBackground } from '../../config/animationConfig.js';
 import { canvaData } from '../../config/canvaConfig.js';
@@ -511,7 +512,10 @@ class DashboardUI {
           body: JSON.stringify({ background: colors })
         });
         if (res.ok && window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
-        if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+
+        // Live Sync
+        const fullConfig = { ...state.get(), background: colors };
+        syncConfigToIframe(fullConfig);
       } catch (e) {
         if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
       }
@@ -579,8 +583,10 @@ class DashboardUI {
         body: JSON.stringify({ [key]: value })
       });
       if (res.ok && window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
-      if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
-      else if (window.refreshPreview) window.refreshPreview();
+
+      // Live Sync
+      const fullConfig = { ...state.get(), [key]: value };
+      syncConfigToIframe(fullConfig);
     } catch (e) {
       if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
     }

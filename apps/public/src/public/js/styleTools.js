@@ -283,27 +283,42 @@ export function applyTheme(theme) {
         document.body.style.fontFamily = `"${_p.fontFamily}", sans-serif`;
         const articleElement = document.getElementById("profile-article");
         if (articleElement) articleElement.style.fontFamily = `"${_p.fontFamily}", sans-serif`;
+
+        // Dynamic Google Font loading
+        const fontId = 'google-font-' + _p.fontFamily.replace(/\s+/g, '-').toLowerCase();
+        if (!document.getElementById(fontId)) {
+            const link = document.createElement('link');
+            link.id = fontId;
+            link.rel = 'stylesheet';
+            link.href = `https://fonts.googleapis.com/css2?family=${_p.fontFamily.replace(/\s+/g, '+')}:wght@400;500;600;700&display=swap`;
+            document.head.appendChild(link);
+        }
     }
 
     if (_p.buttonStyle) {
         let radius = '16px'; // default
         if (_p.buttonStyle === 'pill') radius = '9999px';
-        if (_p.buttonStyle === 'sharp') radius = '0px';
-        if (_p.buttonStyle === 'rounded') radius = '16px';
-        if (_p.buttonStyle === 'soft') radius = '8px';
-        if (_p.buttonStyle === 'extra-rounded') radius = '32px';
-        if (_p.buttonStyle === 'leaf') radius = '24px 4px 24px 4px';
-        if (_p.buttonStyle === 'leaf-alt') radius = '4px 24px 4px 24px';
+        else if (_p.buttonStyle === 'sharp') radius = '0px';
+        else if (_p.buttonStyle === 'soft') radius = '10px';
+        else if (_p.buttonStyle === 'extra-rounded') radius = '32px';
+        else if (_p.buttonStyle === 'leaf') radius = '24px 4px 24px 4px';
+        else if (_p.buttonStyle === 'leaf-alt') radius = '4px 24px 4px 24px';
+        else if (_p.buttonStyle === 'rounded-large') radius = '20px';
 
         const styleSheetObj = document.styleSheets[document.styleSheets.length - 1] || document.styleSheets[0];
         try {
+            // Main border-radius rule for all button-like elements
             styleSheetObj.insertRule(`
-            .discord-box, .label-button, .email, .profile-description, .theme-toggle-button {
+            .discord-box, .link-item, .label-button, .label-item, .statusBarText, .statusbar-content, 
+            .email, .desc-email-container, .profile-description, .theme-toggle-button,
+            .form-content, .form-submit-btn {
                 border-radius: ${radius} !important;
             }
         `, styleSheetObj.cssRules.length);
+
+            // Also apply to pseudo-elements if they exist (like shimmer/overlays)
             styleSheetObj.insertRule(`
-            .discord-box::after {
+            .discord-box::after, .link-item::after, .label-button::after, .label-item::after {
                 border-radius: ${radius} !important;
             }
         `, styleSheetObj.cssRules.length);
@@ -335,6 +350,23 @@ export function applyTheme(theme) {
             htmlLabel.style.color = theme.textColor;
         }
     });
+
+    // Handle Category Titles (Headers) and Form Labels for Light Themes
+    if (!theme.darkTheme) {
+        document.querySelectorAll('.link-header').forEach(h => {
+            h.style.color = 'black';
+        });
+        document.querySelectorAll('.form-content label').forEach(l => {
+            l.style.color = 'black';
+        });
+    } else {
+        document.querySelectorAll('.link-header').forEach(h => {
+            h.style.color = theme.textColor || '#fff';
+        });
+        document.querySelectorAll('.form-content label').forEach(l => {
+            l.style.color = 'rgba(255, 255, 255, 0.45)'; // Default fallback for dark
+        });
+    }
 }
 export function setBackgroundStyles(profileData) {
     const _p = profileData || getProfileData() || {};

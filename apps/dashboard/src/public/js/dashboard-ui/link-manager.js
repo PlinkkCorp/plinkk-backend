@@ -1,5 +1,6 @@
 import { store as state } from './state.js';
 import { uiUtils } from './ui-utils.js';
+import { syncConfigToIframe } from './iframeCommunication.js';
 
 export class LinkManager {
     constructor() {
@@ -599,7 +600,9 @@ export class LinkManager {
                 this.renderLinksList(result.links);
             }
 
-            if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+            // Live Sync
+            const fullConfig = { ...window.__PLINKK_GET_CONFIG__(), links: result?.links || links };
+            syncConfigToIframe(fullConfig);
         } catch (e) {
             if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
 
@@ -635,9 +638,11 @@ export class LinkManager {
 
         try {
             if (window.__PLINKK_SHOW_SAVING__) window.__PLINKK_SHOW_SAVING__();
-            await saveFn(links);
             if (window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
-            if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
+
+            // Live Sync
+            const fullConfig = { ...window.__PLINKK_GET_CONFIG__(), links: links };
+            syncConfigToIframe(fullConfig);
         } catch (e) {
             if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
 
@@ -678,9 +683,12 @@ export class LinkManager {
                     }
                     if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.links = result.links;
                     if (window.__PLINKK_SYNC_SIDEBAR__) window.__PLINKK_SYNC_SIDEBAR__();
+                    if (window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
+
+                    // Live Sync
+                    const fullConfig = { ...window.__PLINKK_GET_CONFIG__(), links: result?.links || sortedLinks };
+                    syncConfigToIframe(fullConfig);
                 }
-                if (window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
-                if (window.__PLINKK_RENDERER_RELOAD__) window.__PLINKK_RENDERER_RELOAD__();
             } catch (e) {
                 if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
             }
@@ -718,11 +726,7 @@ export class LinkManager {
                         <div class="nested-links ml-8 mt-2 space-y-2 min-h-[40px] border-l-2 border-slate-800/50 pl-4" data-header-id="${link.id}">
                 `;
             } else {
-                if (currentHeaderGroup) {
-                    html += this.getLinkItemHtml(link);
-                } else {
-                    html += this.getLinkItemHtml(link);
-                }
+                html += this.getLinkItemHtml(link);
             }
         });
 

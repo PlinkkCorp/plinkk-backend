@@ -175,28 +175,26 @@ export function createProfileContainer(profileData) {
 }
 export function createUserName(profileData) {
     const userName = document.createElement("h1");
-    setSafeText(userName, profileData.userName);
+    userName.className = "profile-name";
+
+    const nameSpan = document.createElement("span");
+    setSafeText(nameSpan, profileData.userName);
+    userName.appendChild(nameSpan);
 
     // --- Badges Logic ---
     if (profileData.isVerified && profileData.showVerifiedBadge) {
         const verifiedBadge = document.createElement("span");
-        verifiedBadge.className = "badge verified-badge";
+        verifiedBadge.className = "verified-badge";
         verifiedBadge.title = "Vérifié";
-        verifiedBadge.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: text-bottom;"><path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" fill="#3B82F6" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.75 12.75L10.25 15.25L16.25 8.75" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-        verifiedBadge.style.marginLeft = "6px";
-        verifiedBadge.style.verticalAlign = "middle";
-        verifiedBadge.style.display = "inline-flex";
+        verifiedBadge.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.75 12.75L10.25 15.25L16.25 8.75" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
         userName.appendChild(verifiedBadge);
     }
 
     if (profileData.isPartner && profileData.showPartnerBadge) {
         const partnerBadge = document.createElement("span");
-        partnerBadge.className = "badge partner-badge";
+        partnerBadge.className = "partner-badge";
         partnerBadge.title = "Partenaire";
-        partnerBadge.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: text-bottom;"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#A855F7" stroke="#A855F7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-        partnerBadge.style.marginLeft = "4px";
-        partnerBadge.style.verticalAlign = "middle";
-        partnerBadge.style.display = "inline-flex";
+        partnerBadge.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
         userName.appendChild(partnerBadge);
     }
 
@@ -481,6 +479,48 @@ export function showCopyModal(message, btn) {
 }
 export function createLinkBoxes(profileData) {
     const maxLinkNumber = 20;
+
+    function isLightTheme(color) {
+        if (!color) return false;
+        let r, g, b;
+        if (color.startsWith('#')) {
+            let hex = color.replace('#', '');
+            if (hex.length === 3 || hex.length === 4) hex = hex.substring(0, 3).split('').map(c => c + c).join('');
+            if (hex.length >= 6) {
+                r = parseInt(hex.substring(0, 2), 16) / 255;
+                g = parseInt(hex.substring(2, 4), 16) / 255;
+                b = parseInt(hex.substring(4, 6), 16) / 255;
+            } else {
+                return false;
+            }
+        } else if (color.startsWith('rgb')) {
+            const match = color.match(/\d+/g);
+            if (match && match.length >= 3) {
+                r = parseInt(match[0]) / 255;
+                g = parseInt(match[1]) / 255;
+                b = parseInt(match[2]) / 255;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+        const a = [r, g, b].map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+        const luminance = 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+        return luminance > 0.5;
+    }
+    const bgType = profileData.backgroundType || 'color';
+    let actualBgColor = profileData.backgroundColor || '#0c0c0c';
+    if (bgType === 'color' && Array.isArray(profileData.background) && profileData.background.length > 0) {
+        actualBgColor = profileData.background[0].color;
+    } else if (bgType !== 'color' && Array.isArray(profileData.background) && profileData.background.length > 0) {
+        actualBgColor = profileData.background[0].color;
+    }
+    const isLight = isLightTheme(actualBgColor);
+    console.log('[DEBUG-PLINKK-TOOLS] profileData.background:', profileData.background);
+    console.log('[DEBUG-PLINKK-TOOLS] actualBgColor tools.js:', actualBgColor);
+    console.log('[DEBUG-PLINKK-TOOLS] isLight tools.js:', isLight);
+
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (!profileData.links || !profileData.links.length) {
         console.warn("No links found in profile data.");
@@ -914,7 +954,7 @@ export function createLinkBoxes(profileData) {
             const header = document.createElement('h3');
             header.className = 'link-header';
             header.textContent = link.text;
-            header.style.color = profileData.textColor || '#fff';
+            header.style.color = isLight ? '#000000' : (profileData.textColor || '#fff');
             header.style.marginTop = '16px';
             header.style.marginBottom = '8px';
             header.style.textAlign = 'center';
@@ -940,18 +980,20 @@ export function createLinkBoxes(profileData) {
             icon.loading = "lazy";
             icon.style.position = "relative";
             icon.style.zIndex = "5";
+            if (isLight) icon.style.filter = "brightness(0)";
 
             const text = document.createElement("span");
             text.textContent = link.text || "Contactez-nous";
             text.style.position = "relative";
             text.style.zIndex = "5";
+            text.style.color = isLight ? '#000000' : (profileData.buttonTextColor || '#fff');
 
             const actionContainer = document.createElement("div");
             actionContainer.style.marginLeft = "auto";
             actionContainer.style.display = "flex";
             actionContainer.style.alignItems = "center";
             actionContainer.style.gap = "6px";
-            actionContainer.style.background = "rgba(255, 255, 255, 0.08)";
+            actionContainer.style.background = isLight ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.08)";
             actionContainer.style.padding = "4px 12px";
             actionContainer.style.borderRadius = "20px";
             actionContainer.style.border = "1px solid rgba(255, 255, 255, 0.1)";
@@ -1374,7 +1416,7 @@ export function createLinkBoxes(profileData) {
                 const header = document.createElement('h3');
                 header.className = 'link-header';
                 header.textContent = link.text || link.name || '';
-                header.style.color = profileData.textColor || '#fff';
+                header.style.color = isLight ? '#000000' : (profileData.textColor || '#fff');
                 header.style.marginTop = '16px';
                 header.style.marginBottom = '8px';
                 header.style.textAlign = 'center';
