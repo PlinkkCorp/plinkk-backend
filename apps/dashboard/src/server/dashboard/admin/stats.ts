@@ -10,6 +10,7 @@ interface StatsQuery {
   to?: string;
   role?: string;
   visibility?: string;
+  granularity?: "day" | "hour" | "minute" | "second";
 }
 
 interface LimitQuery {
@@ -24,10 +25,17 @@ interface TopPlinkksQuery {
   search?: string;
 }
 
-function formatDate(dt: Date): string {
+function formatDate(dt: Date, granularity: "day" | "hour" | "minute" | "second" = "day"): string {
   const y = dt.getUTCFullYear();
   const m = String(dt.getUTCMonth() + 1).padStart(2, "0");
   const d = String(dt.getUTCDate()).padStart(2, "0");
+  const h = String(dt.getUTCHours()).padStart(2, "0");
+  const min = String(dt.getUTCMinutes()).padStart(2, "0");
+  const s = String(dt.getUTCSeconds()).padStart(2, "0");
+
+  if (granularity === "second") return `${y}-${m}-${d} ${h}:${min}:${s}`;
+  if (granularity === "minute") return `${y}-${m}-${d} ${h}:${min}:00`;
+  if (granularity === "hour") return `${y}-${m}-${d} ${h}:00:00`;
   return `${y}-${m}-${d}`;
 }
 
@@ -40,10 +48,21 @@ function getDateRange(from?: string, to?: string) {
   return { start, end };
 }
 
-function initDateMap<T>(start: Date, end: Date, defaultValue: () => T): Map<string, T> {
+function initDateMap<T>(start: Date, end: Date, granularity: "day" | "hour" | "minute" | "second", defaultValue: () => T): Map<string, T> {
   const map = new Map<string, T>();
-  for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
-    map.set(formatDate(t), defaultValue());
+
+  let step = 86400000; // day
+  if (granularity === "hour") step = 3600000;
+  else if (granularity === "minute") step = 60000;
+  else if (granularity === "second") step = 1000;
+
+  // Prevent enormous maps if someone asks for seconds over a year
+  const limit = 10000;
+  let count = 0;
+
+  for (let t = new Date(start.getTime()); t <= end && count < limit; t = new Date(t.getTime() + step)) {
+    map.set(formatDate(t, granularity), defaultValue());
+    count++;
   }
   return map;
 }
@@ -62,7 +81,7 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
     const ok = await ensurePermission(request, reply, "VIEW_STATS");
     if (!ok) return;
 
-    const { from, to, role = "all", visibility = "all" } = request.query;
+    const { from, to, role = "all", visibility = "all", granularity = "day" } = request.query;
     const { start, end } = getDateRange(from, to);
 
     const where: Prisma.UserWhereInput = { createdAt: { gte: start, lte: end } };
@@ -71,9 +90,9 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
 
     const users = await prisma.user.findMany({ where, select: { createdAt: true } });
 
-    const byDate = initDateMap(start, end, () => 0);
+    const byDate = initDateMap(start, end, granularity, () => 0);
     for (const u of users) {
-      const key = formatDate(new Date(u.createdAt));
+      const key = formatDate(new Date(u.createdAt), granularity);
       if (byDate.has(key)) byDate.set(key, (byDate.get(key) || 0) + 1);
     }
 
@@ -81,7 +100,7 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([date, count]) => ({ date, count }));
 
-    return reply.send({ from: formatDate(start), to: formatDate(end), series });
+    return reply.send({ from: formatDate(start, "day"), to: formatDate(end, "day"), series });
   });
 
   fastify.get<{ Querystring: StatsQuery }>("/users/summary", { preHandler: [requireAuth] }, async function (request, reply) {
@@ -113,7 +132,7 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
     const ok = await ensurePermission(request, reply, "VIEW_STATS");
     if (!ok) return;
 
-    const { from, to } = request.query;
+    const { from, to, granularity = "day" } = request.query;
     const { start, end } = getDateRange(from, to);
 
     const rows = await prisma.user.findMany({
@@ -121,9 +140,9 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       select: { lastLogin: true },
     });
 
-    const byDate = initDateMap(start, end, () => 0);
+    const byDate = initDateMap(start, end, granularity, () => 0);
     for (const r of rows) {
-      const key = formatDate(new Date(r.lastLogin));
+      const key = formatDate(new Date(r.lastLogin), granularity);
       if (byDate.has(key)) byDate.set(key, (byDate.get(key) || 0) + 1);
     }
 
@@ -131,7 +150,7 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([date, count]) => ({ date, count }));
 
-    return reply.send({ from: formatDate(start), to: formatDate(end), series });
+    return reply.send({ from: formatDate(start, "day"), to: formatDate(end, "day"), series });
   });
 
   fastify.get<{ Querystring: LimitQuery }>("/logins/recent", { preHandler: [requireAuth] }, async function (request, reply) {
@@ -153,7 +172,7 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
     const ok = await ensurePermission(request, reply, "VIEW_STATS");
     if (!ok) return;
 
-    const { from, to } = request.query;
+    const { from, to, granularity = "day" } = request.query;
     const { start, end } = getDateRange(from, to);
 
     const [bansCreated, bansRevoked, bansAll] = await Promise.all([
@@ -162,16 +181,16 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       prisma.bannedEmail.findMany(),
     ]);
 
-    const byDate = initDateMap(start, end, () => ({ created: 0, revoked: 0 }));
+    const byDate = initDateMap(start, end, granularity, () => ({ created: 0, revoked: 0 }));
 
     for (const b of bansCreated) {
-      const key = formatDate(new Date(b.createdAt));
+      const key = formatDate(new Date(b.createdAt), granularity);
       const v = byDate.get(key);
       if (v) v.created += 1;
     }
 
     for (const b of bansRevoked) {
-      const key = formatDate(new Date(b.revoquedAt as Date));
+      const key = formatDate(new Date(b.revoquedAt as Date), granularity);
       const v = byDate.get(key);
       if (v) v.revoked += 1;
     }
@@ -193,8 +212,8 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
     }
 
     return reply.send({
-      from: formatDate(start),
-      to: formatDate(end),
+      from: formatDate(start, "day"),
+      to: formatDate(end, "day"),
       series,
       summary: {
         activeNow,
@@ -208,7 +227,7 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
     const me = await prisma.user.findFirst({ where: { id: request.userId }, select: { role: true } });
     if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: "forbidden" });
 
-    const { from, to } = request.query;
+    const { from, to, granularity = "day" } = request.query;
     const { start, end } = getDateRange(from, to);
 
     const rows = await prisma.user.findMany({
@@ -216,10 +235,10 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       select: { createdAt: true, isPublic: true },
     });
 
-    const byDate = initDateMap(start, end, () => ({ public: 0, private: 0 }));
+    const byDate = initDateMap(start, end, granularity, () => ({ public: 0, private: 0 }));
 
     for (const r of rows) {
-      const key = formatDate(new Date(r.createdAt));
+      const key = formatDate(new Date(r.createdAt), granularity);
       const bucket = byDate.get(key);
       if (bucket) {
         if (r.isPublic) bucket.public += 1;
@@ -231,14 +250,14 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([date, v]) => ({ date, public: v.public, private: v.private }));
 
-    return reply.send({ from: formatDate(start), to: formatDate(end), series });
+    return reply.send({ from: formatDate(start, "day"), to: formatDate(end, "day"), series });
   });
 
   fastify.get<{ Querystring: StatsQuery }>("/users/series/by-role", { preHandler: [requireAuth] }, async function (request, reply) {
     const me = await prisma.user.findFirst({ where: { id: request.userId }, select: { role: true } });
     if (!(me && verifyRoleIsStaff(me.role))) return reply.code(403).send({ error: "forbidden" });
 
-    const { from, to } = request.query;
+    const { from, to, granularity = "day" } = request.query;
     const { start, end } = getDateRange(from, to);
 
     const rows = await prisma.user.findMany({
@@ -251,10 +270,10 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
     const roles = Array.from(roleSet.values()).sort();
 
     const makeZero = () => Object.fromEntries(roles.map((r) => [r, 0])) as Record<string, number>;
-    const byDate = initDateMap(start, end, makeZero);
+    const byDate = initDateMap(start, end, granularity, makeZero);
 
     for (const r of rows) {
-      const key = formatDate(new Date(r.createdAt));
+      const key = formatDate(new Date(r.createdAt), granularity);
       const bucket = byDate.get(key);
       if (bucket && r.role?.name) {
         const name = r.role.name;
@@ -267,14 +286,14 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([date, v]) => ({ date, ...v }));
 
-    return reply.send({ from: formatDate(start), to: formatDate(end), roles, series });
+    return reply.send({ from: formatDate(start, "day"), to: formatDate(end, "day"), roles, series });
   });
 
   fastify.get<{ Querystring: StatsQuery }>("/plinkks/series", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_STATS");
     if (!ok) return;
 
-    const { from, to } = request.query;
+    const { from, to, granularity = "day" } = request.query;
     const { start, end } = getDateRange(from, to);
 
     const rows = await prisma.plinkk.findMany({
@@ -282,9 +301,9 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       select: { createdAt: true },
     });
 
-    const byDate = initDateMap(start, end, () => 0);
+    const byDate = initDateMap(start, end, granularity, () => 0);
     for (const r of rows) {
-      const key = formatDate(new Date(r.createdAt));
+      const key = formatDate(new Date(r.createdAt), granularity);
       if (byDate.has(key)) byDate.set(key, (byDate.get(key) || 0) + 1);
     }
 
@@ -292,7 +311,7 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([date, count]) => ({ date, count }));
 
-    return reply.send({ from: formatDate(start), to: formatDate(end), series });
+    return reply.send({ from: formatDate(start, "day"), to: formatDate(end, "day"), series });
   });
 
   fastify.get<{ Querystring: TopPlinkksQuery }>("/plinkks/top", { preHandler: [requireAuth] }, async function (request, reply) {
@@ -378,7 +397,7 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
     const ok = await ensurePermission(request, reply, "VIEW_STATS");
     if (!ok) return;
 
-    const { from, to } = request.query;
+    const { from, to, granularity = "day" } = request.query;
     const { start, end } = getDateRange(from, to);
 
     const purchases = await prisma.purchase.findMany({
@@ -386,9 +405,9 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       select: { createdAt: true, type: true, amount: true, quantity: true },
     });
 
-    const byDate = initDateMap(start, end, () => ({ count: 0, revenue: 0, extra_plinkk: 0, extra_redirects: 0 }));
+    const byDate = initDateMap(start, end, granularity, () => ({ count: 0, revenue: 0, extra_plinkk: 0, extra_redirects: 0 }));
     for (const p of purchases) {
-      const key = formatDate(new Date(p.createdAt));
+      const key = formatDate(new Date(p.createdAt), granularity);
       const bucket = byDate.get(key);
       if (bucket) {
         bucket.count += 1;
@@ -402,7 +421,7 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([date, v]) => ({ date, ...v }));
 
-    return reply.send({ from: formatDate(start), to: formatDate(end), series });
+    return reply.send({ from: formatDate(start, "day"), to: formatDate(end, "day"), series });
   });
 
   // ─── Comptes & Connexions OAuth ───────────────────────────────────────────
@@ -453,7 +472,7 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
   fastify.get<{ Querystring: StatsQuery }>("/signups", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_STATS");
     if (!ok) return;
-    const { from, to } = request.query;
+    const { from, to, granularity = "day" } = request.query;
     const { start, end } = getDateRange(from, to);
 
     const [totalCount, visibleCount, staffCount, seriesData] = await Promise.all([
@@ -478,11 +497,11 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
     const visible = visibleCount;
     const staff = staffCount;
 
-    const byDate = initDateMap(start, end, () => ({ count: 0, pub: 0, priv: 0, user: 0, staff: 0, cumul: 0 }));
+    const byDate = initDateMap(start, end, granularity, () => ({ count: 0, pub: 0, priv: 0, user: 0, staff: 0, cumul: 0 }));
     let runningTotal = await prisma.user.count({ where: { createdAt: { lt: start } } });
 
     for (const u of seriesData) {
-      const key = formatDate(new Date(u.createdAt));
+      const key = formatDate(new Date(u.createdAt), granularity);
       const b = byDate.get(key);
       if (b) {
         b.count++;
@@ -510,7 +529,7 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
   fastify.get<{ Querystring: StatsQuery }>("/logins", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_STATS");
     if (!ok) return;
-    const { from, to } = request.query;
+    const { from, to, granularity = "day" } = request.query;
     const { start, end } = getDateRange(from, to);
 
     const rows = await prisma.user.findMany({
@@ -518,10 +537,10 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       select: { lastLogin: true },
     });
 
-    const byDate = initDateMap(start, end, () => 0);
+    const byDate = initDateMap(start, end, granularity, () => 0);
     for (const r of rows) {
       if (!r.lastLogin) continue;
-      const key = formatDate(new Date(r.lastLogin));
+      const key = formatDate(new Date(r.lastLogin), granularity);
       if (byDate.has(key)) byDate.set(key, (byDate.get(key) || 0) + 1);
     }
 
@@ -539,22 +558,33 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
   fastify.get<{ Querystring: StatsQuery }>("/plinkks", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_STATS");
     if (!ok) return;
-    const { from, to } = request.query;
+    const { from, to, granularity = "day" } = request.query;
     const { start, end } = getDateRange(from, to);
 
-    const [totalViewsAgg, totalPlinkks, dailyViews] = await Promise.all([
+    const [totalViewsAgg, totalPlinkks] = await Promise.all([
       prisma.plinkk.aggregate({ _sum: { views: true } }),
       prisma.plinkk.count(),
-      prisma.plinkkViewDaily.findMany({
-        where: { date: { gte: start, lte: end } }
-      })
     ]);
 
-    const byDate = initDateMap(start, end, () => 0);
+    // Use UserViewDaily if granularity is day (optimisation)
+    let dailyViews: { date: Date, count: number }[] = [];
+    if (granularity === "day") {
+      dailyViews = await prisma.plinkkViewDaily.findMany({
+        where: { date: { gte: start, lte: end } }
+      });
+    } else {
+      const rawStats = await prisma.pageStat.findMany({
+        where: { eventType: "view", createdAt: { gte: start, lte: end } },
+        select: { createdAt: true }
+      });
+      dailyViews = rawStats.map(r => ({ date: r.createdAt, count: 1 }));
+    }
+
+    const byDate = initDateMap(start, end, granularity, () => 0);
     for (const r of dailyViews) {
-      const key = formatDate(new Date(r.date));
+      const key = formatDate(new Date(r.date), granularity);
       if (byDate.has(key)) {
-        byDate.set(key, (byDate.get(key) || 0) + r.count);
+        byDate.set(key, (byDate.get(key) || 0) + (granularity === "day" ? r.count : 1));
       }
     }
 
@@ -577,20 +607,32 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
   fastify.get<{ Querystring: StatsQuery }>("/redirections", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_STATS");
     if (!ok) return;
-    const { from, to } = request.query;
+    const { from, to, granularity = "day" } = request.query;
     const { start, end } = getDateRange(from, to);
 
-    const [totalClicksAgg, totalRedirects, dailyClicks] = await Promise.all([
+    const [totalClicksAgg, totalRedirects] = await Promise.all([
       prisma.redirect.aggregate({ _sum: { clicks: true } }),
       prisma.redirect.count(),
-      prisma.redirectClickDaily.findMany({
-        where: { date: { gte: start, lte: end } }
-      })
     ]);
 
-    const byDate = initDateMap(start, end, () => 0);
+    let dailyClicks: { date: Date, count: number }[] = [];
+    if (granularity === "day") {
+      dailyClicks = await prisma.redirectClickDaily.findMany({
+        where: { date: { gte: start, lte: end } }
+      });
+    } else {
+      // NOTE: Here we lack a raw events table for redirects, 
+      // RedirectClickDaily is the only table available, 
+      // preventing minute/second granularity for this specific stat
+      dailyClicks = await prisma.redirectClickDaily.findMany({
+        where: { date: { gte: start, lte: end } }
+      });
+      // the date in redirectClickDaily is grouped by day, so mapping to lower granularities will look like a spike at 00:00:00
+    }
+
+    const byDate = initDateMap(start, end, granularity, () => 0);
     for (const r of dailyClicks) {
-      const key = formatDate(new Date(r.date));
+      const key = formatDate(new Date(r.date), granularity);
       if (byDate.has(key)) {
         byDate.set(key, (byDate.get(key) || 0) + r.count);
       }
@@ -653,7 +695,7 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
   fastify.get<{ Querystring: StatsQuery }>("/premium", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_STATS");
     if (!ok) return;
-    const { from, to } = request.query;
+    const { from, to, granularity = "day" } = request.query;
     const { start, end } = getDateRange(from, to);
 
     const [totalHistory, activeNow, purchases] = await Promise.all([
@@ -667,9 +709,9 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
     const periodPurchases = purchases.length;
     const revenue = purchases.reduce((a, b) => a + (b.amount * b.quantity), 0);
 
-    const byDate = initDateMap(start, end, () => 0);
+    const byDate = initDateMap(start, end, granularity, () => 0);
     for (const p of purchases) {
-      const key = formatDate(new Date(p.createdAt));
+      const key = formatDate(new Date(p.createdAt), granularity);
       if (byDate.has(key)) byDate.set(key, (byDate.get(key) || 0) + 1);
     }
 
@@ -689,7 +731,7 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
   fastify.get<{ Querystring: StatsQuery }>("/bans", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_STATS");
     if (!ok) return;
-    const { from, to } = request.query;
+    const { from, to, granularity = "day" } = request.query;
     const { start, end } = getDateRange(from, to);
 
     const [created, revoked] = await Promise.all([
@@ -697,14 +739,14 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       prisma.bannedEmail.findMany({ where: { revoquedAt: { not: null, gte: start, lte: end } } })
     ]);
 
-    const byDate = initDateMap(start, end, () => ({ bans: 0, revokes: 0 }));
+    const byDate = initDateMap(start, end, granularity, () => ({ bans: 0, revokes: 0 }));
     for (const b of created) {
-      const key = formatDate(new Date(b.createdAt));
+      const key = formatDate(new Date(b.createdAt), granularity);
       const bucket = byDate.get(key);
       if (bucket) bucket.bans++;
     }
     for (const b of revoked) {
-      const key = formatDate(new Date(b.revoquedAt as Date));
+      const key = formatDate(new Date(b.revoquedAt as Date), granularity);
       const bucket = byDate.get(key);
       if (bucket) bucket.revokes++;
     }

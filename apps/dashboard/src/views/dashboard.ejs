@@ -8,343 +8,370 @@
                 <main class="col-span-12 lg:col-span-10 space-y-8">
 
                     <% if (!user.isPremium) { %>
-                    <!-- Premium Upsell Banner -->
-                    <div class="relative overflow-hidden rounded-2xl border border-violet-500/20 bg-gradient-to-r from-violet-500/10 via-fuchsia-500/10 to-violet-500/10 p-5 mb-0" id="premiumBanner">
-                        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxjaXJjbGUgZmlsbD0iI2ZmZiIgZmlsbC1vcGFjaXR5PSIuMDMiIGN4PSIzMCIgY3k9IjMwIiByPSIxIi8+PC9nPjwvc3ZnPg==')] opacity-50"></div>
-                        <div class="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-                                    </svg>
+                        <!-- Premium Upsell Banner -->
+                        <div class="relative overflow-hidden rounded-2xl border border-violet-500/20 bg-gradient-to-r from-violet-500/10 via-fuchsia-500/10 to-violet-500/10 p-5 mb-0"
+                            id="premiumBanner">
+                            <div
+                                class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxjaXJjbGUgZmlsbD0iI2ZmZiIgZmlsbC1vcGFjaXR5PSIuMDMiIGN4PSIzMCIgY3k9IjMwIiByPSIxIi8+PC9nPjwvc3ZnPg==')] opacity-50">
+                            </div>
+                            <div
+                                class="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                <div class="flex items-center gap-4">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-white">Débloquez tout le potentiel de
+                                            Plinkk</p>
+                                        <p class="text-xs text-slate-400 mt-0.5">Plus de pages, thèmes exclusifs, stats
+                                            avancées — à partir de 4,99€/mois</p>
+                                    </div>
                                 </div>
+                                <div class="flex items-center gap-3 flex-shrink-0">
+                                    <a href="/premium/configure"
+                                        class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-sm font-semibold shadow-lg shadow-violet-900/20 hover:shadow-violet-900/40 hover:-translate-y-0.5 transition-all whitespace-nowrap">
+                                        Passer à Premium →
+                                    </a>
+                                    <button onclick="this.closest('#premiumBanner').remove()"
+                                        class="text-slate-500 hover:text-slate-300 transition-colors p-1"
+                                        title="Fermer">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                            stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                            <div
+                                class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+                                <div
+                                    class="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none">
+                                </div>
+                                <div class="relative z-10">
+                                    <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Bonjour, <span
+                                            class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">
+                                            <%= (user && user.userName) || 'Créateur' %>
+                                        </span> 👋</h1>
+                                    <p class="text-slate-400 text-lg">Prêt à développer votre audience aujourd'hui ?</p>
+                                </div>
+                                <div class="flex gap-3 relative z-10">
+                                    <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>"
+                                        target="_blank"
+                                        class="px-5 py-3 bg-slate-700/50 hover:bg-slate-700 text-white rounded-xl border border-slate-600 transition-all flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                            <polyline points="15 3 21 3 21 9"></polyline>
+                                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                                        </svg>
+                                        Voir ma page
+                                    </a>
+                                    <button
+                                        onclick="navigator.clipboard.writeText('<%= frontendUrl %>/<%= (user && user.userName) || (user && user.id) %>')"
+                                        class="px-5 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl shadow-lg shadow-violet-900/20 transition-all flex items-center gap-2 font-medium">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+                                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+                                        </svg>
+                                        Copier le lien
+                                    </button>
+                                </div>
+                            </div>
+
+
+
+                            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                                <div class="space-y-8">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div
+                                            class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
+                                            <div class="flex items-center justify-between mb-4">
+                                                <div class="p-3 bg-blue-500/10 rounded-xl text-blue-400">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <p class="text-slate-400 text-sm font-medium">Vues totales</p>
+                                            <div id="stat-views-skeleton"
+                                                class="h-9 w-24 bg-slate-800 rounded-lg animate-pulse mt-1"></div>
+                                            <h3 id="stat-views-value" class="text-3xl font-bold text-white mt-1 hidden">
+                                            </h3>
+                                        </div>
+                                        <div
+                                            class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
+                                            <div class="flex items-center justify-between mb-4">
+                                                <div class="p-3 bg-violet-500/10 rounded-xl text-violet-400">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path
+                                                            d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71">
+                                                        </path>
+                                                        <path
+                                                            d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71">
+                                                        </path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <p class="text-slate-400 text-sm font-medium">Clics totaux</p>
+                                            <div id="stat-clicks-skeleton"
+                                                class="h-9 w-24 bg-slate-800 rounded-lg animate-pulse mt-1"></div>
+                                            <h3 id="stat-clicks-value"
+                                                class="text-3xl font-bold text-white mt-1 hidden"></h3>
+                                        </div>
+                                        <div
+                                            class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
+                                            <div class="flex items-center justify-between mb-4">
+                                                <div class="p-3 bg-pink-500/10 rounded-xl text-pink-400">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M12 20v-6M6 20V10M18 20V4"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <p class="text-slate-400 text-sm font-medium">Taux de clic (CTR)</p>
+                                            <div id="stat-ctr-skeleton"
+                                                class="h-9 w-24 bg-slate-800 rounded-lg animate-pulse mt-1"></div>
+                                            <h3 id="stat-ctr-value" class="text-3xl font-bold text-white mt-1 hidden">
+                                            </h3>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-lg font-semibold text-white mb-4">Actions rapides</h2>
+                                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                            <a href="/edit#add-link"
+                                                class="group flex flex-col items-center justify-center p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-violet-500/50 transition-all cursor-pointer">
+                                                <div
+                                                    class="w-12 h-12 rounded-full bg-violet-500/10 text-violet-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M5 12h14"></path>
+                                                        <path d="M12 5v14"></path>
+                                                    </svg>
+                                                </div>
+                                                <span
+                                                    class="text-sm text-center font-medium text-slate-300 group-hover:text-white">Ajouter
+                                                    un lien</span>
+                                            </a>
+                                            <a href="/appearance"
+                                                class="group flex flex-col items-center justify-center p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-pink-500/50 transition-all cursor-pointer">
+                                                <div
+                                                    class="w-12 h-12 rounded-full bg-pink-500/10 text-pink-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                                                    </svg>
+                                                </div>
+                                                <span
+                                                    class="text-sm font-medium text-slate-300 group-hover:text-white">Apparence</span>
+                                            </a>
+                                            <a href="/stats"
+                                                class="group flex flex-col items-center justify-center p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-blue-500/50 transition-all cursor-pointer">
+                                                <div
+                                                    class="w-12 h-12 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                                                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                                                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                                                    </svg>
+                                                </div>
+                                                <span
+                                                    class="text-sm font-medium text-slate-300 group-hover:text-white">Statistiques</span>
+                                            </a>
+                                            <a href="/settings"
+                                                class="group flex flex-col items-center justify-center p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-orange-500/50 transition-all cursor-pointer">
+                                                <div
+                                                    class="w-12 h-12 rounded-full bg-orange-500/10 text-orange-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path
+                                                            d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z">
+                                                        </path>
+                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                    </svg>
+                                                </div>
+                                                <span
+                                                    class="text-sm font-medium text-slate-300 group-hover:text-white">Paramètres</span>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
+                                        <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                                            <h3 class="font-semibold text-white text-lg">Vos liens performants</h3>
+                                            <a href="/edit#section-link"
+                                                class="text-sm text-violet-400 hover:text-violet-300 font-medium">Voir
+                                                tout
+                                                →</a>
+                                        </div>
+                                        <div class="overflow-x-auto">
+                                            <table class="w-full text-left">
+                                                <thead
+                                                    class="bg-slate-950/50 text-xs uppercase font-semibold text-slate-500">
+                                                    <tr>
+                                                        <th class="px-6 py-4">Titre</th>
+                                                        <th class="px-6 py-4">Lien</th>
+                                                        <th class="px-6 py-4 text-right">Clics</th>
+                                                        <th class="px-6 py-4 text-right">Statut</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="links-tbody" class="divide-y divide-slate-800 text-sm">
+                                                    <% for(let i=0; i<3; i++) { %>
+                                                        <tr class="animate-pulse">
+                                                            <td class="px-6 py-4">
+                                                                <div class="h-5 w-32 bg-slate-800 rounded"></div>
+                                                            </td>
+                                                            <td class="px-6 py-4">
+                                                                <div class="h-5 w-48 bg-slate-800/50 rounded"></div>
+                                                            </td>
+                                                            <td class="px-6 py-4">
+                                                                <div class="h-5 w-12 bg-slate-800 rounded ml-auto">
+                                                                </div>
+                                                            </td>
+                                                            <td class="px-6 py-4 text-right"><span
+                                                                    class="inline-block h-5 w-16 bg-emerald-900/20 rounded"></span>
+                                                            </td>
+                                                        </tr>
+                                                        <% } %>
+                                                </tbody>
+                                                <template id="links-empty-template">
+                                                    <tr>
+                                                        <td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                                                            <div class="flex flex-col items-center justify-center">
+                                                                <div
+                                                                    class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-3 text-slate-600">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                                                                        height="24" viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="2"
+                                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                                        <path
+                                                                            d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71">
+                                                                        </path>
+                                                                        <path
+                                                                            d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71">
+                                                                        </path>
+                                                                    </svg>
+                                                                </div>
+                                                                <p>Aucun lien pour le moment.</p>
+                                                                <a href="/edit#add-link"
+                                                                    class="mt-2 text-violet-400 hover:underline">Ajouter
+                                                                    votre
+                                                                    premier lien</a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div>
-                                    <p class="text-sm font-semibold text-white">Débloquez tout le potentiel de Plinkk</p>
-                                    <p class="text-xs text-slate-400 mt-0.5">Plus de pages, thèmes exclusifs, stats avancées — à partir de 1,99€/mois</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3 flex-shrink-0">
-                                <a href="/premium/configure" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-sm font-semibold shadow-lg shadow-violet-900/20 hover:shadow-violet-900/40 hover:-translate-y-0.5 transition-all whitespace-nowrap">
-                                    Passer à Premium →
-                                </a>
-                                <button onclick="this.closest('#premiumBanner').remove()" class="text-slate-500 hover:text-slate-300 transition-colors p-1" title="Fermer">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <% } %>
-                    <div
-                        class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
-                        <div
-                            class="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none">
-                        </div>
-                        <div class="relative z-10">
-                            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Bonjour, <span
-                                    class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">
-                                    <%= (user && user.userName) || 'Créateur' %>
-                                </span> 👋</h1>
-                            <p class="text-slate-400 text-lg">Prêt à développer votre audience aujourd'hui ?</p>
-                        </div>
-                        <div class="flex gap-3 relative z-10">
-                            <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>"
-                                target="_blank"
-                                class="px-5 py-3 bg-slate-700/50 hover:bg-slate-700 text-white rounded-xl border border-slate-600 transition-all flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                    <polyline points="15 3 21 3 21 9"></polyline>
-                                    <line x1="10" y1="14" x2="21" y2="3"></line>
-                                </svg>
-                                Voir ma page
-                            </a>
-                            <button
-                                onclick="navigator.clipboard.writeText('<%= frontendUrl %>/<%= (user && user.userName) || (user && user.id) %>')"
-                                class="px-5 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl shadow-lg shadow-violet-900/20 transition-all flex items-center gap-2 font-medium">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
-                                    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
-                                </svg>
-                                Copier le lien
-                            </button>
-                        </div>
-                    </div>
-
-
-
-                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                        <div class="space-y-8">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div
-                                    class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <div class="p-3 bg-blue-500/10 rounded-xl text-blue-400">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-                                                <circle cx="12" cy="12" r="3"></circle>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <p class="text-slate-400 text-sm font-medium">Vues totales</p>
-                                    <div id="stat-views-skeleton"
-                                        class="h-9 w-24 bg-slate-800 rounded-lg animate-pulse mt-1"></div>
-                                    <h3 id="stat-views-value" class="text-3xl font-bold text-white mt-1 hidden"></h3>
-                                </div>
-                                <div
-                                    class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <div class="p-3 bg-violet-500/10 rounded-xl text-violet-400">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71">
-                                                </path>
-                                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71">
-                                                </path>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <p class="text-slate-400 text-sm font-medium">Clics totaux</p>
-                                    <div id="stat-clicks-skeleton"
-                                        class="h-9 w-24 bg-slate-800 rounded-lg animate-pulse mt-1"></div>
-                                    <h3 id="stat-clicks-value" class="text-3xl font-bold text-white mt-1 hidden"></h3>
-                                </div>
-                                <div
-                                    class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <div class="p-3 bg-pink-500/10 rounded-xl text-pink-400">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M12 20v-6M6 20V10M18 20V4"></path>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <p class="text-slate-400 text-sm font-medium">Taux de clic (CTR)</p>
-                                    <div id="stat-ctr-skeleton"
-                                        class="h-9 w-24 bg-slate-800 rounded-lg animate-pulse mt-1"></div>
-                                    <h3 id="stat-ctr-value" class="text-3xl font-bold text-white mt-1 hidden"></h3>
-                                </div>
-                            </div>
-                            <div>
-                                <h2 class="text-lg font-semibold text-white mb-4">Actions rapides</h2>
-                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                    <a href="/edit#add-link"
-                                        class="group flex flex-col items-center justify-center p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-violet-500/50 transition-all cursor-pointer">
+                                    <div class="sticky top-8">
                                         <div
-                                            class="w-12 h-12 rounded-full bg-violet-500/10 text-violet-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M5 12h14"></path>
-                                                <path d="M12 5v14"></path>
-                                            </svg>
-                                        </div>
-                                        <span
-                                            class="text-sm text-center font-medium text-slate-300 group-hover:text-white">Ajouter
-                                            un lien</span>
-                                    </a>
-                                    <a href="/appearance"
-                                        class="group flex flex-col items-center justify-center p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-pink-500/50 transition-all cursor-pointer">
-                                        <div
-                                            class="w-12 h-12 rounded-full bg-pink-500/10 text-pink-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-                                            </svg>
-                                        </div>
-                                        <span
-                                            class="text-sm font-medium text-slate-300 group-hover:text-white">Apparence</span>
-                                    </a>
-                                    <a href="/stats"
-                                        class="group flex flex-col items-center justify-center p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-blue-500/50 transition-all cursor-pointer">
-                                        <div
-                                            class="w-12 h-12 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round">
-                                                <line x1="18" y1="20" x2="18" y2="10"></line>
-                                                <line x1="12" y1="20" x2="12" y2="4"></line>
-                                                <line x1="6" y1="20" x2="6" y2="14"></line>
-                                            </svg>
-                                        </div>
-                                        <span
-                                            class="text-sm font-medium text-slate-300 group-hover:text-white">Statistiques</span>
-                                    </a>
-                                    <a href="/settings"
-                                        class="group flex flex-col items-center justify-center p-6 bg-slate-900 border border-slate-800 rounded-2xl hover:bg-slate-800 hover:border-orange-500/50 transition-all cursor-pointer">
-                                        <div
-                                            class="w-12 h-12 rounded-full bg-orange-500/10 text-orange-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round">
-                                                <path
-                                                    d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z">
-                                                </path>
-                                                <circle cx="12" cy="12" r="3"></circle>
-                                            </svg>
-                                        </div>
-                                        <span
-                                            class="text-sm font-medium text-slate-300 group-hover:text-white">Paramètres</span>
-                                    </a>
-                                </div>
-                            </div>
+                                            class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-6 shadow-2xl shadow-black/50 relative overflow-hidden">
+                                            <div
+                                                class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-violet-900/20 to-transparent pointer-events-none">
+                                            </div>
 
-                            <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
-                                <div class="p-6 border-b border-slate-800 flex justify-between items-center">
-                                    <h3 class="font-semibold text-white text-lg">Vos liens performants</h3>
-                                    <a href="/edit#section-link"
-                                        class="text-sm text-violet-400 hover:text-violet-300 font-medium">Voir tout
-                                        →</a>
-                                </div>
-                                <div class="overflow-x-auto">
-                                    <table class="w-full text-left">
-                                        <thead class="bg-slate-950/50 text-xs uppercase font-semibold text-slate-500">
-                                            <tr>
-                                                <th class="px-6 py-4">Titre</th>
-                                                <th class="px-6 py-4">Lien</th>
-                                                <th class="px-6 py-4 text-right">Clics</th>
-                                                <th class="px-6 py-4 text-right">Statut</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="links-tbody" class="divide-y divide-slate-800 text-sm">
-                                            <% for(let i=0; i<3; i++) { %>
-                                                <tr class="animate-pulse">
-                                                    <td class="px-6 py-4">
-                                                        <div class="h-5 w-32 bg-slate-800 rounded"></div>
-                                                    </td>
-                                                    <td class="px-6 py-4">
-                                                        <div class="h-5 w-48 bg-slate-800/50 rounded"></div>
-                                                    </td>
-                                                    <td class="px-6 py-4">
-                                                        <div class="h-5 w-12 bg-slate-800 rounded ml-auto"></div>
-                                                    </td>
-                                                    <td class="px-6 py-4 text-right"><span
-                                                            class="inline-block h-5 w-16 bg-emerald-900/20 rounded"></span>
-                                                    </td>
-                                                </tr>
-                                                <% } %>
-                                        </tbody>
-                                        <template id="links-empty-template">
-                                            <tr>
-                                                <td colspan="4" class="px-6 py-12 text-center text-slate-500">
-                                                    <div class="flex flex-col items-center justify-center">
-                                                        <div
-                                                            class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-3 text-slate-600">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="24"
-                                                                height="24" viewBox="0 0 24 24" fill="none"
-                                                                stroke="currentColor" stroke-width="2"
-                                                                stroke-linecap="round" stroke-linejoin="round">
-                                                                <path
-                                                                    d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71">
-                                                                </path>
-                                                                <path
-                                                                    d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71">
-                                                                </path>
-                                                            </svg>
-                                                        </div>
-                                                        <p>Aucun lien pour le moment.</p>
-                                                        <a href="/edit#add-link"
-                                                            class="mt-2 text-violet-400 hover:underline">Ajouter votre
-                                                            premier lien</a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                                            <div class="flex items-center justify-between mb-6 relative z-10">
+                                                <h3 class="text-base font-semibold text-white">Aperçu mobile</h3>
+                                                <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>"
+                                                    target="_blank"
+                                                    class="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition-colors">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path
+                                                            d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6">
+                                                        </path>
+                                                        <polyline points="15 3 21 3 21 9"></polyline>
+                                                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                                                    </svg>
+                                                </a>
+                                            </div>
 
-                        <div>
-                            <div class="sticky top-8">
-                                <div
-                                    class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-6 shadow-2xl shadow-black/50 relative overflow-hidden">
-                                    <div
-                                        class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-violet-900/20 to-transparent pointer-events-none">
-                                    </div>
+                                            <div
+                                                class="relative mx-auto border-slate-950 bg-slate-950 border-[10px] rounded-[3rem] h-[600px] w-[300px] shadow-xl ring-1 ring-slate-800">
+                                                <div
+                                                    class="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-slate-950 rounded-b-2xl z-20">
+                                                </div>
 
-                                    <div class="flex items-center justify-between mb-6 relative z-10">
-                                        <h3 class="text-base font-semibold text-white">Aperçu mobile</h3>
-                                        <a href="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>"
-                                            target="_blank"
-                                            class="p-2 bg-slate-800 hover:bg-slate-700 rounded-full text-slate-300 transition-colors">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6">
-                                                </path>
-                                                <polyline points="15 3 21 3 21 9"></polyline>
-                                                <line x1="10" y1="14" x2="21" y2="3"></line>
-                                            </svg>
-                                        </a>
-                                    </div>
+                                                <div
+                                                    class="w-full h-full rounded-[2.3rem] overflow-hidden bg-white relative z-10">
+                                                    <iframe id="preview"
+                                                        src="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %>?preview=1<% } else { %>/<%= user.id %>?preview=1<% } %>"
+                                                        class="w-full h-full border-0" title="Preview"></iframe>
+                                                </div>
+                                            </div>
 
-                                    <div
-                                        class="relative mx-auto border-slate-950 bg-slate-950 border-[10px] rounded-[3rem] h-[600px] w-[300px] shadow-xl ring-1 ring-slate-800">
-                                        <div
-                                            class="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-slate-950 rounded-b-2xl z-20">
+                                            <div class="mt-6 text-center">
+                                                <p class="text-xs text-slate-500">L'aperçu se met à jour automatiquement
+                                                </p>
+                                            </div>
                                         </div>
-
-                                        <div
-                                            class="w-full h-full rounded-[2.3rem] overflow-hidden bg-white relative z-10">
-                                            <iframe id="preview"
-                                                src="<%= frontendUrl %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %>?preview=1<% } else { %>/<%= user.id %>?preview=1<% } %>"
-                                                class="w-full h-full border-0" title="Preview"></iframe>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-6 text-center">
-                                        <p class="text-xs text-slate-500">L'aperçu se met à jour automatiquement</p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <script>
-                        document.addEventListener('DOMContentLoaded', async () => {
-                            try {
-                                const res = await fetch('/api/me/dashboard-summary');
-                                if (!res.ok) throw new Error('Failed to fetch dashboard stats');
-                                const data = await res.json();
+                            <script>
+                                document.addEventListener('DOMContentLoaded', async () => {
+                                    try {
+                                        const res = await fetch('/api/me/dashboard-summary');
+                                        if (!res.ok) throw new Error('Failed to fetch dashboard stats');
+                                        const data = await res.json();
 
-                                // Helpers
-                                const updateStat = (id, val) => {
-                                    const skel = document.getElementById(id + '-skeleton');
-                                    const el = document.getElementById(id + '-value');
-                                    if (skel && el) {
-                                        skel.classList.add('hidden');
-                                        el.classList.remove('hidden');
-                                        el.textContent = val;
-                                    }
-                                };
-                                const escapeHtml = (unsafe) => {
-                                    return (unsafe || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-                                }
-
-                                // Stats
-                                const fmt = new Intl.NumberFormat('fr-FR');
-                                updateStat('stat-views', fmt.format(data.stats.views));
-                                updateStat('stat-clicks', fmt.format(data.stats.clicks));
-                                updateStat('stat-ctr', data.stats.ctr);
-
-                                // Links Table
-                                const tbody = document.getElementById('links-tbody');
-                                const template = document.getElementById('links-empty-template');
-
-                                if (tbody) {
-                                    if (!data.links || data.links.length === 0) {
-                                        if (template) {
-                                            tbody.innerHTML = template.innerHTML;
+                                        // Helpers
+                                        const updateStat = (id, val) => {
+                                            const skel = document.getElementById(id + '-skeleton');
+                                            const el = document.getElementById(id + '-value');
+                                            if (skel && el) {
+                                                skel.classList.add('hidden');
+                                                el.classList.remove('hidden');
+                                                el.textContent = val;
+                                            }
+                                        };
+                                        const escapeHtml = (unsafe) => {
+                                            return (unsafe || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
                                         }
-                                    } else {
-                                        tbody.innerHTML = data.links.slice(0, 5).map(link => `
+
+                                        // Stats
+                                        const fmt = new Intl.NumberFormat('fr-FR');
+                                        updateStat('stat-views', fmt.format(data.stats.views));
+                                        updateStat('stat-clicks', fmt.format(data.stats.clicks));
+                                        updateStat('stat-ctr', data.stats.ctr);
+
+                                        // Links Table
+                                        const tbody = document.getElementById('links-tbody');
+                                        const template = document.getElementById('links-empty-template');
+
+                                        if (tbody) {
+                                            if (!data.links || data.links.length === 0) {
+                                                if (template) {
+                                                    tbody.innerHTML = template.innerHTML;
+                                                }
+                                            } else {
+                                                tbody.innerHTML = data.links.slice(0, 5).map(link => `
                         <tr class="hover:bg-slate-800/30 transition-colors">
                             <td class="px-6 py-4 font-medium text-slate-200">${escapeHtml(link.text || 'Sans titre')}</td>
                             <td class="px-6 py-4 text-slate-400 truncate max-w-[200px]">${escapeHtml(link.url)}</td>
@@ -354,225 +381,249 @@
                             </td>
                         </tr>
                     `).join('');
+                                            }
+                                        }
+
+                                    } catch (e) {
+                                        console.error('Dashboard stats error:', e);
                                     }
-                                }
+                                });
+                            </script>
 
-                            } catch (e) {
-                                console.error('Dashboard stats error:', e);
-                            }
-                        });
-                    </script>
-
-                    <!-- Onboarding Modal -->
-                    <% const userCreatedAt=user && user.createdAt ? new Date(user.createdAt).toISOString() : '' ; const
-                        plinkkUrl=(typeof frontendUrl !=='undefined' ? frontendUrl : '' ) + '/' + ((typeof plinkk
-                        !=='undefined' && plinkk && plinkk.slug) ? plinkk.slug : (user && user.id)); %>
-                        <div id="onboardingOverlay" class="fixed inset-0 z-[100] hidden">
-                            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="onboardingBackdrop"></div>
-                            <div class="relative min-h-screen flex items-center justify-center p-4">
-                                <div class="w-full max-w-lg">
-                                    <div class="bg-slate-900/95 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden"
-                                        style="animation: onboardFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;">
-
-                                        <!-- Step indicators -->
-                                        <div class="flex items-center justify-center gap-2 pt-6 pb-2">
-                                            <div class="onboard-dot w-2.5 h-2.5 rounded-full bg-violet-500 transition-colors"
-                                                data-step="0"></div>
-                                            <div class="onboard-dot w-2.5 h-2.5 rounded-full bg-slate-700 transition-colors"
-                                                data-step="1"></div>
-                                            <div class="onboard-dot w-2.5 h-2.5 rounded-full bg-slate-700 transition-colors"
-                                                data-step="2"></div>
-                                        </div>
-
-                                        <!-- Step 1: Welcome -->
-                                        <div class="onboard-step px-8 py-8 text-center" data-onboard="0">
-                                            <div
-                                                class="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/30">
-                                                <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24"
-                                                    stroke="currentColor" stroke-width="1.5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
-                                                </svg>
-                                            </div>
-                                            <h2 class="text-2xl font-bold text-white mb-3">Bienvenue sur Plinkk ! 🎉
-                                            </h2>
-                                            <p class="text-slate-400 text-base leading-relaxed mb-2">Votre page de liens
-                                                est prête.</p>
-                                            <div
-                                                class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-sm font-medium mt-2">
-                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
-                                                    stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                                </svg>
-                                                <span id="onboardLink">
-                                                    <%= plinkkUrl %>
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 2: Customize -->
-                                        <div class="onboard-step px-8 py-8 text-center hidden" data-onboard="1">
-                                            <div
-                                                class="w-20 h-20 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-pink-500/30">
-                                                <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24"
-                                                    stroke="currentColor" stroke-width="1.5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
-                                                </svg>
-                                            </div>
-                                            <h2 class="text-2xl font-bold text-white mb-3">Personnalisez votre page</h2>
-                                            <p class="text-slate-400 text-base leading-relaxed">Ajoutez vos liens,
-                                                changez les couleurs, choisissez un thème et rendez votre page unique.
-                                            </p>
-                                        </div>
-
-                                        <!-- Step 3: Share -->
-                                        <div class="onboard-step px-8 py-8 text-center hidden" data-onboard="2">
-                                            <div
-                                                class="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/30">
-                                                <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24"
-                                                    stroke="currentColor" stroke-width="1.5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
-                                                </svg>
-                                            </div>
-                                            <h2 class="text-2xl font-bold text-white mb-3">Partagez partout</h2>
-                                            <p class="text-slate-400 text-base leading-relaxed mb-5">Copiez votre lien
-                                                et partagez-le sur tous vos réseaux sociaux, votre bio Instagram,
-                                                TikTok, etc.</p>
-                                            <button id="onboardCopyLink"
-                                                class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-colors font-medium">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                                                    stroke="currentColor" stroke-width="2">
-                                                    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
-                                                    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2">
-                                                    </path>
-                                                </svg>
-                                                <span id="onboardCopyText">Copier mon lien</span>
-                                            </button>
-                                        </div>
-
-                                        <!-- Navigation buttons -->
-                                        <div class="flex items-center justify-between px-8 pb-8">
-                                            <button id="onboardSkip"
-                                                class="text-sm text-slate-500 hover:text-slate-300 font-medium transition-colors">
-                                                Passer
-                                            </button>
-                                            <div class="flex gap-3">
-                                                <button id="onboardPrev"
-                                                    class="hidden px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-sm font-medium text-slate-300 transition-colors border border-white/10">
-                                                    Précédent
-                                                </button>
-                                                <button id="onboardNext"
-                                                    class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-sm font-semibold text-white transition-all shadow-lg shadow-violet-500/20">
-                                                    Suivant
-                                                </button>
-
-                                    <div class="mt-4 pt-4 border-t border-white/10">
-                                        <a href="/premium/configure" class="inline-flex items-center gap-2 text-sm text-violet-400 hover:text-violet-300 transition-colors group">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
-                                            <span>Boostez votre page avec Premium</span>
-                                            <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                                        </a>
+                            <!-- Onboarding Modal -->
+                            <% const userCreatedAt=user && user.createdAt ? new Date(user.createdAt).toISOString() : ''
+                                ; const plinkkUrl=(typeof frontendUrl !=='undefined' ? frontendUrl : '' ) + '/' +
+                                ((typeof plinkk !=='undefined' && plinkk && plinkk.slug) ? plinkk.slug : (user &&
+                                user.id)); %>
+                                <div id="onboardingOverlay" class="fixed inset-0 z-[100] hidden">
+                                    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="onboardingBackdrop">
                                     </div>
-                                                <a id="onboardFinish" href="/edit"
-                                                    class="hidden px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-sm font-semibold text-white transition-all shadow-lg shadow-emerald-500/20 inline-flex items-center gap-2">
-                                                    Personnaliser ma page →
-                                                </a>
+                                    <div class="relative min-h-screen flex items-center justify-center p-4">
+                                        <div class="w-full max-w-lg">
+                                            <div class="bg-slate-900/95 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden"
+                                                style="animation: onboardFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;">
+
+                                                <!-- Step indicators -->
+                                                <div class="flex items-center justify-center gap-2 pt-6 pb-2">
+                                                    <div class="onboard-dot w-2.5 h-2.5 rounded-full bg-violet-500 transition-colors"
+                                                        data-step="0"></div>
+                                                    <div class="onboard-dot w-2.5 h-2.5 rounded-full bg-slate-700 transition-colors"
+                                                        data-step="1"></div>
+                                                    <div class="onboard-dot w-2.5 h-2.5 rounded-full bg-slate-700 transition-colors"
+                                                        data-step="2"></div>
+                                                </div>
+
+                                                <!-- Step 1: Welcome -->
+                                                <div class="onboard-step px-8 py-8 text-center" data-onboard="0">
+                                                    <div
+                                                        class="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/30">
+                                                        <svg class="w-10 h-10 text-white" fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor"
+                                                            stroke-width="1.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                                                        </svg>
+                                                    </div>
+                                                    <h2 class="text-2xl font-bold text-white mb-3">Bienvenue sur Plinkk
+                                                        ! 🎉
+                                                    </h2>
+                                                    <p class="text-slate-400 text-base leading-relaxed mb-2">Votre page
+                                                        de liens
+                                                        est prête.</p>
+                                                    <div
+                                                        class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-sm font-medium mt-2">
+                                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                                        </svg>
+                                                        <span id="onboardLink">
+                                                            <%= plinkkUrl %>
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Step 2: Customize -->
+                                                <div class="onboard-step px-8 py-8 text-center hidden" data-onboard="1">
+                                                    <div
+                                                        class="w-20 h-20 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-pink-500/30">
+                                                        <svg class="w-10 h-10 text-white" fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor"
+                                                            stroke-width="1.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
+                                                        </svg>
+                                                    </div>
+                                                    <h2 class="text-2xl font-bold text-white mb-3">Personnalisez votre
+                                                        page</h2>
+                                                    <p class="text-slate-400 text-base leading-relaxed">Ajoutez vos
+                                                        liens,
+                                                        changez les couleurs, choisissez un thème et rendez votre page
+                                                        unique.
+                                                    </p>
+                                                </div>
+
+                                                <!-- Step 3: Share -->
+                                                <div class="onboard-step px-8 py-8 text-center hidden" data-onboard="2">
+                                                    <div
+                                                        class="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/30">
+                                                        <svg class="w-10 h-10 text-white" fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor"
+                                                            stroke-width="1.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                                                        </svg>
+                                                    </div>
+                                                    <h2 class="text-2xl font-bold text-white mb-3">Partagez partout</h2>
+                                                    <p class="text-slate-400 text-base leading-relaxed mb-5">Copiez
+                                                        votre lien
+                                                        et partagez-le sur tous vos réseaux sociaux, votre bio
+                                                        Instagram,
+                                                        TikTok, etc.</p>
+                                                    <button id="onboardCopyLink"
+                                                        class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 transition-colors font-medium">
+                                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor" stroke-width="2">
+                                                            <rect width="14" height="14" x="8" y="8" rx="2" ry="2">
+                                                            </rect>
+                                                            <path
+                                                                d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2">
+                                                            </path>
+                                                        </svg>
+                                                        <span id="onboardCopyText">Copier mon lien</span>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Navigation buttons -->
+                                                <div class="flex items-center justify-between px-8 pb-8">
+                                                    <button id="onboardSkip"
+                                                        class="text-sm text-slate-500 hover:text-slate-300 font-medium transition-colors">
+                                                        Passer
+                                                    </button>
+                                                    <div class="flex gap-3">
+                                                        <button id="onboardPrev"
+                                                            class="hidden px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-sm font-medium text-slate-300 transition-colors border border-white/10">
+                                                            Précédent
+                                                        </button>
+                                                        <button id="onboardNext"
+                                                            class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-sm font-semibold text-white transition-all shadow-lg shadow-violet-500/20">
+                                                            Suivant
+                                                        </button>
+
+                                                        <div class="mt-4 pt-4 border-t border-white/10">
+                                                            <a href="/premium/configure"
+                                                                class="inline-flex items-center gap-2 text-sm text-violet-400 hover:text-violet-300 transition-colors group">
+                                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                                                                    stroke="currentColor" stroke-width="2">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                                                                </svg>
+                                                                <span>Boostez votre page avec Premium</span>
+                                                                <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform"
+                                                                    fill="none" viewBox="0 0 24 24"
+                                                                    stroke="currentColor" stroke-width="2">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        d="M9 5l7 7-7 7" />
+                                                                </svg>
+                                                            </a>
+                                                        </div>
+                                                        <a id="onboardFinish" href="/edit"
+                                                            class="hidden px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-sm font-semibold text-white transition-all shadow-lg shadow-emerald-500/20 inline-flex items-center gap-2">
+                                                            Personnaliser ma page →
+                                                        </a>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <style>
-                            @keyframes onboardFadeUp {
-                                from {
-                                    opacity: 0;
-                                    transform: translateY(30px) scale(0.95);
-                                }
+                                <style>
+                                    @keyframes onboardFadeUp {
+                                        from {
+                                            opacity: 0;
+                                            transform: translateY(30px) scale(0.95);
+                                        }
 
-                                to {
-                                    opacity: 1;
-                                    transform: translateY(0) scale(1);
-                                }
-                            }
-                        </style>
+                                        to {
+                                            opacity: 1;
+                                            transform: translateY(0) scale(1);
+                                        }
+                                    }
+                                </style>
 
-                        <script>
-                            (function () {
-                                const ONBOARD_KEY = 'plinkk_onboarding_done';
-                                const createdAt = '<%= userCreatedAt %>';
+                                <script>
+                                    (function () {
+                                        const ONBOARD_KEY = 'plinkk_onboarding_done';
+                                        const createdAt = '<%= userCreatedAt %>';
 
-                                // Show onboarding only for recent users who haven't dismissed it
-                                if (!createdAt || localStorage.getItem(ONBOARD_KEY)) return;
+                                        // Show onboarding only for recent users who haven't dismissed it
+                                        if (!createdAt || localStorage.getItem(ONBOARD_KEY)) return;
 
-                                const created = new Date(createdAt);
-                                const now = new Date();
-                                const diffMs = now - created;
-                                const tenMinutes = 10 * 60 * 1000;
+                                        const created = new Date(createdAt);
+                                        const now = new Date();
+                                        const diffMs = now - created;
+                                        const tenMinutes = 10 * 60 * 1000;
 
-                                if (diffMs > tenMinutes) return;
+                                        if (diffMs > tenMinutes) return;
 
-                                // Show the onboarding modal
-                                const overlay = document.getElementById('onboardingOverlay');
-                                if (!overlay) return;
+                                        // Show the onboarding modal
+                                        const overlay = document.getElementById('onboardingOverlay');
+                                        if (!overlay) return;
 
-                                setTimeout(() => { overlay.classList.remove('hidden'); }, 500);
+                                        setTimeout(() => { overlay.classList.remove('hidden'); }, 500);
 
-                                let currentStep = 0;
-                                const totalSteps = 3;
-                                const steps = overlay.querySelectorAll('.onboard-step');
-                                const dots = overlay.querySelectorAll('.onboard-dot');
-                                const prevBtn = document.getElementById('onboardPrev');
-                                const nextBtn = document.getElementById('onboardNext');
-                                const finishBtn = document.getElementById('onboardFinish');
-                                const skipBtn = document.getElementById('onboardSkip');
-                                const copyBtn = document.getElementById('onboardCopyLink');
-                                const copyText = document.getElementById('onboardCopyText');
-                                const backdrop = document.getElementById('onboardingBackdrop');
+                                        let currentStep = 0;
+                                        const totalSteps = 3;
+                                        const steps = overlay.querySelectorAll('.onboard-step');
+                                        const dots = overlay.querySelectorAll('.onboard-dot');
+                                        const prevBtn = document.getElementById('onboardPrev');
+                                        const nextBtn = document.getElementById('onboardNext');
+                                        const finishBtn = document.getElementById('onboardFinish');
+                                        const skipBtn = document.getElementById('onboardSkip');
+                                        const copyBtn = document.getElementById('onboardCopyLink');
+                                        const copyText = document.getElementById('onboardCopyText');
+                                        const backdrop = document.getElementById('onboardingBackdrop');
 
-                                function updateStep() {
-                                    steps.forEach((step, i) => {
-                                        step.classList.toggle('hidden', i !== currentStep);
-                                    });
-                                    dots.forEach((dot, i) => {
-                                        dot.classList.toggle('bg-violet-500', i <= currentStep);
-                                        dot.classList.toggle('bg-slate-700', i > currentStep);
-                                    });
-                                    prevBtn.classList.toggle('hidden', currentStep === 0);
-                                    nextBtn.classList.toggle('hidden', currentStep === totalSteps - 1);
-                                    finishBtn.classList.toggle('hidden', currentStep !== totalSteps - 1);
-                                    skipBtn.textContent = currentStep === totalSteps - 1 ? 'Fermer' : 'Passer';
-                                }
+                                        function updateStep() {
+                                            steps.forEach((step, i) => {
+                                                step.classList.toggle('hidden', i !== currentStep);
+                                            });
+                                            dots.forEach((dot, i) => {
+                                                dot.classList.toggle('bg-violet-500', i <= currentStep);
+                                                dot.classList.toggle('bg-slate-700', i > currentStep);
+                                            });
+                                            prevBtn.classList.toggle('hidden', currentStep === 0);
+                                            nextBtn.classList.toggle('hidden', currentStep === totalSteps - 1);
+                                            finishBtn.classList.toggle('hidden', currentStep !== totalSteps - 1);
+                                            skipBtn.textContent = currentStep === totalSteps - 1 ? 'Fermer' : 'Passer';
+                                        }
 
-                                function closeOnboarding() {
-                                    localStorage.setItem(ONBOARD_KEY, '1');
-                                    overlay.style.transition = 'opacity 0.3s ease';
-                                    overlay.style.opacity = '0';
-                                    setTimeout(() => { overlay.classList.add('hidden'); overlay.style.opacity = ''; }, 300);
-                                }
+                                        function closeOnboarding() {
+                                            localStorage.setItem(ONBOARD_KEY, '1');
+                                            overlay.style.transition = 'opacity 0.3s ease';
+                                            overlay.style.opacity = '0';
+                                            setTimeout(() => { overlay.classList.add('hidden'); overlay.style.opacity = ''; }, 300);
+                                        }
 
-                                nextBtn.addEventListener('click', () => { if (currentStep < totalSteps - 1) { currentStep++; updateStep(); } });
-                                prevBtn.addEventListener('click', () => { if (currentStep > 0) { currentStep--; updateStep(); } });
-                                skipBtn.addEventListener('click', closeOnboarding);
-                                backdrop.addEventListener('click', closeOnboarding);
+                                        nextBtn.addEventListener('click', () => { if (currentStep < totalSteps - 1) { currentStep++; updateStep(); } });
+                                        prevBtn.addEventListener('click', () => { if (currentStep > 0) { currentStep--; updateStep(); } });
+                                        skipBtn.addEventListener('click', closeOnboarding);
+                                        backdrop.addEventListener('click', closeOnboarding);
 
-                                if (copyBtn) {
-                                    const linkUrl = '<%= plinkkUrl %>';
-                                    copyBtn.addEventListener('click', () => {
-                                        navigator.clipboard.writeText(linkUrl).then(() => {
-                                            copyText.textContent = 'Copié !';
-                                            copyBtn.classList.add('border-emerald-400', 'text-emerald-300');
-                                            setTimeout(() => { copyText.textContent = 'Copier mon lien'; copyBtn.classList.remove('border-emerald-400', 'text-emerald-300'); }, 2000);
-                                        });
-                                    });
-                                }
+                                        if (copyBtn) {
+                                            const linkUrl = '<%= plinkkUrl %>';
+                                            copyBtn.addEventListener('click', () => {
+                                                navigator.clipboard.writeText(linkUrl).then(() => {
+                                                    copyText.textContent = 'Copié !';
+                                                    copyBtn.classList.add('border-emerald-400', 'text-emerald-300');
+                                                    setTimeout(() => { copyText.textContent = 'Copier mon lien'; copyBtn.classList.remove('border-emerald-400', 'text-emerald-300'); }, 2000);
+                                                });
+                                            });
+                                        }
 
-                                updateStep();
-                            })();
-                        </script>
+                                        updateStep();
+                                    })();
+                                </script>
                 </main>
         </div>

@@ -45,7 +45,7 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
           try {
             const key = new Date(r.date).toISOString().slice(0, 10);
             byDate.set(key, Number(r.count));
-          } catch(e) {}
+          } catch (e) { }
         }
 
         for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
@@ -71,7 +71,7 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
         try {
           const key = new Date(r.date).toISOString().slice(0, 10);
           redirectByDate.set(key, Number(r._sum.count || 0));
-        } catch(e) {}
+        } catch (e) { }
       }
 
       for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
@@ -125,7 +125,7 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
 
   fastify.get("/views", { preHandler: [requireAuth] }, async function (request, reply) {
     const userId = request.userId!;
-    const { from, to } = request.query as { from?: string; to?: string };
+    const { from, to, granularity = "day" } = request.query as { from?: string; to?: string; granularity?: "day" | "hour" | "minute" | "second" };
 
     // Charger l'utilisateur pour vérifier les limites premium
     const user = await prisma.user.findUnique({ where: { id: userId }, include: { role: true } });
@@ -139,35 +139,72 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
     const maxStart = new Date(end.getTime() - (maxDays - 1) * 86400000);
     if (start < maxStart) start = maxStart;
 
-    const fmt = (dt: Date) => {
+    const fmt = (dt: Date, gran = granularity) => {
       const y = dt.getUTCFullYear();
       const m = String(dt.getUTCMonth() + 1).padStart(2, "0");
       const d = String(dt.getUTCDate()).padStart(2, "0");
+      const h = String(dt.getUTCHours()).padStart(2, "0");
+      const min = String(dt.getUTCMinutes()).padStart(2, "0");
+      const s = String(dt.getUTCSeconds()).padStart(2, "0");
+      if (gran === "second") return `${y}-${m}-${d} ${h}:${min}:${s}`;
+      if (gran === "minute") return `${y}-${m}-${d} ${h}:${min}:00`;
+      if (gran === "hour") return `${y}-${m}-${d} ${h}:00:00`;
       return `${y}-${m}-${d}`;
     };
-    const s = fmt(start);
-    const e = fmt(end);
+    const s = fmt(start, "day");
+    const e = fmt(end, "day");
 
     try {
-      await prisma.$executeRawUnsafe(
-        'CREATE TABLE IF NOT EXISTS "UserViewDaily" ("userId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("userId","date"))'
-      );
-      const rows = await prisma.$queryRaw<Array<{ date: string; count: number }>>`
-        SELECT "date", "count"
-        FROM "UserViewDaily"
-        WHERE "userId" = ${userId} AND "date" BETWEEN ${s} AND ${e}
-        ORDER BY "date" ASC
-      `;
+      let rows: Array<{ date: string | Date; count: number }> = [];
+
+      if (granularity === "day") {
+        await prisma.$executeRawUnsafe(
+          'CREATE TABLE IF NOT EXISTS "UserViewDaily" ("userId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("userId","date"))'
+        );
+        rows = await prisma.$queryRaw<Array<{ date: string; count: number }>>`
+          SELECT "date", "count"
+          FROM "UserViewDaily"
+          WHERE "userId" = ${userId} AND "date" BETWEEN ${s} AND ${e}
+          ORDER BY "date" ASC
+        `;
+      } else {
+        // Find raw events for finer granularity
+        // Need to query plinkks from this user first
+        const userPlinkks = await prisma.plinkk.findMany({ where: { userId }, select: { id: true } });
+        const plinkkIds = userPlinkks.map(p => p.id);
+
+        if (plinkkIds.length > 0) {
+          const rawEvents = await prisma.pageStat.findMany({
+            where: {
+              plinkkId: { in: plinkkIds },
+              eventType: "view",
+              createdAt: { gte: start, lte: end }
+            },
+            select: { createdAt: true }
+          });
+
+          rows = rawEvents.map(ev => ({ date: ev.createdAt, count: 1 }));
+        }
+      }
 
       const byDate = new Map<string, number>();
       for (const r of rows) {
-        byDate.set(fmt(new Date(r.date)), Number(r.count));
+        const key = fmt(new Date(r.date));
+        byDate.set(key, (byDate.get(key) || 0) + Number(r.count || 1));
       }
 
       const series: { date: string; count: number }[] = [];
-      for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
+      let step = 86400000;
+      if (granularity === "hour") step = 3600000;
+      else if (granularity === "minute") step = 60000;
+      else if (granularity === "second") step = 1000;
+
+      const limit = 10000;
+      let count = 0;
+      for (let t = new Date(start.getTime()); t <= end && count < limit; t = new Date(t.getTime() + step)) {
         const key = fmt(t);
         series.push({ date: key, count: byDate.get(key) || 0 });
+        count++;
       }
       return reply.send({ from: s, to: e, series });
     } catch (err) {
@@ -178,7 +215,7 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
 
   fastify.get("/clicks", { preHandler: [requireAuth] }, async function (request, reply) {
     const userId = request.userId!;
-    const { from, to } = request.query as { from?: string; to?: string };
+    const { from, to, granularity = "day" } = request.query as { from?: string; to?: string; granularity?: "day" | "hour" | "minute" | "second" };
 
     // Charger l'utilisateur pour vérifier les limites premium
     const user = await prisma.user.findUnique({ where: { id: userId }, include: { role: true } });
@@ -192,37 +229,71 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
     const maxStart = new Date(end.getTime() - (maxDays - 1) * 86400000);
     if (start < maxStart) start = maxStart;
 
-    const fmt = (dt: Date) => {
+    const fmt = (dt: Date, gran = granularity) => {
       const y = dt.getUTCFullYear();
       const m = String(dt.getUTCMonth() + 1).padStart(2, "0");
       const d = String(dt.getUTCDate()).padStart(2, "0");
+      const h = String(dt.getUTCHours()).padStart(2, "0");
+      const min = String(dt.getUTCMinutes()).padStart(2, "0");
+      const s = String(dt.getUTCSeconds()).padStart(2, "0");
+      if (gran === "second") return `${y}-${m}-${d} ${h}:${min}:${s}`;
+      if (gran === "minute") return `${y}-${m}-${d} ${h}:${min}:00`;
+      if (gran === "hour") return `${y}-${m}-${d} ${h}:00:00`;
       return `${y}-${m}-${d}`;
     };
-    const s = fmt(start);
-    const e = fmt(end);
+    const s = fmt(start, "day");
+    const e = fmt(end, "day");
 
     try {
       const linkIds = (await prisma.link.findMany({ where: { userId }, select: { id: true } })).map((x) => x.id);
       if (linkIds.length === 0) return reply.send({ from: s, to: e, series: [] });
 
-      const rows = (
-        await prisma.linkClickDaily.groupBy({
-          by: ["date"],
-          where: { linkId: { in: linkIds }, date: { gte: start, lte: end } },
-          _sum: { count: true },
-          orderBy: { date: "asc" },
-        })
-      ).map((r) => ({ date: r.date, count: r._sum.count ?? 0 }));
+      let rows: Array<{ date: string | Date; count: number }> = [];
+
+      if (granularity === "day") {
+        rows = (
+          await prisma.linkClickDaily.groupBy({
+            by: ["date"],
+            where: { linkId: { in: linkIds }, date: { gte: start, lte: end } },
+            _sum: { count: true },
+            orderBy: { date: "asc" },
+          })
+        ).map((r) => ({ date: r.date, count: r._sum.count ?? 0 }));
+      } else {
+        const userPlinkks = await prisma.plinkk.findMany({ where: { userId }, select: { id: true } });
+        const plinkkIds = userPlinkks.map(p => p.id);
+
+        if (plinkkIds.length > 0) {
+          const rawEvents = await prisma.pageStat.findMany({
+            where: {
+              plinkkId: { in: plinkkIds },
+              eventType: "click",
+              createdAt: { gte: start, lte: end }
+            },
+            select: { createdAt: true }
+          });
+          rows = rawEvents.map(ev => ({ date: ev.createdAt, count: 1 }));
+        }
+      }
 
       const byDate = new Map<string, number>();
       for (const r of rows) {
-        byDate.set(fmt(new Date(r.date)), Number(r.count));
+        const key = fmt(new Date(r.date));
+        byDate.set(key, (byDate.get(key) || 0) + Number(r.count || 1));
       }
 
       const series: { date: string; count: number }[] = [];
-      for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
+      let step = 86400000;
+      if (granularity === "hour") step = 3600000;
+      else if (granularity === "minute") step = 60000;
+      else if (granularity === "second") step = 1000;
+
+      const limit = 10000;
+      let count = 0;
+      for (let t = new Date(start.getTime()); t <= end && count < limit; t = new Date(t.getTime() + step)) {
         const key = fmt(t);
         series.push({ date: key, count: byDate.get(key) || 0 });
+        count++;
       }
       return reply.send({ from: s, to: e, series });
     } catch (err) {

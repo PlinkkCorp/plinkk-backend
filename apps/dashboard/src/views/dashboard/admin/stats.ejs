@@ -49,15 +49,16 @@
                             <button
                                 class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
                                 data-tab="accounts" aria-selected="false">Comptes</button>
-            <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
-                data-tab="funnel" aria-selected="false">Tunnel</button>
+                            <button
+                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                                data-tab="funnel" aria-selected="false">Tunnel</button>
                         </nav>
                     </div>
 
                     <!--  CONTROL BAR  -->
                     <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6">
                         <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-                            <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl">
+                            <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl">
                                 <div class="space-y-1.5">
                                     <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Date
                                         Début</label>
@@ -69,6 +70,16 @@
                                         Fin</label>
                                     <input type="date" id="fTo"
                                         class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:border-violet-500 transition-all outline-none" />
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label
+                                        class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Précision</label>
+                                    <select id="fGranularity"
+                                        class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:border-violet-500 transition-all outline-none appearance-none">
+                                        <option value="day" selected>Par jour</option>
+                                        <option value="hour">Par heure</option>
+                                        <option value="minute">Par minute</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
@@ -430,256 +441,346 @@
                         </div>
                     </section>
 
-        <!-- ─── TUNNEL D'ACQUISITION ─── -->
-        <section id="panel-funnel" class="tab-panel hidden space-y-6">
+                    <!-- ─── TUNNEL D'ACQUISITION ─── -->
+                    <section id="panel-funnel" class="tab-panel hidden space-y-6">
 
-            <!-- Sub-tab toggle -->
-            <div class="flex items-center gap-2 p-1 bg-slate-800/50 rounded-xl w-fit">
-                <button id="funnelSubPlinkk" class="px-4 py-2 rounded-lg text-sm font-medium bg-violet-500/20 text-violet-300 border border-violet-500/30 transition-all">
-                    Tunnel Plinkk
-                </button>
-                <button id="funnelSubPurchase" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-all">
-                    Tunnel Achats
-                        <button class="px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-white/5 sub-funnel-btn" data-sub="funnel-detail">Tunnel Détaillé</button>
-                </button>
-            </div>
+                        <!-- Sub-tab toggle -->
+                        <div class="flex items-center gap-2 p-1 bg-slate-800/50 rounded-xl w-fit">
+                            <button id="funnelSubPlinkk"
+                                class="px-4 py-2 rounded-lg text-sm font-medium bg-violet-500/20 text-violet-300 border border-violet-500/30 transition-all">
+                                Tunnel Plinkk
+                            </button>
+                            <button id="funnelSubPurchase"
+                                class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+                                Tunnel Achats
+                            </button>
+                            <button id="funnelSubDetail"
+                                class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+                                Tunnel Détaillé
+                            </button>
+                        </div>
 
-            <!-- Plinkk Funnel -->
-            <div id="funnelPlinkk" class="space-y-6">
-                <div class="glass-card rounded-2xl border border-white/5 p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="font-bold text-lg text-white flex items-center gap-2">
-                            <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                            </svg>
-                            Tunnel Plinkk
-                        </h2>
-                        <span class="text-xs text-slate-500">Données globales</span>
-                    </div>
-                    <div class="space-y-0" id="funnelPlinkkSteps">
-                        <div class="flex items-center gap-4 py-3" data-funnel="f-p-users">
-                            <div class="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-sm font-medium text-white">Utilisateurs inscrits</span>
-                                    <span class="text-lg font-bold text-white" id="fp-users">...</span>
+                        <!-- Plinkk Funnel -->
+                        <div id="funnelPlinkk" class="space-y-6">
+                            <div class="glass-card rounded-2xl border border-white/5 p-6">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h2 class="font-bold text-lg text-white flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                        </svg>
+                                        Tunnel Plinkk
+                                    </h2>
+                                    <span class="text-xs text-slate-500">Données globales</span>
                                 </div>
-                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-violet-500 to-violet-400 h-full rounded-full transition-all duration-700" style="width:100%" id="fp-bar-users"></div></div>
-                            </div>
-                            <span class="text-sm font-semibold text-violet-400 w-14 text-right">100%</span>
-                        </div>
-                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
+                                <div class="space-y-0" id="funnelPlinkkSteps">
+                                    <div class="flex items-center gap-4 py-3" data-funnel="f-p-users">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <span class="text-sm font-medium text-white">Utilisateurs
+                                                    inscrits</span>
+                                                <span class="text-lg font-bold text-white" id="fp-users">...</span>
+                                            </div>
+                                            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                                                <div class="bg-gradient-to-r from-violet-500 to-violet-400 h-full rounded-full transition-all duration-700"
+                                                    style="width:100%" id="fp-bar-users"></div>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm font-semibold text-violet-400 w-14 text-right">100%</span>
+                                    </div>
+                                    <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
 
-                        <div class="flex items-center gap-4 py-3">
-                            <div class="w-10 h-10 rounded-full bg-fuchsia-500/20 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25A2.25 2.25 0 0010.5 18v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25zm9.75-9.75H18a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0018 3.75h-2.25A2.25 2.25 0 0013.5 6v2.25a2.25 2.25 0 002.25 2.25z" /></svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-sm font-medium text-white">Ont créé un Plinkk</span>
-                                    <span class="text-lg font-bold text-white" id="fp-withPlinkk">...</span>
+                                    <div class="flex items-center gap-4 py-3">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-fuchsia-500/20 flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25A2.25 2.25 0 0010.5 18v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25zm9.75-9.75H18a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0018 3.75h-2.25A2.25 2.25 0 0013.5 6v2.25a2.25 2.25 0 002.25 2.25z" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <span class="text-sm font-medium text-white">Ont créé un Plinkk</span>
+                                                <span class="text-lg font-bold text-white" id="fp-withPlinkk">...</span>
+                                            </div>
+                                            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                                                <div class="bg-gradient-to-r from-fuchsia-500 to-fuchsia-400 h-full rounded-full transition-all duration-700"
+                                                    style="width:0%" id="fp-bar-withPlinkk"></div>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm font-semibold text-fuchsia-400 w-14 text-right"
+                                            id="fp-pct-withPlinkk">-</span>
+                                    </div>
+                                    <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
+
+                                    <div class="flex items-center gap-4 py-3">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <span class="text-sm font-medium text-white">Vues totales</span>
+                                                <span class="text-lg font-bold text-white" id="fp-views">...</span>
+                                            </div>
+                                            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                                                <div class="bg-gradient-to-r from-indigo-500 to-indigo-400 h-full rounded-full transition-all duration-700"
+                                                    style="width:0%" id="fp-bar-views"></div>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm font-semibold text-indigo-400 w-14 text-right"
+                                            id="fp-pct-views">-</span>
+                                    </div>
+                                    <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
+
+                                    <div class="flex items-center gap-4 py-3">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <span class="text-sm font-medium text-white">Clics totaux</span>
+                                                <span class="text-lg font-bold text-white" id="fp-clicks">...</span>
+                                            </div>
+                                            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                                                <div class="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-700"
+                                                    style="width:0%" id="fp-bar-clicks"></div>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm font-semibold text-emerald-400 w-14 text-right"
+                                            id="fp-pct-clicks">-</span>
+                                    </div>
                                 </div>
-                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-fuchsia-500 to-fuchsia-400 h-full rounded-full transition-all duration-700" style="width:0%" id="fp-bar-withPlinkk"></div></div>
                             </div>
-                            <span class="text-sm font-semibold text-fuchsia-400 w-14 text-right" id="fp-pct-withPlinkk">-</span>
-                        </div>
-                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
-
-                        <div class="flex items-center gap-4 py-3">
-                            <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-sm font-medium text-white">Vues totales</span>
-                                    <span class="text-lg font-bold text-white" id="fp-views">...</span>
+                            <!-- Plinkk funnel KPIs -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Activation</p>
+                                    <p class="text-2xl font-bold text-white" id="fp-kpi-activation">-</p>
+                                    <p class="text-xs text-slate-500 mt-1">Inscrits → Plinkk</p>
                                 </div>
-                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-indigo-500 to-indigo-400 h-full rounded-full transition-all duration-700" style="width:0%" id="fp-bar-views"></div></div>
-                            </div>
-                            <span class="text-sm font-semibold text-indigo-400 w-14 text-right" id="fp-pct-views">-</span>
-                        </div>
-                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
-
-                        <div class="flex items-center gap-4 py-3">
-                            <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" /></svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-sm font-medium text-white">Clics totaux</span>
-                                    <span class="text-lg font-bold text-white" id="fp-clicks">...</span>
+                                <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">CTR Global</p>
+                                    <p class="text-2xl font-bold text-white" id="fp-kpi-ctr">-</p>
+                                    <p class="text-xs text-slate-500 mt-1">Vues → Clics</p>
                                 </div>
-                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-700" style="width:0%" id="fp-bar-clicks"></div></div>
-                            </div>
-                            <span class="text-sm font-semibold text-emerald-400 w-14 text-right" id="fp-pct-clicks">-</span>
-                        </div>
-                    </div>
-                </div>
-                <!-- Plinkk funnel KPIs -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
-                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Activation</p>
-                        <p class="text-2xl font-bold text-white" id="fp-kpi-activation">-</p>
-                        <p class="text-xs text-slate-500 mt-1">Inscrits → Plinkk</p>
-                    </div>
-                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
-                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">CTR Global</p>
-                        <p class="text-2xl font-bold text-white" id="fp-kpi-ctr">-</p>
-                        <p class="text-xs text-slate-500 mt-1">Vues → Clics</p>
-                    </div>
-                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
-                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Vues / Plinkk</p>
-                        <p class="text-2xl font-bold text-white" id="fp-kpi-vpg">-</p>
-                        <p class="text-xs text-slate-500 mt-1">Moyenne</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Purchase Funnel -->
-            <div id="funnelPurchase" class="space-y-6 hidden">
-                <div class="glass-card rounded-2xl border border-white/5 p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="font-bold text-lg text-white flex items-center gap-2">
-                            <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
-                            </svg>
-                            Tunnel Achats
-                        </h2>
-                        <span class="text-xs text-slate-500">Données globales</span>
-                    </div>
-                    <div class="space-y-0" id="funnelPurchaseSteps">
-                        <div class="flex items-center gap-4 py-3">
-                            <div class="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-sm font-medium text-white">Utilisateurs totaux</span>
-                                    <span class="text-lg font-bold text-white" id="fc-users">...</span>
+                                <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Vues / Plinkk</p>
+                                    <p class="text-2xl font-bold text-white" id="fp-kpi-vpg">-</p>
+                                    <p class="text-xs text-slate-500 mt-1">Moyenne</p>
                                 </div>
-                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-violet-500 to-violet-400 h-full rounded-full transition-all duration-700" style="width:100%" id="fc-bar-users"></div></div>
                             </div>
-                            <span class="text-sm font-semibold text-violet-400 w-14 text-right">100%</span>
                         </div>
-                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
 
-                        <div class="flex items-center gap-4 py-3">
-                            <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-sm font-medium text-white">Utilisateurs Premium</span>
-                                    <span class="text-lg font-bold text-white" id="fc-premium">...</span>
+                        <!-- Purchase Funnel -->
+                        <div id="funnelPurchase" class="space-y-6 hidden">
+                            <div class="glass-card rounded-2xl border border-white/5 p-6">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h2 class="font-bold text-lg text-white flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                                        </svg>
+                                        Tunnel Achats
+                                    </h2>
+                                    <span class="text-xs text-slate-500">Données globales</span>
                                 </div>
-                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-amber-500 to-amber-400 h-full rounded-full transition-all duration-700" style="width:0%" id="fc-bar-premium"></div></div>
-                            </div>
-                            <span class="text-sm font-semibold text-amber-400 w-14 text-right" id="fc-pct-premium">-</span>
-                        </div>
-                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
+                                <div class="space-y-0" id="funnelPurchaseSteps">
+                                    <div class="flex items-center gap-4 py-3">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <span class="text-sm font-medium text-white">Utilisateurs totaux</span>
+                                                <span class="text-lg font-bold text-white" id="fc-users">...</span>
+                                            </div>
+                                            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                                                <div class="bg-gradient-to-r from-violet-500 to-violet-400 h-full rounded-full transition-all duration-700"
+                                                    style="width:100%" id="fc-bar-users"></div>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm font-semibold text-violet-400 w-14 text-right">100%</span>
+                                    </div>
+                                    <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
 
-                        <div class="flex items-center gap-4 py-3">
-                            <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-sm font-medium text-white">Achats réalisés</span>
-                                    <span class="text-lg font-bold text-white" id="fc-purchases">...</span>
+                                    <div class="flex items-center gap-4 py-3">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <span class="text-sm font-medium text-white">Utilisateurs Premium</span>
+                                                <span class="text-lg font-bold text-white" id="fc-premium">...</span>
+                                            </div>
+                                            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                                                <div class="bg-gradient-to-r from-amber-500 to-amber-400 h-full rounded-full transition-all duration-700"
+                                                    style="width:0%" id="fc-bar-premium"></div>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm font-semibold text-amber-400 w-14 text-right"
+                                            id="fc-pct-premium">-</span>
+                                    </div>
+                                    <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
+
+                                    <div class="flex items-center gap-4 py-3">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <span class="text-sm font-medium text-white">Achats réalisés</span>
+                                                <span class="text-lg font-bold text-white" id="fc-purchases">...</span>
+                                            </div>
+                                            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                                                <div class="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-700"
+                                                    style="width:0%" id="fc-bar-purchases"></div>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm font-semibold text-emerald-400 w-14 text-right"
+                                            id="fc-pct-purchases">-</span>
+                                    </div>
+                                    <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
+
+                                    <div class="flex items-center gap-4 py-3">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-rose-500/20 flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <span class="text-sm font-medium text-white">Revenu total</span>
+                                                <span class="text-lg font-bold text-white" id="fc-revenue">...</span>
+                                            </div>
+                                            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                                                <div class="bg-gradient-to-r from-rose-500 to-rose-400 h-full rounded-full transition-all duration-700"
+                                                    style="width:0%" id="fc-bar-revenue"></div>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm font-semibold text-rose-400 w-14 text-right"
+                                            id="fc-pct-revenue">-</span>
+                                    </div>
                                 </div>
-                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-700" style="width:0%" id="fc-bar-purchases"></div></div>
                             </div>
-                            <span class="text-sm font-semibold text-emerald-400 w-14 text-right" id="fc-pct-purchases">-</span>
-                        </div>
-                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
-
-                        <div class="flex items-center gap-4 py-3">
-                            <div class="w-10 h-10 rounded-full bg-rose-500/20 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-sm font-medium text-white">Revenu total</span>
-                                    <span class="text-lg font-bold text-white" id="fc-revenue">...</span>
+                            <!-- Purchase funnel KPIs -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Conversion Premium
+                                    </p>
+                                    <p class="text-2xl font-bold text-white" id="fc-kpi-conv">-</p>
+                                    <p class="text-xs text-slate-500 mt-1">Inscrits → Premium</p>
                                 </div>
-                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-rose-500 to-rose-400 h-full rounded-full transition-all duration-700" style="width:0%" id="fc-bar-revenue"></div></div>
+                                <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">ARPU</p>
+                                    <p class="text-2xl font-bold text-white" id="fc-kpi-arpu">-</p>
+                                    <p class="text-xs text-slate-500 mt-1">Revenu / User Premium</p>
+                                </div>
+                                <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Panier moyen</p>
+                                    <p class="text-2xl font-bold text-white" id="fc-kpi-avgorder">-</p>
+                                    <p class="text-xs text-slate-500 mt-1">Par achat</p>
+                                </div>
+                                <!-- Churn & Retention -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Rétention</p>
+                                        <p class="text-2xl font-bold text-emerald-400" id="fc-kpi-retention">-</p>
+                                        <p class="text-xs text-slate-500 mt-1">Premium actifs / Total ayant payé</p>
+                                    </div>
+                                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Churn</p>
+                                        <p class="text-2xl font-bold text-rose-400" id="fc-kpi-churn">-</p>
+                                        <p class="text-xs text-slate-500 mt-1">Ont résilié / parti</p>
+                                    </div>
+                                </div>
+
                             </div>
-                            <span class="text-sm font-semibold text-rose-400 w-14 text-right" id="fc-pct-revenue">-</span>
                         </div>
-                    </div>
-                </div>
-                <!-- Purchase funnel KPIs -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
-                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Conversion Premium</p>
-                        <p class="text-2xl font-bold text-white" id="fc-kpi-conv">-</p>
-                        <p class="text-xs text-slate-500 mt-1">Inscrits → Premium</p>
-                    </div>
-                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
-                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">ARPU</p>
-                        <p class="text-2xl font-bold text-white" id="fc-kpi-arpu">-</p>
-                        <p class="text-xs text-slate-500 mt-1">Revenu / User Premium</p>
-                    </div>
-                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
-                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Panier moyen</p>
-                        <p class="text-2xl font-bold text-white" id="fc-kpi-avgorder">-</p>
-                        <p class="text-xs text-slate-500 mt-1">Par achat</p>
-                    </div>
-                <!-- Churn & Retention -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
-                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Rétention</p>
-                        <p class="text-2xl font-bold text-emerald-400" id="fc-kpi-retention">-</p>
-                        <p class="text-xs text-slate-500 mt-1">Premium actifs / Total ayant payé</p>
-                    </div>
-                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
-                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Churn</p>
-                        <p class="text-2xl font-bold text-rose-400" id="fc-kpi-churn">-</p>
-                        <p class="text-xs text-slate-500 mt-1">Ont résilié / parti</p>
-                    </div>
-                </div>
 
-                <!-- Tunnel Détaillé -->
-                <div id="sub-funnel-detail" class="hidden">
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                        <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
-                            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Landing</p>
-                            <p class="text-xl font-bold text-violet-400" id="fc-kpi-landing">-</p>
-                        </div>
-                        <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
-                            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Inscriptions</p>
-                            <p class="text-xl font-bold text-blue-400" id="fc-kpi-signups">-</p>
-                        </div>
-                        <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
-                            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Page Premium</p>
-                            <p class="text-xl font-bold text-fuchsia-400" id="fc-kpi-premview">-</p>
-                        </div>
-                        <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
-                            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Configuration</p>
-                            <p class="text-xl font-bold text-indigo-400" id="fc-kpi-configview">-</p>
-                        </div>
-                        <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
-                            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Achats</p>
-                            <p class="text-xl font-bold text-emerald-400" id="fc-kpi-funpurchase">-</p>
-                        </div>
-                        <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
-                            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Résiliations</p>
-                            <p class="text-xl font-bold text-rose-400" id="fc-kpi-funcancels">-</p>
-                        </div>
-                    </div>
+                        <!-- Tunnel Détaillé -->
+                        <div id="sub-funnel-detail" class="space-y-6 hidden">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                                <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                                    <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Landing</p>
+                                    <p class="text-xl font-bold text-violet-400" id="fc-kpi-landing">-</p>
+                                </div>
+                                <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                                    <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Inscriptions</p>
+                                    <p class="text-xl font-bold text-blue-400" id="fc-kpi-signups">-</p>
+                                </div>
+                                <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                                    <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Page Premium</p>
+                                    <p class="text-xl font-bold text-fuchsia-400" id="fc-kpi-premview">-</p>
+                                </div>
+                                <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                                    <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Configuration
+                                    </p>
+                                    <p class="text-xl font-bold text-indigo-400" id="fc-kpi-configview">-</p>
+                                </div>
+                                <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                                    <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Achats</p>
+                                    <p class="text-xl font-bold text-emerald-400" id="fc-kpi-funpurchase">-</p>
+                                </div>
+                                <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                                    <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Résiliations</p>
+                                    <p class="text-xl font-bold text-rose-400" id="fc-kpi-funcancels">-</p>
+                                </div>
+                            </div>
 
-                    <!-- Funnel bar visualization -->
-                    <div class="mt-6 space-y-2" id="funnel-bars"></div>
-                    <p class="text-[10px] text-slate-600 mt-3">Données issues du tracking réel des événements utilisateurs.</p>
-                </div>
-                </div>
-            </div>
+                            <!-- Funnel bar visualization -->
+                            <div class="mt-6 space-y-2" id="funnel-bars"></div>
+                            <p class="text-[10px] text-slate-600 mt-3">Données issues du tracking réel des événements
+                                utilisateurs.</p>
+                        </div>
+                        <p class="text-[10px] text-slate-600 mt-3">Données issues du tracking réel des événements
+                            utilisateurs.</p>
+        </div>
+        </div>
 
         </section>
 
-                </main>
+        </main>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -735,10 +836,12 @@
                 async function fetchAPI(url) {
                     const f = qs('#fFrom');
                     const t = qs('#fTo');
+                    const g = qs('#fGranularity');
                     const from = f ? f.value : '';
                     const to = t ? t.value : '';
+                    const gran = g ? g.value : 'day';
                     const sep = url.includes('?') ? '&' : '?';
-                    const res = await fetch(`${url}${sep}from=${from}&to=${to}`, { credentials: 'same-origin' });
+                    const res = await fetch(`${url}${sep}from=${from}&to=${to}&granularity=${gran}`, { credentials: 'same-origin' });
                     if (!res.ok) throw new Error('API Error: ' + res.status);
                     return res.json();
                 }
@@ -1009,6 +1112,7 @@
 
                 qs('#fFrom')?.addEventListener('change', () => loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab));
                 qs('#fTo')?.addEventListener('change', () => loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab));
+                qs('#fGranularity')?.addEventListener('change', () => loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab));
 
                 // Export Logic
                 function exportGraph() {
@@ -1156,143 +1260,162 @@
                 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
             })();
 
-    // Funnel tab logic
-    (function() {
-        let funnelLoaded = false;
-        const subPlinkk = document.getElementById('funnelSubPlinkk');
-        const subPurchase = document.getElementById('funnelSubPurchase');
-        const panelPlinkk = document.getElementById('funnelPlinkk');
-        const panelPurchase = document.getElementById('funnelPurchase');
+            // Funnel tab logic
+            (function () {
+                let funnelLoaded = false;
+                const subPlinkk = document.getElementById('funnelSubPlinkk');
+                const subPurchase = document.getElementById('funnelSubPurchase');
+                const subDetail = document.getElementById('funnelSubDetail');
+                const panelPlinkk = document.getElementById('funnelPlinkk');
+                const panelPurchase = document.getElementById('funnelPurchase');
+                const panelDetail = document.getElementById('sub-funnel-detail');
 
-        if (subPlinkk && subPurchase) {
-            subPlinkk.addEventListener('click', () => {
-                panelPlinkk.classList.remove('hidden');
-                panelPurchase.classList.add('hidden');
-                subPlinkk.classList.add('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                subPlinkk.classList.remove('text-slate-400');
-                subPurchase.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                subPurchase.classList.add('text-slate-400');
-            });
-            subPurchase.addEventListener('click', () => {
-                panelPlinkk.classList.add('hidden');
-                panelPurchase.classList.remove('hidden');
-                subPurchase.classList.add('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                subPurchase.classList.remove('text-slate-400');
-                subPlinkk.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                subPlinkk.classList.add('text-slate-400');
-            });
-        }
-
-        // Observe tab switch
-        const observer = new MutationObserver(() => {
-            const panel = document.getElementById('panel-funnel');
-            if (panel && !panel.classList.contains('hidden') && !funnelLoaded) {
-                funnelLoaded = true;
-                loadFunnelData();
-            }
-        });
-        const funnelPanel = document.getElementById('panel-funnel');
-        if (funnelPanel) observer.observe(funnelPanel, { attributes: true, attributeFilter: ['class'] });
-
-        async function loadFunnelData() {
-            try {
-                const res = await fetch('/admin/stats/funnel');
-                if (!res.ok) throw new Error('Failed');
-                const data = await res.json();
-                const fmt = new Intl.NumberFormat('fr-FR');
-
-                // Plinkk funnel
-                const p = data.plinkk;
-                setText('fp-users', fmt.format(p.totalUsers));
-                setText('fp-withPlinkk', fmt.format(p.usersWithPlinkk));
-                setText('fp-views', fmt.format(p.totalViews));
-                setText('fp-clicks', fmt.format(p.totalClicks));
-
-                if (p.totalUsers > 0) {
-                    setBar('fp-bar-withPlinkk', 'fp-pct-withPlinkk', p.usersWithPlinkk, p.totalUsers);
-                }
-                if (p.usersWithPlinkk > 0) {
-                    const viewsRatio = Math.min(100, Math.round((p.totalViews / (p.usersWithPlinkk * 100)) * 100));
-                    setEl('fp-bar-views', viewsRatio);
-                    setText('fp-pct-views', viewsRatio + '%');
-                }
-                if (p.totalViews > 0) {
-                    setBar('fp-bar-clicks', 'fp-pct-clicks', p.totalClicks, p.totalViews);
+                if (subPlinkk && subPurchase && subDetail) {
+                    subPlinkk.addEventListener('click', () => {
+                        panelPlinkk.classList.remove('hidden');
+                        panelPurchase.classList.add('hidden');
+                        panelDetail.classList.add('hidden');
+                        subPlinkk.classList.add('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                        subPlinkk.classList.remove('text-slate-400');
+                        subPurchase.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                        subPurchase.classList.add('text-slate-400');
+                        subDetail.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                        subDetail.classList.add('text-slate-400');
+                    });
+                    subPurchase.addEventListener('click', () => {
+                        panelPlinkk.classList.add('hidden');
+                        panelPurchase.classList.remove('hidden');
+                        panelDetail.classList.add('hidden');
+                        subPurchase.classList.add('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                        subPurchase.classList.remove('text-slate-400');
+                        subPlinkk.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                        subPlinkk.classList.add('text-slate-400');
+                        subDetail.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                        subDetail.classList.add('text-slate-400');
+                    });
+                    subDetail.addEventListener('click', () => {
+                        panelPlinkk.classList.add('hidden');
+                        panelPurchase.classList.add('hidden');
+                        panelDetail.classList.remove('hidden');
+                        subDetail.classList.add('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                        subDetail.classList.remove('text-slate-400');
+                        subPlinkk.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                        subPlinkk.classList.add('text-slate-400');
+                        subPurchase.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                        subPurchase.classList.add('text-slate-400');
+                    });
                 }
 
-                // KPIs
-                setText('fp-kpi-activation', p.totalUsers > 0 ? Math.round((p.usersWithPlinkk / p.totalUsers) * 100) + '%' : '0%');
-                setText('fp-kpi-ctr', p.totalViews > 0 ? Math.round((p.totalClicks / p.totalViews) * 100) + '%' : '0%');
-                setText('fp-kpi-vpg', p.totalPlinkks > 0 ? Math.round(p.totalViews / p.totalPlinkks) : '0');
+                // Observe tab switch
+                const observer = new MutationObserver(() => {
+                    const panel = document.getElementById('panel-funnel');
+                    if (panel && !panel.classList.contains('hidden') && !funnelLoaded) {
+                        funnelLoaded = true;
+                        loadFunnelData();
+                    }
+                });
+                const funnelPanel = document.getElementById('panel-funnel');
+                if (funnelPanel) observer.observe(funnelPanel, { attributes: true, attributeFilter: ['class'] });
 
-                // Purchase funnel
-                const c = data.purchase;
-                setText('fc-users', fmt.format(c.totalUsers));
-                setText('fc-premium', fmt.format(c.premiumUsers));
-                setText('fc-purchases', fmt.format(c.totalPurchases));
-                setText('fc-revenue', (c.totalRevenue / 100).toFixed(2) + ' €');
+                async function loadFunnelData() {
+                    try {
+                        const res = await fetch('/admin/stats/funnel');
+                        if (!res.ok) throw new Error('Failed');
+                        const data = await res.json();
+                        const fmt = new Intl.NumberFormat('fr-FR');
 
-                if (c.totalUsers > 0) {
-                    setBar('fc-bar-premium', 'fc-pct-premium', c.premiumUsers, c.totalUsers);
+                        // Plinkk funnel
+                        const p = data.plinkk;
+                        setText('fp-users', fmt.format(p.totalUsers));
+                        setText('fp-withPlinkk', fmt.format(p.usersWithPlinkk));
+                        setText('fp-views', fmt.format(p.totalViews));
+                        setText('fp-clicks', fmt.format(p.totalClicks));
+
+                        if (p.totalUsers > 0) {
+                            setBar('fp-bar-withPlinkk', 'fp-pct-withPlinkk', p.usersWithPlinkk, p.totalUsers);
+                        }
+                        if (p.usersWithPlinkk > 0) {
+                            const viewsRatio = Math.min(100, Math.round((p.totalViews / (p.usersWithPlinkk * 100)) * 100));
+                            setEl('fp-bar-views', viewsRatio);
+                            setText('fp-pct-views', viewsRatio + '%');
+                        }
+                        if (p.totalViews > 0) {
+                            setBar('fp-bar-clicks', 'fp-pct-clicks', p.totalClicks, p.totalViews);
+                        }
+
+                        // KPIs
+                        setText('fp-kpi-activation', p.totalUsers > 0 ? Math.round((p.usersWithPlinkk / p.totalUsers) * 100) + '%' : '0%');
+                        setText('fp-kpi-ctr', p.totalViews > 0 ? Math.round((p.totalClicks / p.totalViews) * 100) + '%' : '0%');
+                        setText('fp-kpi-vpg', p.totalPlinkks > 0 ? Math.round(p.totalViews / p.totalPlinkks) : '0');
+
+                        // Purchase funnel
+                        const c = data.purchase;
+                        setText('fc-users', fmt.format(c.totalUsers));
+                        setText('fc-premium', fmt.format(c.premiumUsers));
+                        setText('fc-purchases', fmt.format(c.totalPurchases));
+                        setText('fc-revenue', (c.totalRevenue / 100).toFixed(2) + ' €');
+
+                        if (c.totalUsers > 0) {
+                            setBar('fc-bar-premium', 'fc-pct-premium', c.premiumUsers, c.totalUsers);
+                        }
+                        if (c.premiumUsers > 0) {
+                            setBar('fc-bar-purchases', 'fc-pct-purchases', c.totalPurchases, c.premiumUsers);
+                        }
+                        // Revenue bar relative to a hypothetical max
+                        if (c.totalPurchases > 0) {
+                            setEl('fc-bar-revenue', Math.min(100, Math.round((c.totalRevenue / (c.totalPurchases * 1000)) * 100)));
+                            setText('fc-pct-revenue', '');
+                        }
+
+                        // KPIs
+                        setText('fc-kpi-conv', c.totalUsers > 0 ? (c.premiumUsers / c.totalUsers * 100).toFixed(1) + '%' : '0%');
+                        setText('fc-kpi-arpu', c.premiumUsers > 0 ? ((c.totalRevenue / 100) / c.premiumUsers).toFixed(2) + ' €' : '0 €');
+                        setText('fc-kpi-avgorder', c.totalPurchases > 0 ? ((c.totalRevenue / 100) / c.totalPurchases).toFixed(2) + ' €' : '0 €');
+
+                        // Churn & Retention
+                        setText('fc-kpi-retention', c.retention + '%');
+                        setText('fc-kpi-churn', fmt.format(c.churned));
+
+                        // Funnel Détaillé
+                        var f = data.funnel || {};
+                        setText('fc-kpi-landing', fmt.format(f.landingVisits || 0));
+                        setText('fc-kpi-signups', fmt.format(f.signups || 0));
+                        setText('fc-kpi-premview', fmt.format(f.premiumViews || 0));
+                        setText('fc-kpi-configview', fmt.format(f.configViews || 0));
+                        setText('fc-kpi-funpurchase', fmt.format(f.purchases || 0));
+                        setText('fc-kpi-funcancels', fmt.format(f.cancels || 0));
+
+                        // Build funnel bars
+                        var barsContainer = document.getElementById("funnel-bars");
+                        if (barsContainer) {
+                            var steps = [
+                                { label: "Landing", value: f.landingVisits || 0, color: "bg-violet-500" },
+                                { label: "Inscription", value: f.signups || 0, color: "bg-blue-500" },
+                                { label: "Page Premium", value: f.premiumViews || 0, color: "bg-fuchsia-500" },
+                                { label: "Configuration", value: f.configViews || 0, color: "bg-indigo-500" },
+                                { label: "Achat", value: f.purchases || 0, color: "bg-emerald-500" },
+                            ];
+                            var maxVal = Math.max(1, steps[0].value);
+                            barsContainer.innerHTML = steps.map(function (s) {
+                                var pct = Math.max(2, Math.round((s.value / maxVal) * 100));
+                                var rate = steps[0].value > 0 ? ((s.value / steps[0].value) * 100).toFixed(1) : "0.0";
+                                return '<div class="flex items-center gap-3"><span class="text-[11px] text-slate-400 w-24 text-right shrink-0">' + s.label + '</span><div class="flex-1 bg-slate-800/50 rounded-full h-6 overflow-hidden"><div class="' + s.color + ' h-full rounded-full flex items-center px-2 transition-all duration-500" style="width:' + pct + '%"><span class="text-[10px] text-white font-bold">' + fmt.format(s.value) + '</span></div></div><span class="text-[11px] text-slate-500 w-12 shrink-0">' + rate + '%</span></div>';
+                            }).join("");
+                        }
+
+                    } catch (e) {
+                        console.error('Funnel load error:', e);
+                    }
                 }
-                if (c.premiumUsers > 0) {
-                    setBar('fc-bar-purchases', 'fc-pct-purchases', c.totalPurchases, c.premiumUsers);
+
+                function setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
+                function setEl(id, pct) { const el = document.getElementById(id); if (el) el.style.width = Math.max(pct, 2) + '%'; }
+                function setBar(barId, pctId, value, total) {
+                    const pct = Math.round((value / total) * 100);
+                    setEl(barId, pct);
+                    setText(pctId, pct + '%');
                 }
-                // Revenue bar relative to a hypothetical max
-                if (c.totalPurchases > 0) {
-                    setEl('fc-bar-revenue', Math.min(100, Math.round((c.totalRevenue / (c.totalPurchases * 1000)) * 100)));
-                    setText('fc-pct-revenue', '');
-                }
-
-                // KPIs
-                setText('fc-kpi-conv', c.totalUsers > 0 ? (c.premiumUsers / c.totalUsers * 100).toFixed(1) + '%' : '0%');
-                setText('fc-kpi-arpu', c.premiumUsers > 0 ? ((c.totalRevenue / 100) / c.premiumUsers).toFixed(2) + ' €' : '0 €');
-                setText('fc-kpi-avgorder', c.totalPurchases > 0 ? ((c.totalRevenue / 100) / c.totalPurchases).toFixed(2) + ' €' : '0 €');
-
-                // Churn & Retention
-                setText('fc-kpi-retention', c.retention + '%');
-                setText('fc-kpi-churn', fmt.format(c.churned));
-
-                // Funnel Détaillé
-                var f = data.funnel || {};
-                setText('fc-kpi-landing', fmt.format(f.landingVisits || 0));
-                setText('fc-kpi-signups', fmt.format(f.signups || 0));
-                setText('fc-kpi-premview', fmt.format(f.premiumViews || 0));
-                setText('fc-kpi-configview', fmt.format(f.configViews || 0));
-                setText('fc-kpi-funpurchase', fmt.format(f.purchases || 0));
-                setText('fc-kpi-funcancels', fmt.format(f.cancels || 0));
-
-                // Build funnel bars
-                var barsContainer = document.getElementById("funnel-bars");
-                if (barsContainer) {
-                    var steps = [
-                        { label: "Landing", value: f.landingVisits || 0, color: "bg-violet-500" },
-                        { label: "Inscription", value: f.signups || 0, color: "bg-blue-500" },
-                        { label: "Page Premium", value: f.premiumViews || 0, color: "bg-fuchsia-500" },
-                        { label: "Configuration", value: f.configViews || 0, color: "bg-indigo-500" },
-                        { label: "Achat", value: f.purchases || 0, color: "bg-emerald-500" },
-                    ];
-                    var maxVal = Math.max(1, steps[0].value);
-                    barsContainer.innerHTML = steps.map(function(s) {
-                        var pct = Math.max(2, Math.round((s.value / maxVal) * 100));
-                        var rate = steps[0].value > 0 ? ((s.value / steps[0].value) * 100).toFixed(1) : "0.0";
-                        return '<div class="flex items-center gap-3"><span class="text-[11px] text-slate-400 w-24 text-right shrink-0">' + s.label + '</span><div class="flex-1 bg-slate-800/50 rounded-full h-6 overflow-hidden"><div class="' + s.color + ' h-full rounded-full flex items-center px-2 transition-all duration-500" style="width:' + pct + '%"><span class="text-[10px] text-white font-bold">' + fmt.format(s.value) + '</span></div></div><span class="text-[11px] text-slate-500 w-12 shrink-0">' + rate + '%</span></div>';
-                    }).join("");
-                }
-
-            } catch (e) {
-                console.error('Funnel load error:', e);
-            }
-        }
-
-        function setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
-        function setEl(id, pct) { const el = document.getElementById(id); if (el) el.style.width = Math.max(pct, 2) + '%'; }
-        function setBar(barId, pctId, value, total) {
-            const pct = Math.round((value / total) * 100);
-            setEl(barId, pct);
-            setText(pctId, pct + '%');
-        }
-    })();
+            })();
         </script>
 
         <%- include('partials/footer.ejs') %>

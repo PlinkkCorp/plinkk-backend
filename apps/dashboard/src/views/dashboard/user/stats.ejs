@@ -1,498 +1,702 @@
-<%- include('partials/head.ejs', { title: 'Statistiques', description: 'Statistiques détaillées de votre profil Plinkk.', robots: 'noindex,nofollow' }) %>
-<%- include('partials/header-dash.ejs', { user: user }) %>
+<%- include('partials/head.ejs', { title: 'Statistiques' ,
+    description: 'Statistiques détaillées de votre profil Plinkk.' , robots: 'noindex,nofollow' }) %>
+    <%- include('partials/header-dash.ejs', { user: user }) %>
 
-<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-    <%- include('partials/asside_dash.ejs', { active: 'stats' }) %>
+        <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+            <%- include('partials/asside_dash.ejs', { active: 'stats' }) %>
 
-    <main class="col-span-12 lg:col-span-10 space-y-8 relative">
+                <main class="col-span-12 lg:col-span-10 space-y-8 relative">
 
-        <!--  HEADER GRADIENT  -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-            <div class="relative z-10">
-                <div class="flex items-center gap-3 mb-2">
-                    <h1 class="text-3xl md:text-4xl font-bold text-white">Statistiques</h1>
-                    <% if (typeof isPremium !== 'undefined' && isPremium) { %>
-                    <span class="px-2.5 py-1 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-[10px] font-bold rounded-lg uppercase tracking-wider">Premium</span>
-                    <% } %>
-                </div>
-                <p class="text-slate-400 text-lg">
-                    <% if (typeof plinkk !== 'undefined' && plinkk) { %>
-                        Vue détaillée pour <span class="text-violet-300 font-medium"><%= plinkk.name %></span>
-                    <% } else { %>
-                        Vue d'ensemble de votre activité Plinkk
-                    <% } %>
-                </p>
-            </div>
-            <div class="relative z-10 flex items-center gap-3">
-                <button id="btnExportGraph" class="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white font-medium rounded-xl hover:bg-slate-700 border border-slate-700 transition-colors" title="Exporter le graphique">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                    Graph
-                </button>
-                <button id="btnExportCSV" class="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white font-medium rounded-xl hover:bg-slate-700 border border-slate-700 transition-colors" title="Exporter les données (CSV)">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    CSV
-                </button>
-                <%- include('partials/changePlinkkDropdown.ejs') %>
-            </div>
-        </div>
-
-        <!--  TAB BAR  -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-2">
-            <nav class="flex gap-1" role="tablist" aria-label="Sections stats">
-                <button class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="overview" aria-selected="true">Aperçu</button>
-                <button class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="trends" aria-selected="false">Tendances</button>
-                <button class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="links" aria-selected="false">Liens</button>
-                <button class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="categories" aria-selected="false">Catégories</button>
-                <button class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="redirects" aria-selected="false">Redirections</button>
-                <button class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="funnel" aria-selected="false">Tunnel</button>
-            </nav>
-        </div>
-
-        <%
-            const _links = (typeof links !== 'undefined' && Array.isArray(links)) ? links : [];
-            const _totalViews = (typeof totalViews !== 'undefined') ? totalViews : 0;
-            const _totalClicks = (typeof totalClicks !== 'undefined') ? totalClicks : 0;
-            const _viewsDaily = (typeof viewsDaily30d !== 'undefined') ? viewsDaily30d : [];
-            const _redirects = (typeof redirects !== 'undefined' && Array.isArray(redirects)) ? redirects : [];
-            const _totalRedirectClicks = (typeof totalRedirectClicks !== 'undefined') ? totalRedirectClicks : 0;
-            const _redirectReturns = (typeof redirectReturns !== 'undefined') ? redirectReturns : [];
-            const _userViews = (typeof user !== 'undefined' && user.views) ? user.views : 0;
-            const _isPremium = (typeof isPremium !== 'undefined') ? isPremium : false;
-            const _maxStatsDays = (typeof maxStatsDays !== 'undefined') ? maxStatsDays : 30;
-
-            const linkTotalClicks = _links.reduce((a, l) => a + (l.clicks || 0), 0);
-            const avgPerLink = _links.length ? Math.round(linkTotalClicks / _links.length) : 0;
-            const sortedLinks = [..._links].sort((a, b) => (b.clicks || 0) - (a.clicks || 0));
-            const topLink = sortedLinks[0];
-        %>
-
-        <!--  OVERVIEW  -->
-        <section id="panel-overview" class="tab-panel space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <div class="flex items-center gap-4">
-                        <div class="p-3 bg-violet-500/10 rounded-xl">
-                            <svg class="w-6 h-6 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    <!--  HEADER GRADIENT  -->
+                    <div
+                        class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+                        <div
+                            class="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none">
                         </div>
-                        <div>
-                            <p class="text-3xl font-bold text-white tracking-tight"><%= _totalViews %></p>
-                            <p class="text-sm text-slate-400">Vues profil</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <div class="flex items-center gap-4">
-                        <div class="p-3 bg-emerald-500/10 rounded-xl">
-                            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-3xl font-bold text-white tracking-tight"><%= _totalClicks %></p>
-                            <p class="text-sm text-slate-400">Clics totaux</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <div class="flex items-center gap-4">
-                        <div class="p-3 bg-amber-500/10 rounded-xl">
-                            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-3xl font-bold text-white tracking-tight"><%= avgPerLink %></p>
-                            <p class="text-sm text-slate-400">Clics moy. / lien</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 overflow-hidden">
-                    <div class="flex items-center gap-4">
-                        <div class="p-3 bg-rose-500/10 rounded-xl">
-                            <svg class="w-6 h-6 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-lg font-bold text-white truncate max-w-[140px]"><%= topLink ? (topLink.text || topLink.name || 'Sans titre') : '' %></p>
-                            <p class="text-sm text-slate-400">Top lien<% if (topLink) { %> (<%= topLink.clicks %> clics)<% } %></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-slate-950/30 rounded-3xl border border-slate-800 p-6 md:p-8">
-                <h2 class="font-bold text-white text-xl mb-6">Vues des 30 derniers jours</h2>
-                <div class="h-80 w-full relative">
-                    <div class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
-                        <div class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin"></div>
-                    </div>
-                    <canvas id="overviewChart"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <!--  TRENDS  -->
-        <section id="panel-trends" class="tab-panel hidden space-y-6">
-            <% if (!_isPremium) { %>
-            <div class="flex flex-col items-center justify-center p-12 bg-slate-900/50 rounded-3xl border border-slate-800 text-center relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-b from-violet-500/5 to-transparent pointer-events-none"></div>
-                <div class="p-4 bg-slate-800/50 rounded-2xl mb-6 relative z-10 blur-xl opacity-50 absolute scale-150"></div>
-                <div class="p-4 bg-violet-500/10 rounded-2xl mb-6 relative z-10">
-                    <svg class="w-8 h-8 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                </div>
-                <h3 class="text-xl font-bold text-white mb-2 relative z-10">Statistiques avancées</h3>
-                <p class="text-slate-400 max-w-md mb-8 relative z-10">Passez en Premium pour accéder aux tendances journaliéres détaillées et exporter vos données en CSV et images.</p>
-                <a href="/pricing" class="px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-xl shadow-lg shadow-violet-900/20 hover:shadow-violet-900/40 hover:-translate-y-0.5 transition-all relative z-10">
-                    Débloquer avec Premium
-                </a>
-            </div>
-            <% } else { %>
-            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                    <h2 class="font-bold text-white text-xl">Tendances journaliéres</h2>
-                    <select id="fRange" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm focus:ring-1 focus:ring-violet-500 transition-all outline-none">
-                        <option value="7">7 jours</option>
-                        <option value="14">14 jours</option>
-                        <option value="30" selected>30 jours</option>
-                        <option value="60" <%= _maxStatsDays < 60 ? 'disabled' : '' %>>60 jours</option>
-                        <option value="90" <%= _maxStatsDays < 90 ? 'disabled' : '' %>>90 jours</option>
-                        <option value="180" <%= _maxStatsDays < 180 ? 'disabled' : '' %>>180 jours</option>
-                        <option value="365" <%= _maxStatsDays < 365 ? 'disabled' : '' %>>1 an</option>
-                    </select>
-                </div>
-                <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                    <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800/50">
-                        <h3 class="text-sm font-medium text-slate-300 mb-6 flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-violet-500"></span>
-                            Vues (journalier)
-                        </h3>
-                        <div class="h-64 relative">
-                            <div class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
-                                <div class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin"></div>
+                        <div class="relative z-10">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h1 class="text-3xl md:text-4xl font-bold text-white">Statistiques</h1>
+                                <% if (typeof isPremium !=='undefined' && isPremium) { %>
+                                    <span
+                                        class="px-2.5 py-1 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-[10px] font-bold rounded-lg uppercase tracking-wider">Premium</span>
+                                    <% } %>
                             </div>
-                            <canvas id="trendsViewsChart"></canvas>
+                            <p class="text-slate-400 text-lg">
+                                <% if (typeof plinkk !=='undefined' && plinkk) { %>
+                                    Vue détaillée pour <span class="text-violet-300 font-medium">
+                                        <%= plinkk.name %>
+                                    </span>
+                                    <% } else { %>
+                                        Vue d'ensemble de votre activité Plinkk
+                                        <% } %>
+                            </p>
+                        </div>
+                        <div class="relative z-10 flex items-center gap-3">
+                            <button id="btnExportGraph"
+                                class="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white font-medium rounded-xl hover:bg-slate-700 border border-slate-700 transition-colors"
+                                title="Exporter le graphique">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                                    <circle cx="9" cy="9" r="2" />
+                                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                                </svg>
+                                Graph
+                            </button>
+                            <button id="btnExportCSV"
+                                class="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white font-medium rounded-xl hover:bg-slate-700 border border-slate-700 transition-colors"
+                                title="Exporter les données (CSV)">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                                CSV
+                            </button>
+                            <%- include('partials/changePlinkkDropdown.ejs') %>
                         </div>
                     </div>
-                    <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800/50">
-                        <h3 class="text-sm font-medium text-slate-300 mb-6 flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            Clics (journalier)
-                        </h3>
-                        <div class="h-64 relative">
-                            <div class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
-                                <div class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin"></div>
+
+                    <!--  TAB BAR  -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-2">
+                        <nav class="flex gap-1" role="tablist" aria-label="Sections stats">
+                            <button
+                                class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                                data-tab="overview" aria-selected="true">Aperçu</button>
+                            <button
+                                class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                                data-tab="trends" aria-selected="false">Tendances</button>
+                            <button
+                                class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                                data-tab="links" aria-selected="false">Liens</button>
+                            <button
+                                class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                                data-tab="categories" aria-selected="false">Catégories</button>
+                            <button
+                                class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                                data-tab="redirects" aria-selected="false">Redirections</button>
+                            <button
+                                class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                                data-tab="funnel" aria-selected="false">Tunnel</button>
+                        </nav>
+                    </div>
+
+                    <% const _links=(typeof links !=='undefined' && Array.isArray(links)) ? links : []; const
+                        _totalViews=(typeof totalViews !=='undefined' ) ? totalViews : 0; const _totalClicks=(typeof
+                        totalClicks !=='undefined' ) ? totalClicks : 0; const _viewsDaily=(typeof viewsDaily30d
+                        !=='undefined' ) ? viewsDaily30d : []; const _redirects=(typeof redirects !=='undefined' &&
+                        Array.isArray(redirects)) ? redirects : []; const _totalRedirectClicks=(typeof
+                        totalRedirectClicks !=='undefined' ) ? totalRedirectClicks : 0; const _redirectReturns=(typeof
+                        redirectReturns !=='undefined' ) ? redirectReturns : []; const _userViews=(typeof user
+                        !=='undefined' && user.views) ? user.views : 0; const _isPremium=(typeof isPremium
+                        !=='undefined' ) ? isPremium : false; const _maxStatsDays=(typeof maxStatsDays !=='undefined' )
+                        ? maxStatsDays : 30; const linkTotalClicks=_links.reduce((a, l)=> a + (l.clicks || 0), 0);
+                        const avgPerLink = _links.length ? Math.round(linkTotalClicks / _links.length) : 0;
+                        const sortedLinks = [..._links].sort((a, b) => (b.clicks || 0) - (a.clicks || 0));
+                        const topLink = sortedLinks[0];
+                        %>
+
+                        <!--  OVERVIEW  -->
+                        <section id="panel-overview" class="tab-panel space-y-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                    <div class="flex items-center gap-4">
+                                        <div class="p-3 bg-violet-500/10 rounded-xl">
+                                            <svg class="w-6 h-6 text-violet-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-3xl font-bold text-white tracking-tight">
+                                                <%= _totalViews %>
+                                            </p>
+                                            <p class="text-sm text-slate-400">Vues profil</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                    <div class="flex items-center gap-4">
+                                        <div class="p-3 bg-emerald-500/10 rounded-xl">
+                                            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-3xl font-bold text-white tracking-tight">
+                                                <%= _totalClicks %>
+                                            </p>
+                                            <p class="text-sm text-slate-400">Clics totaux</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                    <div class="flex items-center gap-4">
+                                        <div class="p-3 bg-amber-500/10 rounded-xl">
+                                            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-3xl font-bold text-white tracking-tight">
+                                                <%= avgPerLink %>
+                                            </p>
+                                            <p class="text-sm text-slate-400">Clics moy. / lien</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 overflow-hidden">
+                                    <div class="flex items-center gap-4">
+                                        <div class="p-3 bg-rose-500/10 rounded-xl">
+                                            <svg class="w-6 h-6 text-rose-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-lg font-bold text-white truncate max-w-[140px]">
+                                                <%= topLink ? (topLink.text || topLink.name || 'Sans titre' ) : '' %>
+                                            </p>
+                                            <p class="text-sm text-slate-400">Top lien<% if (topLink) { %> (<%=
+                                                        topLink.clicks %> clics)<% } %>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <canvas id="trendsClicksChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <% } %>
-        </section>
 
-        <!--  LINKS  -->
-        <section id="panel-links" class="tab-panel hidden space-y-6">
-            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="lg:col-span-2">
-                        <label class="text-sm text-slate-400 mb-2 block font-medium">Recherche</label>
-                        <input id="fSearch" type="text" class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-600 focus:border-violet-500 transition-all outline-none" placeholder="Nom, URL, ID..." />
-                    </div>
-                    <div>
-                        <label class="text-sm text-slate-400 mb-2 block font-medium">Min. clics</label>
-                        <input id="fMin" type="number" min="0" value="0" class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white focus:border-violet-500 transition-all outline-none" />
-                    </div>
-                    <div>
-                        <label class="text-sm text-slate-400 mb-2 block font-medium">Top N</label>
-                        <input id="fTop" type="number" min="1" value="10" class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white focus:border-violet-500 transition-all outline-none" />
-                    </div>
-                </div>
-            </div>
+                            <div class="bg-slate-950/30 rounded-3xl border border-slate-800 p-6 md:p-8">
+                                <h2 class="font-bold text-white text-xl mb-6">Vues des 30 derniers jours</h2>
+                                <div class="h-80 w-full relative">
+                                    <div
+                                        class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
+                                        <div
+                                            class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin">
+                                        </div>
+                                    </div>
+                                    <canvas id="overviewChart"></canvas>
+                                </div>
+                            </div>
+                        </section>
 
-            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
-                <h2 class="font-bold text-white text-xl mb-6">Top liens par clics</h2>
-                <div class="h-80 relative">
-                    <div class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
-                        <div class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin"></div>
-                    </div>
-                    <canvas id="linksChart"></canvas>
-                </div>
-            </div>
-
-            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl overflow-hidden">
-                <div class="p-6 border-b border-slate-800 bg-slate-900/50">
-                    <h2 class="font-bold text-white text-xl">Détail des liens</h2>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500 bg-slate-950/50">
-                                <th class="p-4 font-bold">ID</th>
-                                <th class="p-4 font-bold">Label</th>
-                                <th class="p-4 font-bold">URL</th>
-                                <th class="p-4 font-bold text-right">Clics</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tblBody" class="divide-y divide-slate-800/50"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!--  CATEGORIES  -->
-        <section id="panel-categories" class="tab-panel hidden space-y-6">
-            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
-                <h2 class="font-bold text-white text-xl mb-8">Répartition par catégorie</h2>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    <div class="h-80 flex items-center justify-center relative">
-                        <div class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
-                            <div class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin"></div>
-                        </div>
-                        <canvas id="categoriesDoughnut"></canvas>
-                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span class="text-slate-500 text-xs uppercase tracking-widest">Ratio Clics</span>
-                        </div>
-                    </div>
-                    <div id="categoriesLegend" class="grid grid-cols-1 gap-3"></div>
-                </div>
-            </div>
-        </section>
-
-        <!--  REDIRECTIONS  -->
-        <section id="panel-redirects" class="tab-panel hidden space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <div class="flex items-center gap-4">
-                        <div class="p-3 bg-violet-500/10 rounded-xl">
-                            <svg class="w-6 h-6 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-3xl font-bold text-white tracking-tight"><%= _totalRedirectClicks %></p>
-                            <p class="text-sm text-slate-400">Clics totaux</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <div class="flex items-center gap-4">
-                        <div class="p-3 bg-amber-500/10 rounded-xl">
-                            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-3xl font-bold text-white tracking-tight"><%= _redirects.length %></p>
-                            <p class="text-sm text-slate-400">Redirections</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <div class="flex items-center gap-4">
-                        <div class="p-3 bg-emerald-500/10 rounded-xl">
-                            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-3xl font-bold text-white tracking-tight"><%= _redirects.filter(r => r.isActive).length %></p>
-                            <p class="text-sm text-slate-400">Actives</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
-                <h2 class="font-bold text-white text-xl mb-6">Clics redirections (30j)</h2>
-                <div class="h-80 relative">
-                    <div class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
-                        <div class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin"></div>
-                    </div>
-                    <canvas id="redirectsChart"></canvas>
-                </div>
-            </div>
-
-            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl overflow-hidden">
-                <div class="p-6 border-b border-slate-800 bg-slate-900/50">
-                    <h2 class="font-bold text-white text-xl">Vos Redirections</h2>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                             <tr class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500 bg-slate-950/50">
-                                <th class="p-4 font-bold">Slug</th>
-                                <th class="p-4 font-bold">URL cible</th>
-                                <th class="p-4 font-bold text-center">Statut</th>
-                                <th class="p-4 font-bold text-right">Clics</th>
-                                <th class="p-4 font-bold text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-800/50">
-                            <% if (_redirects.length > 0) { %>
-                                <% _redirects.forEach(r => { %>
-                                    <tr class="hover:bg-slate-800/30 transition-colors">
-                                        <td class="p-4">
-                                            <div class="flex items-center gap-2">
-                                                <code class="px-2 py-1 bg-violet-500/10 text-violet-400 rounded-lg text-sm font-mono">/r/<%= r.slug %></code>
-                                                <button onclick="navigator.clipboard.writeText('<%= process.env.FRONTEND_URL || 'https://plinkk.fr' %>/r/<%= r.slug %>')" class="p-1 text-slate-500 hover:text-white transition-colors">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                                                </button>
+                        <!--  TRENDS  -->
+                        <section id="panel-trends" class="tab-panel hidden space-y-6">
+                            <% if (!_isPremium) { %>
+                                <div
+                                    class="flex flex-col items-center justify-center p-12 bg-slate-900/50 rounded-3xl border border-slate-800 text-center relative overflow-hidden">
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-b from-violet-500/5 to-transparent pointer-events-none">
+                                    </div>
+                                    <div
+                                        class="p-4 bg-slate-800/50 rounded-2xl mb-6 relative z-10 blur-xl opacity-50 absolute scale-150">
+                                    </div>
+                                    <div class="p-4 bg-violet-500/10 rounded-2xl mb-6 relative z-10">
+                                        <svg class="w-8 h-8 text-violet-400" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-white mb-2 relative z-10">Statistiques avancées
+                                    </h3>
+                                    <p class="text-slate-400 max-w-md mb-8 relative z-10">Passez en Premium pour accéder
+                                        aux tendances journaliéres détaillées et exporter vos données en CSV et images.
+                                    </p>
+                                    <a href="/pricing"
+                                        class="px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-xl shadow-lg shadow-violet-900/20 hover:shadow-violet-900/40 hover:-translate-y-0.5 transition-all relative z-10">
+                                        Débloquer avec Premium
+                                    </a>
+                                </div>
+                                <% } else { %>
+                                    <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+                                        <div
+                                            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                                            <h2 class="font-bold text-white text-xl">Tendances journaliéres</h2>
+                                            <div class="flex items-center gap-2 w-full sm:w-auto">
+                                                <select id="fRange"
+                                                    class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm focus:ring-1 focus:ring-violet-500 transition-all outline-none">
+                                                    <option value="7">7 jours</option>
+                                                    <option value="14">14 jours</option>
+                                                    <option value="30" selected>30 jours</option>
+                                                    <option value="60" <%=_maxStatsDays < 60 ? 'disabled' : '' %>>60
+                                                        jours</option>
+                                                    <option value="90" <%=_maxStatsDays < 90 ? 'disabled' : '' %>>90
+                                                        jours</option>
+                                                    <option value="180" <%=_maxStatsDays < 180 ? 'disabled' : '' %>>180
+                                                        jours</option>
+                                                    <option value="365" <%=_maxStatsDays < 365 ? 'disabled' : '' %>>1 an
+                                                    </option>
+                                                </select>
+                                                <select id="fGranularity"
+                                                    class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm focus:ring-1 focus:ring-violet-500 transition-all outline-none">
+                                                    <option value="day" selected>Jour</option>
+                                                    <option value="hour">Heure</option>
+                                                    <option value="minute">Minute</option>
+                                                </select>
                                             </div>
-                                        </td>
-                                        <td class="p-4 text-slate-300 max-w-[250px] truncate" title="<%= r.targetUrl %>"><%= r.targetUrl %></td>
-                                        <td class="p-4 text-center">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase <%= r.isActive ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20' %> tracking-tighter">
-                                                <%= r.isActive ? 'Actif' : 'Inactif' %>
-                                            </span>
-                                        </td>
-                                        <td class="p-4 text-right font-bold text-white"><%= r.clicks %></td>
-                                        <td class="p-4 text-right">
-                                            <a href="/redirects/<%= r.id %>/stats" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors inline-flex items-center justify-center group" title="Voir les statistiques détaillées">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-violet-400 transition-colors"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                <% }) %>
-                            <% } else { %>
-                                <tr>
-                                    <td colspan="5" class="p-12 text-center text-slate-600 font-medium italic">Aucune redirection créée pour le moment.</td>
-                                </tr>
-                            <% } %>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+                                        </div>
+                                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                                            <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800/50">
+                                                <h3
+                                                    class="text-sm font-medium text-slate-300 mb-6 flex items-center gap-2">
+                                                    <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+                                                    Vues (journalier)
+                                                </h3>
+                                                <div class="h-64 relative">
+                                                    <div
+                                                        class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
+                                                        <div
+                                                            class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin">
+                                                        </div>
+                                                    </div>
+                                                    <canvas id="trendsViewsChart"></canvas>
+                                                </div>
+                                            </div>
+                                            <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-800/50">
+                                                <h3
+                                                    class="text-sm font-medium text-slate-300 mb-6 flex items-center gap-2">
+                                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                                    Clics (journalier)
+                                                </h3>
+                                                <div class="h-64 relative">
+                                                    <div
+                                                        class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
+                                                        <div
+                                                            class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin">
+                                                        </div>
+                                                    </div>
+                                                    <canvas id="trendsClicksChart"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <% } %>
+                        </section>
 
-        <!-- ─── TUNNEL D'ACQUISITION ─── -->
-        <section id="panel-funnel" class="tab-panel hidden space-y-6">
-
-            <!-- Funnel Visual -->
-            <div class="glass-card rounded-2xl border border-white/5 p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="font-bold text-lg text-white flex items-center gap-2">
-                        <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                        </svg>
-                        Tunnel d'acquisition
-                    </h2>
-                    <span class="text-xs text-slate-500">Données globales</span>
-                </div>
-
-                <!-- Funnel Steps -->
-                <div class="space-y-0" id="funnelSteps">
-                    <!-- Step 1: Vues -->
-                    <div class="relative">
-                        <div class="flex items-center gap-4 py-4">
-                            <div class="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-sm font-medium text-white">Visiteurs</span>
-                                    <span class="text-lg font-bold text-white" id="funnel-views"><%= typeof totalViews !== 'undefined' ? totalViews : 0 %></span>
-                                </div>
-                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
-                                    <div class="bg-gradient-to-r from-violet-500 to-violet-400 h-full rounded-full transition-all duration-700" style="width: 100%" id="funnel-bar-views"></div>
-                                </div>
-                            </div>
-                            <span class="text-sm font-semibold text-violet-400 w-14 text-right">100%</span>
-                        </div>
-                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-4"></div>
-                    </div>
-
-                    <!-- Step 2: Clics -->
-                    <div class="relative">
-                        <div class="flex items-center gap-4 py-4">
-                            <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
-                                </svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-sm font-medium text-white">Clics sur les liens</span>
-                                    <span class="text-lg font-bold text-white" id="funnel-clicks"><%= typeof totalClicks !== 'undefined' ? totalClicks : 0 %></span>
-                                </div>
-                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
-                                    <div class="bg-gradient-to-r from-indigo-500 to-indigo-400 h-full rounded-full transition-all duration-700" style="width: 0%" id="funnel-bar-clicks"></div>
+                        <!--  LINKS  -->
+                        <section id="panel-links" class="tab-panel hidden space-y-6">
+                            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <div class="lg:col-span-2">
+                                        <label class="text-sm text-slate-400 mb-2 block font-medium">Recherche</label>
+                                        <input id="fSearch" type="text"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-600 focus:border-violet-500 transition-all outline-none"
+                                            placeholder="Nom, URL, ID..." />
+                                    </div>
+                                    <div>
+                                        <label class="text-sm text-slate-400 mb-2 block font-medium">Min. clics</label>
+                                        <input id="fMin" type="number" min="0" value="0"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white focus:border-violet-500 transition-all outline-none" />
+                                    </div>
+                                    <div>
+                                        <label class="text-sm text-slate-400 mb-2 block font-medium">Top N</label>
+                                        <input id="fTop" type="number" min="1" value="10"
+                                            class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white focus:border-violet-500 transition-all outline-none" />
+                                    </div>
                                 </div>
                             </div>
-                            <span class="text-sm font-semibold text-indigo-400 w-14 text-right" id="funnel-pct-clicks">0%</span>
-                        </div>
-                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-4"></div>
-                    </div>
 
-                    <!-- Step 3: Redirections -->
-                    <div class="relative">
-                        <div class="flex items-center gap-4 py-4">
-                            <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                                </svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-sm font-medium text-white">Redirections</span>
-                                    <span class="text-lg font-bold text-white" id="funnel-redirects"><%= typeof totalRedirectClicks !== 'undefined' ? totalRedirectClicks : 0 %></span>
-                                </div>
-                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
-                                    <div class="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-700" style="width: 0%" id="funnel-bar-redirects"></div>
+                            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+                                <h2 class="font-bold text-white text-xl mb-6">Top liens par clics</h2>
+                                <div class="h-80 relative">
+                                    <div
+                                        class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
+                                        <div
+                                            class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin">
+                                        </div>
+                                    </div>
+                                    <canvas id="linksChart"></canvas>
                                 </div>
                             </div>
-                            <span class="text-sm font-semibold text-emerald-400 w-14 text-right" id="funnel-pct-redirects">0%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Conversion Metrics -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
-                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Taux de clic (CTR)</p>
-                    <p class="text-2xl font-bold text-white" id="funnel-ctr">0%</p>
-                    <p class="text-xs text-slate-500 mt-1">Visiteurs → Clics</p>
-                </div>
-                <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
-                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Engagement global</p>
-                    <p class="text-2xl font-bold text-white" id="funnel-engagement">0%</p>
-                    <p class="text-xs text-slate-500 mt-1">Visiteurs ayant interagi</p>
-                </div>
-                <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
-                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Clics / Visiteur</p>
-                    <p class="text-2xl font-bold text-white" id="funnel-avg">0</p>
-                    <p class="text-xs text-slate-500 mt-1">Moyenne de clics</p>
-                </div>
-            </div>
+                            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl overflow-hidden">
+                                <div class="p-6 border-b border-slate-800 bg-slate-900/50">
+                                    <h2 class="font-bold text-white text-xl">Détail des liens</h2>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr
+                                                class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500 bg-slate-950/50">
+                                                <th class="p-4 font-bold">ID</th>
+                                                <th class="p-4 font-bold">Label</th>
+                                                <th class="p-4 font-bold">URL</th>
+                                                <th class="p-4 font-bold text-right">Clics</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tblBody" class="divide-y divide-slate-800/50"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
 
-            <!-- Tips -->
-            <div class="glass-card rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5">
-                <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-semibold text-violet-300 mb-1">Conseils d'optimisation</h3>
-                        <ul class="text-xs text-slate-400 space-y-1.5">
-                            <li class="flex items-start gap-1.5">
-                                <span class="text-violet-400 mt-0.5">•</span>
-                                <span>Un bon CTR se situe entre <strong class="text-slate-300">10% et 30%</strong>. En dessous, pensez à améliorer vos titres de liens.</span>
-                            </li>
-                            <li class="flex items-start gap-1.5">
-                                <span class="text-violet-400 mt-0.5">•</span>
-                                <span>Placez vos liens les plus importants <strong class="text-slate-300">en haut de votre page</strong> pour maximiser les clics.</span>
-                            </li>
-                            <li class="flex items-start gap-1.5">
-                                <span class="text-violet-400 mt-0.5">•</span>
-                                <span>Utilisez des <strong class="text-slate-300">icônes et descriptions</strong> pour rendre vos liens plus attractifs.</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+                        <!--  CATEGORIES  -->
+                        <section id="panel-categories" class="tab-panel hidden space-y-6">
+                            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+                                <h2 class="font-bold text-white text-xl mb-8">Répartition par catégorie</h2>
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                                    <div class="h-80 flex items-center justify-center relative">
+                                        <div
+                                            class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
+                                            <div
+                                                class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin">
+                                            </div>
+                                        </div>
+                                        <canvas id="categoriesDoughnut"></canvas>
+                                        <div
+                                            class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                            <span class="text-slate-500 text-xs uppercase tracking-widest">Ratio
+                                                Clics</span>
+                                        </div>
+                                    </div>
+                                    <div id="categoriesLegend" class="grid grid-cols-1 gap-3"></div>
+                                </div>
+                            </div>
+                        </section>
 
-        </section>
+                        <!--  REDIRECTIONS  -->
+                        <section id="panel-redirects" class="tab-panel hidden space-y-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                    <div class="flex items-center gap-4">
+                                        <div class="p-3 bg-violet-500/10 rounded-xl">
+                                            <svg class="w-6 h-6 text-violet-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-3xl font-bold text-white tracking-tight">
+                                                <%= _totalRedirectClicks %>
+                                            </p>
+                                            <p class="text-sm text-slate-400">Clics totaux</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                    <div class="flex items-center gap-4">
+                                        <div class="p-3 bg-amber-500/10 rounded-xl">
+                                            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-3xl font-bold text-white tracking-tight">
+                                                <%= _redirects.length %>
+                                            </p>
+                                            <p class="text-sm text-slate-400">Redirections</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                    <div class="flex items-center gap-4">
+                                        <div class="p-3 bg-emerald-500/10 rounded-xl">
+                                            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-3xl font-bold text-white tracking-tight">
+                                                <%= _redirects.filter(r=> r.isActive).length %>
+                                            </p>
+                                            <p class="text-sm text-slate-400">Actives</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-    </main>
-</div>
+                            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+                                <h2 class="font-bold text-white text-xl mb-6">Clics redirections (30j)</h2>
+                                <div class="h-80 relative">
+                                    <div
+                                        class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
+                                        <div
+                                            class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin">
+                                        </div>
+                                    </div>
+                                    <canvas id="redirectsChart"></canvas>
+                                </div>
+                            </div>
 
-<!--  DATA  -->
-<script type="application/json" id="stats-data"><%- JSON.stringify({
+                            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl overflow-hidden">
+                                <div class="p-6 border-b border-slate-800 bg-slate-900/50">
+                                    <h2 class="font-bold text-white text-xl">Vos Redirections</h2>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr
+                                                class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500 bg-slate-950/50">
+                                                <th class="p-4 font-bold">Slug</th>
+                                                <th class="p-4 font-bold">URL cible</th>
+                                                <th class="p-4 font-bold text-center">Statut</th>
+                                                <th class="p-4 font-bold text-right">Clics</th>
+                                                <th class="p-4 font-bold text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-800/50">
+                                            <% if (_redirects.length> 0) { %>
+                                                <% _redirects.forEach(r=> { %>
+                                                    <tr class="hover:bg-slate-800/30 transition-colors">
+                                                        <td class="p-4">
+                                                            <div class="flex items-center gap-2">
+                                                                <code
+                                                                    class="px-2 py-1 bg-violet-500/10 text-violet-400 rounded-lg text-sm font-mono">/r/<%= r.slug %></code>
+                                                                <button
+                                                                    onclick="navigator.clipboard.writeText('<%= process.env.FRONTEND_URL || 'https://plinkk.fr' %>/r/<%= r.slug %>')"
+                                                                    class="p-1 text-slate-500 hover:text-white transition-colors">
+                                                                    <svg class="w-3.5 h-3.5" fill="none"
+                                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
+                                                                            d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3">
+                                                                        </path>
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                        <td class="p-4 text-slate-300 max-w-[250px] truncate"
+                                                            title="<%= r.targetUrl %>">
+                                                            <%= r.targetUrl %>
+                                                        </td>
+                                                        <td class="p-4 text-center">
+                                                            <span
+                                                                class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase <%= r.isActive ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20' %> tracking-tighter">
+                                                                <%= r.isActive ? 'Actif' : 'Inactif' %>
+                                                            </span>
+                                                        </td>
+                                                        <td class="p-4 text-right font-bold text-white">
+                                                            <%= r.clicks %>
+                                                        </td>
+                                                        <td class="p-4 text-right">
+                                                            <a href="/redirects/<%= r.id %>/stats"
+                                                                class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors inline-flex items-center justify-center group"
+                                                                title="Voir les statistiques détaillées">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                                    height="16" viewBox="0 0 24 24" fill="none"
+                                                                    stroke="currentColor" stroke-width="2"
+                                                                    stroke-linecap="round" stroke-linejoin="round"
+                                                                    class="group-hover:stroke-violet-400 transition-colors">
+                                                                    <line x1="18" x2="18" y1="20" y2="10" />
+                                                                    <line x1="12" x2="12" y1="20" y2="4" />
+                                                                    <line x1="6" x2="6" y1="20" y2="14" />
+                                                                </svg>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                    <% }) %>
+                                                        <% } else { %>
+                                                            <tr>
+                                                                <td colspan="5"
+                                                                    class="p-12 text-center text-slate-600 font-medium italic">
+                                                                    Aucune redirection créée pour le moment.</td>
+                                                            </tr>
+                                                            <% } %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- ─── TUNNEL D'ACQUISITION ─── -->
+                        <section id="panel-funnel" class="tab-panel hidden space-y-6">
+
+                            <!-- Funnel Visual -->
+                            <div class="glass-card rounded-2xl border border-white/5 p-6">
+                                <div class="flex items-center justify-between mb-6">
+                                    <h2 class="font-bold text-lg text-white flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                        </svg>
+                                        Tunnel d'acquisition
+                                    </h2>
+                                    <span class="text-xs text-slate-500">Données globales</span>
+                                </div>
+
+                                <!-- Funnel Steps -->
+                                <div class="space-y-0" id="funnelSteps">
+                                    <!-- Step 1: Vues -->
+                                    <div class="relative">
+                                        <div class="flex items-center gap-4 py-4">
+                                            <div
+                                                class="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor" stroke-width="1.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center justify-between mb-1.5">
+                                                    <span class="text-sm font-medium text-white">Visiteurs</span>
+                                                    <span class="text-lg font-bold text-white" id="funnel-views">
+                                                        <%= typeof totalViews !=='undefined' ? totalViews : 0 %>
+                                                    </span>
+                                                </div>
+                                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                                                    <div class="bg-gradient-to-r from-violet-500 to-violet-400 h-full rounded-full transition-all duration-700"
+                                                        style="width: 100%" id="funnel-bar-views"></div>
+                                                </div>
+                                            </div>
+                                            <span
+                                                class="text-sm font-semibold text-violet-400 w-14 text-right">100%</span>
+                                        </div>
+                                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-4"></div>
+                                    </div>
+
+                                    <!-- Step 2: Clics -->
+                                    <div class="relative">
+                                        <div class="flex items-center gap-4 py-4">
+                                            <div
+                                                class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor" stroke-width="1.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center justify-between mb-1.5">
+                                                    <span class="text-sm font-medium text-white">Clics sur les
+                                                        liens</span>
+                                                    <span class="text-lg font-bold text-white" id="funnel-clicks">
+                                                        <%= typeof totalClicks !=='undefined' ? totalClicks : 0 %>
+                                                    </span>
+                                                </div>
+                                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                                                    <div class="bg-gradient-to-r from-indigo-500 to-indigo-400 h-full rounded-full transition-all duration-700"
+                                                        style="width: 0%" id="funnel-bar-clicks"></div>
+                                                </div>
+                                            </div>
+                                            <span class="text-sm font-semibold text-indigo-400 w-14 text-right"
+                                                id="funnel-pct-clicks">0%</span>
+                                        </div>
+                                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-4"></div>
+                                    </div>
+
+                                    <!-- Step 3: Redirections -->
+                                    <div class="relative">
+                                        <div class="flex items-center gap-4 py-4">
+                                            <div
+                                                class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor" stroke-width="1.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center justify-between mb-1.5">
+                                                    <span class="text-sm font-medium text-white">Redirections</span>
+                                                    <span class="text-lg font-bold text-white" id="funnel-redirects">
+                                                        <%= typeof totalRedirectClicks !=='undefined' ?
+                                                            totalRedirectClicks : 0 %>
+                                                    </span>
+                                                </div>
+                                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                                                    <div class="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-700"
+                                                        style="width: 0%" id="funnel-bar-redirects"></div>
+                                                </div>
+                                            </div>
+                                            <span class="text-sm font-semibold text-emerald-400 w-14 text-right"
+                                                id="funnel-pct-redirects">0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Conversion Metrics -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Taux de clic (CTR)
+                                    </p>
+                                    <p class="text-2xl font-bold text-white" id="funnel-ctr">0%</p>
+                                    <p class="text-xs text-slate-500 mt-1">Visiteurs → Clics</p>
+                                </div>
+                                <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Engagement global
+                                    </p>
+                                    <p class="text-2xl font-bold text-white" id="funnel-engagement">0%</p>
+                                    <p class="text-xs text-slate-500 mt-1">Visiteurs ayant interagi</p>
+                                </div>
+                                <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Clics / Visiteur</p>
+                                    <p class="text-2xl font-bold text-white" id="funnel-avg">0</p>
+                                    <p class="text-xs text-slate-500 mt-1">Moyenne de clics</p>
+                                </div>
+                            </div>
+
+                            <!-- Tips -->
+                            <div class="glass-card rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5">
+                                <div class="flex items-start gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-sm font-semibold text-violet-300 mb-1">Conseils d'optimisation
+                                        </h3>
+                                        <ul class="text-xs text-slate-400 space-y-1.5">
+                                            <li class="flex items-start gap-1.5">
+                                                <span class="text-violet-400 mt-0.5">•</span>
+                                                <span>Un bon CTR se situe entre <strong class="text-slate-300">10% et
+                                                        30%</strong>. En dessous, pensez à améliorer vos titres de
+                                                    liens.</span>
+                                            </li>
+                                            <li class="flex items-start gap-1.5">
+                                                <span class="text-violet-400 mt-0.5">•</span>
+                                                <span>Placez vos liens les plus importants <strong
+                                                        class="text-slate-300">en haut de votre page</strong> pour
+                                                    maximiser les clics.</span>
+                                            </li>
+                                            <li class="flex items-start gap-1.5">
+                                                <span class="text-violet-400 mt-0.5">•</span>
+                                                <span>Utilisez des <strong class="text-slate-300">icônes et
+                                                        descriptions</strong> pour rendre vos liens plus
+                                                    attractifs.</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </section>
+
+                </main>
+        </div>
+
+        <!--  DATA  -->
+        <script type="application/json" id="stats-data"><%- JSON.stringify({
     views: _userViews,
     totalViews: _totalViews,
     totalClicks: _totalClicks,
@@ -505,357 +709,359 @@
     maxStatsDays: _maxStatsDays
 }) %></script>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-(function() {
-    /*  helpers  */
-    const qs = (s) => document.querySelector(s);
-    const qsa = (s) => Array.from(document.querySelectorAll(s));
-    const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n || 0);
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            (function () {
+                /*  helpers  */
+                const qs = (s) => document.querySelector(s);
+                const qsa = (s) => Array.from(document.querySelectorAll(s));
+                const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n || 0);
 
-    const CHART_TOOLTIP = {
-        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-        titleColor: '#fff',
-        bodyColor: '#94a3b8',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        borderWidth: 1,
-        padding: 12,
-        cornerRadius: 8,
-        displayColors: true
-    };
+                const CHART_TOOLTIP = {
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    titleColor: '#fff',
+                    bodyColor: '#94a3b8',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    padding: 12,
+                    cornerRadius: 8,
+                    displayColors: true
+                };
 
-    const CHART_SCALES = {
-        x: {
-            grid: { display: false },
-            border: { display: false },
-            ticks: { color: '#64748b', maxTicksLimit: 10, font: { size: 10 } }
-        },
-        y: {
-            beginAtZero: true,
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            border: { display: false },
-            ticks: { color: '#64748b', precision: 0, font: { size: 10 } }
-        }
-    };
-    
-    // Global Access to charts for export
-    const charts = {};
-    let activeTab = 'overview';
-    
-    // Trends Data Cache
-    let trendsData = { views: [], clicks: [] };
+                const CHART_SCALES = {
+                    x: {
+                        grid: { display: false },
+                        border: { display: false },
+                        ticks: { color: '#64748b', maxTicksLimit: 10, font: { size: 10 } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        border: { display: false },
+                        ticks: { color: '#64748b', precision: 0, font: { size: 10 } }
+                    }
+                };
 
-    function makeLineChart(ctxEx, labels, data, label, color) {
-        if (!ctxEx) return null;
-        const chart = new Chart(ctxEx, {
-            type: 'line',
-            data: {
-                labels,
-                datasets: [{
-                    label,
-                    data,
-                    borderColor: color,
-                    backgroundColor: color.replace('rgb', 'rgba').replace(')', ', 0.1)'),
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 5,
-                    pointHoverRadius: 8,
-                    pointBackgroundColor: color,
-                    pointBorderColor: '#0f172a',
-                    pointBorderWidth: 2,
-                    borderWidth: 2.5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: { duration: 400 },
-                plugins: { 
-                    legend: { display: false }, 
-                    tooltip: CHART_TOOLTIP 
-                },
-                scales: CHART_SCALES
-            }
-        });
-        
-        requestAnimationFrame(() => {
-            chart.update('none');
-        });
-        
-        return chart;
-    }
+                // Global Access to charts for export
+                const charts = {};
+                let activeTab = 'overview';
 
-    function fmtDateLabel(d) {
-        return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-    }
+                // Trends Data Cache
+                let trendsData = { views: [], clicks: [] };
 
-    /*  data  */
-    let D = {};
-    try { D = JSON.parse(qs('#stats-data')?.textContent || '{}'); } catch (e) {}
-    const links = D.links || [];
-    const viewsDaily = D.viewsDaily30d || [];
-    const redirectReturns = D.redirectReturns || [];
-    const isPremiumUser = D.isPremium || false;
-    const maxStatsDays = D.maxStatsDays || 30;
+                function makeLineChart(ctxEx, labels, data, label, color) {
+                    if (!ctxEx) return null;
+                    const chart = new Chart(ctxEx, {
+                        type: 'line',
+                        data: {
+                            labels,
+                            datasets: [{
+                                label,
+                                data,
+                                borderColor: color,
+                                backgroundColor: color.replace('rgb', 'rgba').replace(')', ', 0.1)'),
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 5,
+                                pointHoverRadius: 8,
+                                pointBackgroundColor: color,
+                                pointBorderColor: '#0f172a',
+                                pointBorderWidth: 2,
+                                borderWidth: 2.5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: { duration: 400 },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: CHART_TOOLTIP
+                            },
+                            scales: CHART_SCALES
+                        }
+                    });
 
-    /*  category classifier  */
-    function classifyUrl(url, label) {
-        const hay = ((url || '') + ' ' + (label || '')).toLowerCase();
-        const tests = [
-            { name: 'Réseaux sociaux', re: /(twitter|x\.com|instagram|facebook|tiktok|linkedin|threads|bluesky)/ },
-            { name: 'Vidéo', re: /(youtube|youtu\.be|vimeo|twitch|dailymotion)/ },
-            { name: 'Musique', re: /(spotify|soundcloud|music\.apple|deezer|bandcamp|artist\.link)/ },
-            { name: 'Code', re: /(github|gitlab|bitbucket|npmjs|pypi|docker\.com|stackoverflow)/ },
-            { name: 'Articles', re: /(medium\.com|dev\.to|hashnode|substack|notion\.site|ghost)/ },
-            { name: 'E-commerce', re: /(gumroad|shopify|buymeacoffee|patreon|ko-fi|paypal|stripe)/ }
-        ];
-        for (const t of tests) { if (t.re.test(hay)) return t.name; }
-        return 'Autre';
-    }
+                    requestAnimationFrame(() => {
+                        chart.update('none');
+                    });
 
-    const CAT_COLORS = ['#8b5cf6','#10b981','#f59e0b','#ef4444','#3b82f6','#ec4899','#6366f1'];
+                    return chart;
+                }
 
-    /*  CSV  */
-    function makeCSV(rows) {
-        const esc = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
-        const lines = [['Link ID','Label','URL','Clicks'].map(esc).join(',')];
-        rows.forEach(r => lines.push([r.id, r.label, r.url, r.clicks].map(esc).join(',')));
-        return lines.join('\r\n');
-    }
-    function downloadBlob(content, filename) {
-        const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = filename;
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 2000);
-    }
+                function fmtDateLabel(d) {
+                    return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                }
 
-    /*  TABS  */
-    const tabButtons = qsa('.tab-btn');
-    const allPanels = qsa('.tab-panel');
-    function setTab(key) {
-        activeTab = key;
-        const panels = { 
-            overview: qs('#panel-overview'), 
-            trends: qs('#panel-trends'), 
-            links: qs('#panel-links'), 
-            categories: qs('#panel-categories'), 
-            redirects: qs('#panel-redirects'),
-            funnel: qs('#panel-funnel'),
-        };
-        tabButtons.forEach(btn => {
-            const t = btn.getAttribute('data-tab');
-            const sel = t === key;
-            btn.setAttribute('aria-selected', sel ? 'true' : 'false');
-            
-            if (sel) {
-                btn.className = "tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25";
-            } else {
-                btn.className = "tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50";
-            }
-        });
-        allPanels.forEach(p => p.classList.add('hidden'));
-        if (panels[key]) panels[key].classList.remove('hidden');
-    }
-    setTab('overview');
-    tabButtons.forEach(btn => btn.addEventListener('click', () => { const k = btn.getAttribute('data-tab'); if (k) setTab(k); }));
+                /*  data  */
+                let D = {};
+                try { D = JSON.parse(qs('#stats-data')?.textContent || '{}'); } catch (e) { }
+                const links = D.links || [];
+                const viewsDaily = D.viewsDaily30d || [];
+                const redirectReturns = D.redirectReturns || [];
+                const isPremiumUser = D.isPremium || false;
+                const maxStatsDays = D.maxStatsDays || 30;
 
-    /*  OVERVIEW CHART  */
-    async function initOverview() {
-        const overCtx = qs('#overviewChart')?.getContext('2d');
-        const panel = qs('#panel-overview');
-        const loader = panel.querySelector('.chart-loader');
-        
-        if (overCtx && viewsDaily.length) {
-            if (loader) loader.classList.remove('hidden');
-            // Petit délai pour simuler le chargement et s'assurer que le DOM est prét
-            await new Promise(r => setTimeout(r, 300));
-            
-            if (charts.overview) charts.overview.destroy();
-            charts.overview = makeLineChart(
-                overCtx,
-                viewsDaily.map(d => fmtDateLabel(d.date)),
-                viewsDaily.map(d => d.count),
-                'Vues', 'rgb(139, 92, 246)'
-            );
-            
-            if (loader) loader.classList.add('hidden');
-        }
-    }
-    initOverview();
+                /*  category classifier  */
+                function classifyUrl(url, label) {
+                    const hay = ((url || '') + ' ' + (label || '')).toLowerCase();
+                    const tests = [
+                        { name: 'Réseaux sociaux', re: /(twitter|x\.com|instagram|facebook|tiktok|linkedin|threads|bluesky)/ },
+                        { name: 'Vidéo', re: /(youtube|youtu\.be|vimeo|twitch|dailymotion)/ },
+                        { name: 'Musique', re: /(spotify|soundcloud|music\.apple|deezer|bandcamp|artist\.link)/ },
+                        { name: 'Code', re: /(github|gitlab|bitbucket|npmjs|pypi|docker\.com|stackoverflow)/ },
+                        { name: 'Articles', re: /(medium\.com|dev\.to|hashnode|substack|notion\.site|ghost)/ },
+                        { name: 'E-commerce', re: /(gumroad|shopify|buymeacoffee|patreon|ko-fi|paypal|stripe)/ }
+                    ];
+                    for (const t of tests) { if (t.re.test(hay)) return t.name; }
+                    return 'Autre';
+                }
 
-    /*  TRENDS CHARTS  */
-    // removed local instances tracking
+                const CAT_COLORS = ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899', '#6366f1'];
 
-    async function fetchSeries(endpoint, days) {
-        const now = new Date();
-        const to = now.toISOString().slice(0, 10);
-        const from = new Date(now.getTime() - (days - 1) * 86400000).toISOString().slice(0, 10);
-        const res = await fetch(`/stats/${endpoint}?from=${from}&to=${to}`, { credentials: 'same-origin' });
-        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-        return res.json();
-    }
+                /*  CSV  */
+                function makeCSV(rows) {
+                    const esc = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+                    const lines = [['Link ID', 'Label', 'URL', 'Clicks'].map(esc).join(',')];
+                    rows.forEach(r => lines.push([r.id, r.label, r.url, r.clicks].map(esc).join(',')));
+                    return lines.join('\r\n');
+                }
+                function downloadBlob(content, filename) {
+                    const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a'); a.href = url; a.download = filename;
+                    document.body.appendChild(a); a.click(); a.remove();
+                    setTimeout(() => URL.revokeObjectURL(url), 2000);
+                }
 
-    async function refreshTrends() {
-        if (!isPremiumUser) return;
-        const rangeEl = qs('#fRange');
-        const panel = qs('#panel-trends');
-        const chartLoaders = qsa('.chart-loader', panel);
-        let days = Number(rangeEl?.value || '30') || 30;
-        if (days > maxStatsDays) {
-            days = maxStatsDays;
-            if (rangeEl) rangeEl.value = String(maxStatsDays <= 30 ? 30 : maxStatsDays);
-        }
-        chartLoaders.forEach(l => l.classList.remove('hidden'));
-        try {
-            const vData = await fetchSeries('views', days);
-            trendsData.views = Array.isArray(vData) ? vData : (vData.series || []); // Handle both formats just in case
-            const vArray = trendsData.views;
+                /*  TABS  */
+                const tabButtons = qsa('.tab-btn');
+                const allPanels = qsa('.tab-panel');
+                function setTab(key) {
+                    activeTab = key;
+                    const panels = {
+                        overview: qs('#panel-overview'),
+                        trends: qs('#panel-trends'),
+                        links: qs('#panel-links'),
+                        categories: qs('#panel-categories'),
+                        redirects: qs('#panel-redirects'),
+                        funnel: qs('#panel-funnel'),
+                    };
+                    tabButtons.forEach(btn => {
+                        const t = btn.getAttribute('data-tab');
+                        const sel = t === key;
+                        btn.setAttribute('aria-selected', sel ? 'true' : 'false');
 
-            const vCtx = qs('#trendsViewsChart')?.getContext('2d');
-            if (charts.trendsViews) charts.trendsViews.destroy();
-            if (vCtx) {
-                charts.trendsViews = makeLineChart(
-                    vCtx,
-                    vArray.map(d => fmtDateLabel(d.date)),
-                    vArray.map(d => d.count),
-                    'Vues', 'rgb(139, 92, 246)'
-                );
-            }
-        } catch (e) {
-            console.error(e);
-        }
-        try {
-            const cData = await fetchSeries('clicks', days);
-            trendsData.clicks = Array.isArray(cData) ? cData : (cData.series || []); // Handle both formats just in case
-            const cArray = trendsData.clicks;
-            
-            const cCtx = qs('#trendsClicksChart')?.getContext('2d');
-            if (charts.trendsClicks) charts.trendsClicks.destroy();
-            if (cCtx) {
-                charts.trendsClicks = makeLineChart(
-                    cCtx,
-                    cArray.map(d => fmtDateLabel(d.date)),
-                    cArray.map(d => d.count),
-                    'Clics', 'rgb(16, 185, 129)'
-                );
-            }
-        } catch (e) {
-            console.error(e);
-        }
-        chartLoaders.forEach(l => l.classList.add('hidden'));
-    }
+                        if (sel) {
+                            btn.className = "tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25";
+                        } else {
+                            btn.className = "tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50";
+                        }
+                    });
+                    allPanels.forEach(p => p.classList.add('hidden'));
+                    if (panels[key]) panels[key].classList.remove('hidden');
+                }
+                setTab('overview');
+                tabButtons.forEach(btn => btn.addEventListener('click', () => { const k = btn.getAttribute('data-tab'); if (k) setTab(k); }));
 
-    qs('#fRange')?.addEventListener('change', refreshTrends);
-    refreshTrends();
+                /*  OVERVIEW CHART  */
+                async function initOverview() {
+                    const overCtx = qs('#overviewChart')?.getContext('2d');
+                    const panel = qs('#panel-overview');
+                    const loader = panel.querySelector('.chart-loader');
 
-    /*  LINKS CHART + TABLE  */
-    let linksChartInstance = null;
+                    if (overCtx && viewsDaily.length) {
+                        if (loader) loader.classList.remove('hidden');
+                        // Petit délai pour simuler le chargement et s'assurer que le DOM est prét
+                        await new Promise(r => setTimeout(r, 300));
 
-    function applyLinksFilter() {
-        const q = (qs('#fSearch')?.value || '').toLowerCase().trim();
-        const min = Number(qs('#fMin')?.value || '0') || 0;
-        const top = Number(qs('#fTop')?.value || '10') || 10;
+                        if (charts.overview) charts.overview.destroy();
+                        charts.overview = makeLineChart(
+                            overCtx,
+                            viewsDaily.map(d => fmtDateLabel(d.date)),
+                            viewsDaily.map(d => d.count),
+                            'Vues', 'rgb(139, 92, 246)'
+                        );
 
-        let rows = links.map(l => ({
-            id: l.id,
-            label: l.text || l.name || l.url || 'Sans titre',
-            url: l.url || '',
-            clicks: Number(l.clicks || 0)
-        }));
-        if (q) rows = rows.filter(x => x.label.toLowerCase().includes(q) || String(x.id).includes(q) || x.url.toLowerCase().includes(q));
-        if (min > 0) rows = rows.filter(x => x.clicks >= min);
-        rows.sort((a, b) => b.clicks - a.clicks);
+                        if (loader) loader.classList.add('hidden');
+                    }
+                }
+                initOverview();
 
-        const tbody = qs('#tblBody');
-        if (tbody) {
-            tbody.innerHTML = '';
-            rows.forEach(r => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-800/30 transition-colors group';
-                tr.innerHTML = `
+                /*  TRENDS CHARTS  */
+                // removed local instances tracking
+
+                async function fetchSeries(endpoint, days) {
+                    const now = new Date();
+                    const to = now.toISOString().slice(0, 10);
+                    const from = new Date(now.getTime() - (days - 1) * 86400000).toISOString().slice(0, 10);
+                    const gran = qs('#fGranularity')?.value || 'day';
+                    const res = await fetch(`/stats/${endpoint}?from=${from}&to=${to}&granularity=${gran}`, { credentials: 'same-origin' });
+                    if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+                    return res.json();
+                }
+
+                async function refreshTrends() {
+                    if (!isPremiumUser) return;
+                    const rangeEl = qs('#fRange');
+                    const panel = qs('#panel-trends');
+                    const chartLoaders = qsa('.chart-loader', panel);
+                    let days = Number(rangeEl?.value || '30') || 30;
+                    if (days > maxStatsDays) {
+                        days = maxStatsDays;
+                        if (rangeEl) rangeEl.value = String(maxStatsDays <= 30 ? 30 : maxStatsDays);
+                    }
+                    chartLoaders.forEach(l => l.classList.remove('hidden'));
+                    try {
+                        const vData = await fetchSeries('views', days);
+                        trendsData.views = Array.isArray(vData) ? vData : (vData.series || []); // Handle both formats just in case
+                        const vArray = trendsData.views;
+
+                        const vCtx = qs('#trendsViewsChart')?.getContext('2d');
+                        if (charts.trendsViews) charts.trendsViews.destroy();
+                        if (vCtx) {
+                            charts.trendsViews = makeLineChart(
+                                vCtx,
+                                vArray.map(d => fmtDateLabel(d.date)),
+                                vArray.map(d => d.count),
+                                'Vues', 'rgb(139, 92, 246)'
+                            );
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                    try {
+                        const cData = await fetchSeries('clicks', days);
+                        trendsData.clicks = Array.isArray(cData) ? cData : (cData.series || []); // Handle both formats just in case
+                        const cArray = trendsData.clicks;
+
+                        const cCtx = qs('#trendsClicksChart')?.getContext('2d');
+                        if (charts.trendsClicks) charts.trendsClicks.destroy();
+                        if (cCtx) {
+                            charts.trendsClicks = makeLineChart(
+                                cCtx,
+                                cArray.map(d => fmtDateLabel(d.date)),
+                                cArray.map(d => d.count),
+                                'Clics', 'rgb(16, 185, 129)'
+                            );
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                    chartLoaders.forEach(l => l.classList.add('hidden'));
+                }
+
+                qs('#fRange')?.addEventListener('change', refreshTrends);
+                qs('#fGranularity')?.addEventListener('change', refreshTrends);
+                refreshTrends();
+
+                /*  LINKS CHART + TABLE  */
+                let linksChartInstance = null;
+
+                function applyLinksFilter() {
+                    const q = (qs('#fSearch')?.value || '').toLowerCase().trim();
+                    const min = Number(qs('#fMin')?.value || '0') || 0;
+                    const top = Number(qs('#fTop')?.value || '10') || 10;
+
+                    let rows = links.map(l => ({
+                        id: l.id,
+                        label: l.text || l.name || l.url || 'Sans titre',
+                        url: l.url || '',
+                        clicks: Number(l.clicks || 0)
+                    }));
+                    if (q) rows = rows.filter(x => x.label.toLowerCase().includes(q) || String(x.id).includes(q) || x.url.toLowerCase().includes(q));
+                    if (min > 0) rows = rows.filter(x => x.clicks >= min);
+                    rows.sort((a, b) => b.clicks - a.clicks);
+
+                    const tbody = qs('#tblBody');
+                    if (tbody) {
+                        tbody.innerHTML = '';
+                        rows.forEach(r => {
+                            const tr = document.createElement('tr');
+                            tr.className = 'hover:bg-slate-800/30 transition-colors group';
+                            tr.innerHTML = `
                     <td class="p-4 text-[10px] text-slate-500 font-mono group-hover:text-slate-300 transition-colors">${r.id}</td>
                     <td class="p-4 text-sm text-slate-200 font-semibold">${r.label}</td>
                     <td class="p-4 text-xs text-violet-400 truncate max-w-[250px]"><a class="hover:underline" href="${r.url}" target="_blank" rel="noopener">${r.url}</a></td>
                     <td class="p-4 text-right font-bold text-white text-base">${fmt(r.clicks)}</td>`;
-                tbody.appendChild(tr);
-            });
-        }
+                            tbody.appendChild(tr);
+                        });
+                    }
 
-        const barRows = rows.slice(0, top);
-        const ctx = qs('#linksChart');
-        if (charts.links) charts.links.destroy();
-        if (ctx && barRows.length) {
-            charts.links = new Chart(ctx.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: barRows.map(r => r.label.length > 20 ? r.label.slice(0, 20) + '...' : r.label),
-                    datasets: [{
-                        label: 'Clics',
-                        data: barRows.map(r => r.clicks),
-                        backgroundColor: 'rgba(139, 92, 246, 0.4)',
-                        borderColor: '#8b5cf6',
-                        borderWidth: 1.5,
-                        borderRadius: 8,
-                        hoverBackgroundColor: 'rgba(139, 92, 246, 0.6)'
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: CHART_TOOLTIP },
-                    scales: {
-                        x: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, border:{display:false}, ticks: { color: '#64748b', font: {size: 10} } },
-                        y: { grid: { display: false }, border:{display:false}, ticks: { color: '#cbd5e1', font: { size: 11, weight: '500' } } }
+                    const barRows = rows.slice(0, top);
+                    const ctx = qs('#linksChart');
+                    if (charts.links) charts.links.destroy();
+                    if (ctx && barRows.length) {
+                        charts.links = new Chart(ctx.getContext('2d'), {
+                            type: 'bar',
+                            data: {
+                                labels: barRows.map(r => r.label.length > 20 ? r.label.slice(0, 20) + '...' : r.label),
+                                datasets: [{
+                                    label: 'Clics',
+                                    data: barRows.map(r => r.clicks),
+                                    backgroundColor: 'rgba(139, 92, 246, 0.4)',
+                                    borderColor: '#8b5cf6',
+                                    borderWidth: 1.5,
+                                    borderRadius: 8,
+                                    hoverBackgroundColor: 'rgba(139, 92, 246, 0.6)'
+                                }]
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false }, tooltip: CHART_TOOLTIP },
+                                scales: {
+                                    x: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, border: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } },
+                                    y: { grid: { display: false }, border: { display: false }, ticks: { color: '#cbd5e1', font: { size: 11, weight: '500' } } }
+                                }
+                            }
+                        });
                     }
                 }
-            });
-        }
-    }
-    ['#fSearch', '#fMin', '#fTop'].forEach(sel => qs(sel)?.addEventListener('input', applyLinksFilter));
-    applyLinksFilter();
+                ['#fSearch', '#fMin', '#fTop'].forEach(sel => qs(sel)?.addEventListener('input', applyLinksFilter));
+                applyLinksFilter();
 
-    /*  CATEGORIES CHART  */
-    const catMap = new Map();
-    links.forEach(l => {
-        const cat = classifyUrl(l.url, l.text || l.name);
-        catMap.set(cat, (catMap.get(cat) || 0) + (Number(l.clicks) || 0));
-    });
-    const catEntries = Array.from(catMap.entries()).sort((a, b) => b[1] - a[1]);
+                /*  CATEGORIES CHART  */
+                const catMap = new Map();
+                links.forEach(l => {
+                    const cat = classifyUrl(l.url, l.text || l.name);
+                    catMap.set(cat, (catMap.get(cat) || 0) + (Number(l.clicks) || 0));
+                });
+                const catEntries = Array.from(catMap.entries()).sort((a, b) => b[1] - a[1]);
 
-    const catCanvas = qs('#categoriesDoughnut');
-    if (catCanvas && catEntries.length) {
-        if(charts.categories) charts.categories.destroy();
-        charts.categories = new Chart(catCanvas.getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: catEntries.map(e => e[0]),
-                datasets: [{
-                    data: catEntries.map(e => e[1]),
-                    backgroundColor: CAT_COLORS.slice(0, catEntries.length),
-                    borderColor: '#0f172a',
-                    borderWidth: 4,
-                    hoverOffset: 15
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '75%',
-                plugins: {
-                    legend: { display: false },
-                    tooltip: CHART_TOOLTIP
-                }
-            }
-        });
-        const legendEl = qs('#categoriesLegend');
-        if (legendEl) {
-            legendEl.innerHTML = '';
-            const total = catEntries.reduce((a, x) => a + x[1], 0);
-            catEntries.forEach((e, i) => {
-                const pct = total ? Math.round(e[1] / total * 100) : 0;
-                legendEl.innerHTML += `
+                const catCanvas = qs('#categoriesDoughnut');
+                if (catCanvas && catEntries.length) {
+                    if (charts.categories) charts.categories.destroy();
+                    charts.categories = new Chart(catCanvas.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: catEntries.map(e => e[0]),
+                            datasets: [{
+                                data: catEntries.map(e => e[1]),
+                                backgroundColor: CAT_COLORS.slice(0, catEntries.length),
+                                borderColor: '#0f172a',
+                                borderWidth: 4,
+                                hoverOffset: 15
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '75%',
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: CHART_TOOLTIP
+                            }
+                        }
+                    });
+                    const legendEl = qs('#categoriesLegend');
+                    if (legendEl) {
+                        legendEl.innerHTML = '';
+                        const total = catEntries.reduce((a, x) => a + x[1], 0);
+                        catEntries.forEach((e, i) => {
+                            const pct = total ? Math.round(e[1] / total * 100) : 0;
+                            legendEl.innerHTML += `
                     <div class="flex items-center justify-between bg-slate-900/40 rounded-2xl p-4 border border-slate-800/50 hover:bg-slate-800/60 transition-all duration-300">
                         <div class="flex items-center gap-4">
                             <div class="w-2.5 h-2.5 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.5)]" style="background:${CAT_COLORS[i] || '#8b5cf6'}"></div>
@@ -866,143 +1072,143 @@
                             <span class="text-[10px] font-bold text-slate-500 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800">${pct}%</span>
                         </div>
                     </div>`;
-            });
-        }
-    }
+                        });
+                    }
+                }
 
-    /*  REDIRECTS CHART  */
-    const redCtx = qs('#redirectsChart')?.getContext('2d');
-    if (redCtx && redirectReturns.length) {
-        if(charts.redirects) charts.redirects.destroy();
-        charts.redirects = makeLineChart(
-            redCtx,
-            redirectReturns.map(d => fmtDateLabel(d.date)),
-            redirectReturns.map(d => d.count),
-            'Clics Redirections', 'rgb(139, 92, 246)'
-        );
-    }
-    
-    /* EXPORT LOGIC */
-    function exportGraph() {
-        if (activeTab === 'trends' && !isPremiumUser) return alert('Fonctionnalité réservée aux membres Premium');
-        const chartMap = {
-            'overview': charts.overview,
-            'trends': charts.trendsViews, // Default to views
-            'links': charts.links,
-            'categories': charts.categories,
-            'redirects': charts.redirects
-        };
-        const chart = chartMap[activeTab];
-        
-        if (chart) {
-            const link = document.createElement('a');
-            link.download = `plinkk-stats-${activeTab}-${new Date().toISOString().slice(0,10)}.png`;
-            link.href = chart.toBase64Image();
-            link.click();
-        } else {
-            alert('Aucun graphique disponible pour cet onglet ou chargement en cours.');
-        }
-    }
+                /*  REDIRECTS CHART  */
+                const redCtx = qs('#redirectsChart')?.getContext('2d');
+                if (redCtx && redirectReturns.length) {
+                    if (charts.redirects) charts.redirects.destroy();
+                    charts.redirects = makeLineChart(
+                        redCtx,
+                        redirectReturns.map(d => fmtDateLabel(d.date)),
+                        redirectReturns.map(d => d.count),
+                        'Clics Redirections', 'rgb(139, 92, 246)'
+                    );
+                }
 
-    function exportCSV() {
-        if (activeTab === 'trends' && !isPremiumUser) return alert('Fonctionnalité réservée aux membres Premium');
-        const today = new Date().toISOString().slice(0, 10);
-        let content = '';
-        let filename = `plinkk-data-${activeTab}-${today}.csv`;
-        const esc = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+                /* EXPORT LOGIC */
+                function exportGraph() {
+                    if (activeTab === 'trends' && !isPremiumUser) return alert('Fonctionnalité réservée aux membres Premium');
+                    const chartMap = {
+                        'overview': charts.overview,
+                        'trends': charts.trendsViews, // Default to views
+                        'links': charts.links,
+                        'categories': charts.categories,
+                        'redirects': charts.redirects
+                    };
+                    const chart = chartMap[activeTab];
 
-        if (activeTab === 'overview') {
-            const rows = [['Date', 'Vues']];
-            viewsDaily.forEach(d => rows.push([d.date, d.count]));
-            content = rows.map(r => r.map(esc).join(',')).join('\n');
-        }
-        else if (activeTab === 'trends') {
-            const rows = [['Date', 'Vues', 'Clics']];
-            // Merge maps
-            const vMap = new Map();
-            (trendsData.views || []).forEach(d => vMap.set(d.date.split('T')[0], d.count));
-            const cMap = new Map();
-            (trendsData.clicks || []).forEach(d => cMap.set(d.date.split('T')[0], d.count));
-            
-            const dates = new Set([...vMap.keys(), ...cMap.keys()]);
-            Array.from(dates).sort().forEach(date => {
-                rows.push([date, vMap.get(date) || 0, cMap.get(date) || 0]);
-            });
-            content = rows.map(r => r.map(esc).join(',')).join('\n');
-        }
-        else if (activeTab === 'links') {
-            const rows = [['ID', 'Label', 'URL', 'Clicks']];
-            links.forEach(l => rows.push([l.id, l.text || l.name || 'Sans titre', l.url || '', l.clicks || 0]));
-            content = rows.map(r => r.map(esc).join(',')).join('\n');
-        }
-        else if (activeTab === 'categories') {
-            const rows = [['Categorie', 'Clics']];
-            catEntries.forEach(e => rows.push([e[0], e[1]]));
-            content = rows.map(r => r.map(esc).join(',')).join('\n');
-        }
-        else if (activeTab === 'redirects') {
-            const rows = [['Slug', 'Target URL', 'Active', 'Clicks']];
-            (D.redirects || []).forEach(r => rows.push([r.slug, r.targetUrl, r.isActive ? 'Oui' : 'Non', r.clicks]));
-            rows.push([]);
-            rows.push(['Date', 'Clics (30j)']);
-            redirectReturns.forEach(d => rows.push([d.date, d.count]));
-            content = rows.map(r => r.map(esc).join(',')).join('\n');
-        }
+                    if (chart) {
+                        const link = document.createElement('a');
+                        link.download = `plinkk-stats-${activeTab}-${new Date().toISOString().slice(0, 10)}.png`;
+                        link.href = chart.toBase64Image();
+                        link.click();
+                    } else {
+                        alert('Aucun graphique disponible pour cet onglet ou chargement en cours.');
+                    }
+                }
 
-        else if (activeTab === 'funnel') {
-            const rows = [['Métrique', 'Valeur']];
-            rows.push(['Visiteurs', document.getElementById('funnel-views')?.textContent || '0']);
-            rows.push(['Clics', document.getElementById('funnel-clicks')?.textContent || '0']);
-            rows.push(['Redirections', document.getElementById('funnel-redirects')?.textContent || '0']);
-            rows.push(['CTR', document.getElementById('funnel-ctr')?.textContent || '0%']);
-            rows.push(['Engagement', document.getElementById('funnel-engagement')?.textContent || '0%']);
-            rows.push(['Clics/Visiteur', document.getElementById('funnel-avg')?.textContent || '0']);
-            downloadBlob(rows.map(r => r.join(',')).join('\n'), filename);
-        }
+                function exportCSV() {
+                    if (activeTab === 'trends' && !isPremiumUser) return alert('Fonctionnalité réservée aux membres Premium');
+                    const today = new Date().toISOString().slice(0, 10);
+                    let content = '';
+                    let filename = `plinkk-data-${activeTab}-${today}.csv`;
+                    const esc = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
 
-        if (content) {
-            downloadBlob(content, filename);
-        } else {
-             alert('Aucune donnée é exporter.');
-        }
-    }
+                    if (activeTab === 'overview') {
+                        const rows = [['Date', 'Vues']];
+                        viewsDaily.forEach(d => rows.push([d.date, d.count]));
+                        content = rows.map(r => r.map(esc).join(',')).join('\n');
+                    }
+                    else if (activeTab === 'trends') {
+                        const rows = [['Date', 'Vues', 'Clics']];
+                        // Merge maps
+                        const vMap = new Map();
+                        (trendsData.views || []).forEach(d => vMap.set(d.date.split('T')[0], d.count));
+                        const cMap = new Map();
+                        (trendsData.clicks || []).forEach(d => cMap.set(d.date.split('T')[0], d.count));
 
-    qs('#btnExportGraph')?.addEventListener('click', exportGraph);
-    qs('#btnExportCSV')?.addEventListener('click', exportCSV);
+                        const dates = new Set([...vMap.keys(), ...cMap.keys()]);
+                        Array.from(dates).sort().forEach(date => {
+                            rows.push([date, vMap.get(date) || 0, cMap.get(date) || 0]);
+                        });
+                        content = rows.map(r => r.map(esc).join(',')).join('\n');
+                    }
+                    else if (activeTab === 'links') {
+                        const rows = [['ID', 'Label', 'URL', 'Clicks']];
+                        links.forEach(l => rows.push([l.id, l.text || l.name || 'Sans titre', l.url || '', l.clicks || 0]));
+                        content = rows.map(r => r.map(esc).join(',')).join('\n');
+                    }
+                    else if (activeTab === 'categories') {
+                        const rows = [['Categorie', 'Clics']];
+                        catEntries.forEach(e => rows.push([e[0], e[1]]));
+                        content = rows.map(r => r.map(esc).join(',')).join('\n');
+                    }
+                    else if (activeTab === 'redirects') {
+                        const rows = [['Slug', 'Target URL', 'Active', 'Clicks']];
+                        (D.redirects || []).forEach(r => rows.push([r.slug, r.targetUrl, r.isActive ? 'Oui' : 'Non', r.clicks]));
+                        rows.push([]);
+                        rows.push(['Date', 'Clics (30j)']);
+                        redirectReturns.forEach(d => rows.push([d.date, d.count]));
+                        content = rows.map(r => r.map(esc).join(',')).join('\n');
+                    }
 
-})();
+                    else if (activeTab === 'funnel') {
+                        const rows = [['Métrique', 'Valeur']];
+                        rows.push(['Visiteurs', document.getElementById('funnel-views')?.textContent || '0']);
+                        rows.push(['Clics', document.getElementById('funnel-clicks')?.textContent || '0']);
+                        rows.push(['Redirections', document.getElementById('funnel-redirects')?.textContent || '0']);
+                        rows.push(['CTR', document.getElementById('funnel-ctr')?.textContent || '0%']);
+                        rows.push(['Engagement', document.getElementById('funnel-engagement')?.textContent || '0%']);
+                        rows.push(['Clics/Visiteur', document.getElementById('funnel-avg')?.textContent || '0']);
+                        downloadBlob(rows.map(r => r.join(',')).join('\n'), filename);
+                    }
 
-    // Funnel calculations
-    (function initFunnel() {
-        const views = parseInt(document.getElementById('funnel-views')?.textContent?.replace(/\s/g, '') || '0') || 0;
-        const clicks = parseInt(document.getElementById('funnel-clicks')?.textContent?.replace(/\s/g, '') || '0') || 0;
-        const redirects = parseInt(document.getElementById('funnel-redirects')?.textContent?.replace(/\s/g, '') || '0') || 0;
-        
-        // Update bars
-        if (views > 0) {
-            const clicksPct = Math.round((clicks / views) * 100);
-            const redirectsPct = Math.round((redirects / views) * 100);
-            
-            const barClicks = document.getElementById('funnel-bar-clicks');
-            const barRedirects = document.getElementById('funnel-bar-redirects');
-            const pctClicks = document.getElementById('funnel-pct-clicks');
-            const pctRedirects = document.getElementById('funnel-pct-redirects');
-            
-            if (barClicks) barClicks.style.width = Math.max(clicksPct, 2) + '%';
-            if (barRedirects) barRedirects.style.width = Math.max(redirectsPct, 2) + '%';
-            if (pctClicks) pctClicks.textContent = clicksPct + '%';
-            if (pctRedirects) pctRedirects.textContent = redirectsPct + '%';
-            
-            // Conversion metrics
-            const ctr = document.getElementById('funnel-ctr');
-            const engagement = document.getElementById('funnel-engagement');
-            const avg = document.getElementById('funnel-avg');
-            
-            if (ctr) ctr.textContent = clicksPct + '%';
-            if (engagement) engagement.textContent = Math.round(((clicks + redirects) / views) * 100) + '%';
-            if (avg) avg.textContent = (clicks / views).toFixed(2);
-        }
-    })();
-</script>
+                    if (content) {
+                        downloadBlob(content, filename);
+                    } else {
+                        alert('Aucune donnée é exporter.');
+                    }
+                }
 
-<%- include('partials/footer.ejs') %>
+                qs('#btnExportGraph')?.addEventListener('click', exportGraph);
+                qs('#btnExportCSV')?.addEventListener('click', exportCSV);
+
+            })();
+
+            // Funnel calculations
+            (function initFunnel() {
+                const views = parseInt(document.getElementById('funnel-views')?.textContent?.replace(/\s/g, '') || '0') || 0;
+                const clicks = parseInt(document.getElementById('funnel-clicks')?.textContent?.replace(/\s/g, '') || '0') || 0;
+                const redirects = parseInt(document.getElementById('funnel-redirects')?.textContent?.replace(/\s/g, '') || '0') || 0;
+
+                // Update bars
+                if (views > 0) {
+                    const clicksPct = Math.round((clicks / views) * 100);
+                    const redirectsPct = Math.round((redirects / views) * 100);
+
+                    const barClicks = document.getElementById('funnel-bar-clicks');
+                    const barRedirects = document.getElementById('funnel-bar-redirects');
+                    const pctClicks = document.getElementById('funnel-pct-clicks');
+                    const pctRedirects = document.getElementById('funnel-pct-redirects');
+
+                    if (barClicks) barClicks.style.width = Math.max(clicksPct, 2) + '%';
+                    if (barRedirects) barRedirects.style.width = Math.max(redirectsPct, 2) + '%';
+                    if (pctClicks) pctClicks.textContent = clicksPct + '%';
+                    if (pctRedirects) pctRedirects.textContent = redirectsPct + '%';
+
+                    // Conversion metrics
+                    const ctr = document.getElementById('funnel-ctr');
+                    const engagement = document.getElementById('funnel-engagement');
+                    const avg = document.getElementById('funnel-avg');
+
+                    if (ctr) ctr.textContent = clicksPct + '%';
+                    if (engagement) engagement.textContent = Math.round(((clicks + redirects) / views) * 100) + '%';
+                    if (avg) avg.textContent = (clicks / views).toFixed(2);
+                }
+            })();
+        </script>
+
+        <%- include('partials/footer.ejs') %>

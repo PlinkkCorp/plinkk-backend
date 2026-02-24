@@ -638,10 +638,22 @@ export class LinkManager {
 
         try {
             if (window.__PLINKK_SHOW_SAVING__) window.__PLINKK_SHOW_SAVING__();
+
+            const result = await saveFn(links);
+
+            if (result && result.links) {
+                if (window.__PLINKK_GET_CONFIG__) {
+                    const cfg = window.__PLINKK_GET_CONFIG__();
+                    if (cfg) cfg.links = result.links;
+                }
+                if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.links = result.links;
+                if (window.__PLINKK_SYNC_SIDEBAR__) window.__PLINKK_SYNC_SIDEBAR__();
+            }
+
             if (window.__PLINKK_SHOW_SAVED__) window.__PLINKK_SHOW_SAVED__();
 
             // Live Sync
-            const fullConfig = { ...window.__PLINKK_GET_CONFIG__(), links: links };
+            const fullConfig = { ...window.__PLINKK_GET_CONFIG__(), links: result?.links || links };
             syncConfigToIframe(fullConfig);
         } catch (e) {
             if (window.__PLINKK_SHOW_ERROR__) window.__PLINKK_SHOW_ERROR__();
