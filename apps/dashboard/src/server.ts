@@ -48,8 +48,7 @@ async function bootstrap() {
     if (
       url.startsWith("/api") ||
       url.startsWith("/public") ||
-      url.startsWith("/umami_script.js") ||
-      url.startsWith("/dashboard")
+      url.startsWith("/umami_script.js")
     ) {
       return reply.callNotFound();
     }
@@ -70,7 +69,7 @@ async function bootstrap() {
 
     const sessionData = request.session.get("data");
     let currentUserId: string | undefined;
-    
+
     if (typeof sessionData === "object") {
       currentUserId = sessionData?.id;
     } else {
@@ -82,9 +81,9 @@ async function bootstrap() {
 
     const currentUser = currentUserId
       ? await prisma.user.findUnique({
-          where: { id: currentUserId },
-          include: { role: true },
-        })
+        where: { id: currentUserId },
+        include: { role: true },
+      })
       : null;
 
     if (!currentUser) {
@@ -142,9 +141,9 @@ async function bootstrap() {
 
     if (error instanceof AppError) {
       if (request.raw.url?.startsWith("/api")) {
-        return reply.code(error.statusCode).send({ 
+        return reply.code(error.statusCode).send({
           error: error.code.toLowerCase(),
-          message: error.message 
+          message: error.message
         });
       }
       const sessionData = request.session.get("data");

@@ -17,6 +17,7 @@ import { adminUsersRoutes } from "./users";
 import { adminBansRoutes } from "./bans";
 import { adminPlinkksRoutes } from "./plinkks";
 import { adminMaintenanceRoutes } from "./maintenance";
+import { dashboardAdminBugReportsRoutes } from "./bugReports";
 
 export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.register(dashboardAdminReportsRoutes, { prefix: "/reports" });
@@ -31,16 +32,23 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.register(adminBansRoutes, { prefix: "/bans" });
   fastify.register(adminPlinkksRoutes, { prefix: "/plinkks" });
   fastify.register(adminMaintenanceRoutes, { prefix: "/maintenance" });
+  fastify.register(dashboardAdminBugReportsRoutes, { prefix: "/bug-reports" });
 
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_ADMIN", { mode: "redirect" });
     if (!ok) return;
 
-    const [usersRaw, totals, pendingThemes, roles] = await Promise.all([
+    const [usersRaw, totals, pendingThemes, roles, pendingBugReports] = await Promise.all([
       findAllUsersForAdmin(),
       getUserStats(),
       getPendingThemesPreview(10),
       prisma.role.findMany({ orderBy: [{ priority: "desc" }, { name: "asc" }] }),
+      prisma.bugReport.findMany({
+        where: { status: "PENDING" },
+        orderBy: { createdAt: "desc" },
+        include: { user: true },
+        take: 5
+      }),
     ]);
 
     let users = usersRaw;
@@ -64,6 +72,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
       users,
       totals,
       pendingThemes,
+      pendingBugReports,
       roles,
       publicPath: request.publicPath,
     });

@@ -13,8 +13,17 @@ const RESERVED_ROOTS = new Set([
 export function registerReservedRootsHook(fastify: FastifyInstance) {
   fastify.addHook("onRequest", async (request, reply) => {
     const url = request.url;
+
+    // Support stripping redundant /dashboard/ prefix
+    if (url.startsWith("/dashboard/")) {
+      return reply.redirect(url.replace("/dashboard/", "/"));
+    }
+    if (url === "/dashboard") {
+      return reply.redirect("/");
+    }
+
     if (url in RESERVED_ROOTS) {
-      reply.redirect(process.env.FRONTEND_URL + url);
+      return reply.redirect(process.env.FRONTEND_URL + url);
     }
   });
 }

@@ -498,8 +498,10 @@ export default async function onRequestHook(
       "logout",
       "register",
     ]);
-    if (reservedRoots.has(request.url.replace("/", ""))) {
-      reply.redirect(process.env.DASHBOARD_URL + request.url)
+    const path = request.url.split('?')[0];
+    if (reservedRoots.has(path.replace("/", "")) || path.startsWith("/dashboard")) {
+      const target = process.env.DASHBOARD_URL + request.url.replace(/^\/dashboard/, "");
+      return reply.redirect(target);
     }
   } catch (error) {
     request.log.error("Error in onRequest hook:", error);

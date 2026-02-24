@@ -18,6 +18,7 @@ import { apiAdminRedirectsRoutes } from "./api/admin/redirects";
 import { apiStripeRoutes } from "./api/stripe";
 import { UnauthorizedError, ForbiddenError, BadRequestError, ConflictError } from "@plinkk/shared";
 import { apiAdminMaintenanceRoutes } from "./api/admin/maintenance";
+import { apiBugReportsRoutes } from "./api/bug-reports";
 
 // const prisma = new PrismaClient();
 
@@ -32,6 +33,7 @@ export function apiRoutes(fastify: FastifyInstance) {
   fastify.register(apiAdminRedirectsRoutes, { prefix: "/admin/redirects" });
   fastify.register(apiAdminMaintenanceRoutes, { prefix: "/admin/maintenance" });
   fastify.register(apiStripeRoutes, { prefix: "/stripe" });
+  fastify.register(apiBugReportsRoutes, { prefix: "/bug-reports" });
 
   // ─── Funnel Event Tracking ──────────────────────────────────────────────────
   const ALLOWED_EVENTS = ['landing_visit', 'signup', 'premium_view', 'config_view', 'purchase', 'cancel'];

@@ -1,8 +1,18 @@
-<%- include('partials/head.ejs', { title: title || 'Erreur', description: '', robots: 'noindex' }) %>
-<%- include('partials/header-dash.ejs', { user: user }) %>
+<%- include('partials/head.ejs', { title: title || 'Erreur' , description: '' , robots: 'noindex' }) %>
+  <%- include('partials/header-dash.ejs', { user: user }) %>
 
-<div class="max-w-xl mx-auto mt-20 text-center text-white">
-  <h1 class="text-3xl font-bold mb-4"><%= title %></h1>
-  <p class="mb-6"><%= message %></p>
-  <a href="/" class="px-4 py-2 bg-violet-600 text-white rounded-lg">Retour au tableau de bord</a>
-</div>
+    <div class="max-w-xl mx-auto mt-20 text-center text-white">
+      <h1 class="text-3xl font-bold mb-4">
+        <%= title %>
+      </h1>
+      <p class="mb-6">
+        <%= message %>
+      </p>
+      <div class="flex justify-center gap-4">
+        <a href="/" class="px-4 py-2 bg-violet-600 text-white rounded-lg">Retour au tableau de bord</a>
+        <button
+          onclick="openGlobalBugReportModal(event, 'Message automatique: Erreur rencontree.', { url: window.location.href, stack: '<%= message %>' })"
+          class="px-4 py-2 border border-slate-700 hover:bg-slate-800 text-slate-300 rounded-lg transition-colors">Signaler
+          un bug</button>
+      </div>
+    </div>

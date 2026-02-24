@@ -1,0 +1,403 @@
+<%- include('partials/head.ejs', { title: 'Tableau de bord - Administration' ,
+    description: "Gestion des signalements de bugs" , robots: 'noindex,nofollow' }) %>
+
+    <%- include('partials/header-dash.ejs', { user: user }) %>
+
+        <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+            <%- include('partials/admin-nav.ejs', { user: user, active: 'bug-reports' }) %>
+
+                <main class="col-span-12 lg:col-span-10 space-y-6">
+                    <!-- Header -->
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+                        <div>
+                            <h1 class="text-2xl font-bold text-white">Signalements de Bugs</h1>
+                            <p class="text-sm text-slate-400 mt-1">Gérez les bugs signalés par les utilisateurs.</p>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-slate-400">
+                                <thead
+                                    class="text-xs text-slate-500 uppercase bg-slate-950/50 border-b border-slate-800">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-4">Informations</th>
+                                        <th scope="col" class="px-6 py-4">Utilisateur</th>
+                                        <th scope="col" class="px-6 py-4">Statut</th>
+                                        <th scope="col" class="px-6 py-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (bugReports && bugReports.length> 0) { %>
+                                        <% bugReports.forEach((r, i)=> { %>
+                                            <tr
+                                                class="border-b border-slate-800 hover:bg-slate-800/50 transition-colors group">
+                                                <td class="px-6 py-4">
+                                                    <div class="flex flex-col">
+                                                        <span
+                                                            class="text-slate-200 font-medium truncate max-w-[400px] mb-2 text-[13px]">
+                                                            <%= r.message %>
+                                                        </span>
+                                                        <div class="flex items-center gap-3">
+                                                            <span
+                                                                class="text-[10px] text-slate-500 flex items-center gap-1.5 font-mono">
+                                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                                                                    stroke="currentColor">
+                                                                    <path
+                                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                                        stroke-width="2" />
+                                                                </svg>
+                                                                <%= new Date(r.createdAt).toLocaleString('fr-FR') %>
+                                                            </span>
+                                                            <% if (r.url) { %>
+                                                                <span
+                                                                    class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-violet-500/10 text-violet-400 border border-violet-500/20 truncate max-w-[150px]"
+                                                                    title="<%= r.url %>">
+                                                                    <%= r.url.replace(/^https?:\/\/[^\/]+/, '' ) ||
+                                                                        r.url %>
+                                                                </span>
+                                                                <% } %>
+                                                                    <% if (typeof r.browser==='object' &&
+                                                                        r.browser?.platform) { %>
+                                                                        <span
+                                                                            class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-slate-800 text-slate-400 border border-slate-700">
+                                                                            <%= r.browser.platform %>
+                                                                        </span>
+                                                                        <% } %>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <% if (r.user) { %>
+                                                        <a href="/dashboard/admin?search=<%= r.user.email %>"
+                                                            class="flex items-center gap-3 group/user hover:opacity-80 transition-opacity">
+                                                            <div
+                                                                class="h-8 w-8 rounded-full bg-slate-800 border border-white/5 overflow-hidden shrink-0 shadow-inner">
+                                                                <% if (r.user.image) { %>
+                                                                    <img src="<%= r.user.image %>"
+                                                                        class="h-full w-full object-cover">
+                                                                    <% } else { %>
+                                                                        <div
+                                                                            class="h-full w-full flex items-center justify-center bg-violet-600/10 text-violet-400 text-xs font-bold uppercase">
+                                                                            <%= r.user.userName?.substring(0,2) %>
+                                                                        </div>
+                                                                        <% } %>
+                                                            </div>
+                                                            <div class="flex flex-col">
+                                                                <span
+                                                                    class="text-sm font-medium text-slate-200 group-hover/user:text-white">
+                                                                    <%= r.user.userName %>
+                                                                </span>
+                                                                <span class="text-[10px] text-slate-500">
+                                                                    <%= r.user.email %>
+                                                                </span>
+                                                            </div>
+                                                        </a>
+                                                        <% } else { %>
+                                                            <div class="flex items-center gap-3 text-slate-500 italic">
+                                                                <div
+                                                                    class="h-8 w-8 rounded-full bg-slate-800/50 border border-white/5 flex items-center justify-center text-[10px]">
+                                                                    ?</div>
+                                                                Anonyme
+                                                            </div>
+                                                            <% } %>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <% if (r.status==='PENDING' ) { %>
+                                                        <span
+                                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-amber-500/10 text-amber-500 border-amber-500/20">
+                                                            <span
+                                                                class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                                            En attente
+                                                        </span>
+                                                        <% } else if (r.status==='RESOLVED' ) { %>
+                                                            <span
+                                                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                                                                <span
+                                                                    class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                                Résolu
+                                                            </span>
+                                                            <% } else { %>
+                                                                <span
+                                                                    class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-slate-800 text-slate-400 border-slate-700">
+                                                                    <%= r.status %>
+                                                                </span>
+                                                                <% } %>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-right">
+                                                    <button onclick="openDetails(<%= i %>)"
+                                                        class="inline-flex items-center gap-2 text-violet-400 hover:text-white font-semibold text-xs bg-violet-500/10 hover:bg-violet-500 px-4 py-2 rounded-xl border border-violet-500/20 hover:border-violet-500 transition-all shadow-lg shadow-violet-900/20">
+                                                        Traiter
+                                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor">
+                                                            <path d="M9 5l7 7-7 7" stroke-width="2.5" />
+                                                        </svg>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                                <% } else { %>
+                                                    <tr>
+                                                        <td colspan="4" class="px-6 py-12 text-center">
+                                                            <div class="flex flex-col items-center gap-2 opacity-50">
+                                                                <svg class="w-12 h-12 text-slate-600" fill="none"
+                                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path
+                                                                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                                        stroke-width="1.5" />
+                                                                </svg>
+                                                                <span class="text-slate-400 font-medium">Aucun bug
+                                                                    signalé.</span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </main>
+        </div>
+
+        <!-- Details Modal -->
+        <div id="detailsModal"
+            class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
+            aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="fixed inset-0" onclick="closeModal()"></div>
+            <div
+                class="relative w-full max-w-4xl transform overflow-hidden rounded-[2.5rem] bg-[#0B1020] border border-white/10 text-left shadow-2xl transition-all flex flex-col max-h-[90vh]">
+                <!-- Modal Top Bar -->
+                <div class="px-8 py-6 border-b border-white/5 flex items-center justify-between shrink-0">
+                    <div>
+                        <h3 class="text-xl font-bold text-white" id="modal-title">Détails du Signalement</h3>
+                        <p class="text-xs text-slate-500 mt-0.5" id="modalIdDisplay"></p>
+                    </div>
+                    <button onclick="closeModal()"
+                        class="p-2 rounded-full hover:bg-white/5 text-slate-500 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M6 18L18 6M6 6l12 12" stroke-width="2" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-8 space-y-8">
+                    <div class="grid grid-cols-12 gap-8">
+                        <!-- Left Col: Content -->
+                        <div class="col-span-12 lg:col-span-8 space-y-8">
+                            <div
+                                class="bg-white/5 p-6 rounded-3xl border border-white/5 relative overflow-hidden group shadow-inner">
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                                </div>
+                                <label
+                                    class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Description du problème
+                                </label>
+                                <div id="modalMessage"
+                                    class="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap selection:bg-violet-500/30 relative z-10 font-medium">
+                                </div>
+                            </div>
+
+                            <div id="modalStackContainer" class="hidden">
+                                <label
+                                    class="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                        </path>
+                                    </svg>
+                                    Contexte technique / Erreur
+                                </label>
+                                <div
+                                    class="bg-rose-500/5 border border-rose-500/20 rounded-3xl overflow-hidden relative shadow-inner">
+                                    <div class="absolute top-0 left-0 w-1 h-full bg-rose-500"></div>
+                                    <pre id="modalStack"
+                                        class="p-6 pl-8 text-[11px] text-rose-300 font-mono overflow-x-auto selection:bg-rose-500/30 leading-relaxed"></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Col: Meta -->
+                        <div class="col-span-12 lg:col-span-4 space-y-6">
+                            <!-- Information Card -->
+                            <div class="bg-slate-900/50 p-6 rounded-3xl border border-white/5 space-y-6 shadow-inner">
+                                <div>
+                                    <label
+                                        class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                                            </path>
+                                        </svg>
+                                        Provenance
+                                    </label>
+                                    <p id="modalUrl"
+                                        class="text-[11px] text-violet-400 break-all font-mono hover:text-violet-300 hover:underline cursor-pointer transition-colors">
+                                    </p>
+                                </div>
+
+                                <div id="modalBrowserContainer" class="hidden">
+                                    <label
+                                        class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                            </path>
+                                        </svg>
+                                        Environnement Client
+                                    </label>
+                                    <div id="modalBrowser"
+                                        class="space-y-1 bg-black/20 p-4 rounded-2xl border border-white/5"></div>
+                                </div>
+
+                                <div>
+                                    <label
+                                        class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                            </path>
+                                        </svg>
+                                        Date du rapport
+                                    </label>
+                                    <p id="modalDate" class="text-xs text-slate-300 font-medium"></p>
+                                </div>
+                            </div>
+
+                            <!-- Admin Response -->
+                            <div
+                                class="bg-gradient-to-br from-violet-600/10 to-transparent p-6 rounded-3xl border border-violet-500/20 space-y-4 shadow-[0_0_30px_-15px_rgba(139,92,246,0.3)]">
+                                <h4 class="text-sm font-bold text-violet-400 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path
+                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                            stroke-width="2" />
+                                    </svg>
+                                    Répondre à l'utilisateur
+                                </h4>
+                                <form id="respondForm" method="POST" class="space-y-3">
+                                    <textarea name="message" required placeholder="Expliquez la résolution..."
+                                        class="w-full bg-black/40 border border-violet-500/20 rounded-2xl p-4 text-[13px] text-white focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none transition-all placeholder:text-violet-500/30 resize-none"
+                                        rows="4"></textarea>
+                                    <div class="flex flex-col gap-2">
+                                        <div class="flex gap-2">
+                                            <select name="displayType"
+                                                class="flex-1 bg-black/40 border border-violet-500/20 rounded-xl px-3 py-2.5 text-[11px] font-medium text-violet-300 outline-none focus:border-violet-500 transition-colors">
+                                                <option value="notification">Notification</option>
+                                                <option value="banner">Bannière</option>
+                                                <option value="popup">Popup</option>
+                                            </select>
+                                            <select name="level"
+                                                class="flex-1 bg-black/40 border border-violet-500/20 rounded-xl px-3 py-2.5 text-[11px] font-medium text-violet-300 outline-none focus:border-violet-500 transition-colors">
+                                                <option value="info">Info</option>
+                                                <option value="success">Succès</option>
+                                                <option value="warning">Avertissement</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit"
+                                            class="w-full bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold uppercase tracking-wider py-3 rounded-xl transition-all shadow-lg shadow-violet-900/20 hover:shadow-violet-900/40 mt-1">
+                                            Envoyer la réponse
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div
+                    class="bg-slate-950/50 px-8 py-6 sm:flex sm:flex-row-reverse sm:px-10 gap-3 shrink-0 border-t border-white/5">
+                    <form id="resolveForm" method="POST" action="">
+                        <input type="hidden" name="status" value="RESOLVED">
+                        <button type="submit" id="resolveSubmitBtn"
+                            class="inline-flex w-full justify-center rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-900/20 hover:bg-emerald-500 sm:w-auto transition-all">Marquer
+                            comme Résolu</button>
+                    </form>
+                    <button type="button" onclick="closeModal()"
+                        class="mt-3 inline-flex w-full justify-center rounded-2xl bg-slate-800 px-6 py-3 text-sm font-bold text-slate-300 shadow-sm ring-1 ring-inset ring-white/10 hover:bg-slate-700 sm:mt-0 sm:w-auto transition-all">Fermer</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Safely embed JSON to prevent issues with quotes, newlines, and XSS
+            const rawData = '<%- Buffer.from(JSON.stringify(bugReports || [])).toString("base64") %>';
+            const bugReportsData = JSON.parse(atob(rawData));
+
+            function openDetails(index) {
+                const r = bugReportsData[index];
+                if (!r) return;
+
+                document.getElementById('modalIdDisplay').textContent = '#' + r.id;
+                document.getElementById('modalMessage').textContent = r.message || "Aucun message.";
+
+                const urlEl = document.getElementById('modalUrl');
+                urlEl.textContent = r.url || "-";
+                urlEl.onclick = () => { if (r.url) window.open(r.url, '_blank'); };
+
+                document.getElementById('modalDate').textContent = new Date(r.createdAt).toLocaleString('fr-FR', {
+                    dateStyle: 'full',
+                    timeStyle: 'medium'
+                });
+
+                if (r.stack) {
+                    document.getElementById('modalStack').textContent = r.stack;
+                    document.getElementById('modalStackContainer').classList.remove('hidden');
+                } else {
+                    document.getElementById('modalStackContainer').classList.add('hidden');
+                }
+
+                // Browser info
+                const browserContainer = document.getElementById('modalBrowserContainer');
+                const browserEl = document.getElementById('modalBrowser');
+                browserEl.innerHTML = '';
+                if (r.browser && typeof r.browser === 'object') {
+                    browserContainer.classList.remove('hidden');
+                    const info = r.browser;
+                    const items = [
+                        { label: 'OS', val: info.platform },
+                        { label: 'Écran', val: info.screen },
+                        { label: 'Viewport', val: info.viewport },
+                        { label: 'Langue', val: info.lang }
+                    ];
+                    items.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'flex items-center justify-between text-[11px] py-1 border-b border-white/5 last:border-0';
+                        div.innerHTML = `<span class="text-slate-500 font-medium">${item.label}</span><span class="text-slate-300 font-mono">${item.val || '-'}</span>`;
+                        browserEl.appendChild(div);
+                    });
+                } else {
+                    browserContainer.classList.add('hidden');
+                }
+
+                document.getElementById('resolveForm').action = `/admin/bug-reports/${r.id}/resolve`;
+                document.getElementById('respondForm').action = `/admin/bug-reports/${r.id}/respond`;
+
+                const resolveBtn = document.getElementById('resolveSubmitBtn');
+                if (r.status === 'RESOLVED') {
+                    resolveBtn.disabled = true;
+                    resolveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    resolveBtn.textContent = 'Déjà Résolu';
+                } else {
+                    resolveBtn.disabled = false;
+                    resolveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    resolveBtn.textContent = 'Marquer comme Résolu';
+                }
+
+                document.getElementById('detailsModal').classList.remove('hidden');
+                document.getElementById('detailsModal').classList.add('flex');
+            }
+
+            function closeModal() {
+                const modal = document.getElementById('detailsModal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        </script>

@@ -188,6 +188,21 @@
 
                                                 <div class="h-px bg-white/5 my-1"></div>
 
+                                                <a href="#" onclick="openGlobalBugReportModal(event)"
+                                                    class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/5 hover:text-amber-400">
+                                                    <svg class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24"
+                                                        stroke="currentColor">
+                                                        <rect x="8" y="6" width="8" height="14" rx="4" stroke-width="2">
+                                                        </rect>
+                                                        <path d="M12 2v4" stroke-width="2"></path>
+                                                        <path d="M8 10H4" stroke-width="2"></path>
+                                                        <path d="M20 10h-4" stroke-width="2"></path>
+                                                        <path d="M8 14H4" stroke-width="2"></path>
+                                                        <path d="M20 14h-4" stroke-width="2"></path>
+                                                    </svg>
+                                                    Signaler un bug
+                                                </a>
+
                                                 <a href="/account"
                                                     class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-white/5 hover:text-white">
                                                     <svg class="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24"
@@ -578,3 +593,19 @@
                                                                     } catch (e) { }
                                                                 })();
                                                             </script>
+
+                                                            <%- include('bug-report-modal.ejs') %>
+                                                                <script>
+                                                                    (function () {
+                                                                        const originalOpenModal = window.openGlobalBugReportModal;
+                                                                        window.openGlobalBugReportModal = function (e, defaultMessage) {
+                                                                            if (typeof originalOpenModal === 'function') {
+                                                                                originalOpenModal(e, defaultMessage);
+                                                                            }
+                                                                            const panel = document.getElementById('profileMenuPanel');
+                                                                            if (panel && !panel.classList.contains('hidden')) {
+                                                                                panel.classList.add('hidden');
+                                                                            }
+                                                                        };
+                                                                    })();
+                                                                </script>

@@ -178,27 +178,23 @@
                         </div>
                     </section>
 
-                    <aside class="hidden xl:block xl:col-span-5 relative space-y-6">
-                        <!-- preview / history switcher with history controls moved here -->
+                    <aside class="hidden xl:block xl:col-span-5 relative space-y-6 max-h-[100vh]">
                         <div class="sticky top-8">
                             <div id="previewCard"
                                 class="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-4 shadow-2xl relative overflow-hidden">
                                 <div
                                     class="absolute top-0 left-0 w-full h-full bg-slate-950 opacity-50 z-0 pointer-events-none">
                                 </div>
-                                <!-- header removed; controls shown only in history view -->
-
                                 <div class="flex justify-center gap-2 mb-2 z-10 relative">
                                     <button id="btnPreview"
                                         class="px-3 py-1 text-sm font-medium rounded-lg bg-violet-600 text-white">Aperçu</button>
                                     <button id="btnHistory"
                                         class="px-3 py-1 text-sm font-medium rounded-lg bg-slate-700 text-slate-200">Historique</button>
                                 </div>
-                                <!-- editor save-status indicator -->
                                 <div id="status"
                                     class="text-xs text-slate-400 opacity-0 transition-opacity mx-auto mb-2"></div>
                                 <div id="previewWrapper"
-                                    class="relative z-10 bg-black rounded-[2rem] overflow-hidden border-[6px] border-slate-800 shadow-inner aspect-[9/19] max-h-[85vh] mx-auto">
+                                    class="relative z-10 bg-black rounded-[2rem] overflow-hidden border-[6px] border-slate-800 shadow-inner aspect-[9/19] max-h-[80vh] mx-auto">
                                     <iframe id="preview"
                                         src="<%= (typeof frontendUrl !== 'undefined' && frontendUrl.includes('localhost')) ? frontendUrl : 'http://127.0.0.1:3002' %><% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %>/<%= plinkk.slug %><% } else { %>/<%= user.id %><% } %>?preview=1"
                                         class="w-full h-full bg-white" frameborder="0"></iframe>
@@ -468,7 +464,7 @@
                             const rawData = JSON.parse(document.getElementById('plinkk-data').textContent);
                             window.__INITIAL_STATE__ = {
                                 ...rawData,
-                                categories: <%- JSON.stringify(locals.categories || []) %>
+                                categories: <% - JSON.stringify(locals.categories || []) %>
                             };
                         } catch (e) {
                             console.error('Failed to parse initial state:', e);
