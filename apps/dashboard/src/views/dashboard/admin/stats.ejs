@@ -803,6 +803,27 @@
                     y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, border: { display: false }, ticks: { color: '#64748b', precision: 0, font: { size: 10 } } }
                 };
 
+                const verticalCrosshairPlugin = {
+                    id: 'verticalCrosshair',
+                    afterDraw(chart) {
+                        if (chart.tooltip && chart.tooltip._active && chart.tooltip._active.length) {
+                            const ctx = chart.ctx;
+                            const x = chart.tooltip._active[0].element.x;
+                            const topY = chart.scales.y.top;
+                            const bottomY = chart.scales.y.bottom;
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.moveTo(x, topY);
+                            ctx.lineTo(x, bottomY);
+                            ctx.lineWidth = 1;
+                            ctx.strokeStyle = 'rgba(139, 92, 246, 0.4)';
+                            ctx.setLineDash([4, 4]);
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                    }
+                };
+
                 const charts = {};
                 let activeTab = 'signups';
                 let currentData = null;
@@ -850,13 +871,21 @@
                         setTimeout(() => drawLine(id, labels, datasets), 100);
                         return;
                     }
+                    const gran = qs('#fGranularity')?.value || 'day';
                     if (charts[id]) charts[id].destroy();
                     charts[id] = new Chart(ctx.getContext('2d'), {
                         type: 'line',
                         data: {
                             labels: labels.map(l => {
                                 try {
-                                    return new Date(l).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                                    const d = new Date(l);
+                                    if (gran === 'hour') {
+                                        return d.toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+                                    }
+                                    if (gran === 'minute') {
+                                        return d.toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                                    }
+                                    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
                                 } catch (e) { return String(l); }
                             }),
                             datasets: datasets.map(ds => ({
@@ -871,21 +900,22 @@
                                 ...ds
                             }))
                         },
+                        plugins: [verticalCrosshairPlugin],
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
                             animation: {
-                                duration: 400 // Animation plus courte pour forcer l'affichage rapide
+                                duration: 400
                             },
+                            interaction: { mode: 'index', intersect: false },
                             plugins: {
                                 legend: { display: datasets.length > 1, labels: { color: '#94a3b8', font: { size: 11 } } },
-                                tooltip: CHART_TOOLTIP
+                                tooltip: { ...CHART_TOOLTIP, mode: 'index', intersect: false }
                             },
                             scales: CHART_SCALES
                         }
                     });
 
-                    // Force un rafraéchissement immédiat pour éviter le bug d'invisibilité
                     requestAnimationFrame(() => {
                         if (charts[id]) charts[id].update('none');
                     });

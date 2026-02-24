@@ -788,6 +788,27 @@
                     }
                 };
 
+                const verticalCrosshairPlugin = {
+                    id: 'verticalCrosshair',
+                    afterDraw(chart) {
+                        if (chart.tooltip && chart.tooltip._active && chart.tooltip._active.length) {
+                            const ctx = chart.ctx;
+                            const x = chart.tooltip._active[0].element.x;
+                            const topY = chart.scales.y.top;
+                            const bottomY = chart.scales.y.bottom;
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.moveTo(x, topY);
+                            ctx.lineTo(x, bottomY);
+                            ctx.lineWidth = 1;
+                            ctx.strokeStyle = 'rgba(139, 92, 246, 0.4)';
+                            ctx.setLineDash([4, 4]);
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                    }
+                };
+
                 // Global Access to charts for export
                 const charts = {};
                 let activeTab = 'overview';
@@ -816,13 +837,15 @@
                                 borderWidth: 2.5
                             }]
                         },
+                        plugins: [verticalCrosshairPlugin],
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
                             animation: { duration: 400 },
+                            interaction: { mode: 'index', intersect: false },
                             plugins: {
                                 legend: { display: false },
-                                tooltip: CHART_TOOLTIP
+                                tooltip: { ...CHART_TOOLTIP, mode: 'index', intersect: false }
                             },
                             scales: CHART_SCALES
                         }
@@ -836,7 +859,15 @@
                 }
 
                 function fmtDateLabel(d) {
-                    return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                    const gran = qs('#fGranularity')?.value || 'day';
+                    const date = new Date(d);
+                    if (gran === 'hour') {
+                        return date.toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+                    }
+                    if (gran === 'minute') {
+                        return date.toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                    }
+                    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
                 }
 
                 /*  data  */
