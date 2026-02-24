@@ -113,7 +113,7 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <p class="text-3xl font-bold text-white tracking-tight">
+                                            <p class="text-3xl font-bold text-white tracking-tight" id="ovTotalViews">
                                                 <%= _totalViews %>
                                             </p>
                                             <p class="text-sm text-slate-400">Vues profil</p>
@@ -131,7 +131,7 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <p class="text-3xl font-bold text-white tracking-tight">
+                                            <p class="text-3xl font-bold text-white tracking-tight" id="ovTotalClicks">
                                                 <%= _totalClicks %>
                                             </p>
                                             <p class="text-sm text-slate-400">Clics totaux</p>
@@ -149,7 +149,7 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <p class="text-3xl font-bold text-white tracking-tight">
+                                            <p class="text-3xl font-bold text-white tracking-tight" id="ovAvgPerLink">
                                                 <%= avgPerLink %>
                                             </p>
                                             <p class="text-sm text-slate-400">Clics moy. / lien</p>
@@ -167,11 +167,12 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <p class="text-lg font-bold text-white truncate max-w-[140px]">
+                                            <p class="text-lg font-bold text-white truncate max-w-[140px]"
+                                                id="ovTopLinkName">
                                                 <%= topLink ? (topLink.text || topLink.name || 'Sans titre' ) : '' %>
                                             </p>
-                                            <p class="text-sm text-slate-400">Top lien<% if (topLink) { %> (<%=
-                                                        topLink.clicks %> clics)<% } %>
+                                            <p class="text-sm text-slate-400" id="ovTopLinkClicks">Top lien<% if
+                                                    (topLink) { %> (<%= topLink.clicks %> clics)<% } %>
                                             </p>
                                         </div>
                                     </div>
@@ -179,7 +180,41 @@
                             </div>
 
                             <div class="bg-slate-950/30 rounded-3xl border border-slate-800 p-6 md:p-8">
-                                <h2 class="font-bold text-white text-xl mb-6">Vues des 30 derniers jours</h2>
+                                <div class="flex items-center justify-between mb-6">
+                                    <h2 class="font-bold text-white text-xl" id="overviewTitle">Vues des 30 derniers
+                                        jours</h2>
+                                    <div class="relative">
+                                        <button id="btnOverviewRange" type="button"
+                                            class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-violet-400 hover:border-violet-500/50 transition-all outline-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                                <line x1="16" y1="2" x2="16" y2="6" />
+                                                <line x1="8" y1="2" x2="8" y2="6" />
+                                                <line x1="3" y1="10" x2="21" y2="10" />
+                                            </svg>
+                                        </button>
+                                        <div id="overviewRangeMenu"
+                                            class="hidden absolute right-0 top-full mt-2 w-36 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl shadow-black/40 z-20 overflow-hidden">
+                                            <button
+                                                class="ov-range-btn w-full px-4 py-2.5 text-left text-sm text-slate-300 hover:bg-violet-600/20 hover:text-white transition-colors"
+                                                data-days="7">7 jours</button>
+                                            <button
+                                                class="ov-range-btn w-full px-4 py-2.5 text-left text-sm text-slate-300 hover:bg-violet-600/20 hover:text-white transition-colors"
+                                                data-days="14">14 jours</button>
+                                            <button
+                                                class="ov-range-btn w-full px-4 py-2.5 text-left text-sm text-violet-400 bg-violet-600/10 font-medium"
+                                                data-days="30">30 jours</button>
+                                            <button
+                                                class="ov-range-btn w-full px-4 py-2.5 text-left text-sm text-slate-300 hover:bg-violet-600/20 hover:text-white transition-colors"
+                                                data-days="60">60 jours</button>
+                                            <button
+                                                class="ov-range-btn w-full px-4 py-2.5 text-left text-sm text-slate-300 hover:bg-violet-600/20 hover:text-white transition-colors"
+                                                data-days="90">90 jours</button>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="h-80 w-full relative">
                                     <div
                                         class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
@@ -222,30 +257,64 @@
                                 </div>
                                 <% } else { %>
                                     <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
-                                        <div
-                                            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                                            <h2 class="font-bold text-white text-xl">Tendances journaliéres</h2>
-                                            <div class="flex items-center gap-2 w-full sm:w-auto">
-                                                <select id="fRange"
-                                                    class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm focus:ring-1 focus:ring-violet-500 transition-all outline-none">
-                                                    <option value="7">7 jours</option>
-                                                    <option value="14">14 jours</option>
-                                                    <option value="30" selected>30 jours</option>
-                                                    <option value="60" <%=_maxStatsDays < 60 ? 'disabled' : '' %>>60
-                                                        jours</option>
-                                                    <option value="90" <%=_maxStatsDays < 90 ? 'disabled' : '' %>>90
-                                                        jours</option>
-                                                    <option value="180" <%=_maxStatsDays < 180 ? 'disabled' : '' %>>180
-                                                        jours</option>
-                                                    <option value="365" <%=_maxStatsDays < 365 ? 'disabled' : '' %>>1 an
-                                                    </option>
-                                                </select>
-                                                <select id="fGranularity"
-                                                    class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm focus:ring-1 focus:ring-violet-500 transition-all outline-none">
-                                                    <option value="day" selected>Jour</option>
-                                                    <option value="hour">Heure</option>
-                                                    <option value="minute">Minute</option>
-                                                </select>
+                                        <h2 class="font-bold text-white text-xl mb-6">Tendances journaliéres</h2>
+
+                                        <!-- CONTROL BAR -->
+                                        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
+                                            <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl">
+                                                <div class="space-y-1.5">
+                                                    <label
+                                                        class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Date
+                                                        Début</label>
+                                                    <input type="date" id="fFrom"
+                                                        class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:border-violet-500 transition-all outline-none" />
+                                                </div>
+                                                <div class="space-y-1.5">
+                                                    <label
+                                                        class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Date
+                                                        Fin</label>
+                                                    <input type="date" id="fTo"
+                                                        class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:border-violet-500 transition-all outline-none" />
+                                                </div>
+                                                <div class="space-y-1.5">
+                                                    <div class="flex items-center gap-2">
+                                                        <label
+                                                            class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Précision</label>
+                                                        <button id="btnToggleGranularity" type="button"
+                                                            title="Précision manuelle"
+                                                            class="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-violet-400 hover:border-violet-500/50 transition-all outline-none">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14"
+                                                                height="14" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2"
+                                                                stroke-linecap="round" stroke-linejoin="round">
+                                                                <circle cx="12" cy="12" r="3" />
+                                                                <path
+                                                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                    <select id="fGranularity"
+                                                        class="hidden w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:border-violet-500 transition-all outline-none appearance-none">
+                                                        <option value="day" selected>Par jour</option>
+                                                        <option value="hour">Par heure</option>
+                                                        <option value="minute">Par minute</option>
+                                                        <option value="second">Par seconde</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                <button
+                                                    class="range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition-all"
+                                                    data-days="1">24h</button>
+                                                <button
+                                                    class="range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition-all"
+                                                    data-days="7">7j</button>
+                                                <button
+                                                    class="range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20"
+                                                    data-days="30">30j</button>
+                                                <button
+                                                    class="range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition-all"
+                                                    data-days="90">90j</button>
                                             </div>
                                         </div>
                                         <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
@@ -752,7 +821,8 @@
     redirects: _redirects,
     totalRedirectClicks: _totalRedirectClicks,
     isPremium: _isPremium,
-    maxStatsDays: _maxStatsDays
+    maxStatsDays: _maxStatsDays,
+    plinkkId: (typeof plinkk !== 'undefined' && plinkk) ? plinkk.id : null
 }) %></script>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -861,6 +931,9 @@
                 function fmtDateLabel(d) {
                     const gran = qs('#fGranularity')?.value || 'day';
                     const date = new Date(d);
+                    if (gran === 'second') {
+                        return date.toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    }
                     if (gran === 'hour') {
                         return date.toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
                     }
@@ -878,6 +951,7 @@
                 const redirectReturns = D.redirectReturns || [];
                 const isPremiumUser = D.isPremium || false;
                 const maxStatsDays = D.maxStatsDays || 30;
+                const currentPlinkkId = D.plinkkId || null;
 
                 /*  category classifier  */
                 function classifyUrl(url, label) {
@@ -942,36 +1016,116 @@
                 tabButtons.forEach(btn => btn.addEventListener('click', () => { const k = btn.getAttribute('data-tab'); if (k) setTab(k); }));
 
                 /*  OVERVIEW CHART  */
-                async function initOverview() {
+                let overviewDays = 30;
+
+                async function loadOverview(days) {
+                    overviewDays = days || 30;
                     const overCtx = qs('#overviewChart')?.getContext('2d');
                     const panel = qs('#panel-overview');
-                    const loader = panel.querySelector('.chart-loader');
+                    const loader = panel?.querySelector('.chart-loader');
+                    const title = qs('#overviewTitle');
 
-                    if (overCtx && viewsDaily.length) {
-                        if (loader) loader.classList.remove('hidden');
-                        // Petit délai pour simuler le chargement et s'assurer que le DOM est prét
-                        await new Promise(r => setTimeout(r, 300));
+                    if (title) {
+                        if (overviewDays === 1) title.textContent = 'Vues des dernières 24h';
+                        else title.textContent = `Vues des ${overviewDays} derniers jours`;
+                    }
+
+                    if (!overCtx) return;
+                    if (loader) loader.classList.remove('hidden');
+
+                    try {
+                        const now = new Date();
+                        const to = now.toISOString().slice(0, 10);
+                        const from = new Date(now.getTime() - (overviewDays - 1) * 86400000).toISOString().slice(0, 10);
+                        const pidParam = currentPlinkkId ? `&plinkkId=${currentPlinkkId}` : '';
+                        const [viewsRes, clicksRes] = await Promise.all([
+                            fetch(`/stats/views?from=${from}&to=${to}&granularity=day${pidParam}`, { credentials: 'same-origin' }),
+                            fetch(`/stats/clicks?from=${from}&to=${to}&granularity=day`, { credentials: 'same-origin' })
+                        ]);
+                        if (!viewsRes.ok) throw new Error('HTTP Error: ' + viewsRes.status);
+                        const vData = await viewsRes.json();
+                        const arr = Array.isArray(vData) ? vData : (vData.series || []);
 
                         if (charts.overview) charts.overview.destroy();
                         charts.overview = makeLineChart(
                             overCtx,
-                            viewsDaily.map(d => fmtDateLabel(d.date)),
-                            viewsDaily.map(d => d.count),
+                            arr.map(d => fmtDateLabel(d.date)),
+                            arr.map(d => d.count),
                             'Vues', 'rgb(139, 92, 246)'
                         );
 
-                        if (loader) loader.classList.add('hidden');
+                        // Update summary cards
+                        const totalV = arr.reduce((a, d) => a + (d.count || 0), 0);
+                        const elV = qs('#ovTotalViews');
+                        if (elV) elV.textContent = totalV;
+
+                        if (clicksRes.ok) {
+                            const cData = await clicksRes.json();
+                            const cArr = Array.isArray(cData) ? cData : (cData.series || []);
+                            const totalC = cArr.reduce((a, d) => a + (d.count || 0), 0);
+                            const elC = qs('#ovTotalClicks');
+                            if (elC) elC.textContent = totalC;
+
+                            // Update avg per link
+                            const elAvg = qs('#ovAvgPerLink');
+                            if (elAvg) {
+                                const avg = links.length ? Math.round(totalC / links.length) : 0;
+                                elAvg.textContent = avg;
+                            }
+                        }
+                    } catch (e) {
+                        // Fallback : use pre-loaded data
+                        if (viewsDaily.length) {
+                            if (charts.overview) charts.overview.destroy();
+                            charts.overview = makeLineChart(
+                                overCtx,
+                                viewsDaily.map(d => fmtDateLabel(d.date)),
+                                viewsDaily.map(d => d.count),
+                                'Vues', 'rgb(139, 92, 246)'
+                            );
+                        }
                     }
+                    if (loader) loader.classList.add('hidden');
                 }
-                initOverview();
+
+                /* Overview dropdown toggle */
+                qs('#btnOverviewRange')?.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    qs('#overviewRangeMenu')?.classList.toggle('hidden');
+                });
+                document.addEventListener('click', () => qs('#overviewRangeMenu')?.classList.add('hidden'));
+
+                qsa('.ov-range-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const days = Number(btn.dataset.days);
+                    // Update active style
+                    qsa('.ov-range-btn').forEach(b => {
+                        b.className = 'ov-range-btn w-full px-4 py-2.5 text-left text-sm text-slate-300 hover:bg-violet-600/20 hover:text-white transition-colors';
+                    });
+                    btn.className = 'ov-range-btn w-full px-4 py-2.5 text-left text-sm text-violet-400 bg-violet-600/10 font-medium';
+                    qs('#overviewRangeMenu')?.classList.add('hidden');
+                    loadOverview(days);
+                }));
+
+                loadOverview(30);
 
                 /*  TRENDS CHARTS  */
                 // removed local instances tracking
 
-                async function fetchSeries(endpoint, days) {
-                    const now = new Date();
-                    const to = now.toISOString().slice(0, 10);
-                    const from = new Date(now.getTime() - (days - 1) * 86400000).toISOString().slice(0, 10);
+                function initDates() {
+                    const fromIn = qs('#fFrom');
+                    const toIn = qs('#fTo');
+                    if (fromIn && toIn && !fromIn.value) {
+                        const now = new Date();
+                        const start = new Date(now.getTime() - 29 * 86400000);
+                        fromIn.value = start.toISOString().slice(0, 10);
+                        toIn.value = now.toISOString().slice(0, 10);
+                    }
+                }
+
+                async function fetchSeries(endpoint) {
+                    const from = qs('#fFrom')?.value || '';
+                    const to = qs('#fTo')?.value || '';
                     const gran = qs('#fGranularity')?.value || 'day';
                     const res = await fetch(`/stats/${endpoint}?from=${from}&to=${to}&granularity=${gran}`, { credentials: 'same-origin' });
                     if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
@@ -980,18 +1134,12 @@
 
                 async function refreshTrends() {
                     if (!isPremiumUser) return;
-                    const rangeEl = qs('#fRange');
                     const panel = qs('#panel-trends');
                     const chartLoaders = qsa('.chart-loader', panel);
-                    let days = Number(rangeEl?.value || '30') || 30;
-                    if (days > maxStatsDays) {
-                        days = maxStatsDays;
-                        if (rangeEl) rangeEl.value = String(maxStatsDays <= 30 ? 30 : maxStatsDays);
-                    }
                     chartLoaders.forEach(l => l.classList.remove('hidden'));
                     try {
-                        const vData = await fetchSeries('views', days);
-                        trendsData.views = Array.isArray(vData) ? vData : (vData.series || []); // Handle both formats just in case
+                        const vData = await fetchSeries('views');
+                        trendsData.views = Array.isArray(vData) ? vData : (vData.series || []);
                         const vArray = trendsData.views;
 
                         const vCtx = qs('#trendsViewsChart')?.getContext('2d');
@@ -1008,8 +1156,8 @@
                         console.error(e);
                     }
                     try {
-                        const cData = await fetchSeries('clicks', days);
-                        trendsData.clicks = Array.isArray(cData) ? cData : (cData.series || []); // Handle both formats just in case
+                        const cData = await fetchSeries('clicks');
+                        trendsData.clicks = Array.isArray(cData) ? cData : (cData.series || []);
                         const cArray = trendsData.clicks;
 
                         const cCtx = qs('#trendsClicksChart')?.getContext('2d');
@@ -1028,8 +1176,60 @@
                     chartLoaders.forEach(l => l.classList.add('hidden'));
                 }
 
-                qs('#fRange')?.addEventListener('change', refreshTrends);
+                /* Auto-set granularity based on selected date range */
+                let manualGranularity = false;
+                function autoGranularity() {
+                    if (manualGranularity) return;
+                    const f = qs('#fFrom');
+                    const t = qs('#fTo');
+                    const el = qs('#fGranularity');
+                    if (!f || !t || !el || !f.value || !t.value) return;
+                    const start = new Date(f.value);
+                    const end = new Date(t.value);
+                    const diffMs = end.getTime() - start.getTime();
+                    const diffHours = diffMs / 3600000;
+                    const diffDays = diffMs / 86400000;
+                    if (diffHours <= 2) el.value = 'second';
+                    else if (diffHours <= 48) el.value = 'minute';
+                    else if (diffDays <= 7) el.value = 'hour';
+                    else el.value = 'day';
+                }
+
+                /* Toggle manual granularity mode */
+                qs('#btnToggleGranularity')?.addEventListener('click', () => {
+                    manualGranularity = !manualGranularity;
+                    const btn = qs('#btnToggleGranularity');
+                    const sel = qs('#fGranularity');
+                    if (manualGranularity) {
+                        sel?.classList.remove('hidden');
+                        btn?.classList.add('text-violet-400', 'border-violet-500/50');
+                        btn?.classList.remove('text-slate-400');
+                    } else {
+                        sel?.classList.add('hidden');
+                        btn?.classList.remove('text-violet-400', 'border-violet-500/50');
+                        btn?.classList.add('text-slate-400');
+                        autoGranularity();
+                        refreshTrends();
+                    }
+                });
+
+                qsa('.range-btn').forEach(btn => btn.addEventListener('click', () => {
+                    const days = Number(btn.dataset.days);
+                    const now = new Date();
+                    const start = new Date(now.getTime() - (days === 1 ? 0 : (days - 1)) * 86400000);
+                    qs('#fFrom').value = start.toISOString().slice(0, 10);
+                    qs('#fTo').value = now.toISOString().slice(0, 10);
+                    qsa('.range-btn').forEach(b => { b.className = "range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition-all"; });
+                    btn.className = "range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20";
+                    autoGranularity();
+                    refreshTrends();
+                }));
+
+                qs('#fFrom')?.addEventListener('change', () => { autoGranularity(); refreshTrends(); });
+                qs('#fTo')?.addEventListener('change', () => { autoGranularity(); refreshTrends(); });
                 qs('#fGranularity')?.addEventListener('change', refreshTrends);
+                initDates();
+                autoGranularity();
                 refreshTrends();
 
                 /*  LINKS CHART + TABLE  */

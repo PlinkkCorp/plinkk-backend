@@ -125,7 +125,7 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
 
   fastify.get("/views", { preHandler: [requireAuth] }, async function (request, reply) {
     const userId = request.userId!;
-    const { from, to, granularity = "day" } = request.query as { from?: string; to?: string; granularity?: "day" | "hour" | "minute" | "second" };
+    const { from, to, granularity = "day", plinkkId: qPlinkkId } = request.query as { from?: string; to?: string; granularity?: "day" | "hour" | "minute" | "second"; plinkkId?: string };
 
     // Charger l'utilisateur pour vérifier les limites premium
     const user = await prisma.user.findUnique({ where: { id: userId }, include: { role: true } });
@@ -158,15 +158,27 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
       let rows: Array<{ date: string | Date; count: number }> = [];
 
       if (granularity === "day") {
-        await prisma.$executeRawUnsafe(
-          'CREATE TABLE IF NOT EXISTS "UserViewDaily" ("userId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("userId","date"))'
-        );
-        rows = await prisma.$queryRaw<Array<{ date: string; count: number }>>`
-          SELECT "date", "count"
-          FROM "UserViewDaily"
-          WHERE "userId" = ${userId} AND "date" BETWEEN ${s} AND ${e}
-          ORDER BY "date" ASC
-        `;
+        if (qPlinkkId) {
+          // Use plinkkViewDaily for a specific plinkk (overview chart)
+          const verifyOwner = await prisma.plinkk.findFirst({ where: { id: qPlinkkId, userId } });
+          if (verifyOwner) {
+            rows = (await prisma.plinkkViewDaily.findMany({
+              where: { plinkkId: qPlinkkId, date: { gte: start, lte: end } },
+              select: { date: true, count: true },
+              orderBy: { date: "asc" },
+            })).map(r => ({ date: r.date, count: Number(r.count) }));
+          }
+        } else {
+          await prisma.$executeRawUnsafe(
+            'CREATE TABLE IF NOT EXISTS "UserViewDaily" ("userId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("userId","date"))'
+          );
+          rows = await prisma.$queryRaw<Array<{ date: string; count: number }>>`
+            SELECT "date", "count"
+            FROM "UserViewDaily"
+            WHERE "userId" = ${userId} AND "date" BETWEEN ${s} AND ${e}
+            ORDER BY "date" ASC
+          `;
+        }
       } else {
         // Find raw events for finer granularity
         // Need to query plinkks from this user first

@@ -72,13 +72,26 @@
                                         class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:border-violet-500 transition-all outline-none" />
                                 </div>
                                 <div class="space-y-1.5">
-                                    <label
-                                        class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Précision</label>
+                                    <div class="flex items-center gap-2">
+                                        <label
+                                            class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Précision</label>
+                                        <button id="btnToggleGranularity" type="button" title="Précision manuelle"
+                                            class="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-violet-400 hover:border-violet-500/50 transition-all outline-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="3" />
+                                                <path
+                                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                     <select id="fGranularity"
-                                        class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:border-violet-500 transition-all outline-none appearance-none">
+                                        class="hidden w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:border-violet-500 transition-all outline-none appearance-none">
                                         <option value="day" selected>Par jour</option>
                                         <option value="hour">Par heure</option>
                                         <option value="minute">Par minute</option>
+                                        <option value="second">Par seconde</option>
                                     </select>
                                 </div>
                             </div>
@@ -851,6 +864,43 @@
                     }
                 }
 
+                /* Auto-set granularity based on selected date range */
+                let manualGranularity = false;
+                function autoGranularity() {
+                    if (manualGranularity) return;
+                    const f = qs('#fFrom');
+                    const t = qs('#fTo');
+                    const el = qs('#fGranularity');
+                    if (!f || !t || !el || !f.value || !t.value) return;
+                    const start = new Date(f.value);
+                    const end = new Date(t.value);
+                    const diffMs = end.getTime() - start.getTime();
+                    const diffHours = diffMs / 3600000;
+                    const diffDays = diffMs / 86400000;
+                    if (diffHours <= 2) el.value = 'second';
+                    else if (diffHours <= 48) el.value = 'minute';
+                    else if (diffDays <= 7) el.value = 'hour';
+                    else el.value = 'day';
+                }
+
+                /* Toggle manual granularity mode */
+                qs('#btnToggleGranularity')?.addEventListener('click', () => {
+                    manualGranularity = !manualGranularity;
+                    const btn = qs('#btnToggleGranularity');
+                    const sel = qs('#fGranularity');
+                    if (manualGranularity) {
+                        sel?.classList.remove('hidden');
+                        btn?.classList.add('text-violet-400', 'border-violet-500/50');
+                        btn?.classList.remove('text-slate-400');
+                    } else {
+                        sel?.classList.add('hidden');
+                        btn?.classList.remove('text-violet-400', 'border-violet-500/50');
+                        btn?.classList.add('text-slate-400');
+                        autoGranularity();
+                        loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab);
+                    }
+                });
+
                 async function fetchAPI(url) {
                     const f = qs('#fFrom');
                     const t = qs('#fTo');
@@ -879,6 +929,9 @@
                             labels: labels.map(l => {
                                 try {
                                     const d = new Date(l);
+                                    if (gran === 'second') {
+                                        return d.toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                                    }
                                     if (gran === 'hour') {
                                         return d.toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
                                     }
@@ -1134,11 +1187,12 @@
                     qs('#fTo').value = now.toISOString().slice(0, 10);
                     qsa('.range-btn').forEach(b => { b.className = "range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition-all"; });
                     btn.className = "range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20";
+                    autoGranularity();
                     loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab);
                 }));
 
-                qs('#fFrom')?.addEventListener('change', () => loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab));
-                qs('#fTo')?.addEventListener('change', () => loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab));
+                qs('#fFrom')?.addEventListener('change', () => { autoGranularity(); loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab); });
+                qs('#fTo')?.addEventListener('change', () => { autoGranularity(); loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab); });
                 qs('#fGranularity')?.addEventListener('change', () => loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab));
 
                 // Export Logic
@@ -1444,5 +1498,3 @@
                 }
             })();
         </script>
-
-        <%- include('partials/footer.ejs') %>
