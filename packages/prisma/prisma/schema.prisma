@@ -61,6 +61,7 @@ model User {
   themes                Theme[]
   role                  Role?                @relation(fields: [roleId], references: [id])
   userLogs              UserLog[]
+  funnelEvents          FunnelEvent[]         @relation("FunnelEvents")
 }
 
 model Connection {
@@ -575,4 +576,23 @@ enum PlinkkEventType {
 enum GravatarSource {
   PRIMARY
   PUBLIC
+}
+
+// ─── Funnel Event Tracking ───────────────────────────────────────────────────
+
+model FunnelEvent {
+  id        String   @id @default(nanoid(16))
+  event     String   // landing_visit, signup, premium_view, config_view, purchase, cancel
+  sessionId String   // anonymous session fingerprint (cookie-based)
+  userId    String?  // set if user is logged in
+  ip        String?
+  userAgent String?
+  referrer  String?
+  meta      Json?
+  createdAt DateTime @default(now())
+  user      User?    @relation("FunnelEvents", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([event, createdAt])
+  @@index([sessionId])
+  @@index([userId])
 }

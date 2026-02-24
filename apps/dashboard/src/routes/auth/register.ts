@@ -30,7 +30,7 @@ export function registerRoutes(fastify: FastifyInstance) {
       username: string;
       email: string;
       password: string;
-      passwordVerif: string;
+      passwordVerif?: string;
       acceptTerms?: string | boolean;
     };
 
@@ -48,7 +48,7 @@ export function registerRoutes(fastify: FastifyInstance) {
       );
     }
 
-    if (password !== passwordVerif) {
+    if (passwordVerif && password !== passwordVerif) {
       return redirectWithErrorToLogin(
         reply,
         "Les mots de passe ne correspondent pas",
@@ -163,6 +163,23 @@ export function registerRoutes(fastify: FastifyInstance) {
 
       await createDefaultPlinkk(req, user.id, username);
       await logUserAction(user.id, "REGISTER", null, { method: "PASSWORD" }, req.ip);
+
+      // Track signup funnel event
+      try {
+        const trackingId = (req.cookies as Record<string, string>)?.["plinkk_tid"] || user.id;
+        await prisma.funnelEvent.create({
+          data: {
+            event: "signup",
+            sessionId: trackingId,
+            userId: user.id,
+            ip: req.ip,
+            userAgent: req.headers["user-agent"] || null,
+            referrer: req.headers.referer || null,
+          },
+        });
+      } catch (e) {
+        req.log?.warn(e, "Failed to track signup funnel event");
+      }
 
       const returnTo =
         (req.body as { returnTo: string })?.returnTo ||

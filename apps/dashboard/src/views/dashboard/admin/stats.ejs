@@ -1,489 +1,833 @@
-<%- include('partials/head.ejs', { title: 'Admin - Statistiques', description: 'Statistiques globales de la plateforme.', robots: 'noindex,nofollow' }) %>
-<%- include('partials/header-dash.ejs', { user: user }) %>
+<%- include('partials/head.ejs', { title: 'Admin - Statistiques' ,
+    description: 'Statistiques globales de la plateforme.' , robots: 'noindex,nofollow' }) %>
+    <%- include('partials/header-dash.ejs', { user: user }) %>
 
-<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-    <%- include('partials/admin-nav.ejs', { user: user, active: '/admin/stats' }) %>
+        <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+            <%- include('partials/admin-nav.ejs', { user: user, active: '/admin/stats' }) %>
 
-    <main class="col-span-12 lg:col-span-10 space-y-8">
+                <main class="col-span-12 lg:col-span-10 space-y-8">
 
-        <!--  HEADER GRADIENT  -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-            <div class="relative z-10">
-                <div class="flex items-center gap-3 mb-2">
-                    <h1 class="text-3xl md:text-4xl font-bold text-white">Statistiques Globales</h1>
-                    <span class="px-2.5 py-1 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-[10px] font-bold rounded-lg uppercase tracking-wider">Admin</span>
-                </div>
-                <p class="text-slate-400 text-lg">Suivi de la croissance, de l'engagement et de la santÈ du rÈseau Plinkk.</p>
-            </div>
-        </div>
-
-        <!--  TAB BAR  -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-2">
-            <nav class="flex gap-1 flex-wrap lg:flex-nowrap" role="tablist" aria-label="Sections Admin Stats">
-                <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="signups" aria-selected="true">Inscriptions</button>
-                <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="logins" aria-selected="false">Connexions</button>
-                <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="plinkks" aria-selected="false">Plinkks</button>
-                <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="redirections" aria-selected="false">Redirections</button>
-                <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="premium" aria-selected="false">Premium</button>
-                <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="bans" aria-selected="false">ModÈration</button>
-                <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="accounts" aria-selected="false">Comptes</button>
-            </nav>
-        </div>
-
-        <!--  CONTROL BAR  -->
-        <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6">
-            <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-                <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl">
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Date DÈbut</label>
-                        <input type="date" id="fFrom" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:border-violet-500 transition-all outline-none" />
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Date Fin</label>
-                        <input type="date" id="fTo" class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:border-violet-500 transition-all outline-none" />
-                    </div>
-                </div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <button class="range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition-all" data-days="1">24h</button>
-                    <button class="range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition-all" data-days="7">7j</button>
-                    <button class="range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20" data-days="30">30j</button>
-                    <button class="range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition-all" data-days="90">90j</button>
-                </div>
-                
-                <!-- EXPORT ACTIONS -->
-                <div class="flex items-center gap-2 border-t lg:border-t-0 lg:border-l border-slate-800 pt-4 lg:pt-0 lg:pl-6">
-                    <button id="btnExportGraph" class="px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-violet-500 hover:bg-violet-500/10 transition-all flex items-center gap-2" title="Exporter le graphique">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                        <span class="hidden sm:inline">Graph</span>
-                    </button>
-                    <button id="btnExportCSV" class="px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-emerald-500 hover:bg-emerald-500/10 transition-all flex items-center gap-2" title="Exporter les donnÈes (CSV)">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
-                        <span class="hidden sm:inline">CSV</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!--  PANEL: SIGNUPS  -->
-        <section id="panel-signups" class="tab-panel space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <p class="text-sm text-slate-400 mb-1">Total Inscrits</p>
-                    <p id="statTotal" class="text-3xl font-bold text-white tracking-tight">-</p>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <p class="text-sm text-slate-400 mb-1">Publics</p>
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                        <p id="statPub" class="text-3xl font-bold text-white tracking-tight">-</p>
-                    </div>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <p class="text-sm text-slate-400 mb-1">PrivÈs</p>
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-rose-500"></div>
-                        <p id="statPriv" class="text-3xl font-bold text-white tracking-tight">-</p>
-                    </div>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <p class="text-sm text-slate-400 mb-1">Staff</p>
-                    <p id="statStaff" class="text-3xl font-bold text-white tracking-tight">-</p>
-                </div>
-            </div>
-
-            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
-                <div class="flex items-center gap-2 mb-8 bg-slate-900/50 p-1 rounded-xl w-fit">
-                    <button class="sub-tab-btn px-4 py-2 rounded-lg text-sm font-bold bg-violet-600 text-white" data-sub="su1">Par jour</button>
-                    <button class="sub-tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-200" data-sub="su2">VisibilitÈ</button>
-                    <button class="sub-tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-200" data-sub="su3">RÙles</button>
-                    <button class="sub-tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-200" data-sub="su4">Cumul</button>
-                </div>
-                <div class="h-[400px] relative">
-                    <div class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
-                        <div class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin"></div>
-                    </div>
-                    <canvas id="chartSignups"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <!--  PANEL: LOGINS  -->
-        <section id="panel-logins" class="tab-panel hidden space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 flex flex-col items-center">
-                    <p class="text-sm text-slate-400 mb-1 font-medium">Connexions (pÈriode)</p>
-                    <p id="statLoginTotal" class="text-5xl font-bold text-white tracking-tighter">-</p>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 flex flex-col items-center">
-                    <p class="text-sm text-slate-400 mb-1 font-medium">Moyenne journaliËre</p>
-                    <p id="statLoginAvg" class="text-5xl font-bold text-cyan-400 tracking-tighter">-</p>
-                </div>
-            </div>
-            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
-                <h3 class="text-lg font-bold text-white mb-6">ActivitÈ des sessions</h3>
-                <div class="h-[400px] relative">
-                    <div class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
-                        <div class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin"></div>
-                    </div>
-                    <canvas id="chartLogins"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <!--  PANEL: PLINKKS  -->
-        <section id="panel-plinkks" class="tab-panel hidden space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <p class="text-sm text-slate-400 mb-1">Vues Totales</p>
-                    <p id="plinkkTotalViews" class="text-3xl font-bold text-white">-</p>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <p class="text-sm text-slate-400 mb-1">Total Plinkks</p>
-                    <p id="plinkkTotalCount" class="text-3xl font-bold text-white">-</p>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <p class="text-sm text-slate-400 mb-1">Top Vues (Jour)</p>
-                    <p id="plinkkTopDay" class="text-3xl font-bold text-violet-400">-</p>
-                </div>
-            </div>
-            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
-                <h3 class="text-lg font-bold text-white mb-6">Vues journaliËres (Plinkks)</h3>
-                <div class="h-[400px] relative">
-                    <div class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
-                        <div class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin"></div>
-                    </div>
-                    <canvas id="chartPlinkks"></canvas>
-                </div>
-            </div>
-
-            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl overflow-hidden">
-                <div class="p-6 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-                    <h3 class="font-bold text-white text-xl">Top Plinkks (vues)</h3>
-                    <div class="flex items-center gap-2">
-                         <span class="text-xs text-slate-500 uppercase font-bold tracking-widest text-[10px]">PÈriode :</span>
-                         <span class="text-[10px] text-violet-400 font-bold uppercase tracking-widest px-2 py-1 bg-violet-400/10 rounded-lg border border-violet-500/20">Global</span>
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500 bg-slate-950/50">
-                                <th class="p-4 font-bold">Plinkk</th>
-                                <th class="p-4 font-bold">Slug</th>
-                                <th class="p-4 font-bold">Auteur</th>
-                                <th class="p-4 font-bold text-center">Date</th>
-                                <th class="p-4 font-bold text-right">Vues</th>
-                            </tr>
-                        </thead>
-                        <tbody id="plinkksTopBody" class="divide-y divide-slate-800/50">
-                            <!-- Injected -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!--  PANEL: REDIRECTIONS  -->
-        <section id="panel-redirections" class="tab-panel hidden space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-2 text-slate-400">
-                        <i class="ph-duotone ph-mouse-left text-xl"></i>
-                        <span class="text-sm font-medium">Total Clics</span>
-                    </div>
-                    <div class="text-3xl font-bold text-white" id="redirectTotalClicks">--</div>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-2 text-slate-400">
-                        <i class="ph-duotone ph-arrows-merge text-xl"></i>
-                        <span class="text-sm font-medium">Total Redirections</span>
-                    </div>
-                    <div class="text-3xl font-bold text-white" id="redirectTotalCount">--</div>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-2 text-slate-400">
-                        <i class="ph-duotone ph-trend-up text-xl"></i>
-                        <span class="text-sm font-medium">Record JournÈe</span>
-                    </div>
-                    <div class="text-3xl font-bold text-white" id="redirectTopDay">--</div>
-                </div>
-            </div>
-            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
-                <h3 class="text-lg font-bold text-white mb-6">Clics journaliers (Redirections)</h3>
-                <div class="h-[400px] relative">
-                    <div class="chart-loader absolute inset-0 flex items-center justify-center bg-slate-950/50 backdrop-blur-sm z-10 transition-opacity duration-300">
-                        <div class="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
-                    </div>
-                    <canvas id="chartRedirections"></canvas>
-                </div>
-            </div>
-
-            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl overflow-hidden">
-                <div class="p-6 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-                    <h3 class="text-lg font-bold text-white">Top Redirections</h3>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="text-xs text-slate-400 uppercase border-b border-slate-800">
-                                <th class="px-6 py-4 font-medium">Slug</th>
-                                <th class="px-6 py-4 font-medium">Cible</th>
-                                <th class="px-6 py-4 font-medium">Utilisateur</th>
-                                <th class="px-6 py-4 font-medium text-right">Clics</th>
-                                <th class="px-6 py-4 font-medium text-right">CrÈÈ le</th>
-                                <th class="px-6 py-4 font-medium text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="redirectsTopBody" class="text-sm"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!--  PANEL: PREMIUM  -->
-        <section id="panel-premium" class="tab-panel hidden space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <p class="text-sm text-slate-400 mb-1">Total Premium</p>
-                    <p id="kpiTotalPremium" class="text-2xl font-bold text-white">-</p>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <p class="text-sm text-slate-400 mb-1">Actifs</p>
-                    <p id="kpiActivePremium" class="text-2xl font-bold text-emerald-400">-</p>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <p class="text-sm text-slate-400 mb-1">Achats (PÈriode)</p>
-                    <p id="kpiTotalPurchases" class="text-2xl font-bold text-white">-</p>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <p class="text-sm text-slate-400 mb-1">Revenu Total</p>
-                    <p id="kpiTotalRevenue" class="text-2xl font-bold text-amber-400">-</p>
-                </div>
-            </div>
-            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
-                <h3 class="text-lg font-bold text-white mb-6">Inscriptions Premium</h3>
-                <div class="h-[400px] relative">
-                    <div class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
-                        <div class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin"></div>
-                    </div>
-                    <canvas id="chartPremium"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <!--  PANEL: BANS  -->
-        <section id="panel-bans" class="tab-panel hidden space-y-6">
-             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <p class="text-sm text-slate-400 mb-1">Actions ModÈration</p>
-                    <p id="statBanTotal" class="text-4xl font-bold text-white tracking-tight">-</p>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                    <p class="text-sm text-slate-400 mb-1">Taux de RÈvocation</p>
-                    <p id="statBanRevokeRate" class="text-4xl font-bold text-rose-400 tracking-tight">-</p>
-                </div>
-            </div>
-            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
-                <h3 class="text-lg font-bold text-white mb-6">Bans & RÈvocations</h3>
-                <div class="h-[400px] relative">
-                    <div class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
-                        <div class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin"></div>
-                    </div>
-                    <canvas id="chartBans"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <!--  PANEL: ACCOUNTS  -->
-        <section id="panel-accounts" class="tab-panel hidden space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                <p class="text-sm text-slate-400 mb-1">Utilisateurs</p>
-                <p id="kpiTotalUsersAcc" class="text-2xl font-bold text-white">-</p>
-              </div>
-              <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                <p class="text-sm text-slate-400 mb-1">Avec Password</p>
-                <p id="kpiWithPassword" class="text-2xl font-bold text-emerald-400">-</p>
-              </div>
-              <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                <p class="text-sm text-slate-400 mb-1">OAuth Uni.</p>
-                <p id="kpiOAuthOnly" class="text-2xl font-bold text-amber-400">-</p>
-              </div>
-              <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                <p class="text-sm text-slate-400 mb-1">Connections</p>
-                <p id="kpiTotalConn" class="text-2xl font-bold text-cyan-400">-</p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-8 flex flex-col items-center">
-                    <h3 class="text-lg font-bold text-white mb-8">MÈthodes de connexion</h3>
-                    <div class="h-[300px] w-full relative">
-                        <div class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
-                            <div class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin"></div>
+                    <!--  HEADER GRADIENT  -->
+                    <div
+                        class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+                        <div
+                            class="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none">
                         </div>
-                        <canvas id="chartDoughnut"></canvas>
-                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <span class="text-slate-500 text-[10px] uppercase font-bold tracking-widest">Ratio</span>
+                        <div class="relative z-10">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h1 class="text-3xl md:text-4xl font-bold text-white">Statistiques Globales</h1>
+                                <span
+                                    class="px-2.5 py-1 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-[10px] font-bold rounded-lg uppercase tracking-wider">Admin</span>
+                            </div>
+                            <p class="text-slate-400 text-lg">Suivi de la croissance, de l'engagement et de la sant√© du
+                                r√©seau Plinkk.</p>
                         </div>
                     </div>
+
+                    <!--  TAB BAR  -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-2">
+                        <nav class="flex gap-1 flex-wrap lg:flex-nowrap" role="tablist"
+                            aria-label="Sections Admin Stats">
+                            <button
+                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                                data-tab="signups" aria-selected="true">Inscriptions</button>
+                            <button
+                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                                data-tab="logins" aria-selected="false">Connexions</button>
+                            <button
+                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                                data-tab="plinkks" aria-selected="false">Plinkks</button>
+                            <button
+                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                                data-tab="redirections" aria-selected="false">Redirections</button>
+                            <button
+                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                                data-tab="premium" aria-selected="false">Premium</button>
+                            <button
+                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                                data-tab="bans" aria-selected="false">Mod√©ration</button>
+                            <button
+                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                                data-tab="accounts" aria-selected="false">Comptes</button>
+            <button class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                data-tab="funnel" aria-selected="false">Tunnel</button>
+                        </nav>
+                    </div>
+
+                    <!--  CONTROL BAR  -->
+                    <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6">
+                        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+                            <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl">
+                                <div class="space-y-1.5">
+                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Date
+                                        D√©but</label>
+                                    <input type="date" id="fFrom"
+                                        class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:border-violet-500 transition-all outline-none" />
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Date
+                                        Fin</label>
+                                    <input type="date" id="fTo"
+                                        class="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:border-violet-500 transition-all outline-none" />
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button
+                                    class="range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition-all"
+                                    data-days="1">24h</button>
+                                <button
+                                    class="range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition-all"
+                                    data-days="7">7j</button>
+                                <button
+                                    class="range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20"
+                                    data-days="30">30j</button>
+                                <button
+                                    class="range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition-all"
+                                    data-days="90">90j</button>
+                            </div>
+
+                            <!-- EXPORT ACTIONS -->
+                            <div
+                                class="flex items-center gap-2 border-t lg:border-t-0 lg:border-l border-slate-800 pt-4 lg:pt-0 lg:pl-6">
+                                <button id="btnExportGraph"
+                                    class="px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-violet-500 hover:bg-violet-500/10 transition-all flex items-center gap-2"
+                                    title="Exporter le graphique">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                                        <circle cx="9" cy="9" r="2" />
+                                        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                                    </svg>
+                                    <span class="hidden sm:inline">Graph</span>
+                                </button>
+                                <button id="btnExportCSV"
+                                    class="px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-emerald-500 hover:bg-emerald-500/10 transition-all flex items-center gap-2"
+                                    title="Exporter les donn√©es (CSV)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path
+                                            d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                                        <polyline points="14 2 14 8 20 8" />
+                                        <path d="M8 13h2" />
+                                        <path d="M8 17h2" />
+                                        <path d="M14 13h2" />
+                                        <path d="M14 17h2" />
+                                    </svg>
+                                    <span class="hidden sm:inline">CSV</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--  PANEL: SIGNUPS  -->
+                    <section id="panel-signups" class="tab-panel space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Total Inscrits</p>
+                                <p id="statTotal" class="text-3xl font-bold text-white tracking-tight">-</p>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Publics</p>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                    <p id="statPub" class="text-3xl font-bold text-white tracking-tight">-</p>
+                                </div>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Priv√©s</p>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-rose-500"></div>
+                                    <p id="statPriv" class="text-3xl font-bold text-white tracking-tight">-</p>
+                                </div>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Staff</p>
+                                <p id="statStaff" class="text-3xl font-bold text-white tracking-tight">-</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+                            <div class="flex items-center gap-2 mb-8 bg-slate-900/50 p-1 rounded-xl w-fit">
+                                <button
+                                    class="sub-tab-btn px-4 py-2 rounded-lg text-sm font-bold bg-violet-600 text-white"
+                                    data-sub="su1">Par jour</button>
+                                <button
+                                    class="sub-tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-200"
+                                    data-sub="su2">Visibilit√©</button>
+                                <button
+                                    class="sub-tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-200"
+                                    data-sub="su3">R√©les</button>
+                                <button
+                                    class="sub-tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-200"
+                                    data-sub="su4">Cumul</button>
+                            </div>
+                            <div class="h-[400px] relative">
+                                <div
+                                    class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
+                                    <div
+                                        class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin">
+                                    </div>
+                                </div>
+                                <canvas id="chartSignups"></canvas>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!--  PANEL: LOGINS  -->
+                    <section id="panel-logins" class="tab-panel hidden space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div
+                                class="bg-slate-900 border border-slate-800 rounded-2xl p-8 flex flex-col items-center">
+                                <p class="text-sm text-slate-400 mb-1 font-medium">Connexions (p√©riode)</p>
+                                <p id="statLoginTotal" class="text-5xl font-bold text-white tracking-tighter">-</p>
+                            </div>
+                            <div
+                                class="bg-slate-900 border border-slate-800 rounded-2xl p-8 flex flex-col items-center">
+                                <p class="text-sm text-slate-400 mb-1 font-medium">Moyenne journali√©re</p>
+                                <p id="statLoginAvg" class="text-5xl font-bold text-cyan-400 tracking-tighter">-</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+                            <h3 class="text-lg font-bold text-white mb-6">Activit√© des sessions</h3>
+                            <div class="h-[400px] relative">
+                                <div
+                                    class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
+                                    <div
+                                        class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin">
+                                    </div>
+                                </div>
+                                <canvas id="chartLogins"></canvas>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!--  PANEL: PLINKKS  -->
+                    <section id="panel-plinkks" class="tab-panel hidden space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Vues Totales</p>
+                                <p id="plinkkTotalViews" class="text-3xl font-bold text-white">-</p>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Total Plinkks</p>
+                                <p id="plinkkTotalCount" class="text-3xl font-bold text-white">-</p>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Top Vues (Jour)</p>
+                                <p id="plinkkTopDay" class="text-3xl font-bold text-violet-400">-</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+                            <h3 class="text-lg font-bold text-white mb-6">Vues journali√©res (Plinkks)</h3>
+                            <div class="h-[400px] relative">
+                                <div
+                                    class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
+                                    <div
+                                        class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin">
+                                    </div>
+                                </div>
+                                <canvas id="chartPlinkks"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950/30 border border-slate-800 rounded-3xl overflow-hidden">
+                            <div
+                                class="p-6 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
+                                <h3 class="font-bold text-white text-xl">Top Plinkks (vues)</h3>
+                                <div class="flex items-center gap-2">
+                                    <span
+                                        class="text-xs text-slate-500 uppercase font-bold tracking-widest text-[10px]">P√©riode
+                                        :</span>
+                                    <span
+                                        class="text-[10px] text-violet-400 font-bold uppercase tracking-widest px-2 py-1 bg-violet-400/10 rounded-lg border border-violet-500/20">Global</span>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr
+                                            class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500 bg-slate-950/50">
+                                            <th class="p-4 font-bold">Plinkk</th>
+                                            <th class="p-4 font-bold">Slug</th>
+                                            <th class="p-4 font-bold">Auteur</th>
+                                            <th class="p-4 font-bold text-center">Date</th>
+                                            <th class="p-4 font-bold text-right">Vues</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="plinkksTopBody" class="divide-y divide-slate-800/50">
+                                        <!-- Injected -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!--  PANEL: REDIRECTIONS  -->
+                    <section id="panel-redirections" class="tab-panel hidden space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <div class="flex items-center gap-3 mb-2 text-slate-400">
+                                    <i class="ph-duotone ph-mouse-left text-xl"></i>
+                                    <span class="text-sm font-medium">Total Clics</span>
+                                </div>
+                                <div class="text-3xl font-bold text-white" id="redirectTotalClicks">--</div>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <div class="flex items-center gap-3 mb-2 text-slate-400">
+                                    <i class="ph-duotone ph-arrows-merge text-xl"></i>
+                                    <span class="text-sm font-medium">Total Redirections</span>
+                                </div>
+                                <div class="text-3xl font-bold text-white" id="redirectTotalCount">--</div>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <div class="flex items-center gap-3 mb-2 text-slate-400">
+                                    <i class="ph-duotone ph-trend-up text-xl"></i>
+                                    <span class="text-sm font-medium">Record Journ√©e</span>
+                                </div>
+                                <div class="text-3xl font-bold text-white" id="redirectTopDay">--</div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+                            <h3 class="text-lg font-bold text-white mb-6">Clics journaliers (Redirections)</h3>
+                            <div class="h-[400px] relative">
+                                <div
+                                    class="chart-loader absolute inset-0 flex items-center justify-center bg-slate-950/50 backdrop-blur-sm z-10 transition-opacity duration-300">
+                                    <div
+                                        class="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin">
+                                    </div>
+                                </div>
+                                <canvas id="chartRedirections"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950/30 border border-slate-800 rounded-3xl overflow-hidden">
+                            <div
+                                class="p-6 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
+                                <h3 class="text-lg font-bold text-white">Top Redirections</h3>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="text-xs text-slate-400 uppercase border-b border-slate-800">
+                                            <th class="px-6 py-4 font-medium">Slug</th>
+                                            <th class="px-6 py-4 font-medium">Cible</th>
+                                            <th class="px-6 py-4 font-medium">Utilisateur</th>
+                                            <th class="px-6 py-4 font-medium text-right">Clics</th>
+                                            <th class="px-6 py-4 font-medium text-right">Cr√©√© le</th>
+                                            <th class="px-6 py-4 font-medium text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="redirectsTopBody" class="text-sm"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!--  PANEL: PREMIUM  -->
+                    <section id="panel-premium" class="tab-panel hidden space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Total Premium</p>
+                                <p id="kpiTotalPremium" class="text-2xl font-bold text-white">-</p>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Actifs</p>
+                                <p id="kpiActivePremium" class="text-2xl font-bold text-emerald-400">-</p>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Achats (P√©riode)</p>
+                                <p id="kpiTotalPurchases" class="text-2xl font-bold text-white">-</p>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Revenu Total</p>
+                                <p id="kpiTotalRevenue" class="text-2xl font-bold text-amber-400">-</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+                            <h3 class="text-lg font-bold text-white mb-6">Inscriptions Premium</h3>
+                            <div class="h-[400px] relative">
+                                <div
+                                    class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
+                                    <div
+                                        class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin">
+                                    </div>
+                                </div>
+                                <canvas id="chartPremium"></canvas>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!--  PANEL: BANS  -->
+                    <section id="panel-bans" class="tab-panel hidden space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Actions Mod√©ration</p>
+                                <p id="statBanTotal" class="text-4xl font-bold text-white tracking-tight">-</p>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Taux de R√©vocation</p>
+                                <p id="statBanRevokeRate" class="text-4xl font-bold text-rose-400 tracking-tight">-</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+                            <h3 class="text-lg font-bold text-white mb-6">Bans & R√©vocations</h3>
+                            <div class="h-[400px] relative">
+                                <div
+                                    class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
+                                    <div
+                                        class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin">
+                                    </div>
+                                </div>
+                                <canvas id="chartBans"></canvas>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!--  PANEL: ACCOUNTS  -->
+                    <section id="panel-accounts" class="tab-panel hidden space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Utilisateurs</p>
+                                <p id="kpiTotalUsersAcc" class="text-2xl font-bold text-white">-</p>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Avec Password</p>
+                                <p id="kpiWithPassword" class="text-2xl font-bold text-emerald-400">-</p>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">OAuth Uni.</p>
+                                <p id="kpiOAuthOnly" class="text-2xl font-bold text-amber-400">-</p>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Connections</p>
+                                <p id="kpiTotalConn" class="text-2xl font-bold text-cyan-400">-</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div
+                                class="bg-slate-950/30 border border-slate-800 rounded-3xl p-8 flex flex-col items-center">
+                                <h3 class="text-lg font-bold text-white mb-8">M√©thodes de connexion</h3>
+                                <div class="h-[300px] w-full relative">
+                                    <div
+                                        class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
+                                        <div
+                                            class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin">
+                                        </div>
+                                    </div>
+                                    <canvas id="chartDoughnut"></canvas>
+                                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                        <span
+                                            class="text-slate-500 text-[10px] uppercase font-bold tracking-widest">Ratio</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="providerDetails" class="grid grid-cols-1 gap-3">
+                                <!-- Injected -->
+                            </div>
+                        </div>
+                    </section>
+
+        <!-- ‚îÄ‚îÄ‚îÄ TUNNEL D'ACQUISITION ‚îÄ‚îÄ‚îÄ -->
+        <section id="panel-funnel" class="tab-panel hidden space-y-6">
+
+            <!-- Sub-tab toggle -->
+            <div class="flex items-center gap-2 p-1 bg-slate-800/50 rounded-xl w-fit">
+                <button id="funnelSubPlinkk" class="px-4 py-2 rounded-lg text-sm font-medium bg-violet-500/20 text-violet-300 border border-violet-500/30 transition-all">
+                    Tunnel Plinkk
+                </button>
+                <button id="funnelSubPurchase" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+                    Tunnel Achats
+                        <button class="px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-white/5 sub-funnel-btn" data-sub="funnel-detail">Tunnel D√©taill√©</button>
+                </button>
+            </div>
+
+            <!-- Plinkk Funnel -->
+            <div id="funnelPlinkk" class="space-y-6">
+                <div class="glass-card rounded-2xl border border-white/5 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="font-bold text-lg text-white flex items-center gap-2">
+                            <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                            </svg>
+                            Tunnel Plinkk
+                        </h2>
+                        <span class="text-xs text-slate-500">Donn√©es globales</span>
+                    </div>
+                    <div class="space-y-0" id="funnelPlinkkSteps">
+                        <div class="flex items-center gap-4 py-3" data-funnel="f-p-users">
+                            <div class="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-sm font-medium text-white">Utilisateurs inscrits</span>
+                                    <span class="text-lg font-bold text-white" id="fp-users">...</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-violet-500 to-violet-400 h-full rounded-full transition-all duration-700" style="width:100%" id="fp-bar-users"></div></div>
+                            </div>
+                            <span class="text-sm font-semibold text-violet-400 w-14 text-right">100%</span>
+                        </div>
+                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
+
+                        <div class="flex items-center gap-4 py-3">
+                            <div class="w-10 h-10 rounded-full bg-fuchsia-500/20 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 16.875h3.375m0 0h3.375m-3.375 0V13.5m0 3.375v3.375M6 10.5h2.25a2.25 2.25 0 002.25-2.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v2.25A2.25 2.25 0 006 10.5zm0 9.75h2.25A2.25 2.25 0 0010.5 18v-2.25a2.25 2.25 0 00-2.25-2.25H6a2.25 2.25 0 00-2.25 2.25V18A2.25 2.25 0 006 20.25zm9.75-9.75H18a2.25 2.25 0 002.25-2.25V6A2.25 2.25 0 0018 3.75h-2.25A2.25 2.25 0 0013.5 6v2.25a2.25 2.25 0 002.25 2.25z" /></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-sm font-medium text-white">Ont cr√©√© un Plinkk</span>
+                                    <span class="text-lg font-bold text-white" id="fp-withPlinkk">...</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-fuchsia-500 to-fuchsia-400 h-full rounded-full transition-all duration-700" style="width:0%" id="fp-bar-withPlinkk"></div></div>
+                            </div>
+                            <span class="text-sm font-semibold text-fuchsia-400 w-14 text-right" id="fp-pct-withPlinkk">-</span>
+                        </div>
+                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
+
+                        <div class="flex items-center gap-4 py-3">
+                            <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-sm font-medium text-white">Vues totales</span>
+                                    <span class="text-lg font-bold text-white" id="fp-views">...</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-indigo-500 to-indigo-400 h-full rounded-full transition-all duration-700" style="width:0%" id="fp-bar-views"></div></div>
+                            </div>
+                            <span class="text-sm font-semibold text-indigo-400 w-14 text-right" id="fp-pct-views">-</span>
+                        </div>
+                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
+
+                        <div class="flex items-center gap-4 py-3">
+                            <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" /></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-sm font-medium text-white">Clics totaux</span>
+                                    <span class="text-lg font-bold text-white" id="fp-clicks">...</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-700" style="width:0%" id="fp-bar-clicks"></div></div>
+                            </div>
+                            <span class="text-sm font-semibold text-emerald-400 w-14 text-right" id="fp-pct-clicks">-</span>
+                        </div>
+                    </div>
                 </div>
-                <div id="providerDetails" class="grid grid-cols-1 gap-3">
-                    <!-- Injected -->
+                <!-- Plinkk funnel KPIs -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Activation</p>
+                        <p class="text-2xl font-bold text-white" id="fp-kpi-activation">-</p>
+                        <p class="text-xs text-slate-500 mt-1">Inscrits ‚Üí Plinkk</p>
+                    </div>
+                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">CTR Global</p>
+                        <p class="text-2xl font-bold text-white" id="fp-kpi-ctr">-</p>
+                        <p class="text-xs text-slate-500 mt-1">Vues ‚Üí Clics</p>
+                    </div>
+                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Vues / Plinkk</p>
+                        <p class="text-2xl font-bold text-white" id="fp-kpi-vpg">-</p>
+                        <p class="text-xs text-slate-500 mt-1">Moyenne</p>
+                    </div>
                 </div>
             </div>
+
+            <!-- Purchase Funnel -->
+            <div id="funnelPurchase" class="space-y-6 hidden">
+                <div class="glass-card rounded-2xl border border-white/5 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="font-bold text-lg text-white flex items-center gap-2">
+                            <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                            </svg>
+                            Tunnel Achats
+                        </h2>
+                        <span class="text-xs text-slate-500">Donn√©es globales</span>
+                    </div>
+                    <div class="space-y-0" id="funnelPurchaseSteps">
+                        <div class="flex items-center gap-4 py-3">
+                            <div class="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-sm font-medium text-white">Utilisateurs totaux</span>
+                                    <span class="text-lg font-bold text-white" id="fc-users">...</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-violet-500 to-violet-400 h-full rounded-full transition-all duration-700" style="width:100%" id="fc-bar-users"></div></div>
+                            </div>
+                            <span class="text-sm font-semibold text-violet-400 w-14 text-right">100%</span>
+                        </div>
+                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
+
+                        <div class="flex items-center gap-4 py-3">
+                            <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-sm font-medium text-white">Utilisateurs Premium</span>
+                                    <span class="text-lg font-bold text-white" id="fc-premium">...</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-amber-500 to-amber-400 h-full rounded-full transition-all duration-700" style="width:0%" id="fc-bar-premium"></div></div>
+                            </div>
+                            <span class="text-sm font-semibold text-amber-400 w-14 text-right" id="fc-pct-premium">-</span>
+                        </div>
+                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
+
+                        <div class="flex items-center gap-4 py-3">
+                            <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-sm font-medium text-white">Achats r√©alis√©s</span>
+                                    <span class="text-lg font-bold text-white" id="fc-purchases">...</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-700" style="width:0%" id="fc-bar-purchases"></div></div>
+                            </div>
+                            <span class="text-sm font-semibold text-emerald-400 w-14 text-right" id="fc-pct-purchases">-</span>
+                        </div>
+                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-3"></div>
+
+                        <div class="flex items-center gap-4 py-3">
+                            <div class="w-10 h-10 rounded-full bg-rose-500/20 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-sm font-medium text-white">Revenu total</span>
+                                    <span class="text-lg font-bold text-white" id="fc-revenue">...</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden"><div class="bg-gradient-to-r from-rose-500 to-rose-400 h-full rounded-full transition-all duration-700" style="width:0%" id="fc-bar-revenue"></div></div>
+                            </div>
+                            <span class="text-sm font-semibold text-rose-400 w-14 text-right" id="fc-pct-revenue">-</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Purchase funnel KPIs -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Conversion Premium</p>
+                        <p class="text-2xl font-bold text-white" id="fc-kpi-conv">-</p>
+                        <p class="text-xs text-slate-500 mt-1">Inscrits ‚Üí Premium</p>
+                    </div>
+                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">ARPU</p>
+                        <p class="text-2xl font-bold text-white" id="fc-kpi-arpu">-</p>
+                        <p class="text-xs text-slate-500 mt-1">Revenu / User Premium</p>
+                    </div>
+                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Panier moyen</p>
+                        <p class="text-2xl font-bold text-white" id="fc-kpi-avgorder">-</p>
+                        <p class="text-xs text-slate-500 mt-1">Par achat</p>
+                    </div>
+                <!-- Churn & Retention -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">R√©tention</p>
+                        <p class="text-2xl font-bold text-emerald-400" id="fc-kpi-retention">-</p>
+                        <p class="text-xs text-slate-500 mt-1">Premium actifs / Total ayant pay√©</p>
+                    </div>
+                    <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Churn</p>
+                        <p class="text-2xl font-bold text-rose-400" id="fc-kpi-churn">-</p>
+                        <p class="text-xs text-slate-500 mt-1">Ont r√©sili√© / parti</p>
+                    </div>
+                </div>
+
+                <!-- Tunnel D√©taill√© -->
+                <div id="sub-funnel-detail" class="hidden">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Landing</p>
+                            <p class="text-xl font-bold text-violet-400" id="fc-kpi-landing">-</p>
+                        </div>
+                        <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Inscriptions</p>
+                            <p class="text-xl font-bold text-blue-400" id="fc-kpi-signups">-</p>
+                        </div>
+                        <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Page Premium</p>
+                            <p class="text-xl font-bold text-fuchsia-400" id="fc-kpi-premview">-</p>
+                        </div>
+                        <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Configuration</p>
+                            <p class="text-xl font-bold text-indigo-400" id="fc-kpi-configview">-</p>
+                        </div>
+                        <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Achats</p>
+                            <p class="text-xl font-bold text-emerald-400" id="fc-kpi-funpurchase">-</p>
+                        </div>
+                        <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                            <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">R√©siliations</p>
+                            <p class="text-xl font-bold text-rose-400" id="fc-kpi-funcancels">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Funnel bar visualization -->
+                    <div class="mt-6 space-y-2" id="funnel-bars"></div>
+                    <p class="text-[10px] text-slate-600 mt-3">Donn√©es issues du tracking r√©el des √©v√©nements utilisateurs.</p>
+                </div>
+                </div>
+            </div>
+
         </section>
 
-    </main>
-</div>
+                </main>
+        </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-(function() {
-    const qs = (s) => document.querySelector(s);
-    const qsa = (s) => Array.from(document.querySelectorAll(s));
-    const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n || 0);
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            (function () {
+                const qs = (s) => document.querySelector(s);
+                const qsa = (s) => Array.from(document.querySelectorAll(s));
+                const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n || 0);
 
-    const CHART_TOOLTIP = {
-        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-        titleColor: '#fff',
-        bodyColor: '#94a3b8',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        borderWidth: 1,
-        padding: 12,
-        cornerRadius: 8,
-        displayColors: true
-    };
+                const CHART_TOOLTIP = {
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    titleColor: '#fff',
+                    bodyColor: '#94a3b8',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    padding: 12,
+                    cornerRadius: 8,
+                    displayColors: true
+                };
 
-    const CHART_SCALES = {
-        x: { grid: { display: false }, border: { display: false }, ticks: { color: '#64748b', maxTicksLimit: 12, font: { size: 10 } } },
-        y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, border: { display: false }, ticks: { color: '#64748b', precision: 0, font: { size: 10 } } }
-    };
+                const CHART_SCALES = {
+                    x: { grid: { display: false }, border: { display: false }, ticks: { color: '#64748b', maxTicksLimit: 12, font: { size: 10 } } },
+                    y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, border: { display: false }, ticks: { color: '#64748b', precision: 0, font: { size: 10 } } }
+                };
 
-    const charts = {};
-    let activeTab = 'signups';
-    let currentData = null;
+                const charts = {};
+                let activeTab = 'signups';
+                let currentData = null;
 
-    function downloadCSV(filename, rows) {
-        const csvContent = "data:text/csv;charset=utf-8," 
-            + rows.map(e => e.join(";")).join("\n");
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
+                function downloadCSV(filename, rows) {
+                    const csvContent = "data:text/csv;charset=utf-8,"
+                        + rows.map(e => e.join(";")).join("\n");
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", filename);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
 
-    function setupDates() {
-        const fromIn = qs('#fFrom');
-        const toIn = qs('#fTo');
-        if (fromIn && toIn && !fromIn.value) {
-            const now = new Date();
-            const start = new Date(now.getTime() - 29 * 86400000);
-            fromIn.value = start.toISOString().slice(0, 10);
-            toIn.value = now.toISOString().slice(0, 10);
-        }
-    }
+                function setupDates() {
+                    const fromIn = qs('#fFrom');
+                    const toIn = qs('#fTo');
+                    if (fromIn && toIn && !fromIn.value) {
+                        const now = new Date();
+                        const start = new Date(now.getTime() - 29 * 86400000);
+                        fromIn.value = start.toISOString().slice(0, 10);
+                        toIn.value = now.toISOString().slice(0, 10);
+                    }
+                }
 
-    async function fetchAPI(url) {
-        const f = qs('#fFrom');
-        const t = qs('#fTo');
-        const from = f ? f.value : '';
-        const to = t ? t.value : '';
-        const sep = url.includes('?') ? '&' : '?';
-        const res = await fetch(`${url}${sep}from=${from}&to=${to}`, { credentials: 'same-origin' });
-        if (!res.ok) throw new Error('API Error: ' + res.status);
-        return res.json();
-    }
+                async function fetchAPI(url) {
+                    const f = qs('#fFrom');
+                    const t = qs('#fTo');
+                    const from = f ? f.value : '';
+                    const to = t ? t.value : '';
+                    const sep = url.includes('?') ? '&' : '?';
+                    const res = await fetch(`${url}${sep}from=${from}&to=${to}`, { credentials: 'same-origin' });
+                    if (!res.ok) throw new Error('API Error: ' + res.status);
+                    return res.json();
+                }
 
-    function drawLine(id, labels, datasets) {
-        const ctx = qs('#' + id);
-        if (!ctx) return;
-        if (typeof Chart === 'undefined') {
-            setTimeout(() => drawLine(id, labels, datasets), 100);
-            return;
-        }
-        if (charts[id]) charts[id].destroy();
-        charts[id] = new Chart(ctx.getContext('2d'), {
-            type: 'line',
-            data: { 
-                labels: labels.map(l => {
-                    try {
-                        return new Date(l).toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
-                    } catch(e) { return String(l); }
-                }), 
-                datasets: datasets.map(ds => ({
-                    tension: 0.4,
-                    fill: true,
-                    pointRadius: 5,
-                    pointHoverRadius: 8,
-                    pointBackgroundColor: ds.borderColor || '#8b5cf6',
-                    pointBorderColor: '#0f172a',
-                    pointBorderWidth: 2,
-                    borderWidth: 2.5,
-                    ...ds
-                }))
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: {
-                    duration: 400 // Animation plus courte pour forcer l'affichage rapide
-                },
-                plugins: { 
-                    legend: { display: datasets.length > 1, labels: { color: '#94a3b8', font: {size:11} } }, 
-                    tooltip: CHART_TOOLTIP 
-                },
-                scales: CHART_SCALES
-            }
-        });
-        
-        // Force un rafraÓchissement immÈdiat pour Èviter le bug d'invisibilitÈ
-        requestAnimationFrame(() => {
-            if (charts[id]) charts[id].update('none');
-        });
-    }
+                function drawLine(id, labels, datasets) {
+                    const ctx = qs('#' + id);
+                    if (!ctx) return;
+                    if (typeof Chart === 'undefined') {
+                        setTimeout(() => drawLine(id, labels, datasets), 100);
+                        return;
+                    }
+                    if (charts[id]) charts[id].destroy();
+                    charts[id] = new Chart(ctx.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: labels.map(l => {
+                                try {
+                                    return new Date(l).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                                } catch (e) { return String(l); }
+                            }),
+                            datasets: datasets.map(ds => ({
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 5,
+                                pointHoverRadius: 8,
+                                pointBackgroundColor: ds.borderColor || '#8b5cf6',
+                                pointBorderColor: '#0f172a',
+                                pointBorderWidth: 2,
+                                borderWidth: 2.5,
+                                ...ds
+                            }))
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: {
+                                duration: 400 // Animation plus courte pour forcer l'affichage rapide
+                            },
+                            plugins: {
+                                legend: { display: datasets.length > 1, labels: { color: '#94a3b8', font: { size: 11 } } },
+                                tooltip: CHART_TOOLTIP
+                            },
+                            scales: CHART_SCALES
+                        }
+                    });
 
-    const loaders = {
-        signups: async () => {
-            const d = await fetchAPI('/admin/stats/signups');
-            currentData = { type: 'signups', data: d };
-            qs('#statTotal').textContent = fmt(d.stats.total);
-            qs('#statPub').textContent = fmt(d.stats.visible);
-            qs('#statPriv').textContent = fmt(d.stats.invisible);
-            qs('#statStaff').textContent = fmt(d.stats.staff);
-            const sub = qs('.sub-tab-btn.bg-violet-600')?.dataset.sub || 'su1';
-            updateSignupsSub(sub, d);
-        },
-        logins: async () => {
-            const d = await fetchAPI('/admin/stats/logins');
-            currentData = { type: 'logins', data: d };
-            qs('#statLoginTotal').textContent = fmt(d.total);
-            qs('#statLoginAvg').textContent = fmt(d.average);
-            drawLine('chartLogins', d.series.map(x => x.date), [{
-                label: 'Connexions', data: d.series.map(x => x.count),
-                borderColor: '#22d3ee', backgroundColor: 'rgba(34, 211, 238, 0.1)'
-            }]);
-        },
-        plinkks: async () => {
-            const [d, top] = await Promise.all([
-                fetchAPI('/admin/stats/plinkks'),
-                fetchAPI('/admin/stats/plinkks/top')
-            ]);
-            currentData = { type: 'plinkks', data: d, top: top };
-            qs('#plinkkTotalViews').textContent = fmt(d.totalViews);
-            qs('#plinkkTotalCount').textContent = fmt(d.totalPlinkks);
-            qs('#plinkkTopDay').textContent = fmt(d.topViewInPeriod);
-            drawLine('chartPlinkks', d.series.map(x => x.date), [{
-                label: 'Vues', data: d.series.map(x => x.count),
-                borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)'
-            }]);
-            const body = qs('#plinkksTopBody');
-            if (body && top.plinkks) {
-                body.innerHTML = top.plinkks.map(p => `
+                    // Force un rafra√©chissement imm√©diat pour √©viter le bug d'invisibilit√©
+                    requestAnimationFrame(() => {
+                        if (charts[id]) charts[id].update('none');
+                    });
+                }
+
+                const loaders = {
+                    signups: async () => {
+                        const d = await fetchAPI('/admin/stats/signups');
+                        currentData = { type: 'signups', data: d };
+                        qs('#statTotal').textContent = fmt(d.stats.total);
+                        qs('#statPub').textContent = fmt(d.stats.visible);
+                        qs('#statPriv').textContent = fmt(d.stats.invisible);
+                        qs('#statStaff').textContent = fmt(d.stats.staff);
+                        const sub = qs('.sub-tab-btn.bg-violet-600')?.dataset.sub || 'su1';
+                        updateSignupsSub(sub, d);
+                    },
+                    logins: async () => {
+                        const d = await fetchAPI('/admin/stats/logins');
+                        currentData = { type: 'logins', data: d };
+                        qs('#statLoginTotal').textContent = fmt(d.total);
+                        qs('#statLoginAvg').textContent = fmt(d.average);
+                        drawLine('chartLogins', d.series.map(x => x.date), [{
+                            label: 'Connexions', data: d.series.map(x => x.count),
+                            borderColor: '#22d3ee', backgroundColor: 'rgba(34, 211, 238, 0.1)'
+                        }]);
+                    },
+                    plinkks: async () => {
+                        const [d, top] = await Promise.all([
+                            fetchAPI('/admin/stats/plinkks'),
+                            fetchAPI('/admin/stats/plinkks/top')
+                        ]);
+                        currentData = { type: 'plinkks', data: d, top: top };
+                        qs('#plinkkTotalViews').textContent = fmt(d.totalViews);
+                        qs('#plinkkTotalCount').textContent = fmt(d.totalPlinkks);
+                        qs('#plinkkTopDay').textContent = fmt(d.topViewInPeriod);
+                        drawLine('chartPlinkks', d.series.map(x => x.date), [{
+                            label: 'Vues', data: d.series.map(x => x.count),
+                            borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)'
+                        }]);
+                        const body = qs('#plinkksTopBody');
+                        if (body && top.plinkks) {
+                            body.innerHTML = top.plinkks.map(p => `
                     <tr class="hover:bg-slate-800/30 transition-colors group">
                         <td class="p-4"><span class="text-white font-bold text-sm">${p.name || 'Sans titre'}</span></td>
                         <td class="p-4"><code class="text-[11px] text-violet-400 bg-violet-400/5 px-2 py-1 rounded-lg border border-violet-500/10">/${p.slug}</code></td>
@@ -496,24 +840,24 @@
                         <td class="p-4 text-center text-slate-500 text-xs">${new Date(p.createdAt).toLocaleDateString('fr-FR')}</td>
                         <td class="p-4 text-right font-bold text-white">${fmt(p.views)}</td>
                     </tr>`).join('');
-            }
-        },
-        redirections: async () => {
-             const [d, top] = await Promise.all([
-                fetchAPI('/admin/stats/redirections'),
-                fetchAPI('/admin/stats/redirections/top')
-            ]);
-            currentData = { type: 'redirections', data: d, top: top };
-            qs('#redirectTotalClicks').textContent = fmt(d.totalClicks);
-            qs('#redirectTotalCount').textContent = fmt(d.totalRedirects);
-            qs('#redirectTopDay').textContent = fmt(d.topViewInPeriod);
-            drawLine('chartRedirections', d.series.map(x => x.date), [{
-                label: 'Clics', data: d.series.map(x => x.count),
-                borderColor: '#ec4899', backgroundColor: 'rgba(236, 72, 153, 0.1)'
-            }]);
-            const body = qs('#redirectsTopBody');
-            if (body && top.redirects) {
-                 body.innerHTML = top.redirects.map(r => `
+                        }
+                    },
+                    redirections: async () => {
+                        const [d, top] = await Promise.all([
+                            fetchAPI('/admin/stats/redirections'),
+                            fetchAPI('/admin/stats/redirections/top')
+                        ]);
+                        currentData = { type: 'redirections', data: d, top: top };
+                        qs('#redirectTotalClicks').textContent = fmt(d.totalClicks);
+                        qs('#redirectTotalCount').textContent = fmt(d.totalRedirects);
+                        qs('#redirectTopDay').textContent = fmt(d.topViewInPeriod);
+                        drawLine('chartRedirections', d.series.map(x => x.date), [{
+                            label: 'Clics', data: d.series.map(x => x.count),
+                            borderColor: '#ec4899', backgroundColor: 'rgba(236, 72, 153, 0.1)'
+                        }]);
+                        const body = qs('#redirectsTopBody');
+                        if (body && top.redirects) {
+                            body.innerHTML = top.redirects.map(r => `
                     <tr class="hover:bg-slate-800/30 transition-colors group">
                         <td class="px-6 py-4"><code class="text-[11px] text-pink-400 bg-pink-400/5 px-2 py-1 rounded-lg border border-pink-500/10">${r.slug}</code></td>
                         <td class="px-6 py-4"><a href="${r.targetUrl}" target="_blank" class="text-xs text-slate-400 hover:text-white hover:underline truncate max-w-[200px] block">${r.targetUrl}</a></td>
@@ -531,286 +875,424 @@
                             </button>
                         </td>
                     </tr>`).join('');
-            }
-        },
-        premium: async () => {
-            const d = await fetchAPI('/admin/stats/premium');
-            currentData = { type: 'premium', data: d };
-            qs('#kpiTotalPremium').textContent = fmt(d.totalHistory);
-            qs('#kpiActivePremium').textContent = fmt(d.activeNow);
-            qs('#kpiTotalPurchases').textContent = fmt(d.periodPurchases);
-            qs('#kpiTotalRevenue').textContent = fmt(d.estimatedTotalRevenue) + 'Ä';
-            drawLine('chartPremium', d.series.map(x => x.date), [{
-                label: 'Achats', data: d.series.map(x => x.count),
-                borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)'
-            }]);
-        },
-        bans: async () => {
-            const d = await fetchAPI('/admin/stats/bans');
-            currentData = { type: 'bans', data: d };
-            qs('#statBanTotal').textContent = fmt(d.totalActions);
-            qs('#statBanRevokeRate').textContent = d.revokeRate + '%';
-            drawLine('chartBans', d.series.map(x => x.date), [
-                { label: 'Bans', data: d.series.map(x => x.bans), borderColor:'#ef4444', backgroundColor:'rgba(239, 68, 68, 0.05)' },
-                { label: 'RÈvocations', data: d.series.map(x => x.revokes), borderColor:'#10b981', backgroundColor:'transparent' }
-            ]);
-        },
-        accounts: async () => {
-            const d = await fetchAPI('/admin/stats/accounts');
-            currentData = { type: 'accounts', data: d };
-            qs('#kpiTotalUsersAcc').textContent = fmt(d.summary.totalUsers);
-            qs('#kpiWithPassword').textContent = fmt(d.summary.withPassword);
-            qs('#kpiOAuthOnly').textContent = fmt(d.summary.oauthOnly);
-            qs('#kpiTotalConn').textContent = fmt(d.summary.totalConnections);
-            const ctx = qs('#chartDoughnut');
-            if (ctx && typeof Chart !== 'undefined') {
-                if (charts.doughnut) charts.doughnut.destroy();
-                charts.doughnut = new Chart(ctx.getContext('2d'), {
-                    type: 'doughnut',
-                    data: { 
-                        labels: d.providers.map(p => p.provider), 
-                        datasets: [{ data: d.providers.map(p => p.count), backgroundColor: ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'], borderColor: '#0f172a', borderWidth: 3 }] 
+                        }
                     },
-                    options: { maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: CHART_TOOLTIP } }
-                });
-            }
-            const det = qs('#providerDetails');
-            if (det) {
-                det.innerHTML = d.providers.map((p, i) => {
-                    const colors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
-                    return `<div class="flex items-center justify-between bg-slate-900/40 rounded-2xl p-4 border border-slate-800/50">
+                    premium: async () => {
+                        const d = await fetchAPI('/admin/stats/premium');
+                        currentData = { type: 'premium', data: d };
+                        qs('#kpiTotalPremium').textContent = fmt(d.totalHistory);
+                        qs('#kpiActivePremium').textContent = fmt(d.activeNow);
+                        qs('#kpiTotalPurchases').textContent = fmt(d.periodPurchases);
+                        qs('#kpiTotalRevenue').textContent = fmt(d.estimatedTotalRevenue) + '√©';
+                        drawLine('chartPremium', d.series.map(x => x.date), [{
+                            label: 'Achats', data: d.series.map(x => x.count),
+                            borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)'
+                        }]);
+                    },
+                    bans: async () => {
+                        const d = await fetchAPI('/admin/stats/bans');
+                        currentData = { type: 'bans', data: d };
+                        qs('#statBanTotal').textContent = fmt(d.totalActions);
+                        qs('#statBanRevokeRate').textContent = d.revokeRate + '%';
+                        drawLine('chartBans', d.series.map(x => x.date), [
+                            { label: 'Bans', data: d.series.map(x => x.bans), borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.05)' },
+                            { label: 'R√©vocations', data: d.series.map(x => x.revokes), borderColor: '#10b981', backgroundColor: 'transparent' }
+                        ]);
+                    },
+                    accounts: async () => {
+                        const d = await fetchAPI('/admin/stats/accounts');
+                        currentData = { type: 'accounts', data: d };
+                        qs('#kpiTotalUsersAcc').textContent = fmt(d.summary.totalUsers);
+                        qs('#kpiWithPassword').textContent = fmt(d.summary.withPassword);
+                        qs('#kpiOAuthOnly').textContent = fmt(d.summary.oauthOnly);
+                        qs('#kpiTotalConn').textContent = fmt(d.summary.totalConnections);
+                        const ctx = qs('#chartDoughnut');
+                        if (ctx && typeof Chart !== 'undefined') {
+                            if (charts.doughnut) charts.doughnut.destroy();
+                            charts.doughnut = new Chart(ctx.getContext('2d'), {
+                                type: 'doughnut',
+                                data: {
+                                    labels: d.providers.map(p => p.provider),
+                                    datasets: [{ data: d.providers.map(p => p.count), backgroundColor: ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'], borderColor: '#0f172a', borderWidth: 3 }]
+                                },
+                                options: { maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false }, tooltip: CHART_TOOLTIP } }
+                            });
+                        }
+                        const det = qs('#providerDetails');
+                        if (det) {
+                            det.innerHTML = d.providers.map((p, i) => {
+                                const colors = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
+                                return `<div class="flex items-center justify-between bg-slate-900/40 rounded-2xl p-4 border border-slate-800/50">
                         <div class="flex items-center gap-4">
                             <div class="w-3 h-3 rounded-full" style="background:${colors[i] || '#64748b'}"></div>
                             <span class="capitalize font-medium text-slate-300 text-sm">${p.provider}</span>
                         </div>
                         <span class="text-white font-bold">${fmt(p.count)}</span>
                     </div>`;
-                }).join('');
-            }
-        }
-    };
+                            }).join('');
+                        }
+                    }
+                };
 
-    function updateSignupsSub(key, data) {
-        if (!data) return;
-        const s = data.series;
-        if (key === 'su1') drawLine('chartSignups', s.map(x => x.date), [{ label: 'Nouveaux', data: s.map(x => x.count), borderColor:'#8b5cf6', backgroundColor:'rgba(139, 92, 246, 0.1)' }]);
-        if (key === 'su2') drawLine('chartSignups', s.map(x => x.date), [{ label: 'Public', data: s.map(x => x.pub), borderColor:'#10b981', backgroundColor:'transparent' }, { label: 'PrivÈ', data: s.map(x => x.priv), borderColor:'#64748b', backgroundColor:'transparent' }]);
-        if (key === 'su3') drawLine('chartSignups', s.map(x => x.date), [{ label: 'User', data: s.map(x => x.user), borderColor:'#3b82f6', backgroundColor:'transparent' }, { label: 'Staff', data: s.map(x => x.staff), borderColor:'#f59e0b', backgroundColor:'transparent' }]);
-        if (key === 'su4') drawLine('chartSignups', s.map(x => x.date), [{ label: 'Total cumulÈ', data: s.map(x => x.cumul), borderColor:'#ec4899', backgroundColor:'rgba(236, 72, 153, 0.05)' }]);
-    }
+                function updateSignupsSub(key, data) {
+                    if (!data) return;
+                    const s = data.series;
+                    if (key === 'su1') drawLine('chartSignups', s.map(x => x.date), [{ label: 'Nouveaux', data: s.map(x => x.count), borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)' }]);
+                    if (key === 'su2') drawLine('chartSignups', s.map(x => x.date), [{ label: 'Public', data: s.map(x => x.pub), borderColor: '#10b981', backgroundColor: 'transparent' }, { label: 'Priv√©', data: s.map(x => x.priv), borderColor: '#64748b', backgroundColor: 'transparent' }]);
+                    if (key === 'su3') drawLine('chartSignups', s.map(x => x.date), [{ label: 'User', data: s.map(x => x.user), borderColor: '#3b82f6', backgroundColor: 'transparent' }, { label: 'Staff', data: s.map(x => x.staff), borderColor: '#f59e0b', backgroundColor: 'transparent' }]);
+                    if (key === 'su4') drawLine('chartSignups', s.map(x => x.date), [{ label: 'Total cumul√©', data: s.map(x => x.cumul), borderColor: '#ec4899', backgroundColor: 'rgba(236, 72, 153, 0.05)' }]);
+                }
 
-    function setTab(key) {
-        activeTab = key;
-        qsa('.tab-btn').forEach(btn => {
-            const t = btn.dataset.tab;
-            const sel = t === key;
-            btn.setAttribute('aria-selected', sel ? 'true' : 'false');
-            btn.className = sel ? "tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25" : "tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50";
-        });
-        qsa('.tab-panel').forEach(p => p.classList.add('hidden'));
-        qs('#panel-' + key)?.classList.remove('hidden');
-        loadTab(key);
-    }
+                function setTab(key) {
+                    activeTab = key;
+                    qsa('.tab-btn').forEach(btn => {
+                        const t = btn.dataset.tab;
+                        const sel = t === key;
+                        btn.setAttribute('aria-selected', sel ? 'true' : 'false');
+                        btn.className = sel ? "tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25" : "tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50";
+                    });
+                    qsa('.tab-panel').forEach(p => p.classList.add('hidden'));
+                    qs('#panel-' + key)?.classList.remove('hidden');
+                    loadTab(key);
+                }
 
-    async function loadTab(key) {
-        try { 
-            if (loaders[key]) {
-                const panel = qs('#panel-' + key);
-                const loadersInPanel = qsa('.chart-loader', panel);
-                
-                if (panel) panel.classList.add('opacity-70', 'pointer-events-none');
-                loadersInPanel.forEach(l => l.classList.remove('hidden'));
+                async function loadTab(key) {
+                    try {
+                        if (loaders[key]) {
+                            const panel = qs('#panel-' + key);
+                            const loadersInPanel = qsa('.chart-loader', panel);
 
-                await loaders[key](); 
+                            if (panel) panel.classList.add('opacity-70', 'pointer-events-none');
+                            loadersInPanel.forEach(l => l.classList.remove('hidden'));
 
-                if (panel) panel.classList.remove('opacity-70', 'pointer-events-none');
-                loadersInPanel.forEach(l => l.classList.add('hidden'));
-            }
-        } catch(e) { 
-            console.error(e); 
-            qsa('.chart-loader').forEach(l => l.classList.add('hidden'));
-            qsa('.tab-panel').forEach(p => p.classList.remove('opacity-70', 'pointer-events-none'));
-        }
-    }
+                            await loaders[key]();
 
-    qsa('.tab-btn').forEach(btn => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
-    qsa('.sub-tab-btn').forEach(btn => btn.addEventListener('click', async () => {
-        qsa('.sub-tab-btn').forEach(b => { b.classList.remove('bg-violet-600','text-white'); b.classList.add('text-slate-400','hover:text-slate-200'); });
-        btn.classList.add('bg-violet-600','text-white');
-        btn.classList.remove('text-slate-400','hover:text-slate-200');
-        
-        // On dÈclenche manuellement le loader spÈcifique pour les sous-onglets
-        const panel = qs('#panel-signups');
-        const chartLoaders = qsa('.chart-loader', panel);
-        chartLoaders.forEach(l => l.classList.remove('hidden'));
-        
-        try {
-            const d = await fetchAPI('/admin/stats/signups');
-            updateSignupsSub(btn.dataset.sub, d);
-        } catch(e) { console.error(e); }
-        
-        chartLoaders.forEach(l => l.classList.add('hidden'));
-    }));
+                            if (panel) panel.classList.remove('opacity-70', 'pointer-events-none');
+                            loadersInPanel.forEach(l => l.classList.add('hidden'));
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        qsa('.chart-loader').forEach(l => l.classList.add('hidden'));
+                        qsa('.tab-panel').forEach(p => p.classList.remove('opacity-70', 'pointer-events-none'));
+                    }
+                }
 
-    qsa('.range-btn').forEach(btn => btn.addEventListener('click', () => {
-        const days = Number(btn.dataset.days);
-        const now = new Date();
-        const start = new Date(now.getTime() - (days === 1 ? 0 : (days - 1)) * 86400000);
-        qs('#fFrom').value = start.toISOString().slice(0, 10);
-        qs('#fTo').value = now.toISOString().slice(0, 10);
-        qsa('.range-btn').forEach(b => { b.className = "range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition-all"; });
-        btn.className = "range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20";
-        loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab);
-    }));
+                qsa('.tab-btn').forEach(btn => btn.addEventListener('click', () => setTab(btn.dataset.tab)));
+                qsa('.sub-tab-btn').forEach(btn => btn.addEventListener('click', async () => {
+                    qsa('.sub-tab-btn').forEach(b => { b.classList.remove('bg-violet-600', 'text-white'); b.classList.add('text-slate-400', 'hover:text-slate-200'); });
+                    btn.classList.add('bg-violet-600', 'text-white');
+                    btn.classList.remove('text-slate-400', 'hover:text-slate-200');
 
-    qs('#fFrom')?.addEventListener('change', () => loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab));
-    qs('#fTo')?.addEventListener('change', () => loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab));
+                    // On d√©clenche manuellement le loader sp√©cifique pour les sous-onglets
+                    const panel = qs('#panel-signups');
+                    const chartLoaders = qsa('.chart-loader', panel);
+                    chartLoaders.forEach(l => l.classList.remove('hidden'));
 
-    // Export Logic
-    function exportGraph() {
-        // Map tab to its main chart ID
-        const chartIdMap = {
-            'signups': 'chartSignups',
-            'logins': 'chartLogins',
-            'plinkks': 'chartPlinkks',
-            'redirections': 'chartRedirections',
-            'premium': 'chartPremium',
-            'bans': 'chartBans',
-            'accounts': 'chartDoughnut'
-        };
-        const chartId = chartIdMap[activeTab];
-        
-        if (chartId && charts[chartId]) {
-            const link = document.createElement('a');
-            link.download = `plinkk-stats-${activeTab}-${new Date().toISOString().slice(0,10)}.png`;
-            link.href = charts[chartId].toBase64Image();
-            link.click();
-        } else {
-            alert('Aucun graphique disponible pour cet onglet ou pas encore chargÈ.');
-        }
-    }
+                    try {
+                        const d = await fetchAPI('/admin/stats/signups');
+                        updateSignupsSub(btn.dataset.sub, d);
+                    } catch (e) { console.error(e); }
 
-    function exportCSV() {
-        if (!currentData || !currentData.data) {
-            alert('Aucune donnÈe chargÈe ‡ exporter.');
-            return;
-        }
-        
-        let rows = [];
-        const today = new Date().toISOString().slice(0, 10);
-        const type = currentData.type;
-        const d = currentData.data;
+                    chartLoaders.forEach(l => l.classList.add('hidden'));
+                }));
 
-        if (type === 'signups') {
-            rows = [['Date', 'Total Cumule', 'Nouveaux', 'Staff', 'Public', 'Prive']];
-            if(d.series) {
-                d.series.forEach(x => {
-                    rows.push([x.date, x.cumul, x.count, x.staff, x.pub, x.priv]);
-                });
-            }
-        }
-        else if (type === 'logins') {
-            rows = [['Date', 'Connexions']];
-            if(d.series) {
-                d.series.forEach(x => {
-                    rows.push([x.date, x.count]);
-                });
-            }
-        }
-        else if (type === 'plinkks') {
-            rows = [['Date', 'Vues']];
-            if(d.series) {
-                d.series.forEach(x => {
-                    rows.push([x.date, x.count]);
-                });
-            }
-            // Add top plinkks if available (as a separate block below)
-            if(currentData.top && currentData.top.plinkks) {
-                rows.push([]);
-                rows.push(['TOP PLINKKS (PERIODE)']);
-                rows.push(['Nom', 'Slug', 'Vues', 'Date Creation']);
-                currentData.top.plinkks.forEach(p => {
-                    rows.push([p.name || 'Sans titre', p.slug, p.views, p.createdAt]);
-                });
-            }
-        }
-        else if (type === 'redirections') {
-            rows = [['Date', 'Clics']];
-            if(d.series) {
-                d.series.forEach(x => {
-                    rows.push([x.date, x.count]);
-                });
-            }
-            if(currentData.top && currentData.top.redirects) {
-                rows.push([]);
-                rows.push(['TOP REDIRECTIONS (PERIODE)']);
-                rows.push(['Slug', 'Cible', 'Clics', 'Date Creation']);
-                currentData.top.redirects.forEach(r => {
-                    rows.push([r.slug, r.targetUrl, r.clicks, r.createdAt]);
-                });
-            }
-        }
-        else if (type === 'premium') {
-            rows = [['Date', 'Achats']];
-            if(d.series) {
-                d.series.forEach(x => {
-                    rows.push([x.date, x.count]);
-                });
-            }
-        }
-        else if (type === 'bans') {
-            rows = [['Date', 'Bans', 'Revocations']];
-            if(d.series) {
-                d.series.forEach(x => {
-                    rows.push([x.date, x.bans, x.revokes]);
-                });
-            }
-        }
-        else if (type === 'accounts') {
-            rows = [['Provider', 'Count']];
-            if(d.providers) {
-                d.providers.forEach(p => {
-                    rows.push([p.provider, p.count]);
-                });
-            }
-            rows.push([]);
-            rows.push(['KPI']);
-            rows.push(['Total Users', d.summary.totalUsers]);
-            rows.push(['With Password', d.summary.withPassword]);
-            rows.push(['OAuth Only', d.summary.oauthOnly]);
-        }
-        
-        if (rows.length > 0) {
-            downloadCSV(`plinkk-data-${type}-${today}.csv`, rows);
-        }
-    }
+                qsa('.range-btn').forEach(btn => btn.addEventListener('click', () => {
+                    const days = Number(btn.dataset.days);
+                    const now = new Date();
+                    const start = new Date(now.getTime() - (days === 1 ? 0 : (days - 1)) * 86400000);
+                    qs('#fFrom').value = start.toISOString().slice(0, 10);
+                    qs('#fTo').value = now.toISOString().slice(0, 10);
+                    qsa('.range-btn').forEach(b => { b.className = "range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition-all"; });
+                    btn.className = "range-btn px-4 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20";
+                    loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab);
+                }));
 
-    qs('#btnExportGraph')?.addEventListener('click', exportGraph);
-    qs('#btnExportCSV')?.addEventListener('click', exportCSV);
+                qs('#fFrom')?.addEventListener('change', () => loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab));
+                qs('#fTo')?.addEventListener('change', () => loadTab(qs('.tab-btn[aria-selected="true"]').dataset.tab));
 
-    window.deleteRedirect = async (id) => {
-        if(!confirm('Voulez-vous vraiment supprimer cette redirection ? Cette action est irrÈversible.')) return;
-        try {
-            const res = await fetch('/api/admin/redirects/' + id, { 
-                method: 'DELETE', 
-                headers: { 'Content-Type': 'application/json' }  // CSRF if needed?
+                // Export Logic
+                function exportGraph() {
+                    // Map tab to its main chart ID
+                    const chartIdMap = {
+                        'signups': 'chartSignups',
+                        'logins': 'chartLogins',
+                        'plinkks': 'chartPlinkks',
+                        'redirections': 'chartRedirections',
+                        'premium': 'chartPremium',
+                        'bans': 'chartBans',
+                        'accounts': 'chartDoughnut'
+                    };
+                    const chartId = chartIdMap[activeTab];
+
+                    if (chartId && charts[chartId]) {
+                        const link = document.createElement('a');
+                        link.download = `plinkk-stats-${activeTab}-${new Date().toISOString().slice(0, 10)}.png`;
+                        link.href = charts[chartId].toBase64Image();
+                        link.click();
+                    } else {
+                        alert('Aucun graphique disponible pour cet onglet ou pas encore charg√©.');
+                    }
+                }
+
+                function exportCSV() {
+                    if (!currentData || !currentData.data) {
+                        alert('Aucune donn√©e charg√©e √© exporter.');
+                        return;
+                    }
+
+                    let rows = [];
+                    const today = new Date().toISOString().slice(0, 10);
+                    const type = currentData.type;
+                    const d = currentData.data;
+
+                    if (type === 'signups') {
+                        rows = [['Date', 'Total Cumule', 'Nouveaux', 'Staff', 'Public', 'Prive']];
+                        if (d.series) {
+                            d.series.forEach(x => {
+                                rows.push([x.date, x.cumul, x.count, x.staff, x.pub, x.priv]);
+                            });
+                        }
+                    }
+                    else if (type === 'logins') {
+                        rows = [['Date', 'Connexions']];
+                        if (d.series) {
+                            d.series.forEach(x => {
+                                rows.push([x.date, x.count]);
+                            });
+                        }
+                    }
+                    else if (type === 'plinkks') {
+                        rows = [['Date', 'Vues']];
+                        if (d.series) {
+                            d.series.forEach(x => {
+                                rows.push([x.date, x.count]);
+                            });
+                        }
+                        // Add top plinkks if available (as a separate block below)
+                        if (currentData.top && currentData.top.plinkks) {
+                            rows.push([]);
+                            rows.push(['TOP PLINKKS (PERIODE)']);
+                            rows.push(['Nom', 'Slug', 'Vues', 'Date Creation']);
+                            currentData.top.plinkks.forEach(p => {
+                                rows.push([p.name || 'Sans titre', p.slug, p.views, p.createdAt]);
+                            });
+                        }
+                    }
+                    else if (type === 'redirections') {
+                        rows = [['Date', 'Clics']];
+                        if (d.series) {
+                            d.series.forEach(x => {
+                                rows.push([x.date, x.count]);
+                            });
+                        }
+                        if (currentData.top && currentData.top.redirects) {
+                            rows.push([]);
+                            rows.push(['TOP REDIRECTIONS (PERIODE)']);
+                            rows.push(['Slug', 'Cible', 'Clics', 'Date Creation']);
+                            currentData.top.redirects.forEach(r => {
+                                rows.push([r.slug, r.targetUrl, r.clicks, r.createdAt]);
+                            });
+                        }
+                    }
+                    else if (type === 'premium') {
+                        rows = [['Date', 'Achats']];
+                        if (d.series) {
+                            d.series.forEach(x => {
+                                rows.push([x.date, x.count]);
+                            });
+                        }
+                    }
+                    else if (type === 'bans') {
+                        rows = [['Date', 'Bans', 'Revocations']];
+                        if (d.series) {
+                            d.series.forEach(x => {
+                                rows.push([x.date, x.bans, x.revokes]);
+                            });
+                        }
+                    }
+                    else if (type === 'accounts') {
+                        rows = [['Provider', 'Count']];
+                        if (d.providers) {
+                            d.providers.forEach(p => {
+                                rows.push([p.provider, p.count]);
+                            });
+                        }
+                        rows.push([]);
+                        rows.push(['KPI']);
+                        rows.push(['Total Users', d.summary.totalUsers]);
+                        rows.push(['With Password', d.summary.withPassword]);
+                        rows.push(['OAuth Only', d.summary.oauthOnly]);
+                    }
+
+                    if (rows.length > 0) {
+                        downloadCSV(`plinkk-data-${type}-${today}.csv`, rows);
+                    }
+                }
+
+                qs('#btnExportGraph')?.addEventListener('click', exportGraph);
+                qs('#btnExportCSV')?.addEventListener('click', exportCSV);
+
+                window.deleteRedirect = async (id) => {
+                    if (!confirm('Voulez-vous vraiment supprimer cette redirection ? Cette action est irr√©versible.')) return;
+                    try {
+                        const res = await fetch('/api/admin/redirects/' + id, {
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json' }  // CSRF if needed?
+                        });
+                        if (res.ok) {
+                            // Refresh the list by reloading the tab
+                            loadTab('redirections');
+                        } else {
+                            const err = await res.json();
+                            alert('Erreur: ' + (err.error || 'Impossible de supprimer'));
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        alert('Erreur serveur lors de la suppression');
+                    }
+                };
+
+                function init() { setupDates(); setTab('signups'); }
+                if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+            })();
+
+    // Funnel tab logic
+    (function() {
+        let funnelLoaded = false;
+        const subPlinkk = document.getElementById('funnelSubPlinkk');
+        const subPurchase = document.getElementById('funnelSubPurchase');
+        const panelPlinkk = document.getElementById('funnelPlinkk');
+        const panelPurchase = document.getElementById('funnelPurchase');
+
+        if (subPlinkk && subPurchase) {
+            subPlinkk.addEventListener('click', () => {
+                panelPlinkk.classList.remove('hidden');
+                panelPurchase.classList.add('hidden');
+                subPlinkk.classList.add('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                subPlinkk.classList.remove('text-slate-400');
+                subPurchase.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                subPurchase.classList.add('text-slate-400');
             });
-            if(res.ok) {
-                // Refresh the list by reloading the tab
-                loadTab('redirections');
-            } else {
-                const err = await res.json();
-                alert('Erreur: ' + (err.error || 'Impossible de supprimer'));
-            }
-        } catch(e) {
-            console.error(e);
-            alert('Erreur serveur lors de la suppression');
+            subPurchase.addEventListener('click', () => {
+                panelPlinkk.classList.add('hidden');
+                panelPurchase.classList.remove('hidden');
+                subPurchase.classList.add('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                subPurchase.classList.remove('text-slate-400');
+                subPlinkk.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                subPlinkk.classList.add('text-slate-400');
+            });
         }
-    };
 
-    function init() { setupDates(); setTab('signups'); }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-})();
-</script>
+        // Observe tab switch
+        const observer = new MutationObserver(() => {
+            const panel = document.getElementById('panel-funnel');
+            if (panel && !panel.classList.contains('hidden') && !funnelLoaded) {
+                funnelLoaded = true;
+                loadFunnelData();
+            }
+        });
+        const funnelPanel = document.getElementById('panel-funnel');
+        if (funnelPanel) observer.observe(funnelPanel, { attributes: true, attributeFilter: ['class'] });
 
-<%- include('partials/footer.ejs') %>
+        async function loadFunnelData() {
+            try {
+                const res = await fetch('/admin/stats/funnel');
+                if (!res.ok) throw new Error('Failed');
+                const data = await res.json();
+                const fmt = new Intl.NumberFormat('fr-FR');
+
+                // Plinkk funnel
+                const p = data.plinkk;
+                setText('fp-users', fmt.format(p.totalUsers));
+                setText('fp-withPlinkk', fmt.format(p.usersWithPlinkk));
+                setText('fp-views', fmt.format(p.totalViews));
+                setText('fp-clicks', fmt.format(p.totalClicks));
+
+                if (p.totalUsers > 0) {
+                    setBar('fp-bar-withPlinkk', 'fp-pct-withPlinkk', p.usersWithPlinkk, p.totalUsers);
+                }
+                if (p.usersWithPlinkk > 0) {
+                    const viewsRatio = Math.min(100, Math.round((p.totalViews / (p.usersWithPlinkk * 100)) * 100));
+                    setEl('fp-bar-views', viewsRatio);
+                    setText('fp-pct-views', viewsRatio + '%');
+                }
+                if (p.totalViews > 0) {
+                    setBar('fp-bar-clicks', 'fp-pct-clicks', p.totalClicks, p.totalViews);
+                }
+
+                // KPIs
+                setText('fp-kpi-activation', p.totalUsers > 0 ? Math.round((p.usersWithPlinkk / p.totalUsers) * 100) + '%' : '0%');
+                setText('fp-kpi-ctr', p.totalViews > 0 ? Math.round((p.totalClicks / p.totalViews) * 100) + '%' : '0%');
+                setText('fp-kpi-vpg', p.totalPlinkks > 0 ? Math.round(p.totalViews / p.totalPlinkks) : '0');
+
+                // Purchase funnel
+                const c = data.purchase;
+                setText('fc-users', fmt.format(c.totalUsers));
+                setText('fc-premium', fmt.format(c.premiumUsers));
+                setText('fc-purchases', fmt.format(c.totalPurchases));
+                setText('fc-revenue', (c.totalRevenue / 100).toFixed(2) + ' ‚Ç¨');
+
+                if (c.totalUsers > 0) {
+                    setBar('fc-bar-premium', 'fc-pct-premium', c.premiumUsers, c.totalUsers);
+                }
+                if (c.premiumUsers > 0) {
+                    setBar('fc-bar-purchases', 'fc-pct-purchases', c.totalPurchases, c.premiumUsers);
+                }
+                // Revenue bar relative to a hypothetical max
+                if (c.totalPurchases > 0) {
+                    setEl('fc-bar-revenue', Math.min(100, Math.round((c.totalRevenue / (c.totalPurchases * 1000)) * 100)));
+                    setText('fc-pct-revenue', '');
+                }
+
+                // KPIs
+                setText('fc-kpi-conv', c.totalUsers > 0 ? (c.premiumUsers / c.totalUsers * 100).toFixed(1) + '%' : '0%');
+                setText('fc-kpi-arpu', c.premiumUsers > 0 ? ((c.totalRevenue / 100) / c.premiumUsers).toFixed(2) + ' ‚Ç¨' : '0 ‚Ç¨');
+                setText('fc-kpi-avgorder', c.totalPurchases > 0 ? ((c.totalRevenue / 100) / c.totalPurchases).toFixed(2) + ' ‚Ç¨' : '0 ‚Ç¨');
+
+                // Churn & Retention
+                setText('fc-kpi-retention', c.retention + '%');
+                setText('fc-kpi-churn', fmt.format(c.churned));
+
+                // Funnel D√©taill√©
+                var f = data.funnel || {};
+                setText('fc-kpi-landing', fmt.format(f.landingVisits || 0));
+                setText('fc-kpi-signups', fmt.format(f.signups || 0));
+                setText('fc-kpi-premview', fmt.format(f.premiumViews || 0));
+                setText('fc-kpi-configview', fmt.format(f.configViews || 0));
+                setText('fc-kpi-funpurchase', fmt.format(f.purchases || 0));
+                setText('fc-kpi-funcancels', fmt.format(f.cancels || 0));
+
+                // Build funnel bars
+                var barsContainer = document.getElementById("funnel-bars");
+                if (barsContainer) {
+                    var steps = [
+                        { label: "Landing", value: f.landingVisits || 0, color: "bg-violet-500" },
+                        { label: "Inscription", value: f.signups || 0, color: "bg-blue-500" },
+                        { label: "Page Premium", value: f.premiumViews || 0, color: "bg-fuchsia-500" },
+                        { label: "Configuration", value: f.configViews || 0, color: "bg-indigo-500" },
+                        { label: "Achat", value: f.purchases || 0, color: "bg-emerald-500" },
+                    ];
+                    var maxVal = Math.max(1, steps[0].value);
+                    barsContainer.innerHTML = steps.map(function(s) {
+                        var pct = Math.max(2, Math.round((s.value / maxVal) * 100));
+                        var rate = steps[0].value > 0 ? ((s.value / steps[0].value) * 100).toFixed(1) : "0.0";
+                        return '<div class="flex items-center gap-3"><span class="text-[11px] text-slate-400 w-24 text-right shrink-0">' + s.label + '</span><div class="flex-1 bg-slate-800/50 rounded-full h-6 overflow-hidden"><div class="' + s.color + ' h-full rounded-full flex items-center px-2 transition-all duration-500" style="width:' + pct + '%"><span class="text-[10px] text-white font-bold">' + fmt.format(s.value) + '</span></div></div><span class="text-[11px] text-slate-500 w-12 shrink-0">' + rate + '%</span></div>';
+                    }).join("");
+                }
+
+            } catch (e) {
+                console.error('Funnel load error:', e);
+            }
+        }
+
+        function setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
+        function setEl(id, pct) { const el = document.getElementById(id); if (el) el.style.width = Math.max(pct, 2) + '%'; }
+        function setBar(barId, pctId, value, total) {
+            const pct = Math.round((value / total) * 100);
+            setEl(barId, pct);
+            setText(pctId, pct + '%');
+        }
+    })();
+        </script>
+
+        <%- include('partials/footer.ejs') %>

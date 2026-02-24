@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { prisma } from "@plinkk/prisma";
+import { prisma, Prisma } from "@plinkk/prisma";
 import {
   listBannedSlugs,
   createBannedSlug,
@@ -32,6 +32,49 @@ export function apiRoutes(fastify: FastifyInstance) {
   fastify.register(apiAdminRedirectsRoutes, { prefix: "/admin/redirects" });
   fastify.register(apiAdminMaintenanceRoutes, { prefix: "/admin/maintenance" });
   fastify.register(apiStripeRoutes, { prefix: "/stripe" });
+
+  // ─── Funnel Event Tracking ──────────────────────────────────────────────────
+  const ALLOWED_EVENTS = ['landing_visit', 'signup', 'premium_view', 'config_view', 'purchase', 'cancel'];
+
+  fastify.post("/track", async (request, reply) => {
+    const body = request.body as { event?: string; meta?: Record<string, unknown> } | undefined;
+    const event = body?.event;
+    if (!event || !ALLOWED_EVENTS.includes(event)) {
+      return reply.code(400).send({ error: "invalid_event" });
+    }
+
+    const sessionData = request.session.get("data");
+    const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+
+    let trackingId = (request.cookies as Record<string, string>)?.["plinkk_tid"];
+    if (!trackingId) {
+      trackingId = Math.random().toString(36).substring(2) + Date.now().toString(36);
+      reply.setCookie("plinkk_tid", trackingId, {
+        path: "/",
+        maxAge: 365 * 24 * 60 * 60,
+        httpOnly: true,
+        sameSite: "lax",
+      });
+    }
+
+    try {
+      await prisma.funnelEvent.create({
+        data: {
+          event,
+          sessionId: trackingId,
+          userId: userId || null,
+          ip: request.ip,
+          userAgent: request.headers["user-agent"] || null,
+          referrer: request.headers.referer || null,
+          meta: (body?.meta as Prisma.InputJsonObject) || null,
+        },
+      });
+    } catch (e) {
+      request.log.error(e, "Failed to save funnel event");
+    }
+
+    return reply.send({ ok: true });
+  });
 
   fastify.get("/roles", async (request, reply) => {
     const sessionData = request.session.get("data");

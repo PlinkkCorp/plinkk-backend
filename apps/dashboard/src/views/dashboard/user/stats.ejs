@@ -1,4 +1,4 @@
-<%- include('partials/head.ejs', { title: 'Statistiques', description: 'Statistiques dÈtaillÈes de votre profil Plinkk.', robots: 'noindex,nofollow' }) %>
+<%- include('partials/head.ejs', { title: 'Statistiques', description: 'Statistiques d√©taill√©es de votre profil Plinkk.', robots: 'noindex,nofollow' }) %>
 <%- include('partials/header-dash.ejs', { user: user }) %>
 
 <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
@@ -18,9 +18,9 @@
                 </div>
                 <p class="text-slate-400 text-lg">
                     <% if (typeof plinkk !== 'undefined' && plinkk) { %>
-                        Vue dÈtaillÈe pour <span class="text-violet-300 font-medium"><%= plinkk.name %></span>
+                        Vue d√©taill√©e pour <span class="text-violet-300 font-medium"><%= plinkk.name %></span>
                     <% } else { %>
-                        Vue d'ensemble de votre activitÈ Plinkk
+                        Vue d'ensemble de votre activit√© Plinkk
                     <% } %>
                 </p>
             </div>
@@ -29,7 +29,7 @@
                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                     Graph
                 </button>
-                <button id="btnExportCSV" class="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white font-medium rounded-xl hover:bg-slate-700 border border-slate-700 transition-colors" title="Exporter les donnÈes (CSV)">
+                <button id="btnExportCSV" class="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white font-medium rounded-xl hover:bg-slate-700 border border-slate-700 transition-colors" title="Exporter les donn√©es (CSV)">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     CSV
                 </button>
@@ -40,11 +40,12 @@
         <!--  TAB BAR  -->
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-2">
             <nav class="flex gap-1" role="tablist" aria-label="Sections stats">
-                <button class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="overview" aria-selected="true">AperÁu</button>
+                <button class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="overview" aria-selected="true">Aper√ßu</button>
                 <button class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="trends" aria-selected="false">Tendances</button>
                 <button class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="links" aria-selected="false">Liens</button>
-                <button class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="categories" aria-selected="false">CatÈgories</button>
+                <button class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="categories" aria-selected="false">Cat√©gories</button>
                 <button class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="redirects" aria-selected="false">Redirections</button>
+                <button class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300" data-tab="funnel" aria-selected="false">Tunnel</button>
             </nav>
         </div>
 
@@ -135,16 +136,16 @@
                 <div class="p-4 bg-violet-500/10 rounded-2xl mb-6 relative z-10">
                     <svg class="w-8 h-8 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                 </div>
-                <h3 class="text-xl font-bold text-white mb-2 relative z-10">Statistiques avancÈes</h3>
-                <p class="text-slate-400 max-w-md mb-8 relative z-10">Passez en Premium pour accÈder aux tendances journaliËres dÈtaillÈes et exporter vos donnÈes en CSV et images.</p>
+                <h3 class="text-xl font-bold text-white mb-2 relative z-10">Statistiques avanc√©es</h3>
+                <p class="text-slate-400 max-w-md mb-8 relative z-10">Passez en Premium pour acc√©der aux tendances journali√©res d√©taill√©es et exporter vos donn√©es en CSV et images.</p>
                 <a href="/pricing" class="px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-xl shadow-lg shadow-violet-900/20 hover:shadow-violet-900/40 hover:-translate-y-0.5 transition-all relative z-10">
-                    DÈbloquer avec Premium
+                    D√©bloquer avec Premium
                 </a>
             </div>
             <% } else { %>
             <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                    <h2 class="font-bold text-white text-xl">Tendances journaliËres</h2>
+                    <h2 class="font-bold text-white text-xl">Tendances journali√©res</h2>
                     <select id="fRange" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm focus:ring-1 focus:ring-violet-500 transition-all outline-none">
                         <option value="7">7 jours</option>
                         <option value="14">14 jours</option>
@@ -216,7 +217,7 @@
 
             <div class="bg-slate-950/30 border border-slate-800 rounded-3xl overflow-hidden">
                 <div class="p-6 border-b border-slate-800 bg-slate-900/50">
-                    <h2 class="font-bold text-white text-xl">DÈtail des liens</h2>
+                    <h2 class="font-bold text-white text-xl">D√©tail des liens</h2>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -237,7 +238,7 @@
         <!--  CATEGORIES  -->
         <section id="panel-categories" class="tab-panel hidden space-y-6">
             <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
-                <h2 class="font-bold text-white text-xl mb-8">RÈpartition par catÈgorie</h2>
+                <h2 class="font-bold text-white text-xl mb-8">R√©partition par cat√©gorie</h2>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                     <div class="h-80 flex items-center justify-center relative">
                         <div class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
@@ -336,7 +337,7 @@
                                         </td>
                                         <td class="p-4 text-right font-bold text-white"><%= r.clicks %></td>
                                         <td class="p-4 text-right">
-                                            <a href="/redirects/<%= r.id %>/stats" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors inline-flex items-center justify-center group" title="Voir les statistiques dÈtaillÈes">
+                                            <a href="/redirects/<%= r.id %>/stats" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors inline-flex items-center justify-center group" title="Voir les statistiques d√©taill√©es">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:stroke-violet-400 transition-colors"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
                                             </a>
                                         </td>
@@ -344,13 +345,147 @@
                                 <% }) %>
                             <% } else { %>
                                 <tr>
-                                    <td colspan="5" class="p-12 text-center text-slate-600 font-medium italic">Aucune redirection crÈÈe pour le moment.</td>
+                                    <td colspan="5" class="p-12 text-center text-slate-600 font-medium italic">Aucune redirection cr√©√©e pour le moment.</td>
                                 </tr>
                             <% } %>
                         </tbody>
                     </table>
                 </div>
             </div>
+        </section>
+
+        <!-- ‚îÄ‚îÄ‚îÄ TUNNEL D'ACQUISITION ‚îÄ‚îÄ‚îÄ -->
+        <section id="panel-funnel" class="tab-panel hidden space-y-6">
+
+            <!-- Funnel Visual -->
+            <div class="glass-card rounded-2xl border border-white/5 p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="font-bold text-lg text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        Tunnel d'acquisition
+                    </h2>
+                    <span class="text-xs text-slate-500">Donn√©es globales</span>
+                </div>
+
+                <!-- Funnel Steps -->
+                <div class="space-y-0" id="funnelSteps">
+                    <!-- Step 1: Vues -->
+                    <div class="relative">
+                        <div class="flex items-center gap-4 py-4">
+                            <div class="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-sm font-medium text-white">Visiteurs</span>
+                                    <span class="text-lg font-bold text-white" id="funnel-views"><%= typeof totalViews !== 'undefined' ? totalViews : 0 %></span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-violet-500 to-violet-400 h-full rounded-full transition-all duration-700" style="width: 100%" id="funnel-bar-views"></div>
+                                </div>
+                            </div>
+                            <span class="text-sm font-semibold text-violet-400 w-14 text-right">100%</span>
+                        </div>
+                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-4"></div>
+                    </div>
+
+                    <!-- Step 2: Clics -->
+                    <div class="relative">
+                        <div class="flex items-center gap-4 py-4">
+                            <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-sm font-medium text-white">Clics sur les liens</span>
+                                    <span class="text-lg font-bold text-white" id="funnel-clicks"><%= typeof totalClicks !== 'undefined' ? totalClicks : 0 %></span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-indigo-500 to-indigo-400 h-full rounded-full transition-all duration-700" style="width: 0%" id="funnel-bar-clicks"></div>
+                                </div>
+                            </div>
+                            <span class="text-sm font-semibold text-indigo-400 w-14 text-right" id="funnel-pct-clicks">0%</span>
+                        </div>
+                        <div class="ml-5 border-l-2 border-dashed border-slate-700 h-4"></div>
+                    </div>
+
+                    <!-- Step 3: Redirections -->
+                    <div class="relative">
+                        <div class="flex items-center gap-4 py-4">
+                            <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-sm font-medium text-white">Redirections</span>
+                                    <span class="text-lg font-bold text-white" id="funnel-redirects"><%= typeof totalRedirectClicks !== 'undefined' ? totalRedirectClicks : 0 %></span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                                    <div class="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-700" style="width: 0%" id="funnel-bar-redirects"></div>
+                                </div>
+                            </div>
+                            <span class="text-sm font-semibold text-emerald-400 w-14 text-right" id="funnel-pct-redirects">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conversion Metrics -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Taux de clic (CTR)</p>
+                    <p class="text-2xl font-bold text-white" id="funnel-ctr">0%</p>
+                    <p class="text-xs text-slate-500 mt-1">Visiteurs ‚Üí Clics</p>
+                </div>
+                <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Engagement global</p>
+                    <p class="text-2xl font-bold text-white" id="funnel-engagement">0%</p>
+                    <p class="text-xs text-slate-500 mt-1">Visiteurs ayant interagi</p>
+                </div>
+                <div class="glass-card rounded-2xl border border-white/5 p-5 text-center">
+                    <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Clics / Visiteur</p>
+                    <p class="text-2xl font-bold text-white" id="funnel-avg">0</p>
+                    <p class="text-xs text-slate-500 mt-1">Moyenne de clics</p>
+                </div>
+            </div>
+
+            <!-- Tips -->
+            <div class="glass-card rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5">
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-violet-300 mb-1">Conseils d'optimisation</h3>
+                        <ul class="text-xs text-slate-400 space-y-1.5">
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-violet-400 mt-0.5">‚Ä¢</span>
+                                <span>Un bon CTR se situe entre <strong class="text-slate-300">10% et 30%</strong>. En dessous, pensez √† am√©liorer vos titres de liens.</span>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-violet-400 mt-0.5">‚Ä¢</span>
+                                <span>Placez vos liens les plus importants <strong class="text-slate-300">en haut de votre page</strong> pour maximiser les clics.</span>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-violet-400 mt-0.5">‚Ä¢</span>
+                                <span>Utilisez des <strong class="text-slate-300">ic√¥nes et descriptions</strong> pour rendre vos liens plus attractifs.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
         </section>
 
     </main>
@@ -467,8 +602,8 @@
     function classifyUrl(url, label) {
         const hay = ((url || '') + ' ' + (label || '')).toLowerCase();
         const tests = [
-            { name: 'RÈseaux sociaux', re: /(twitter|x\.com|instagram|facebook|tiktok|linkedin|threads|bluesky)/ },
-            { name: 'VidÈo', re: /(youtube|youtu\.be|vimeo|twitch|dailymotion)/ },
+            { name: 'R√©seaux sociaux', re: /(twitter|x\.com|instagram|facebook|tiktok|linkedin|threads|bluesky)/ },
+            { name: 'Vid√©o', re: /(youtube|youtu\.be|vimeo|twitch|dailymotion)/ },
             { name: 'Musique', re: /(spotify|soundcloud|music\.apple|deezer|bandcamp|artist\.link)/ },
             { name: 'Code', re: /(github|gitlab|bitbucket|npmjs|pypi|docker\.com|stackoverflow)/ },
             { name: 'Articles', re: /(medium\.com|dev\.to|hashnode|substack|notion\.site|ghost)/ },
@@ -505,7 +640,8 @@
             trends: qs('#panel-trends'), 
             links: qs('#panel-links'), 
             categories: qs('#panel-categories'), 
-            redirects: qs('#panel-redirects') 
+            redirects: qs('#panel-redirects'),
+            funnel: qs('#panel-funnel'),
         };
         tabButtons.forEach(btn => {
             const t = btn.getAttribute('data-tab');
@@ -532,7 +668,7 @@
         
         if (overCtx && viewsDaily.length) {
             if (loader) loader.classList.remove('hidden');
-            // Petit dÈlai pour simuler le chargement et s'assurer que le DOM est prÍt
+            // Petit d√©lai pour simuler le chargement et s'assurer que le DOM est pr√©t
             await new Promise(r => setTimeout(r, 300));
             
             if (charts.overview) charts.overview.destroy();
@@ -748,7 +884,7 @@
     
     /* EXPORT LOGIC */
     function exportGraph() {
-        if (activeTab === 'trends' && !isPremiumUser) return alert('FonctionnalitÈ rÈservÈe aux membres Premium');
+        if (activeTab === 'trends' && !isPremiumUser) return alert('Fonctionnalit√© r√©serv√©e aux membres Premium');
         const chartMap = {
             'overview': charts.overview,
             'trends': charts.trendsViews, // Default to views
@@ -769,7 +905,7 @@
     }
 
     function exportCSV() {
-        if (activeTab === 'trends' && !isPremiumUser) return alert('FonctionnalitÈ rÈservÈe aux membres Premium');
+        if (activeTab === 'trends' && !isPremiumUser) return alert('Fonctionnalit√© r√©serv√©e aux membres Premium');
         const today = new Date().toISOString().slice(0, 10);
         let content = '';
         let filename = `plinkk-data-${activeTab}-${today}.csv`;
@@ -813,10 +949,21 @@
             content = rows.map(r => r.map(esc).join(',')).join('\n');
         }
 
+        else if (activeTab === 'funnel') {
+            const rows = [['M√©trique', 'Valeur']];
+            rows.push(['Visiteurs', document.getElementById('funnel-views')?.textContent || '0']);
+            rows.push(['Clics', document.getElementById('funnel-clicks')?.textContent || '0']);
+            rows.push(['Redirections', document.getElementById('funnel-redirects')?.textContent || '0']);
+            rows.push(['CTR', document.getElementById('funnel-ctr')?.textContent || '0%']);
+            rows.push(['Engagement', document.getElementById('funnel-engagement')?.textContent || '0%']);
+            rows.push(['Clics/Visiteur', document.getElementById('funnel-avg')?.textContent || '0']);
+            downloadBlob(rows.map(r => r.join(',')).join('\n'), filename);
+        }
+
         if (content) {
             downloadBlob(content, filename);
         } else {
-             alert('Aucune donnÈe ‡ exporter.');
+             alert('Aucune donn√©e √© exporter.');
         }
     }
 
@@ -824,6 +971,38 @@
     qs('#btnExportCSV')?.addEventListener('click', exportCSV);
 
 })();
+
+    // Funnel calculations
+    (function initFunnel() {
+        const views = parseInt(document.getElementById('funnel-views')?.textContent?.replace(/\s/g, '') || '0') || 0;
+        const clicks = parseInt(document.getElementById('funnel-clicks')?.textContent?.replace(/\s/g, '') || '0') || 0;
+        const redirects = parseInt(document.getElementById('funnel-redirects')?.textContent?.replace(/\s/g, '') || '0') || 0;
+        
+        // Update bars
+        if (views > 0) {
+            const clicksPct = Math.round((clicks / views) * 100);
+            const redirectsPct = Math.round((redirects / views) * 100);
+            
+            const barClicks = document.getElementById('funnel-bar-clicks');
+            const barRedirects = document.getElementById('funnel-bar-redirects');
+            const pctClicks = document.getElementById('funnel-pct-clicks');
+            const pctRedirects = document.getElementById('funnel-pct-redirects');
+            
+            if (barClicks) barClicks.style.width = Math.max(clicksPct, 2) + '%';
+            if (barRedirects) barRedirects.style.width = Math.max(redirectsPct, 2) + '%';
+            if (pctClicks) pctClicks.textContent = clicksPct + '%';
+            if (pctRedirects) pctRedirects.textContent = redirectsPct + '%';
+            
+            // Conversion metrics
+            const ctr = document.getElementById('funnel-ctr');
+            const engagement = document.getElementById('funnel-engagement');
+            const avg = document.getElementById('funnel-avg');
+            
+            if (ctr) ctr.textContent = clicksPct + '%';
+            if (engagement) engagement.textContent = Math.round(((clicks + redirects) / views) * 100) + '%';
+            if (avg) avg.textContent = (clicks / views).toFixed(2);
+        }
+    })();
 </script>
 
 <%- include('partials/footer.ejs') %>

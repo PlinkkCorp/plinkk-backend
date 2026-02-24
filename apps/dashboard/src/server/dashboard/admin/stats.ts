@@ -742,4 +742,81 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       providers: connections.map(c => ({ provider: c.provider, count: c._count.provider }))
     });
   });
+  // ─── Tunnel d'acquisition ──────────────────────────────────────────────────
+
+  fastify.get("/funnel", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_STATS");
+    if (!ok) return;
+
+    const [
+      totalUsers,
+      usersWithPlinkk,
+      totalPlinkks,
+      totalViewsAgg,
+      totalClicksAgg,
+      premiumUsers,
+      totalPurchases,
+      allPurchases,
+      usersWithLinks,
+      churned,
+      // FunnelEvent counts
+      landingVisits,
+      signups,
+      premiumViews,
+      configViews,
+      funnelPurchases,
+      funnelCancels,
+    ] = await Promise.all([
+      prisma.user.count(),
+      prisma.user.count({ where: { plinkks: { some: {} } } }),
+      prisma.plinkk.count(),
+      prisma.plinkk.aggregate({ _sum: { views: true } }),
+      prisma.pageStat.count({ where: { eventType: "click" } }),
+      prisma.user.count({ where: { isPremium: true } }),
+      prisma.purchase.count(),
+      prisma.purchase.findMany({ select: { amount: true, quantity: true } }),
+      prisma.user.count({ where: { links: { some: {} } } }),
+      prisma.user.count({ where: { isPremium: false, purchases: { some: {} } } }),
+      // FunnelEvent tracking data
+      prisma.funnelEvent.count({ where: { event: "landing_visit" } }),
+      prisma.funnelEvent.count({ where: { event: "signup" } }),
+      prisma.funnelEvent.count({ where: { event: "premium_view" } }),
+      prisma.funnelEvent.count({ where: { event: "config_view" } }),
+      prisma.funnelEvent.count({ where: { event: "purchase" } }),
+      prisma.funnelEvent.count({ where: { event: "cancel" } }),
+    ]);
+
+    const totalViews = totalViewsAgg._sum.views || 0;
+    const totalRevenue = allPurchases.reduce((sum, p) => sum + p.amount * p.quantity, 0);
+
+    return reply.send({
+      plinkk: {
+        totalUsers,
+        usersWithPlinkk,
+        totalPlinkks,
+        usersWithLinks,
+        totalViews,
+        totalClicks: totalClicksAgg,
+      },
+      purchase: {
+        totalUsers,
+        premiumUsers,
+        totalPurchases,
+        totalRevenue,
+        churned,
+        activePremium: premiumUsers,
+        retention: premiumUsers > 0 && (premiumUsers + churned) > 0
+          ? Math.round((premiumUsers / (premiumUsers + churned)) * 100)
+          : 100,
+      },
+      funnel: {
+        landingVisits,
+        signups,
+        premiumViews,
+        configViews,
+        purchases: funnelPurchases,
+        cancels: funnelCancels,
+      },
+    });
+  });
 }

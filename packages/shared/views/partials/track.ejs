@@ -1,0 +1,14 @@
+<script>
+    (function () {
+        var ev = '<%= typeof trackEvent !== "undefined" ? trackEvent : "" %>';
+        if (!ev) return;
+        var endpoint = '<%= typeof trackEndpoint !== "undefined" ? trackEndpoint : "/api/track" %>';
+        try {
+            // Only fire once per session per event
+            var key = 'plinkk_tracked_' + ev;
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+            navigator.sendBeacon(endpoint, new Blob([JSON.stringify({ event: ev })], { type: 'application/json' }));
+        } catch (e) { }
+    })();
+</script>
