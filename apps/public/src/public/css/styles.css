@@ -1647,3 +1647,21 @@ input:checked+.slider:before {
     max-width: 50%;
   }
 }
+
+.verified-badge {
+  color: #1DA1F2;
+  -webkit-text-fill-color: initial;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.partner-badge {
+  color: #F59E0B;
+  -webkit-text-fill-color: initial;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  vertical-align: middle;
+}
