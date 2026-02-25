@@ -464,7 +464,7 @@
                             const rawData = JSON.parse(document.getElementById('plinkk-data').textContent);
                             window.__INITIAL_STATE__ = {
                                 ...rawData,
-                                categories: <% - JSON.stringify(locals.categories || []) %>
+                                categories: <%- JSON.stringify(locals.categories || []) %>
                             };
                         } catch (e) {
                             console.error('Failed to parse initial state:', e);
