@@ -1,0 +1,5 @@
+<% var inviteUrl=typeof url !=='undefined' ? url : 'https://discord.gg/SJRx86UFWe' ; var cls=typeof linkClass
+    !=='undefined' ? linkClass : '' ; var text=typeof linkText !=='undefined' ? linkText : 'Discord' ; var newTab=typeof
+    targetBlank !=='undefined' ? targetBlank : true; %>
+    <a href="<%= inviteUrl %>" <%=newTab ? 'target="_blank" rel="noopener noreferrer"' : '' %>
+        <%= cls ? ('class="' + cls + '"') : '' %>><%= text %></a>
