@@ -1,104 +1,144 @@
-<%- include('partials/head', { title: 'Conditions d’utilisation', description: 'Conditions générales d’utilisation de Plinkk.' }) %>
-<%- include('partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
+<%- include('partials/head', { title: 'Conditions d’utilisation' ,
+  description: 'Conditions générales d’utilisation de Plinkk.' }) %>
+  <%- include('partials/header', { user: (typeof user !=='undefined' ? user : null) }) %>
 
-<main class="relative isolate overflow-hidden min-h-screen">
-  <!-- Background Effects -->
-  <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-    <div class="absolute left-[50%] top-0 -translate-x-1/2 blur-3xl opacity-20" aria-hidden="true">
-      <div class="aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc]" style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"></div>
-    </div>
-  </div>
-
-  <div class="mx-auto max-w-4xl px-6 py-24 sm:py-32">
-    
-    <div class="text-center mb-16 animate-slide-up">
-      <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl">Conditions d'utilisation</h1>
-      <div class="mt-4 flex items-center justify-center gap-2 text-slate-400">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        <span>Dernière mise à jour : <time datetime="2025-09-29" class="text-slate-200 font-medium">29 septembre 2025</time></span>
+    <main class="relative isolate overflow-hidden min-h-screen">
+      <!-- Background Effects -->
+      <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div class="absolute left-[50%] top-0 -translate-x-1/2 blur-3xl opacity-20" aria-hidden="true">
+          <div class="aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc]"
+            style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)">
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div class="bg-slate-900/40 backdrop-blur-md rounded-3xl border border-white/5 p-8 sm:p-12 shadow-2xl animate-slide-up" style="animation-delay: 100ms;">
-      
-      <!-- Navigation -->
-      <nav class="flex flex-wrap gap-2 mb-12 border-b border-white/5 pb-8">
-        <a href="/terms" class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-white/10">Conditions d'utilisation</a>
-        <a href="/cgv" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">Conditions de vente</a>
-        <a href="/privacy" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">Confidentialité</a>
-        <a href="/cookies" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">Cookies</a>
-        <a href="/legal" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">Mentions légales</a>
-      </nav>
+      <div class="mx-auto max-w-4xl px-6 py-24 sm:py-32">
 
-      <div class="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-a:text-violet-400 prose-a:no-underline hover:prose-a:text-violet-300 prose-strong:text-white prose-li:text-slate-300">
-        
-        <h2 id="objet" class="flex items-center gap-3">
-          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">1</span>
-          Objet
-        </h2>
-        <p>Plinkk permet de créer une page publique de liens personnalisés. L’utilisation du service implique l’acceptation des présentes CGU.</p>
+        <div class="text-center mb-16 animate-slide-up">
+          <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl">Conditions d'utilisation</h1>
+          <div class="mt-4 flex items-center justify-center gap-2 text-slate-400">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Dernière mise à jour : <time datetime="2025-09-29" class="text-slate-200 font-medium">29 septembre
+                2025</time></span>
+          </div>
+        </div>
 
-        <h2 id="compte" class="flex items-center gap-3">
-          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">2</span>
-          Compte utilisateur
-        </h2>
-        <ul>
-          <li>Vous êtes responsable de la confidentialité de vos identifiants.</li>
-          <li>Vous garantissez l’exactitude des informations fournies.</li>
-        </ul>
+        <div
+          class="bg-slate-900/40 backdrop-blur-md rounded-3xl border border-white/5 p-8 sm:p-12 shadow-2xl animate-slide-up"
+          style="animation-delay: 100ms;">
 
-        <h2 id="contenus" class="flex items-center gap-3">
-          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">3</span>
-          Contenus
-        </h2>
-        <ul>
-          <li>Interdiction de publier des contenus illégaux, haineux, diffamatoires, contrefaisants ou nuisibles.</li>
-          <li>Le contenu que vous publiez reste sous votre responsabilité.</li>
-        </ul>
+          <!-- Navigation -->
+          <nav class="flex flex-wrap gap-2 mb-12 border-b border-white/5 pb-8">
+            <a href="/terms" class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-white/10">Conditions
+              d'utilisation</a>
+            <a href="/cgv"
+              class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">Conditions
+              de vente</a>
+            <a href="/privacy"
+              class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">Confidentialité</a>
+            <a href="/cookies"
+              class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">Cookies</a>
+            <a href="/legal"
+              class="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-colors">Mentions
+              légales</a>
+          </nav>
 
-        <h2 id="droits" class="flex items-center gap-3">
-          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">4</span>
-          Propriété intellectuelle
-        </h2>
-        <p>Vous conservez vos droits sur vos contenus. Vous nous accordez une licence limitée pour l’affichage et l’hébergement nécessaires à la fourniture du service.</p>
-        <p>Nous nous engageons à respecter vos droits et à ne pas utiliser vos contenus à d’autres fins que celles prévues par le service.</p>
-        <p>Le code source de Plinkk est sous licence MIT (voir la <a href="#" class="openLicenseModal">licence</a>).</p>
-        <p>Les autres éléments du site (textes, images, logos, icônes) sont la propriété de Plinkk ou de ses partenaires et sont protégés. Toute reproduction non autorisée est interdite.</p>
-        <p>Pour toute demande de licence ou de réutilisation, contactez-nous à <%- include('partials/contact-email', { linkClass: 'text-violet-400 hover:text-violet-300 transition-colors' }) %>.</p>
-        <p>L'utilisateur s'engage à respecter les droits de propriété intellectuelle (droit d'auteur, droit voisin, droit des marques et des logos), et à n'utiliser que des images ou autres éléments dont il détient légalement les droits ou pour lesquels il dispose d'une autorisation expresse des titulaires.</p>
+          <div
+            class="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-a:text-violet-400 prose-a:no-underline hover:prose-a:text-violet-300 prose-strong:text-white prose-li:text-slate-300">
 
-        <h2 id="resiliation" class="flex items-center gap-3">
-          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">5</span>
-          Suspension et résiliation
-        </h2>
-        <p>Nous pouvons suspendre ou résilier l’accès en cas de non‑respect manifeste des CGU, de fraude ou d’atteinte à la sécurité.</p>
+            <h2 id="objet" class="flex items-center gap-3">
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">1</span>
+              Objet
+            </h2>
+            <p>Plinkk permet de créer une page publique de liens personnalisés. L’utilisation du service implique
+              l’acceptation des présentes CGU.</p>
 
-        <h2 id="responsabilite" class="flex items-center gap-3">
-          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">6</span>
-          Responsabilité
-        </h2>
-        <p>Le service est fourni « en l’état ». Nous ne garantissons pas une disponibilité ininterrompue. Notre responsabilité ne saurait être engagée pour des dommages indirects.</p>
+            <h2 id="compte" class="flex items-center gap-3">
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">2</span>
+              Compte utilisateur
+            </h2>
+            <ul>
+              <li>Vous êtes responsable de la confidentialité de vos identifiants.</li>
+              <li>Vous garantissez l’exactitude des informations fournies.</li>
+            </ul>
 
-        <h2 id="donnees" class="flex items-center gap-3">
-          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">7</span>
-          Données personnelles
-        </h2>
-        <p>Le traitement des données est décrit dans la <a href="/privacy">Politique de confidentialité</a> et la <a href="/cookies">Politique des cookies</a>. En vous inscrivant sur Plinkk, vous acceptez expressément ces traitements et confirmez avoir pris connaissance de la Politique de confidentialité.</p>
+            <h2 id="contenus" class="flex items-center gap-3">
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">3</span>
+              Contenus
+            </h2>
+            <ul>
+              <li>Interdiction de publier des contenus illégaux, haineux, diffamatoires, contrefaisants ou nuisibles.
+              </li>
+              <li>Le contenu que vous publiez reste sous votre responsabilité.</li>
+            </ul>
 
-        <h2 id="modifications" class="flex items-center gap-3">
-          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">8</span>
-          Modifications
-        </h2>
-        <p>Nous pouvons modifier les présentes CGU. Les modifications sont applicables dès leur publication. La date de mise à jour est indiquée en tête.</p>
+            <h2 id="droits" class="flex items-center gap-3">
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">4</span>
+              Propriété intellectuelle
+            </h2>
+            <p>Vous conservez vos droits sur vos contenus. Vous nous accordez une licence limitée pour l’affichage et
+              l’hébergement nécessaires à la fourniture du service.</p>
+            <p>Nous nous engageons à respecter vos droits et à ne pas utiliser vos contenus à d’autres fins que celles
+              prévues par le service.</p>
+            <p>Le code source de Plinkk est sous licence PCL (voir la <a href="#" class="openLicenseModal">licence</a>).
+            </p>
+            <p>Les autres éléments du site (textes, images, logos, icônes) sont la propriété de Plinkk ou de ses
+              partenaires et sont protégés. Toute reproduction non autorisée est interdite.</p>
+            <p>Pour toute demande de licence ou de réutilisation, contactez-nous à <%- include('partials/contact-email',
+                { linkClass: 'text-violet-400 hover:text-violet-300 transition-colors' }) %>.</p>
+            <p>L'utilisateur s'engage à respecter les droits de propriété intellectuelle (droit d'auteur, droit voisin,
+              droit des marques et des logos), et à n'utiliser que des images ou autres éléments dont il détient
+              légalement les droits ou pour lesquels il dispose d'une autorisation expresse des titulaires.</p>
 
-        <h2 id="droit" class="flex items-center gap-3">
-          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">9</span>
-          Droit applicable
-        </h2>
-        <p>Droit français. Compétence des tribunaux du siège de l’éditeur en cas de litige.</p>
+            <h2 id="resiliation" class="flex items-center gap-3">
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">5</span>
+              Suspension et résiliation
+            </h2>
+            <p>Nous pouvons suspendre ou résilier l’accès en cas de non‑respect manifeste des CGU, de fraude ou
+              d’atteinte à la sécurité.</p>
 
+            <h2 id="responsabilite" class="flex items-center gap-3">
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">6</span>
+              Responsabilité
+            </h2>
+            <p>Le service est fourni « en l’état ». Nous ne garantissons pas une disponibilité ininterrompue. Notre
+              responsabilité ne saurait être engagée pour des dommages indirects.</p>
+
+            <h2 id="donnees" class="flex items-center gap-3">
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">7</span>
+              Données personnelles
+            </h2>
+            <p>Le traitement des données est décrit dans la <a href="/privacy">Politique de confidentialité</a> et la <a
+                href="/cookies">Politique des cookies</a>. En vous inscrivant sur Plinkk, vous acceptez expressément ces
+              traitements et confirmez avoir pris connaissance de la Politique de confidentialité.</p>
+
+            <h2 id="modifications" class="flex items-center gap-3">
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">8</span>
+              Modifications
+            </h2>
+            <p>Nous pouvons modifier les présentes CGU. Les modifications sont applicables dès leur publication. La date
+              de mise à jour est indiquée en tête.</p>
+
+            <h2 id="droit" class="flex items-center gap-3">
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 text-sm font-bold">9</span>
+              Droit applicable
+            </h2>
+            <p>Droit français. Compétence des tribunaux du siège de l’éditeur en cas de litige.</p>
+
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</main>
-<%- include('partials/footer') %>
+    </main>
+    <%- include('partials/footer') %>
