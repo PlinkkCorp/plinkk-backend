@@ -12,6 +12,7 @@ import { recordPlinkkView } from "../lib/plinkkUtils";
 import { filterScheduledLinks } from "@plinkk/shared";
 import { coerceThemeData } from "../lib/theme";
 import { generateBundle } from "../lib/generateBundle";
+import { replyView } from "../lib/replyView";
 import { generateTheme } from "../lib/generateTheme";
 import { roundedRect, wrapText } from "../lib/fileUtils";
 import { PlinkkSnapshot } from "../types/plinkk";
@@ -27,6 +28,13 @@ async function ensureCanvas(): Promise<CanvasMod> {
     _canvasMod = null;
   }
   return _canvasMod;
+}
+
+async function getCurrentUser(request: any) {
+  const sessionData = request.session.get("data");
+  const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+  if (!currentUserId) return null;
+  return await prisma.user.findUnique({ where: { id: currentUserId }, include: { role: true } });
 }
 
 export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
@@ -62,7 +70,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       }
 
       if (!password) {
-        return reply.view("plinkk/password.ejs", {
+        const currentUser = await getCurrentUser(request);
+        return await replyView(reply, "plinkk/password.ejs", currentUser as any, {
           page: resolved.page,
           username,
           identifier,
@@ -79,7 +88,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         request.session.set(`plinkk_unlocked_${resolved.page.id}`, true);
         return reply.redirect(targetUrl);
       } else {
-        return reply.view("plinkk/password.ejs", {
+        const currentUser = await getCurrentUser(request);
+        return await replyView(reply, "plinkk/password.ejs", currentUser as any, {
           page: resolved.page,
           username,
           identifier,
@@ -199,7 +209,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
                           ban.time * 60000,
                         ).toISOString()
                         : null;
-                    return reply.view("erreurs/banned.ejs", {
+                    const currentUser = await getCurrentUser(request);
+                    return await replyView(reply, "erreurs/banned.ejs", currentUser as any, {
                       reason: ban.reason || "Violation des règles",
                       email: u.email,
                       until,
@@ -214,7 +225,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
               const sessionKey = `plinkk_unlocked_${resolved.page.id}`;
               const unlocked = request.session.get(sessionKey);
               if (!unlocked) {
-                return reply.view("plinkk/password.ejs", {
+                const currentUser = await getCurrentUser(request);
+                return await replyView(reply, "plinkk/password.ejs", currentUser as any, {
                   page: resolved.page,
                   username,
                   identifier: undefined,
@@ -262,7 +274,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
             }
 
             const settings = await prisma.plinkkSettings.findUnique({ where: { plinkkId: resolved.page.id } });
-            return reply.view("plinkk/show.ejs", {
+            const currentUser = await getCurrentUser(request);
+            return await replyView(reply, "plinkk/show.ejs", currentUser as any, {
               page: displayPage,
               userId: resolved.user.id,
               username: resolved.user.id,
@@ -364,7 +377,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
                       new Date(ban.createdAt).getTime() + ban.time * 60000,
                     ).toISOString()
                     : null;
-                return reply.view("erreurs/banned.ejs", {
+                const currentUser = await getCurrentUser(request);
+                return await replyView(reply, "erreurs/banned.ejs", currentUser as any, {
                   reason: ban.reason || "Violation des règles",
                   email: u.email,
                   until,
@@ -378,14 +392,15 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         if (resolved.isPasswordProtected && !resolved.isOwner) {
           const sessionKey = `plinkk_unlocked_${resolved.page.id}`;
           const unlocked = request.session.get(sessionKey);
-          if (!unlocked) {
-            return reply.view("plinkk/password.ejs", {
-              page: resolved.page,
-              username,
-              identifier: undefined,
-              error: null,
-            });
-          }
+            if (!unlocked) {
+              const currentUser = await getCurrentUser(request);
+              return await replyView(reply, "plinkk/password.ejs", currentUser as any, {
+                page: resolved.page,
+                username,
+                identifier: undefined,
+                error: null,
+              });
+            }
         }
 
         const allLinks = await prisma.link.findMany({
@@ -427,7 +442,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         }
 
         const settings = await prisma.plinkkSettings.findUnique({ where: { plinkkId: resolved.page.id } });
-        return reply.view("plinkk/show.ejs", {
+        const currentUser = await getCurrentUser(request);
+        return await replyView(reply, "plinkk/show.ejs", currentUser as any, {
           page: displayPage,
           userId: resolved.user.id,
           username: resolved.user.id,
@@ -930,17 +946,17 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       identifier,
       request,
     );
-    if (resolved.status !== 200)
-      return reply
-        .code(resolved.status)
-        .view("erreurs/404.ejs", { user: null });
+    if (resolved.status !== 200) {
+      return await replyView(reply, "erreurs/404.ejs", null as any, { user: null }, resolved.status);
+    }
 
     // Plinkk protégé par mot de passe
     if (resolved.isPasswordProtected && !resolved.isOwner) {
       const sessionKey = `plinkk_unlocked_${resolved.page.id}`;
       const unlocked = request.session.get(sessionKey);
       if (!unlocked) {
-        return reply.view("plinkk/password.ejs", {
+        const currentUser = await getCurrentUser(request);
+        return await replyView(reply, "plinkk/password.ejs", currentUser as any, {
           page: resolved.page,
           username,
           identifier,
@@ -976,7 +992,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         request,
       );
     }
-    return reply.view("plinkk/show.ejs", {
+    const currentUser = await getCurrentUser(request);
+    return await replyView(reply, "plinkk/show.ejs", currentUser as any, {
       page: resolved.page,
       userId: resolved.user.id,
       username: resolved.user.id,
@@ -998,17 +1015,17 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       undefined,
       request,
     );
-    if (resolved.status !== 200)
-      return reply
-        .code(resolved.status)
-        .view("erreurs/404.ejs", { user: null });
+    if (resolved.status !== 200) {
+      return await replyView(reply, "erreurs/404.ejs", null as any, { user: null }, resolved.status);
+    }
 
     // Plinkk protégé par mot de passe
     if (resolved.isPasswordProtected && !resolved.isOwner) {
       const sessionKey = `plinkk_unlocked_${resolved.page.id}`;
       const unlocked = request.session.get(sessionKey);
       if (!unlocked) {
-        return reply.view("plinkk/password.ejs", {
+        const currentUser = await getCurrentUser(request);
+        return await replyView(reply, "plinkk/password.ejs", currentUser as any, {
           page: resolved.page,
           username,
           identifier: "0",
@@ -1041,7 +1058,8 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         request,
       );
     }
-    return reply.view("plinkk/show.ejs", {
+    const currentUser = await getCurrentUser(request);
+    return await replyView(reply, "plinkk/show.ejs", currentUser as any, {
       page: resolved.page,
       userId: resolved.user.id,
       username: resolved.user.id,

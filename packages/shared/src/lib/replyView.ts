@@ -30,6 +30,8 @@ export async function replyView(
   extraData: Record<string, any> = {},
   statusCode: number = 200
 ): Promise<string> {
+  const frontendUrl = process.env.FRONTEND_URL || process.env.PUBLIC_URL || (process.env.NODE_ENV !== 'production' ? 'http://127.0.0.1:3002' : '');
+
   if (user === null) {
     return reply.code(statusCode).view(template, {
       __SITE_MESSAGES__: await getActiveAnnouncementsForUser(null, extraData.__platform),
@@ -37,6 +39,7 @@ export async function replyView(
       isAdmin: false,
       isStaff: false,
       getGravatarUrl,
+      frontendUrl,
       ...extraData,
       ...data,
     });
@@ -56,6 +59,7 @@ export async function replyView(
     isAdmin: isAdmin,
     isStaff: isStaff,
     getGravatarUrl,
+    frontendUrl,
     ...extraData,
     ...data,
   });

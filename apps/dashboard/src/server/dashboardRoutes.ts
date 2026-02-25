@@ -13,6 +13,7 @@ import { dashboardThemesRoutes } from "./dashboard/themes";
 import { dashboardRedirectsRoutes } from "./dashboard/redirects";
 import { dashboardLeadsRoutes } from "./dashboard/leads";
 import { dashboardPartnershipRoutes } from "./dashboard/partnership";
+import { verifyRoleIsStaff, verifyRolePartner } from "../lib/verifyRole";
 import { getPublicPath } from "../services/plinkkService";
 
 export function dashboardRoutes(fastify: FastifyInstance) {
@@ -27,6 +28,28 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.register(dashboardRedirectsRoutes, { prefix: "/redirects" });
   fastify.register(dashboardLeadsRoutes, { prefix: "/leads" });
   fastify.register(dashboardPartnershipRoutes, { prefix: "/partnership" });
+
+
+  fastify.get(
+    "/partners",
+    { preHandler: [requireAuthRedirect] },
+    async function (request, reply) {
+      const userInfo = request.currentUser!;
+      const userId = request.userId!;
+      const partners = await prisma.partner.findMany({
+        include: { quests: true, _count: { select: { quests: true } } },
+        orderBy: { order: 'asc' }
+      });
+
+      const completed = await prisma.userQuest.findMany({
+        where: { userId },
+        select: { partnerQuestId: true }
+      });
+      const userQuests = completed.map(uq => uq.partnerQuestId);
+
+      return replyView(reply, "dashboard/user/partners.ejs", userInfo, { partners, userQuests });
+    }
+  );
 
   fastify.get("/premium", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
     const userInfo = request.currentUser!;

@@ -184,8 +184,10 @@
                                                     <%= quest.title %>
                                                 </h3>
                                                 <span
-                                                    class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-violet-500/10 text-violet-400 border border-violet-500/20">
-                                                    +<%= quest.rewardGems %> Gems
+                                                    class="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                                                    <img src="/public/images/gems.svg" alt="Gems"
+                                                        class="w-4 h-4 shrink-0" />
+                                                    <%= quest.rewardGems %>
                                                 </span>
                                                 <span
                                                     class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider <%= quest.isActive ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-800 text-slate-400' %>">

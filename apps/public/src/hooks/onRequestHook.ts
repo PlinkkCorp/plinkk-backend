@@ -56,10 +56,9 @@ export default async function onRequestHook(
       !(host === "127.0.0.1:3002" && effectiveUrl.startsWith("/config.js"))
     ) {
       const isDevHost = devHosts.has(host);
-      const publicRoutes = new Set(["/", "/pricing", "/about", "/cgv", "/confidentialite", "/mentions-legales", "/feedback"]);
+      const publicRoutes = new Set(["/", "/pricing", "/about", "/cgv", "/confidentialite", "/mentions-legales", "/feedback", "/partners"]);
       const cleanPath = effectivePath.split("?")[0];
-      if (isDevHost && (publicRoutes.has(cleanPath) || cleanPath.startsWith("/about/"))) {
-        // Let Fastify routes handle these normally
+      if (isDevHost && (publicRoutes.has(cleanPath) || cleanPath.startsWith("/about/") || cleanPath.startsWith("/partners"))) {
       } else {
         let hostDb: any = null;
 

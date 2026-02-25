@@ -1,0 +1,202 @@
+<%- include('partials/head.ejs', { title: `Partenaires`, description: `Liste des partenaires et leurs quêtes associées`,
+    robots: `noindex,nofollow` }) %>
+    <%- include('partials/header-dash.ejs', { user: user }) %>
+
+        <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+            <%- include('partials/asside_dash.ejs', { active: 'partners' }) %>
+
+                <main class="col-span-12 lg:col-span-10 space-y-8">
+                    <!-- Header -->
+                    <div
+                        class="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] relative overflow-hidden group">
+                        <div
+                            class="absolute top-0 right-0 w-64 h-64 bg-violet-600/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-violet-600/20 transition-colors duration-700">
+                        </div>
+                        <div class="relative z-10">
+                            <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Partenaires</h1>
+                            <p class="text-slate-400 mt-2 text-lg">Découvrez nos partenaires et complétez des quêtes
+                                pour gagner des <span class="text-violet-400 font-semibold">Gems</span>.</p>
+                        </div>
+                    </div>
+
+                    <!-- Partners Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                        <% if (partners && partners.length> 0) { %>
+                            <% partners.forEach(partner=> { %>
+                                <div
+                                    class="bg-slate-900 border border-slate-800 rounded-[2.5rem] overflow-hidden hover:border-slate-700 transition-all duration-300 flex flex-col group/card shadow-xl hover:shadow-2xl hover:shadow-violet-600/5">
+                                    <!-- Banner & Logo -->
+                                    <div class="h-32 bg-slate-800 relative">
+                                        <% if (partner.bannerUrl) { %>
+                                            <img src="<%= partner.bannerUrl %>" alt="Banner"
+                                                class="w-full h-full object-cover opacity-60 group-hover/card:opacity-80 transition-opacity duration-500">
+                                            <% } %>
+                                                <div
+                                                    class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent">
+                                                </div>
+
+                                                <!-- Logo Overlay -->
+                                                <div class="absolute -bottom-6 left-8">
+                                                    <div
+                                                        class="w-20 h-20 rounded-2xl bg-slate-950 border-4 border-slate-900 overflow-hidden flex items-center justify-center shadow-2xl transition-transform duration-300 group-hover/card:scale-105">
+                                                        <% if (partner.logoUrl) { %>
+                                                            <img src="<%= partner.logoUrl %>" alt="Logo"
+                                                                class="w-full h-full object-contain p-2">
+                                                            <% } else { %>
+                                                                <span class="text-3xl font-bold text-slate-500">
+                                                                    <%= partner.name.charAt(0) %>
+                                                                </span>
+                                                                <% } %>
+                                                    </div>
+                                                </div>
+
+                                                <!-- External Link -->
+                                                <% if (partner.url) { %>
+                                                    <a href="<%= partner.url %>" target="_blank"
+                                                        class="absolute top-4 right-4 p-2.5 rounded-xl bg-slate-950/50 backdrop-blur-md border border-white/10 text-white/70 hover:text-white transition-all hover:scale-110 active:scale-95"
+                                                        title="Visiter le site">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                            stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <path
+                                                                d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6">
+                                                            </path>
+                                                            <polyline points="15 3 21 3 21 9"></polyline>
+                                                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                                                        </svg>
+                                                    </a>
+                                                    <% } %>
+                                    </div>
+
+                                    <!-- Content -->
+                                    <div class="p-8 pt-12 flex-1 flex flex-col">
+                                        <div class="flex items-start justify-between mb-4">
+                                            <h3
+                                                class="text-2xl font-bold text-white tracking-tight group-hover/card:text-violet-400 transition-colors">
+                                                <%= partner.name %>
+                                            </h3>
+                                            <span
+                                                class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest <%= partner.isActive ? `bg-emerald-500/10 text-emerald-400 border border-emerald-500/20` : `bg-slate-800 text-slate-500 border border-slate-700` %>">
+                                                <%= partner.isActive ? `Actif` : `Archivé` %>
+                                            </span>
+                                        </div>
+
+                                        <p class="text-slate-400 text-sm leading-relaxed mb-10 line-clamp-3">
+                                            <%= partner.description || `Ce partenaire n'a pas encore de description
+                                                détaillée.` %>
+                                        </p>
+
+                                        <!-- Quests Section -->
+                                        <div class="space-y-4 mt-auto">
+                                            <div class="flex items-center justify-between">
+                                                <h4
+                                                    class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">
+                                                    Quêtes Disponibles</h4>
+                                                <span
+                                                    class="text-xs font-bold text-slate-400 bg-slate-800/50 px-2.5 py-1 rounded-lg">
+                                                    <%= partner.quests ? partner.quests.length : 0 %>
+                                                </span>
+                                            </div>
+
+                                            <% if (partner.quests && partner.quests.length> 0) { %>
+                                                <div class="space-y-3">
+                                                    <% partner.quests.slice(0, 4).forEach(q=> {
+                                                        const isCompleted = userQuests.includes(q.id);
+                                                        %>
+                                                        <div
+                                                            class="p-4 bg-slate-950/40 border border-slate-800/50 rounded-2xl flex items-center justify-between hover:bg-slate-800/30 transition-all group/quest border-l-0 hover:border-l-4 hover:border-l-violet-600 <%= isCompleted ? 'grayscale opacity-60' : '' %>">
+                                                            <div class="flex-1 min-w-0 mr-4">
+                                                                <div
+                                                                    class="font-bold text-white truncate text-sm tracking-tight">
+                                                                    <%= q.title %>
+                                                                </div>
+                                                                <div class="flex items-center gap-2 mt-1.5">
+                                                                    <div
+                                                                        class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-violet-500/10 border border-violet-500/20 shadow-sm">
+                                                                        <img src="/public/images/gems.svg" alt="Gems"
+                                                                            class="w-4 h-4 shrink-0" />
+                                                                        <span
+                                                                            class="text-violet-400 font-black text-[11px]">
+                                                                            <%= q.rewardGems %>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <% if (isCompleted) { %>
+                                                                <div
+                                                                    class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-bold uppercase tracking-wider">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12"
+                                                                        height="12" viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="3"
+                                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                                                    </svg>
+                                                                    Quête accomplie
+                                                                </div>
+                                                                <% } else if (q.isActive) { %>
+                                                                    <a href="/partnership/quest/<%= q.id %>/start"
+                                                                        target="_blank"
+                                                                        class="w-10 h-10 flex items-center justify-center bg-violet-600 hover:bg-violet-500 text-white rounded-xl transition-all shadow-lg shadow-violet-600/10 hover:shadow-violet-600/30 group-hover/quest:scale-105 active:scale-90">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            width="18" height="18" viewBox="0 0 24 24"
+                                                                            fill="none" stroke="currentColor"
+                                                                            stroke-width="3" stroke-linecap="round"
+                                                                            stroke-linejoin="round">
+                                                                            <polyline points="9 18 15 12 9 6">
+                                                                            </polyline>
+                                                                        </svg>
+                                                                    </a>
+                                                                    <% } else { %>
+                                                                        <span
+                                                                            class="text-[10px] font-bold text-slate-600 uppercase tracking-widest px-2">Offline</span>
+                                                                        <% } %>
+                                                        </div>
+                                                        <% }) %>
+                                                            <% if (partner.quests.length> 4) { %>
+                                                                <p
+                                                                    class="text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest pt-2">
+                                                                    + <%= partner.quests.length - 4 %> autres quêtes</p>
+                                                                <% } %>
+                                                </div>
+                                                <% } else { %>
+                                                    <div
+                                                        class="py-8 px-4 bg-slate-950/20 border-2 border-dashed border-slate-800/50 rounded-3xl text-center">
+                                                        <p class="text-xs text-slate-600 font-medium italic">Aucune
+                                                            quête disponible pour le moment.</p>
+                                                    </div>
+                                                    <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }) %>
+                                    <% } else { %>
+                                        <div
+                                            class="col-span-full py-32 text-center bg-slate-900 border border-slate-800 rounded-[3.5rem] relative overflow-hidden">
+                                            <div
+                                                class="absolute inset-0 bg-gradient-to-b from-violet-600/5 to-transparent pointer-events-none">
+                                            </div>
+                                            <div
+                                                class="w-28 h-28 mx-auto rounded-[2rem] bg-slate-800/50 flex items-center justify-center mb-8 border border-slate-700/50 shadow-inner">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                                                    class="text-slate-600">
+                                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                                    <circle cx="9" cy="7" r="4"></circle>
+                                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                                </svg>
+                                            </div>
+                                            <h3 class="text-3xl font-bold text-white mb-3 tracking-tight">Plus de
+                                                partenaires arrivent bientôt</h3>
+                                            <p class="text-slate-400 text-lg max-w-md mx-auto leading-relaxed">Nous
+                                                sélectionnons les meilleurs partenaires pour vous offrir les récompenses
+                                                les plus exclusives.</p>
+                                        </div>
+                                        <% } %>
+                    </div>
+                </main>
+        </div>
+
+        <%- include('partials/footer.ejs') %>

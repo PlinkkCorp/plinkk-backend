@@ -14,6 +14,10 @@ const STATIC_PAGES = [
   { path: "/partners", template: "partners.ejs" },
 ];
 
+  // Redirect trailing slash to canonical path
+  // (keeps behaviour consistent with /docs)
+  // Note: we register the redirect after the STATIC_PAGES handling below
+
 async function getCurrentUser(request: FastifyRequest) {
   const sessionData = request.session.get("data");
   if (!sessionData) return null;
@@ -57,6 +61,11 @@ export function staticPagesRoutes(fastify: FastifyInstance) {
 
   fastify.get("/docs/", async (request, reply) => {
     return reply.code(301).redirect("/docs");
+  });
+
+  // Redirect /partners/ -> /partners to handle trailing slash
+  fastify.get("/partners/", async (request, reply) => {
+    return reply.code(301).redirect("/partners");
   });
 
   fastify.get("/robots.txt", async (request, reply) => {

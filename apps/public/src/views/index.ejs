@@ -30,10 +30,15 @@
   <main class="relative overflow-hidden">
 
     <!-- Hero Section -->
-    <section class="relative min-h-screen flex flex-col justify-center px-6 lg:px-12">
+    <section class="relative min-h-screen flex flex-col justify-center px-6 lg:px-12 overflow-hidden">
+      <!-- Brand Banner -->
+      <div class="absolute inset-0 z-0">
+        <img src="/public/images/baniere.svg" alt="" class="w-full h-full object-cover opacity-30">
+      </div>
+
       <!-- Background glow -->
       <div
-        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full glow-purple pointer-events-none parallax"
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full glow-purple pointer-events-none parallax opacity-80"
         data-speed="-0.2"></div>
 
       <div class="relative z-10 max-w-[1400px] mx-auto w-full pt-32 pb-20">

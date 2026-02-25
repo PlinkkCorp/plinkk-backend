@@ -13,6 +13,58 @@ export function partnersRoutes(fastify: FastifyInstance) {
             orderBy: { order: 'asc' }
         });
 
+        // Aggregate daily stats (views / clicks) and gems rewarded per partner
+        try {
+            const partnerIds = partners.map(p => p.id);
+
+            const statsAgg = partnerIds.length > 0 ? await prisma.partnerStatDaily.groupBy({
+                by: ['partnerId'],
+                where: { partnerId: { in: partnerIds } },
+                _sum: { views: true, clicks: true }
+            }) : [] as any[];
+
+            const quests = partnerIds.length > 0 ? await prisma.partnerQuest.findMany({
+                where: { partnerId: { in: partnerIds } },
+                select: { id: true, partnerId: true }
+            }) : [] as any[];
+
+            const questIds = quests.map(q => q.id);
+            const userQuestSums = questIds.length > 0 ? await prisma.userQuest.groupBy({
+                by: ['partnerQuestId'],
+                where: { partnerQuestId: { in: questIds } },
+                _sum: { gemsRewarded: true }
+            }) : [] as any[];
+
+            const statsMap = new Map<string, { views: number; clicks: number }>();
+            statsAgg.forEach(s => {
+                statsMap.set(s.partnerId, { views: s._sum.views || 0, clicks: s._sum.clicks || 0 });
+            });
+
+            const questToPartner = new Map<string, string>();
+            quests.forEach(q => questToPartner.set(q.id, q.partnerId));
+
+            const gemsMap = new Map<string, number>();
+            userQuestSums.forEach(uq => {
+                const pid = questToPartner.get(uq.partnerQuestId);
+                if (!pid) return;
+                const current = gemsMap.get(pid) || 0;
+                gemsMap.set(pid, current + (uq._sum.gemsRewarded || 0));
+            });
+
+            // Attach aggregated stats to partner objects (non-breaking: added field `stats`)
+            partners.forEach(p => {
+                const s = statsMap.get(p.id) || { views: 0, clicks: 0 };
+                (p as any).stats = {
+                    views: s.views,
+                    clicks: s.clicks,
+                    gemsAwarded: gemsMap.get(p.id) || 0
+                };
+            });
+        } catch (e) {
+            // If aggregation fails, we still return partners without stats
+            request.log?.error?.(e);
+        }
+
         const sessionData = request.session.get("data");
         const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
 
@@ -149,7 +201,7 @@ export function partnersRoutes(fastify: FastifyInstance) {
 
             // Import affiliateService dynamically to avoid issues if needed, or stick to the shared export
             const { affiliateService } = await import("@plinkk/shared");
-            await affiliateService.recordClick(affiliateLink.id);
+            await affiliateService.recordClick(affiliateLink.slug);
 
             // Redirect to the user's plinkk page
             const user = await prisma.user.findUnique({

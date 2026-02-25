@@ -114,6 +114,7 @@ article {
     margin: 2em auto 1em auto;
     animation: fadeInUp 1.2s cubic-bezier(0.165, 0.84, 0.44, 1);
     will-change: transform;
+    transform: scale(0.99);
 }
 
 
@@ -141,7 +142,7 @@ article:hover::before {
 }
 
 article:hover {
-    transform: translateY(-4px) scale(1.01);
+    transform: translateY(-4px) scale(1.00);
     box-shadow:
         0 12px 40px rgba(0, 0, 0, 0.4),
         0 24px 64px rgba(0, 0, 0, 0.2),

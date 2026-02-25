@@ -18,13 +18,7 @@
                         class="absolute top-0 right-0 inline-flex items-center gap-2 px-4 py-2 bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl shadow-xl shadow-violet-900/20 transform hover:scale-105 transition-transform cursor-default">
                         <div
                             class="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-inner">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" class="text-white">
-                                <polygon
-                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
-                                </polygon>
-                            </svg>
+                            <img src="/public/images/gems.svg" alt="Gems" class="w-5 h-5 shrink-0" />
                         </div>
                         <div class="text-left">
                             <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Vos Plinkk Gems
@@ -39,13 +33,7 @@
 
                         <div
                             class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400 text-sm font-medium mb-6">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path
-                                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
-                                </path>
-                            </svg>
+                            <img src="/public/images/gems.svg" alt="Gems" class="w-4 h-4 shrink-0" />
                             Partenaires & Récompenses
                         </div>
                         <h1 class="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
@@ -74,11 +62,22 @@
                             <% } %>
             </div>
 
-            <!-- Content Loading State -->
-            <div id="loadingState" class="flex flex-col items-center justify-center py-20">
-                <div class="w-12 h-12 border-4 border-violet-500/30 border-t-violet-500 rounded-full animate-spin mb-4">
-                </div>
-                <p class="text-slate-400 font-medium">Chargement des partenaires...</p>
+            <!-- Skeleton Loading State -->
+            <div id="loadingState" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-8">
+                <% for(let i=0; i < 6; i++) { %>
+                    <div class="glass-card rounded-[2.5rem] overflow-hidden flex flex-col h-[400px]">
+                        <div class="h-32 skeleton"></div>
+                        <div class="p-8 pt-12 flex-1">
+                            <div class="h-8 w-3/4 skeleton rounded-lg mb-4"></div>
+                            <div class="h-4 w-full skeleton rounded-lg mb-2"></div>
+                            <div class="h-4 w-5/6 skeleton rounded-lg mb-8"></div>
+                            <div class="space-y-4">
+                                <div class="h-12 w-full skeleton rounded-2xl"></div>
+                                <div class="h-12 w-full skeleton rounded-2xl"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
             </div>
 
             <div id="partnersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
@@ -127,11 +126,27 @@
                 .animate-in {
                     animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
                 }
+
+                @keyframes shimmer {
+                    0% {
+                        background-position: -200% 0;
+                    }
+
+                    100% {
+                        background-position: 200% 0;
+                    }
+                }
+
+                .skeleton {
+                    background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+                    background-size: 200% 100%;
+                    animation: shimmer 1.5s infinite linear;
+                }
             </style>
 
             <script>
                 document.addEventListener('DOMContentLoaded', async () => {
-                    const isLoggedReified = <%= locals.currentUser ? 'true' : 'false' %>;
+                    const isLoggedReified = <%- JSON.stringify(!!locals.currentUser) %>;
 
                     try {
                         const res = await fetch('/api/partners');
@@ -176,18 +191,18 @@
                                     questsHtml = partner.quests.map(quest => {
                                         const completed = userQuests.includes(quest.id);
                                         const btnClass = completed
-                                            ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 cursor-default opacity-80'
+                                            ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-default opacity-60 grayscale'
                                             : 'bg-violet-600 hover:bg-violet-500 text-white cursor-pointer hover:shadow-lg hover:shadow-violet-900/40 relative overflow-hidden group/btn';
 
                                         const btnIcon = completed
                                             ? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>'
-                                            : `<span class="flex items-center gap-1 font-bold"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="gem-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> +${quest.rewardGems}</span>`;
+                                            : `<span class="flex items-center gap-1 font-bold"><img src="/public/images/gems.svg" alt="Gems" class="w-4 h-4 shrink-0 gem-icon" /> +${quest.rewardGems}</span>`;
 
                                         const btnAction = completed
                                             ? `onclick="window.open('${quest.actionUrl}', '_blank')"`
-                                            : `onclick="completeQuest('${quest.id}')"`;
+                                            : `onclick="completeQuest(event, '${quest.id}')"`;
 
-                                        const btnText = completed ? 'Complété' : 'Récupérer';
+                                        const btnText = completed ? 'Quête accomplie' : 'Récupérer';
 
                                         return `
               <div class="quest-item p-3 mt-2 rounded-2xl bg-slate-900/50 border border-slate-800 flex items-center justify-between gap-3">
@@ -231,10 +246,15 @@
           <div class="p-6 pt-10 flex-1 flex flex-col z-20 relative">
             <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-violet-400 transition-colors">${partner.name}</h3>
             <p class="text-sm text-slate-400 mb-6 flex-1">${partner.description || ''}</p>
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="text-xs text-slate-400">Vues: <span class="text-white font-bold">${(partner.stats && partner.stats.views) || 0}</span></div>
+                            <div class="text-xs text-slate-400">Clics: <span class="text-white font-bold">${(partner.stats && partner.stats.clicks) || 0}</span></div>
+                            <div class="text-xs text-slate-400">Gems distribués: <span class="text-white font-bold">${(partner.stats && partner.stats.gemsAwarded) || 0}</span></div>
+                        </div>
             
             <div class="border-t border-slate-800/60 pt-4">
               <div class="flex items-center gap-2 mb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-violet-400"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                <img src="/public/images/gems.svg" alt="Gems" class="w-4 h-4 shrink-0" />
                 <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Quêtes disponibles</span>
               </div>
               <div class="space-y-1">
@@ -262,8 +282,8 @@
                 });
 
                 // Action Quête
-                async function completeQuest(questId) {
-                    const isLogged = <%= locals.currentUser ? 'true' : 'false' %>;
+                async function completeQuest(event, questId) {
+                    const isLogged = <%- JSON.stringify(!!locals.currentUser) %>;
                     if (!isLogged) {
                         window.location.href = '/login?alert=Pour gagner des Gems, veuillez vous connecter.';
                         return;
@@ -301,9 +321,14 @@
 
                                 // Open URL in new tab
                                 window.open(data.actionUrl, '_blank');
+
+                                // Mark as completed in UI immediately
+                                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Quête accomplie';
+                                btn.classList.remove('bg-violet-600', 'hover:bg-violet-500');
+                                btn.classList.add('bg-slate-800', 'text-slate-500', 'border', 'border-slate-700', 'opacity-60', 'grayscale');
+
+                                // Reload UI in background to reflect globally after a delay
                             }
-                            // Reload UI in background to reflect completed state
-                            setTimeout(() => window.location.reload(), 1500);
                         } else {
                             alert(data.message || 'Erreur lors de la quête.');
                             btn.innerHTML = originalHtml;

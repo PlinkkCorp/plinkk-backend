@@ -95,6 +95,45 @@ export function apiAdminPartnersRoutes(fastify: FastifyInstance) {
     return reply.send({ partner });
   });
 
+  // --- STATS ---
+  fastify.get("/:id/stats", async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const partner = await prisma.partner.findUnique({ where: { id }, include: { quests: true } });
+    if (!partner) return reply.code(404).send({ error: "not_found" });
+
+    try {
+      // Aggregate partner daily stats
+      const stats = await prisma.partnerStatDaily.findMany({ where: { partnerId: id }, orderBy: { date: 'asc' } });
+
+      // Gems per quest (total and daily series)
+      const quests = partner.quests || [];
+      const questIds = quests.map(q => q.id);
+
+      const gemsTotals = questIds.length > 0 ? await prisma.userQuest.groupBy({
+        by: ['partnerQuestId'],
+        where: { partnerQuestId: { in: questIds } },
+        _sum: { gemsRewarded: true }
+      }) : [] as any[];
+
+      const gemsTotalsMap: Record<string, number> = {};
+      gemsTotals.forEach(g => { gemsTotalsMap[g.partnerQuestId] = g._sum.gemsRewarded || 0; });
+
+      // Daily gems per quest (simple approach: count completed by date)
+      const dailyByQuest = await prisma.$queryRawUnsafe(`
+        SELECT "partnerQuestId" as "questId", DATE("completedAt") as "date", SUM("gemsRewarded") as "gems"
+        FROM "UserQuest"
+        WHERE "partnerQuestId" IN (${questIds.map(() => '?').join(',')})
+        GROUP BY "partnerQuestId", DATE("completedAt")
+        ORDER BY DATE("completedAt") ASC
+      `, ...questIds);
+
+      return reply.send({ partner: { id: partner.id, name: partner.name }, stats, quests: quests.map(q => ({ id: q.id, title: q.title, gemsAwarded: gemsTotalsMap[q.id] || 0 })), dailyByQuest });
+    } catch (e) {
+      request.log?.error?.(e);
+      return reply.code(500).send({ error: 'failed_to_aggregate' });
+    }
+  });
+
   fastify.post("/", async (request, reply) => {
     const body = request.body as { name: string; description?: string; logoUrl?: string; bannerUrl?: string; url?: string; isActive?: boolean; order?: number; userId?: string };
     if (!body.name) return reply.code(400).send({ error: "missing_name" });
