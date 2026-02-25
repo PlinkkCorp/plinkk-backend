@@ -25,18 +25,50 @@
             Plinkk est conçu pour être rapide, beau et respectueux de votre vie privée. <br class="hidden sm:block">
             Une expérience fluide, personnalisable et facile à auto-héberger.
           </p>
-          <div class="mt-10 flex items-center justify-center gap-x-6">
-            <a href="https://github.com/PlinkkCorp/plinkk" target="_blank"
-              class="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-all hover:scale-105">
-              <svg class="w-5 h-5 inline-block mr-2 -mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                <path
-                  d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-              </svg>
-              Star sur GitHub
-            </a>
-            <a href="/docs" class="text-sm font-semibold leading-6 text-white hover:text-violet-300 transition-colors">
-              Documentation <span aria-hidden="true">→</span>
-            </a>
+          <div class="mt-10 flex flex-col items-center justify-center gap-x-6 gap-y-4">
+            <div class="flex items-center gap-x-6">
+              <a href="https://github.com/PlinkkCorp/plinkk" target="_blank"
+                class="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-all hover:scale-105">
+                <svg class="w-5 h-5 inline-block mr-2 -mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                </svg>
+                Star sur GitHub
+              </a>
+
+              <a href="https://github.com/PlinkkCorp/plinkk-backend" target="_blank"
+                class="rounded-xl bg-slate-800/80 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-all hover:scale-105">
+                Repo Backend
+              </a>
+
+              <a href="/docs" class="text-sm font-semibold leading-6 text-white hover:text-violet-300 transition-colors">
+                Documentation <span aria-hidden="true">→</span>
+              </a>
+            </div>
+
+            <div id="github-stats" class="mt-4 flex flex-wrap justify-center gap-4">
+              <a data-repo="PlinkkCorp/plinkk" href="https://github.com/PlinkkCorp/plinkk" target="_blank"
+                class="repo-card rounded-xl bg-slate-900/30 p-4 border border-white/5 flex flex-col items-start gap-2 w-64 hover:bg-slate-900/50 transition-colors">
+                <div class="font-semibold text-white hover:text-violet-300">Plinkk</div>
+                <div class="text-sm text-slate-300 flex items-center gap-2">
+                  <i class="bi bi-star-fill inline-block text-[16px] text-yellow-400" aria-hidden="true"></i>
+                  <span data-key="stargazers_count">—</span>
+                  <i class="bi bi-git inline-block text-[16px] text-slate-300 ml-2" aria-hidden="true"></i>
+                  <span data-key="forks_count">—</span>
+                </div>
+              </a>
+
+              <a data-repo="PlinkkCorp/plinkk-backend" href="https://github.com/PlinkkCorp/plinkk-backend" target="_blank"
+                class="repo-card rounded-xl bg-slate-900/30 p-4 border border-white/5 flex flex-col items-start gap-2 w-64 hover:bg-slate-900/50 transition-colors">
+                <div class="font-semibold text-white hover:text-violet-300">Plinkk Backend</div>
+                <div class="text-sm text-slate-300 flex items-center gap-2">
+                  <i class="bi bi-star-fill inline-block text-[16px] text-yellow-400" aria-hidden="true"></i>
+                  <span data-key="stargazers_count">—</span>
+                  <i class="bi bi-git inline-block text-[16px] text-slate-300 ml-2" aria-hidden="true"></i>
+                  <span data-key="forks_count">—</span>
+                </div>
+              </a>
+            </div>
           </div>
         </div>
 
@@ -59,7 +91,7 @@
                 <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-400">
                 <p class="flex-auto">
                   Le code de <strong>Plinkk Backend</strong> est open source sous <strong>Plinkk Communautary Licence (PCL)</strong>.<br>
-                  <a href="https://github.com/PlinkkCorp/plinkk-backend/blob/master/LICENCE" target="_blank" class="underline hover:text-violet-300">Voir la licence complète</a>.<br>
+                  <a href="https://github.com/PlinkkCorp/plinkk-backend/blob/master/LICENSE" target="_blank" class="underline hover:text-violet-300">Voir la licence complète</a>.<br>
                   <br>
                   <button type="button"
                   class="mt-2 inline-flex items-center gap-2 rounded-lg bg-slate-800 px-3 py-1.5 text-sm font-semibold text-violet-300 hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-400"
@@ -186,4 +218,37 @@
 
       </div>
     </main>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const repos = ['PlinkkCorp/plinkk', 'PlinkkCorp/plinkk-backend'];
+        const nf = new Intl.NumberFormat();
+
+        async function fetchRepo(repo) {
+          try {
+            const res = await fetch('https://api.github.com/repos/' + repo);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return await res.json();
+          } catch (e) {
+            return null;
+          }
+        }
+
+        repos.forEach(async (repo) => {
+          const data = await fetchRepo(repo);
+          const cardLink = document.querySelector('[data-repo="' + repo + '"]');
+          const card = cardLink ? cardLink.closest('.repo-card') : null;
+          if (!card) return;
+          if (!data) {
+            card.querySelectorAll('[data-key]').forEach(el => el.textContent = '—');
+            return;
+          }
+          const stars = nf.format(data.stargazers_count ?? 0);
+          const forks = nf.format(data.forks_count ?? 0);
+          const starEl = card.querySelector('[data-key="stargazers_count"]');
+          const forksEl = card.querySelector('[data-key="forks_count"]');
+          if (starEl) starEl.textContent = stars;
+          if (forksEl) forksEl.textContent = forks;
+        });
+      });
+    </script>
     <%- include('partials/footer') %>
