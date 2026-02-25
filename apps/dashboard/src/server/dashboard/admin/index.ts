@@ -18,6 +18,7 @@ import { adminBansRoutes } from "./bans";
 import { adminPlinkksRoutes } from "./plinkks";
 import { adminMaintenanceRoutes } from "./maintenance";
 import { dashboardAdminBugReportsRoutes } from "./bugReports";
+import { adminPartnersRoutes } from "./partners";
 
 export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.register(dashboardAdminReportsRoutes, { prefix: "/reports" });
@@ -33,6 +34,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.register(adminPlinkksRoutes, { prefix: "/plinkks" });
   fastify.register(adminMaintenanceRoutes, { prefix: "/maintenance" });
   fastify.register(dashboardAdminBugReportsRoutes, { prefix: "/bug-reports" });
+  fastify.register(adminPartnersRoutes, { prefix: "/partners" });
 
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_ADMIN", { mode: "redirect" });

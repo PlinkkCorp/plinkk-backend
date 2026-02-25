@@ -19,6 +19,8 @@ import { apiStripeRoutes } from "./api/stripe";
 import { UnauthorizedError, ForbiddenError, BadRequestError, ConflictError } from "@plinkk/shared";
 import { apiAdminMaintenanceRoutes } from "./api/admin/maintenance";
 import { apiBugReportsRoutes } from "./api/bug-reports";
+import { apiAdminPartnersRoutes } from "./api/admin/partners";
+import { apiAdminAffiliateRoutes } from "./api/admin/affiliate";
 
 // const prisma = new PrismaClient();
 
@@ -32,6 +34,8 @@ export function apiRoutes(fastify: FastifyInstance) {
   fastify.register(apiAdminRolesRoutes, { prefix: "/admin/roles" });
   fastify.register(apiAdminRedirectsRoutes, { prefix: "/admin/redirects" });
   fastify.register(apiAdminMaintenanceRoutes, { prefix: "/admin/maintenance" });
+  fastify.register(apiAdminPartnersRoutes, { prefix: "/admin/partners" });
+  fastify.register(apiAdminAffiliateRoutes, { prefix: "/admin/affiliate" });
   fastify.register(apiStripeRoutes, { prefix: "/stripe" });
   fastify.register(apiBugReportsRoutes, { prefix: "/bug-reports" });
 

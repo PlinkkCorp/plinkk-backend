@@ -1,0 +1,584 @@
+<%- include('partials/head.ejs', { title: partner.name + " - Partenaire Admin" , description: "Édition d'un partenaire"
+    , robots: "noindex,nofollow" }) %>
+    <%- include('partials/header-dash.ejs', { user: user }) %>
+
+        <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+            <%- include('partials/admin-nav.ejs', { user: user, active: 'partners' }) %>
+
+                <main class="col-span-12 lg:col-span-10 space-y-6">
+                    <div class="flex items-center gap-4 mb-4">
+                        <a href="/admin/partners"
+                            class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="m15 18-6-6 6-6" />
+                            </svg>
+                        </a>
+                        <div>
+                            <h1 class="text-3xl font-bold text-white tracking-tight">Éditer Partenaire</h1>
+                            <p class="text-slate-400 mt-1">Configurez les informations et les quêtes de ce partenaire.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Informations du Partenaire -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                        <h2 class="text-xl font-bold text-white mb-6">Informations Générales</h2>
+
+                        <form id="editPartnerForm" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-400 mb-2">Nom du
+                                        partenaire</label>
+                                    <input type="text" name="name" value="<%= partner.name %>" required
+                                        class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-violet-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-400 mb-2">Lien principal
+                                        (URL)</label>
+                                    <input type="url" name="url" value="<%= partner.url || '' %>"
+                                        class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-violet-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-400 mb-2">Lié à un compte</label>
+                                    <select name="userId"
+                                        class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-violet-500 focus:outline-none">
+                                        <option value="">Aucun compte lié</option>
+                                        <% partnerUsers.forEach(u=> { %>
+                                            <option value="<%= u.id %>" <%=partner.userId===u.id ? 'selected' : '' %>>
+                                                <%= u.name %> (<%= u.email %>)
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-2">Description</label>
+                                <textarea name="description" rows="3"
+                                    class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-violet-500 focus:outline-none"><%= partner.description || '' %></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-400 mb-2">URL du Logo</label>
+                                    <div class="flex gap-2">
+                                        <input type="url" name="logoUrl" id="logoUrl"
+                                            value="<%= partner.logoUrl || '' %>"
+                                            class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-violet-500 focus:outline-none placeholder-slate-600"
+                                            placeholder="https://...">
+                                        <label
+                                            class="cursor-pointer px-4 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-colors flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                                <polyline points="17 8 12 3 7 8" />
+                                                <line x1="12" y1="3" x2="12" y2="15" />
+                                            </svg>
+                                            <input type="file" class="hidden"
+                                                onchange="uploadImage(this, 'logo', 'logoUrl')">
+                                        </label>
+                                    </div>
+                                    <% if (partner.logoUrl) { %>
+                                        <div id="logoPreview"
+                                            class="mt-3 w-16 h-16 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center p-2">
+                                            <img src="<%= partner.logoUrl %>" alt="Logo"
+                                                class="max-w-full max-h-full object-contain">
+                                        </div>
+                                        <% } else { %>
+                                            <div id="logoPreview"
+                                                class="hidden mt-3 w-16 h-16 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center p-2">
+                                            </div>
+                                            <% } %>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-400 mb-2">URL de la
+                                        Bannière</label>
+                                    <div class="flex gap-2">
+                                        <input type="url" name="bannerUrl" id="bannerUrl"
+                                            value="<%= partner.bannerUrl || '' %>"
+                                            class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-violet-500 focus:outline-none placeholder-slate-600"
+                                            placeholder="https://...">
+                                        <label
+                                            class="cursor-pointer px-4 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-colors flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                                <polyline points="17 8 12 3 7 8" />
+                                                <line x1="12" y1="3" x2="12" y2="15" />
+                                            </svg>
+                                            <input type="file" class="hidden"
+                                                onchange="uploadImage(this, 'banner', 'bannerUrl')">
+                                        </label>
+                                    </div>
+                                    <% if (partner.bannerUrl) { %>
+                                        <div id="bannerPreview"
+                                            class="mt-3 h-24 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden">
+                                            <img src="<%= partner.bannerUrl %>" alt="Banner"
+                                                class="w-full h-full object-cover">
+                                        </div>
+                                        <% } else { %>
+                                            <div id="bannerPreview"
+                                                class="hidden mt-3 h-24 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden">
+                                            </div>
+                                            <% } %>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-400 mb-2">Ordre
+                                        d'affichage</label>
+                                    <input type="number" name="order" value="<%= partner.order %>"
+                                        class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white focus:border-violet-500 focus:outline-none">
+                                </div>
+                                <div class="flex items-center gap-3 pt-8">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="isActive" class="sr-only peer" <%=partner.isActive
+                                            ? 'checked' : '' %>>
+                                        <div
+                                            class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600">
+                                        </div>
+                                    </label>
+                                    <span class="text-sm font-medium text-slate-300">Activer ce partenaire (visible
+                                        publiquement)</span>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end pt-4 border-t border-slate-800">
+                                <button type="submit" id="btnSavePartner"
+                                    class="px-6 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-colors">
+                                    Enregistrer les modifications
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Quêtes -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold text-white">Quêtes du Partenaire</h2>
+                            <button onclick="openQuestModal()"
+                                class="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-500 rounded-xl font-medium transition-colors text-sm flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Ajouter une quête
+                            </button>
+                        </div>
+
+                        <div class="space-y-4">
+                            <% if (partner.quests && partner.quests.length> 0) { %>
+                                <% partner.quests.forEach(quest=> { %>
+                                    <div
+                                        class="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                        <div>
+                                            <div class="flex items-center gap-3 mb-1">
+                                                <h3 class="font-bold text-white">
+                                                    <%= quest.title %>
+                                                </h3>
+                                                <span
+                                                    class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                                                    +<%= quest.rewardGems %> Gems
+                                                </span>
+                                                <span
+                                                    class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider <%= quest.isActive ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-800 text-slate-400' %>">
+                                                    <%= quest.isActive ? 'Actif' : 'Inactif' %>
+                                                </span>
+                                            </div>
+                                            <p class="text-sm text-slate-400 mb-2">
+                                                <%= quest.description || 'Pas de description' %>
+                                            </p>
+                                            <code
+                                                class="text-xs text-slate-500 bg-slate-900 px-2 py-1 rounded truncate max-w-xs md:max-w-md inline-block"><%= quest.actionUrl %></code>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <button data-id="<%= quest.id %>"
+                                                data-title="<%= Buffer.from(quest.title || '').toString('base64') %>"
+                                                data-description="<%= Buffer.from(quest.description || '').toString('base64') %>"
+                                                data-gems="<%= quest.rewardGems || 10 %>"
+                                                data-url="<%= Buffer.from(quest.actionUrl || '').toString('base64') %>"
+                                                data-type="<%= quest.type %>"
+                                                data-active="<%= quest.isActive ? 'true' : 'false' %>"
+                                                onclick="handleEditQuest(this)"
+                                                class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M12 20h9"></path>
+                                                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                            <button data-id="<%= quest.id %>" onclick="handleDeleteQuest(this)"
+                                                class="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M3 6h18"></path>
+                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <div
+                                                class="py-10 text-center border-2 border-dashed border-slate-800 rounded-2xl">
+                                                <p class="text-slate-500 text-sm">Ce partenaire n'a aucune quête pour le
+                                                    moment.</p>
+                                            </div>
+                                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Liens Affiliés -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold text-white">Liens Affiliés</h2>
+                            <% if (typeof linkedUser !=='undefined' && linkedUser) { %>
+                                <button onclick="handleCreateAffiliateLink()"
+                                    class="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-amber-500 rounded-xl font-medium transition-colors text-sm flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                    Nouveau lien
+                                </button>
+                                <% } %>
+                        </div>
+
+                        <% if (typeof linkedUser !=='undefined' && linkedUser) { %>
+                            <div class="space-y-4">
+                                <% if (linkedUser.affiliateLinks && linkedUser.affiliateLinks.length> 0) { %>
+                                    <% linkedUser.affiliateLinks.forEach(link=> { %>
+                                        <div
+                                            class="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                                            <div>
+                                                <div class="flex items-center gap-2 mb-1">
+                                                    <code
+                                                        class="px-2 py-1 bg-amber-500/10 text-amber-500 rounded-lg text-sm font-mono"><%= (typeof process !== "undefined" && process.env.PUBLIC_URL) || "https://plinkk.fr" %>/a/<%= link.slug %></code>
+                                                    <button
+                                                        onclick="navigator.clipboard.writeText('<%= (typeof process !== `undefined` && process.env.PUBLIC_URL) || `https://plinkk.fr` %>/a/<%= link.slug %>'); const t = this; const prev = t.innerHTML; t.innerHTML = 'Copié !'; setTimeout(()=>t.innerHTML=prev, 2000);"
+                                                        class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition-colors flex items-center gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                            stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <path
+                                                                d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2">
+                                                            </path>
+                                                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                                                        </svg>
+                                                        Copier
+                                                    </button>
+                                                    <span
+                                                        class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400">
+                                                        <%= link.type %>
+                                                    </span>
+                                                </div>
+                                                <p class="text-xs text-slate-500">
+                                                    <%= link.clicks %> clics
+                                                </p>
+                                            </div>
+                                            <button onclick="handleDeleteAffiliateLink('<%= link.id %>')"
+                                                class="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M3 6h18"></path>
+                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <% }) %>
+                                            <% } else { %>
+                                                <div
+                                                    class="py-6 text-center border-2 border-dashed border-slate-800 rounded-2xl">
+                                                    <p class="text-slate-500 text-sm">Aucun lien affilié pour cet
+                                                        utilisateur.</p>
+                                                </div>
+                                                <% } %>
+                            </div>
+                            <% } else { %>
+                                <div
+                                    class="py-10 text-center border-2 border-dashed border-slate-800 rounded-2xl bg-amber-500/5">
+                                    <p class="text-amber-500/70 text-sm">Aucun utilisateur correspondant au rôle
+                                        "PARTNER" et au nom "<%= partner.name %>" n'a été trouvé.</p>
+                                    <p class="text-slate-500 text-xs mt-2">Assurez-vous qu'un utilisateur existe avec
+                                        exactement ce nom et le rôle Partenaire.</p>
+                                </div>
+                                <% } %>
+                    </div>
+                </main>
+        </div>
+
+        <!-- Modal Quest -->
+        <div id="questModal"
+            class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+            <div class="w-full max-w-lg mx-4 bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-2xl">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 id="modalTitle" class="font-semibold text-lg text-white">Nouvelle Quête</h3>
+                    <button onclick="closeQuestModal()" class="text-slate-400 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <form id="questForm" class="space-y-4">
+                    <input type="hidden" id="questId" name="questId">
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Titre de l'action (Ex: Rejoindre le
+                            Discord)</label>
+                        <input type="text" id="qTitle" name="title" required
+                            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-violet-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Description</label>
+                        <textarea id="qDesc" name="description" rows="2"
+                            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-violet-500 focus:outline-none"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Récompense (Gems)</label>
+                            <input type="number" id="qGems" name="rewardGems" value="10" min="1" required
+                                class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-violet-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Type d'action</label>
+                            <select id="qType" name="type"
+                                class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-violet-500 focus:outline-none">
+                                <option value="link">Lien classique</option>
+                                <option value="discord_join">Rejoindre Discord</option>
+                                <option value="app_install">Installer une App</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">URL de redirection / Action</label>
+                        <input type="url" id="qUrl" name="actionUrl" required
+                            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-violet-500 focus:outline-none"
+                            placeholder="https://...">
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-2 pb-2">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="qActive" name="isActive" class="sr-only peer" checked>
+                            <div
+                                class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-violet-600">
+                            </div>
+                        </label>
+                        <span class="text-xs text-slate-400">Quête active</span>
+                    </div>
+
+                    <div class="flex items-center gap-3 pt-4 border-t border-slate-800">
+                        <button type="button" onclick="closeQuestModal()"
+                            class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium transition-colors">Annuler</button>
+                        <button type="submit"
+                            class="flex-1 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium transition-colors">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            const partnerId = '<%= partner.id %>';
+
+            async function uploadImage(input, type, targetId) {
+                const file = input.files[0];
+                if (!file) return;
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const label = input.parentElement;
+                const originalContent = label.innerHTML;
+                label.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+
+                try {
+                    const res = await fetch(`/api/admin/partners/upload?type=${type}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (data.ok) {
+                        document.getElementById(targetId).value = data.url;
+                        const preview = document.getElementById(type + 'Preview');
+                        preview.innerHTML = type === 'logo'
+                            ? `<img src="${data.url}" class="max-w-full max-h-full object-contain">`
+                            : `<img src="${data.url}" class="w-full h-full object-cover">`;
+                        preview.classList.remove('hidden');
+                    } else {
+                        alert(data.error || 'Erreur lors de l\'upload');
+                    }
+                } catch (e) {
+                    alert('Erreur réseau');
+                } finally {
+                    label.innerHTML = originalContent;
+                }
+            }
+
+            // Partner Form
+            document.getElementById('editPartnerForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('btnSavePartner');
+                const oldText = btn.innerText;
+                btn.innerText = 'Enregistrement...';
+
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+                data.isActive = formData.has('isActive');
+                data.order = parseInt(data.order, 10);
+
+                try {
+                    const res = await fetch(`/api/admin/partners/${partnerId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Erreur lors de la sauvegarde');
+                        btn.innerText = oldText;
+                    }
+                } catch (err) {
+                    alert('Erreur réseau');
+                    btn.innerText = oldText;
+                }
+            });
+
+            // Quests Logic
+            const modal = document.getElementById('questModal');
+            const form = document.getElementById('questForm');
+
+            function openQuestModal() {
+                form.reset();
+                document.getElementById('questId').value = '';
+                document.getElementById('modalTitle').innerText = 'Nouvelle Quête';
+                document.getElementById('qActive').checked = true;
+                modal.classList.remove('hidden');
+            }
+
+            function closeQuestModal() {
+                modal.classList.add('hidden');
+            }
+
+            function handleEditQuest(btn) {
+                const id = btn.getAttribute('data-id');
+                const b64Title = btn.getAttribute('data-title');
+                const b64Desc = btn.getAttribute('data-description');
+                const gems = btn.getAttribute('data-gems');
+                const b64Url = btn.getAttribute('data-url');
+                const type = btn.getAttribute('data-type');
+                const isActive = btn.getAttribute('data-active') === 'true';
+
+                document.getElementById('questId').value = id;
+                document.getElementById('qTitle').value = atob(b64Title);
+                document.getElementById('qDesc').value = atob(b64Desc);
+                document.getElementById('qGems').value = gems;
+                document.getElementById('qUrl').value = atob(b64Url);
+                document.getElementById('qType').value = type;
+                document.getElementById('qActive').checked = isActive;
+                document.getElementById('modalTitle').innerText = 'Modifier la Quête';
+                modal.classList.remove('hidden');
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const qid = document.getElementById('questId').value;
+                const url = qid ? `/api/admin/partners/${partnerId}/quests/${qid}` : `/api/admin/partners/${partnerId}/quests`;
+                const method = qid ? 'PUT' : 'POST';
+
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                data.isActive = formData.has('isActive');
+                data.rewardGems = parseInt(data.rewardGems, 10);
+
+                try {
+                    const res = await fetch(url, {
+                        method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Erreur');
+                    }
+                } catch (e) {
+                    alert('Erreur réseau');
+                }
+            });
+
+            async function handleDeleteQuest(btn) {
+                const qid = btn.getAttribute('data-id');
+                if (!confirm('Supprimer cette quête ?')) return;
+                try {
+                    const res = await fetch(`/api/admin/partners/${partnerId}/quests/${qid}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Erreur');
+                    }
+                } catch (err) {
+                    alert('Erreur réseau');
+                }
+            }
+
+            // Affiliate Links logic
+            async function handleCreateAffiliateLink() {
+                const type = confirm('Créer un lien personnalisé (OK) ou aléatoire (Annuler) ?') ? 'CUSTOM' : 'RANDOM';
+                let slug = undefined;
+                if (type === 'CUSTOM') {
+                    slug = prompt('Entrez le slug souhaité :');
+                    if (!slug) return;
+                }
+
+                try {
+                    const res = await fetch(`/api/admin/affiliate/links`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: '<%= typeof linkedUser !== "undefined" && linkedUser ? linkedUser.id : "" %>', type, slug })
+                    });
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Erreur lors de la création');
+                    }
+                } catch (err) {
+                    alert('Erreur réseau');
+                }
+            }
+
+            async function handleDeleteAffiliateLink(linkId) {
+                if (!confirm('Supprimer ce lien affilié ?')) return;
+                try {
+                    const res = await fetch(`/api/admin/affiliate/links/${linkId}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Erreur lors de la suppression');
+                    }
+                } catch (err) {
+                    alert('Erreur réseau');
+                }
+            }
+        </script>
+        </body>
+
+        </html>

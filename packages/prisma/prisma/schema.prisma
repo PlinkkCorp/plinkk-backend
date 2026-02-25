@@ -42,6 +42,7 @@ model User {
   stripeCustomerId      String?              @unique
   showPremiumUi         Boolean              @default(true)
   premiumSource         String?
+  plinkkGems            Int                  @default(0)
   gravatarEmailSource   GravatarSource       @default(PRIMARY)
   announcement          AnnouncementTarget[]
   backgroundColors      BackgroundColor[]
@@ -61,8 +62,11 @@ model User {
   themes                Theme[]
   role                  Role?                @relation(fields: [roleId], references: [id])
   userLogs              UserLog[]
-  funnelEvents          FunnelEvent[]         @relation("FunnelEvents")
+  funnelEvents          FunnelEvent[]        @relation("FunnelEvents")
   bugReports            BugReport[]
+  userQuests            UserQuest[]
+  affiliateLinks        AffiliateLink[]
+  partner               Partner?
 }
 
 model Connection {
@@ -595,9 +599,9 @@ enum GravatarSource {
 
 model FunnelEvent {
   id        String   @id @default(nanoid(16))
-  event     String   // landing_visit, signup, premium_view, config_view, purchase, cancel
-  sessionId String   // anonymous session fingerprint (cookie-based)
-  userId    String?  // set if user is logged in
+  event     String // landing_visit, signup, premium_view, config_view, purchase, cancel
+  sessionId String // anonymous session fingerprint (cookie-based)
+  userId    String? // set if user is logged in
   ip        String?
   userAgent String?
   referrer  String?
@@ -608,4 +612,94 @@ model FunnelEvent {
   @@index([event, createdAt])
   @@index([sessionId])
   @@index([userId])
+}
+
+// ─── Partners & Quests System ────────────────────────────────────────────────
+
+model Partner {
+  id          String   @id @default(nanoid(16))
+  name        String
+  description String?
+  logoUrl     String?
+  bannerUrl   String?
+  url         String?
+  userId      String?  @unique
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  user       User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  quests     PartnerQuest[]
+  dailyStats PartnerStatDaily[]
+}
+
+model PartnerQuest {
+  id          String   @id @default(nanoid(16))
+  partnerId   String
+  title       String
+  description String?
+  rewardGems  Int      @default(10)
+  actionUrl   String
+  type        String   @default("link") // 'link', 'discord_join', 'app_install'
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  partner    Partner     @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  userQuests UserQuest[]
+}
+
+model UserQuest {
+  id             String   @id @default(nanoid(16))
+  userId         String
+  partnerQuestId String
+  completedAt    DateTime @default(now())
+  gemsRewarded   Int
+
+  user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quest PartnerQuest @relation(fields: [partnerQuestId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, partnerQuestId])
+  @@index([userId])
+  @@index([partnerQuestId])
+}
+
+model PartnerStatDaily {
+  partnerId String
+  date      DateTime @default(now())
+  views     Int      @default(0)
+  clicks    Int      @default(0)
+
+  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  @@id([partnerId, date])
+  @@map("PartnerStatDaily")
+}
+
+model AffiliateLink {
+  id        String   @id @default(nanoid(16))
+  userId    String
+  slug      String   @unique
+  type      String   @default("RANDOM") // RANDOM or CUSTOM
+  clicks    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user       User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyStats AffiliateLinkClickDaily[]
+
+  @@index([userId])
+  @@index([slug])
+}
+
+model AffiliateLinkClickDaily {
+  affiliateLinkId String
+  date            DateTime @default(now())
+  count           Int      @default(0)
+
+  link AffiliateLink @relation(fields: [affiliateLinkId], references: [id], onDelete: Cascade)
+
+  @@id([affiliateLinkId, date])
+  @@map("AffiliateLinkClickDaily")
 }

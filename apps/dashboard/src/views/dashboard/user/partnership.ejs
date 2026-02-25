@@ -1,0 +1,276 @@
+<%- include('partials/head.ejs', { title: 'Gestion Partenariat' ,
+    description: 'Gérez vos liens affiliés et suivez vos statistiques de partenariat.' , robots: 'noindex,nofollow' })
+    %>
+    <%- include('partials/header-dash.ejs', { user: user }) %>
+
+        <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+            <%- include('partials/asside_dash.ejs', { active: 'partnership' }) %>
+
+                <main class="col-span-12 lg:col-span-10 space-y-8 relative">
+                    <!-- HEADER -->
+                    <div
+                        class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+                        <div
+                            class="absolute top-0 right-0 w-64 h-64 bg-amber-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none">
+                        </div>
+                        <div class="relative z-10">
+                            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Partenariat</h1>
+                            <p class="text-slate-400 text-lg">Gérez vos liens d'affiliation et suivez vos performances.
+                            </p>
+                        </div>
+                        <div class="relative z-10">
+                            <button id="btnCreateLink"
+                                class="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold rounded-xl shadow-lg hover:shadow-amber-500/20 hover:-translate-y-0.5 transition-all outline-none">
+                                Créer un lien
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- STATS OVERVIEW -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <% const totalClicks=affiliateLinks.reduce((acc, link)=> acc + link.clicks, 0);
+                            const activeLinks = affiliateLinks.length;
+                            %>
+                            <div class="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-6">
+                                <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Total Clics
+                                </p>
+                                <p class="text-3xl font-bold text-white">
+                                    <%= totalClicks %>
+                                </p>
+                            </div>
+                            <div class="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-6">
+                                <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Liens Actifs
+                                </p>
+                                <p class="text-3xl font-bold text-white">
+                                    <%= activeLinks %>
+                                </p>
+                            </div>
+                            <div class="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-6">
+                                <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Statut
+                                    Partenaire</p>
+                                <p class="text-3xl font-bold text-emerald-400">Actif</p>
+                            </div>
+                    </div>
+
+                    <!-- AFFILIATE LINKS TABLE -->
+                    <div class="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl overflow-hidden">
+                        <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+                            <h2 class="font-bold text-white text-xl">Vos Liens Affiliés</h2>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr
+                                        class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500 bg-slate-950/50">
+                                        <th class="p-4 font-bold">Slug</th>
+                                        <th class="p-4 font-bold">Type</th>
+                                        <th class="p-4 font-bold">Lien de redirection</th>
+                                        <th class="p-4 font-bold text-right">Clics</th>
+                                        <th class="p-4 font-bold text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800/50">
+                                    <% if (affiliateLinks.length> 0) { %>
+                                        <% affiliateLinks.forEach(link=> { %>
+                                            <tr class="hover:bg-slate-800/30 transition-colors">
+                                                <td class="p-4">
+                                                    <code
+                                                        class="px-2 py-1 bg-amber-500/10 text-amber-500 rounded-lg text-sm font-mono"><%= link.slug %></code>
+                                                </td>
+                                                <td class="p-4">
+                                                    <span
+                                                        class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase <%= link.type === 'CUSTOM' ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'bg-slate-800 text-slate-400' %>">
+                                                        <%= link.type %>
+                                                    </span>
+                                                </td>
+                                                <td class="p-4">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-slate-400 text-sm truncate max-w-[200px]">
+                                                            <%= (typeof process !=='undefined' &&
+                                                                process.env.PUBLIC_URL) || 'https://plinkk.fr' %>/a/<%=
+                                                                    link.slug %>
+                                                        </span>
+                                                        <button onclick="copyToClipboard('<%= link.slug %>')"
+                                                            class="text-slate-500 hover:text-white transition-colors">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3">
+                                                                </path>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                <td class="p-4 text-right font-bold text-white">
+                                                    <%= link.clicks %>
+                                                </td>
+                                                <td class="p-4 text-right">
+                                                    <button onclick="showStats('<%= link.id %>')"
+                                                        class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2m0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                                            </path>
+                                                        </svg>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                                <% } else { %>
+                                                    <tr>
+                                                        <td colspan="5"
+                                                            class="p-12 text-center text-slate-600 font-medium italic">
+                                                            Aucun lien affilié créé pour le moment.</td>
+                                                    </tr>
+                                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- STATISTICS CHART -->
+                    <div id="statsSection"
+                        class="hidden bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-8">
+                        <div class="flex items-center justify-between mb-8">
+                            <h2 class="font-bold text-white text-xl">Détails du lien</h2>
+                            <button onclick="closeStats()"
+                                class="text-slate-500 hover:text-white transition-colors">Fermer</button>
+                        </div>
+                        <div class="h-80 w-full relative">
+                            <canvas id="affiliateChart"></canvas>
+                        </div>
+                    </div>
+                </main>
+        </div>
+
+        <!-- MODAL CREATE LINK -->
+        <div id="modalCreate" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onclick="toggleModal()"></div>
+            <div class="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl">
+                <h2 class="text-2xl font-bold text-white mb-6">Créer un lien affilié</h2>
+                <form id="formCreateLink" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-2">Type de lien</label>
+                        <select id="linkType"
+                            class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-500 transition-all">
+                            <option value="RANDOM">Aléatoire</option>
+                            <option value="CUSTOM">Personnalisé (Slug)</option>
+                        </select>
+                    </div>
+                    <div id="slugContainer" class="hidden">
+                        <label class="block text-sm font-medium text-slate-400 mb-2">Slug souhaité</label>
+                        <input type="text" id="linkSlug" placeholder="votre-slug"
+                            class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-500 transition-all">
+                    </div>
+                    <div class="flex gap-4 pt-4">
+                        <button type="button" onclick="toggleModal()"
+                            class="flex-1 px-6 py-3 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-all">Annuler</button>
+                        <button type="submit"
+                            class="flex-1 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold rounded-xl shadow-lg hover:shadow-amber-500/20 transition-all">Créer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const modal = document.getElementById('modalCreate');
+            const slugContainer = document.getElementById('slugContainer');
+            const linkType = document.getElementById('linkType');
+            let currentChart = null;
+
+            const publicUrl = '<%= (typeof process !== "undefined" && process.env.PUBLIC_URL) || "https://plinkk.fr" %>';
+
+            function copyToClipboard(slug) {
+                navigator.clipboard.writeText(`${publicUrl}/a/${slug}`);
+            }
+
+            function toggleModal() {
+                modal.classList.toggle('hidden');
+            }
+
+            linkType.addEventListener('change', (e) => {
+                if (e.target.value === 'CUSTOM') {
+                    slugContainer.classList.remove('hidden');
+                } else {
+                    slugContainer.classList.add('hidden');
+                }
+            });
+
+            document.getElementById('btnCreateLink').addEventListener('click', toggleModal);
+
+            document.getElementById('formCreateLink').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const type = linkType.value;
+                const slug = document.getElementById('linkSlug').value;
+
+                const res = await fetch('/partnership/links', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, slug: type === 'CUSTOM' ? slug : undefined })
+                });
+
+                if (res.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Erreur lors de la création du lien.');
+                }
+            });
+
+            const affiliateLinks = <%- JSON.stringify(affiliateLinks) %>;
+
+            function showStats(linkId) {
+                const link = affiliateLinks.find(l => l.id === linkId);
+                if (!link) return;
+
+                document.getElementById('statsSection').classList.remove('hidden');
+                document.getElementById('statsSection').scrollIntoView({ behavior: 'smooth' });
+
+                if (currentChart) currentChart.destroy();
+
+                const ctx = document.getElementById('affiliateChart').getContext('2d');
+                const data = link.stats || [];
+
+                currentChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(d => d.date),
+                        datasets: [{
+                            label: 'Clics',
+                            data: data.map(d => d.count),
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#64748b' }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#64748b' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function closeStats() {
+                document.getElementById('statsSection').classList.add('hidden');
+            }
+        </script>
+
+        <%- include('partials/footer.ejs') %>

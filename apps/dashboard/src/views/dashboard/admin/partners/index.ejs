@@ -1,0 +1,225 @@
+<%- include('partials/head.ejs', { title: 'Liste des Partenaires - Admin' , description: 'Gestion des partenaires' ,
+    robots: 'noindex,nofollow' }) %>
+    <%- include('partials/header-dash.ejs', { user: user }) %>
+
+        <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+            <%- include('partials/admin-nav.ejs', { user: user, active: 'partners' }) %>
+
+                <main class="col-span-12 lg:col-span-10 space-y-6">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h1 class="text-3xl font-bold text-white tracking-tight">Partenaires</h1>
+                            <p class="text-slate-400 mt-2">Gérez les partenaires affichés sur la page publique et leurs
+                                quêtes.</p>
+                        </div>
+                        <button onclick="document.getElementById('createPartnerModal').classList.remove('hidden')"
+                            class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-colors flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Nouveau Partenaire
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <% if (partners && partners.length> 0) { %>
+                            <% partners.forEach(partner=> { %>
+                                <div
+                                    class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden hover:border-slate-700 transition-all flex flex-col">
+                                    <div class="h-32 bg-slate-800 relative">
+                                        <% if (partner.bannerUrl) { %>
+                                            <img src="<%= partner.bannerUrl %>" alt="Banner"
+                                                class="w-full h-full object-cover opacity-60">
+                                            <% } %>
+                                                <div
+                                                    class="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent">
+                                                </div>
+
+                                                <div class="absolute -bottom-6 left-6">
+                                                    <div
+                                                        class="w-16 h-16 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex items-center justify-center">
+                                                        <% if (partner.logoUrl) { %>
+                                                            <img src="<%= partner.logoUrl %>" alt="Logo"
+                                                                class="w-full h-full object-contain">
+                                                            <% } else { %>
+                                                                <span class="text-2xl font-bold text-slate-500">
+                                                                    <%= partner.name.charAt(0) %>
+                                                                </span>
+                                                                <% } %>
+                                                    </div>
+                                                </div>
+
+                                                <div class="absolute top-4 right-4 flex gap-2">
+                                                    <span
+                                                        class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider <%= partner.isActive ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-slate-800 text-slate-400 border border-slate-700' %>">
+                                                        <%= partner.isActive ? 'Actif' : 'Inactif' %>
+                                                    </span>
+                                                </div>
+                                    </div>
+
+                                    <div class="p-6 pt-10 flex-1 flex flex-col">
+                                        <h3 class="text-xl font-bold text-white mb-2">
+                                            <%= partner.name %>
+                                        </h3>
+                                        <p class="text-slate-400 text-sm mb-4 line-clamp-2">
+                                            <%= partner.description || 'Aucune description' %>
+                                        </p>
+
+                                        <div class="flex items-center gap-4 text-xs text-slate-500 mb-6 mt-auto">
+                                            <div class="flex items-center gap-1.5">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polygon
+                                                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                                    </polygon>
+                                                </svg>
+                                                <%= partner._count.quests %> Quête(s)
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center gap-3 pt-4 border-t border-slate-800">
+                                            <a href="/admin/partners/<%= partner.id %>"
+                                                class="flex-1 py-2 text-center rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium transition-colors">
+                                                Gérer
+                                            </a>
+                                            <button onclick="deletePartner('<%= partner.id %>')"
+                                                class="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 transition-colors"
+                                                title="Supprimer">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M3 6h18"></path>
+                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }) %>
+                                    <% } else { %>
+                                        <div
+                                            class="col-span-full py-20 text-center bg-slate-900 border border-slate-800 rounded-3xl">
+                                            <div
+                                                class="w-16 h-16 mx-auto rounded-full bg-slate-800/50 flex items-center justify-center mb-4">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                    class="text-slate-600">
+                                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                                    <circle cx="9" cy="7" r="4"></circle>
+                                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                                </svg>
+                                            </div>
+                                            <h3 class="text-lg font-medium text-white">Aucun partenaire</h3>
+                                            <p class="text-slate-400 text-sm mt-1 mb-6">Commencez par ajouter votre
+                                                premier partenaire.</p>
+                                            <button
+                                                onclick="document.getElementById('createPartnerModal').classList.remove('hidden')"
+                                                class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-colors inline-block">
+                                                Ajouter un partenaire
+                                            </button>
+                                        </div>
+                                        <% } %>
+                    </div>
+                </main>
+        </div>
+
+        <!-- Modal Create Partner -->
+        <div id="createPartnerModal"
+            class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+            <div class="w-full max-w-lg mx-4 bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-2xl">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-semibold text-lg text-white">Nouveau Partenaire</h3>
+                    <button onclick="document.getElementById('createPartnerModal').classList.add('hidden')"
+                        class="text-slate-400 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <form id="createPartnerForm" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Nom</label>
+                        <input type="text" name="name" required
+                            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-violet-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Description</label>
+                        <textarea name="description" rows="3"
+                            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-violet-500 focus:outline-none"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Logo URL</label>
+                            <input type="url" name="logoUrl"
+                                class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-violet-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Banner URL</label>
+                            <input type="url" name="bannerUrl"
+                                class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-violet-500 focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Lien principal (URL)</label>
+                        <input type="url" name="url"
+                            class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:border-violet-500 focus:outline-none">
+                    </div>
+                    <div class="flex items-center gap-3 pt-4">
+                        <button type="button"
+                            onclick="document.getElementById('createPartnerModal').classList.add('hidden')"
+                            class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium transition-colors">Annuler</button>
+                        <button type="submit"
+                            class="flex-1 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium transition-colors">Créer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            document.getElementById('createPartnerForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    const res = await fetch('/api/admin/partners', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Erreur lors de la création');
+                    }
+                } catch (err) {
+                    alert('Erreur réseau');
+                }
+            });
+
+            async function deletePartner(id) {
+                if (!confirm('Êtes-vous sûr de vouloir supprimer ce partenaire ? Toutes ses quêtes seront supprimées.')) return;
+                try {
+                    const res = await fetch(`/api/admin/partners/${id}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('Erreur lors de la suppression');
+                    }
+                } catch (err) {
+                    alert('Erreur réseau');
+                }
+            }
+        </script>
+        </body>
+
+        </html>

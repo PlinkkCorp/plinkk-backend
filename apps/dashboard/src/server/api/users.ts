@@ -34,6 +34,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
         isVerified: true,
         isPartner: true,
         isPremium: true,
+        plinkkGems: true,
         premiumUntil: true,
         links: { select: { clicks: true } },
         role: { select: { id: true, name: true } },
@@ -79,27 +80,27 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
 
     const data: Prisma.UserUpdateInput = {};
     if (typeof userName === 'string') {
-        const uName = userName.trim();
-        if (uName.length < 3 || uName.length > 50) return reply.code(400).send({ error: 'Username invalid length' });
-        const exists = await prisma.user.findFirst({ where: { userName: { equals: uName, mode: 'insensitive' }, id: { not: id } } });
-        if (exists) return reply.code(409).send({ error: 'Username taken' });
-        data.userName = uName;
+      const uName = userName.trim();
+      if (uName.length < 3 || uName.length > 50) return reply.code(400).send({ error: 'Username invalid length' });
+      const exists = await prisma.user.findFirst({ where: { userName: { equals: uName, mode: 'insensitive' }, id: { not: id } } });
+      if (exists) return reply.code(409).send({ error: 'Username taken' });
+      data.userName = uName;
     }
     if (typeof email === 'string') {
-        const mail = email.trim();
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!re.test(mail)) return reply.code(400).send({ error: 'Email invalid' });
-        const exists = await prisma.user.findFirst({ where: { email: { equals: mail, mode: 'insensitive' }, id: { not: id } } });
-        if (exists) return reply.code(409).send({ error: 'Email taken' });
-        data.email = mail;
+      const mail = email.trim();
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!re.test(mail)) return reply.code(400).send({ error: 'Email invalid' });
+      const exists = await prisma.user.findFirst({ where: { email: { equals: mail, mode: 'insensitive' }, id: { not: id } } });
+      if (exists) return reply.code(409).send({ error: 'Email taken' });
+      data.email = mail;
     }
 
     if (Object.keys(data).length > 0) {
-        const u = await prisma.user.update({ where: { id }, data });
-        await logAdminAction(meId, 'UPDATE_USER_PROFILE', id, data, request.ip);
-        /* @ts-ignore */
-        await logUserAction(id, "ADMIN_UPDATE_PROFILE", meId, data, request.ip);
-        return reply.send({ id: u.id, userName: u.userName, email: u.email });
+      const u = await prisma.user.update({ where: { id }, data });
+      await logAdminAction(meId, 'UPDATE_USER_PROFILE', id, data, request.ip);
+      /* @ts-ignore */
+      await logUserAction(id, "ADMIN_UPDATE_PROFILE", meId, data, request.ip);
+      return reply.send({ id: u.id, userName: u.userName, email: u.email });
     }
     return reply.send({ ok: true });
   });
@@ -126,8 +127,8 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       until:
         ban && typeof ban.time === "number" && ban.time! > 0
           ? new Date(
-              new Date(ban.createdAt).getTime() + (ban.time || 0) * 60 * 1000
-            ).toISOString()
+            new Date(ban.createdAt).getTime() + (ban.time || 0) * 60 * 1000
+          ).toISOString()
           : null,
     });
   });
@@ -520,7 +521,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     await logAdminAction(userId, 'UNBAN_EMAIL', undefined, { email: target }, request.ip);
     const targetUser = await prisma.user.findFirst({ where: { email: target }, select: { id: true } });
     if (targetUser) {
-        await logUserAction(targetUser.id, "UNBANNED_EMAIL", userId, { email: target }, request.ip);
+      await logUserAction(targetUser.id, "UNBANNED_EMAIL", userId, { email: target }, request.ip);
     }
     return reply.send({ ok: true, count: res.count });
   });
@@ -740,5 +741,206 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     }, request.ip);
 
     return reply.send({ ok: true, data });
+  });
+
+  fastify.get("/:id/logs", async (request, reply) => {
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+
+    const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
+    if (!ok) return;
+
+    const { id } = request.params as { id: string };
+    const {
+      page = 1,
+      limit = 20,
+      source = 'ALL',
+      search = ''
+    } = request.query as {
+      page?: number;
+      limit?: number;
+      source?: 'ALL' | 'USER' | 'ADMIN';
+      search?: string;
+    };
+
+    const skip = (Number(page) - 1) * Number(limit);
+    const take = Number(limit);
+
+    // Build filters
+    const userLogWhere: Prisma.UserLogWhereInput = { userId: id };
+    const adminLogWhere: Prisma.AdminLogWhereInput = { targetId: id };
+
+    if (search) {
+      userLogWhere.OR = [
+        { action: { contains: search, mode: 'insensitive' } },
+        { targetId: { contains: search, mode: 'insensitive' } }
+      ];
+      adminLogWhere.OR = [
+        { action: { contains: search, mode: 'insensitive' } },
+        { targetId: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+
+    let logs: any[] = [];
+    let total = 0;
+
+    if (source === 'USER') {
+      [logs, total] = await Promise.all([
+        prisma.userLog.findMany({
+          where: userLogWhere,
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take,
+          include: { user: { select: { userName: true, image: true, id: true } } }
+        }),
+        prisma.userLog.count({ where: userLogWhere })
+      ]);
+      logs = logs.map(l => ({
+        ...l,
+        _source: 'USER',
+        actorName: l.user?.userName,
+        userImage: l.user?.image,
+        actorId: l.userId
+      }));
+    } else if (source === 'ADMIN') {
+      [logs, total] = await Promise.all([
+        prisma.adminLog.findMany({
+          where: adminLogWhere,
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take,
+        }),
+        prisma.adminLog.count({ where: adminLogWhere })
+      ]);
+
+      const adminIds = [...new Set(logs.map(l => l.adminId))];
+      const admins = await prisma.user.findMany({
+        where: { id: { in: adminIds } },
+        select: { id: true, userName: true, image: true }
+      });
+      const adminsMap = new Map(admins.map(a => [a.id, a]));
+
+      logs = logs.map(l => ({
+        ...l,
+        _source: 'ADMIN',
+        actorName: adminsMap.get(l.adminId)?.userName,
+        adminImage: adminsMap.get(l.adminId)?.image,
+        actorId: l.adminId
+      }));
+    } else {
+      const [uLogs, aLogs] = await Promise.all([
+        prisma.userLog.findMany({
+          where: userLogWhere,
+          orderBy: { createdAt: 'desc' },
+          take: skip + take,
+          include: { user: { select: { userName: true, image: true, id: true } } }
+        }),
+        prisma.adminLog.findMany({
+          where: adminLogWhere,
+          orderBy: { createdAt: 'desc' },
+          take: skip + take,
+        })
+      ]);
+
+      const adminIds = [...new Set(aLogs.map(l => l.adminId))];
+      const admins = await prisma.user.findMany({
+        where: { id: { in: adminIds } },
+        select: { id: true, userName: true, image: true }
+      });
+      const adminsMap = new Map(admins.map(a => [a.id, a]));
+
+      const combined = [
+        ...uLogs.map(l => ({
+          ...l,
+          _source: 'USER',
+          actorName: l.user?.userName,
+          userImage: l.user?.image,
+          actorId: l.userId
+        })),
+        ...aLogs.map(l => ({
+          ...l,
+          _source: 'ADMIN',
+          actorName: adminsMap.get(l.adminId)?.userName,
+          adminImage: adminsMap.get(l.adminId)?.image,
+          actorId: l.adminId
+        }))
+      ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+      logs = combined.slice(skip, skip + take);
+
+      const [uCount, aCount] = await Promise.all([
+        prisma.userLog.count({ where: userLogWhere }),
+        prisma.adminLog.count({ where: adminLogWhere })
+      ]);
+      total = uCount + aCount;
+    }
+
+    const targetIds = [...new Set(logs.filter(l => l.targetId).map(l => l.targetId))];
+    if (targetIds.length > 0) {
+      const targets = await prisma.user.findMany({
+        where: { id: { in: targetIds as string[] } },
+        select: { id: true, userName: true, image: true, email: true }
+      });
+      const targetsMap = new Map(targets.map(t => [t.id, t]));
+      logs = logs.map(l => ({
+        ...l,
+        targetUser: l.targetId ? targetsMap.get(l.targetId) : null
+      }));
+    }
+
+    return reply.send({
+      logs,
+      meta: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        hasMore: skip + take < total
+      }
+    });
+  });
+
+  fastify.post("/:id/gems", async (request, reply) => {
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+
+    const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
+    if (!ok) return;
+
+    const { id } = request.params as { id: string };
+    const { amount, reason } = request.body as { amount: number; reason?: string };
+
+    if (typeof amount !== 'number') {
+      return reply.code(400).send({ error: "Amount must be a number" });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, plinkkGems: true, userName: true }
+    });
+
+    if (!user) return reply.code(404).send({ error: "Utilisateur introuvable" });
+
+    const newBalance = Math.max(0, user.plinkkGems + amount);
+
+    const updated = await prisma.user.update({
+      where: { id },
+      data: { plinkkGems: newBalance },
+      select: { id: true, plinkkGems: true }
+    });
+
+    const actionType = amount >= 0 ? 'ADMIN_GEMS_ADD' : 'ADMIN_GEMS_REMOVE';
+    const logDetails = {
+      amount,
+      oldBalance: user.plinkkGems,
+      newBalance,
+      reason: reason || 'Non spécifiée'
+    };
+
+    await logAdminAction(meId, actionType, id, logDetails, request.ip);
+    await logUserAction(id, actionType, meId, logDetails, request.ip);
+
+    return reply.send({ ok: true, plinkkGems: updated.plinkkGems });
   });
 }
