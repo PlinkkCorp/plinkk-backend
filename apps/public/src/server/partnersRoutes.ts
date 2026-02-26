@@ -203,14 +203,7 @@ export function partnersRoutes(fastify: FastifyInstance) {
             const { affiliateService } = await import("@plinkk/shared");
             await affiliateService.recordClick(affiliateLink.slug);
 
-            // Redirect to the user's plinkk page
-            const user = await prisma.user.findUnique({
-                where: { id: affiliateLink.userId },
-                include: { plinkks: { take: 1 } }
-            });
-
-            const targetUrl = user?.plinkks[0]?.slug ? `/${user.plinkks[0].slug}` : "/";
-            return reply.redirect(targetUrl);
+            return reply.redirect("/");
         } catch (e) {
             return reply.redirect("/");
         }
