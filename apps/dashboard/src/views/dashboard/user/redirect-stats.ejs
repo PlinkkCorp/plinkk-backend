@@ -1,4 +1,4 @@
-<%- include('partials/head.ejs', { title: 'Statistiques - ' + redirect.slug, description: 'Statistiques détaillées de votre redirection.', robots: 'noindex,nofollow' }) %>
+<%- include('partials/head.ejs', { title: 'Statistiques - ' + redirect.slug, description: 'Statistiques dï¿½taillï¿½es de votre redirection.', robots: 'noindex,nofollow' }) %>
 <%- include('partials/header-dash.ejs', { user: user }) %>
 
 <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
@@ -21,7 +21,7 @@
                 <% if (redirect.title) { %>
                     <p class="text-slate-400 text-lg italic opacity-80"><%= redirect.title %></p>
                 <% } else { %>
-                    <p class="text-slate-400 text-lg">Analyse détaillée du trafic de votre lien court.</p>
+                    <p class="text-slate-400 text-lg">Analyse dï¿½taillï¿½e du trafic de votre lien court.</p>
                 <% } %>
             </div>
         </div>
@@ -57,7 +57,7 @@
                     </div>
                     <div>
                         <p class="text-3xl font-bold text-white tracking-tight"><%= new Date(redirect.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) %></p>
-                        <p class="text-sm text-slate-400">Créé le</p>
+                        <p class="text-sm text-slate-400">CrÃ©Ã© le</p>
                     </div>
                 </div>
             </div>
@@ -124,7 +124,7 @@
                                 <%= new Date(redirect.expiresAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) %>
                             </span>
                             <% if (new Date(redirect.expiresAt) < new Date()) { %>
-                                <span class="px-3 py-1 bg-rose-500/10 text-rose-400 text-[10px] font-bold uppercase rounded-lg border border-rose-500/20 tracking-wider">Lien Expiré</span>
+                                <span class="px-3 py-1 bg-rose-500/10 text-rose-400 text-[10px] font-bold uppercase rounded-lg border border-rose-500/20 tracking-wider">Lien Expirï¿½</span>
                             <% } %>
                         </div>
                     </div>
