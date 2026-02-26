@@ -60,6 +60,21 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
             createdAt: true
           },
           orderBy: { updatedAt: 'desc' }
+        },
+        userQuests: {
+          select: {
+            id: true,
+            completedAt: true,
+            gemsRewarded: true,
+            quest: {
+              select: {
+                title: true,
+                rewardGems: true,
+                partner: { select: { name: true } }
+              }
+            }
+          },
+          orderBy: { completedAt: 'desc' }
         }
       },
     });
