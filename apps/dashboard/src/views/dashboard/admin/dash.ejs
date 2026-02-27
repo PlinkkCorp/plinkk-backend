@@ -1735,24 +1735,6 @@
             `;
                 document.head.appendChild(uxStyle);
 
-                function getToastContainer() {
-                    let c = document.querySelector('.plinkk-toast-container');
-                    if (!c) { c = document.createElement('div'); c.className = 'plinkk-toast-container'; document.body.appendChild(c); }
-                    return c;
-                }
-
-                function showToast(message, ms = 2000) {
-                    try {
-                        const c = getToastContainer();
-                        const t = document.createElement('div');
-                        t.className = 'plinkk-toast';
-                        t.textContent = message;
-                        c.appendChild(t);
-                        void t.offsetWidth;
-                        t.classList.add('show');
-                        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 180); }, ms);
-                    } catch (e) { }
-                }
 
                 function confirmWithInput(displayName, userId) {
                     return new Promise(resolve => {
@@ -2223,7 +2205,7 @@
                         const password = um.newPwd ? um.newPwd.value : '';
 
                         if (!password || password.length < 8) {
-                            return showToast('Le mot de passe doit faire au moins 8 caractères.');
+                            return showToast('Le mot de passe doit faire au moins 8 caractères.', 'error');
                         }
 
                         const ok = await showConfirm(`Êtes-vous sûr de vouloir changer le mot de passe de @${id} ?`, "Changer");
@@ -2254,11 +2236,11 @@
                                 throw new Error(err.error || 'Erreur inconnue');
                             }
 
-                            showToast('Mot de passe mis à jour avec succès');
+                            showToast('Mot de passe mis à jour avec succès', 'success');
                             if (um.newPwd) um.newPwd.value = '';
                         } catch (e) {
                             console.error('Password update failed:', e);
-                            showToast('Erreur: ' + e.message);
+                            showToast('Erreur: ' + e.message, 'error');
                         } finally {
                             btn.disabled = false;
                             if (spinner) spinner.classList.add('hidden');
