@@ -8,6 +8,7 @@ import {
 } from "../../lib/verifyRole";
 import { ensurePermission } from "../../lib/permissions";
 import { logAdminAction } from "../../lib/adminLogger";
+import bcrypt from "bcrypt";
 
 // const prisma = new PrismaClient();
 
@@ -432,6 +433,33 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
     await logUserAction(id, "ADMIN_FORCE_PASSWORD_RESET", meId, { mustChange }, request.ip);
     await logAdminAction(meId, 'FORCE_PASSWORD_RESET', id, { mustChange }, request.ip);
     return reply.send({ id: updated.id, mustChangePassword: updated.mustChangePassword });
+  });
+
+  fastify.post("/:id/password", async (request, reply) => {
+    const sessionData = request.session.get("data");
+    const meId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+    if (!meId) return reply.code(401).send({ error: "Unauthorized" });
+
+    const ok = await ensurePermission(request, reply, 'MANAGE_USERS');
+    if (!ok) return;
+
+    const { id } = request.params as { id: string };
+    const { password } = (request.body as { password?: string }) ?? {};
+
+    if (!password || typeof password !== "string" || password.length < 8) {
+      return reply.code(400).send({ error: "Le mot de passe doit faire au moins 8 caractères." });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+    await prisma.user.update({
+      where: { id },
+      data: { password: hashed, hasPassword: true },
+    });
+
+    await logAdminAction(meId, 'UPDATE_PASSWORD', id, {}, request.ip);
+    await logUserAction(id, "ADMIN_UPDATE_PASSWORD", meId, {}, request.ip);
+
+    return reply.send({ ok: true });
   });
 
   fastify.get("/bans/emails", async (request, reply) => {

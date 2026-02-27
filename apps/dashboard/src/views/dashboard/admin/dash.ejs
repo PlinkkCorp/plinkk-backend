@@ -1189,6 +1189,25 @@
                                         <span>Désactiver</span>
                                     </button>
                                 </div>
+
+                                <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+                                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Modifier le
+                                        mot de passe</h3>
+                                    <div class="flex flex-col sm:flex-row gap-3">
+                                        <input id="umNewPwd" type="password"
+                                            placeholder="Nouveau mot de passe (min 8 car.)"
+                                            class="flex-1 rounded-xl bg-slate-950/50 border border-slate-800 px-4 py-3 text-sm text-white outline-none focus:border-violet-600 transition-all" />
+                                        <button id="umUpdatePwd"
+                                            class="px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold transition-colors has-spinner flex items-center justify-center gap-2">
+                                            <svg class="plinkk-spinner hidden" width="16" height="16"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10" opacity="0.2" />
+                                                <path d="M22 12a10 10 0 0 1-10 10" />
+                                            </svg>
+                                            <span>Mettre à jour</span>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1497,7 +1516,7 @@
                 if (!container) {
                     container = document.createElement('div');
                     container.id = 'toastContainer';
-                    container.className = 'fixed right-6 top-6 z-[99999] flex flex-col gap-3';
+                    container.className = 'fixed right-6 top-6 z-[2147483647] flex flex-col gap-3';
                     document.body.appendChild(container);
                 }
                 const el = document.createElement('div');
@@ -1514,7 +1533,7 @@
             function showConfirm(message, actionText = 'Confirmer') {
                 return new Promise(resolve => {
                     const overlay = document.createElement('div');
-                    overlay.className = 'fixed inset-0 z-[100000] flex items-center justify-center bg-black/70 backdrop-blur-sm';
+                    overlay.className = 'fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/70 backdrop-blur-sm';
                     overlay.style.cssText = 'animation: fadeIn 0.15s ease-out';
                     overlay.innerHTML = `
                 <style>@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}</style>
@@ -1913,6 +1932,8 @@
                     gemsReason: document.getElementById('umGemsReason'),
                     gemsAdd: document.getElementById('umGemsAdd'),
                     gemsRemove: document.getElementById('umGemsRemove'),
+                    newPwd: document.getElementById('umNewPwd'),
+                    updatePwd: document.getElementById('umUpdatePwd'),
                     open: (id) => {
                         const all = typeof paginator !== 'undefined' ? paginator.getAll() : [];
                         const targetLi = all.find(li => (li.dataset.id || '').toLowerCase() === (id || '').toLowerCase() || (li.dataset.username || '').toLowerCase() === (id || '').toLowerCase());
@@ -2195,6 +2216,60 @@
                 um.root?.querySelector('[data-close]')?.addEventListener('click', closeUserModal);
                 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !um.root.classList.contains('hidden')) closeUserModal(); });
 
+                if (um.updatePwd) {
+                    um.updatePwd.addEventListener('click', async () => {
+                        if (!currentLI) return;
+                        const id = currentLI.dataset.id;
+                        const password = um.newPwd ? um.newPwd.value : '';
+
+                        if (!password || password.length < 8) {
+                            return showToast('Le mot de passe doit faire au moins 8 caractères.');
+                        }
+
+                        const ok = await showConfirm(`Êtes-vous sûr de vouloir changer le mot de passe de @${id} ?`, "Changer");
+                        if (!ok) return;
+
+                        const btn = um.updatePwd;
+                        const spinner = btn.querySelector('.plinkk-spinner');
+                        const label = btn.querySelector('span');
+                        const prevText = label ? label.textContent : '';
+
+                        btn.disabled = true;
+                        if (spinner) spinner.classList.remove('hidden');
+                        if (label) {
+                            label.setAttribute('data-prev', label.textContent);
+                            label.textContent = 'Mise à jour...';
+                        }
+                        btn.classList.add('opacity-80', 'cursor-not-allowed');
+
+                        try {
+                            const res = await fetch('/api/users/' + encodeURIComponent(id) + '/password', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ password })
+                            });
+
+                            if (!res.ok) {
+                                const err = await res.json();
+                                throw new Error(err.error || 'Erreur inconnue');
+                            }
+
+                            showToast('Mot de passe mis à jour avec succès');
+                            if (um.newPwd) um.newPwd.value = '';
+                        } catch (e) {
+                            console.error('Password update failed:', e);
+                            showToast('Erreur: ' + e.message);
+                        } finally {
+                            btn.disabled = false;
+                            if (spinner) spinner.classList.add('hidden');
+                            if (label) label.textContent = label.getAttribute('data-prev') || 'Mettre à jour';
+                            btn.classList.remove('opacity-80', 'cursor-not-allowed');
+                        }
+                    });
+                } else {
+                    console.error('um.updatePwd NOT found in DOM during initialization');
+                }
+
                 um.copy?.addEventListener('click', async () => {
                     if (!currentLI) return;
                     const fallback = "<%= frontendUrl %>" + '/' + currentLI.dataset.id;
@@ -2247,7 +2322,7 @@
                     const ok = await confirmWithInput(name, id); if (!ok) return;
                     const btn = um.del; const spinner = btn.querySelector('.plinkk-spinner'); const label = btn.querySelector('span'); const prev = label ? label.textContent : btn.textContent; btn.disabled = true; if (spinner) spinner.classList.remove('hidden'); if (label) label.textContent = 'Suppression...';
                     try {
-                        const res = await fetch(`/ api / users / ${encodeURIComponent(id)} `, { method: 'DELETE' });
+                        const res = await fetch(`/api/users/${encodeURIComponent(id)}`, { method: 'DELETE' });
                         if (!res.ok) throw new Error('HTTP ' + res.status);
                         currentLI.remove(); paginator.setFiltered(paginator.getAll()); if (totalCount) totalCount.textContent = String(paginator.getAll().length);
                         closeUserModal(); showToast('Utilisateur supprimé');
@@ -2336,7 +2411,7 @@
 
                     try {
                         // Use new endpoint that returns a URL instead of setting cookie
-                        const res = await fetch(`/ impersonate - link / ${encodeURIComponent(id)} `, { method: 'POST' });
+                        const res = await fetch(`/impersonate-link/${encodeURIComponent(id)}`, { method: 'POST' });
                         if (!res.ok) throw new Error('HTTP ' + res.status);
                         const data = await res.json();
 
@@ -2366,7 +2441,7 @@
                     if (spinner) spinner.classList.remove('hidden');
 
                     try {
-                        const res = await fetch(`/ api / users / ${encodeURIComponent(id)}/badges`, {
+                        const res = await fetch(`/api/users/${encodeURIComponent(id)}/badges`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ type, value: checked })
