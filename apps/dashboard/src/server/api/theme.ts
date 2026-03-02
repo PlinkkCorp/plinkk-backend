@@ -1,7 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { coerceThemeData } from "../../lib/theme";
-import { verifyRoleIsStaff } from "../../lib/verifyRole";
 import { ensurePermission } from "../../lib/permissions";
 import { generateTheme } from "../../lib/generateTheme";
 import { logUserAction } from "../../lib/userLogger";

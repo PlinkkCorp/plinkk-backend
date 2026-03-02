@@ -9,11 +9,11 @@ import { apiMeThemesRoutes } from "./me/theme";
 import { apiMePlinkksRoutes } from "./me/plinkks/index";
 import { apiMeRedirectsRoutes } from "./me/redirects";
 import crypto from "crypto";
-import { Upload } from "@aws-sdk/lib-storage";
-import { ListObjectsV2Command, ListObjectsV2CommandOutput, S3Client, _Object, PutObjectCommand } from "@aws-sdk/client-s3";
+import { ListObjectsV2Command, _Object, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getS3Client } from "../../lib/fileUtils";
 import sharp from "sharp"
 import { logUserAction } from "../../lib/userLogger";
+import { EmailService } from "../../services/emailService";
 
 interface S3ClientWithSend {
   send(command: any): Promise<any>;
@@ -160,12 +160,26 @@ export function apiMeRoutes(fastify: FastifyInstance) {
       select: { id: true },
     });
     if (exists) throw new ConflictError("Email déjà utilisé");
+    
+    // Récupérer le nom d'utilisateur avant la mise à jour
+    const user = await prisma.user.findUnique({
+      where: { id: userId as string },
+      select: { userName: true },
+    });
+    
     const updated = await prisma.user.update({
       where: { id: userId as string },
       data: { email },
       select: { id: true, email: true },
     });
+    
     await logUserAction(userId as string, "UPDATE_EMAIL", null, { email }, request.ip);
+    
+    // Envoyer un email de confirmation sur la nouvelle adresse
+    if (user && EmailService.isConfigured()) {
+      await EmailService.sendEmailChangeConfirmation(email, user.userName);
+    }
+    
     return reply.send(updated);
   });
 

@@ -69,7 +69,7 @@ function initDateMap<T>(start: Date, end: Date, granularity: "day" | "hour" | "m
 
 export function adminStatsRoutes(fastify: FastifyInstance) {
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
-    const ok = await ensurePermission(request, reply, "VIEW_STATS", { mode: "redirect" });
+    const ok = await ensurePermission(request, reply, "VIEW_STATS", { mode: "view", active: "stats" });
     if (!ok) return;
 
     return replyView(reply, "dashboard/admin/stats.ejs", request.currentUser!, {

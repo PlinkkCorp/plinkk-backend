@@ -2,7 +2,6 @@
 import {
     prisma,
     Plinkk,
-    User,
     Prisma,
     BackgroundColor,
     NeonColor,

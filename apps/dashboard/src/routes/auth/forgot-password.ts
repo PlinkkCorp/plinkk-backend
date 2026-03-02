@@ -5,6 +5,7 @@ import { prisma } from "@plinkk/prisma";
 import { replyView } from "../../lib/replyView";
 import { generateToken } from "../../lib/token";
 import { logUserAction } from "../../lib/userLogger";
+import { EmailService } from "../../services/emailService";
 
 export function forgotPasswordRoutes(fastify: FastifyInstance) {
     // GET: Show forgot password request page
@@ -46,9 +47,12 @@ export function forgotPasswordRoutes(fastify: FastifyInstance) {
 
             const resetLink = `${process.env.FRONTEND_URL || "https://dash.plinkk.fr"}/auth/reset-password?token=${token}`;
 
-            // In a real app, send email here. For now, log to console.
-            console.log(`[PASSWORD RESET] User: ${user.userName} (${email})`);
-            console.log(`[PASSWORD RESET] Link: ${resetLink}`);
+            // Send password reset email asynchronously
+            setImmediate(() => {
+                EmailService.sendPasswordResetEmail(email, user.userName, token).catch((err) => {
+                    console.error("[EMAIL ERROR] Failed to send password reset email:", err);
+                });
+            });
 
             await logUserAction(user.id, "PASSWORD_RESET_REQUESTED", null, { email }, request.ip);
         }

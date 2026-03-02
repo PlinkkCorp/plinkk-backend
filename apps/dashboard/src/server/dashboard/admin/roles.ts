@@ -2,12 +2,11 @@ import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { replyView } from "../../../lib/replyView";
 import { ensurePermission } from "../../../lib/permissions";
-import { logAdminAction } from "../../../lib/adminLogger";
-import { requireAuthRedirect, requireAuth } from "../../../middleware/auth";
+import { requireAuthRedirect } from "../../../middleware/auth";
 
 export function adminRolesRoutes(fastify: FastifyInstance) {
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
-    const ok = await ensurePermission(request, reply, "MANAGE_ROLES", { mode: "redirect" });
+    const ok = await ensurePermission(request, reply, "MANAGE_ROLES", { mode: "view", active: "roles" });
     if (!ok) return;
 
     let roles: any[] = [];

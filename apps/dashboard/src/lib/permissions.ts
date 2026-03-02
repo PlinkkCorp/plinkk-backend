@@ -1,6 +1,6 @@
 import { prisma } from "@plinkk/prisma";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { UnauthorizedError, ForbiddenError } from "@plinkk/shared";
+import { UnauthorizedError, ForbiddenError, replyView } from "@plinkk/shared";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -41,7 +41,7 @@ export async function ensurePermission(
   request: FastifyRequest,
   reply: FastifyReply,
   keyOrKeys: string | string[],
-  options?: { mode?: "json" | "redirect"; redirectTo?: string; all?: boolean }
+  options?: { mode?: "json" | "redirect" | "view"; redirectTo?: string; all?: boolean; active?: string }
 ): Promise<boolean> {
   const mode = options?.mode || "json";
   const all = options?.all || false;
@@ -59,7 +59,7 @@ export async function ensurePermission(
   }
 
   if (!meId) {
-    if (mode === "redirect") {
+    if (mode === "redirect" || mode === "view") {
       const ret = request.url || "/";
       reply.redirect(`/login?returnTo=${encodeURIComponent(ret)}`);
       return false;
@@ -71,7 +71,10 @@ export async function ensurePermission(
     ? (all ? await userHasAllPermissions(meId, keyOrKeys) : await userHasAnyPermission(meId, keyOrKeys))
     : await userHasPermission(meId, keyOrKeys);
   if (!ok) {
-    if (mode === "redirect") {
+    if (mode === "view" && request.currentUser) {
+      await replyView(reply, "dashboard/admin/forbidden.ejs", request.currentUser, { active: options?.active || "" }, {}, 403);
+      return false;
+    } else if (mode === "redirect") {
       reply.redirect(options?.redirectTo || "/");
       return false;
     } else {

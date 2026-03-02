@@ -8,7 +8,7 @@ import { requireAuthRedirect, requireAuth } from "../../../middleware/auth";
 export function adminAnnouncementsRoutes(fastify: FastifyInstance) {
   // ── Page admin ──
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
-    const ok = await ensurePermission(request, reply, "MANAGE_ANNOUNCEMENTS", { mode: "redirect" });
+    const ok = await ensurePermission(request, reply, "MANAGE_ANNOUNCEMENTS", { mode: "view", active: "message" });
     if (!ok) return;
 
     const roles = await prisma.role.findMany({ orderBy: { priority: "desc" } });

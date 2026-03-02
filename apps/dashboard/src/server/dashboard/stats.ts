@@ -3,13 +3,12 @@ import { prisma, User } from "@plinkk/prisma";
 import { replyView } from "../../lib/replyView";
 import { requireAuthRedirect, requireAuth } from "../../middleware/auth";
 import {
-  getPublicPath,
   getPlinkksByUserId,
   getSelectedPlinkk,
   formatPlinkkForView,
   formatPagesForView,
 } from "../../services/plinkkService";
-import { isUserPremium, getMaxStatsDays, getUserLimits, FREE_MAX_STATS_DAYS } from "@plinkk/shared";
+import { getMaxStatsDays, getUserLimits, FREE_MAX_STATS_DAYS } from "@plinkk/shared";
 
 export function dashboardStatsRoutes(fastify: FastifyInstance) {
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {

@@ -17,6 +17,7 @@ import { adminUsersRoutes } from "./users";
 import { adminBansRoutes } from "./bans";
 import { adminPlinkksRoutes } from "./plinkks";
 import { adminMaintenanceRoutes } from "./maintenance";
+import { adminEmailsRoutes } from "./emails";
 import { dashboardAdminBugReportsRoutes } from "./bugReports";
 import { adminPartnersRoutes } from "./partners";
 
@@ -33,6 +34,7 @@ export function dashboardAdminRoutes(fastify: FastifyInstance) {
   fastify.register(adminBansRoutes, { prefix: "/bans" });
   fastify.register(adminPlinkksRoutes, { prefix: "/plinkks" });
   fastify.register(adminMaintenanceRoutes, { prefix: "/maintenance" });
+  fastify.register(adminEmailsRoutes, { prefix: "/emails" });
   fastify.register(dashboardAdminBugReportsRoutes, { prefix: "/bug-reports" });
   fastify.register(adminPartnersRoutes, { prefix: "/partners" });
 

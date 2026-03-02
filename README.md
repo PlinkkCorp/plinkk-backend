@@ -85,7 +85,23 @@ Un fichier `.env` à la racine est requis :
 - `PORT_PUBLIC` / `PORT_DASHBOARD` : Ports des apps (ex: 3000 et 3001)
 - `DATABASE_URL` : URI Postgres (prod) ou chemin fichier SQLite (dev: `file:./packages/prisma/prisma/dev.db`)
 - `SESSION_SECRET` : Clé secrète pour chiffrer les cookies de session
+- `RESEND_API_KEY` : Clé API Resend pour l'envoi d'emails (gratuit jusqu'à 3000 emails/mois)
 - Les identifiants API externes (Stripe, Service Email dynamique, etc.)
+
+## 📧 Service d'Email
+
+Le backend utilise **Resend** pour l'envoi d'emails transactionnels depuis `noreply@plinkk.fr` :
+
+- **Configuration** : Ajoutez `RESEND_API_KEY` dans votre `.env`
+- **Documentation complète** : [docs/EMAIL_SERVICE.md](docs/EMAIL_SERVICE.md)
+- **Tester le service** : `pnpm --filter @plinkk/dashboard test:email`
+
+Fonctionnalités :
+- Emails de bienvenue
+- Confirmations de changement d'email
+- Réinitialisation de mot de passe
+- Notifications administrateur
+- Templates HTML personnalisables
 
 ## 👮 Rôles & Permissions
 

@@ -18,7 +18,8 @@
     "migrate:plinkks": "node ../../scripts/migrate-plinkks.cjs",
     "delete_inactive": "node ../../scripts/delete_inactive_user.js ",
     "seed:role": "ts-node prisma/seed.ts",
-    "prisma:generate": "prisma generate --schema=../../prisma/schema.prisma --generator=dashboard"
+    "prisma:generate": "prisma generate --schema=../../prisma/schema.prisma --generator=dashboard",
+    "test:email": "ts-node src/services/__tests__/emailService.test.ts"
   },
   "keywords": [],
   "author": "",
@@ -57,6 +58,7 @@
     "nanoid": "^3.3.11",
     "otplib": "^12.0.1",
     "qrcode": "^1.5.4",
+    "resend": "^6.9.3",
     "rimraf": "^5.0.10",
     "sharp": "^0.34.5",
     "stripe": "^20.3.1",
@@ -69,6 +71,7 @@
     "@prisma/adapter-pg": "^7.1.0",
     "@types/ejs": "^3.1.5",
     "@types/node": "^24.8.1",
+    "concurrently": "^9.2.1",
     "pg": "^8.18.0",
     "prisma": "^7.3.0",
     "ts-node-dev": "^2.0.0",

@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { replyView } from "../lib/replyView";
-import { requireAuthRedirect, requireAuth } from "../middleware/auth";
+import { requireAuthRedirect } from "../middleware/auth";
 import { dashboardAdminRoutes } from "./dashboard/admin/index";
 import dashboardUserSessionsRoutes from "./dashboard/user/sessions";
 import { dashboardStatsRoutes } from "./dashboard/stats";
@@ -13,8 +13,6 @@ import { dashboardThemesRoutes } from "./dashboard/themes";
 import { dashboardRedirectsRoutes } from "./dashboard/redirects";
 import { dashboardLeadsRoutes } from "./dashboard/leads";
 import { dashboardPartnershipRoutes } from "./dashboard/partnership";
-import { verifyRoleIsStaff, verifyRolePartner } from "../lib/verifyRole";
-import { getPublicPath } from "../services/plinkkService";
 
 export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.register(dashboardAdminRoutes, { prefix: "/admin" });

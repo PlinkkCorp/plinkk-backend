@@ -2,9 +2,6 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { restorePlinkkVersion, createPlinkkVersion } from "../../../services/historyService";
-import { isUserPremium } from "@plinkk/shared";
-// @ts-ignore
-import { logUserAction } from "../../../../lib/userLogger";
 
 // snapshot shape used in history entries
 interface PlinkkSnapshot {

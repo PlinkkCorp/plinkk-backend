@@ -67,6 +67,7 @@ model User {
   userQuests            UserQuest[]
   affiliateLinks        AffiliateLink[]
   partner               Partner?
+  emailCampaigns        EmailCampaign[]
 }
 
 model Connection {
@@ -703,3 +704,25 @@ model AffiliateLinkClickDaily {
   @@id([affiliateLinkId, date])
   @@map("AffiliateLinkClickDaily")
 }
+
+model EmailCampaign {
+  id            String   @id @default(nanoid(16))
+  subject       String
+  title         String
+  message       String
+  actionUrl     String?
+  actionText    String?
+  category      String   @default("announcement") // announcement, feature, update, security, other
+  recipientType String   @default("all") // all, staff, admin, custom
+  sentCount     Int      @default(0)
+  failedCount   Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+  createdById   String
+
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([createdById])
+  @@index([createdAt])
+}
+

@@ -18,14 +18,26 @@
 
         <!-- Navigation -->
         <nav class="flex-1 space-y-6">
-            <% const isActive=(path)=> (typeof active !== 'undefined' && active === path) || (typeof currentPath !==
-                'undefined' && currentPath === path); %>
+            <%
+            const isActive = (path) => (typeof active !== 'undefined' && active === path) || (typeof currentPath !== 'undefined' && currentPath === path);
+            const perms = (user.role && user.role.permissions) ? user.role.permissions.map(p => p.permissionKey) : [];
+            const hasPerm = (key) => perms.includes(key);
+
+            const activeClass = 'bg-violet-500/10 text-violet-400 border border-violet-500/20';
+            const normalClass = 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50';
+            const disabledClass = 'text-slate-600 cursor-not-allowed opacity-40 pointer-events-none';
+
+            const linkClass = (path, perm) => {
+                if (perm && !hasPerm(perm)) return disabledClass;
+                return isActive(path) ? activeClass : normalClass;
+            };
+            %>
 
                 <!-- General -->
                 <div class="space-y-1">
                     <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Général</p>
                     <a href="/admin"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('dashboard') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('dashboard', 'VIEW_ADMIN') %>">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="7" height="7"></rect>
@@ -35,8 +47,8 @@
                         </svg>
                         <span class="font-medium">Tableau de bord</span>
                     </a>
-                    <a href="/admin/stats"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('stats') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                    <a href="<%= hasPerm('VIEW_STATS') ? '/admin/stats' : '#' %>"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('stats', 'VIEW_STATS') %>">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -51,7 +63,7 @@
                 <div class="space-y-1">
                     <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Modération</p>
                     <a href="/admin/reports"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('reports') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('reports', 'VIEW_ADMIN') %>">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
                             <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
@@ -60,7 +72,7 @@
                         <span class="font-medium">Signalements</span>
                     </a>
                     <a href="/admin/bug-reports"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('bug-reports') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('bug-reports', 'VIEW_ADMIN') %>">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
                             <rect x="8" y="6" width="8" height="14" rx="4"></rect>
@@ -75,7 +87,7 @@
                         <span class="font-medium">Bugs</span>
                     </a>
                     <a href="/admin/sessions"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('sessions') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('sessions', 'VIEW_ADMIN') %>">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
                             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -84,8 +96,8 @@
                         </svg>
                         <span class="font-medium">Sessions</span>
                     </a>
-                    <a href="/admin/bans"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('bans') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                    <a href="<%= hasPerm('MANAGE_BANNED_EMAILS') ? '/admin/bans' : '#' %>"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('bans', 'MANAGE_BANNED_EMAILS') %>">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
@@ -93,8 +105,8 @@
                         </svg>
                         <span class="font-medium">Bannissements</span>
                     </a>
-                    <a href="/admin/logs"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('logs') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                    <a href="<%= hasPerm('VIEW_ADMIN_LOGS') ? '/admin/logs' : '#' %>"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('logs', 'VIEW_ADMIN_LOGS') %>">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -105,18 +117,16 @@
                         </svg>
                         <span class="font-medium">Logs système</span>
                     </a>
-                    <a href="/admin/message"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('message') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                    <a href="<%= hasPerm('MANAGE_ANNOUNCEMENTS') ? '/admin/message' : '#' %>"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('message', 'MANAGE_ANNOUNCEMENTS') %>">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
-                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                            </svg>
-                            <span class="font-medium">Message global</span>
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span class="font-medium">Message global</span>
                     </a>
                     <a href="/admin/partners"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('partners') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('partners', 'VIEW_ADMIN') %>">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
                             <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -132,15 +142,15 @@
                 <div class="space-y-1">
                     <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Système</p>
                     <a href="/admin/themes"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('themes') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('themes', 'VIEW_ADMIN') %>">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
                         </svg>
                         <span class="font-medium">Thèmes</span>
                     </a>
-                    <a href="/admin/roles"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('roles') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                    <a href="<%= hasPerm('MANAGE_ROLES') ? '/admin/roles' : '#' %>"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('roles', 'MANAGE_ROLES') %>">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -150,8 +160,8 @@
                         </svg>
                         <span class="font-medium">Rôles</span>
                     </a>
-                    <a href="/admin/system"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('system') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                    <a href="<%= hasPerm('VIEW_SYSTEM_HEALTH') ? '/admin/system' : '#' %>"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('system', 'VIEW_SYSTEM_HEALTH') %>">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
@@ -159,10 +169,19 @@
                         <span class="font-medium">État Système</span>
                     </a>
 
-                    <% if (user.role && user.role.permissions && user.role.permissions.some(p=> p.permissionKey ===
-                        'MANAGE_MAINTENANCE')) { %>
+                    <a href="<%= hasPerm('SEND_EMAILS') ? '/admin/emails' : '#' %>"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('emails', 'SEND_EMAILS') %>">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                        </svg>
+                        <span class="font-medium">Emails</span>
+                    </a>
+
+                    <% if (hasPerm('MANAGE_MAINTENANCE')) { %>
                         <a href="/admin/maintenance"
-                            class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= isActive('maintenance') ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50' %>">
+                            class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('maintenance', 'MANAGE_MAINTENANCE') %>">
                             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
                                 <path
@@ -171,7 +190,7 @@
                             </svg>
                             <span class="font-medium">Maintenance</span>
                         </a>
-                        <% } %>
+                    <% } %>
                 </div>
         </nav>
 

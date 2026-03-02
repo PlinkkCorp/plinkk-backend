@@ -1,6 +1,5 @@
 import { FastifyInstance, FastifyRequest } from "fastify";
 import { Prisma, prisma } from "@plinkk/prisma";
-import { replyView } from "../../../lib/replyView";
 import { ensurePermission, SessionData } from "../../../lib/permissions";
 import { logAdminAction, logDetailedAdminAction } from "../../../lib/adminLogger";
 import { requireAuth, requireAuthWithUser } from "../../../middleware/auth";

@@ -3,13 +3,13 @@ import { replyView } from "../../../lib/replyView";
 import { ensurePermission } from "../../../lib/permissions";
 import { requireAuthRedirect } from "../../../middleware/auth";
 
-export function adminBansRoutes(fastify: FastifyInstance) {
+export async function adminEmailsRoutes(fastify: FastifyInstance) {
+  // GET /admin/emails
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
-    const ok = await ensurePermission(request, reply, "MANAGE_BANNED_EMAILS", { mode: "view", active: "bans" });
+    const ok = await ensurePermission(request, reply, "SEND_EMAILS", { mode: "view", active: "emails" });
     if (!ok) return;
 
-    return replyView(reply, "dashboard/admin/bans.ejs", request.currentUser!, {
-      publicPath: request.publicPath,
-    });
+    const user = request.currentUser!;
+    return replyView(reply, "dashboard/admin/emails.ejs", user, {});
   });
 }

@@ -1,0 +1,288 @@
+<%- include('partials/head.ejs', { title: 'Emails - Administration' , description: 'Gestion et envoi d\'emails personnalisés.' , robots: 'noindex,nofollow' }) %>
+    <%- include('partials/header-dash.ejs', { user: user }) %>
+
+        <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+            <%- include('partials/admin-nav.ejs', { user: user, active: 'emails' }) %>
+
+                <main class="col-span-12 lg:col-span-10 space-y-8">
+                    <!-- Header -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                        <div class="relative z-10">
+                            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center gap-2">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                                Gestion d'Emails
+                            </h1>
+                            <p class="text-slate-400 text-lg">Envoyer des emails personnalisés aux utilisateurs</p>
+                        </div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+                            <div class="text-slate-400 text-sm font-medium mb-2">Campagnes envoyées</div>
+                            <div class="text-3xl font-bold text-blue-400">0</div>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+                            <div class="text-slate-400 text-sm font-medium mb-2">Emails envoyés</div>
+                            <div class="text-3xl font-bold text-blue-400">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire d'envoi -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-6">
+                        <div>
+                            <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                                Nouvelle Campagne
+                            </h2>
+                        </div>
+
+                        <form id="emailForm" class="space-y-6">
+                            <!-- Type de destinataires -->
+                            <div>
+                                <label class="block text-sm font-semibold text-white mb-3">Destinataires</label>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <label class="flex items-center p-4 border border-slate-700 rounded-2xl cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
+                                        <input type="radio" name="recipientType" value="all" checked class="mr-3 w-5 h-5">
+                                        <span class="text-white font-medium">Tous les utilisateurs</span>
+                                    </label>
+                                    <label class="flex items-center p-4 border border-slate-700 rounded-2xl cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
+                                        <input type="radio" name="recipientType" value="staff" class="mr-3 w-5 h-5">
+                                        <span class="text-white font-medium">Staff uniquement</span>
+                                    </label>
+                                    <label class="flex items-center p-4 border border-slate-700 rounded-2xl cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
+                                        <input type="radio" name="recipientType" value="admin" class="mr-3 w-5 h-5">
+                                        <span class="text-white font-medium">Admin uniquement</span>
+                                    </label>
+                                    <label class="flex items-center p-4 border border-slate-700 rounded-2xl cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
+                                        <input type="radio" name="recipientType" value="custom" class="mr-3 w-5 h-5">
+                                        <span class="text-white font-medium">Destinataires spécifiques</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Destinataires customisés -->
+                            <div id="customRecipientsField" class="hidden">
+                                <label class="block text-sm font-semibold text-white mb-2">Adresses emails (une par ligne)</label>
+                                <textarea name="recipients" rows="4" placeholder="email1@example.com&#10;email2@example.com&#10;email3@example.com" class="w-full bg-slate-800 border border-slate-700 rounded-2xl p-4 text-white font-mono text-sm placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors"></textarea>
+                            </div>
+
+                            <!-- Catégorie -->
+                            <div>
+                                <label class="block text-sm font-semibold text-white mb-3">Catégorie</label>
+                                <select name="category" class="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3 text-white focus:border-blue-500 focus:outline-none transition-colors">
+                                    <option value="announcement">Annonce</option>
+                                    <option value="feature">Nouvelle fonctionnalité</option>
+                                    <option value="update">Mise à jour</option>
+                                    <option value="security">Sécurité</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                            </div>
+
+                            <!-- Sujet -->
+                            <div>
+                                <label class="block text-sm font-semibold text-white mb-2">Sujet de l'email</label>
+                                <input type="text" name="subject" placeholder="ex: Nouvelle fonctionnalité disponible" required class="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors">
+                            </div>
+
+                            <!-- Titre -->
+                            <div>
+                                <label class="block text-sm font-semibold text-white mb-2">Titre de l'email</label>
+                                <input type="text" name="title" placeholder="ex: Découvrez notre nouvelle fonctionnalité" required class="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors">
+                            </div>
+
+                            <!-- Message -->
+                            <div>
+                                <label class="block text-sm font-semibold text-white mb-2">Message</label>
+                                <textarea name="message" rows="6" placeholder="Entrez votre message ici..." required class="w-full bg-slate-800 border border-slate-700 rounded-2xl p-4 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors resize-none"></textarea>
+                            </div>
+
+                            <!-- Lien d'action (optionnel) -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-white mb-2">URL d'action (optionnel)</label>
+                                    <input type="url" name="actionUrl" placeholder="ex: https://plinkk.fr/features" class="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-white mb-2">Texte du bouton (optionnel)</label>
+                                    <input type="text" name="actionText" placeholder="ex: Découvrir" class="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors">
+                                </div>
+                            </div>
+
+                            <!-- Aperçu -->
+                            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4">
+                                <details class="cursor-pointer">
+                                    <summary class="text-sm font-semibold text-white select-none hover:text-blue-400 transition-colors flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                                        Aperçu de l'email
+                                    </summary>
+                                    <div class="mt-4 pt-4 border-t border-slate-700 space-y-2 text-sm text-slate-300">
+                                        <p><strong>Catégorie:</strong> <span id="previewCategory">Annonce</span></p>
+                                        <p><strong>Sujet:</strong> <span id="previewSubject">-</span></p>
+                                        <p><strong>Titre:</strong> <span id="previewTitle">-</span></p>
+                                        <p><strong>Message:</strong> <span id="previewMessage">-</span></p>
+                                        <p id="previewAction" class="hidden"><strong>Bouton:</strong> <span id="previewActionText">-</span> → <span id="previewActionUrl">-</span></p>
+                                    </div>
+                                </details>
+                            </div>
+
+                            <!-- Confirmation -->
+                            <div class="bg-blue-500/10 border border-blue-500/50 rounded-2xl p-4">
+                                <p class="text-sm text-blue-200 flex items-start gap-2">
+                                    <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                                    <span>Cet email sera envoyé à <strong id="recipientCountDisplay">tous les utilisateurs</strong>. Cette action ne peut pas être annulée.</span>
+                                </p>
+                            </div>
+
+                            <!-- Boutons -->
+                            <div class="flex gap-3 pt-4">
+                                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-2xl transition-colors">
+                                    Envoyer la campagne
+                                </button>
+                                <button type="reset" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-2xl transition-colors">
+                                    Réinitialiser
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Historique des campagnes -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8">
+                        <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.1 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v16z"/></svg>
+                            Historique des campagnes
+                        </h2>
+                        <div id="campaignsHistory" class="space-y-3 text-slate-400">
+                            <p class="text-center py-8">Chargement...</p>
+                        </div>
+                    </div>
+                </main>
+        </div>
+
+        <script>
+            // Gérer l'affichage des destinataires personnalisés
+            document.querySelectorAll('input[name="recipientType"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    const customField = document.getElementById('customRecipientsField');
+                    const displayTexts = {
+                        all: 'tous les utilisateurs',
+                        staff: 'tous les membres du staff',
+                        admin: 'tous les administrateurs',
+                        custom: 'les destinataires spécifiés'
+                    };
+                    
+                    document.getElementById('recipientCountDisplay').textContent = 
+                        displayTexts[radio.value] || 'tous les utilisateurs';
+                    
+                    customField.classList.toggle('hidden', radio.value !== 'custom');
+                });
+            });
+
+            // Mise à jour de l'aperçu
+            const form = document.getElementById('emailForm');
+            ['subject', 'title', 'message', 'category', 'actionText', 'actionUrl'].forEach(field => {
+                const input = form.querySelector(`[name="${field}"]`);
+                input?.addEventListener('input', () => {
+                    document.getElementById(`preview${field.charAt(0).toUpperCase() + field.slice(1)}`).textContent = 
+                        input.value || '-';
+                    
+                    const actionDetails = document.getElementById('previewAction');
+                    const actionUrl = form.querySelector('[name="actionUrl"]').value;
+                    const actionText = form.querySelector('[name="actionText"]').value;
+                    if (actionUrl && actionText) {
+                        actionDetails.classList.remove('hidden');
+                    } else {
+                        actionDetails.classList.add('hidden');
+                    }
+                });
+            });
+
+            // Envoi du formulaire
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+                const recipientType = formData.get('recipientType');
+                const recipients = recipientType === 'custom' 
+                    ? formData.get('recipients')?.split('\n').map(e => e.trim()).filter(e => e)
+                    : undefined;
+
+                const payload = {
+                    recipientType,
+                    recipients,
+                    subject: formData.get('subject'),
+                    title: formData.get('title'),
+                    message: formData.get('message'),
+                    actionUrl: formData.get('actionUrl') || undefined,
+                    actionText: formData.get('actionText') || undefined,
+                    category: formData.get('category'),
+                };
+
+                try {
+                    const response = await fetch('/api/admin/emails/send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        alert('Erreur: ' + (data.error || 'Impossible d\'envoyer l\'email'));
+                        return;
+                    }
+
+                    alert(data.message);
+                    form.reset();
+                    loadCampaigns();
+                } catch (error) {
+                    alert('Erreur: ' + error.message);
+                }
+            });
+
+            // Charger l'historique
+            async function loadCampaigns() {
+                try {
+                    const response = await fetch('/api/admin/emails/campaigns');
+                    const campaigns = await response.json();
+
+                    const historyDiv = document.getElementById('campaignsHistory');
+                    if (!campaigns.length) {
+                        historyDiv.innerHTML = '<p class="text-center py-8">Aucune campagne envoyée</p>';
+                        return;
+                    }
+
+                    historyDiv.innerHTML = campaigns.map(campaign => `
+                        <div class="border border-slate-700 rounded-2xl p-4 hover:border-slate-600 transition-colors">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-white">${campaign.subject}</h3>
+                                    <p class="text-sm text-slate-400 mt-1">
+                                        Catégorie: 
+                                        <span class="inline-block px-2 py-1 bg-slate-800 rounded text-xs font-medium">
+                                            ${campaign.category}
+                                        </span>
+                                    </p>
+                                    <p class="text-xs text-slate-500 mt-2">
+                                        Par: <strong>${campaign.createdBy?.userName || 'System'}</strong>
+                                    </p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-blue-400 font-bold">${campaign.sentCount}</div>
+                                    <div class="text-xs text-slate-400">emails envoyés</div>
+                                    <div class="text-xs text-slate-500 mt-2">
+                                        ${new Date(campaign.createdAt).toLocaleDateString('fr-FR')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (error) {
+                    console.error('Erreur lors du chargement:', error);
+                }
+            }
+
+            // Charger les campagnes au chargement
+            loadCampaigns();
+        </script>

@@ -1,5 +1,4 @@
 import { FastifyInstance } from "fastify";
-import { prisma } from "@plinkk/prisma";
 import { replyView } from "../../../lib/replyView";
 import { ensurePermission } from "../../../lib/permissions";
 import { logAdminAction } from "../../../lib/adminLogger";
@@ -16,7 +15,7 @@ const ALLOWED_SCRIPTS = [
 
 export function adminSystemRoutes(fastify: FastifyInstance) {
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
-    const ok = await ensurePermission(request, reply, "VIEW_SYSTEM_HEALTH", { mode: "redirect" });
+    const ok = await ensurePermission(request, reply, "VIEW_SYSTEM_HEALTH", { mode: "view", active: "system" });
     if (!ok) return;
 
     return replyView(reply, "dashboard/admin/system.ejs", request.currentUser!, {

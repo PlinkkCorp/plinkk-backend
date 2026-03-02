@@ -104,4 +104,8 @@ export const PERMISSIONS: PermissionDefinition[] = [
   { key: 'PREMIUM_STATS_EXTENDED', category: 'Premium', description: 'Accès aux statistiques étendues (> 30 jours)', defaultRoles: ['ADMIN', 'DEVELOPER', 'PARTNER'] },
   { key: 'PREMIUM_EXPORT_CSV', category: 'Premium', description: 'Export CSV avancé des données', defaultRoles: ['ADMIN', 'DEVELOPER', 'PARTNER'] },
   { key: 'PREMIUM_EXTENDED_LIMITS', category: 'Premium', description: 'Limites étendues (plinkks, thèmes, redirections)', defaultRoles: ['ADMIN', 'DEVELOPER', 'PARTNER'] },
+
+  // Communication / Emails
+  { key: 'SEND_EMAILS', category: 'Administration', description: 'Envoyer des emails personnalisés aux utilisateurs', defaultRoles: ['ADMIN', 'DEVELOPER'] },
 ];
+

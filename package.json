@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@prisma/adapter-pg": "^7.3.0",
+    "concurrently": "^9.2.1",
     "pg": "^8.18.0",
     "prisma": "^7.3.0"
   },

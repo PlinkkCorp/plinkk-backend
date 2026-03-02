@@ -8,7 +8,7 @@ import { getMaintenanceStatus } from "../../../services/maintenance.service";
 
 export function adminMaintenanceRoutes(fastify: FastifyInstance) {
     fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
-        const ok = await ensurePermission(request, reply, "MANAGE_MAINTENANCE", { mode: "redirect" });
+        const ok = await ensurePermission(request, reply, "MANAGE_MAINTENANCE", { mode: "view", active: "maintenance" });
         if (!ok) return;
 
         const maintenanceStatus = await getMaintenanceStatus();

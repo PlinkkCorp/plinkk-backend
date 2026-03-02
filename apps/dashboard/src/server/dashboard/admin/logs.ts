@@ -2,7 +2,6 @@ import { FastifyInstance } from "fastify";
 import { Prisma, prisma } from "@plinkk/prisma";
 import { replyView } from "../../../lib/replyView";
 import { ensurePermission } from "../../../lib/permissions";
-import { logAdminAction } from "../../../lib/adminLogger";
 import { requireAuthRedirect, requireAuth } from "../../../middleware/auth";
 
 interface LogsQuery {
@@ -54,7 +53,7 @@ interface EnrichedUserLog {
 
 export function adminLogsRoutes(fastify: FastifyInstance) {
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
-    const ok = await ensurePermission(request, reply, "VIEW_ADMIN_LOGS", { mode: "redirect" });
+    const ok = await ensurePermission(request, reply, "VIEW_ADMIN_LOGS", { mode: "view", active: "logs" });
     if (!ok) return;
 
     return replyView(reply, "dashboard/admin/logs.ejs", request.currentUser!, {
