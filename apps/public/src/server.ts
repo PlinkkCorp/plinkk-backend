@@ -303,6 +303,27 @@ fastify.get("/users", async (request, reply) => {
   });
 });
 
+fastify.get("/patchnotes", async (request, reply) => {
+  const sessionData = request.session.get("data");
+  const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+  const currentUser = currentUserId
+    ? await prisma.user.findUnique({
+      where: { id: currentUserId },
+      include: { role: true },
+    })
+    : null;
+
+  const patchNotes = await prisma.patchNote.findMany({
+    where: { isPublished: true },
+    include: { createdBy: { select: { id: true, userName: true } } },
+    orderBy: { publishedAt: "desc" },
+  });
+
+  return await replyView(reply, "patchnotes.ejs", currentUser, {
+    patchNotes: patchNotes,
+  });
+});
+
 fastify.get("/*", async (request, reply) => {
   const url = request.raw.url || "";
   if (
@@ -314,7 +335,14 @@ fastify.get("/*", async (request, reply) => {
     return reply.callNotFound();
   }
   const host = request.headers.host || "";
-  if (host !== "plinkk.fr" && host !== "127.0.0.1:3002") {
+  const allowedHosts = new Set([
+    "plinkk.fr",
+    "127.0.0.1:3002",
+    "localhost:3002",
+    "127.0.0.1",
+    "localhost"
+  ]);
+  if (!allowedHosts.has(host)) {
     return reply.callNotFound();
   }
   if (/\.[a-zA-Z0-9]+$/.test(url)) {

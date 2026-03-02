@@ -22,6 +22,7 @@ import { apiAdminEmailsRoutes } from "./api/admin/emails";
 import { apiBugReportsRoutes } from "./api/bug-reports";
 import { apiAdminPartnersRoutes } from "./api/admin/partners";
 import { apiAdminAffiliateRoutes } from "./api/admin/affiliate";
+import { apiAdminPatchNotesRoutes } from "./api/admin/patchnotes";
 
 // const prisma = new PrismaClient();
 
@@ -38,6 +39,7 @@ export function apiRoutes(fastify: FastifyInstance) {
   fastify.register(apiAdminEmailsRoutes, { prefix: "/admin/emails" });
   fastify.register(apiAdminPartnersRoutes, { prefix: "/admin/partners" });
   fastify.register(apiAdminAffiliateRoutes, { prefix: "/admin/affiliate" });
+  fastify.register(apiAdminPatchNotesRoutes, { prefix: "/admin/patchnotes" });
   fastify.register(apiStripeRoutes, { prefix: "/stripe" });
   fastify.register(apiBugReportsRoutes, { prefix: "/bug-reports" });
 

@@ -110,13 +110,20 @@
         </div>
 
         <!-- Contrôles globaux permissions -->
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <!-- Toolbar permissions -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div class="flex items-center gap-2">
+            <div class="relative">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input id="permSearch" placeholder="Rechercher une permission…" class="w-56 pl-9 pr-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/50 transition-all" />
+            </div>
             <button id="btnEnableAll" class="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 text-xs font-medium transition-colors">Tout activer</button>
             <button id="btnDisableAll" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition-colors">Tout désactiver</button>
           </div>
-          
           <div class="flex items-center gap-2">
+            <button id="btnExpandAll" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 text-xs font-medium transition-colors" title="Tout déplier">Déplier</button>
+            <button id="btnCollapseAll" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 text-xs font-medium transition-colors" title="Tout replier">Replier</button>
+            <div class="h-4 w-px bg-slate-700"></div>
             <div class="relative">
               <select id="importRoleSelect" class="appearance-none pl-3 pr-8 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-300 focus:outline-none focus:border-violet-500/50">
                 <option value="">Importer depuis…</option>
@@ -127,35 +134,82 @@
           </div>
         </div>
 
-        <div id="permissionsPanel" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <% Object.keys(permissionsGrouped).forEach(cat => { %>
-            <div class="bg-slate-950/50 border border-slate-800 rounded-2xl overflow-hidden" data-category="<%= cat %>">
-              <div class="px-4 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
-                <span class="text-xs font-bold text-slate-300 uppercase tracking-wider"><%= cat %></span>
-                <div class="flex items-center gap-1">
-                  <button type="button" class="btn-cat-enable p-1 rounded hover:bg-emerald-500/10 text-slate-500 hover:text-emerald-500 transition-colors" title="Activer tout">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  </button>
-                  <button type="button" class="btn-cat-disable p-1 rounded hover:bg-rose-500/10 text-slate-500 hover:text-rose-500 transition-colors" title="Désactiver tout">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                  </button>
-                </div>
-              </div>
-              <div class="p-2 space-y-1">
-                <% permissionsGrouped[cat].forEach(p => { %>
-                  <div class="group flex items-center justify-between gap-3 p-2 rounded-xl hover:bg-slate-900 transition-colors">
-                    <div class="flex flex-col min-w-0">
-                      <div class="flex items-center gap-2">
-                        <code class="text-[10px] font-mono text-violet-400 bg-violet-500/10 px-1.5 py-0.5 rounded border border-violet-500/20"><%= p.key %></code>
-                      </div>
-                      <span class="text-[11px] text-slate-500 truncate mt-0.5 group-hover:text-slate-400 transition-colors"><%= p.description || '' %></span>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
-                      <input type="checkbox" class="perm-toggle sr-only peer" data-key="<%= p.key %>">
-                      <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-violet-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-violet-600"></div>
-                    </label>
+        <!-- Permissions accordion -->
+        <div id="permissionsPanel" class="space-y-2">
+          <%
+          const catIcons = {
+            'Administration': '<path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/><circle cx="12" cy="12" r="3"/>',
+            'Modération': '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
+            'Utilisateur': '<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+            'Contenu': '<path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>',
+            'Sécurité': '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>',
+            'Statistiques': '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+            'Développement': '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+            'Intégrations': '<path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>',
+            'Facturation': '<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
+            'Redirections': '<polyline points="15 3 21 3 21 9"/><path d="M21 3l-7 7"/><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>',
+            'Premium': '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+            'Communication': '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',
+          };
+          const catColors = {
+            'Administration': 'violet',
+            'Modération': 'amber',
+            'Utilisateur': 'sky',
+            'Contenu': 'emerald',
+            'Sécurité': 'rose',
+            'Statistiques': 'blue',
+            'Développement': 'cyan',
+            'Intégrations': 'indigo',
+            'Facturation': 'orange',
+            'Redirections': 'teal',
+            'Premium': 'yellow',
+            'Communication': 'pink',
+          };
+          Object.keys(permissionsGrouped).forEach((cat, catIdx) => {
+            const color = catColors[cat] || 'slate';
+            const icon = catIcons[cat] || '<circle cx="12" cy="12" r="10"/>';
+            const perms = permissionsGrouped[cat];
+          %>
+            <div class="perm-category bg-slate-950/50 border border-slate-800 rounded-2xl overflow-hidden" data-category="<%= cat %>">
+              <!-- Category header (clickable accordion) -->
+              <button type="button" class="cat-toggle w-full px-4 py-3 flex items-center justify-between bg-slate-900/30 hover:bg-slate-900/60 transition-colors group">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-<%= color %>-500/10 border border-<%= color %>-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-<%= color %>-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><%- icon %></svg>
                   </div>
-                <% }) %>
+                  <div class="text-left">
+                    <span class="text-sm font-semibold text-slate-200"><%= cat %></span>
+                    <span class="cat-counter ml-2 text-[10px] font-mono text-slate-500" data-total="<%= perms.length %>">0/<%= perms.length %></span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span class="btn-cat-enable p-1 rounded hover:bg-emerald-500/10 text-slate-500 hover:text-emerald-500 transition-colors cursor-pointer" title="Activer tout" onclick="event.stopPropagation()">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </span>
+                    <span class="btn-cat-disable p-1 rounded hover:bg-rose-500/10 text-slate-500 hover:text-rose-500 transition-colors cursor-pointer" title="Désactiver tout" onclick="event.stopPropagation()">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </span>
+                  </div>
+                  <svg class="cat-chevron w-4 h-4 text-slate-500 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+              </button>
+              <!-- Category body (collapsible) -->
+              <div class="cat-body" style="display:none">
+                <div class="p-2 space-y-0.5 border-t border-slate-800/50">
+                  <% perms.forEach(p => { %>
+                    <div class="perm-row group flex items-center justify-between gap-3 px-3 py-2 rounded-xl hover:bg-slate-900/80 transition-colors" data-perm-key="<%= p.key %>" data-perm-desc="<%= (p.description || '').toLowerCase() %>">
+                      <div class="flex flex-col min-w-0 flex-1">
+                        <span class="text-xs font-medium text-slate-300 group-hover:text-white transition-colors"><%= p.description || p.key %></span>
+                        <code class="text-[10px] font-mono text-slate-600 group-hover:text-slate-500 transition-colors"><%= p.key %></code>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                        <input type="checkbox" class="perm-toggle sr-only peer" data-key="<%= p.key %>">
+                        <div class="w-8 h-[18px] bg-slate-800 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-violet-500/20 rounded-full peer peer-checked:after:translate-x-3.5 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-500 after:rounded-full after:h-[14px] after:w-[14px] after:transition-all peer-checked:bg-violet-600 peer-checked:after:bg-white"></div>
+                      </label>
+                    </div>
+                  <% }) %>
+                </div>
               </div>
             </div>
           <% }) %>
@@ -292,6 +346,7 @@
       const on = current.has(key);
       chk.checked = on;
     });
+    updateCatCounters();
   }
 
   // Helpers permissions
@@ -446,6 +501,7 @@
       const r = rolesData.find(x=>x.id===roleId); if(!r) return;
       if(on){ if(!r.permissions.includes(key)) r.permissions.push(key); }
       else { r.permissions = r.permissions.filter(p=>p!==key); }
+      updateCatCounters();
     } else {
       // revert
       chk.checked = !on;
@@ -513,6 +569,77 @@
     try{ await patchPermissions(roleId, add, remove); updateLocalPerms(roleId, srcSet); renderRight(); sel.value=''; }
     catch{ $('#rolesError').textContent = 'Échec: import de permissions'; $('#rolesError').classList.remove('hidden'); }
   });
+
+  // --- Accordion toggle ---
+  $$('.cat-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cat = btn.closest('.perm-category');
+      const body = cat.querySelector('.cat-body');
+      const chevron = btn.querySelector('.cat-chevron');
+      if (body.style.display === 'none') {
+        body.style.display = '';
+        chevron.style.transform = 'rotate(0deg)';
+      } else {
+        body.style.display = 'none';
+        chevron.style.transform = 'rotate(-90deg)';
+      }
+    });
+    // Init chevron state
+    const body = btn.closest('.perm-category').querySelector('.cat-body');
+    const chevron = btn.querySelector('.cat-chevron');
+    if (body.style.display === 'none') chevron.style.transform = 'rotate(-90deg)';
+  });
+
+  // --- Expand / Collapse all ---
+  $('#btnExpandAll').addEventListener('click', () => {
+    $$('.perm-category').forEach(cat => {
+      cat.querySelector('.cat-body').style.display = '';
+      cat.querySelector('.cat-chevron').style.transform = 'rotate(0deg)';
+    });
+  });
+  $('#btnCollapseAll').addEventListener('click', () => {
+    $$('.perm-category').forEach(cat => {
+      cat.querySelector('.cat-body').style.display = 'none';
+      cat.querySelector('.cat-chevron').style.transform = 'rotate(-90deg)';
+    });
+  });
+
+  // --- Permission search ---
+  $('#permSearch').addEventListener('input', (ev) => {
+    const q = String(ev.currentTarget.value || '').toLowerCase().trim();
+    $$('.perm-category').forEach(cat => {
+      const rows = $$('.perm-row', cat);
+      let anyVisible = false;
+      rows.forEach(row => {
+        const key = (row.getAttribute('data-perm-key') || '').toLowerCase();
+        const desc = row.getAttribute('data-perm-desc') || '';
+        const match = !q || key.includes(q) || desc.includes(q);
+        row.style.display = match ? '' : 'none';
+        if (match) anyVisible = true;
+      });
+      // Show/hide entire category
+      cat.style.display = anyVisible ? '' : 'none';
+      // Auto-expand when searching
+      if (q && anyVisible) {
+        cat.querySelector('.cat-body').style.display = '';
+        cat.querySelector('.cat-chevron').style.transform = 'rotate(0deg)';
+      }
+    });
+  });
+
+  // --- Category counters ---
+  function updateCatCounters() {
+    $$('.perm-category').forEach(cat => {
+      const toggles = $$('.perm-toggle', cat);
+      const enabled = toggles.filter(t => t.checked).length;
+      const total = toggles.length;
+      const counter = cat.querySelector('.cat-counter');
+      if (counter) {
+        counter.textContent = enabled + '/' + total;
+        counter.className = 'cat-counter ml-2 text-[10px] font-mono ' + (enabled === total ? 'text-emerald-400' : enabled > 0 ? 'text-violet-400' : 'text-slate-500');
+      }
+    });
+  }
 
   // Init (affichage uniquement des données pré-rendues serveur)
   if(!rolesData.length){

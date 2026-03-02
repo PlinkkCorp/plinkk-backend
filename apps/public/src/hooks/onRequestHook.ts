@@ -50,11 +50,17 @@ export default async function onRequestHook(
       return reply.sendFile(`/images/icons/${iconFile}`);
     }
 
-    if (
-      host !== "plinkk.fr" &&
-      host !== "beta.plinkk.fr" &&
-      !(host === "127.0.0.1:3002" && effectiveUrl.startsWith("/config.js"))
-    ) {
+    // Hosts autorisés sans restriction (plinkk.fr officiel + développement local)
+    const allowedHosts = new Set([
+      "plinkk.fr",
+      "beta.plinkk.fr",
+      "127.0.0.1:3002",
+      "localhost:3002",
+      "127.0.0.1",
+      "localhost"
+    ]);
+
+    if (!allowedHosts.has(host)) {
       const isDevHost = devHosts.has(host);
       const publicRoutes = new Set(["/", "/pricing", "/about", "/cgv", "/confidentialite", "/mentions-legales", "/feedback", "/partners"]);
       const cleanPath = effectivePath.split("?")[0];
@@ -91,6 +97,16 @@ export default async function onRequestHook(
             where: { id: host },
             include: { plinkk: { include: { user: true } } },
           });
+        }
+
+        // Si le domaine n'existe pas dans la base (DNS non configuré), afficher "Accès restreint"
+        if (!hostDb) {
+          return reply.code(409).view("erreurs/reserved.ejs");
+        }
+
+        // Si le domaine existe mais n'est pas vérifié, afficher "Accès restreint"
+        if (hostDb && !hostDb.verified) {
+          return reply.code(409).view("erreurs/reserved.ejs");
         }
 
         if (hostDb && hostDb.verified === true) {
@@ -494,8 +510,9 @@ export default async function onRequestHook(
               `images/${request.url.replace("/public/images/", "")}`
             );
           }
+          // Si domaine vérifié mais route non trouvée, afficher "Accès restreint"
+          return reply.code(409).view("erreurs/reserved.ejs");
         }
-        return reply.code(409).view("erreurs/reserved.ejs")
       } // end else (not a dev public route)
     }
     const reservedRoots = new Set([

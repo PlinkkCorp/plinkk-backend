@@ -47,7 +47,10 @@ export const PERMISSIONS: PermissionDefinition[] = [
   { key: 'VIEW_USER_PRIVATE_EMAIL', category: 'Modération', description: 'Voir les emails privés des utilisateurs', defaultRoles: ['ADMIN', 'MODERATOR'] },
   { key: 'VIEW_PRIVATE_PAGES', category: 'Modération', description: 'Voir les pages privées', defaultRoles: ['ADMIN', 'MODERATOR', 'DEVELOPER'] },
   { key: 'SUSPEND_PLINKK', category: 'Modération', description: 'Suspendre temporairement une Plinkk', defaultRoles: ['ADMIN', 'MODERATOR'] },
-  { key: 'MANAGE_REPORTS', category: 'Modération', description: 'Gérer les signalements', defaultRoles: ['ADMIN', 'MODERATOR'] },
+  { key: 'VIEW_REPORTS', category: 'Modération', description: 'Voir les signalements', defaultRoles: ['ADMIN', 'MODERATOR', 'DEVELOPER'] },
+  { key: 'MANAGE_REPORTS', category: 'Modération', description: 'Gérer les signalements (résoudre, supprimer)', defaultRoles: ['ADMIN', 'MODERATOR'] },
+  { key: 'VIEW_BUG_REPORTS', category: 'Modération', description: 'Voir les rapports de bugs', defaultRoles: ['ADMIN', 'MODERATOR', 'DEVELOPER'] },
+  { key: 'MANAGE_BUG_REPORTS', category: 'Modération', description: 'Gérer les rapports de bugs (résoudre, supprimer)', defaultRoles: ['ADMIN', 'DEVELOPER'] },
 
   // Contenu / Plinkk
   { key: 'CREATE_PLINKK', category: 'Contenu', description: 'Créer une Plinkk', defaultRoles: ['USER', 'BETA', 'PARTNER', 'ADMIN', 'DEVELOPER'] },
@@ -66,8 +69,8 @@ export const PERMISSIONS: PermissionDefinition[] = [
   // Sécurité avancée
   { key: 'VIEW_AUDIT_LOGS', category: 'Sécurité', description: 'Voir le journal d’audit', defaultRoles: ['ADMIN', 'DEVELOPER'] },
   { key: 'MANAGE_SECURITY_SETTINGS', category: 'Sécurité', description: 'Gérer les paramètres de sécurité', defaultRoles: ['ADMIN', 'DEVELOPER'] },
-  { key: 'VIEW_ADMIN_LOGS', category: 'Sécurité', description: 'Voir les logs d’administration', defaultRoles: ['ADMIN', 'DEVELOPER'] },
-
+  { key: 'VIEW_ADMIN_LOGS', category: 'Sécurité', description: 'Voir les logs d’administration', defaultRoles: ['ADMIN', 'DEVELOPER'] },  { key: 'VIEW_SESSIONS', category: 'Sécurité', description: 'Voir les sessions utilisateurs actives', defaultRoles: ['ADMIN', 'DEVELOPER', 'MODERATOR'] },
+  { key: 'MANAGE_SESSIONS', category: 'Sécurité', description: 'Révoquer / gérer les sessions utilisateurs', defaultRoles: ['ADMIN', 'DEVELOPER'] },
   // Statistiques détaillées
   { key: 'VIEW_LOGIN_STATS', category: 'Statistiques', description: 'Voir les statistiques de connexion', defaultRoles: ['ADMIN', 'DEVELOPER', 'MODERATOR'] },
   { key: 'VIEW_THEME_STATS', category: 'Statistiques', description: 'Voir les statistiques des thèmes', defaultRoles: ['ADMIN', 'DEVELOPER', 'MODERATOR'] },
@@ -87,6 +90,8 @@ export const PERMISSIONS: PermissionDefinition[] = [
   { key: 'RUN_SYSTEM_TASKS', category: 'Administration', description: 'Lancer des tâches système', defaultRoles: ['ADMIN', 'DEVELOPER'] },
   { key: 'ACCESS_MAINTENANCE', category: 'Administration', description: 'Accéder aux pages en maintenance', defaultRoles: ['ADMIN', 'DEVELOPER'] },
   { key: 'MANAGE_MAINTENANCE', category: 'Administration', description: 'Gérer la maintenance (paramètres)', defaultRoles: ['ADMIN', 'DEVELOPER'] },
+  { key: 'VIEW_PARTNERS', category: 'Administration', description: 'Voir la liste des partenaires', defaultRoles: ['ADMIN', 'DEVELOPER', 'MODERATOR'] },
+  { key: 'MANAGE_PARTNERS', category: 'Administration', description: 'Gérer les partenaires (ajouter, modifier, supprimer)', defaultRoles: ['ADMIN', 'DEVELOPER'] },
 
   // Billing
   { key: 'VIEW_BILLING', category: 'Facturation', description: 'Voir la facturation', defaultRoles: ['ADMIN'] },
@@ -106,6 +111,9 @@ export const PERMISSIONS: PermissionDefinition[] = [
   { key: 'PREMIUM_EXTENDED_LIMITS', category: 'Premium', description: 'Limites étendues (plinkks, thèmes, redirections)', defaultRoles: ['ADMIN', 'DEVELOPER', 'PARTNER'] },
 
   // Communication / Emails
-  { key: 'SEND_EMAILS', category: 'Administration', description: 'Envoyer des emails personnalisés aux utilisateurs', defaultRoles: ['ADMIN', 'DEVELOPER'] },
+  { key: 'SEND_EMAILS', category: 'Communication', description: 'Envoyer des emails personnalisés aux utilisateurs', defaultRoles: ['ADMIN', 'DEVELOPER'] },
+  { key: 'VIEW_EMAIL_CAMPAIGNS', category: 'Communication', description: 'Voir l'historique des campagnes emails', defaultRoles: ['ADMIN', 'DEVELOPER'] },
+  { key: 'VIEW_EMAIL_STATS', category: 'Communication', description: 'Voir les statistiques d'envoi d'emails', defaultRoles: ['ADMIN', 'DEVELOPER'] },
+  { key: 'MANAGE_PATCHNOTES', category: 'Communication', description: 'Gérer les patch notes (créer, modifier, publier)', defaultRoles: ['ADMIN', 'DEVELOPER'] },
 ];
 

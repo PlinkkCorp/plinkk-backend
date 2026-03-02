@@ -12,6 +12,7 @@ const STATIC_PAGES = [
   { path: "/docs", template: "docs.ejs" },
   { path: "/pricing", template: "pricing.ejs" },
   { path: "/partners", template: "partners.ejs" },
+  { path: "/features", template: "features.ejs" },
 ];
 
   // Redirect trailing slash to canonical path

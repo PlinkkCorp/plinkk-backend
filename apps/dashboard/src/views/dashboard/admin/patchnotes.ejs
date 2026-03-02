@@ -1,0 +1,303 @@
+<%- include('partials/head.ejs', { title: 'Patch Notes - Administration' , description: 'Gestion des patch notes et des mises à jour.' , robots: 'noindex,nofollow' }) %>
+    <%- include('partials/header-dash.ejs', { user: user }) %>
+
+        <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+            <%- include('partials/admin-nav.ejs', { user: user, active: 'patchnotes' }) %>
+
+                <main class="col-span-12 lg:col-span-10 space-y-8">
+                    <!-- Header -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                        <div class="relative z-10">
+                            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center gap-2">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/></svg>
+                                Patch Notes
+                            </h1>
+                            <p class="text-slate-400 text-lg">Gérer les mises à jour et publier des patch notes</p>
+                        </div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+                            <div class="text-slate-400 text-sm font-medium mb-2">Total de patch notes</div>
+                            <div class="text-3xl font-bold text-blue-400"><%= patchNotes?.length || 0 %></div>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+                            <div class="text-slate-400 text-sm font-medium mb-2">Publiées</div>
+                            <div class="text-3xl font-bold text-green-400"><%= patchNotes?.filter(p => p.isPublished).length || 0 %></div>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl">
+                            <div class="text-slate-400 text-sm font-medium mb-2">En brouillon</div>
+                            <div class="text-3xl font-bold text-yellow-400"><%= patchNotes?.filter(p => !p.isPublished).length || 0 %></div>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire de création -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-6">
+                        <div>
+                            <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                                Nouvelle Patch Note
+                            </h2>
+                        </div>
+
+                        <form id="patchnoteForm" class="space-y-6">
+                            <!-- Titre -->
+                            <div>
+                                <label class="block text-sm font-semibold text-white mb-2">Titre</label>
+                                <input type="text" name="title" placeholder="ex: Nouvelle interface utilisateur" required class="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors">
+                            </div>
+
+                            <!-- Version -->
+                            <div>
+                                <label class="block text-sm font-semibold text-white mb-2">Version (format X.Y.Z)</label>
+                                <input type="text" name="version" placeholder="ex: 2.5.0" pattern="\d+\.\d+\.\d+" required class="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors">
+                                <p class="text-xs text-slate-400 mt-1">Utilisez le format sémantique (majeure.mineure.patch)</p>
+                            </div>
+
+                            <!-- Contenu Markdown -->
+                            <div>
+                                <label class="block text-sm font-semibold text-white mb-2">Contenu (Markdown)</label>
+                                <textarea name="content" rows="10" placeholder="## Nouvelles fonctionnalités&#10;- Fonctionnalité 1&#10;- Fonctionnalité 2&#10;&#10;## Corrections de bugs&#10;- Bug corrigé 1" required class="w-full bg-slate-800 border border-slate-700 rounded-2xl p-4 text-white font-mono text-sm placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors resize-none"></textarea>
+                                <p class="text-xs text-slate-400 mt-1">Vous pouvez utiliser Markdown: # Titre, ## Sous-titre, **gras**, *italique*, - listes, etc.</p>
+                            </div>
+
+                            <!-- Options de publication -->
+                            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4">
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" name="isPublished" class="w-5 h-5 rounded">
+                                    <span class="text-white font-medium">Publier immédiatement</span>
+                                </label>
+                                <p class="text-xs text-slate-400 mt-2 ml-8">Si désactivé, la patch note sera en brouillon</p>
+                            </div>
+
+                            <!-- Aperçu -->
+                            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4">
+                                <details class="cursor-pointer">
+                                    <summary class="text-sm font-semibold text-white select-none hover:text-blue-400 transition-colors flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                                        Aperçu
+                                    </summary>
+                                    <div class="mt-4 pt-4 border-t border-slate-700 space-y-2 text-sm text-slate-300">
+                                        <p><strong>Titre:</strong> <span id="previewTitle">-</span></p>
+                                        <p><strong>Version:</strong> <span id="previewVersion">-</span></p>
+                                        <p><strong>État:</strong> <span id="previewState">Brouillon</span></p>
+                                    </div>
+                                </details>
+                            </div>
+
+                            <!-- Boutons -->
+                            <div class="flex gap-3 pt-4">
+                                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-2xl transition-colors">
+                                    Créer la patch note
+                                </button>
+                                <button type="reset" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-2xl transition-colors">
+                                    Réinitialiser
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Liste des patch notes -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8">
+                        <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.1 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v16z"/></svg>
+                            Historique des Patch Notes
+                        </h2>
+                        <div id="patchnotesHistory" class="space-y-4">
+                            <% if (patchNotes && patchNotes.length > 0) { %>
+                                <% patchNotes.forEach((note, index) => { %>
+                                    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 hover:border-slate-600 transition-colors">
+                                        <div class="flex items-start justify-between gap-4">
+                                            <div class="flex-1">
+                                                <div class="flex items-center gap-3 mb-2">
+                                                    <span class="text-lg font-bold text-white"><%= note.title %></span>
+                                                    <span class="px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-full">v<%= note.version %></span>
+                                                    <% if (note.isPublished) { %>
+                                                        <span class="px-3 py-1 bg-green-600 text-white text-xs font-bold rounded-full">Publié</span>
+                                                    <% } else { %>
+                                                        <span class="px-3 py-1 bg-yellow-600 text-white text-xs font-bold rounded-full">Brouillon</span>
+                                                    <% } %>
+                                                </div>
+                                                <p class="text-slate-400 text-sm">
+                                                    <% if (note.publishedAt) { %>
+                                                        Publié le <%= new Date(note.publishedAt).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+                                                    <% } else { %>
+                                                        Créé le <%= new Date(note.createdAt).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+                                                    <% } %>
+                                                </p>
+                                                <p class="text-slate-400 text-sm mt-1">
+                                                    Par <%= note.createdBy?.userName || 'Inconnu' %>
+                                                </p>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <button onclick="editPatchNote('<%= note.id %>')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors" title="Modifier">
+                                                    ✏️ Modifier
+                                                </button>
+                                                <button onclick="deletePatchNote('<%= note.id %>')" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors" title="Supprimer">
+                                                    🗑️ Supprimer
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% }); %>
+                            <% } else { %>
+                                <p class="text-center text-slate-400 py-8">Aucune patch note pour le moment</p>
+                            <% } %>
+                        </div>
+                    </div>
+                </main>
+        </div>
+
+        <!-- Modal d'édition -->
+        <div id="editModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <h2 class="text-2xl font-bold text-white mb-6">Modifier la Patch Note</h2>
+                
+                <form id="editForm" class="space-y-6">
+                    <input type="hidden" id="editId">
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-white mb-2">Titre</label>
+                        <input type="text" id="editTitle" required class="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-white mb-2">Contenu (Markdown)</label>
+                        <textarea id="editContent" rows="8" required class="w-full bg-slate-800 border border-slate-700 rounded-2xl p-4 text-white font-mono text-sm placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors resize-none"></textarea>
+                    </div>
+
+                    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="checkbox" id="editIsPublished" class="w-5 h-5 rounded">
+                            <span class="text-white font-medium">Publier</span>
+                        </label>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-2xl transition-colors">
+                            Enregistrer
+                        </button>
+                        <button type="button" onclick="closeEditModal()" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-2xl transition-colors">
+                            Annuler
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            // Mise à jour de l'aperçu
+            const form = document.getElementById('patchnoteForm');
+            ['title', 'version'].forEach(field => {
+                const input = form.querySelector(`[name="${field}"]`);
+                const fieldName = field.charAt(0).toUpperCase() + field.slice(1);
+                input?.addEventListener('input', () => {
+                    const element = document.getElementById(`preview${fieldName}`);
+                    if (element) element.textContent = input.value || '-';
+                });
+            });
+
+            form.querySelector('[name="isPublished"]')?.addEventListener('change', (e) => {
+                document.getElementById('previewState').textContent = e.target.checked ? 'Publié' : 'Brouillon';
+            });
+
+            // Création d'une patch note
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(form);
+                
+                try {
+                    const response = await fetch('/api/admin/patchnotes', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            title: formData.get('title'),
+                            version: formData.get('version'),
+                            content: formData.get('content'),
+                            isPublished: formData.get('isPublished') === 'on'
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        alert('Erreur: ' + error.message);
+                        return;
+                    }
+
+                    alert('Patch note créée avec succès!');
+                    location.reload();
+                } catch (err) {
+                    alert('Erreur lors de la création: ' + err.message);
+                }
+            });
+
+            // Édition d'une patch note
+            async function editPatchNote(id) {
+                try {
+                    const response = await fetch(`/api/admin/patchnotes/${id}`);
+                    const patchNote = await response.json();
+
+                    document.getElementById('editId').value = id;
+                    document.getElementById('editTitle').value = patchNote.title;
+                    document.getElementById('editContent').value = patchNote.content;
+                    document.getElementById('editIsPublished').checked = patchNote.isPublished;
+
+                    document.getElementById('editModal').classList.remove('hidden');
+                } catch (err) {
+                    alert('Erreur: ' + err.message);
+                }
+            }
+
+            function closeEditModal() {
+                document.getElementById('editModal').classList.add('hidden');
+            }
+
+            document.getElementById('editForm')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('editId').value;
+
+                try {
+                    const response = await fetch(`/api/admin/patchnotes/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            title: document.getElementById('editTitle').value,
+                            content: document.getElementById('editContent').value,
+                            isPublished: document.getElementById('editIsPublished').checked
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        alert('Erreur: ' + error.message);
+                        return;
+                    }
+
+                    alert('Patch note mise à jour!');
+                    location.reload();
+                } catch (err) {
+                    alert('Erreur: ' + err.message);
+                }
+            });
+
+            // Suppression d'une patch note
+            async function deletePatchNote(id) {
+                if (!confirm('Êtes-vous sûr de vouloir supprimer cette patch note?')) return;
+
+                try {
+                    const response = await fetch(`/api/admin/patchnotes/${id}`, { method: 'DELETE' });
+
+                    if (!response.ok) {
+                        alert('Erreur lors de la suppression');
+                        return;
+                    }
+
+                    alert('Patch note supprimée!');
+                    location.reload();
+                } catch (err) {
+                    alert('Erreur: ' + err.message);
+                }
+            }
+        </script>

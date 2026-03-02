@@ -7,7 +7,8 @@ const RESERVED_ROOTS = new Set([
   "public",
   "users",
   "terms",
-  "privacy"
+  "privacy",
+  "features"
 ]);
 
 export function registerReservedRootsHook(fastify: FastifyInstance) {
