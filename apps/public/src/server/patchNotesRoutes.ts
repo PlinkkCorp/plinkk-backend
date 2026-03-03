@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { replyView } from "../lib/replyView";
+import { marked } from "marked";
 
 async function getCurrentUser(request: FastifyRequest) {
   const sessionData = request.session.get("data");
@@ -65,8 +66,18 @@ export function patchNotesRoutes(fastify: FastifyInstance) {
       return reply.code(404).send({ error: "Patch note not found" });
     }
 
+    // Prétraiter le markdown pour convertir les lignes "->" en flèches
+    let markdownContent = patchNote.content;
+    markdownContent = markdownContent.replace(/^(→|->)\s+(.+)$/gm, '- <span class="arrow-item">→ $2</span>');
+    
+    // Convertir le markdown en HTML
+    const htmlContent = await marked(markdownContent);
+
     return replyView(reply, "patch-notes/patch-note-detail.ejs", currentUser, {
-      patchNote,
+      patchNote: {
+        ...patchNote,
+        htmlContent,
+      },
     });
   });
 

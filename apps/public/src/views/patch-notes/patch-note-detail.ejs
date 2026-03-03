@@ -1,5 +1,4 @@
 <%- include('../partials/head', { title: patchNote.title + ' - Patch Notes - Plinkk', description: 'Découvrez les détails de cette mise à jour Plinkk.' }) %>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <%- include('../partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
 
 <main class="relative isolate overflow-hidden min-h-screen">
@@ -59,8 +58,8 @@
 
       <!-- Content -->
       <div class="prose prose-invert max-w-none">
-        <div class="patch-note-content text-slate-300 leading-relaxed" id="markdown-container" data-markdown="<%= patchNote.content.replace(/"/g, '&quot;').replace(/\n/g, '&#10;') %>">
-          <!-- Le contenu sera rendu ici par JavaScript -->
+        <div class="patch-note-content text-slate-300 leading-relaxed">
+          <%- patchNote.htmlContent %>
         </div>
       </div>
 
@@ -118,100 +117,136 @@
   }
 
   .patch-note-content h2 {
-    @apply text-2xl font-bold text-violet-300 mt-8 mb-4;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: rgb(196 181 253);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
   }
 
   .patch-note-content h3 {
-    @apply text-xl font-bold text-violet-200 mt-6 mb-3;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: rgb(221 214 254);
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
   }
 
   .patch-note-content h4,
   .patch-note-content h5 {
-    @apply font-bold text-slate-200 mt-4 mb-2;
+    font-weight: 700;
+    color: rgb(226 232 240);
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   .patch-note-content p {
-    @apply text-slate-300 mb-4;
+    color: rgb(203 213 225);
+    margin-bottom: 1rem;
   }
 
   .patch-note-content ul,
   .patch-note-content ol {
-    @apply my-4 pl-6;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
   }
 
   .patch-note-content li {
-    @apply mb-2 text-slate-300;
+    margin-bottom: 0.5rem;
+    color: rgb(203 213 225);
+  }
+
+  /* Items avec flèches */
+  .patch-note-content li.arrow-list-item {
+    list-style-type: none;
+    margin-left: -1.5rem;
+  }
+
+  .patch-note-content .arrow-item {
+    color: rgb(167 139 250);
+    font-weight: 500;
   }
 
   .patch-note-content code {
-    @apply bg-slate-800/50 px-2 py-1 rounded text-violet-300 text-sm font-mono;
+    background-color: rgba(30, 41, 59, 0.5);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    color: rgb(196 181 253);
+    font-size: 0.875rem;
+    font-family: ui-monospace, monospace;
   }
 
   .patch-note-content pre {
-    @apply bg-slate-800/50 p-4 rounded-lg overflow-x-auto my-4 border border-slate-700;
+    background-color: rgba(30, 41, 59, 0.5);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgb(51 65 85);
   }
 
   .patch-note-content pre code {
-    @apply bg-transparent px-0 py-0 text-slate-200;
+    background-color: transparent;
+    padding: 0;
+    color: rgb(226 232 240);
   }
 
   .patch-note-content blockquote {
-    @apply border-l-4 border-violet-400 pl-4 py-2 italic text-slate-400 my-4 bg-slate-800/30 pr-4 rounded-r;
+    border-left: 4px solid rgb(167 139 250);
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    font-style: italic;
+    color: rgb(148 163 184);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    background-color: rgba(30, 41, 59, 0.3);
+    border-radius: 0 0.25rem 0.25rem 0;
   }
 
   .patch-note-content a {
-    @apply text-violet-400 hover:text-violet-300 underline transition-colors;
+    color: rgb(167 139 250);
+    text-decoration: underline;
+    transition: color 0.2s;
+  }
+
+  .patch-note-content a:hover {
+    color: rgb(196 181 253);
   }
 
   .patch-note-content strong {
-    @apply text-slate-100 font-bold;
+    color: rgb(241 245 249);
+    font-weight: 700;
   }
 
   .patch-note-content em {
-    @apply text-slate-200 italic;
+    color: rgb(226 232 240);
+    font-style: italic;
   }
 
   .patch-note-content hr {
-    @apply border-t border-slate-700 my-8;
+    border-top: 1px solid rgb(51 65 85);
+    margin-top: 2rem;
+    margin-bottom: 2rem;
   }
 
   /* Emoji styling */
   .emoji {
-    @apply mr-2;
+    margin-right: 0.5rem;
   }
 </style>
 
 <script>
-  // Attendre que marked soit chargé et rendre le Markdown
-  function renderMarkdown() {
-    if (typeof marked === 'undefined') {
-      setTimeout(renderMarkdown, 50);
-      return;
-    }
-
-    const container = document.getElementById('markdown-container');
-    if (container) {
-      const markdown = container.getAttribute('data-markdown');
-      if (markdown) {
-        try {
-          const html = marked.parse(markdown);
-          container.innerHTML = html;
-        } catch (e) {
-          console.error('Erreur lors du rendu Markdown:', e);
-          container.innerHTML = markdown;
-        }
+  // Ajouter la classe aux <li> qui contiennent des flèches
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.arrow-item').forEach(function(arrow) {
+      const li = arrow.closest('li');
+      if (li) {
+        li.classList.add('arrow-list-item');
       }
-    }
-  }
-
-  // Appeler dès que le DOM est prêt
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', renderMarkdown);
-  } else {
-    renderMarkdown();
-  }
-
-  // Appels supplémentaires pour s'assurer que marked est chargé
-  setTimeout(renderMarkdown, 100);
-  setTimeout(renderMarkdown, 300);
+    });
+  });
 </script>
