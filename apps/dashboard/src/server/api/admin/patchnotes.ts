@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyRequest } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { UnauthorizedError, ForbiddenError, BadRequestError, NotFoundError } from "@plinkk/shared";
 import { logAdminAction, logDetailedAdminAction } from "../../../lib/adminLogger";
+import { discordService } from "../../../services/discordService";
 import z from "zod";
 
 const createPatchNoteSchema = z.object({
@@ -98,10 +99,20 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
           publishedAt: body.isPublished ? new Date() : null,
           createdById: currentUser.id,
         },
-        include: { createdBy: { select: { id: true, userName: true } } },
+        include: { createdBy: { select: { id: true, userName: true, name: true, image: true } } },
       });
 
       await logAdminAction(currentUser.id, 'CREATE_PATCHNOTE', patchNote.id, { title: body.title, version: body.version, isPublished: body.isPublished }, (request as any).ip);
+
+      // Publier sur Discord si le patch note est publié
+      if (body.isPublished) {
+        try {
+          await discordService.publishPatchNote(patchNote);
+        } catch (error) {
+          console.error('[Discord] Erreur lors de la publication sur Discord:', error);
+          // On ne bloque pas la création du patch note en cas d'erreur Discord
+        }
+      }
 
       return reply.code(201).send(patchNote);
     } catch (error) {
@@ -152,10 +163,20 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
           }),
           updatedAt: new Date(),
         },
-        include: { createdBy: { select: { id: true, userName: true } } },
+        include: { createdBy: { select: { id: true, userName: true, name: true, image: true } } },
       });
 
       await logDetailedAdminAction(currentUser.id, 'UPDATE_PATCHNOTE', id, patchNote, updated, (request as any).ip);
+
+      // Publier sur Discord si le patch note vient d'être publié
+      if (body.isPublished === true && !patchNote.isPublished) {
+        try {
+          await discordService.publishPatchNote(updated);
+        } catch (error) {
+          console.error('[Discord] Erreur lors de la publication sur Discord:', error);
+          // On ne bloque pas la mise à jour du patch note en cas d'erreur Discord
+        }
+      }
 
       return reply.send(updated);
     } catch (error) {

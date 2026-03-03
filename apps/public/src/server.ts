@@ -321,7 +321,7 @@ fastify.get("/patchnotes", async (request, reply) => {
     orderBy: { publishedAt: "desc" },
   });
 
-  return await replyView(reply, "patchnotes.ejs", currentUser, {
+  return await replyView(reply, "patch-notes/patch-notes.ejs", currentUser, {
     patchNotes: patchNotes,
   });
 });

@@ -14,6 +14,7 @@ import { authRoutes } from "./routes/auth";
 import { generateTheme } from "./lib/generateTheme";
 import { registerOAuth2 } from "./config/fastifyOAuth2";
 import { AppError } from "@plinkk/shared";
+import { discordService } from "./services/discordService";
 
 const fastify = Fastify({ logger: true, trustProxy: true });
 
@@ -23,6 +24,9 @@ async function bootstrap() {
   await registerPlugins(fastify);
   await registerCronJobs(fastify);
   await registerOAuth2(fastify)
+
+  // Initialiser le service Discord
+  await discordService.initialize();
 
   registerReservedRootsHook(fastify);
   registerSessionValidator(fastify);
