@@ -1,13 +1,22 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { replyView } from "../../../lib/replyView";
-import { ensurePermission } from "../../../lib/permissions";
+import { userHasAnyPermission } from "../../../lib/permissions";
 import { requireAuthRedirect } from "../../../middleware/auth";
 
 export function adminPatchNotesRoutes(fastify: FastifyInstance) {
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
-    const ok = await ensurePermission(request, reply, "MANAGE_PATCHNOTES", { mode: "redirect" });
-    if (!ok) return;
+    // Check if user has any patch notes permission
+    const ok = await userHasAnyPermission(request.userId || (request.currentUser as any)?.id, [
+      "CREATE_PATCHNOTES",
+      "EDIT_PATCHNOTES",
+      "PUBLISH_PATCHNOTES",
+      "DELETE_PATCHNOTES",
+    ]);
+    
+    if (!ok) {
+      return reply.redirect("/admin");
+    }
 
     const patchNotes = await prisma.patchNote.findMany({
       include: { createdBy: { select: { id: true, userName: true } } },

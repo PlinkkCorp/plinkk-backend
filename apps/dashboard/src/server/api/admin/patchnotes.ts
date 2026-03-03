@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { UnauthorizedError, ForbiddenError, BadRequestError, NotFoundError } from "@plinkk/shared";
+import { logAdminAction, logDetailedAdminAction } from "../../../lib/adminLogger";
 import z from "zod";
 
 const createPatchNoteSchema = z.object({
@@ -16,29 +17,30 @@ const updatePatchNoteSchema = z.object({
   isPublished: z.boolean().optional(),
 });
 
-export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
-  // Middleware to check permission
-  fastify.addHook("preHandler", async (request, reply) => {
-    const sessionData = request.session.get("data");
-    const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+// Helper function to check specific permission
+const checkPermission = async (request: FastifyRequest, requiredPermission: string) => {
+  const sessionData = request.session.get("data");
+  const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
 
-    if (!currentUserId) throw new UnauthorizedError();
+  if (!currentUserId) throw new UnauthorizedError();
 
-    const user = await prisma.user.findUnique({
-      where: { id: currentUserId },
-      include: { role: { include: { permissions: true } } },
-    });
-
-    const hasPermission = user?.role?.permissions.some((rp) => rp.permissionKey === "MANAGE_PATCHNOTES");
-    if (!hasPermission) {
-      throw new ForbiddenError();
-    }
-
-    (request as any).currentUser = user;
+  const user = await prisma.user.findUnique({
+    where: { id: currentUserId },
+    include: { role: { include: { permissions: true } } },
   });
 
+  const hasPermission = user?.role?.permissions.some((rp) => rp.permissionKey === requiredPermission);
+  if (!hasPermission) {
+    throw new ForbiddenError();
+  }
+
+  (request as any).currentUser = user;
+};
+
+export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
   // GET all patch notes (admin only, can see all including unpublished)
   fastify.get("/", async (request, reply) => {
+    await checkPermission(request, "EDIT_PATCHNOTES");
     const patchNotes = await prisma.patchNote.findMany({
       include: { createdBy: { select: { id: true, userName: true } } },
       orderBy: { publishedAt: { sort: "desc", nulls: "last" } },
@@ -49,6 +51,7 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
 
   // GET published patch notes only
   fastify.get("/published", async (request, reply) => {
+    await checkPermission(request, "EDIT_PATCHNOTES");
     const patchNotes = await prisma.patchNote.findMany({
       where: { isPublished: true },
       include: { createdBy: { select: { id: true, userName: true } } },
@@ -60,6 +63,7 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
 
   // GET a specific patch note
   fastify.get("/:id", async (request, reply) => {
+    await checkPermission(request, "EDIT_PATCHNOTES");
     const { id } = request.params as { id: string };
 
     const patchNote = await prisma.patchNote.findUnique({
@@ -74,6 +78,7 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
 
   // CREATE a new patch note
   fastify.post("/", async (request, reply) => {
+    await checkPermission(request, "CREATE_PATCHNOTES");
     try {
       const body = createPatchNoteSchema.parse(request.body);
       const currentUser = (request as any).currentUser;
@@ -96,6 +101,8 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
         include: { createdBy: { select: { id: true, userName: true } } },
       });
 
+      await logAdminAction(currentUser.id, 'CREATE_PATCHNOTE', patchNote.id, { title: body.title, version: body.version, isPublished: body.isPublished }, (request as any).ip);
+
       return reply.code(201).send(patchNote);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -107,9 +114,29 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
 
   // UPDATE a patch note
   fastify.put("/:id", async (request, reply) => {
+    // Require either EDIT or PUBLISH permission for updates
+    const sessionData = request.session.get("data");
+    const currentUserId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+
+    if (!currentUserId) throw new UnauthorizedError();
+
+    const user = await prisma.user.findUnique({
+      where: { id: currentUserId },
+      include: { role: { include: { permissions: true } } },
+    });
+
+    const hasPermission = user?.role?.permissions.some(
+      (rp) => rp.permissionKey === "EDIT_PATCHNOTES" || rp.permissionKey === "PUBLISH_PATCHNOTES"
+    );
+    if (!hasPermission) {
+      throw new ForbiddenError();
+    }
+
+    (request as any).currentUser = user;
     try {
       const { id } = request.params as { id: string };
       const body = updatePatchNoteSchema.parse(request.body);
+      const currentUser = (request as any).currentUser;
 
       const patchNote = await prisma.patchNote.findUnique({ where: { id } });
       if (!patchNote) throw new NotFoundError("Patch note not found");
@@ -128,6 +155,8 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
         include: { createdBy: { select: { id: true, userName: true } } },
       });
 
+      await logDetailedAdminAction(currentUser.id, 'UPDATE_PATCHNOTE', id, patchNote, updated, (request as any).ip);
+
       return reply.send(updated);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -139,12 +168,16 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
 
   // DELETE a patch note
   fastify.delete("/:id", async (request, reply) => {
+    await checkPermission(request, "DELETE_PATCHNOTES");
     const { id } = request.params as { id: string };
+    const currentUser = (request as any).currentUser;
 
     const patchNote = await prisma.patchNote.findUnique({ where: { id } });
     if (!patchNote) throw new NotFoundError("Patch note not found");
 
     await prisma.patchNote.delete({ where: { id } });
+
+    await logAdminAction(currentUser.id, 'DELETE_PATCHNOTE', id, { title: patchNote.title, version: patchNote.version }, (request as any).ip);
 
     return reply.code(204).send();
   });

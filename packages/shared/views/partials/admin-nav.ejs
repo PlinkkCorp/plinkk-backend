@@ -22,6 +22,7 @@
             const isActive = (path) => (typeof active !== 'undefined' && active === path) || (typeof currentPath !== 'undefined' && currentPath === path);
             const perms = (user.role && user.role.permissions) ? user.role.permissions.map(p => p.permissionKey) : [];
             const hasPerm = (key) => perms.includes(key);
+            const hasPatchnotesPerm = () => hasPerm('CREATE_PATCHNOTES') || hasPerm('EDIT_PATCHNOTES') || hasPerm('PUBLISH_PATCHNOTES') || hasPerm('DELETE_PATCHNOTES');
 
             const activeClass = 'bg-violet-500/10 text-violet-400 border border-violet-500/20';
             const normalClass = 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50';
@@ -179,8 +180,8 @@
                         <span class="font-medium">Emails</span>
                     </a>
 
-                    <a href="<%= hasPerm('MANAGE_PATCHNOTES') ? '/admin/patchnotes' : '#' %>"
-                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('patchnotes', 'MANAGE_PATCHNOTES') %>">
+                    <a href="<%= hasPatchnotesPerm() ? '/admin/patchnotes' : '#' %>"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= !hasPatchnotesPerm() ? disabledClass : (isActive('patchnotes') ? activeClass : normalClass) %>">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>

@@ -3,7 +3,7 @@ import { prisma } from "@plinkk/prisma";
 import { EmailService } from "../../../services/emailService";
 import { UnauthorizedError, ForbiddenError, BadRequestError } from "@plinkk/shared";
 import z from "zod";
-import { logUserAction } from "../../../lib/userLogger";
+import { logAdminAction } from "../../../lib/adminLogger";
 
 // Validation du corps de la requête
 const sendEmailSchema = z.object({
@@ -192,12 +192,11 @@ export async function apiAdminEmailsRoutes(fastify: FastifyInstance) {
     });
 
     // Logger l'action
-    await logUserAction(
+    await logAdminAction(
       currentUserId,
       "SEND_EMAIL_CAMPAIGN",
-      null,
+      campaign.id,
       {
-        campaignId: campaign.id,
         recipientType: body.recipientType,
         recipientCount: recipients.length,
         subject: body.subject,

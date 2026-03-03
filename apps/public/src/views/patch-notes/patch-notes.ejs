@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patch Notes - Plinkk</title>
+    <link rel="stylesheet" href="/css/index.css">
+    <style>
+        :root {
+            --color-primary: #6366f1;
+            --color-bg: #fff;
+            --color-text: #1f2937;
+            --color-border: #e5e7eb;
+            --color-hover: #f3f4f6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-bg: #0f172a;
+                --color-text: #f1f5f9;
+                --color-border: #334155;
+                --color-hover: #1e293b;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .patch-notes-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .patch-notes-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .patch-notes-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--color-primary), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .patch-notes-header p {
+            font-size: 1.1rem;
+            color: var(--color-text);
+            opacity: 0.7;
+        }
+
+        .patch-notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .patch-note-card {
+            background-color: var(--color-hover);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .patch-note-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: var(--color-primary);
+        }
+
+        .patch-note-version {
+            display: inline-block;
+            background-color: var(--color-primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        .patch-note-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .patch-note-date {
+            font-size: 0.875rem;
+            color: var(--color-text);
+            opacity: 0.6;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .patch-note-author {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .patch-note-author-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: var(--color-border);
+        }
+
+        .patch-note-author-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.125rem;
+        }
+
+        .patch-note-author-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .patch-note-author-label {
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+
+        .patch-note-preview {
+            font-size: 0.9rem;
+            color: var(--color-text);
+            opacity: 0.7;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .patch-notes-empty {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-text);
+            opacity: 0.6;
+        }
+
+        .patch-notes-empty p {
+            font-size: 1.1rem;
+        }
+
+        .divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+            margin: 2rem 0;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            left: -2rem;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            background-color: var(--color-primary);
+            border-radius: 50%;
+            border: 3px solid var(--color-bg);
+            box-shadow: 0 0 0 1px var(--color-border);
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-item:last-child::after {
+            content: "";
+            position: absolute;
+            left: -1.5rem;
+            top: 12px;
+            width: 3px;
+            height: calc(100% + 1rem);
+            background: linear-gradient(180deg, var(--color-primary), transparent);
+            display: none;
+        }
+
+        a {
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .nav-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            color: var(--color-text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background-color: var(--color-hover);
+            border-color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="patch-notes-container">
+        <a href="/" class="nav-link">← Retour à l'accueil</a>
+
+        <div class="patch-notes-header">
+            <h1>📋 Patch Notes Plinkk</h1>
+            <p>Découvrez toutes les mises à jour et améliorations de Plinkk</p>
+        </div>
+
+        <% if (patchNotes && patchNotes.length > 0) { %>
+            <div class="timeline">
+                <% patchNotes.forEach((note, index) => { %>
+                    <a href="/patch-notes/<%= note.version %>" style="text-decoration: none; color: inherit;">
+                        <div class="timeline-item">
+                            <div class="patch-note-card">
+                                <div class="patch-note-version"><%= note.version %></div>
+                                <h3 class="patch-note-title"><%= note.title %></h3>
+                                
+                                <div class="patch-note-preview">
+                                    <%= note.content.substring(0, 150).replace(/<[^>]*>/g, '').replace(/#+\s/g, '').replace(/\*\*/g, '') %>...
+                                </div>
+
+                                <div class="patch-note-date">
+                                    📅 <%= new Date(note.publishedAt).toLocaleDateString('fr-FR', { 
+                                        year: 'numeric', 
+                                        month: 'long', 
+                                        day: 'numeric' 
+                                    }) %>
+                                </div>
+
+                                <% if (note.createdBy) { %>
+                                    <div class="patch-note-author">
+                                        <% if (note.createdBy.image) { %>
+                                            <img src="<%= note.createdBy.image %>" alt="<%= note.createdBy.name %>" class="patch-note-author-avatar">
+                                        <% } else { %>
+                                            <div class="patch-note-author-avatar" style="background: var(--color-primary); display: flex; align-items: center; justify-content: center;">
+                                                <span style="color: white; font-weight: bold;"><%= note.createdBy.name.charAt(0).toUpperCase() %></span>
+                                            </div>
+                                        <% } %>
+                                        <div class="patch-note-author-info">
+                                            <span class="patch-note-author-name"><%= note.createdBy.name %></span>
+                                            <span class="patch-note-author-label">Auteur</span>
+                                        </div>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </a>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="patch-notes-empty">
+                <p>Aucune mise à jour publiée pour le moment</p>
+                <p style="margin-top: 1rem; font-size: 1em;">Revenez bientôt ! 🚀</p>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

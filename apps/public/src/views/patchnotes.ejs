@@ -1,15 +1,12 @@
-<%- include('partials/head') %>
+<%- include('partials/head', {
+  title: 'Patch Notes - Plinkk',
+  description: 'Découvrez toutes les mises à jour et améliorations de Plinkk'
+}) %>
+<%- include('partials/header') %>
 
-<!DOCTYPE html>
-<html lang="en">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Patch Notes - Plinkk</title>
-  <meta name="description" content="Explore all Plinkk updates and patch notes" />
-
-  <style>
+<style>
     * {
       margin: 0;
       padding: 0;
@@ -230,14 +227,17 @@
       }
     }
   </style>
-</head>
 
-<body>
-  <%- include('partials/navbar') %>
-
+<main class="min-h-screen">
   <div class="container">
     <header>
-      <h1>📋 Patch Notes</h1>
+      <h1>
+        <svg class="inline-block w-8 h-8 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #667eea;">
+          <rect x="8" y="2" width="8" height="4" rx="1"/>
+          <path d="M16 4h1a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1"/>
+        </svg>
+        Patch Notes
+      </h1>
       <p>Toutes les mises à jour et améliorations de Plinkk</p>
     </header>
 
@@ -258,8 +258,8 @@
                 }) %>
               </span>
             <% } %>
-            <div class="patchnote-content">
-              <%- require('marked').marked(note.content) %>
+            <div class="patchnote-content markdown-content" data-content="<%= note.content.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;') %>">
+              <!-- Contenu rendu par JavaScript -->
             </div>
           </div>
         <% }); %>
@@ -271,8 +271,18 @@
       <% } %>
     </div>
   </div>
+</main>
 
-  <%- include('partials/footer') %>
-</body>
+<script>
+  // Rendre le Markdown côté client une fois que marked est chargé
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.markdown-content').forEach(el => {
+      const content = el.getAttribute('data-content');
+      if (content && window.marked) {
+        el.innerHTML = window.marked(content);
+      }
+    });
+  });
+</script>
 
-</html>
+<%- include('partials/footer') %>

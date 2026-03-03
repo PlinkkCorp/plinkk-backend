@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { updateMaintenanceStatus, getMaintenanceStatus, MaintenanceStatus } from "../../../services/maintenance.service";
 import { prisma } from "@plinkk/prisma";
 import { UnauthorizedError, ForbiddenError } from "@plinkk/shared";
+import { logAdminAction, logDetailedAdminAction } from "../../../lib/adminLogger";
 
 export async function apiAdminMaintenanceRoutes(fastify: FastifyInstance) {
     // Middleware to check permission
@@ -35,9 +36,12 @@ export async function apiAdminMaintenanceRoutes(fastify: FastifyInstance) {
 
     fastify.post("/", async (request, reply) => {
         try {
+            const sessionData = request.session.get("data");
+            const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
             const body = request.body as Partial<MaintenanceStatus>;
             console.log("[DEBUG] Updating maintenance status:", body);
 
+            const current = await getMaintenanceStatus();
             const updated = await updateMaintenanceStatus({
                 global: body.global,
                 dashboard: body.dashboard,
@@ -49,6 +53,10 @@ export async function apiAdminMaintenanceRoutes(fastify: FastifyInstance) {
                 allowedIps: body.allowedIps,
                 allowedRoles: body.allowedRoles,
             });
+
+            if (userId) {
+                await logDetailedAdminAction(userId, 'UPDATE_MAINTENANCE', undefined, current, updated, (request as any).ip);
+            }
 
             return reply.send(updated);
         } catch (error) {

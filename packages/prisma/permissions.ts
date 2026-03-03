@@ -114,6 +114,9 @@ export const PERMISSIONS: PermissionDefinition[] = [
   { key: 'SEND_EMAILS', category: 'Communication', description: 'Envoyer des emails personnalisés aux utilisateurs', defaultRoles: ['ADMIN', 'DEVELOPER'] },
   { key: 'VIEW_EMAIL_CAMPAIGNS', category: 'Communication', description: 'Voir l'historique des campagnes emails', defaultRoles: ['ADMIN', 'DEVELOPER'] },
   { key: 'VIEW_EMAIL_STATS', category: 'Communication', description: 'Voir les statistiques d'envoi d'emails', defaultRoles: ['ADMIN', 'DEVELOPER'] },
-  { key: 'MANAGE_PATCHNOTES', category: 'Communication', description: 'Gérer les patch notes (créer, modifier, publier)', defaultRoles: ['ADMIN', 'DEVELOPER'] },
+  { key: 'CREATE_PATCHNOTES', category: 'Communication', description: 'Créer des patch notes', defaultRoles: ['ADMIN', 'DEVELOPER'] },
+  { key: 'EDIT_PATCHNOTES', category: 'Communication', description: 'Modifier les patch notes', defaultRoles: ['ADMIN', 'DEVELOPER'] },
+  { key: 'PUBLISH_PATCHNOTES', category: 'Communication', description: 'Publier / dépublier les patch notes', defaultRoles: ['ADMIN', 'DEVELOPER'] },
+  { key: 'DELETE_PATCHNOTES', category: 'Communication', description: 'Supprimer les patch notes', defaultRoles: ['ADMIN'] },
 ];
 

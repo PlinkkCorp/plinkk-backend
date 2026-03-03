@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { verifyRoleIsStaff } from "../../../lib/verifyRole";
 import { isReservedSlug, slugify, reindexNonDefault } from "../../../lib/plinkkUtils";
+import { logAdminAction, logDetailedAdminAction } from "../../../lib/adminLogger";
 
 // const prisma = new PrismaClient();
 
@@ -66,7 +67,9 @@ export function apiAdminPlinkksRoutes(fastify: FastifyInstance) {
     }
 
     if (Object.keys(set).length) {
-      await prisma.plinkk.update({ where: { id }, data: set });
+      const oldData = { ...page };
+      const updated = await prisma.plinkk.update({ where: { id }, data: set });
+      await logDetailedAdminAction(String(meId), 'UPDATE_PLINKK', id, oldData, updated, request.ip);
     }
     return reply.send({ ok: true, id });
   });
@@ -81,7 +84,8 @@ export function apiAdminPlinkksRoutes(fastify: FastifyInstance) {
     if (typeof isActive !== "boolean") return reply.code(400).send({ error: "invalid_payload" });
     const existing = await prisma.plinkk.findUnique({ where: { id }, select: { id: true } });
     if (!existing) return reply.code(404).send({ error: "not_found" });
-    await prisma.plinkk.update({ where: { id }, data: { isActive: Boolean(isActive) } });
+    const updated = await prisma.plinkk.update({ where: { id }, data: { isActive: Boolean(isActive) } });
+    await logAdminAction(String(meId), 'UPDATE_PLINKK_ACTIVE', id, { isActive: Boolean(isActive) }, request.ip);
     return reply.send({ ok: true, id, isActive: Boolean(isActive) });
   });
 
@@ -99,6 +103,7 @@ export function apiAdminPlinkksRoutes(fastify: FastifyInstance) {
     }
     await prisma.plinkk.delete({ where: { id } });
     await reindexNonDefault(prisma, page.userId);
+    await logAdminAction(String(meId), 'DELETE_PLINKK', id, { name: page.name, slug: page.slug, userId: page.userId }, request.ip);
     return reply.send({ ok: true, id });
   });
 
@@ -111,11 +116,12 @@ export function apiAdminPlinkksRoutes(fastify: FastifyInstance) {
     const { affichageEmail } = (request.body as { affichageEmail?: string | null }) ?? {};
     const page = await prisma.plinkk.findUnique({ where: { id }, select: { id: true } });
     if (!page) return reply.code(404).send({ error: "not_found" });
-    await prisma.plinkkSettings.upsert({
+    const settings = await prisma.plinkkSettings.upsert({
       where: { plinkkId: id },
       create: { plinkkId: id, affichageEmail: affichageEmail ?? null },
       update: { affichageEmail: affichageEmail ?? null },
     });
+    await logAdminAction(String(meId), 'UPDATE_PLINKK_CONFIG', id, { affichageEmail }, request.ip);
     return reply.send({ ok: true, id });
   });
 }
