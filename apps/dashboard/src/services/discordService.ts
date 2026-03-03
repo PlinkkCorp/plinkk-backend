@@ -9,6 +9,10 @@ interface DiscordEmbed {
   timestamp?: string;
   footer?: {
     text: string;
+    icon_url?: string;
+  };
+  thumbnail?: {
+    url: string;
   };
   author?: {
     name: string;
@@ -196,6 +200,13 @@ class DiscordService {
     const frontendUrl = process.env.FRONTEND_URL || "https://plinkk.fr";
     const patchNoteUrl = `${frontendUrl}/patch-notes/${patchNote.version}`;
 
+    // Ajouter un lien "Voir plus"
+    fields.push({
+      name: "\u200B",
+      value: `🔗 **[Voir tous les détails sur le site](${patchNoteUrl})**`,
+      inline: false,
+    });
+
     return {
       title: `🎉 ${patchNote.title}`,
       description: `**Version ${patchNote.version}** vient d'être publiée !`,
@@ -203,7 +214,11 @@ class DiscordService {
       url: patchNoteUrl,
       timestamp: new Date().toISOString(),
       footer: {
-        text: "Plinkk - Gestionnaire de liens",
+        text: "Déployé avec ❤️ par l'équipe Plinkk",
+        icon_url: "https://plinkk.fr/images/logo.png",
+      },
+      thumbnail: {
+        url: "https://plinkk.fr/images/logo.png",
       },
       author: patchNote.createdBy?.name
         ? {
@@ -215,55 +230,22 @@ class DiscordService {
     };
   }
 
-  /**
-   * Publie un message via un webhook Discord
-   */
-  private async publishViaWebhook(embed: DiscordEmbed): Promise<boolean> {
-    if (!this.config.webhookUrl) {
-      console.warn("[Discord] Webhook URL non configurée");
-      return false;
-    }
 
-    try {
-      const response = await fetch(this.config.webhookUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          content: "@everyone 🚀 Nouvelle mise à jour disponible !",
-          embeds: [embed],
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("[Discord] Erreur lors de l'envoi via webhook:", response.status, errorText);
-        return false;
-      }
-
-      console.log("[Discord] Patch note publié avec succès via webhook");
-      return true;
-    } catch (error) {
-      console.error("[Discord] Erreur lors de l'envoi via webhook:", error);
-      return false;
-    }
-  }
 
   /**
    * Publie un message via l'API Discord (bot)
    */
   private async publishViaBot(embed: DiscordEmbed): Promise<boolean> {
-    if (!this.config.botToken || !this.config.channelId) {
+    if (!this.botToken || !this.channelId) {
       console.warn("[Discord] Bot token ou channel ID non configurés");
       return false;
     }
 
     try {
-      const response = await fetch(`https://discord.com/api/v10/channels/${this.config.channelId}/messages`, {
+      const response = await fetch(`https://discord.com/api/v10/channels/${this.channelId}/messages`, {
         method: "POST",
         headers: {
-          Authorization: `Bot ${this.config.botToken}`,
+          Authorization: `Bot ${this.botToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -297,17 +279,17 @@ class DiscordService {
    * Publie un message (crosspost) pour les serveurs suiveurs d'un channel d'annonces
    */
   private async publishMessage(messageId: string): Promise<void> {
-    if (!this.config.botToken || !this.config.channelId) {
+    if (!this.botToken || !this.channelId) {
       return;
     }
 
     try {
       const response = await fetch(
-        `https://discord.com/api/v10/channels/${this.config.channelId}/messages/${messageId}/crosspost`,
+        `https://discord.com/api/v10/channels/${this.channelId}/messages/${messageId}/crosspost`,
         {
           method: "POST",
           headers: {
-            Authorization: `Bot ${this.config.botToken}`,
+            Authorization: `Bot ${this.botToken}`,
           },
         }
       );
