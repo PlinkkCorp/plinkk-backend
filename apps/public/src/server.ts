@@ -317,7 +317,7 @@ fastify.get("/patchnotes", async (request, reply) => {
 
   const patchNotes = await prisma.patchNote.findMany({
     where: { isPublished: true },
-    include: { createdBy: { select: { id: true, userName: true } } },
+    include: { createdBy: { select: { id: true, name: true, image: true } } },
     orderBy: { publishedAt: "desc" },
   });
 
