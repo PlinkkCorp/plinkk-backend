@@ -37,6 +37,7 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
       premium?: boolean; 
       extraPlinkks?: number; 
       extraRedirects?: number;
+      extraQrCodes?: number;
       plan?: 'monthly' | 'yearly' | 'lifetime';
     };
 
@@ -49,12 +50,13 @@ export function apiStripeRoutes(fastify: FastifyInstance) {
           premium: body.premium || false,
           extraPlinkks: Math.max(0, body.extraPlinkks || 0),
           extraRedirects: Math.max(0, body.extraRedirects || 0),
+          extraQrCodes: Math.max(0, body.extraQrCodes || 0),
           plan: body.plan,
         },
         dashboardUrl
       );
       
-      await logUserAction(userId, "UPDATE_PLAN", null, { premium: body.premium, extraPlinkks: body.extraPlinkks, extraRedirects: body.extraRedirects, plan: body.plan }, request.ip);
+      await logUserAction(userId, "UPDATE_PLAN", null, { premium: body.premium, extraPlinkks: body.extraPlinkks, extraRedirects: body.extraRedirects, extraQrCodes: body.extraQrCodes, plan: body.plan }, request.ip);
 
       return reply.send(result);
     } catch (e: unknown) {

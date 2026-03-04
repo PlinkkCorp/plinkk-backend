@@ -649,6 +649,41 @@
                                                 class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold transition-colors grid place-items-center border border-slate-700">+</button>
                                         </div>
                                     </div>
+
+                                    <!-- QR Code -->
+                                     <div class="rounded-xl bg-slate-900/60 border border-slate-800 p-4">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="w-8 h-8 rounded-lg bg-fuchsia-500/15 text-fuchsia-400 grid place-items-center">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path d="M5 5h6v6H5zM13 5h6v6h-6zM5 13h6v6H5z" stroke-width="2"
+                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                        <path d="M15 13h4M15 17h4M13 15h2" stroke-width="2"
+                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <span class="block text-sm font-medium text-white">Packs de 20 QR
+                                                        Codes</span>
+                                                    <span class="block text-[11px] text-slate-500">1.00€ / pack /
+                                                        mois</span>
+                                                </div>
+                                            </div>
+                                            <span class="font-bold text-sm text-fuchsia-400"
+                                                id="price_qrcode">0.00€</span>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <button onclick="changeVal('input_qrcode', -1)"
+                                                class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold transition-colors grid place-items-center border border-slate-700">−</button>
+                                            <input type="number" id="input_qrcode" value="0" min="0" max="50"
+                                                class="bg-slate-800/50 border border-slate-700 rounded-lg text-center text-white font-bold w-16 py-2 text-sm"
+                                                readonly>
+                                            <button onclick="changeVal('input_qrcode', 1)"
+                                                class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold transition-colors grid place-items-center border border-slate-700">+</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -100,6 +100,15 @@
                     </svg>
                     Copier
                   </button>
+                  <button onclick="downloadQrCode('<%= qr.plinkkId %>', '<%= qr.id %>', '<%= qr.name || 'QR Code' %>')"
+                    class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Télécharger
+                  </button>
                   <button onclick="editQrCode('<%= qr.plinkkId %>', '<%= qr.id %>')"
                     class="px-4 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -157,6 +166,16 @@
     navigator.clipboard.writeText(text).then(() => {
       alert('Lien copié dans le presse-papiers !');
     });
+  };
+
+  window.downloadQrCode = (plinkkId, qrId, name) => {
+    const url = `/api/me/plinkks/${plinkkId}/qrcodes/${qrId}/image.svg`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${name || 'qrcode'}.svg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   window.editQrCode = (plinkkId, qrId) => {

@@ -38,6 +38,12 @@ export const PRODUCTS = {
     unitAmount: 100, // 1€ en centimes
     type: "subscription_addon" as const,
   },
+  extra_qrcodes: {
+    name: "+10 QR Codes supplémentaires",
+    description: "Ajoutez 10 QR codes supplémentaires à votre compte.",
+    unitAmount: 100, // 1€ en centimes  
+    type: "subscription_addon" as const,
+  },
 } as const;
 
 export type ProductType = keyof typeof PRODUCTS;
@@ -85,7 +91,7 @@ export async function getOrCreateStripeCustomer(userId: string): Promise<string>
  */
 export async function syncSubscription(
   userId: string,
-  config: { premium: boolean; extraPlinkks: number; extraRedirects: number; plan?: 'monthly' | 'yearly' | 'lifetime' },
+  config: { premium: boolean; extraPlinkks: number; extraRedirects: number; extraQrCodes: number; plan?: 'monthly' | 'yearly' | 'lifetime' },
   dashboardUrl: string
 ): Promise<{ url?: string; updated?: boolean; message?: string }> {
   if (!stripe) throw new Error("Stripe non configuré");
@@ -147,10 +153,17 @@ export async function syncSubscription(
     recurring: { interval: "month" as const },
   };
 
+  const QRCODE_PRICE_DATA = {
+    currency: "eur",
+    product_data: { name: PRODUCTS.extra_qrcodes.name, metadata: { type: "extra_qrcodes" } },
+    unit_amount: PRODUCTS.extra_qrcodes.unitAmount,
+    recurring: { interval: "month" as const },
+  };
+
   // CAS 1 : Pas d'abonnement actif -> On crée une session Checkout
   if (!sub) {
     // Si la config est vide (Free tier), rien à faire (ou message d'info)
-    if (!config.premium && config.extraPlinkks === 0 && config.extraRedirects === 0) {
+     if (!config.premium && config.extraPlinkks === 0 && config.extraRedirects === 0 && config.extraQrCodes === 0) {
        return { message: "Aucun abonnement nécessaire pour le plan gratuit." };
     }
 
@@ -163,6 +176,9 @@ export async function syncSubscription(
     }
     if (config.extraRedirects > 0) {
       lineItems.push({ price_data: REDIRECT_PRICE_DATA, quantity: config.extraRedirects });
+    }
+    if (config.extraQrCodes > 0) {
+      lineItems.push({ price_data: QRCODE_PRICE_DATA, quantity: config.extraQrCodes });
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -221,9 +237,18 @@ export async function syncSubscription(
     itemsToUpdate.push({ id: redirectItem.id, deleted: true });
   }
 
+  // Gestion Extra QR Codes
+  const qrCodeItem = findItem("extra_qrcodes");
+  if (config.extraQrCodes > 0) {
+    if (qrCodeItem) itemsToUpdate.push({ id: qrCodeItem.id, quantity: config.extraQrCodes });
+    else itemsToUpdate.push({ price_data: QRCODE_PRICE_DATA, quantity: config.extraQrCodes });
+  } else if (qrCodeItem) {
+    itemsToUpdate.push({ id: qrCodeItem.id, deleted: true });
+  }
+
   // Si tout est à 0 (retour au gratuit) -> On annule l'abonnement à la fin de la période
   // Ou on le supprime immediatement ? Préférable de supprimer items ou cancel sub.
-  const isEmptySub = !config.premium && config.extraPlinkks === 0 && config.extraRedirects === 0;
+  const isEmptySub = !config.premium && config.extraPlinkks === 0 && config.extraRedirects === 0 && config.extraQrCodes === 0;
   if (isEmptySub) {
     await stripe.subscriptions.cancel(sub.id);
     // On doit aussi mettre à jour la DB localement pour dire "pu de premium" quand le webhook arrivera
@@ -348,6 +373,12 @@ export async function handleSuccessfulPayment(session: Stripe.Checkout.Session):
       data: { extraRedirects: { increment: 5 * quantity } },
     });
     console.log(`[Stripe] +${5 * quantity} redirections pour l'utilisateur ${userId}`);
+  } else if (productType === "extra_qrcodes") {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { extraQrCodes: { increment: 20 * quantity } },
+    });
+    console.log(`[Stripe] +${20 * quantity} QR codes pour l'utilisateur ${userId}`);
   } else if (productType === "premium_lifetime") {
     await prisma.user.update({
       where: { id: userId },
