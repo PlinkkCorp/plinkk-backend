@@ -628,6 +628,22 @@ window.addEventListener('load', () => {
     await saveQr(true);
   }
 
+  function downloadQrCodeSvg() {
+    const qrId = qrCodeIdEl.value;
+    if (!qrId) {
+      alert('Veuillez d\'abord créer le QR Code.');
+      return;
+    }
+    const fileName = (fieldName.value || 'QR Code').replace(/[^a-z0-9_-]/gi, '_');
+    const url = `/api/me/plinkks/${plinkkId}/qrcodes/${qrId}/image.svg`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${fileName}.svg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   document.getElementById('btnNewQr').addEventListener('click', resetForm);
   document.getElementById('btnResetForm').addEventListener('click', resetForm);
   uploadLogoBtn.addEventListener('click', () => imageFileInput.click());
@@ -680,6 +696,8 @@ window.addEventListener('load', () => {
       alert(`Erreur: ${error.message}`);
     }
   });
+
+  downloadBtn.addEventListener('click', downloadQrCodeSvg);
 
   [fieldTargetType, fieldCustomUrl, fieldForeground, fieldEye, fieldBackground, fieldRounded, fieldMargin, fieldErrorCorrection, fieldIncludeImage, fieldImageUrl, fieldImageSize, fieldLogoColor].forEach((el) => {
     if (el) {

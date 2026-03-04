@@ -406,7 +406,16 @@
             alert('Erreur: ' + error.message);
         }
     };
-
+    window.downloadQrCodeFromEditor = (qrId, name) => {
+        const fileName = (name || 'QR Code').replace(/[^a-z0-9_-]/gi, '_');
+        const url = `/api/me/plinkks/${plinkkId}/qrcodes/${qrId}/image.svg`;
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${fileName}.svg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
     // Event listener for create button
     document.getElementById('btnCreateQrCode').addEventListener('click', window.openQrCodeModal);
 
