@@ -189,7 +189,7 @@
                 <polyline points="7 10 12 15 17 10"></polyline>
                 <line x1="12" y1="15" x2="12" y2="3"></line>
               </svg>
-              Télécharger en SVG
+              Télécharger en PNG
             </button>
           </div>
         </div>
@@ -635,10 +635,10 @@ window.addEventListener('load', () => {
       return;
     }
     const fileName = (fieldName.value || 'QR Code').replace(/[^a-z0-9_-]/gi, '_');
-    const url = `/api/me/plinkks/${plinkkId}/qrcodes/${qrId}/image.svg`;
+    const url = `/api/me/plinkks/${plinkkId}/qrcodes/${qrId}/image.png`;
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${fileName}.svg`;
+    link.download = `${fileName}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

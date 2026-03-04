@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { prisma, QrTargetType } from "@plinkk/prisma";
 import QRCode from "qrcode";
 import { customAlphabet } from "nanoid";
+import sharp from "sharp";
 import { ensurePermission } from "../../../../lib/permissions";
 import { logUserAction } from "../../../../lib/userLogger";
 import { getMaxQrCodes, isUserPremium, PREMIUM_MAX_QRCODES } from "@plinkk/shared";
@@ -143,6 +144,39 @@ function normalizeImageUrl(value: unknown) {
   if (/^data:image\//i.test(v)) return v.slice(0, 255);
   if (v.startsWith("/")) return v.slice(0, 255);
   return null;
+}
+
+async function resolveImageToDataUrl(imageUrl: string | null): Promise<string | null> {
+  if (!imageUrl) return null;
+  
+  try {
+    // Si c'est déjà une data URL, retourner tel quel
+    if (/^data:image\//i.test(imageUrl)) {
+      return imageUrl;
+    }
+
+    // Si c'est une URL externe
+    if (/^https?:\/\//i.test(imageUrl)) {
+      try {
+        const response = await fetch(imageUrl, {
+          headers: { 'User-Agent': 'Plinkk/1.0' }
+        });
+        if (!response.ok) throw new Error("Image fetch failed");
+        const buffer = await response.arrayBuffer();
+        const base64 = Buffer.from(buffer).toString('base64');
+        const contentType = response.headers.get('content-type') || 'image/png';
+        return `data:${contentType};base64,${base64}`;
+      } catch (e: any) {
+        throw new Error(`Failed to fetch image: ${e.message}`);
+      }
+    }
+
+    // Si c'est un chemin local, le laisser tel quel
+    return imageUrl;
+  } catch (error) {
+    console.error("Error resolving image to data URL:", error);
+    return null;
+  }
 }
 
 async function resolveTargetUrl(input: {
@@ -535,6 +569,13 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
 
     if (!item) return reply.code(404).send({ error: "qr_not_found" });
 
+    // ensure logo included for display by resolving image to data URL if necessary
+    let svgImageUrl = item.imageUrl;
+    if (item.includeImage && item.imageUrl) {
+      const dataUrl = await resolveImageToDataUrl(item.imageUrl);
+      if (dataUrl) svgImageUrl = dataUrl;
+    }
+
     const svg = makeQrSvg({
       text: (item.directTarget === true) ? item.targetUrl : `${getBaseUrl()}/q/${item.shortCode}`,
       size: item.size,
@@ -545,7 +586,7 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
       rounded: item.rounded,
       errorCorrectionLevel: item.errorCorrectionLevel,
       includeImage: item.includeImage,
-      imageUrl: item.imageUrl,
+      imageUrl: svgImageUrl,
       imageSize: item.imageSize,
       logoColor: item.logoColor,
     });
@@ -635,5 +676,74 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
       .header("cache-control", "no-store")
       .header("x-qr-target-url", previewText)
       .send(svg);
+  });
+
+  fastify.get("/:id/qrcodes/:qrId/image.png", async (request, reply) => {
+    const userId = request.session.get("data") as string | undefined;
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+
+    const canManageQr = await ensurePermission(request, reply, ["MANAGE_QRCODES", "EDIT_PLINKK"]);
+    if (!canManageQr) return;
+
+    const { id, qrId } = request.params as { id: string; qrId: string };
+    const item = await prisma.qrCode.findFirst({
+      where: { id: qrId, userId, plinkkId: id },
+      select: {
+        shortCode: true,
+        directTarget: true,
+        targetUrl: true,
+        size: true,
+        margin: true,
+        foregroundHex: true,
+        backgroundHex: true,
+        eyeHex: true,
+        logoColor: true,
+        rounded: true,
+        errorCorrectionLevel: true,
+        includeImage: true,
+        imageUrl: true,
+        imageSize: true,
+      },
+    });
+
+    if (!item) return reply.code(404).send({ error: "qr_not_found" });
+
+    // Résoudre l'image du logo en data URL pour la conversion PNG
+    let resolvedImageUrl = item.imageUrl;
+    if (item.includeImage && item.imageUrl) {
+      const dataUrl = await resolveImageToDataUrl(item.imageUrl);
+      if (dataUrl) {
+        resolvedImageUrl = dataUrl;
+      }
+    }
+
+    const svg = makeQrSvg({
+      text: (item.directTarget === true) ? item.targetUrl : `${getBaseUrl()}/q/${item.shortCode}`,
+      size: item.size,
+      margin: item.margin,
+      dark: item.foregroundHex,
+      light: item.backgroundHex,
+      eye: item.eyeHex,
+      rounded: item.rounded,
+      errorCorrectionLevel: item.errorCorrectionLevel,
+      includeImage: item.includeImage,
+      imageUrl: resolvedImageUrl,
+      imageSize: item.imageSize,
+      logoColor: item.logoColor,
+    });
+
+    try {
+      const pngBuffer = await sharp(Buffer.from(svg))
+        .png()
+        .toBuffer();
+
+      return reply
+        .header("content-type", "image/png")
+        .header("cache-control", "private, max-age=60")
+        .send(pngBuffer);
+    } catch (error) {
+      console.error("Error converting SVG to PNG:", error);
+      return reply.code(500).send({ error: "conversion_failed" });
+    }
   });
 }
