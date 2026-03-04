@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { Prisma, prisma } from "@plinkk/prisma";
 import { replyView } from "../../../lib/replyView";
 import { ensurePermission } from "../../../lib/permissions";
-import { verifyRoleIsStaff } from "../../../lib/verifyRole";
+import { verifyRoleIsStaff } from "@plinkk/shared";
 import { requireAuthRedirect, requireAuth } from "../../../middleware/auth";
 
 interface StatsQuery {

@@ -7,7 +7,7 @@ import {
   suggestUniqueSlug,
   createPlinkkForUser,
   isReservedSlug,
-} from "../lib/plinkkUtils";
+} from "@plinkk/shared";
 import { replyView } from "../lib/replyView";
 import { logUserAction } from "../lib/userLogger";
 

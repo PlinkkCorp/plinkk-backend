@@ -4,10 +4,10 @@ import {
   listBannedSlugs,
   createBannedSlug,
   deleteBannedSlugById,
-} from "../lib/bannedSlugs";
+} from "@plinkk/shared";
 import path from "path";
 import { existsSync, readdirSync } from "fs";
-import { verifyRoleIsStaff } from "../lib/verifyRole";
+import { verifyRoleIsStaff } from "@plinkk/shared";
 import { logAdminAction } from "../lib/adminLogger";
 import { apiMeRoutes } from "./api/me";
 import { apiThemeRoutes } from "./api/theme";

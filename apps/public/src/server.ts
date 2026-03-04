@@ -40,14 +40,7 @@ import { replyView } from "./lib/replyView";
 import fastifyRateLimit from "@fastify/rate-limit";
 import fastifyCompress from "@fastify/compress";
 import fastifyHttpProxy from "@fastify/http-proxy";
-import { generateBundle } from "./lib/generateBundle";
-import { resolvePlinkkPage } from "./lib/resolvePlinkkPage";
-import { generateProfileConfig } from "./lib/generateConfig";
-import { minify } from "uglify-js";
-import { coerceThemeData } from "./lib/theme";
-import { generateTheme } from "./lib/generateTheme";
 import { AppError } from "@plinkk/shared";
-import { RESERVED_SLUGS } from "@plinkk/shared";
 
 const fastify = Fastify({
   logger: true,

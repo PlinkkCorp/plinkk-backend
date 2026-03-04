@@ -2,11 +2,8 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { RESERVED_SLUGS } from "@plinkk/shared";
 import { generateBundle } from "../lib/generateBundle";
-import { resolvePlinkkPage } from "../lib/resolvePlinkkPage";
-import { generateProfileConfig } from "../lib/generateConfig";
+import { resolvePlinkkPage, generateProfileConfig, coerceThemeData, generateTheme } from "@plinkk/shared";
 import { minify } from "uglify-js";
-import { coerceThemeData } from "../lib/theme";
-import { generateTheme } from "../lib/generateTheme";
 import { PlinkkSnapshot } from "../types/plinkk";
 
 export default async function onRequestHook(

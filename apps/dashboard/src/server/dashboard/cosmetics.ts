@@ -1,7 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { replyView } from "../../lib/replyView";
-import { verifyRoleAdmin, verifyRoleDeveloper } from "../../lib/verifyRole";
 import { requireAuthRedirect } from "../../middleware/auth";
 import { canUseGifBanner, canUseVisualEffects, getUserLimits } from "@plinkk/shared";
 

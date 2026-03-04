@@ -3,7 +3,7 @@ import { prisma } from "@plinkk/prisma";
 import { replyView } from "../../lib/replyView";
 import { requireAuthRedirect } from "../../middleware/auth";
 import { affiliateService } from "@plinkk/shared";
-import { verifyRolePartner, verifyRoleIsStaff } from "../../lib/verifyRole";
+import { verifyRolePartner, verifyRoleIsStaff } from "@plinkk/shared";
 
 export async function dashboardPartnershipRoutes(fastify: FastifyInstance) {
     fastify.addHook("preHandler", requireAuthRedirect);

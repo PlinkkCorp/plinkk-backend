@@ -3,7 +3,7 @@ import { prisma } from "@plinkk/prisma";
 import { ensurePermission } from "../../../lib/permissions";
 import { logAdminAction } from "../../../lib/adminLogger";
 import { requireAuth } from "../../../middleware/auth";
-import { reindexNonDefault } from "../../../lib/plinkkUtils";
+import { reindexNonDefault } from "@plinkk/shared";
 
 export function adminPlinkksRoutes(fastify: FastifyInstance) {
     
