@@ -1,7 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
-import { verifyRoleIsStaff } from "../../../lib/verifyRole";
-import { isReservedSlug, slugify, reindexNonDefault } from "../../../lib/plinkkUtils";
+import { verifyRoleIsStaff, isReservedSlug, slugify, reindexNonDefault } from "@plinkk/shared";
 import { logAdminAction, logDetailedAdminAction } from "../../../lib/adminLogger";
 
 // const prisma = new PrismaClient();

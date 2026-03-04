@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { Theme, prisma, Prisma } from "@plinkk/prisma";
-import { coerceThemeData, readBuiltInThemes } from "../../../lib/theme";
+import { coerceThemeData, readBuiltInThemes } from "@plinkk/shared";
 import { logUserAction } from "../../../lib/userLogger";
 import { themeColors } from "../../../lib/themeNames";
 

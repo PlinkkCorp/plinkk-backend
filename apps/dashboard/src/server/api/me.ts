@@ -10,7 +10,7 @@ import { apiMePlinkksRoutes } from "./me/plinkks/index";
 import { apiMeRedirectsRoutes } from "./me/redirects";
 import crypto from "crypto";
 import { ListObjectsV2Command, _Object, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getS3Client } from "../../lib/fileUtils";
+import { getS3Client } from "@plinkk/shared";
 import sharp from "sharp"
 import { logUserAction } from "../../lib/userLogger";
 import { EmailService } from "../../services/emailService";

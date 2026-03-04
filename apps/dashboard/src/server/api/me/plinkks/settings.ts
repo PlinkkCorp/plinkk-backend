@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { Label, Link, NeonColor, PlinkkStatusbar, SocialIcon, prisma } from "@plinkk/prisma";
-import { pickDefined } from "../../../../lib/plinkkUtils";
+import { pickDefined } from "@plinkk/shared";
 import { logUserAction } from "../../../../lib/userLogger";
 import { calculateArrayDiff, calculateObjectDiff } from "../../../../lib/diffUtils";
 import { createPlinkkVersion } from "../../../services/historyService";

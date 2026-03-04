@@ -5,9 +5,7 @@ import archiver from "archiver";
 import ejs from "ejs";
 import { existsSync } from "fs";
 import { generateBundle } from "../../../../lib/generateBundle";
-import { generateProfileConfig } from "../../../../lib/generateConfig";
-import { generateTheme } from "../../../../lib/generateTheme";
-import { fetchRemoteFile } from "../../../../lib/fileUtils";
+import { generateProfileConfig, generateTheme, fetchRemoteFile } from "@plinkk/shared";
 import { canvaData } from "../../../../public/config/canvaConfig";
 import { logUserAction } from "../../../../lib/userLogger";
 

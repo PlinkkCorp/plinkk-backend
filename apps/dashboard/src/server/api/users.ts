@@ -5,7 +5,7 @@ import {
   verifyRoleIsStaff,
   verifyRoleAdmin,
   verifyRoleDeveloper,
-} from "../../lib/verifyRole";
+} from "@plinkk/shared";
 import { ensurePermission } from "../../lib/permissions";
 import { logAdminAction } from "../../lib/adminLogger";
 import bcrypt from "bcrypt";

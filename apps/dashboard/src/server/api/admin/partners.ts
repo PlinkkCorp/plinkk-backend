@@ -1,7 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
-import { verifyRoleIsStaff } from "../../../lib/verifyRole";
-import { getS3Client } from "../../../lib/fileUtils";
+import { verifyRoleIsStaff, getS3Client } from "@plinkk/shared";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import crypto from "crypto";
 import sharp from "sharp";

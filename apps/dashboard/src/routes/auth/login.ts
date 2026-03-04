@@ -3,7 +3,7 @@ import { randomBytes } from "crypto";
 import bcrypt from "bcrypt";
 import z from "zod";
 import { prisma } from "@plinkk/prisma";
-import { slugify } from "../../lib/plinkkUtils";
+import { slugify } from "@plinkk/shared";
 import { replyView } from "../../lib/replyView";
 import { createUserSession } from "../../services/sessionService";
 import { redirectWithError } from "../../utils/errorRedirect";

@@ -11,7 +11,7 @@ import {
   getRedirectStats,
   countUserRedirects,
 } from "../../../services/redirectService";
-import { slugify } from "../../../lib/plinkkUtils";
+import { slugify } from "@plinkk/shared";
 import {
   getMaxRedirects,
   isUserPremium,

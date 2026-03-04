@@ -5,7 +5,7 @@ import {
   slugify,
   isReservedSlug,
   createPlinkkForUser,
-} from "../../../../lib/plinkkUtils";
+} from "@plinkk/shared";
 import {
   getMaxPlinkks,
   isUserPremium,

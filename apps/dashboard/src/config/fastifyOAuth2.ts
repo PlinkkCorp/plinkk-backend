@@ -3,7 +3,7 @@ import { request } from "undici";
 import "../types/index";
 import { GithubUser } from "../types/githubUser";
 import { prisma } from "@plinkk/prisma";
-import { slugify } from "../lib/plinkkUtils";
+import { slugify } from "@plinkk/shared";
 import { createUserSession } from "../services/sessionService";
 import { createDefaultPlinkk } from "../routes/auth/register";
 import { discordUser } from "../types/discordUser";

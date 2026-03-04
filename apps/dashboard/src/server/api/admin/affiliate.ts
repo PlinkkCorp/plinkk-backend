@@ -1,7 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
-import { verifyRoleIsStaff } from "../../../lib/verifyRole";
-import { affiliateService } from "@plinkk/shared";
+import { verifyRoleIsStaff, affiliateService } from "@plinkk/shared";
 
 export function apiAdminAffiliateRoutes(fastify: FastifyInstance) {
     // Middleware to check admin role

@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
-import { verifyRoleIsStaff, verifyRoleAdmin } from "../lib/verifyRole";
+import { verifyRoleIsStaff, verifyRoleAdmin } from "@plinkk/shared";
 import { getPublicPath } from "../services/plinkkService";
 import { UnauthorizedError, ForbiddenError } from "@plinkk/shared";
 

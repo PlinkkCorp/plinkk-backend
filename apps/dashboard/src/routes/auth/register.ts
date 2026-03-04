@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import bcrypt from "bcrypt";
 import z from "zod";
 import { prisma } from "@plinkk/prisma";
-import { slugify, isReservedSlug, createPlinkkForUser } from "../../lib/plinkkUtils";
+import { slugify, isReservedSlug, createPlinkkForUser } from "@plinkk/shared";
 import profileConfig from "../../public/config/profileConfig";
 import { createUserSession } from "../../services/sessionService";
 import { redirectWithErrorToLogin } from "../../utils/errorRedirect";

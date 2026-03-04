@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { request as undiciRequest } from "undici";
 import { prisma } from "@plinkk/prisma";
-import { slugify } from "../../lib/plinkkUtils";
+import { slugify } from "@plinkk/shared";
 import { createUserSession } from "../../services/sessionService";
 import { createDefaultPlinkk } from "./register";
 import { logUserAction } from "../../lib/userLogger";

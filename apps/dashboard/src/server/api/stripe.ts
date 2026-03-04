@@ -6,7 +6,7 @@ import { logUserAction } from "../../lib/userLogger";
 import {
   stripe,
   createCheckoutSession,
-  syncSubscription, // Nouvelle fonction importée
+  syncSubscription,
   handleSuccessfulPayment,
   getUserPurchases,
   getOrCreateStripeCustomer,

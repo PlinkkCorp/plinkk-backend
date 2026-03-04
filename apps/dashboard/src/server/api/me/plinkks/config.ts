@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { PlinkkSettings, prisma } from "@plinkk/prisma";
-import { pickDefined } from "../../../../lib/plinkkUtils";
+import { pickDefined } from "@plinkk/shared";
 import { logUserAction } from "../../../../lib/userLogger";
 // import { canUseVisualEffects } from "@plinkk/shared";
 

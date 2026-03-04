@@ -11,9 +11,8 @@ import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkPagesRoutes } from "./server/plinkkPagesRoutes";
 import { linkTrackingRoutes } from "./server/linkTrackingRoutes";
 import { authRoutes } from "./routes/auth";
-import { generateTheme } from "./lib/generateTheme";
 import { registerOAuth2 } from "./config/fastifyOAuth2";
-import { AppError } from "@plinkk/shared";
+import { AppError, generateTheme } from "@plinkk/shared";
 import { discordService } from "./services/discordService";
 
 const fastify = Fastify({ logger: true, trustProxy: true });
