@@ -646,16 +646,6 @@ export function apiMeRoutes(fastify: FastifyInstance) {
         ? "webp"
         : "jpg"; // plinkk-image
 
-    /* const dir = path.join(
-      __dirname,
-      "..",
-      "..",
-      "public",
-      "uploads",
-      "avatars"
-    );
-    if (!existsSync(dir)) mkdirSync(dir, { recursive: true }); */
-
     const me = await prisma.user.findUnique({
       where: { id: userId as string },
     });
@@ -677,7 +667,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     });
 
     await (getS3Client() as unknown as S3ClientWithSend).send(command);
-    const url = `https://cdn.marvideo.fr/profiles/${dedupName}`;
+    const url = `https://cdn.plinkk.fr/profiles/${dedupName}`;
 
     await prisma.user.update({
       where: { id: me.id },

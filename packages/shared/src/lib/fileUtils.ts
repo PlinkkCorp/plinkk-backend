@@ -48,7 +48,7 @@ export function fetchRemoteFile(url: string): Promise<string> {
 }
 
 export function getS3Client() {
-  const endpoint = process.env.S3_ENDPOINT || "https://ue3.marvideo.fr";
+  const endpoint = process.env.S3_ENDPOINT || "https://s3.marvideo.fr";
   console.log(`[S3] Initializing client...`);
   console.log(`[S3]   - Endpoint: ${endpoint}`);
   console.log(`[S3]   - Region: ${process.env.S3_REGION || "us-east-1"}`);
