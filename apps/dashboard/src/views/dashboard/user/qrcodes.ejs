@@ -27,6 +27,14 @@
         </div>
         <p class="text-2xl font-bold text-white"><%= totalQrCodes %></p>
         <p class="text-xs text-slate-400 mt-1">Code<%= totalQrCodes !== 1 ? 's' : '' %> QR créé<%= totalQrCodes !== 1 ? 's' : '' %></p>
+        <% if (typeof maxQrCodes !== 'undefined') { %>
+          <div class="mt-3 pt-3 border-t border-slate-800">
+            <p class="text-xs text-slate-500">Limite: <%= totalQrCodes %>/<%= maxQrCodes %></p>
+            <% if (totalQrCodes >= maxQrCodes * 0.8) { %>
+              <a href="/premium" class="text-xs text-violet-400 hover:text-violet-300 transition-colors">Augmenter la limite</a>
+            <% } %>
+          </div>
+        <% } %>
       </div>
 
       <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors">

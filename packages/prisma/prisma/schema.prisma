@@ -39,6 +39,7 @@ model User {
   premiumUntil          DateTime?
   extraPlinkks          Int                  @default(0)
   extraRedirects        Int                  @default(0)
+  extraQrCodes          Int                  @default(0)
   stripeCustomerId      String?              @unique
   showPremiumUi         Boolean              @default(true)
   premiumSource         String?
@@ -550,6 +551,7 @@ model QrCode {
   targetType            QrTargetType
   targetUrl             String
   shortCode             String           @unique
+  directTarget          Boolean          @default(false)
   isActive              Boolean          @default(true)
   foregroundHex         String           @default("#111827")
   backgroundHex         String           @default("#ffffff")

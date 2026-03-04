@@ -9,6 +9,7 @@ export const FREE_MAX_PLINKKS = 1;
 export const FREE_MAX_THEMES = 10;
 export const FREE_MAX_REDIRECTS = 5;
 export const FREE_MAX_LINKS = 15;
+export const FREE_MAX_QRCODES = 10;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Limites premium
@@ -18,6 +19,7 @@ export const PREMIUM_MAX_PLINKKS = 2;
 export const PREMIUM_MAX_THEMES = 20;
 export const PREMIUM_MAX_REDIRECTS = 10;
 export const PREMIUM_MAX_LINKS = 30;
+export const PREMIUM_MAX_QRCODES = 20;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Limites staff / extended
@@ -27,6 +29,7 @@ export const STAFF_MAX_PLINKKS = 100;
 export const STAFF_MAX_THEMES = 100;
 export const STAFF_MAX_REDIRECTS = 100;
 export const STAFF_MAX_LINKS = 100;
+export const STAFF_MAX_QRCODES = 100;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Liste des fonctionnalités premium
@@ -53,9 +56,10 @@ export interface PremiumCheckUser {
   isPremium?: boolean;
   premiumUntil?: Date | string | null;
   isPartner?: boolean;
-  role?: Role | null;
+  role?: Partial<Role> | null;
   extraPlinkks?: number;
   extraRedirects?: number;
+  extraQrCodes?: number;
 }
 
 /**
@@ -145,6 +149,19 @@ export function getMaxLinks(user?: PremiumCheckUser | null): number {
 }
 
 /**
+ * Retourne le nombre maximum de QR codes autorisés
+ */
+export function getMaxQrCodes(user?: PremiumCheckUser | null): number {
+  if (!user) return FREE_MAX_QRCODES;
+  let limit = FREE_MAX_QRCODES;
+  if (verifyRoleIsStaff(user.role)) limit = Math.max(limit, STAFF_MAX_QRCODES);
+  if (isUserPremium(user)) limit = Math.max(limit, PREMIUM_MAX_QRCODES);
+  // Ajout des packs de QR codes achetés (+20 par achat à 1€/mois)
+  if (user.extraQrCodes && user.extraQrCodes > 0) limit += user.extraQrCodes;
+  return limit;
+}
+
+/**
  * Vérifie si un utilisateur a accès à une fonctionnalité premium spécifique
  */
 export function hasFeatureAccess(user: PremiumCheckUser | null | undefined, _feature: PremiumFeatureKey): boolean {
@@ -210,11 +227,13 @@ export function getUserLimits(user?: PremiumCheckUser | null) {
     maxThemes: getMaxThemes(user),
     maxRedirects: getMaxRedirects(user),
     maxLinks: getMaxLinks(user),
+    maxQrCodes: getMaxQrCodes(user),
     canUseGifBanner: canUseGifBanner(user),
     canUseVisualEffects: canUseVisualEffects(user),
     canUsePasswordProtectedPlinkk: canUsePasswordProtectedPlinkk(user),
     canUseScheduledLinks: canUseScheduledLinks(user),
     extraPlinkks: user?.extraPlinkks ?? 0,
     extraRedirects: user?.extraRedirects ?? 0,
+    extraQrCodes: user?.extraQrCodes ?? 0,
   };
 }

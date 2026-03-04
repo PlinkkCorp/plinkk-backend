@@ -4,6 +4,7 @@ import QRCode from "qrcode";
 import { customAlphabet } from "nanoid";
 import { ensurePermission } from "../../../../lib/permissions";
 import { logUserAction } from "../../../../lib/userLogger";
+import { getMaxQrCodes, isUserPremium, PREMIUM_MAX_QRCODES } from "@plinkk/shared";
 
 const makeShortCode = customAlphabet("23456789abcdefghjkmnpqrstuvwxyz", 8);
 
@@ -222,8 +223,8 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
     return reply.send({
       items: items.map((item) => ({
         ...item,
-        imageUrl: `/api/me/plinkks/${id}/qrcodes/${item.id}/image.svg`,
-        shareUrl: `${getBaseUrl()}/q/${item.shortCode}`,
+        svgUrl: `/api/me/plinkks/${id}/qrcodes/${item.id}/image.svg`,
+        shareUrl: (item.directTarget === true) ? item.targetUrl : `${getBaseUrl()}/q/${item.shortCode}`,
       })),
     });
   });
@@ -238,6 +239,34 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
     const owns = await ensurePlinkkOwner(userId, id);
     if (!owns) return reply.code(404).send({ error: "not_found" });
+
+    // Vérifier la limite de QR codes
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        isPremium: true,
+        premiumUntil: true,
+        isPartner: true,
+        extraQrCodes: true,
+        role: { select: { id: true, name: true, isStaff: true, maxRedirects: true } },
+      },
+    });
+
+    const currentCount = await prisma.qrCode.count({ where: { userId } });
+    const maxQrCodes = getMaxQrCodes(user);
+
+    if (currentCount >= maxQrCodes) {
+      const isPremium = isUserPremium(user);
+      const canUpgrade = !isPremium && PREMIUM_MAX_QRCODES > maxQrCodes;
+
+      return reply.code(403).send({
+        error: "qrcode_limit_reached",
+        current: currentCount,
+        max: maxQrCodes,
+        canUpgrade,
+        premiumLimit: canUpgrade ? PREMIUM_MAX_QRCODES : undefined,
+      });
+    }
 
     const body = request.body as {
       name?: string;
@@ -261,6 +290,7 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
       label?: string;
       labelColor?: string;
       preset?: string;
+      directTarget?: boolean;
     };
 
     const targetType = (body.targetType || "PLINKK_PAGE") as QrTargetType;
@@ -294,6 +324,7 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
         targetType,
         targetUrl: resolved.targetUrl,
         shortCode,
+        directTarget: Boolean(body.directTarget),
         foregroundHex: normalizeHex(body.foregroundHex, "#111827"),
         backgroundHex: normalizeHex(body.backgroundHex, "#ffffff"),
         eyeHex: normalizeHex(body.eyeHex, "#7c3aed"),
@@ -324,8 +355,8 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
     return reply.code(201).send({
       item: {
         ...created,
-        imageUrl: `/api/me/plinkks/${id}/qrcodes/${created.id}/image.svg`,
-        shareUrl: `${getBaseUrl()}/q/${created.shortCode}`,
+        svgUrl: `/api/me/plinkks/${id}/qrcodes/${created.id}/image.svg`,
+        shareUrl: created.directTarget ? created.targetUrl : `${getBaseUrl()}/q/${created.shortCode}`,
       },
     });
   });
@@ -367,6 +398,7 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
       labelColor?: string;
       preset?: string;
       isActive?: boolean;
+      directTarget?: boolean;
     };
 
     const patch: Record<string, unknown> = {};
@@ -377,6 +409,10 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
 
     if (typeof body.isActive === "boolean") {
       patch.isActive = body.isActive;
+    }
+
+    if (typeof body.directTarget === "boolean") {
+      patch.directTarget = body.directTarget;
     }
 
     if (body.foregroundHex !== undefined) patch.foregroundHex = normalizeHex(body.foregroundHex, existing.foregroundHex);
@@ -433,8 +469,8 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
     return reply.send({
       item: {
         ...updated,
-        imageUrl: `/api/me/plinkks/${id}/qrcodes/${updated.id}/image.svg`,
-        shareUrl: `${getBaseUrl()}/q/${updated.shortCode}`,
+        svgUrl: `/api/me/plinkks/${id}/qrcodes/${updated.id}/image.svg`,
+        shareUrl: (updated.directTarget === true) ? updated.targetUrl : `${getBaseUrl()}/q/${updated.shortCode}`,
       },
     });
   });
@@ -481,6 +517,8 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
       where: { id: qrId, userId, plinkkId: id },
       select: {
         shortCode: true,
+        directTarget: true,
+        targetUrl: true,
         size: true,
         margin: true,
         foregroundHex: true,
@@ -498,7 +536,7 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
     if (!item) return reply.code(404).send({ error: "qr_not_found" });
 
     const svg = makeQrSvg({
-      text: `${getBaseUrl()}/q/${item.shortCode}`,
+      text: (item.directTarget === true) ? item.targetUrl : `${getBaseUrl()}/q/${item.shortCode}`,
       size: item.size,
       margin: item.margin,
       dark: item.foregroundHex,
@@ -533,6 +571,7 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
       targetType?: QrTargetType;
       customUrl?: string;
       redirectId?: string;
+      qrId?: string;
       foregroundHex?: string;
       backgroundHex?: string;
       eyeHex?: string;
@@ -544,6 +583,7 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
       includeImage?: boolean;
       imageUrl?: string;
       imageSize?: number;
+      directTarget?: boolean;
     };
 
     const targetType = (body.targetType || "PLINKK_PAGE") as QrTargetType;
@@ -564,8 +604,19 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
       return reply.code(400).send({ error: e?.message || "invalid_target" });
     }
 
+    let previewText = resolved.targetUrl;
+    if (!body.directTarget && body.qrId) {
+      const existing = await prisma.qrCode.findFirst({
+        where: { id: body.qrId, userId, plinkkId: id },
+        select: { shortCode: true },
+      });
+      if (existing?.shortCode) {
+        previewText = `${getBaseUrl()}/q/${existing.shortCode}`;
+      }
+    }
+
     const svg = makeQrSvg({
-      text: resolved.targetUrl,
+      text: previewText,
       size: clampInt(body.size, 192, 1024, 384),
       margin: clampInt(body.margin, 0, 8, 2),
       dark: normalizeHex(body.foregroundHex, "#111827"),
@@ -582,7 +633,7 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
     return reply
       .header("content-type", "image/svg+xml; charset=utf-8")
       .header("cache-control", "no-store")
-      .header("x-qr-target-url", resolved.targetUrl)
+      .header("x-qr-target-url", previewText)
       .send(svg);
   });
 }

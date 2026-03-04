@@ -120,6 +120,21 @@
                     </div>
                     <p class="mt-1 text-xs text-slate-400">Espace blanc autour du QR Code</p>
                 </div>
+
+                <!-- Direct Target -->
+                <div class="mt-6 p-4 bg-slate-800/50 rounded-xl border border-slate-700">
+                    <div class="flex items-start gap-3">
+                        <input type="checkbox" id="qrCodeDirectTarget"
+                            class="mt-1 w-4 h-4 text-violet-600 bg-slate-800 border-slate-700 rounded focus:ring-violet-500 focus:ring-2">
+                        <div class="flex-1">
+                            <label for="qrCodeDirectTarget" class="text-sm font-medium text-white cursor-pointer">Lien direct (sans statistiques)</label>
+                            <p class="text-xs text-slate-400 mt-1">
+                                Si activé, le QR code redirigera directement vers la cible sans passer par le système de tracking. 
+                                <span class="text-amber-400">Attention: aucune statistique de scan ne sera collectée.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Preview -->
@@ -214,6 +229,7 @@
             eyeHex: document.getElementById('qrCodeEyeColor').value,
             rounded: parseInt(document.getElementById('qrCodeBorderRadius').value) > 0,
             margin: parseInt(document.getElementById('qrCodeMargin').value),
+            directTarget: document.getElementById('qrCodeDirectTarget').checked,
         };
 
         try {

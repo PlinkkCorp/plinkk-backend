@@ -377,6 +377,7 @@ window.addEventListener('load', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          qrId: qrCodeIdEl.value || undefined,
           targetType: fieldTargetType.value,
           customUrl: fieldTargetType.value === 'CUSTOM_URL' ? fieldCustomUrl.value : undefined,
           foregroundHex: fieldForeground.value,
