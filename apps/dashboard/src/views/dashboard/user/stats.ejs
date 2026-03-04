@@ -78,6 +78,9 @@
                                 data-tab="redirects" aria-selected="false">Redirections</button>
                             <button
                                 class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
+                                data-tab="qrcodes" aria-selected="false">QR Codes</button>
+                            <button
+                                class="tab-btn flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
                                 data-tab="funnel" aria-selected="false">Tunnel</button>
                         </nav>
                     </div>
@@ -88,7 +91,10 @@
                         !=='undefined' ) ? viewsDaily30d : []; const _redirects=(typeof redirects !=='undefined' &&
                         Array.isArray(redirects)) ? redirects : []; const _totalRedirectClicks=(typeof
                         totalRedirectClicks !=='undefined' ) ? totalRedirectClicks : 0; const _redirectReturns=(typeof
-                        redirectReturns !=='undefined' ) ? redirectReturns : []; const _userViews=(typeof user
+                        redirectReturns !=='undefined' ) ? redirectReturns : []; const _qrCodes=(typeof qrCodes
+                        !=='undefined' && Array.isArray(qrCodes)) ? qrCodes : []; const _totalQrScans=(typeof
+                        totalQrScans !=='undefined' ) ? totalQrScans : 0; const _qrScansDaily=(typeof qrScansDaily30d
+                        !=='undefined' ) ? qrScansDaily30d : []; const _userViews=(typeof user
                         !=='undefined' && user.views) ? user.views : 0; const _isPremium=(typeof isPremium
                         !=='undefined' ) ? isPremium : false; const _maxStatsDays=(typeof maxStatsDays !=='undefined' )
                         ? maxStatsDays : 30; const linkTotalClicks=_links.reduce((a, l)=> a + (l.clicks || 0), 0);
@@ -589,6 +595,115 @@
                             </div>
                         </section>
 
+                        <section id="panel-qrcodes" class="tab-panel hidden space-y-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                    <p class="text-3xl font-bold text-white" id="qrTotalScans"><%= _totalQrScans %></p>
+                                    <p class="text-sm text-slate-400 mt-1">Scans QR totaux</p>
+                                </div>
+                                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                    <p class="text-3xl font-bold text-white" id="qrTotalCodes"><%= _qrCodes.length %></p>
+                                    <p class="text-sm text-slate-400 mt-1">QR codes créés</p>
+                                </div>
+                                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                    <p class="text-3xl font-bold text-white" id="qrAvgScans"><%= _qrCodes.length ? Math.round(_totalQrScans / _qrCodes.length) : 0 %></p>
+                                    <p class="text-sm text-slate-400 mt-1">Scans moyens / QR</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+                                <h2 class="font-bold text-white text-xl mb-6">Créer un QR code</h2>
+                                <form id="qrForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Nom</label>
+                                        <input id="qrName" class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200" placeholder="Ex: QR Instagram bio" maxlength="80" />
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Type de destination</label>
+                                        <select id="qrTargetType" class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200">
+                                            <option value="PLINKK_PAGE">Lien de cette page Plinkk</option>
+                                            <option value="PROFILE">Page profil Plinkk</option>
+                                            <option value="REDIRECT">Lien de redirection</option>
+                                            <option value="CUSTOM_URL">Lien personnalisé</option>
+                                        </select>
+                                    </div>
+
+                                    <div id="qrRedirectWrap" class="hidden">
+                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Redirection</label>
+                                        <select id="qrRedirectId" class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200">
+                                            <option value="">Choisir une redirection</option>
+                                            <% _redirects.forEach(r => { %>
+                                                <option value="<%= r.id %>">/r/<%= r.slug %> → <%= r.targetUrl %></option>
+                                            <% }) %>
+                                        </select>
+                                    </div>
+
+                                    <div id="qrCustomWrap" class="hidden">
+                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">URL personnalisée</label>
+                                        <input id="qrCustomUrl" class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200" placeholder="https://..." />
+                                    </div>
+
+                                    <div>
+                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Couleur QR</label>
+                                        <input id="qrForegroundHex" type="color" value="#111827" class="mt-1 w-full h-11 bg-slate-900 border border-slate-800 rounded-xl" />
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Couleur fond</label>
+                                        <input id="qrBackgroundHex" type="color" value="#ffffff" class="mt-1 w-full h-11 bg-slate-900 border border-slate-800 rounded-xl" />
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Couleur yeux</label>
+                                        <input id="qrEyeHex" type="color" value="#7c3aed" class="mt-1 w-full h-11 bg-slate-900 border border-slate-800 rounded-xl" />
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Taille</label>
+                                        <input id="qrSize" type="number" min="192" max="1024" value="384" class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200" />
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Marge</label>
+                                        <input id="qrMargin" type="number" min="0" max="8" value="2" class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200" />
+                                    </div>
+                                    <div class="flex items-end">
+                                        <label class="flex items-center gap-2 text-slate-300 text-sm">
+                                            <input id="qrRounded" type="checkbox" class="rounded border-slate-700 bg-slate-900" />
+                                            Modules arrondis
+                                        </label>
+                                    </div>
+
+                                    <div class="md:col-span-2 flex items-center gap-3">
+                                        <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-xl font-semibold">Créer le QR</button>
+                                        <p id="qrFormMsg" class="text-sm text-slate-400"></p>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+                                <h2 class="font-bold text-white text-xl mb-6">Scans QR (30j)</h2>
+                                <div class="h-80"><canvas id="qrScansChart"></canvas></div>
+                            </div>
+
+                            <div class="bg-slate-950/30 border border-slate-800 rounded-3xl overflow-hidden">
+                                <div class="p-6 border-b border-slate-800 bg-slate-900/50">
+                                    <h2 class="font-bold text-white text-xl">Vos QR codes</h2>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500 bg-slate-950/50">
+                                                <th class="p-4 font-bold">QR</th>
+                                                <th class="p-4 font-bold">Nom</th>
+                                                <th class="p-4 font-bold">Type</th>
+                                                <th class="p-4 font-bold">Scans</th>
+                                                <th class="p-4 font-bold">Partager</th>
+                                                <th class="p-4 font-bold text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="qrTableBody" class="divide-y divide-slate-800/50"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+
                         <!-- ─── TUNNEL D'ACQUISITION ─── -->
                         <section id="panel-funnel" class="tab-panel hidden space-y-6">
                             <% if (!_isPremium) { %>
@@ -820,6 +935,9 @@
     redirectReturns: _redirectReturns,
     redirects: _redirects,
     totalRedirectClicks: _totalRedirectClicks,
+    qrCodes: _qrCodes,
+    totalQrScans: _totalQrScans,
+    qrScansDaily30d: _qrScansDaily,
     isPremium: _isPremium,
     maxStatsDays: _maxStatsDays,
     plinkkId: (typeof plinkk !== 'undefined' && plinkk) ? plinkk.id : null
@@ -949,6 +1067,9 @@
                 const links = D.links || [];
                 const viewsDaily = D.viewsDaily30d || [];
                 const redirectReturns = D.redirectReturns || [];
+                const qrScansDaily = D.qrScansDaily30d || [];
+                let qrCodes = D.qrCodes || [];
+                const redirectsData = D.redirects || [];
                 const isPremiumUser = D.isPremium || false;
                 const maxStatsDays = D.maxStatsDays || 30;
                 const currentPlinkkId = D.plinkkId || null;
@@ -996,6 +1117,7 @@
                         links: qs('#panel-links'),
                         categories: qs('#panel-categories'),
                         redirects: qs('#panel-redirects'),
+                        qrcodes: qs('#panel-qrcodes'),
                         funnel: qs('#panel-funnel'),
                     };
                     tabButtons.forEach(btn => {
@@ -1365,6 +1487,168 @@
                     );
                 }
 
+                /*  QR CODES  */
+                function updateQrSummary() {
+                    const totalScans = qrCodes.reduce((acc, item) => acc + Number(item.scansCount || 0), 0);
+                    const totalCodes = qrCodes.length;
+                    const avg = totalCodes ? Math.round(totalScans / totalCodes) : 0;
+                    if (qs('#qrTotalScans')) qs('#qrTotalScans').textContent = fmt(totalScans);
+                    if (qs('#qrTotalCodes')) qs('#qrTotalCodes').textContent = fmt(totalCodes);
+                    if (qs('#qrAvgScans')) qs('#qrAvgScans').textContent = fmt(avg);
+                }
+
+                function renderQrTable() {
+                    const tbody = qs('#qrTableBody');
+                    if (!tbody) return;
+                    tbody.innerHTML = '';
+
+                    if (!qrCodes.length) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-500">Aucun QR code pour le moment.</td></tr>';
+                        return;
+                    }
+
+                    qrCodes.forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-slate-800/30 transition-colors';
+                        tr.innerHTML = `
+                            <td class="p-4"><img src="${item.imageUrl}" alt="QR" class="w-14 h-14 rounded-lg border border-slate-700 bg-white p-1"/></td>
+                            <td class="p-4">
+                                <p class="font-semibold text-white">${item.name || 'QR Code'}</p>
+                                <p class="text-xs text-slate-500">${item.shortCode || ''}</p>
+                            </td>
+                            <td class="p-4 text-sm text-slate-300">${item.targetType}</td>
+                            <td class="p-4 text-sm font-bold text-white">${fmt(item.scansCount || 0)}</td>
+                            <td class="p-4">
+                                <button data-action="copy" data-id="${item.id}" class="px-3 py-1.5 bg-slate-800 rounded-lg text-xs text-slate-300 hover:text-white">Copier lien</button>
+                            </td>
+                            <td class="p-4 text-right space-x-2">
+                                <button data-action="toggle" data-id="${item.id}" class="px-3 py-1.5 rounded-lg text-xs ${item.isActive ? 'bg-emerald-500/15 text-emerald-300' : 'bg-rose-500/15 text-rose-300'}">${item.isActive ? 'Actif' : 'Inactif'}</button>
+                                <button data-action="style" data-id="${item.id}" class="px-3 py-1.5 bg-slate-800 rounded-lg text-xs text-slate-300 hover:text-white">Style</button>
+                                <button data-action="delete" data-id="${item.id}" class="px-3 py-1.5 bg-rose-500/15 rounded-lg text-xs text-rose-300">Supprimer</button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+
+                async function loadQrCodes() {
+                    if (!currentPlinkkId) return;
+                    const res = await fetch(`/api/me/plinkks/${currentPlinkkId}/qrcodes`, { credentials: 'same-origin' });
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    qrCodes = data.items || [];
+                    renderQrTable();
+                    updateQrSummary();
+                }
+
+                const qrCtx = qs('#qrScansChart')?.getContext('2d');
+                if (qrCtx && qrScansDaily.length) {
+                    if (charts.qrcodes) charts.qrcodes.destroy();
+                    charts.qrcodes = makeLineChart(
+                        qrCtx,
+                        qrScansDaily.map(d => fmtDateLabel(d.date)),
+                        qrScansDaily.map(d => d.count),
+                        'Scans QR', 'rgb(124, 58, 237)'
+                    );
+                }
+
+                function syncQrTargetFields() {
+                    const type = qs('#qrTargetType')?.value;
+                    qs('#qrRedirectWrap')?.classList.toggle('hidden', type !== 'REDIRECT');
+                    qs('#qrCustomWrap')?.classList.toggle('hidden', type !== 'CUSTOM_URL');
+                }
+
+                qs('#qrTargetType')?.addEventListener('change', syncQrTargetFields);
+                syncQrTargetFields();
+
+                qs('#qrForm')?.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (!currentPlinkkId) return;
+                    const msg = qs('#qrFormMsg');
+                    if (msg) msg.textContent = 'Création...';
+
+                    const payload = {
+                        name: qs('#qrName')?.value || 'QR Code',
+                        targetType: qs('#qrTargetType')?.value || 'PLINKK_PAGE',
+                        redirectId: qs('#qrRedirectId')?.value || undefined,
+                        customUrl: qs('#qrCustomUrl')?.value || undefined,
+                        foregroundHex: qs('#qrForegroundHex')?.value || '#111827',
+                        backgroundHex: qs('#qrBackgroundHex')?.value || '#ffffff',
+                        eyeHex: qs('#qrEyeHex')?.value || '#7c3aed',
+                        rounded: !!qs('#qrRounded')?.checked,
+                        margin: Number(qs('#qrMargin')?.value || 2),
+                        size: Number(qs('#qrSize')?.value || 384),
+                    };
+
+                    const res = await fetch(`/api/me/plinkks/${currentPlinkkId}/qrcodes`, {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: { 'content-type': 'application/json' },
+                        body: JSON.stringify(payload),
+                    });
+
+                    if (!res.ok) {
+                        if (msg) msg.textContent = 'Erreur lors de la création du QR code.';
+                        return;
+                    }
+
+                    if (msg) msg.textContent = 'QR code créé.';
+                    await loadQrCodes();
+                });
+
+                qs('#qrTableBody')?.addEventListener('click', async (e) => {
+                    const btn = e.target?.closest('button[data-action]');
+                    if (!btn || !currentPlinkkId) return;
+                    const id = btn.dataset.id;
+                    const action = btn.dataset.action;
+                    const item = qrCodes.find(x => x.id === id);
+                    if (!id || !item) return;
+
+                    if (action === 'copy') {
+                        const link = item.shareUrl || `${window.location.origin}/q/${item.shortCode}`;
+                        await navigator.clipboard.writeText(link);
+                        return;
+                    }
+
+                    if (action === 'toggle') {
+                        await fetch(`/api/me/plinkks/${currentPlinkkId}/qrcodes/${id}`, {
+                            method: 'PATCH',
+                            credentials: 'same-origin',
+                            headers: { 'content-type': 'application/json' },
+                            body: JSON.stringify({ isActive: !item.isActive }),
+                        });
+                        await loadQrCodes();
+                        return;
+                    }
+
+                    if (action === 'style') {
+                        const fg = prompt('Couleur QR (#RRGGBB)', item.foregroundHex || '#111827') || item.foregroundHex;
+                        const bg = prompt('Couleur fond (#RRGGBB)', item.backgroundHex || '#ffffff') || item.backgroundHex;
+                        const eye = prompt('Couleur yeux (#RRGGBB)', item.eyeHex || '#7c3aed') || item.eyeHex;
+                        await fetch(`/api/me/plinkks/${currentPlinkkId}/qrcodes/${id}`, {
+                            method: 'PATCH',
+                            credentials: 'same-origin',
+                            headers: { 'content-type': 'application/json' },
+                            body: JSON.stringify({ foregroundHex: fg, backgroundHex: bg, eyeHex: eye }),
+                        });
+                        await loadQrCodes();
+                        return;
+                    }
+
+                    if (action === 'delete') {
+                        if (!confirm('Supprimer ce QR code ?')) return;
+                        await fetch(`/api/me/plinkks/${currentPlinkkId}/qrcodes/${id}`, {
+                            method: 'DELETE',
+                            credentials: 'same-origin',
+                        });
+                        await loadQrCodes();
+                    }
+                });
+
+                renderQrTable();
+                updateQrSummary();
+                if (currentPlinkkId) loadQrCodes();
+
                 /* EXPORT LOGIC */
                 function exportGraph() {
                     if (activeTab === 'trends' && !isPremiumUser) return alert('Fonctionnalité réservée aux membres Premium');
@@ -1373,7 +1657,8 @@
                         'trends': charts.trendsViews, // Default to views
                         'links': charts.links,
                         'categories': charts.categories,
-                        'redirects': charts.redirects
+                        'redirects': charts.redirects,
+                        'qrcodes': charts.qrcodes,
                     };
                     const chart = chartMap[activeTab];
 
@@ -1429,6 +1714,21 @@
                         rows.push([]);
                         rows.push(['Date', 'Clics (30j)']);
                         redirectReturns.forEach(d => rows.push([d.date, d.count]));
+                        content = rows.map(r => r.map(esc).join(',')).join('\n');
+                    }
+                    else if (activeTab === 'qrcodes') {
+                        const rows = [['Nom', 'Type', 'URL cible', 'Lien partage', 'Scans', 'Actif']];
+                        qrCodes.forEach(r => rows.push([
+                            r.name,
+                            r.targetType,
+                            r.targetUrl,
+                            r.shareUrl || '',
+                            r.scansCount || 0,
+                            r.isActive ? 'Oui' : 'Non'
+                        ]));
+                        rows.push([]);
+                        rows.push(['Date', 'Scans QR (30j)']);
+                        qrScansDaily.forEach(d => rows.push([d.date, d.count]));
                         content = rows.map(r => r.map(esc).join(',')).join('\n');
                     }
 

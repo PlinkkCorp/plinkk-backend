@@ -131,8 +131,15 @@
                                         Status
                                     </button>
                                 </li>
-
-
+                                <li>
+                                    <button data-target="#section-qrcodes"
+                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
+                                        <svg class="size-4" viewBox="0 0 24 24" fill="white">
+                                            <path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h2v2H3z" />
+                                        </svg>
+                                        QR Codes
+                                    </button>
+                                </li>
                             </ul>
                         </nav>
 
@@ -172,8 +179,10 @@
                                 <%- include('./partials/editor-sections/statusbar.ejs') %>
                             </div>
 
-
-
+                            <div id="section-qrcodes"
+                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
+                                <%- include('./partials/editor-sections/qrcodes.ejs') %>
+                            </div>
 
                         </div>
                     </section>

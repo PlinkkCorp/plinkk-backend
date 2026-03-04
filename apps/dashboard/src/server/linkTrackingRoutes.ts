@@ -10,6 +10,52 @@ import { recordRedirectClick } from "../services/redirectService";
  * 3. Enregistrer les clics côté API pour les liens affichés
  */
 export function linkTrackingRoutes(fastify: FastifyInstance) {
+  fastify.get("/q/:shortCode", async (request, reply) => {
+    const { shortCode } = request.params as { shortCode: string };
+
+    if (!shortCode) {
+      return reply.code(400).send({ error: "missing_short_code" });
+    }
+
+    const qrCode = await prisma.qrCode.findUnique({
+      where: { shortCode: shortCode.toLowerCase() },
+      select: {
+        id: true,
+        userId: true,
+        plinkkId: true,
+        targetUrl: true,
+        isActive: true,
+      },
+    });
+
+    if (!qrCode || !qrCode.isActive) {
+      return reply.code(404).view("erreurs/404.ejs", { currentUser: null });
+    }
+
+    try {
+      await prisma.$transaction([
+        prisma.qrCode.update({
+          where: { id: qrCode.id },
+          data: { scansCount: { increment: 1 } },
+        }),
+        prisma.qrCodeScan.create({
+          data: {
+            qrCodeId: qrCode.id,
+            userId: qrCode.userId,
+            plinkkId: qrCode.plinkkId,
+            ip: request.ip,
+            userAgent: request.headers["user-agent"] || null,
+            referrer: request.headers.referer || null,
+          },
+        }),
+      ]);
+    } catch (e) {
+      request.log?.warn({ err: e }, "qr_scan_tracking_failed");
+    }
+
+    return reply.redirect(qrCode.targetUrl);
+  });
+
   /**
    * GET /r/:slug
    * Redirection publique via slug personnalisé (ex: plinkk.fr/r/github)

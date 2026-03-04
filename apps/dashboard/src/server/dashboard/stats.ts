@@ -27,9 +27,12 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
 
     let preSeries: { date: Date; count: number }[] = [];
     let redirectSeries: { date: Date; count: number }[] = [];
+    let qrScanSeries: { date: Date; count: number }[] = [];
     let totalViews = 0;
     let totalClicks = 0;
     let totalRedirectClicks = 0;
+    let totalQrScans = 0;
+    let qrCodes: any[] = [];
 
     try {
       if (selected) {
@@ -84,6 +87,41 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
       });
       totalRedirectClicks = rawTotalRedirectClicks._sum.clicks || 0;
 
+      const qrWhere = selected
+        ? { userId, plinkkId: selected.id }
+        : { userId };
+
+      const qrScanRows = await prisma.qrCodeScan.findMany({
+        where: {
+          ...(selected ? { plinkkId: selected.id } : { userId }),
+          scannedAt: { gte: start, lte: end },
+        },
+        select: { scannedAt: true },
+      });
+
+      const qrByDate = new Map<string, number>();
+      for (const row of qrScanRows) {
+        const key = new Date(row.scannedAt).toISOString().slice(0, 10);
+        qrByDate.set(key, (qrByDate.get(key) || 0) + 1);
+      }
+
+      for (let t = new Date(start.getTime()); t <= end; t = new Date(t.getTime() + 86400000)) {
+        const key = t.toISOString().slice(0, 10);
+        qrScanSeries.push({ date: t, count: qrByDate.get(key) || 0 });
+      }
+
+      const rawTotalQrScans = await prisma.qrCode.aggregate({
+        where: qrWhere,
+        _sum: { scansCount: true },
+      });
+      totalQrScans = rawTotalQrScans._sum.scansCount || 0;
+
+      qrCodes = await prisma.qrCode.findMany({
+        where: qrWhere,
+        orderBy: [{ scansCount: "desc" }, { createdAt: "desc" }],
+        take: 100,
+      });
+
     } catch (e) {
       request.log.error(e);
     }
@@ -114,6 +152,9 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
       redirects,
       totalRedirectClicks,
       redirectReturns: redirectSeries,
+      totalQrScans,
+      qrCodes,
+      qrScansDaily30d: qrScanSeries,
       publicPath: request.publicPath,
       // Premium info
       isPremium: premiumInfo.isPremium,
@@ -309,6 +350,88 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
       return reply.send({ from: s, to: e, series });
     } catch (err) {
       request.log?.error({ err }, "Failed to query daily clicks");
+      return reply.code(500).send({ error: "internal_error" });
+    }
+  });
+
+  fastify.get("/qr-scans", { preHandler: [requireAuth] }, async function (request, reply) {
+    const userId = request.userId!;
+    const {
+      from,
+      to,
+      granularity = "day",
+      plinkkId: qPlinkkId,
+    } = request.query as {
+      from?: string;
+      to?: string;
+      granularity?: "day" | "hour" | "minute" | "second";
+      plinkkId?: string;
+    };
+
+    const user = await prisma.user.findUnique({ where: { id: userId }, include: { role: true } });
+    const maxDays = getMaxStatsDays(user);
+
+    const now = new Date();
+    const end = to ? new Date(to) : now;
+    let start = from ? new Date(from) : new Date(end.getTime() - 29 * 86400000);
+
+    const maxStart = new Date(end.getTime() - (maxDays - 1) * 86400000);
+    if (start < maxStart) start = maxStart;
+
+    const fmt = (dt: Date, gran = granularity) => {
+      const y = dt.getUTCFullYear();
+      const m = String(dt.getUTCMonth() + 1).padStart(2, "0");
+      const d = String(dt.getUTCDate()).padStart(2, "0");
+      const h = String(dt.getUTCHours()).padStart(2, "0");
+      const min = String(dt.getUTCMinutes()).padStart(2, "0");
+      const s = String(dt.getUTCSeconds()).padStart(2, "0");
+      if (gran === "second") return `${y}-${m}-${d} ${h}:${min}:${s}`;
+      if (gran === "minute") return `${y}-${m}-${d} ${h}:${min}:00`;
+      if (gran === "hour") return `${y}-${m}-${d} ${h}:00:00`;
+      return `${y}-${m}-${d}`;
+    };
+    const s = fmt(start, "day");
+    const e = fmt(end, "day");
+
+    try {
+      if (qPlinkkId) {
+        const owns = await prisma.plinkk.findFirst({ where: { id: qPlinkkId, userId }, select: { id: true } });
+        if (!owns) return reply.code(403).send({ error: "forbidden" });
+      }
+
+      const where = {
+        ...(qPlinkkId ? { plinkkId: qPlinkkId } : { userId }),
+        scannedAt: { gte: start, lte: end },
+      };
+
+      const rows = await prisma.qrCodeScan.findMany({
+        where,
+        select: { scannedAt: true },
+      });
+
+      const byDate = new Map<string, number>();
+      for (const row of rows) {
+        const key = fmt(new Date(row.scannedAt));
+        byDate.set(key, (byDate.get(key) || 0) + 1);
+      }
+
+      const series: { date: string; count: number }[] = [];
+      let step = 86400000;
+      if (granularity === "hour") step = 3600000;
+      else if (granularity === "minute") step = 60000;
+      else if (granularity === "second") step = 1000;
+
+      const limit = 10000;
+      let count = 0;
+      for (let t = new Date(start.getTime()); t <= end && count < limit; t = new Date(t.getTime() + step)) {
+        const key = fmt(t);
+        series.push({ date: key, count: byDate.get(key) || 0 });
+        count++;
+      }
+
+      return reply.send({ from: s, to: e, series });
+    } catch (err) {
+      request.log?.error({ err }, "Failed to query qr scans");
       return reply.code(500).send({ error: "internal_error" });
     }
   });

@@ -5,6 +5,7 @@ import { plinkksSettingsRoutes } from "./settings";
 import { plinkksExportRoutes } from "./export";
 import { plinkksPremiumRoutes } from "./premium";
 import { plinkksHistoryRoutes } from "./history";
+import { plinkksQrCodesRoutes } from "./qrcodes";
 
 
 export function apiMePlinkksRoutes(fastify: FastifyInstance) {
@@ -14,4 +15,5 @@ export function apiMePlinkksRoutes(fastify: FastifyInstance) {
   fastify.register(plinkksExportRoutes);
   fastify.register(plinkksPremiumRoutes);
   fastify.register(plinkksHistoryRoutes);
+  fastify.register(plinkksQrCodesRoutes);
 }

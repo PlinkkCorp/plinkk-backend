@@ -105,6 +105,11 @@ export const PERMISSIONS: PermissionDefinition[] = [
   { key: 'VIEW_REDIRECT_STATS', category: 'Redirections', description: 'Voir les statistiques de redirection globales', defaultRoles: ['ADMIN', 'DEVELOPER', 'MODERATOR'] },
   { key: 'DELETE_ANY_REDIRECT', category: 'Redirections', description: 'Supprimer n\'importe quelle redirection', defaultRoles: ['ADMIN', 'MODERATOR'] },
 
+  // QR Codes
+  { key: 'MANAGE_QRCODES', category: 'QR Codes', description: 'Créer et gérer ses QR codes', defaultRoles: ['USER', 'BETA', 'PARTNER', 'ADMIN', 'DEVELOPER'] },
+  { key: 'VIEW_QRCODE_STATS', category: 'QR Codes', description: 'Voir les statistiques QR globales', defaultRoles: ['ADMIN', 'DEVELOPER', 'MODERATOR'] },
+  { key: 'MANAGE_QRCODES_ADMIN', category: 'QR Codes', description: 'Gérer les QR codes de tous les utilisateurs', defaultRoles: ['ADMIN', 'DEVELOPER'] },
+
   // Premium
   { key: 'PREMIUM_STATS_EXTENDED', category: 'Premium', description: 'Accès aux statistiques étendues (> 30 jours)', defaultRoles: ['ADMIN', 'DEVELOPER', 'PARTNER'] },
   { key: 'PREMIUM_EXPORT_CSV', category: 'Premium', description: 'Export CSV avancé des données', defaultRoles: ['ADMIN', 'DEVELOPER', 'PARTNER'] },

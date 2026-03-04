@@ -69,6 +69,8 @@ model User {
   partner               Partner?
   emailCampaigns        EmailCampaign[]
   patchNotes            PatchNote[]
+  qrCodes               QrCode[]
+  qrCodeScans           QrCodeScan[]
 }
 
 model Connection {
@@ -373,6 +375,8 @@ model Plinkk {
   versions     PlinkkVersion[]
   reports      Report[]
   socialIcons  SocialIcon[]
+  qrCodes      QrCode[]
+  qrCodeScans  QrCodeScan[]
 
   @@unique([userId, slug])
   @@unique([userId, index])
@@ -531,9 +535,68 @@ model Redirect {
   expiresAt   DateTime?
   user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   dailyStats  RedirectClickDaily[]
+  qrCodes     QrCode[]
 
   @@index([userId])
   @@index([slug])
+}
+
+model QrCode {
+  id                    String           @id @default(nanoid(16))
+  userId                String
+  plinkkId              String?
+  redirectId            String?
+  name                  String
+  targetType            QrTargetType
+  targetUrl             String
+  shortCode             String           @unique
+  isActive              Boolean          @default(true)
+  foregroundHex         String           @default("#111827")
+  backgroundHex         String           @default("#ffffff")
+  eyeHex                String           @default("#7c3aed")
+  rounded               Boolean          @default(false)
+  margin                Int              @default(2)
+  size                  Int              @default(384)
+  cornerStyle           String           @default("rounded")
+  eyeStyle              String           @default("square")
+  patternStyle          String           @default("square")
+  includeImage          Boolean          @default(false)
+  imageUrl              String?
+  imageSize             Int              @default(25)
+  logoColor             String?
+  errorCorrectionLevel  String           @default("M")
+  label                 String?
+  labelColor            String?
+  preset                String?
+  scansCount            Int              @default(0)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @default(now()) @updatedAt
+  user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plinkk                Plinkk?          @relation(fields: [plinkkId], references: [id], onDelete: Cascade)
+  redirect              Redirect?        @relation(fields: [redirectId], references: [id], onDelete: SetNull)
+  scans                 QrCodeScan[]
+
+  @@index([userId, createdAt])
+  @@index([plinkkId, createdAt])
+  @@index([isActive])
+}
+
+model QrCodeScan {
+  id         String   @id @default(nanoid(16))
+  qrCodeId   String
+  userId     String
+  plinkkId   String?
+  scannedAt  DateTime @default(now())
+  ip         String?
+  userAgent  String?
+  referrer   String?
+  qrCode     QrCode   @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plinkk     Plinkk?  @relation(fields: [plinkkId], references: [id], onDelete: SetNull)
+
+  @@index([userId, scannedAt])
+  @@index([plinkkId, scannedAt])
+  @@index([qrCodeId, scannedAt])
 }
 
 model RedirectClickDaily {
@@ -595,6 +658,13 @@ enum PlinkkEventType {
 enum GravatarSource {
   PRIMARY
   PUBLIC
+}
+
+enum QrTargetType {
+  PROFILE
+  PLINKK_PAGE
+  REDIRECT
+  CUSTOM_URL
 }
 
 // ─── Funnel Event Tracking ───────────────────────────────────────────────────

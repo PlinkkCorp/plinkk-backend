@@ -692,6 +692,87 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
     return reply.send({ redirects, total });
   });
 
+  fastify.get<{ Querystring: StatsQuery }>("/qrcodes", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, ["VIEW_STATS", "VIEW_QRCODE_STATS"]);
+    if (!ok) return;
+
+    const { from, to, granularity = "day" } = request.query;
+    const { start, end } = getDateRange(from, to);
+
+    const [totalScansAgg, totalQrCodes] = await Promise.all([
+      prisma.qrCode.aggregate({ _sum: { scansCount: true } }),
+      prisma.qrCode.count(),
+    ]);
+
+    const scans = await prisma.qrCodeScan.findMany({
+      where: { scannedAt: { gte: start, lte: end } },
+      select: { scannedAt: true },
+    });
+
+    const byDate = initDateMap(start, end, granularity, () => 0);
+    for (const scan of scans) {
+      const key = formatDate(new Date(scan.scannedAt), granularity);
+      if (byDate.has(key)) byDate.set(key, (byDate.get(key) || 0) + 1);
+    }
+
+    let topVal = 0;
+    const series = Array.from(byDate.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, count]) => {
+        if (count > topVal) topVal = count;
+        return { date, count };
+      });
+
+    return reply.send({
+      totalScans: totalScansAgg._sum.scansCount || 0,
+      totalQrCodes,
+      topScanInPeriod: topVal,
+      series,
+    });
+  });
+
+  fastify.get<{ Querystring: TopPlinkksQuery }>("/qrcodes/top", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, ["VIEW_STATS", "VIEW_QRCODE_STATS"]);
+    if (!ok) return;
+
+    const { page = 1, limit = 20, sort = "scansCount", order = "desc", search = "" } = request.query;
+    const skip = (Number(page) - 1) * Number(limit);
+    const take = Number(limit);
+
+    const where: Prisma.QrCodeWhereInput = {};
+    if (search) {
+      where.OR = [
+        { name: { contains: search } },
+        { shortCode: { contains: search } },
+        { targetUrl: { contains: search } },
+        { user: { userName: { contains: search } } },
+      ];
+    }
+
+    const [qrcodes, total] = await Promise.all([
+      prisma.qrCode.findMany({
+        where,
+        select: {
+          id: true,
+          name: true,
+          shortCode: true,
+          targetType: true,
+          targetUrl: true,
+          scansCount: true,
+          isActive: true,
+          createdAt: true,
+          user: { select: { userName: true, image: true } },
+        },
+        orderBy: { [sort]: order },
+        skip,
+        take,
+      }),
+      prisma.qrCode.count({ where }),
+    ]);
+
+    return reply.send({ qrcodes, total });
+  });
+
   fastify.get<{ Querystring: StatsQuery }>("/premium", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_STATS");
     if (!ok) return;
