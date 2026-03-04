@@ -17,8 +17,8 @@
       </p>
     </section>
 
-    <section class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-      <div class="xl:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-5">
+    <section class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+      <div class="xl:col-span-4 bg-slate-900 border border-slate-800 rounded-3xl p-5">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-bold text-white">Mes QR codes</h2>
           <button id="btnNewQr"
@@ -29,7 +29,7 @@
         <div id="qrCodesList" class="space-y-3"></div>
       </div>
 
-      <div class="xl:col-span-7 bg-slate-900 border border-slate-800 rounded-3xl p-6">
+      <div class="xl:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-6">
         <form id="qrCodeForm" class="space-y-5">
           <input type="hidden" id="qrCodeId" value="">
 
@@ -74,6 +74,14 @@
             </div>
 
             <div>
+              <label for="qrCodeEyeColor" class="block text-sm font-medium text-white mb-2">Couleur des yeux</label>
+              <div class="flex items-center gap-3">
+                <input type="color" id="qrCodeEyeColor" value="#111827" class="w-10 h-10 rounded-lg border border-slate-700">
+                <span id="qrCodeEyeColorValue" class="text-xs text-slate-400 font-mono">#111827</span>
+              </div>
+            </div>
+
+            <div>
               <label for="qrCodeBackgroundColor" class="block text-sm font-medium text-white mb-2">Couleur fond</label>
               <div class="flex items-center gap-3">
                 <input type="color" id="qrCodeBackgroundColor" value="#ffffff" class="w-10 h-10 rounded-lg border border-slate-700">
@@ -81,18 +89,22 @@
               </div>
             </div>
 
+            <div>
+              <label for="qrCodeErrorCorrection" class="block text-sm font-medium text-white mb-2">Niveau de correction</label>
+              <select id="qrCodeErrorCorrection"
+                class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-violet-500 transition-colors text-sm">
+                <option value="L">L - 7% (Low)</option>
+                <option value="M" selected>M - 15% (Medium)</option>
+                <option value="Q">Q - 25% (Quartile)</option>
+                <option value="H">H - 30% (High)</option>
+              </select>
+            </div>
+
             <div class="md:col-span-2">
               <label class="inline-flex items-center gap-2 text-sm text-white cursor-pointer">
                 <input type="checkbox" id="qrCodeRounded" class="accent-violet-600">
                 Modules arrondis
               </label>
-            </div>
-          </div>
-
-          <div class="border-t border-slate-800 pt-5">
-            <p class="text-sm font-semibold text-white mb-3">Prévisualisation en direct</p>
-            <div class="bg-slate-800 rounded-xl p-4 flex items-center justify-center min-h-[260px]">
-              <div id="qrCodePreview" class="w-full max-w-[260px] flex items-center justify-center"></div>
             </div>
           </div>
 
@@ -108,30 +120,46 @@
           </div>
         </form>
       </div>
+
+      <div class="xl:col-span-3 xl:sticky xl:top-24 space-y-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
+          <p class="text-sm font-semibold text-white mb-3">Prévisualisation en direct</p>
+          <div class="bg-slate-800 rounded-xl p-4 flex items-center justify-center min-h-[280px]">
+            <div id="qrCodePreview" class="w-full max-w-[280px] flex items-center justify-center"></div>
+          </div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
+          <p class="text-sm font-semibold text-white mb-2">Conseil</p>
+          <p class="text-xs text-slate-400">Utilisez un contraste fort (foncé sur clair) pour améliorer la lecture du QR code.</p>
+        </div>
+      </div>
     </section>
   </main>
 </div>
 
-<script src="https://unpkg.com/qrcode@1.5.4/build/qrcode.min.js"></script>
 <script>
-(() => {
+window.addEventListener('load', () => {
   const params = new URLSearchParams(window.location.search);
   const plinkkId = params.get('plinkkId');
   const qrIdToEdit = params.get('qrId');
   let currentQrCodes = [];
   let currentEditingQr = null;
+  let previewController = null;
 
   const fieldName = document.getElementById('qrCodeName');
   const fieldTargetType = document.getElementById('qrCodeTargetType');
   const fieldCustomUrl = document.getElementById('qrCodeCustomUrl');
   const fieldForeground = document.getElementById('qrCodeForegroundColor');
+  const fieldEye = document.getElementById('qrCodeEyeColor');
   const fieldBackground = document.getElementById('qrCodeBackgroundColor');
   const fieldRounded = document.getElementById('qrCodeRounded');
   const fieldMargin = document.getElementById('qrCodeMargin');
+  const fieldErrorCorrection = document.getElementById('qrCodeErrorCorrection');
 
   const customUrlGroup = document.getElementById('customUrlGroup');
   const marginValue = document.getElementById('qrCodeMarginValue');
   const foregroundValue = document.getElementById('qrCodeForegroundColorValue');
+  const eyeValue = document.getElementById('qrCodeEyeColorValue');
   const backgroundValue = document.getElementById('qrCodeBackgroundColorValue');
   const previewEl = document.getElementById('qrCodePreview');
   const listEl = document.getElementById('qrCodesList');
@@ -148,50 +176,70 @@
       .replaceAll("'", '&#39;');
   }
 
-  function getPreviewText() {
-    if (currentEditingQr?.shortCode) {
-      return `${window.location.origin}/q/${currentEditingQr.shortCode}`;
-    }
-    if (fieldTargetType.value === 'CUSTOM_URL' && fieldCustomUrl.value.trim()) {
-      return fieldCustomUrl.value.trim();
-    }
-    return `${window.location.origin}/q/preview`;
-  }
-
   async function renderPreview() {
-    const text = getPreviewText();
-    const margin = parseInt(fieldMargin.value || '2', 10);
-    const options = {
-      type: 'svg',
-      errorCorrectionLevel: 'M',
-      margin,
-      width: 260,
-      color: {
-        dark: fieldForeground.value,
-        light: fieldBackground.value,
-      },
-    };
+    if (!plinkkId) {
+      previewEl.innerHTML = '<p class="text-sm text-rose-400">Plinkk introuvable.</p>';
+      return;
+    }
 
     try {
-      const svg = await QRCode.toString(text, options);
+      if (previewController) {
+        previewController.abort();
+      }
+      previewController = new AbortController();
+
+      const response = await fetch(`/api/me/plinkks/${plinkkId}/qrcodes/preview.svg`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetType: fieldTargetType.value,
+          customUrl: fieldTargetType.value === 'CUSTOM_URL' ? fieldCustomUrl.value : undefined,
+          foregroundHex: fieldForeground.value,
+          eyeHex: fieldEye.value,
+          backgroundHex: fieldBackground.value,
+          rounded: fieldRounded.checked,
+          margin: parseInt(fieldMargin.value || '2', 10),
+          size: 384,
+          errorCorrectionLevel: fieldErrorCorrection.value,
+        }),
+        signal: previewController.signal,
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Impossible de générer la prévisualisation.');
+      }
+
+      const svg = await response.text();
       previewEl.innerHTML = svg;
       const svgNode = previewEl.querySelector('svg');
       if (svgNode) {
-        svgNode.classList.add('w-full', 'h-full', 'max-w-[260px]');
-        if (fieldRounded.checked) {
-          svgNode.style.borderRadius = '16px';
-        } else {
-          svgNode.style.borderRadius = '0';
-        }
+        svgNode.style.width = '100%';
+        svgNode.style.height = '100%';
+        svgNode.style.maxWidth = '280px';
       }
-    } catch {
-      previewEl.innerHTML = '<p class="text-sm text-rose-400">Impossible de générer la prévisualisation.</p>';
+
+      const previewNode = previewEl.firstElementChild;
+      if (previewNode) {
+        previewNode.classList.add('w-full', 'h-full');
+      }
+
+      if (fieldRounded.checked) {
+        previewEl.style.borderRadius = '16px';
+      } else {
+        previewEl.style.borderRadius = '0';
+      }
+    } catch (error) {
+      if (error?.name === 'AbortError') return;
+      console.error('Erreur QR Code:', error);
+      previewEl.innerHTML = '<p class="text-sm text-rose-400">Erreur: ' + escapeHtml(error?.message || 'Impossible de générer') + '</p>';
     }
   }
 
   function syncFormIndicators() {
     marginValue.textContent = fieldMargin.value;
     foregroundValue.textContent = fieldForeground.value;
+    eyeValue.textContent = fieldEye.value;
     backgroundValue.textContent = fieldBackground.value;
     customUrlGroup.classList.toggle('hidden', fieldTargetType.value !== 'CUSTOM_URL');
   }
@@ -203,9 +251,11 @@
     fieldTargetType.value = 'PLINKK_PAGE';
     fieldCustomUrl.value = '';
     fieldForeground.value = '#111827';
+    fieldEye.value = '#111827';
     fieldBackground.value = '#ffffff';
     fieldRounded.checked = false;
     fieldMargin.value = '2';
+    fieldErrorCorrection.value = 'M';
     submitBtn.textContent = 'Créer le QR Code';
     syncFormIndicators();
     renderPreview();
@@ -218,9 +268,11 @@
     fieldTargetType.value = item.targetType || 'PLINKK_PAGE';
     fieldCustomUrl.value = item.targetType === 'CUSTOM_URL' ? (item.targetUrl || '') : '';
     fieldForeground.value = item.foregroundHex || '#111827';
+    fieldEye.value = item.eyeHex || '#111827';
     fieldBackground.value = item.backgroundHex || '#ffffff';
     fieldRounded.checked = Boolean(item.rounded);
     fieldMargin.value = String(item.margin ?? 2);
+    fieldErrorCorrection.value = item.errorCorrectionLevel || 'M';
     submitBtn.textContent = 'Enregistrer les modifications';
     syncFormIndicators();
     renderPreview();
@@ -291,10 +343,11 @@
       targetType: fieldTargetType.value,
       customUrl: fieldTargetType.value === 'CUSTOM_URL' ? fieldCustomUrl.value : undefined,
       foregroundHex: fieldForeground.value,
+      eyeHex: fieldEye.value,
       backgroundHex: fieldBackground.value,
-      eyeHex: fieldForeground.value,
       rounded: fieldRounded.checked,
       margin: parseInt(fieldMargin.value || '2', 10),
+      errorCorrectionLevel: fieldErrorCorrection.value,
     };
 
     const response = await fetch(url, {
@@ -321,15 +374,17 @@
     }
   });
 
-  [fieldTargetType, fieldCustomUrl, fieldForeground, fieldBackground, fieldRounded, fieldMargin].forEach((el) => {
-    el.addEventListener('input', () => {
-      syncFormIndicators();
-      renderPreview();
-    });
-    el.addEventListener('change', () => {
-      syncFormIndicators();
-      renderPreview();
-    });
+  [fieldTargetType, fieldCustomUrl, fieldForeground, fieldEye, fieldBackground, fieldRounded, fieldMargin, fieldErrorCorrection].forEach((el) => {
+    if (el) {
+      el.addEventListener('input', () => {
+        syncFormIndicators();
+        renderPreview();
+      });
+      el.addEventListener('change', () => {
+        syncFormIndicators();
+        renderPreview();
+      });
+    }
   });
 
   syncFormIndicators();
@@ -337,5 +392,5 @@
   loadQRCodes().catch((error) => {
     listEl.innerHTML = `<div class="text-sm text-rose-400">${escapeHtml(error.message)}</div>`;
   });
-})();
+});
 </script>

@@ -65,14 +65,17 @@ function makeQrSvg(params: {
   light: string;
   eye: string;
   rounded: boolean;
+  errorCorrectionLevel?: string;
 }) {
-  const qr = QRCode.create(params.text, { errorCorrectionLevel: "M" });
+  const level = ["L", "M", "Q", "H"].includes((params.errorCorrectionLevel || "M").toUpperCase())
+    ? (params.errorCorrectionLevel || "M").toUpperCase()
+    : "M";
+  const qr = QRCode.create(params.text, { errorCorrectionLevel: level as "L" | "M" | "Q" | "H" });
   const moduleCount = qr.modules.size;
   const box = params.size;
   const total = moduleCount + params.margin * 2;
   const cell = box / total;
   const innerRadius = params.rounded ? cell * 0.35 : 0;
-
   const pieces: string[] = [];
   pieces.push(`<rect x="0" y="0" width="${box}" height="${box}" fill="${escapeXml(params.light)}"/>`);
 
@@ -471,6 +474,65 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
     return reply
       .header("content-type", "image/svg+xml; charset=utf-8")
       .header("cache-control", "private, max-age=60")
+      .send(svg);
+  });
+  
+  fastify.post("/:id/qrcodes/preview.svg", async (request, reply) => {
+    const userId = request.session.get("data") as string | undefined;
+    if (!userId) return reply.code(401).send({ error: "unauthorized" });
+
+    const canManageQr = await ensurePermission(request, reply, ["MANAGE_QRCODES", "EDIT_PLINKK"]);
+    if (!canManageQr) return;
+
+    const { id } = request.params as { id: string };
+    const owns = await ensurePlinkkOwner(userId, id);
+    if (!owns) return reply.code(404).send({ error: "not_found" });
+
+    const body = request.body as {
+      targetType?: QrTargetType;
+      customUrl?: string;
+      redirectId?: string;
+      foregroundHex?: string;
+      backgroundHex?: string;
+      eyeHex?: string;
+      rounded?: boolean;
+      margin?: number;
+      size?: number;
+      errorCorrectionLevel?: string;
+    };
+
+    const targetType = (body.targetType || "PLINKK_PAGE") as QrTargetType;
+    if (!["PROFILE", "PLINKK_PAGE", "REDIRECT", "CUSTOM_URL"].includes(targetType)) {
+      return reply.code(400).send({ error: "invalid_target_type" });
+    }
+
+    let resolved: { targetUrl: string; redirectId: string | null };
+    try {
+      resolved = await resolveTargetUrl({
+        targetType,
+        userId,
+        plinkkId: id,
+        customUrl: body.customUrl,
+        redirectId: body.redirectId,
+      });
+    } catch (e: any) {
+      return reply.code(400).send({ error: e?.message || "invalid_target" });
+    }
+
+    const svg = makeQrSvg({
+      text: resolved.targetUrl,
+      size: clampInt(body.size, 192, 1024, 384),
+      margin: clampInt(body.margin, 0, 8, 2),
+      dark: normalizeHex(body.foregroundHex, "#111827"),
+      light: normalizeHex(body.backgroundHex, "#ffffff"),
+      eye: normalizeHex(body.eyeHex, "#7c3aed"),
+      rounded: Boolean(body.rounded),
+      errorCorrectionLevel: (body.errorCorrectionLevel || "M").toString(),
+    });
+
+    return reply
+      .header("content-type", "image/svg+xml; charset=utf-8")
+      .header("cache-control", "no-store")
       .send(svg);
   });
 }
