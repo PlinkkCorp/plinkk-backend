@@ -66,6 +66,10 @@ function makeQrSvg(params: {
   eye: string;
   rounded: boolean;
   errorCorrectionLevel?: string;
+  includeImage?: boolean;
+  imageUrl?: string | null;
+  imageSize?: number;
+  logoColor?: string | null;
 }) {
   const level = ["L", "M", "Q", "H"].includes((params.errorCorrectionLevel || "M").toUpperCase())
     ? (params.errorCorrectionLevel || "M").toUpperCase()
@@ -110,7 +114,34 @@ function makeQrSvg(params: {
   drawFinder(moduleCount - 7, 0);
   drawFinder(0, moduleCount - 7);
 
+  if (params.includeImage && params.imageUrl) {
+    const imageSizePercent = Math.max(10, Math.min(40, Math.round(params.imageSize ?? 25)));
+    const logoSize = (box * imageSizePercent) / 100;
+    const logoX = (box - logoSize) / 2;
+    const logoY = (box - logoSize) / 2;
+    const bgRadius = params.rounded ? logoSize * 0.22 : 8;
+    pieces.push(`<rect x="${logoX - 6}" y="${logoY - 6}" width="${logoSize + 12}" height="${logoSize + 12}" rx="${bgRadius}" ry="${bgRadius}" fill="${escapeXml(params.light)}"/>`);
+    const isSvgLogo = /^data:image\/svg\+xml/i.test(params.imageUrl) || /\.svg([?#].*)?$/i.test(params.imageUrl);
+    if (isSvgLogo && params.logoColor) {
+      const maskId = "logo-mask";
+      pieces.push(`<defs><mask id="${maskId}" maskUnits="userSpaceOnUse"><rect x="${logoX}" y="${logoY}" width="${logoSize}" height="${logoSize}" fill="black"/><image x="${logoX}" y="${logoY}" width="${logoSize}" height="${logoSize}" href="${escapeXml(params.imageUrl)}" preserveAspectRatio="xMidYMid meet"/></mask></defs>`);
+      pieces.push(`<rect x="${logoX}" y="${logoY}" width="${logoSize}" height="${logoSize}" fill="${escapeXml(params.logoColor)}" mask="url(#${maskId})"/>`);
+    } else {
+      pieces.push(`<image x="${logoX}" y="${logoY}" width="${logoSize}" height="${logoSize}" href="${escapeXml(params.imageUrl)}" preserveAspectRatio="xMidYMid meet"/>`);
+    }
+  }
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${box}" height="${box}" viewBox="0 0 ${box} ${box}">${pieces.join("")}</svg>`;
+}
+
+function normalizeImageUrl(value: unknown) {
+  if (typeof value !== "string") return null;
+  const v = value.trim();
+  if (!v) return null;
+  if (/^https?:\/\//i.test(v)) return v.slice(0, 255);
+  if (/^data:image\//i.test(v)) return v.slice(0, 255);
+  if (v.startsWith("/")) return v.slice(0, 255);
+  return null;
 }
 
 async function resolveTargetUrl(input: {
@@ -455,7 +486,12 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
         foregroundHex: true,
         backgroundHex: true,
         eyeHex: true,
+        logoColor: true,
         rounded: true,
+        errorCorrectionLevel: true,
+        includeImage: true,
+        imageUrl: true,
+        imageSize: true,
       },
     });
 
@@ -469,6 +505,11 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
       light: item.backgroundHex,
       eye: item.eyeHex,
       rounded: item.rounded,
+      errorCorrectionLevel: item.errorCorrectionLevel,
+      includeImage: item.includeImage,
+      imageUrl: item.imageUrl,
+      imageSize: item.imageSize,
+      logoColor: item.logoColor,
     });
 
     return reply
@@ -495,10 +536,14 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
       foregroundHex?: string;
       backgroundHex?: string;
       eyeHex?: string;
+      logoColor?: string;
       rounded?: boolean;
       margin?: number;
       size?: number;
       errorCorrectionLevel?: string;
+      includeImage?: boolean;
+      imageUrl?: string;
+      imageSize?: number;
     };
 
     const targetType = (body.targetType || "PLINKK_PAGE") as QrTargetType;
@@ -526,13 +571,18 @@ export function plinkksQrCodesRoutes(fastify: FastifyInstance) {
       dark: normalizeHex(body.foregroundHex, "#111827"),
       light: normalizeHex(body.backgroundHex, "#ffffff"),
       eye: normalizeHex(body.eyeHex, "#7c3aed"),
+      logoColor: normalizeHex(body.logoColor, "#7c3aed"),
       rounded: Boolean(body.rounded),
       errorCorrectionLevel: (body.errorCorrectionLevel || "M").toString(),
+      includeImage: Boolean(body.includeImage),
+      imageUrl: normalizeImageUrl(body.imageUrl),
+      imageSize: clampInt(body.imageSize, 10, 40, 25),
     });
 
     return reply
       .header("content-type", "image/svg+xml; charset=utf-8")
       .header("cache-control", "no-store")
+      .header("x-qr-target-url", resolved.targetUrl)
       .send(svg);
   });
 }

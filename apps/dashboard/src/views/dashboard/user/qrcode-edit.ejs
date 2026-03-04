@@ -5,10 +5,10 @@
 }) %>
 <%- include('partials/header-dash.ejs') %>
 
-<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-4 min-h-[calc(100vh-72px)]">
   <%- include('partials/asside_dash.ejs', { active: 'qrcodes' }) %>
 
-  <main class="col-span-12 lg:col-span-10 space-y-6">
+  <main class="col-span-12 lg:col-span-10 space-y-4 h-full flex flex-col">
     <section class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
       <h1 class="text-2xl font-bold text-white">Édition QR Code</h1>
       <p class="text-sm text-slate-400 mt-1">
@@ -17,8 +17,8 @@
       </p>
     </section>
 
-    <section class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-      <div class="xl:col-span-4 bg-slate-900 border border-slate-800 rounded-3xl p-5">
+    <section class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start flex-1 xl:min-h-0">
+      <div class="xl:col-span-4 bg-slate-900 border border-slate-800 rounded-3xl p-5 xl:h-full xl:flex xl:flex-col">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-bold text-white">Mes QR codes</h2>
           <button id="btnNewQr"
@@ -26,10 +26,10 @@
             Nouveau
           </button>
         </div>
-        <div id="qrCodesList" class="space-y-3"></div>
+        <div id="qrCodesList" class="space-y-3 xl:overflow-y-auto xl:pr-1"></div>
       </div>
 
-      <div class="xl:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-6">
+      <div class="xl:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-6 xl:h-full xl:overflow-y-auto">
         <form id="qrCodeForm" class="space-y-5">
           <input type="hidden" id="qrCodeId" value="">
 
@@ -100,6 +100,55 @@
               </select>
             </div>
 
+            <div>
+              <label for="qrCodePreset" class="block text-sm font-medium text-white mb-2">Preset couleur</label>
+              <select id="qrCodePreset"
+                class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-violet-500 transition-colors text-sm">
+                <option value="custom">Personnalisé</option>
+                <option value="plinkk">Plinkk</option>
+                <option value="midnight">Midnight</option>
+                <option value="forest">Forest</option>
+                <option value="sunset">Sunset</option>
+                <option value="mono">Noir & Blanc</option>
+              </select>
+            </div>
+
+            <div class="md:col-span-2 border border-slate-800 rounded-xl p-4 space-y-4">
+              <label class="inline-flex items-center gap-2 text-sm text-white cursor-pointer">
+                <input type="checkbox" id="qrCodeIncludeImage" class="accent-violet-600">
+                Ajouter un logo/image au centre
+              </label>
+
+              <div id="qrCodeImageFields" class="hidden space-y-4">
+                <input type="hidden" id="qrCodeImageUrl" value="">
+                <input type="file" id="qrCodeImageFileInput" accept="image/*,.svg" class="hidden">
+                <div>
+                  <p class="block text-sm font-medium text-white mb-2">Image/logo</p>
+                  <div class="flex flex-wrap gap-2">
+                    <button type="button" id="btnUploadQrLogo" class="px-3 py-2 text-sm rounded-lg bg-slate-800 border border-slate-700 text-white hover:bg-slate-700 transition-colors">Upload image</button>
+                    <button type="button" id="btnLibraryQrLogo" class="px-3 py-2 text-sm rounded-lg bg-slate-800 border border-slate-700 text-white hover:bg-slate-700 transition-colors">Bibliothèque</button>
+                    <button type="button" id="btnClearQrLogo" class="px-3 py-2 text-sm rounded-lg bg-slate-900 border border-slate-700 text-slate-300 hover:text-white transition-colors">Supprimer</button>
+                  </div>
+                  <p id="qrCodeImageSource" class="text-xs text-slate-400 mt-2 break-all">Aucune image sélectionnée</p>
+                </div>
+                <div id="qrCodeLogoColorGroup" class="hidden">
+                  <label for="qrCodeLogoColor" class="block text-sm font-medium text-white mb-2">Couleur logo SVG</label>
+                  <div class="flex items-center gap-3">
+                    <input type="color" id="qrCodeLogoColor" value="#7c3aed" class="w-10 h-10 rounded-lg border border-slate-700">
+                    <span id="qrCodeLogoColorValue" class="text-xs text-slate-400 font-mono">#7c3aed</span>
+                  </div>
+                </div>
+                <div>
+                  <label for="qrCodeImageSize" class="block text-sm font-medium text-white mb-2">Taille logo</label>
+                  <div class="flex items-center gap-3">
+                    <input type="range" id="qrCodeImageSize" min="10" max="40" value="25"
+                      class="flex-1 h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-violet-600">
+                    <span id="qrCodeImageSizeValue" class="text-xs text-slate-400 w-10">25%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="md:col-span-2">
               <label class="inline-flex items-center gap-2 text-sm text-white cursor-pointer">
                 <input type="checkbox" id="qrCodeRounded" class="accent-violet-600">
@@ -118,14 +167,19 @@
               Réinitialiser
             </button>
           </div>
+          <p id="qrSaveStatus" class="text-xs text-slate-400">Autosave activé pour les modifications.</p>
         </form>
       </div>
 
-      <div class="xl:col-span-3 xl:sticky xl:top-24 space-y-4">
+      <div class="xl:col-span-3 xl:sticky xl:top-20 xl:max-h-[calc(100vh-96px)] xl:overflow-y-auto space-y-4">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
           <p class="text-sm font-semibold text-white mb-3">Prévisualisation en direct</p>
           <div class="bg-slate-800 rounded-xl p-4 flex items-center justify-center min-h-[280px]">
             <div id="qrCodePreview" class="w-full max-w-[280px] flex items-center justify-center"></div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-800">
+            <p class="text-xs text-slate-400 mb-1">Lien du QR code</p>
+            <a id="qrCodePreviewLink" href="#" target="_blank" rel="noopener noreferrer" class="text-xs text-violet-400 hover:text-violet-300 break-all">-</a>
           </div>
         </div>
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
@@ -137,6 +191,16 @@
   </main>
 </div>
 
+<div id="qrLibraryModal" class="hidden fixed inset-0 z-[120] bg-black/70 p-4">
+  <div class="max-w-3xl mx-auto bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden">
+    <div class="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+      <p class="text-sm font-semibold text-white">Bibliothèque d'images</p>
+      <button type="button" id="btnCloseQrLibrary" class="text-slate-300 hover:text-white text-sm">Fermer</button>
+    </div>
+    <div id="qrLibraryGrid" class="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[60vh] overflow-auto"></div>
+  </div>
+</div>
+
 <script>
 window.addEventListener('load', () => {
   const params = new URLSearchParams(window.location.search);
@@ -145,6 +209,9 @@ window.addEventListener('load', () => {
   let currentQrCodes = [];
   let currentEditingQr = null;
   let previewController = null;
+  let autoSaveTimer = null;
+  let isAutoSaving = false;
+  let suspendAutoSave = false;
 
   const fieldName = document.getElementById('qrCodeName');
   const fieldTargetType = document.getElementById('qrCodeTargetType');
@@ -155,17 +222,135 @@ window.addEventListener('load', () => {
   const fieldRounded = document.getElementById('qrCodeRounded');
   const fieldMargin = document.getElementById('qrCodeMargin');
   const fieldErrorCorrection = document.getElementById('qrCodeErrorCorrection');
+  const fieldPreset = document.getElementById('qrCodePreset');
+  const fieldIncludeImage = document.getElementById('qrCodeIncludeImage');
+  const fieldImageUrl = document.getElementById('qrCodeImageUrl');
+  const fieldImageSize = document.getElementById('qrCodeImageSize');
+  const fieldLogoColor = document.getElementById('qrCodeLogoColor');
 
   const customUrlGroup = document.getElementById('customUrlGroup');
+  const imageFieldsGroup = document.getElementById('qrCodeImageFields');
+  const logoColorGroup = document.getElementById('qrCodeLogoColorGroup');
   const marginValue = document.getElementById('qrCodeMarginValue');
+  const imageSizeValue = document.getElementById('qrCodeImageSizeValue');
+  const logoColorValue = document.getElementById('qrCodeLogoColorValue');
   const foregroundValue = document.getElementById('qrCodeForegroundColorValue');
   const eyeValue = document.getElementById('qrCodeEyeColorValue');
   const backgroundValue = document.getElementById('qrCodeBackgroundColorValue');
+  const imageSourceValue = document.getElementById('qrCodeImageSource');
   const previewEl = document.getElementById('qrCodePreview');
+  const previewLinkEl = document.getElementById('qrCodePreviewLink');
   const listEl = document.getElementById('qrCodesList');
   const formEl = document.getElementById('qrCodeForm');
   const submitBtn = document.getElementById('qrCodeSubmitBtn');
+  const saveStatusEl = document.getElementById('qrSaveStatus');
   const qrCodeIdEl = document.getElementById('qrCodeId');
+  const uploadLogoBtn = document.getElementById('btnUploadQrLogo');
+  const libraryLogoBtn = document.getElementById('btnLibraryQrLogo');
+  const clearLogoBtn = document.getElementById('btnClearQrLogo');
+  const imageFileInput = document.getElementById('qrCodeImageFileInput');
+  const qrLibraryModal = document.getElementById('qrLibraryModal');
+  const qrLibraryGrid = document.getElementById('qrLibraryGrid');
+  const closeQrLibraryBtn = document.getElementById('btnCloseQrLibrary');
+  const PLINKK_LOGO_URL = 'https://cdn.plinkk.fr/logo.svg';
+
+  function isSvgUrl(url) {
+    if (!url) return false;
+    return /^data:image\/svg\+xml/i.test(url) || /\.svg([?#].*)?$/i.test(url);
+  }
+
+  function updateImageSourceLabel() {
+    if (!fieldImageUrl.value) {
+      imageSourceValue.textContent = 'Aucune image sélectionnée';
+      return;
+    }
+    imageSourceValue.textContent = fieldImageUrl.value;
+  }
+
+  async function uploadLogoFile(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch('/api/me/upload?field=iconUrl', {
+      method: 'POST',
+      body: formData,
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || 'upload_failed');
+    }
+    const data = await response.json();
+    if (!data?.url) throw new Error('upload_failed');
+    return data.url;
+  }
+
+  async function openLibraryModal() {
+    qrLibraryModal.classList.remove('hidden');
+    qrLibraryGrid.innerHTML = '<div class="col-span-full text-sm text-slate-400">Chargement...</div>';
+    const response = await fetch('/api/me/uploads');
+    if (!response.ok) {
+      qrLibraryGrid.innerHTML = '<div class="col-span-full text-sm text-rose-400">Impossible de charger la bibliothèque.</div>';
+      return;
+    }
+    const data = await response.json();
+    const uploads = data.uploads || [];
+    if (!uploads.length) {
+      qrLibraryGrid.innerHTML = '<div class="col-span-full text-sm text-slate-400">Aucune image dans la bibliothèque.</div>';
+      return;
+    }
+    qrLibraryGrid.innerHTML = uploads.map((item) => `
+      <button type="button" data-url="${escapeHtml(item.url)}" class="p-2 rounded-xl border border-slate-700 bg-slate-950 hover:border-violet-500/40 transition-colors text-left">
+        <img src="${escapeHtml(item.url)}" alt="upload" class="w-full h-20 object-contain rounded-lg bg-slate-800" />
+        <p class="text-[11px] text-slate-400 mt-2 truncate">${escapeHtml(item.name || 'Image')}</p>
+      </button>
+    `).join('');
+    qrLibraryGrid.querySelectorAll('button[data-url]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        fieldIncludeImage.checked = true;
+        fieldImageUrl.value = btn.dataset.url || '';
+        syncFormIndicators();
+        updateImageSourceLabel();
+        renderPreview();
+        scheduleAutoSave();
+        qrLibraryModal.classList.add('hidden');
+      });
+    });
+  }
+
+  const presets = {
+    custom: null,
+    plinkk: { foreground: '#111827', eye: '#7c3aed', background: '#ffffff' },
+    midnight: { foreground: '#e2e8f0', eye: '#38bdf8', background: '#0f172a' },
+    forest: { foreground: '#14532d', eye: '#166534', background: '#f0fdf4' },
+    sunset: { foreground: '#9a3412', eye: '#ea580c', background: '#fff7ed' },
+    mono: { foreground: '#000000', eye: '#000000', background: '#ffffff' },
+  };
+
+  function applyPreset(presetKey) {
+    const preset = presets[presetKey];
+    if (!preset) return;
+    fieldForeground.value = preset.foreground;
+    fieldEye.value = preset.eye;
+    fieldBackground.value = preset.background;
+
+    if (presetKey !== 'custom') {
+      fieldIncludeImage.checked = true;
+      fieldImageUrl.value = PLINKK_LOGO_URL;
+    }
+  }
+
+  function updatePreviewLink(targetUrl) {
+    const link = currentEditingQr?.shareUrl || targetUrl || '#';
+    previewLinkEl.href = link;
+    previewLinkEl.textContent = link;
+  }
+
+  function setSaveStatus(message, isError = false) {
+    if (!saveStatusEl) return;
+    saveStatusEl.textContent = message;
+    saveStatusEl.classList.toggle('text-rose-400', Boolean(isError));
+    saveStatusEl.classList.toggle('text-emerald-400', !isError && /enregistré/i.test(message));
+    saveStatusEl.classList.toggle('text-slate-400', !isError && !/enregistré/i.test(message));
+  }
 
   function escapeHtml(value) {
     return String(value || '')
@@ -201,6 +386,10 @@ window.addEventListener('load', () => {
           margin: parseInt(fieldMargin.value || '2', 10),
           size: 384,
           errorCorrectionLevel: fieldErrorCorrection.value,
+          includeImage: fieldIncludeImage.checked,
+          imageUrl: fieldIncludeImage.checked ? fieldImageUrl.value : undefined,
+          imageSize: parseInt(fieldImageSize.value || '25', 10),
+          logoColor: fieldLogoColor.value,
         }),
         signal: previewController.signal,
       });
@@ -210,7 +399,9 @@ window.addEventListener('load', () => {
         throw new Error(data.error || 'Impossible de générer la prévisualisation.');
       }
 
-      const svg = await response.text();
+        const svg = await response.text();
+        const targetUrl = response.headers.get('x-qr-target-url') || '';
+        updatePreviewLink(targetUrl);
       previewEl.innerHTML = svg;
       const svgNode = previewEl.querySelector('svg');
       if (svgNode) {
@@ -238,10 +429,14 @@ window.addEventListener('load', () => {
 
   function syncFormIndicators() {
     marginValue.textContent = fieldMargin.value;
+    imageSizeValue.textContent = `${fieldImageSize.value}%`;
+    logoColorValue.textContent = fieldLogoColor.value;
     foregroundValue.textContent = fieldForeground.value;
     eyeValue.textContent = fieldEye.value;
     backgroundValue.textContent = fieldBackground.value;
     customUrlGroup.classList.toggle('hidden', fieldTargetType.value !== 'CUSTOM_URL');
+    imageFieldsGroup.classList.toggle('hidden', !fieldIncludeImage.checked);
+    logoColorGroup.classList.toggle('hidden', !fieldIncludeImage.checked || !isSvgUrl(fieldImageUrl.value));
   }
 
   function resetForm() {
@@ -256,8 +451,16 @@ window.addEventListener('load', () => {
     fieldRounded.checked = false;
     fieldMargin.value = '2';
     fieldErrorCorrection.value = 'M';
+    fieldPreset.value = 'plinkk';
+    fieldIncludeImage.checked = true;
+    fieldImageUrl.value = PLINKK_LOGO_URL;
+    fieldImageSize.value = '25';
+    fieldLogoColor.value = '#7c3aed';
+    applyPreset('plinkk');
     submitBtn.textContent = 'Créer le QR Code';
     syncFormIndicators();
+    updateImageSourceLabel();
+    updatePreviewLink('');
     renderPreview();
   }
 
@@ -273,8 +476,15 @@ window.addEventListener('load', () => {
     fieldRounded.checked = Boolean(item.rounded);
     fieldMargin.value = String(item.margin ?? 2);
     fieldErrorCorrection.value = item.errorCorrectionLevel || 'M';
+    fieldPreset.value = item.preset || 'custom';
+    fieldIncludeImage.checked = Boolean(item.includeImage);
+    fieldImageUrl.value = item.imageUrl || '';
+    fieldImageSize.value = String(item.imageSize ?? 25);
+    fieldLogoColor.value = item.logoColor || '#7c3aed';
     submitBtn.textContent = 'Enregistrer les modifications';
     syncFormIndicators();
+    updateImageSourceLabel();
+    updatePreviewLink(item.shareUrl || '');
     renderPreview();
   }
 
@@ -328,17 +538,8 @@ window.addEventListener('load', () => {
     }
   }
 
-  async function onSubmit(event) {
-    event.preventDefault();
-    if (!plinkkId) return;
-
-    const qrId = qrCodeIdEl.value;
-    const method = qrId ? 'PATCH' : 'POST';
-    const url = qrId
-      ? `/api/me/plinkks/${plinkkId}/qrcodes/${qrId}`
-      : `/api/me/plinkks/${plinkkId}/qrcodes`;
-
-    const payload = {
+  function buildPayload() {
+    return {
       name: fieldName.value,
       targetType: fieldTargetType.value,
       customUrl: fieldTargetType.value === 'CUSTOM_URL' ? fieldCustomUrl.value : undefined,
@@ -348,24 +549,117 @@ window.addEventListener('load', () => {
       rounded: fieldRounded.checked,
       margin: parseInt(fieldMargin.value || '2', 10),
       errorCorrectionLevel: fieldErrorCorrection.value,
+      preset: fieldPreset.value,
+      includeImage: fieldIncludeImage.checked,
+      imageUrl: fieldIncludeImage.checked ? fieldImageUrl.value : undefined,
+      imageSize: parseInt(fieldImageSize.value || '25', 10),
+      logoColor: fieldLogoColor.value,
     };
+  }
 
-    const response = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      throw new Error(data.error || 'Erreur lors de la sauvegarde');
+  async function saveQr(forceCreate = false) {
+    if (!plinkkId) return;
+    const qrId = qrCodeIdEl.value;
+    if (!qrId && !forceCreate) {
+      setSaveStatus('Nouveau QR : cliquez sur Créer pour initialiser.');
+      return;
     }
 
-    await loadQRCodes();
+    const method = qrId ? 'PATCH' : 'POST';
+    const url = qrId
+      ? `/api/me/plinkks/${plinkkId}/qrcodes/${qrId}`
+      : `/api/me/plinkks/${plinkkId}/qrcodes`;
+
+    isAutoSaving = true;
+    setSaveStatus('Enregistrement...');
+
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildPayload()),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Erreur lors de la sauvegarde');
+      }
+
+      await loadQRCodes();
+      setSaveStatus('✅ Modifications enregistrées');
+    } finally {
+      isAutoSaving = false;
+    }
+  }
+
+  function scheduleAutoSave() {
+    if (suspendAutoSave || isAutoSaving) return;
+    if (!qrCodeIdEl.value) {
+      setSaveStatus('Nouveau QR : cliquez sur Créer pour initialiser.');
+      return;
+    }
+    setSaveStatus('Modifications en attente...');
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(async () => {
+      try {
+        await saveQr(false);
+      } catch (error) {
+        setSaveStatus(`Erreur autosave: ${error.message}`, true);
+      }
+    }, 700);
+  }
+
+  async function onSubmit(event) {
+    event.preventDefault();
+    if (!plinkkId) return;
+    await saveQr(true);
   }
 
   document.getElementById('btnNewQr').addEventListener('click', resetForm);
   document.getElementById('btnResetForm').addEventListener('click', resetForm);
+  uploadLogoBtn.addEventListener('click', () => imageFileInput.click());
+  imageFileInput.addEventListener('change', async () => {
+    const file = imageFileInput.files?.[0];
+    if (!file) return;
+    try {
+      const uploadedUrl = await uploadLogoFile(file);
+      fieldIncludeImage.checked = true;
+      fieldImageUrl.value = uploadedUrl;
+      syncFormIndicators();
+      updateImageSourceLabel();
+      renderPreview();
+      scheduleAutoSave();
+    } catch (error) {
+      alert(`Erreur upload: ${error.message}`);
+    } finally {
+      imageFileInput.value = '';
+    }
+  });
+  libraryLogoBtn.addEventListener('click', () => {
+    openLibraryModal().catch((e) => {
+      console.error(e);
+      qrLibraryGrid.innerHTML = '<div class="col-span-full text-sm text-rose-400">Erreur chargement bibliothèque.</div>';
+    });
+  });
+  clearLogoBtn.addEventListener('click', () => {
+    fieldImageUrl.value = '';
+    fieldIncludeImage.checked = false;
+    syncFormIndicators();
+    updateImageSourceLabel();
+    renderPreview();
+    scheduleAutoSave();
+  });
+  closeQrLibraryBtn.addEventListener('click', () => qrLibraryModal.classList.add('hidden'));
+  qrLibraryModal.addEventListener('click', (event) => {
+    if (event.target === qrLibraryModal) qrLibraryModal.classList.add('hidden');
+  });
+  fieldPreset.addEventListener('change', () => {
+    applyPreset(fieldPreset.value);
+    syncFormIndicators();
+    updateImageSourceLabel();
+    renderPreview();
+    scheduleAutoSave();
+  });
   formEl.addEventListener('submit', async (event) => {
     try {
       await onSubmit(event);
@@ -374,20 +668,23 @@ window.addEventListener('load', () => {
     }
   });
 
-  [fieldTargetType, fieldCustomUrl, fieldForeground, fieldEye, fieldBackground, fieldRounded, fieldMargin, fieldErrorCorrection].forEach((el) => {
+  [fieldTargetType, fieldCustomUrl, fieldForeground, fieldEye, fieldBackground, fieldRounded, fieldMargin, fieldErrorCorrection, fieldIncludeImage, fieldImageUrl, fieldImageSize, fieldLogoColor].forEach((el) => {
     if (el) {
       el.addEventListener('input', () => {
         syncFormIndicators();
         renderPreview();
+        scheduleAutoSave();
       });
       el.addEventListener('change', () => {
         syncFormIndicators();
         renderPreview();
+        scheduleAutoSave();
       });
     }
   });
 
   syncFormIndicators();
+  updateImageSourceLabel();
   renderPreview();
   loadQRCodes().catch((error) => {
     listEl.innerHTML = `<div class="text-sm text-rose-400">${escapeHtml(error.message)}</div>`;

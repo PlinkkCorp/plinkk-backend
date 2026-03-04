@@ -776,12 +776,13 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     if (!me) return reply.code(404).send({ error: "Utilisateur introuvable" });
 
     const isGif = file.mimetype === "image/gif";
+    const isSvg = file.mimetype === "image/svg+xml";
     let processed: Buffer;
     let ext: string;
 
-    if (isGif || isVideo) {
+    if (isGif || isVideo || isSvg) {
       processed = buf;
-      ext = isGif ? "gif" : file.mimetype.split("/")[1];
+      ext = isGif ? "gif" : (isSvg ? "svg" : file.mimetype.split("/")[1]);
     } else {
       const size = field === "backgroundImage" ? 1920 : (field === "iconUrl" ? 64 : field === "profileIcon" ? 128 : 512);
       processed = await sharp(buf)
