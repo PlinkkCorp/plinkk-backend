@@ -1,0 +1,1130 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bienvenue sur Plinkk !</title>
+  <link rel="icon" href="https://cdn.plinkk.fr/logo.svg" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <style>
+    * { font-family: 'Inter', system-ui, sans-serif; box-sizing: border-box; }
+
+    /* ── Animations ── */
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
+    @keyframes slideLeft  { from { opacity:0; transform:translateX(28px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes slideRight { from { opacity:0; transform:translateX(-28px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes blobFloat { 0%,100%{border-radius:60% 40% 30% 70%/60% 30% 70% 40%} 50%{border-radius:30% 60% 70% 40%/50% 60% 30% 60%} }
+    @keyframes phoneGlow { 0%,100%{box-shadow:0 0 30px rgba(139,92,246,.2)} 50%{box-shadow:0 0 60px rgba(139,92,246,.35)} }
+    @keyframes tooltipPop { from{opacity:0;transform:scale(.92) translateY(6px)} to{opacity:1;transform:scale(1) translateY(0)} }
+
+    .fade-up    { animation: fadeUp .4s ease both; }
+    .blob { animation: blobFloat 9s ease-in-out infinite; }
+
+    /* ── Steps ── */
+    .step-panel { display: none; }
+    .step-panel.active { display: block; animation: slideLeft .3s ease both; }
+
+    /* ── Inputs ── */
+    .field-input {
+      width: 100%;
+      background: rgba(30,41,59,.7);
+      border: 1.5px solid rgba(71,85,105,.6);
+      color: #f8fafc;
+      border-radius: 12px;
+      padding: 11px 16px;
+      font-size: 14px;
+      transition: border-color .18s, box-shadow .18s;
+      outline: none;
+    }
+    .field-input::placeholder { color: #475569; }
+    .field-input:focus { border-color: #8b5cf6; box-shadow: 0 0 0 3px rgba(139,92,246,.15); }
+    .field-input.valid   { border-color: #10b981; }
+    .field-input.invalid { border-color: #ef4444; }
+    textarea.field-input { resize: none; }
+
+    /* ── Color swatches ── */
+    .swatch {
+      width: 26px; height: 26px; border-radius: 50%;
+      cursor: pointer; border: 2.5px solid transparent;
+      transition: transform .15s, border-color .15s;
+      flex-shrink: 0;
+    }
+    .swatch:hover, .swatch.on { border-color: #fff; transform: scale(1.18); }
+
+    /* ── Category pills ── */
+    .cat-btn {
+      border: 1.5px solid rgba(71,85,105,.6);
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      background: rgba(30,41,59,.6);
+      transition: border-color .15s, background .15s;
+    }
+    .cat-btn.on { border-color: #8b5cf6; background: rgba(139,92,246,.12); }
+
+    /* ── Icon buttons ── */
+    .icon-btn {
+      border: 2px solid rgba(71,85,105,.6);
+      cursor: pointer;
+      transition: border-color .18s, background-color .18s, transform .12s;
+    }
+    .icon-btn:hover {
+      border-color: #8b5cf6;
+      background: rgba(139,92,246,.08);
+      transform: translateY(-2px);
+    }
+    .icon-btn.border-violet-500 { border-color: #8b5cf6 !important; }
+    .icon-btn.bg-violet-500\/10 { background: rgba(139,92,246,.15) !important; }
+
+    /* Simple Icons SVG are brand-colored/black by default; force white for dark UI */
+    .library-link-icon {
+      filter: brightness(0) invert(1);
+      opacity: .95;
+    }
+
+    /* ── Tour spotlight ── */
+    #tourHighlight {
+      position: fixed;
+      z-index: 9998;
+      pointer-events: none;
+      border-radius: 10px;
+      border: 2px solid #8b5cf6;
+      box-shadow: 0 0 0 4000px rgba(0,0,0,.72);
+      transition: top .28s cubic-bezier(.4,0,.2,1),
+                  left .28s cubic-bezier(.4,0,.2,1),
+                  width .28s cubic-bezier(.4,0,.2,1),
+                  height .28s cubic-bezier(.4,0,.2,1);
+    }
+    #tourCard {
+      position: fixed;
+      z-index: 9999;
+      width: 288px;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid rgba(139,92,246,.4);
+      border-radius: 16px;
+      padding: 18px 20px;
+      box-shadow: 0 24px 48px rgba(0,0,0,.6), 0 0 0 1px rgba(139,92,246,.1);
+    }
+    #tourCard.arrow-top::before    { content:''; position:absolute; border:7px solid transparent; border-bottom-color:rgba(139,92,246,.4); top:-14px; left:calc(50% - 7px); }
+    #tourCard.arrow-bottom::before { content:''; position:absolute; border:7px solid transparent; border-top-color:rgba(139,92,246,.4); bottom:-14px; left:calc(50% - 7px); }
+    #tourCard.arrow-left::before   { content:''; position:absolute; border:7px solid transparent; border-right-color:rgba(139,92,246,.4); left:-14px; top:calc(50% - 7px); }
+    #tourCard.arrow-right::before  { content:''; position:absolute; border:7px solid transparent; border-left-color:rgba(139,92,246,.4); right:-14px; top:calc(50% - 7px); }
+
+    /* ── Phone mockup ── */
+    .phone-mockup {
+      width: 200px;
+      border-radius: 28px;
+      border: 2px solid rgba(100,116,139,.4);
+      background: #0f172a;
+      overflow: hidden;
+      animation: phoneGlow 4s ease-in-out infinite;
+    }
+
+    /* ── Progress bar ── */
+    .progress-track { height: 3px; background: rgba(71,85,105,.4); border-radius: 9px; overflow: hidden; }
+    .progress-fill  { height: 100%; border-radius: 9px; background: linear-gradient(90deg,#8b5cf6,#6366f1); transition: width .4s cubic-bezier(.4,0,.2,1); }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-white overflow-x-hidden">
+
+  <!-- Background blobs -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden">
+    <div class="blob absolute -top-60 -left-60 w-[600px] h-[600px] bg-violet-700/8 rounded-full blur-3xl"></div>
+    <div class="blob absolute -bottom-60 -right-60 w-[600px] h-[600px] bg-indigo-700/8 rounded-full blur-3xl" style="animation-delay:4.5s"></div>
+  </div>
+
+  <!-- ── Main layout ─────────────────────────────────────────────────────────── -->
+  <div class="relative min-h-screen flex flex-col lg:flex-row">
+
+    <!-- Left: form -->
+    <div class="flex-1 flex flex-col items-center justify-center px-4 py-10 lg:py-16">
+      <div class="w-full max-w-md">
+
+        <!-- Logo + header -->
+        <div class="flex items-center gap-2.5 mb-8 fade-up">
+          <img src="https://cdn.plinkk.fr/logo.svg" alt="Plinkk" class="w-8 h-8 rounded-xl" />
+          <span class="font-bold text-lg">Plinkk</span>
+          <span class="ml-auto text-xs text-slate-500 flex items-center gap-1.5 transition-opacity duration-300" id="saveIndicator" style="opacity:0">
+            <i class="bi bi-check-lg text-emerald-400"></i>
+            Sauvegardé
+          </span>
+        </div>
+
+        <!-- Progress -->
+        <div class="mb-6 fade-up" style="animation-delay:.05s">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-medium text-slate-400" id="stepLabel">Étape 1 sur 3</span>
+            <button onclick="startTour()" class="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-1 transition-colors">
+              <i class="bi bi-question-circle"></i>
+              Guide
+            </button>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill" style="width:33%"></div>
+          </div>
+        </div>
+
+        <!-- Card -->
+        <div class="bg-slate-900/80 backdrop-blur border border-slate-800 rounded-2xl shadow-2xl fade-up" style="animation-delay:.1s">
+
+          <!-- ── STEP 1 : Identité ─────────────────────────────────────────── -->
+          <div class="step-panel active p-6" id="step-1">
+            <div class="mb-5">
+              <h2 class="text-xl font-bold mb-1 flex items-center gap-2">Qui es-tu ? <i class="bi bi-hand-wave text-2xl"></i></h2>
+              <p class="text-sm text-slate-400">Nomme ton espace et choisis ton URL unique.</p>
+            </div>
+
+            <!-- Nom d'affichage -->
+            <div class="mb-4" id="field-displayName">
+              <label class="block text-sm font-medium text-slate-300 mb-1.5">
+                Nom d'affichage <span class="text-rose-400">*</span>
+              </label>
+              <input id="displayName" type="text" maxlength="50" placeholder="Ex : Sophie Martin"
+                value="<%- (typeof draft !== 'undefined' && draft.displayName) ? draft.displayName : '' %>"
+                class="field-input" autocomplete="name" />
+            </div>
+
+            <!-- Slug -->
+            <div class="mb-4" id="field-slug">
+              <label class="block text-sm font-medium text-slate-300 mb-1.5">
+                Ton URL Plinkk <span class="text-rose-400">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm select-none pointer-events-none">plinkk.fr/</span>
+                <input id="slugInput" type="text" maxlength="30" placeholder="mon-nom"
+                  value="<%- (typeof draft !== 'undefined' && draft.slug) ? draft.slug : '' %>"
+                  class="field-input pl-[94px] pr-32"
+                  style="font-family:'Courier New',monospace;" />
+                <span id="slugIcon" class="absolute right-24 top-1/2 -translate-y-1/2 text-sm leading-none"></span>
+                <button type="button" id="regenerateSlugBtn" onclick="regenerateSlug()" 
+                  class="absolute right-3 top-1/2 -translate-y-1/2 px-2 py-1 rounded text-xs font-medium bg-violet-600/20 hover:bg-violet-600/35 text-violet-300 transition-colors select-none"
+                  title="Régénérer le slug depuis le nom">↻</button>
+              </div>
+              <p id="slugMsg" class="text-xs mt-1.5 text-slate-500 min-h-[16px]"></p>
+            </div>
+
+            <!-- Catégorie -->
+            <div class="mb-6" id="field-category">
+              <label class="block text-sm font-medium text-slate-300 mb-2">Catégorie</label>
+              <div class="grid grid-cols-3 gap-2">
+                <% [
+                  { v:'créateur',  e:'<i class="bi bi-palette text-xl"></i>', l:'Créateur'  },
+                  { v:'pro',       e:'<i class="bi bi-briefcase text-xl"></i>', l:'Pro'       },
+                  { v:'perso',     e:'<i class="bi bi-person text-xl"></i>', l:'Perso'     },
+                  { v:'musique',   e:'<i class="bi bi-music-note-beamed text-xl"></i>', l:'Musique'   },
+                  { v:'tech',      e:'<i class="bi bi-laptop text-xl"></i>', l:'Tech'      },
+                  { v:'sport',     e:'<i class="bi bi-trophy text-xl"></i>', l:'Sport'     },
+                ].forEach(c => { %>
+                <button type="button" data-cat="<%= c.v %>" onclick="pickCat('<%= c.v %>')"
+                  class="cat-btn text-left <%- (typeof draft !== 'undefined' && draft.category === c.v) ? 'on' : '' %>">
+                  <span class="block leading-none mb-1"><%- c.e %></span>
+                  <span class="block text-xs font-medium text-slate-200"><%= c.l %></span>
+                </button>
+                <% }); %>
+              </div>
+              <input type="hidden" id="catVal" value="<%- (typeof draft !== 'undefined' && draft.category) ? draft.category : '' %>" />
+            </div>
+
+            <button onclick="goStep(2)"
+              class="w-full bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl py-3 text-sm transition-colors flex items-center justify-center gap-2">
+              Suivant
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
+
+          <!-- ── STEP 2 : Style ─────────────────────────────────────────────── -->
+          <div class="step-panel p-6" id="step-2">
+            <div class="mb-5">
+              <h2 class="text-xl font-bold mb-1 flex items-center gap-2">Ton style <i class="bi bi-stars text-2xl"></i></h2>
+              <p class="text-sm text-slate-400">Personnalise l'apparence de ton profil.</p>
+            </div>
+
+            <!-- Avatar -->
+            <div class="mb-4" id="field-avatar">
+              <label class="block text-sm font-medium text-slate-300 mb-2">Avatar</label>
+              <div class="flex items-center gap-3">
+                <div id="avatarRing" class="w-14 h-14 rounded-2xl bg-slate-800 border-2 overflow-hidden flex items-center justify-center shrink-0" style="border-color:#8b5cf6">
+                  <span id="avatarInitials" class="text-lg font-bold text-slate-400"></span>
+                  <img id="avatarImg" class="w-full h-full object-cover hidden" alt="avatar" />
+                </div>
+                <div class="flex-1 flex flex-col gap-2">
+                  <div class="flex items-center gap-2">
+                    <button type="button" id="avatarUploadBtn" onclick="document.getElementById('avatarFileInput').click()"
+                      class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 hover:border-violet-500 text-xs font-medium text-slate-300 hover:text-white transition-all whitespace-nowrap">
+                      <i class="bi bi-image"></i>
+                      Uploader
+                    </button>
+                    <input id="avatarFileInput" type="file" accept="image/*" class="hidden" onchange="handleAvatarUpload(this)" />
+                    <span id="avatarUploadStatus" class="hidden text-xs text-emerald-400"></span>
+                  </div>
+                  <input id="avatarUrl" type="url" placeholder="ou colle une URL…"
+                    value="<%- (typeof draft !== 'undefined' && draft.avatarUrl) ? draft.avatarUrl : '' %>"
+                    class="field-input text-sm" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Bio -->
+            <div class="mb-4" id="field-bio">
+              <label class="block text-sm font-medium text-slate-300 mb-1.5">
+                Bio <span class="text-slate-600 font-normal">(optionnel)</span>
+              </label>
+              <textarea id="bioInput" rows="3" maxlength="160" placeholder="Dis quelque chose sur toi…"
+                class="field-input"><%- (typeof draft !== 'undefined' && draft.bio) ? draft.bio : '' %></textarea>
+              <p class="text-right text-xs text-slate-600 mt-1"><span id="bioCount">0</span>/160</p>
+            </div>
+
+            <!-- Thème Plinkk -->
+            <div class="mb-6" id="field-color">
+              <label class="block text-sm font-medium text-slate-300 mb-2">Thème Plinkk</label>
+              <div class="grid grid-cols-5 gap-1.5">
+                <% const PLINKK_THEMES = [
+                  {name:'Grey',       btn:'#7289DA'},
+                  {name:'Doré',       btn:'#FFA500'},
+                  {name:'Vert',       btn:'#00FF00'},
+                  {name:'Bleu',       btn:'#00A0DC'},
+                  {name:'Rouge',      btn:'#FF0000'},
+                  {name:'Ciel',       btn:'#87CEFA'},
+                  {name:'Corail',     btn:'#FF4500'},
+                  {name:'Orange',     btn:'#E6950A'},
+                  {name:'Gris 2',     btn:'#A9A9A9'},
+                  {name:'Vert gris',  btn:'#3CB371'},
+                  {name:'Bleu clair', btn:'#ADD8E6'},
+                  {name:'Brun',       btn:'#A0522D'},
+                  {name:'Rose',       btn:'#FF69B4'},
+                  {name:'Violet',     btn:'#800080'},
+                  {name:'Neptune',    btn:'#8a7272'},
+                ]; PLINKK_THEMES.forEach((t, i) => { %>
+                <button type="button" data-theme-idx="<%= i %>" data-c="<%= t.btn %>"
+                  onclick="pickTheme(<%= i %>, '<%= t.btn %>')"
+                  class="theme-btn flex flex-col items-center gap-1 py-2 px-1 rounded-xl border transition-all <%- (typeof draft !== 'undefined' && draft.themeIndex === i) ? 'border-violet-500 bg-violet-500/10' : 'border-slate-700 hover:border-slate-500' %>">
+                  <div class="w-5 h-5 rounded-full" style="background:<%= t.btn %>"></div>
+                  <span class="text-[9px] text-slate-400 truncate w-full text-center leading-tight"><%= t.name %></span>
+                </button>
+                <% }); %>
+              </div>
+              <input type="hidden" id="accentVal" value="<%- (typeof draft !== 'undefined' && draft.accentColor) ? draft.accentColor : '#7289DA' %>" />
+              <input type="hidden" id="themeIdx" value="<%- (typeof draft !== 'undefined' && draft.themeIndex !== undefined) ? draft.themeIndex : 0 %>" />
+            </div>
+
+            <div class="flex gap-3">
+              <button onclick="goStep(1)" class="flex-1 border border-slate-700 hover:border-slate-600 text-slate-300 font-medium rounded-xl py-3 text-sm transition-colors">
+                Retour
+              </button>
+              <button onclick="goStep(3)"
+                class="flex-1 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl py-3 text-sm transition-colors flex items-center justify-center gap-2">
+                Suivant
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- ── STEP 3 : Premier lien ─────────────────────────────────────── -->
+          <div class="step-panel p-6" id="step-3">
+            <div class="mb-5">
+              <h2 class="text-xl font-bold mb-1 flex items-center gap-2">Ton premier lien <i class="bi bi-link-45deg text-2xl"></i></h2>
+              <p class="text-sm text-slate-400">Ajoute un lien vers tes réseaux ou ton site (optionnel).</p>
+            </div>
+
+            <!-- Titre du lien -->
+            <div class="mb-4" id="field-linkTitle">
+              <label class="block text-sm font-medium text-slate-300 mb-1.5">
+                Titre du lien <span class="text-slate-600 font-normal">(optionnel)</span>
+              </label>
+              <input id="firstLinkTitle" type="text" maxlength="100" placeholder="Ex : Mon Instagram, Mon Site Web…"
+                value="<%- (typeof draft !== 'undefined' && draft.firstLinkTitle) ? draft.firstLinkTitle : '' %>"
+                class="field-input" />
+            </div>
+
+            <!-- URL du lien -->
+            <div class="mb-4" id="field-linkUrl">
+              <label class="block text-sm font-medium text-slate-300 mb-1.5">
+                URL du lien <span class="text-slate-600 font-normal">(optionnel)</span>
+              </label>
+              <input id="firstLinkUrl" type="url" placeholder="https://…"
+                value="<%- (typeof draft !== 'undefined' && draft.firstLinkUrl) ? draft.firstLinkUrl : '' %>"
+                class="field-input" />
+            </div>
+
+            <!-- Icône du lien (Bibliothèque) -->
+            <div class="mb-6" id="field-linkIcon">
+              <label class="block text-sm font-medium text-slate-300 mb-2">
+                Icône du lien <span class="text-slate-600 font-normal">(optionnel)</span>
+              </label>
+              
+              <!-- Icons populaires -->
+              <div class="mb-3">
+                <p class="text-xs text-slate-500 mb-2">Réseaux populaires :</p>
+                <div class="grid grid-cols-4 gap-2 mb-4">
+                  <% const LINK_ICONS = [
+                    { name:'GitHub', url:'https://cdn.jsdelivr.net/npm/simple-icons@11/icons/github.svg' },
+                    { name:'Twitter', url:'https://cdn.jsdelivr.net/npm/simple-icons@11/icons/twitter.svg' },
+                    { name:'Instagram', url:'https://cdn.jsdelivr.net/npm/simple-icons@11/icons/instagram.svg' },
+                    { name:'LinkedIn', url:'https://cdn.jsdelivr.net/npm/simple-icons@11/icons/linkedin.svg' },
+                    { name:'YouTube', url:'https://cdn.jsdelivr.net/npm/simple-icons@11/icons/youtube.svg' },
+                    { name:'TikTok', url:'https://cdn.jsdelivr.net/npm/simple-icons@11/icons/tiktok.svg' },
+                    { name:'Discord', url:'https://cdn.jsdelivr.net/npm/simple-icons@11/icons/discord.svg' },
+                    { name:'Twitch', url:'https://cdn.jsdelivr.net/npm/simple-icons@11/icons/twitch.svg' },
+                  ]; LINK_ICONS.forEach((icon) => { %>
+                  <button type="button"
+                    onclick="selectLinkIcon('<%= icon.name %>', '<%= icon.url %>')"
+                    class="icon-btn flex flex-col items-center gap-1 p-2 rounded-lg border-2 border-slate-700 hover:border-violet-500 transition-all"
+                    data-icon-url="<%= icon.url %>">
+                    <img src="<%= icon.url %>" alt="<%= icon.name %>" class="w-5 h-5 library-link-icon" />
+                    <span class="text-[10px] text-slate-400"><%= icon.name %></span>
+                  </button>
+                  <% }); %>
+                </div>
+              </div>
+              
+              <!-- Upload custom image -->
+              <div class="flex gap-2">
+                <button type="button" id="linkIconUploadBtn" onclick="document.getElementById('linkIconFileInput').click()"
+                  class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 hover:border-violet-500 text-xs font-medium text-slate-300 hover:text-white transition-all whitespace-nowrap flex-1">
+                  <i class="bi bi-image"></i>
+                  Image custom
+                </button>
+                <button type="button" id="linkIconClearBtn" onclick="clearLinkIcon()"
+                  class="px-2 py-2 rounded-lg bg-slate-800 border border-slate-700 hover:border-rose-500 text-slate-400 hover:text-rose-400 transition-all">
+                  <i class="bi bi-x text-xl"></i>
+                </button>
+              </div>
+              <input id="linkIconFileInput" type="file" accept="image/*" class="hidden" onchange="handleLinkIconUpload(this)" />
+              
+              <!-- Preview -->
+              <div id="linkIconPreview" class="mt-3 flex items-center gap-2 p-2 rounded-lg bg-slate-900/50 hidden">
+                <img id="linkIconPreviewImg" src="" alt="Preview" class="w-6 h-6" />
+                <span id="linkIconPreviewName" class="text-xs text-slate-300 flex-1"></span>
+              </div>
+              
+              <input type="hidden" id="firstLinkIcon" value="<%- (typeof draft !== 'undefined' && draft.firstLinkIcon) ? draft.firstLinkIcon : '' %>" />
+            </div>
+
+            <div class="flex gap-3">
+              <button onclick="goStep(2)" class="flex-1 border border-slate-700 hover:border-slate-600 text-slate-300 font-medium rounded-xl py-3 text-sm transition-colors">
+                Retour
+              </button>
+              <button onclick="completeOnboarding()" id="completeBtn"
+                class="flex-1 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold rounded-xl py-3 text-sm transition-all flex items-center justify-center gap-2">
+                <span id="completeTxt" class="flex items-center gap-2">Créer mon Plinkk <i class="bi bi-rocket-takeoff text-lg"></i></span>
+                <span id="completeSpinner" class="hidden">
+                  <i class="bi bi-arrow-clockwise animate-spin"></i>
+                </span>
+              </button>
+            </div>
+          </div>
+
+
+        </div><!-- /card -->
+      </div>
+    </div>
+
+    <!-- Right: live preview (desktop only) -->
+    <div class="hidden lg:flex flex-col items-center justify-center w-[340px] xl:w-[400px] shrink-0 px-8 py-16 border-l border-slate-800/60 bg-slate-950/50">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-6">Aperçu en direct</p>
+
+      <div class="phone-mockup">
+        <!-- Status bar -->
+        <div class="bg-slate-900 px-4 py-2 flex items-center justify-between">
+          <span class="text-xs text-slate-500 font-mono overflow-hidden whitespace-nowrap" style="max-width:120px">plinkk.fr/<span id="previewSlug">ton-nom</span></span>
+          <div class="flex gap-1">
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+          </div>
+        </div>
+        <!-- Profile content -->
+        <div class="p-4" style="background:linear-gradient(160deg,#0f172a 0%,#1e1b4b 100%);">
+          <div class="flex flex-col items-center mb-4 pt-2">
+            <div id="previewAvatarWrap" class="w-16 h-16 rounded-2xl mb-3 overflow-hidden flex items-center justify-center border-2" style="border-color:#8b5cf6;background:#1e293b;">
+              <span id="previewInitials" class="text-xl font-bold text-slate-400">?</span>
+              <img id="previewAvatarImg" class="w-full h-full object-cover hidden" alt="" />
+            </div>
+            <p id="previewName" class="text-sm font-bold text-white text-center leading-tight">Ton nom</p>
+            <p id="previewBio" class="text-xs text-slate-400 text-center mt-1 leading-relaxed px-2 hidden"></p>
+            <div id="previewBadge" class="hidden mt-2 px-2 py-0.5 rounded-full text-xs font-medium text-white" style="background:#8b5cf6"></div>
+          </div>
+          <div id="previewLinkBtn" class="hidden rounded-xl p-2.5 mb-2 text-center text-xs font-semibold text-white" style="background:#8b5cf6"></div>
+          <div class="space-y-2 opacity-20">
+            <div class="rounded-xl h-8 bg-slate-700"></div>
+            <div class="rounded-xl h-8 bg-slate-700"></div>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-600 mt-5 text-center max-w-[180px] leading-relaxed">Aperçu temps réel de ton profil public.</p>
+    </div>
+  </div>
+
+  <!-- ── Tour elements ───────────────────────────────────────────────────────── -->
+  <div id="tourHighlight" class="hidden"></div>
+  <div id="tourCard" class="hidden" style="animation:tooltipPop .22s ease both"></div>
+  <div id="tourBackdrop" class="hidden fixed inset-0 z-[9997] cursor-pointer" onclick="nextTour()"></div>
+
+  <script>
+  // ════════════════════════════════════════════════════════════════════
+  //  STATE
+  // ════════════════════════════════════════════════════════════════════
+  let currentStep = <%- (typeof step !== 'undefined' && step) ? step : 1 %>;
+  let saveTimer  = null;
+  let slugTimer  = null;
+  let slugOk     = <%- (typeof draft !== 'undefined' && draft && draft.slug && draft.slug.length >= 2) ? 'true' : 'false' %>;
+
+  // ════════════════════════════════════════════════════════════════════
+  //  STEP NAVIGATION
+  // ════════════════════════════════════════════════════════════════════
+  function goStep(n) {
+    if (n < 1 || n > 3) return;
+    if (n > currentStep && !validateStep(currentStep)) return;
+
+    document.getElementById(`step-${currentStep}`).classList.remove('active');
+    currentStep = n;
+    document.getElementById(`step-${currentStep}`).classList.add('active');
+
+    const labels = ['Étape 1 sur 3','Étape 2 sur 3','Étape 3 sur 3'];
+    const widths  = ['33%','66%','100%'];
+    document.getElementById('stepLabel').textContent = labels[n-1];
+    document.getElementById('progressFill').style.width = widths[n-1];
+
+    scheduleSave();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function validateStep(n) {
+    if (n === 1) {
+      const name = document.getElementById('displayName').value.trim();
+      const slug = document.getElementById('slugInput').value.trim();
+      if (!name) { shake('displayName'); toast('Le nom d\'affichage est requis.'); return false; }
+      if (!slug || !slugOk) { shake('slugInput'); toast('Choisis une URL disponible.'); return false; }
+    }
+    return true;
+  }
+
+  function shake(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('invalid');
+    const moves = [4,-4,3,-3,0];
+    moves.forEach((v,i) => setTimeout(() => el.style.transform = v ? `translateX(${v}px)` : '', i*55));
+    setTimeout(() => el.classList.remove('invalid'), 800);
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  //  CATEGORY
+  // ════════════════════════════════════════════════════════════════════
+  function pickCat(v) {
+    document.getElementById('catVal').value = v;
+    document.querySelectorAll('[data-cat]').forEach(b => b.classList.toggle('on', b.dataset.cat === v));
+    updatePreview(); scheduleSave();
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  //  THÈME
+  // ══════════════════════════════════════════════════════════════════
+  function pickTheme(idx, btnColor) {
+    document.getElementById('accentVal').value = btnColor;
+    document.getElementById('themeIdx').value  = idx;
+    document.querySelectorAll('.theme-btn').forEach(b => {
+      const isOn = parseInt(b.dataset.themeIdx) === idx;
+      b.classList.toggle('border-violet-500', isOn);
+      b.classList.toggle('bg-violet-500/10', isOn);
+      b.classList.toggle('border-slate-700', !isOn);
+    });
+    updatePreview();
+    scheduleSave();
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  //  DISPLAY NAME
+  // ════════════════════════════════════════════════════════════════════
+  document.getElementById('displayName').addEventListener('input', function () {
+    updateInitials();
+    const slugEl = document.getElementById('slugInput');
+    if (!slugEl.dataset.manual) {
+      const s = this.value.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+        .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+      slugEl.value = s;
+      slugOk = false; triggerSlugCheck(s);
+    }
+    updatePreview(); scheduleSave();
+  });
+
+  function regenerateSlug() {
+    const displayName = document.getElementById('displayName').value.trim();
+    if (!displayName) {
+      toast('Remplis d\'abord le nom d\'affichage.', 'error');
+      return;
+    }
+    const s = displayName.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+    const slugEl = document.getElementById('slugInput');
+    slugEl.value = s;
+    delete slugEl.dataset.manual;
+    slugOk = false;
+    triggerSlugCheck(s);
+    updatePreview();
+    scheduleSave();
+    toast('URL régénérée !', 'success');
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  //  LINK ICON SELECTION
+  // ════════════════════════════════════════════════════════════════════
+  function selectLinkIcon(name, url) {
+    document.getElementById('firstLinkIcon').value = url;
+    document.querySelectorAll('.icon-btn').forEach(btn => btn.classList.remove('border-violet-500', 'bg-violet-500/10'));
+    event.currentTarget.classList.add('border-violet-500', 'bg-violet-500/10');
+    showLinkIconPreview(name, url);
+    scheduleSave();
+  }
+
+  function handleLinkIconUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast('Veuillez sélectionner une image.', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      document.getElementById('firstLinkIcon').value = dataUrl;
+      showLinkIconPreview(file.name, dataUrl);
+      document.querySelectorAll('.icon-btn').forEach(btn => btn.classList.remove('border-violet-500', 'bg-violet-500/10'));
+      scheduleSave();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function showLinkIconPreview(name, url) {
+    const preview = document.getElementById('linkIconPreview');
+    const img = document.getElementById('linkIconPreviewImg');
+    const label = document.getElementById('linkIconPreviewName');
+    const isLibraryIcon = typeof url === 'string' && url.includes('simple-icons@');
+
+    img.src = url;
+    img.classList.toggle('library-link-icon', isLibraryIcon);
+    label.textContent = name;
+    preview.classList.remove('hidden');
+  }
+
+  function clearLinkIcon() {
+    document.getElementById('firstLinkIcon').value = '';
+    document.getElementById('linkIconPreview').classList.add('hidden');
+    document.querySelectorAll('.icon-btn').forEach(btn => btn.classList.remove('border-violet-500', 'bg-violet-500/10'));
+    document.getElementById('linkIconFileInput').value = '';
+    scheduleSave();
+  }
+
+  // Restore icon selection on page load
+  window.addEventListener('load', () => {
+    const iconVal = document.getElementById('firstLinkIcon').value;
+    if (iconVal) {
+      const btn = document.querySelector(`.icon-btn[data-icon-url="${CSS.escape(iconVal)}"]`);
+      if (btn) {
+        btn.classList.add('border-violet-500', 'bg-violet-500/10');
+        const name = btn.querySelector('span').textContent;
+        showLinkIconPreview(name, iconVal);
+      } else {
+        const name = iconVal.includes('/') ? iconVal.split('/').pop() : 'Icône custom';
+        showLinkIconPreview(name, iconVal);
+      }
+    }
+  });
+
+  // ════════════════════════════════════════════════════════════════════
+  //  SLUG
+  // ════════════════════════════════════════════════════════════════════
+  document.getElementById('slugInput').addEventListener('input', function () {
+    this.dataset.manual = '1';
+    clearTimeout(slugTimer);
+    slugTimer = setTimeout(() => triggerSlugCheck(this.value), 480);
+    updatePreview(); scheduleSave();
+  });
+
+  async function triggerSlugCheck(val) {
+    const icon = document.getElementById('slugIcon');
+    const msg  = document.getElementById('slugMsg');
+    const inp  = document.getElementById('slugInput');
+    inp.classList.remove('valid','invalid');
+
+    if (!val || val.length < 2) {
+      icon.textContent = ''; msg.textContent = ''; slugOk = false; return;
+    }
+
+    icon.innerHTML = '<i class="bi bi-arrow-clockwise text-slate-500 animate-spin"></i>';
+
+    try {
+      const r = await fetch(`/onboarding/check-slug?slug=${encodeURIComponent(val)}`);
+      const d = await r.json();
+      if (d.available) {
+        slugOk = true;
+        icon.innerHTML  = '<i class="bi bi-check-lg text-emerald-400 text-lg"></i>';
+        msg.textContent = '';
+        inp.classList.add('valid');
+      } else {
+        slugOk = false;
+        const msgs = { too_short:'Trop court', too_long:'Trop long (max 30)', reserved:'URL réservée', taken:'Déjà pris — essaie une variante' };
+        icon.innerHTML  = '<i class="bi bi-x-lg text-rose-400 text-lg"></i>';
+        msg.textContent = msgs[d.reason] || 'Indisponible';
+        msg.className   = 'text-xs mt-1.5 text-rose-400 min-h-[16px]';
+        inp.classList.add('invalid');
+      }
+    } catch { icon.textContent = ''; slugOk = false; }
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  //  AVATAR UPLOAD
+  // ══════════════════════════════════════════════════════════════════
+  async function handleAvatarUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const status = document.getElementById('avatarUploadStatus');
+    const btn    = document.getElementById('avatarUploadBtn');
+    status.textContent = 'Envoi…';
+    status.classList.remove('hidden');
+    btn.disabled = true;
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const r = await fetch('/api/me/upload?field=profileImage', { method: 'POST', body: fd });
+      const d = await r.json();
+      if (!r.ok || !d.url) throw new Error(d.error || 'upload_failed');
+      document.getElementById('avatarUrl').value = d.url;
+      setAvatar(d.url);
+      status.textContent = 'Uploadé';
+      scheduleSave();
+      setTimeout(() => status.classList.add('hidden'), 2500);
+    } catch {
+      status.textContent = '';
+      status.classList.add('hidden');
+      toast('Erreur lors de l\'upload de l\'image.', 'error');
+    } finally {
+      btn.disabled = false;
+      input.value = '';
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  //  AVATAR URL
+  // ════════════════════════════════════════════════════════════════════
+  document.getElementById('avatarUrl').addEventListener('input', function () {
+    setAvatar(this.value.trim()); scheduleSave();
+  });
+
+  function setAvatar(url) {
+    const img = document.getElementById('avatarImg');
+    const ini = document.getElementById('avatarInitials');
+    if (url) {
+      img.onload  = () => { img.classList.remove('hidden'); ini.classList.add('hidden'); };
+      img.onerror = () => { img.classList.add('hidden'); ini.classList.remove('hidden'); };
+      img.src = url;
+    } else {
+      img.classList.add('hidden'); ini.classList.remove('hidden');
+    }
+    updatePreview();
+  }
+
+  function updateInitials() {
+    const name    = document.getElementById('displayName').value;
+    const letters = name.split(' ').slice(0,2).map(w=>w[0]?.toUpperCase()||'').join('') || '?';
+    document.getElementById('avatarInitials').textContent  = letters;
+    document.getElementById('previewInitials').textContent = letters;
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  //  BIO
+  // ════════════════════════════════════════════════════════════════════
+  document.getElementById('bioInput').addEventListener('input', function () {
+    document.getElementById('bioCount').textContent = this.value.length;
+    updatePreview(); scheduleSave();
+  });
+
+  // ════════════════════════════════════════════════════════════════════
+
+  //  LIVE PREVIEW
+  // ════════════════════════════════════════════════════════════════════
+  function updatePreview() {
+    const name   = document.getElementById('displayName').value || 'Ton nom';
+    const slug   = document.getElementById('slugInput').value   || 'ton-nom';
+    const bio    = document.getElementById('bioInput').value;
+    const cat    = document.getElementById('catVal').value;
+    const accent = document.getElementById('accentVal').value || '#7289DA';
+    const avatar = document.getElementById('avatarUrl').value;
+
+    // Slug
+    const slugEl = document.getElementById('previewSlug');
+    if (slugEl) slugEl.textContent = slug.slice(0,16) + (slug.length > 16 ? '…' : '');
+
+    // Name
+    document.getElementById('previewName').textContent = name;
+
+    // Bio
+    const bioEl = document.getElementById('previewBio');
+    if (bio) { bioEl.textContent = bio.slice(0,80); bioEl.classList.remove('hidden'); }
+    else { bioEl.classList.add('hidden'); }
+
+    // Badge
+    const catIcons = {
+      créateur: '<i class="bi bi-palette"></i>',
+      pro: '<i class="bi bi-briefcase"></i>',
+      perso: '<i class="bi bi-person"></i>',
+      musique: '<i class="bi bi-music-note-beamed"></i>',
+      tech: '<i class="bi bi-laptop"></i>',
+      sport: '<i class="bi bi-trophy"></i>',
+    };
+    const catLabels = {créateur:'Créateur',pro:'Pro',perso:'Perso',musique:'Musique',tech:'Tech',sport:'Sport'};
+    const badge = document.getElementById('previewBadge');
+    if (cat && catLabels[cat]) { 
+      badge.innerHTML = (catIcons[cat] || '') + ' ' + catLabels[cat]; 
+      badge.style.background = accent; 
+      badge.classList.remove('hidden'); 
+    }
+    else badge.classList.add('hidden');
+
+    // Avatar
+    const pWrap = document.getElementById('previewAvatarWrap');
+    const pImg  = document.getElementById('previewAvatarImg');
+    const pIni  = document.getElementById('previewInitials');
+    pWrap.style.borderColor = accent;
+    if (avatar) {
+      pImg.src = avatar; pImg.classList.remove('hidden'); pIni.classList.add('hidden');
+    } else {
+      pImg.classList.add('hidden'); pIni.classList.remove('hidden');
+    }
+
+    // Accent on ring
+    document.getElementById('avatarRing').style.borderColor = accent;
+
+    // Link button always hidden (links ajoutés depuis le dashboard)
+    const lBtn = document.getElementById('previewLinkBtn');
+    if (lBtn) lBtn.classList.add('hidden');
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  //  AUTO-SAVE
+  // ════════════════════════════════════════════════════════════════════
+  function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(doSave, 900); }
+
+  async function doSave() {
+    try {
+      await fetch('/onboarding/draft', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          step: currentStep,
+          displayName: document.getElementById('displayName').value,
+          slug:        document.getElementById('slugInput').value,
+          category:    document.getElementById('catVal').value,
+          bio:         document.getElementById('bioInput').value,
+          accentColor: document.getElementById('accentVal').value,
+          themeIndex:  parseInt(document.getElementById('themeIdx').value) || 0,
+          avatarUrl:   document.getElementById('avatarUrl').value,
+          firstLinkTitle: document.getElementById('firstLinkTitle').value,
+          firstLinkUrl:   document.getElementById('firstLinkUrl').value,
+          firstLinkIcon:  document.getElementById('firstLinkIcon').value,
+        }),
+      });
+      const ind = document.getElementById('saveIndicator');
+      ind.style.opacity = '1';
+      setTimeout(() => ind.style.opacity = '0', 2200);
+    } catch {}
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') doSave();
+  });
+
+  // ════════════════════════════════════════════════════════════════════
+  //  COMPLETE
+  // ════════════════════════════════════════════════════════════════════
+  function completeOnboarding() {
+    // Valider les champs requis de l'étape 1
+    const name = document.getElementById('displayName').value.trim();
+    const slug = document.getElementById('slugInput').value.trim();
+    if (!name) { toast('Le nom d\'affichage est requis.', 'error'); goStep(1); return; }
+    if (!slug || slug.length < 2) { toast('L\'URL est trop courte (2 caractères min).', 'error'); goStep(1); return; }
+    complete();
+  }
+
+  async function complete() {
+    const btn  = document.getElementById('completeBtn');
+    const txt  = document.getElementById('completeTxt');
+    const spin = document.getElementById('completeSpinner');
+    btn.disabled = true; txt.textContent = 'Création…'; spin.classList.remove('hidden');
+
+    try {
+      const res  = await fetch('/onboarding/complete', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          displayName: document.getElementById('displayName').value,
+          slug:        document.getElementById('slugInput').value,
+          category:    document.getElementById('catVal').value,
+          bio:         document.getElementById('bioInput').value,
+          accentColor: document.getElementById('accentVal').value,
+          themeIndex:  parseInt(document.getElementById('themeIdx').value) || 0,
+          avatarUrl:   document.getElementById('avatarUrl').value,
+          firstLinkTitle: document.getElementById('firstLinkTitle').value,
+          firstLinkUrl:   document.getElementById('firstLinkUrl').value,
+          firstLinkIcon:  document.getElementById('firstLinkIcon').value,
+        }),
+      });
+      const json = await res.json();
+
+      if (!res.ok) {
+        btn.disabled = false; txt.innerHTML = '<span class="flex items-center gap-2">Créer mon Plinkk <i class="bi bi-rocket-takeoff text-lg"></i></span>'; spin.classList.add('hidden');
+        const msgs = {
+          slug_invalid:'Slug invalide.',
+          slug_reserved:'URL réservée.',
+          slug_taken:'URL déjà prise.',
+          name_required:'Le nom d\'affichage est requis.',
+          email_not_verified:'Vérifie ton email avant de publier ton Plinkk.',
+        };
+        toast(msgs[json.error] || 'Une erreur est survenue.', 'error'); return;
+      }
+
+      launchConfetti();
+      setTimeout(() => { window.location.href = json.redirect || '/?welcome=1'; }, 2600);
+
+    } catch {
+      btn.disabled = false; txt.innerHTML = '<span class="flex items-center gap-2">Créer mon Plinkk <i class="bi bi-rocket-takeoff text-lg"></i></span>'; spin.classList.add('hidden');
+      toast('Erreur réseau. Vérifie ta connexion.', 'error');
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  //  TOAST
+  // ════════════════════════════════════════════════════════════════════
+  function toast(msg, type) {
+    const bg = type === 'error' ? '#dc2626' : '#16a34a';
+    const el = document.createElement('div');
+    el.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:99999;background:${bg};color:#fff;font-size:13px;font-weight:500;border-radius:12px;padding:10px 20px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:fadeUp .3s ease both;white-space:nowrap;`;
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 300); }, 3500);
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  //  CONFETTI
+  // ════════════════════════════════════════════════════════════════════
+  function launchConfetti() {
+    const c = ['#8b5cf6','#6366f1','#10b981','#f59e0b','#ec4899','#fff'];
+    confetti({particleCount:130, spread:90, origin:{y:.6}, colors:c});
+    setTimeout(() => confetti({particleCount:60, angle:55,  spread:65, origin:{x:0,y:.6}, colors:c}), 200);
+    setTimeout(() => confetti({particleCount:60, angle:125, spread:65, origin:{x:1,y:.6}, colors:c}), 350);
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:99998;pointer-events:none;';
+    overlay.innerHTML = `
+      <div style="text-align:center;animation:fadeUp .5s ease both">
+        <i class="bi bi-party-popper" style="font-size:60px;color:#8b5cf6;display:block;margin-bottom:14px"></i>
+        <h2 style="font-size:22px;font-weight:800;color:#fff;margin:0 0 8px">Ton Plinkk est créé !</h2>
+        <p style="font-size:14px;color:#a78bfa;margin:0">Redirection dans un instant…</p>
+      </div>`;
+    document.body.appendChild(overlay);
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  //  TOUR SYSTEM
+  // ════════════════════════════════════════════════════════════════════
+  const TOUR = [
+    {
+      target: '#field-displayName',
+      title:  'Nom d\'affichage',
+      body:   'C\'est le nom visible par tous tes visiteurs. Utilise ton prénom, ton pseudo ou ton nom de marque.',
+      placement: 'right',
+    },
+    {
+      target: '#field-slug',
+      title:  'Ton URL unique',
+      body:   'Chaque Plinkk a une adresse courte : <strong style="color:#c4b5fd">plinkk.fr/ton-slug</strong>. Choisis quelque chose de simple et mémorable, sans accents.',
+      placement: 'right',
+    },
+    {
+      target: '#field-category',
+      title:  'Catégorie',
+      body:   'La catégorie contextualise ton profil. Elle s\'affiche sous ton nom comme un badge coloré avec la couleur accent choisie.',
+      placement: 'right',
+    },
+    {
+      target: '#field-avatar',
+      title:  'Ton avatar',
+      stepTo: 2,
+      body:   'Upload une photo depuis ton appareil ou colle une URL d\'image. L\'aperçu se met à jour instantanément.',
+      placement: 'right',
+    },
+    {
+      target: '#field-bio',
+      title:  'Ta bio',
+      stepTo: 2,
+      body:   'Une courte description qui apparaît sous ton nom sur ton profil public. 160 caractères maximum.',
+      placement: 'right',
+    },
+    {
+      target: '#field-color',
+      title:  'Thème Plinkk',
+      stepTo: 2,
+      body:   'Choisis un thème Plinkk pour personnaliser les couleurs de tes boutons et badges. Tu pourras le changer à tout moment depuis le dashboard.',
+      placement: 'right',
+    },
+  ];
+
+  let tourIdx = -1;
+  const hlEl  = document.getElementById('tourHighlight');
+  const tcEl  = document.getElementById('tourCard');
+  const bgEl  = document.getElementById('tourBackdrop');
+
+  function startTour() {
+    localStorage.removeItem('plinkk_tour_done');
+    tourIdx = -1; nextTour();
+  }
+
+  function nextTour() {
+    tourIdx++;
+    if (tourIdx >= TOUR.length) { endTour(); return; }
+    const step = TOUR[tourIdx];
+    if (step.stepTo && step.stepTo !== currentStep) {
+      goStep(step.stepTo);
+      setTimeout(() => renderTourStep(step), 380);
+    } else {
+      renderTourStep(step);
+    }
+  }
+
+  function prevTour() {
+    if (tourIdx <= 0) { endTour(); return; }
+    tourIdx -= 2; nextTour();
+  }
+
+  function renderTourStep(step) {
+    const target = document.querySelector(step.target);
+    if (!target) { nextTour(); return; }
+
+    target.scrollIntoView({behavior:'smooth', block:'nearest'});
+    setTimeout(() => placeHighlight(step, target), 160);
+  }
+
+  function placeHighlight(step, target) {
+    const r   = target.getBoundingClientRect();
+    const PAD = 8;
+
+    // Highlight
+    hlEl.classList.remove('hidden');
+    hlEl.style.top    = (r.top - PAD) + 'px';
+    hlEl.style.left   = (r.left - PAD) + 'px';
+    hlEl.style.width  = (r.width + PAD*2) + 'px';
+    hlEl.style.height = (r.height + PAD*2) + 'px';
+
+    bgEl.classList.remove('hidden');
+
+    // Card HTML
+    const isFirst = tourIdx === 0;
+    const isLast  = tourIdx === TOUR.length - 1;
+    const dots    = TOUR.map((_,i) => `<div style="width:6px;height:6px;border-radius:50%;background:${i===tourIdx?'#a78bfa':'#334155'};transition:background .2s"></div>`).join('');
+
+    tcEl.innerHTML = `
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
+        <p style="font-size:13px;font-weight:700;color:#f8fafc;line-height:1.3;margin:0">${step.title}</p>
+        <button onclick="endTour()" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:14px;padding:2px 4px;border-radius:6px;transition:color .15s;flex-shrink:0" onmouseover="this.style.color='#f8fafc'" onmouseout="this.style.color='#64748b'"><i class="bi bi-x" style="font-size:18px"></i></button>
+      </div>
+      <p style="font-size:12px;color:#94a3b8;line-height:1.6;margin:0 0 14px">${step.body}</p>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;gap:4px;align-items:center">${dots}</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          ${!isFirst ? `<button onclick="prevTour()" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:12px;padding:0;transition:color .15s" onmouseover="this.style.color='#f8fafc'" onmouseout="this.style.color='#64748b'">← Préc.</button>` : ''}
+          <button onclick="nextTour()" style="background:none;border:none;color:#a78bfa;cursor:pointer;font-size:12px;font-weight:600;padding:0;transition:color .15s" onmouseover="this.style.color='#d8b4fe'" onmouseout="this.style.color='#a78bfa'">
+            ${isLast ? 'Terminer' : 'Suivant →'}
+          </button>
+        </div>
+      </div>
+    `;
+
+    // Remove old arrow class
+    tcEl.className = '';
+    tcEl.classList.remove('hidden');
+
+    // Position
+    const W  = 288;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let top, left, arrowClass = '';
+
+    // Prefer right placement
+    if (step.placement === 'right' && r.right + W + 20 < vw) {
+      left = r.right + 16;
+      top  = Math.max(12, Math.min(r.top + r.height/2 - 80, vh - 180));
+      arrowClass = 'arrow-left';
+    } else if (r.top - 180 > 0) {
+      left = Math.max(12, Math.min(r.left + r.width/2 - W/2, vw - W - 12));
+      top  = r.top - 16 - 160;
+      arrowClass = 'arrow-bottom';
+    } else {
+      left = Math.max(12, Math.min(r.left + r.width/2 - W/2, vw - W - 12));
+      top  = r.bottom + 16;
+      arrowClass = 'arrow-top';
+    }
+
+    tcEl.style.cssText = `position:fixed;z-index:9999;left:${left}px;top:${top}px;width:${W}px;background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid rgba(139,92,246,.4);border-radius:16px;padding:18px 20px;box-shadow:0 24px 48px rgba(0,0,0,.6);animation:tooltipPop .22s ease both;`;
+    if (arrowClass) tcEl.classList.add(arrowClass);
+  }
+
+  function endTour() {
+    hlEl.classList.add('hidden');
+    tcEl.classList.add('hidden');
+    bgEl.classList.add('hidden');
+    hlEl.style.top = hlEl.style.left = hlEl.style.width = hlEl.style.height = '';
+    localStorage.setItem('plinkk_tour_done','1');
+    tourIdx = -1;
+  }
+
+  window.addEventListener('resize', () => {
+    if (tourIdx < 0 || tourIdx >= TOUR.length) return;
+    const step = TOUR[tourIdx];
+    const target = document.querySelector(step.target);
+    if (target) placeHighlight(step, target);
+  });
+
+  // ════════════════════════════════════════════════════════════════════
+  //  INIT
+  // ════════════════════════════════════════════════════════════════════
+  (function init() {
+    const themeIdxVal = parseInt(document.getElementById('themeIdx').value) || 0;
+    const accent      = document.getElementById('accentVal').value || '#7289DA';
+    pickTheme(themeIdxVal, accent);
+
+    const cat = document.getElementById('catVal').value;
+    if (cat) pickCat(cat);
+
+    setAvatar(document.getElementById('avatarUrl').value);
+    updateInitials();
+
+    const bio = document.getElementById('bioInput').value;
+    if (bio) document.getElementById('bioCount').textContent = bio.length;
+
+    const slug = document.getElementById('slugInput').value;
+    if (slug) triggerSlugCheck(slug);
+
+    updatePreview();
+
+    // If resuming from a saved step
+    if (currentStep > 1) {
+      const safeStep = Math.min(currentStep, 3);
+      document.getElementById('step-1').classList.remove('active');
+      document.getElementById(`step-${safeStep}`).classList.add('active');
+      const widths = ['33%','66%','100%'];
+      const labels = ['Étape 1 sur 3','Étape 2 sur 3','Étape 3 sur 3'];
+      document.getElementById('progressFill').style.width = widths[safeStep-1];
+      document.getElementById('stepLabel').textContent    = labels[safeStep-1];
+    }
+
+    // Tour disponible via le bouton "Guide" — pas d'auto-démarrage
+  })();
+  </script>
+</body>
+</html>

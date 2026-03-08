@@ -1,0 +1,12 @@
+import { randomBytes } from "crypto";
+
+/**
+ * Génère un identifiant aléatoire URL-safe de longueur donnée.
+ */
+export function generateNanoId(length = 10): string {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  const bytes = randomBytes(length);
+  return Array.from(bytes)
+    .map((b) => chars[b % chars.length])
+    .join("");
+}
