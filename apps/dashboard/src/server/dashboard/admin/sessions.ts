@@ -21,7 +21,10 @@ export function dashboardAdminSessionsRoutes(fastify: FastifyInstance) {
     const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin/sessions")}`);
     
-    const userInfo = await prisma.user.findFirst({ where: { id: userId }, include: { role: true } });
+    const userInfo = await prisma.user.findFirst({
+      where: { id: userId },
+      include: { role: { include: { permissions: true } } },
+    });
     if (!userInfo) return reply.redirect(`/login?returnTo=${encodeURIComponent("/admin/sessions")}`);
     
     const ok = await ensurePermission(request, reply, 'VIEW_ADMIN', { mode: 'redirect' });
