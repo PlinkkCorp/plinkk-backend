@@ -8,7 +8,6 @@ import {
 } from "@plinkk/shared";
 import { ensurePermission } from "../../lib/permissions";
 import { logAdminAction } from "../../lib/adminLogger";
-import bcrypt from "bcrypt";
 
 // const prisma = new PrismaClient();
 
@@ -450,7 +449,7 @@ export function apiUsersRoutes(fastify: FastifyInstance) {
       return reply.code(400).send({ error: "Le mot de passe doit faire au moins 8 caractères." });
     }
 
-    const hashed = await bcrypt.hash(password, 10);
+    const hashed = await Bun.password.hash(password);
     await prisma.user.update({
       where: { id },
       data: { password: hashed, hasPassword: true },

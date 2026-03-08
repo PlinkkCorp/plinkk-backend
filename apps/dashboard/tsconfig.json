@@ -4,7 +4,7 @@
         "skipLibCheck": true,
         "strict": false,
         "moduleResolution": "node16",
-        "types": ["node"],
+        "types": ["node", "bun"],
         "typeRoots": ["./node_modules/@types", "./src/types"],
         "lib": ["ES2021", "DOM"],
         "module": "node16",

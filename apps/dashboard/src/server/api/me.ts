@@ -2,7 +2,6 @@ import { FastifyInstance } from "fastify";
 import { authenticator } from "otplib";
 import z from "zod";
 import { verifyDomain } from "../../lib/verifyDNS";
-import bcrypt from "bcrypt";
 import QRCode from "qrcode";
 import { User, prisma, Prisma } from "@plinkk/prisma";
 import { apiMeThemesRoutes } from "./me/theme";
@@ -210,15 +209,15 @@ export function apiMeRoutes(fastify: FastifyInstance) {
 
     if (hasPwd) {
       if (!currentPassword) return reply.code(400).send({ error: "Mot de passe actuel requis" });
-      const ok = await bcrypt.compare(currentPassword, user.password);
+      const ok = await Bun.password.verify(currentPassword, user.password);
       if (!ok) return reply.code(403).send({ error: "Mot de passe actuel incorrect" });
     }
 
-    if (await bcrypt.compare(newPassword, user.password))
+    if (await Bun.password.verify(newPassword, user.password))
       return reply
         .code(400)
         .send({ error: "Nouveau mot de passe identique à l'actuel" });
-    const hashed = await bcrypt.hash(newPassword, 10);
+    const hashed = await Bun.password.hash(newPassword);
     await prisma.user.update({
       where: { id: userId as string },
       data: { password: hashed, hasPassword: true },
@@ -244,7 +243,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     if (!password)
       return reply.code(400).send({ error: "Mot de passe requis" });
 
-    const ok = await bcrypt.compare(password, me.password);
+    const ok = await Bun.password.verify(password, me.password);
     if (!ok) return reply.code(403).send({ error: "Mot de passe incorrect" });
     if (me.twoFactorEnabled) {
       if (!otp || typeof otp !== "string")

@@ -1,6 +1,5 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
-import bcrypt from "bcrypt";
 import { canUsePasswordProtectedPlinkk, canUseScheduledLinks } from "@plinkk/shared";
 import { logUserAction } from "../../../../lib/userLogger";
 
@@ -49,7 +48,7 @@ export function plinkksPremiumRoutes(fastify: FastifyInstance) {
       });
     }
 
-    const hash = await bcrypt.hash(body.password, 10);
+    const hash = await Bun.password.hash(body.password);
     await prisma.plinkk.update({
       where: { id },
       data: { passwordHash: hash },

@@ -1,6 +1,5 @@
 import { FastifyInstance } from "fastify";
 import { randomBytes } from "crypto";
-import bcrypt from "bcrypt";
 import z from "zod";
 import { prisma } from "@plinkk/prisma";
 import { slugify } from "@plinkk/shared";
@@ -154,7 +153,7 @@ export function loginRoutes(fastify: FastifyInstance) {
       });
     }
 
-    const valid = await bcrypt.compare(password, user.password);
+    const valid = await Bun.password.verify(password, user.password);
     if (!valid) {
       return redirectWithError(reply, "/login", "Mot de passe incorrect", {
         email: identifier,

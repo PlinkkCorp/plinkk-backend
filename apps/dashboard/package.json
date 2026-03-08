@@ -47,7 +47,6 @@
     "@types/archiver": "^6.0.3",
     "@types/uglify-js": "^3.17.5",
     "archiver": "^7.0.1",
-    "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "fastify": "^5.6.1",
@@ -70,6 +69,7 @@
   },
   "devDependencies": {
     "@prisma/adapter-pg": "^7.1.0",
+    "@types/bun": "latest",
     "@types/ejs": "^3.1.5",
     "@types/node": "^24.8.1",
     "concurrently": "^9.2.1",

@@ -5,7 +5,6 @@ import path from "path";
 import { generateProfileConfig, resolvePlinkkPage, parseIdentifier, recordPlinkkView, coerceThemeData, generateTheme, roundedRect, wrapText } from "@plinkk/shared";
 import { minify } from "uglify-js";
 import { prisma } from "@plinkk/prisma";
-import bcrypt from "bcrypt";
 import { filterScheduledLinks } from "@plinkk/shared";
 import { generateBundle } from "../lib/generateBundle";
 import { replyView } from "../lib/replyView";
@@ -74,7 +73,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const isValid = await bcrypt.compare(
+      const isValid = await Bun.password.verify(
         password,
         resolved.page.passwordHash || "",
       );

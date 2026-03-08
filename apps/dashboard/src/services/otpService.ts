@@ -3,7 +3,6 @@
  * pour le flux d'inscription email-only.
  */
 import { prisma } from "@plinkk/prisma";
-import bcrypt from "bcrypt";
 import { randomBytes } from "crypto";
 import { EmailService } from "./emailService";
 import { emailQuotaService } from "./emailQuotaService";
@@ -93,7 +92,7 @@ export async function sendOtp(email: string): Promise<OtpSendResult> {
 
     // Renvoi : on régénère code + magic token, on incrémente sendCount
     const code = generateCode();
-    const codeHash = await bcrypt.hash(code, 10);
+    const codeHash = await Bun.password.hash(code);
     const magicToken = generateMagicToken();
     const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60_000);
 
@@ -120,7 +119,7 @@ export async function sendOtp(email: string): Promise<OtpSendResult> {
 
   // Premier envoi : création d'un nouveau OtpCode
   const code = generateCode();
-  const codeHash = await bcrypt.hash(code, 10);
+  const codeHash = await Bun.password.hash(code);
   const magicToken = generateMagicToken();
   const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60_000);
 
@@ -160,7 +159,7 @@ export async function verifyOtpCode(
     return { ok: false, error: "expired" };
   }
 
-  const match = await bcrypt.compare(code.trim(), otp.codeHash);
+  const match = await Bun.password.verify(code.trim(), otp.codeHash);
 
   if (!match) {
     const newAttempts = otp.verifyAttempts + 1;

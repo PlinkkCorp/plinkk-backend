@@ -42,7 +42,6 @@
     "@types/archiver": "^6.0.3",
     "@types/uglify-js": "^3.17.5",
     "archiver": "^7.0.1",
-    "bcrypt": "^6.0.0",
     "canvas": "^3.2.0",
     "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
@@ -59,6 +58,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@types/bun": "latest",
     "@types/ejs": "^3.1.5",
     "@types/node": "^24.7.0",
     "prisma": "^7.3.0",
