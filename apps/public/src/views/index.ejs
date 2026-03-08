@@ -27,78 +27,265 @@
   <!-- Cursor glow effect -->
   <div class="cursor-glow hidden lg:block" id="cursorGlow"></div>
 
+  <style>
+    .hero-shell {
+      --hero-accent-a: #00c2a8;
+      --hero-accent-b: #ff7a59;
+      --hero-accent-c: #0ea5e9;
+      background:
+        radial-gradient(1200px 520px at 10% 0%, rgba(0, 194, 168, 0.14), transparent 60%),
+        radial-gradient(980px 480px at 92% 12%, rgba(255, 122, 89, 0.16), transparent 60%),
+        linear-gradient(180deg, #07080d 0%, #0b1020 55%, #0a0f1a 100%);
+    }
+
+    .hero-grid {
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 52px 52px;
+      -webkit-mask-image: radial-gradient(ellipse 82% 70% at 50% 40%, black 28%, transparent 100%);
+      mask-image: radial-gradient(ellipse 82% 70% at 50% 40%, black 28%, transparent 100%);
+    }
+    .hero-title {
+      font-family: "Sora", "Space Grotesk", "Segoe UI", sans-serif;
+      font-size: clamp(2.3rem, 5.2vw, 4.5rem);
+      line-height: 1.03;
+      letter-spacing: -0.035em;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-top: 22px;
+      margin-bottom: 16px;
+    }
+
+    .hero-title-accent {
+      background: linear-gradient(92deg, #8af9ef 0%, #63d8ff 42%, #ffd3a7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      color: rgba(226, 232, 240, 0.78);
+      max-width: 640px;
+      margin: 0 auto 30px;
+      font-size: clamp(0.98rem, 1.7vw, 1.16rem);
+      line-height: 1.65;
+    }
+
+    .hero-input-wrap {
+      background: rgba(8, 12, 20, 0.66);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 18px;
+      padding: 6px;
+      box-shadow: 0 12px 46px rgba(5, 8, 16, 0.46);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-input {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid transparent;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+
+    .hero-input:focus {
+      outline: none;
+      border-color: rgba(99, 216, 255, 0.75);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+    }
+
+    .hero-strip {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      color: rgba(226, 232, 240, 0.66);
+      font-size: 12px;
+    }
+
+    .hero-strip span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .hero-visual {
+      position: relative;
+      width: min(440px, 92vw);
+      margin: 26px auto 0;
+      padding: 18px;
+      border-radius: 28px;
+      background: linear-gradient(160deg, rgba(14, 23, 37, 0.88), rgba(11, 17, 29, 0.78));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow:
+        0 30px 68px rgba(0, 0, 0, 0.48),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+      text-align: left;
+      overflow: hidden;
+    }
+
+    .hero-visual::before {
+      content: "";
+      position: absolute;
+      inset: -45% 45% auto -10%;
+      height: 240px;
+      background: radial-gradient(circle, rgba(0, 194, 168, 0.24), transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-profile-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      color: rgba(248, 250, 252, 0.9);
+      font-size: 13px;
+      letter-spacing: 0.01em;
+    }
+
+    .hero-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(140deg, var(--hero-accent-a), var(--hero-accent-c));
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      color: #051018;
+    }
+
+    .hero-link-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .hero-link-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(241, 245, 249, 0.92);
+      font-size: 13px;
+      transform: translateY(12px);
+      opacity: 0;
+      animation: heroCardUp 0.7s ease forwards;
+    }
+
+    .hero-link-item:nth-child(2) { animation-delay: .1s; }
+    .hero-link-item:nth-child(3) { animation-delay: .2s; }
+    .hero-link-item:nth-child(4) { animation-delay: .3s; }
+
+    .hero-link-item strong {
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .hero-link-item em {
+      font-style: normal;
+      color: rgba(203, 213, 225, 0.68);
+      font-size: 11px;
+    }
+
+    .hero-link-badge {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .hero-link-badge.live {
+      background: rgba(0, 194, 168, 0.18);
+      color: #95fff4;
+    }
+
+    .hero-link-badge.hot {
+      background: rgba(255, 122, 89, 0.22);
+      color: #ffd0c4;
+    }
+
+    @keyframes heroCardUp {
+      from {
+        transform: translateY(12px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .hero-layout {
+        max-width: 720px;
+        margin: 0 auto;
+        text-align: center;
+      }
+    }
+  </style>
+
   <main class="relative overflow-hidden">
 
-    <!-- Hero Section -->
-    <section class="relative min-h-screen flex flex-col justify-center px-6 lg:px-12 overflow-hidden">
-      <!-- Brand Banner -->
-      <div class="absolute inset-0 z-0">
-        <img src="/public/images/baniere.svg" alt="" class="w-full h-full object-cover opacity-30">
-      </div>
+    <section class="hero-shell relative min-h-screen flex items-center px-6 py-24 lg:py-14 overflow-hidden">
 
-      <!-- Background glow -->
-      <div
-        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full glow-purple pointer-events-none parallax opacity-80"
-        data-speed="-0.2"></div>
+      <div class="hero-grid absolute inset-0 pointer-events-none" aria-hidden="true"></div>
 
-      <div class="relative z-10 max-w-[1400px] mx-auto w-full pt-32 pb-20">
-        <!-- Overline -->
-        <div class="reveal flex items-center gap-3 mb-8">
-          <div class="w-12 h-px bg-gradient-to-r from-violet-500 to-transparent"></div>
-          <span class="text-sm text-slate-400 tracking-widest uppercase">Open Source Link Platform</span>
-        </div>
+      <div class="hero-layout relative z-10 w-full text-center">
+        <div>
+          <h1 class="reveal reveal-delay-1 hero-title">
+            Votre univers en un lien.
+            <span class="hero-title-accent">Clair, vivant, memorisable.</span>
+          </h1>
 
-        <!-- Main title -->
-        <h1 class="hero-title text-white mb-8">
-          <span class="reveal block">Tous vos liens.</span>
-          <span class="reveal reveal-delay-1 block gradient-text-color">Un seul endroit.</span>
-        </h1>
+          <p class="reveal reveal-delay-2 hero-subtitle">
+            Plinkk rassemble vos contenus, offres et reseaux dans une page qui convertit vraiment. Une experience fluide inspiree des meilleurs standards creator, avec une vraie identite de marque.
+          </p>
 
-        <!-- Subtitle -->
-        <p class="reveal reveal-delay-2 text-xl lg:text-2xl text-slate-400 max-w-2xl mb-12 leading-relaxed">
-          L'alternative open-source à Linktree. Créez, personnalisez et partagez votre page de liens en quelques
-          minutes.
-        </p>
-
-        <!-- CTA inline email capture -->
-        <form id="heroEmailForm" class="reveal reveal-delay-3 mb-8" onsubmit="return false;">
-          <div class="flex flex-col sm:flex-row items-stretch gap-3 max-w-xl">
-            <div class="relative flex-1">
-              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <svg class="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+          <div class="reveal hero-input-stack mx-auto">
+            <form id="heroEmailForm" onsubmit="return false;">
+              <div class="hero-input-wrap flex flex-col sm:flex-row items-stretch gap-2">
+                <div class="relative flex-1">
+                  <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <input type="email" id="heroEmail" required
+                    class="hero-input w-full pl-10 pr-4 py-3.5 rounded-xl text-sm text-white placeholder-slate-500"
+                    placeholder="vous@exemple.com" autocomplete="email" />
+                </div>
+                <button type="submit" id="heroEmailBtn"
+                  class="magnetic-btn btn-primary px-6 py-3.5 rounded-xl text-sm font-semibold whitespace-nowrap">
+                  <span class="magnetic-btn-inner">Creer mon Plinkk</span>
+                </button>
               </div>
-              <input type="email" id="heroEmail" required
-                class="w-full pl-12 pr-4 py-4 rounded-full bg-white/5 border border-white/10 text-white placeholder-slate-500 outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all text-base"
-                placeholder="Entrez votre e-mail" />
+            </form>
+
+            <div class="hero-strip">
+              <span>
+                <svg class="w-3.5 h-3.5 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                Gratuit pour commencer
+              </span>
+              <span>
+                <svg class="w-3.5 h-3.5 text-sky-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                Setup en 2 minutes
+              </span>
+              <span>
+                <svg class="w-3.5 h-3.5 text-orange-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                Open source
+              </span>
             </div>
-            <button type="submit" id="heroEmailBtn"
-              class="magnetic-btn btn-primary px-8 py-4 rounded-full text-base inline-flex items-center justify-center gap-2 whitespace-nowrap">
-              <span class="magnetic-btn-inner">Commencer gratuitement →</span>
-            </button>
           </div>
-          <p class="mt-3 text-sm text-slate-500">Gratuit, pour toujours. Aucune carte bancaire requise.</p>
-        </form>
-
-        <div class="reveal reveal-delay-4 flex flex-wrap items-center gap-4 mb-20">
-          <a href="https://github.com/PlinkkCorp/plinkk-backend" target="_blank"
-            class="btn-ghost px-6 py-4 rounded-full text-base inline-flex items-center gap-2">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path
-                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-            </svg>
-            Star on GitHub
-          </a>
-        </div>
-
-        <!-- Scroll indicator -->
-        <div class="reveal reveal-delay-4 flex items-center gap-3 text-slate-500">
-          <div class="w-6 h-10 rounded-full border border-slate-700 flex items-start justify-center p-2">
-            <div class="w-1 h-2 bg-slate-500 rounded-full animate-bounce"></div>
-          </div>
-          <span class="text-sm">Scroll pour découvrir</span>
         </div>
       </div>
     </section>
@@ -138,7 +325,7 @@
               ressemble vraiment.
             </p>
             <a class="reveal reveal-delay-3 smooth-link text-white inline-flex items-center gap-2 text-lg"
-              href="<%= dashboardUrl %>/login#signup">
+              href="<%= dashboardUrl %>/join">
               Créer ma page
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3">
@@ -192,114 +379,53 @@
     </section>
 
     <!-- Features Grid -->
-    <section class="py-32 lg:py-48 px-6 lg:px-12">
+    <section class="py-20 lg:py-28 px-6 lg:px-12">
       <div class="max-w-[1400px] mx-auto">
 
         <!-- Section header -->
-        <div class="max-w-2xl mb-20">
-          <span
-            class="reveal text-violet-400 text-sm font-medium tracking-wider uppercase mb-4 block">Fonctionnalités</span>
-          <h2 class="reveal reveal-delay-1 section-title text-white mb-6">
-            Tout pour créer la page parfaite
-          </h2>
-          <p class="reveal reveal-delay-2 text-lg text-slate-400 leading-relaxed">
-            Des outils puissants, une expérience simple. Concentrez-vous sur votre contenu, on s'occupe du reste.
+        <div class="text-center max-w-xl mx-auto mb-12">
+          <span class="reveal text-violet-400 text-xs font-semibold tracking-widest uppercase mb-3 block">Fonctionnalités</span>
+          <h2 class="reveal reveal-delay-1 section-title text-white mb-4">Tout pour votre page</h2>
+          <p class="reveal reveal-delay-2 text-base text-slate-400 leading-relaxed">
+            Des outils puissants, une expérience simple.
           </p>
         </div>
 
-        <!-- Feature grid -->
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Feature grid — 4 cards égales -->
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-          <!-- Feature 1 - Large -->
-          <div
-            class="reveal feature-item rounded-3xl p-8 lg:p-10 md:col-span-2 lg:col-span-2 lg:row-span-2 flex flex-col justify-between min-h-[400px]">
-            <div>
-              <div class="w-14 h-14 rounded-2xl bg-violet-500/10 flex items-center justify-center mb-6">
-                <svg class="w-7 h-7 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z">
-                  </path>
-                </svg>
-              </div>
-              <h3 class="text-2xl lg:text-3xl font-semibold text-white mb-4">Personnalisation totale</h3>
-              <p class="text-slate-400 text-lg leading-relaxed max-w-md">
-                Thèmes prédéfinis ou création sur mesure. Couleurs, polices, animations : tout est modifiable pour
-                refléter votre identité unique.
-              </p>
+          <div class="reveal feature-item rounded-2xl p-6">
+            <div class="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center mb-4">
+              <svg class="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"/></svg>
             </div>
-            <div class="mt-8 flex -space-x-3">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500"></div>
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500"></div>
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-pink-500"></div>
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500"></div>
-              <div class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-xs text-white">+∞
-              </div>
-            </div>
+            <h3 class="text-base font-semibold text-white mb-2">Personnalisation</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">Couleurs, thèmes et animations pour refléter votre identité.</p>
           </div>
 
-          <!-- Feature 2 -->
-          <div class="reveal reveal-delay-1 feature-item rounded-3xl p-8">
-            <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-5">
-              <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                  d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z">
-                </path>
-              </svg>
+          <div class="reveal reveal-delay-1 feature-item rounded-2xl p-6">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4">
+              <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
             </div>
-            <h3 class="text-xl font-semibold text-white mb-3">Analytics temps réel</h3>
-            <p class="text-slate-400">Suivez vos clics, sources de trafic et performances en un coup d'œil.</p>
+            <h3 class="text-base font-semibold text-white mb-2">Analytics</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">Clics, sources et performances en temps réel.</p>
           </div>
 
-          <!-- Feature 3 -->
-          <div class="reveal reveal-delay-2 feature-item rounded-3xl p-8">
-            <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-5">
-              <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                  d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z">
-                </path>
-              </svg>
+          <div class="reveal reveal-delay-2 feature-item rounded-2xl p-6">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
+              <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
             </div>
-            <h3 class="text-xl font-semibold text-white mb-3">100% Open Source</h3>
-            <p class="text-slate-400">Code transparent, communauté active. Vos données restent vôtres.</p>
+            <h3 class="text-base font-semibold text-white mb-2">Ultra rapide</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">Pages chargées en moins de 100 ms, partout.</p>
           </div>
 
-          <!-- Feature 4 -->
-          <div class="reveal feature-item rounded-3xl p-8">
-            <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-5">
-              <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                  d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"></path>
-              </svg>
+          <div class="reveal reveal-delay-3 feature-item rounded-2xl p-6">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
+              <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
             </div>
-            <h3 class="text-xl font-semibold text-white mb-3">Ultra performant</h3>
-            <p class="text-slate-400">Chargement en moins de 100ms. Performance optimale garantie.</p>
+            <h3 class="text-base font-semibold text-white mb-2">Open Source</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">Code transparent. Vos données restent vôtres.</p>
           </div>
 
-          <!-- Feature 5 -->
-          <div class="reveal reveal-delay-1 feature-item rounded-3xl p-8">
-            <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center mb-5">
-              <svg class="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                  d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3">
-                </path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold text-white mb-3">Mobile First</h3>
-            <p class="text-slate-400">Design responsive parfait sur tous les appareils.</p>
-          </div>
-
-          <!-- Feature 6 -->
-          <div class="reveal reveal-delay-2 feature-item rounded-3xl p-8">
-            <div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-5">
-              <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                  d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418">
-                </path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold text-white mb-3">Domaine perso</h3>
-            <p class="text-slate-400">Utilisez votre propre domaine ou notre URL courte.</p>
-          </div>
         </div>
       </div>
     </section>
@@ -397,167 +523,95 @@
     </section>
 
     <!-- Pricing Teaser -->
-    <section class="py-32 lg:py-48 px-6 lg:px-12 relative" id="pricing">
-      <div class="absolute inset-0 glow-purple pointer-events-none opacity-30"></div>
+    <section class="py-20 lg:py-28 px-6 lg:px-12 relative" id="pricing">
+      <div class="absolute inset-0 glow-purple pointer-events-none opacity-20"></div>
 
-      <div class="relative max-w-5xl mx-auto">
+      <div class="relative max-w-3xl mx-auto">
         <!-- Section header -->
-        <div class="text-center mb-16">
-          <p class="reveal text-sm font-semibold tracking-widest text-violet-400 uppercase mb-4">Tarifs</p>
-          <h2 class="reveal reveal-delay-1 section-title text-white mb-6">
-            Gratuit pour démarrer,<br>Premium pour grandir
-          </h2>
-          <p class="reveal reveal-delay-2 text-lg text-slate-400 max-w-xl mx-auto">
-            Commencez sans rien payer, puis débloquez toute la puissance de Plinkk quand vous êtes prêt.
-          </p>
+        <div class="text-center mb-10">
+          <p class="reveal text-xs font-semibold tracking-widest text-violet-400 uppercase mb-3">Tarifs</p>
+          <h2 class="reveal reveal-delay-1 section-title text-white mb-3">Simple et transparent</h2>
+          <p class="reveal reveal-delay-2 text-sm text-slate-400">Gratuit pour démarrer. Premium pour en faire plus.</p>
         </div>
 
         <!-- Plans grid -->
-        <div class="reveal reveal-delay-3 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+        <div class="reveal reveal-delay-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
 
           <!-- Free Plan -->
-          <div class="relative rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-sm p-8 flex flex-col">
-            <h3 class="text-lg font-bold text-white mb-1">Gratuit</h3>
-            <p class="text-sm text-slate-400 mb-6">Pour découvrir Plinkk</p>
-
-            <div class="flex items-baseline gap-1 mb-8">
-              <span class="text-4xl font-extrabold text-white">0€</span>
-              <span class="text-slate-500 text-sm">/ pour toujours</span>
+          <div class="relative rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-sm p-6 flex flex-col">
+            <div class="flex items-baseline gap-1 mb-1">
+              <span class="text-3xl font-extrabold text-white">0€</span>
+              <span class="text-slate-500 text-xs">/ pour toujours</span>
             </div>
+            <h3 class="text-sm font-semibold text-slate-400 mb-5">Gratuit — pour démarrer</h3>
 
-            <ul class="space-y-3 mb-8 flex-1">
-              <li class="flex items-center gap-2.5 text-sm text-slate-300">
-                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                1 page Plinkk
-              </li>
-              <li class="flex items-center gap-2.5 text-sm text-slate-300">
-                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                Liens illimités
-              </li>
-              <li class="flex items-center gap-2.5 text-sm text-slate-300">
-                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                Thèmes de base
-              </li>
-              <li class="flex items-center gap-2.5 text-sm text-slate-300">
-                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                Statistiques 7 jours
-              </li>
+            <ul class="space-y-2 mb-6 flex-1 text-sm text-slate-300">
+              <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> 1 page Plinkk</li>
+              <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Liens illimités</li>
+              <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Stats 7 jours</li>
             </ul>
 
-            <a href="<%= dashboardUrl %>/login#signup"
-              class="btn-ghost px-6 py-3.5 rounded-xl text-sm font-semibold text-center transition-all">
+            <a href="<%= dashboardUrl %>/join"
+              class="btn-ghost px-5 py-2.5 rounded-xl text-sm font-semibold text-center transition-all">
               Commencer gratuitement
             </a>
           </div>
 
           <!-- Premium Plan -->
-          <div
-            class="relative rounded-2xl border border-violet-500/30 bg-gradient-to-b from-violet-500/[0.08] to-transparent backdrop-blur-sm p-8 flex flex-col shadow-lg shadow-violet-500/10">
-            <!-- Badge -->
-            <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-              <span
-                class="px-4 py-1 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-xs font-bold uppercase tracking-wider shadow-lg">
-                Populaire
-              </span>
+          <div class="relative rounded-2xl border border-violet-500/30 bg-gradient-to-b from-violet-500/[0.08] to-transparent backdrop-blur-sm p-6 flex flex-col shadow-lg shadow-violet-500/10">
+            <div class="absolute -top-3 left-6">
+              <span class="px-3 py-0.5 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-xs font-bold uppercase tracking-wider">Populaire</span>
             </div>
 
-            <h3 class="text-lg font-bold text-white mb-1">Premium</h3>
-            <p class="text-sm text-violet-300/70 mb-6">Pour les créateurs ambitieux</p>
-
-            <div class="flex items-baseline gap-1 mb-8">
-              <span class="text-4xl font-extrabold text-white">4,99€</span>
-              <span class="text-slate-500 text-sm">/ mois</span>
+            <div class="flex items-baseline gap-1 mb-1">
+              <span class="text-3xl font-extrabold text-white">4,99€</span>
+              <span class="text-slate-500 text-xs">/ mois</span>
             </div>
+            <h3 class="text-sm font-semibold text-violet-300/70 mb-5">Premium — pour les créateurs</h3>
 
-            <ul class="space-y-3 mb-8 flex-1">
-              <li class="flex items-center gap-2.5 text-sm text-slate-300">
-                <svg class="w-4 h-4 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                  stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                2 Pages Plinkk
-              </li>
-              <li class="flex items-center gap-2.5 text-sm text-slate-300">
-                <svg class="w-4 h-4 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                  stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                Redirections illimitées
-              </li>
-              <li class="flex items-center gap-2.5 text-sm text-slate-300">
-                <svg class="w-4 h-4 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                  stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                Tous les thèmes + personnalisation
-              </li>
-              <li class="flex items-center gap-2.5 text-sm text-slate-300">
-                <svg class="w-4 h-4 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                  stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                Statistiques avancées 365 jours
-              </li>
-              <li class="flex items-center gap-2.5 text-sm text-slate-300">
-                <svg class="w-4 h-4 text-violet-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                  stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                Badge Premium
-              </li>
+            <ul class="space-y-2 mb-6 flex-1 text-sm text-slate-300">
+              <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> 2 pages Plinkk</li>
+              <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> Tous les thèmes</li>
+              <li class="flex items-center gap-2"><span class="text-violet-400">✓</span> Stats avancées 365 j</li>
             </ul>
 
             <a href="<%= dashboardUrl %>/premium/configure"
-              class="magnetic-btn btn-primary px-6 py-3.5 rounded-xl text-sm font-semibold text-center">
+              class="magnetic-btn btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold text-center">
               <span class="magnetic-btn-inner">Passer à Premium →</span>
             </a>
           </div>
 
         </div>
 
-        <!-- Extra link -->
-        <p class="reveal reveal-delay-4 text-center mt-8 text-sm text-slate-500">
-          <a href="/pricing" class="text-violet-400 hover:text-violet-300 transition-colors">Voir la comparaison
-            complète →</a>
+        <p class="reveal reveal-delay-4 text-center mt-6 text-xs text-slate-600">
+          <a href="/pricing" class="text-violet-500 hover:text-violet-400 transition-colors">Voir la comparaison complète →</a>
         </p>
       </div>
     </section>
 
     <!-- Final CTA -->
-    <section class="py-32 lg:py-48 px-6 lg:px-12 relative">
-      <div class="absolute inset-0 glow-purple pointer-events-none"></div>
+    <section class="py-20 lg:py-28 px-6 lg:px-12 relative">
+      <div class="absolute inset-0 glow-purple pointer-events-none opacity-40"></div>
 
-      <div class="relative max-w-4xl mx-auto text-center">
-        <h2 class="reveal section-title text-white mb-6">
+      <div class="relative max-w-xl mx-auto text-center">
+        <h2 class="reveal text-2xl lg:text-3xl font-bold text-white mb-4">
           Prêt à créer votre page ?
         </h2>
-        <p class="reveal reveal-delay-1 text-xl text-slate-400 mb-12 max-w-xl mx-auto">
-          Rejoignez des milliers de créateurs. Gratuit, pour toujours. Aucune carte bancaire requise.
+        <p class="reveal reveal-delay-1 text-sm text-slate-400 mb-8">
+          Gratuit, pour toujours. Aucune carte bancaire requise.
         </p>
 
-        <div class="reveal reveal-delay-2 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a href="<%= dashboardUrl %>/login#signup" class="magnetic-btn btn-primary px-10 py-5 rounded-full text-lg">
-            <span class="magnetic-btn-inner">Commencer maintenant</span>
+        <div class="reveal reveal-delay-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <a href="<%= dashboardUrl %>/join" class="magnetic-btn btn-primary px-8 py-3.5 rounded-full text-sm font-semibold">
+            <span class="magnetic-btn-inner">Commencer maintenant →</span>
           </a>
-          <a href="/users" class="btn-ghost px-8 py-5 rounded-full text-lg">
+          <a href="/users" class="btn-ghost px-6 py-3.5 rounded-full text-sm">
             Voir des exemples
           </a>
         </div>
 
-        <p class="reveal reveal-delay-3 text-slate-500 text-sm mt-8">
-          Open source • Gratuit • Personnalisable
+        <p class="reveal reveal-delay-3 text-slate-600 text-xs mt-6">
+          Open source · Gratuit · Personnalisable
         </p>
       </div>
     </section>
@@ -571,22 +625,34 @@
       document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('heroEmailForm');
         const emailInput = document.getElementById('heroEmail');
+        const submitBtn = document.getElementById('heroEmailBtn');
+        const submitBtnLabel = submitBtn && submitBtn.querySelector('.magnetic-btn-inner');
         if (form && emailInput) {
           form.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = emailInput.value.trim();
             if (email && emailInput.checkValidity()) {
-              const dashboardUrl = '<%= dashboardUrl %>';
-              window.location.href = dashboardUrl + '/login?email=' + encodeURIComponent(email) + '#signup';
+              const dashboardBase = String('<%= dashboardUrl %>' || '').replace(/\/+$/, '');
+              const postUrl = (dashboardBase || '') + '/join';
+
+              if (submitBtn) submitBtn.disabled = true;
+              if (submitBtnLabel) submitBtnLabel.textContent = 'Envoi du code...';
+
+              const postForm = document.createElement('form');
+              postForm.method = 'POST';
+              postForm.action = postUrl;
+              postForm.style.display = 'none';
+
+              const emailField = document.createElement('input');
+              emailField.type = 'hidden';
+              emailField.name = 'email';
+              emailField.value = email;
+              postForm.appendChild(emailField);
+
+              document.body.appendChild(postForm);
+              postForm.submit();
             }
           });
-          // Also handle button click
-          const btn = document.getElementById('heroEmailBtn');
-          if (btn) {
-            btn.addEventListener('click', () => {
-              form.dispatchEvent(new Event('submit'));
-            });
-          }
         }
       });
     </script>
