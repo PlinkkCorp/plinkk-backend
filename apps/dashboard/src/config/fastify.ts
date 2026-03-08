@@ -48,12 +48,28 @@ export async function registerPlugins(fastify: FastifyInstance) {
 
   await fastify.register(fastifyCookie);
 
+  // Configuration adaptée à l'environnement
+  // En production, partager les cookies entre dash.plinkk.fr et plinkk.fr
+  const isProduction = process.env.DASHBOARD_URL?.includes("plinkk.fr") ?? false;
+  const cookieConfig = isProduction
+    ? {
+        path: "/",
+        domain: ".plinkk.fr",
+        secure: true,
+        httpOnly: true,
+        sameSite: "lax" as const,
+      }
+    : {
+        path: "/",
+        httpOnly: true,
+      };
+
   await fastify.register(fastifySecureSession, {
     sessionName: "session",
     cookieName: "plinkk-backend",
     key: readFileSync(path.join(__dirname, "..", "secret-key")),
     expiry: 24 * 60 * 60,
-    cookie: { path: "/" },
+    cookie: cookieConfig,
   });
 
   await fastify.register(fastifyOAuth2, {
@@ -86,7 +102,17 @@ export async function registerPlugins(fastify: FastifyInstance) {
       `https://dash.plinkk.fr/login/discord/callback`,
   });
 
-  await fastify.register(fastifyCors, { origin: true });
+  const corsConfig = isProduction
+    ? {
+        origin: ["https://dash.plinkk.fr", "https://plinkk.fr"],
+        credentials: true,
+      }
+    : {
+        origin: true, // Permet toutes les origines en dev
+        credentials: true,
+      };
+
+  await fastify.register(fastifyCors, corsConfig);
 
   await fastify.register(fastifyHttpProxy, {
     upstream: "https://analytics.plinkk.fr/",
