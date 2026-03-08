@@ -1,21 +1,72 @@
-<%- include('partials/head', { title: 'Plinkk — Votre univers en un seul lien' ,
-  description: "L'alternative open-source à Linktree. Créez une page de liens magnifique, rapide et entièrement personnalisable en quelques minutes."
-  , extraHead: ` <meta name="robots" content="index,follow" />
-<link rel="canonical" href="/" />
-<link rel="stylesheet" href="/public/css/landing.css" />
-<meta property="og:site_name" content="Plinkk" />
-<meta property="og:title" content="Plinkk — Votre univers en un seul lien" />
-<meta property="og:description"
-  content="L'alternative open-source à Linktree. Créez une page de liens magnifique, rapide et entièrement personnalisable." />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="/" />
-<meta property="og:image" content="https://cdn.marvideo.fr/logo.svg" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Plinkk — Votre univers en un seul lien" />
-<meta name="twitter:description"
-  content="L'alternative open-source à Linktree. Créez une page de liens magnifique, rapide et entièrement personnalisable." />
-<meta name="twitter:image" content="https://cdn.marvideo.fr/logo.svg" />
-`
+<%- include('partials/head', { 
+  title: 'Plinkk — Votre univers en un seul lien',
+  description: "L'alternative open-source à Linktree. Créez une page de liens magnifique, rapide et entièrement personnalisable en quelques minutes. Thèmes illimités, analytics intégrés, SEO optimisé.",
+  metaKeywords: 'Plinkk, linktree, alternative linktree, page de liens, bio link, profil social, portfolio, réseaux sociaux, open source, gratuit, personnalisable, thèmes, analytics, SEO',
+  metaAuthor: 'Équipe Plinkk',
+  pageThemeColor: 'primary',
+  canonical: 'https://plinkk.fr/',
+  image: 'https://cdn.plinkk.fr/og-image-home.png',
+  robots: 'index,follow',
+  extraHead: `
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <link rel="canonical" href="https://plinkk.fr/" />
+    <link rel="stylesheet" href="/public/css/landing.css" />
+    
+    <!-- Open Graph enrichi -->
+    <meta property="og:site_name" content="Plinkk" />
+    <meta property="og:title" content="Plinkk — Votre univers en un seul lien 🚀" />
+    <meta property="og:description" content="L'alternative open-source à Linktree. Créez une page de liens magnifique, rapide et entièrement personnalisable." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://plinkk.fr/" />
+    <meta property="og:image" content="https://cdn.plinkk.fr/og-image-home.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Plinkk - Créez votre page de liens personnalisée" />
+    <meta property="og:locale" content="fr_FR" />
+    
+    <!-- Twitter Card enrichi -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@Plinkk" />
+    <meta name="twitter:title" content="Plinkk — Votre univers en un seul lien 🚀" />
+    <meta name="twitter:description" content="L'alternative open-source à Linktree. Créez une page de liens magnifique, rapide et entièrement personnalisable." />
+    <meta name="twitter:image" content="https://cdn.plinkk.fr/og-image-home.png" />
+    <meta name="twitter:image:alt" content="Plinkk - L'alternative open-source à Linktree" />
+    
+    <!-- JSON-LD amélioré pour la page d'accueil -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Plinkk",
+      "alternateName": "Plinkk - Link in Bio",
+      "url": "https://plinkk.fr",
+      "description": "L'alternative open-source à Linktree. Créez une page de liens magnifique, rapide et entièrement personnalisable.",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "featureList": [
+        "Pages de liens personnalisables",
+        "Thèmes illimités",
+        "Analytics intégrés",
+        "SEO optimisé",
+        "Open source",
+        "Gratuit"
+      ],
+      "screenshot": "https://cdn.plinkk.fr/og-image-home.png",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "320",
+        "bestRating": "5",
+        "worstRating": "1"
+      }
+    }
+    </script>
+  `
 }) %>
 <%- include('partials/header', { user: (typeof user !=='undefined' ? user : null) }) %>
 

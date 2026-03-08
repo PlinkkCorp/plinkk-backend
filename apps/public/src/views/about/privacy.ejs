@@ -1,4 +1,11 @@
-<%- include('partials/head', { title: 'Confidentialité', description: 'Politique de confidentialité de Plinkk.' }) %>
+<%- include('partials/head', { 
+  title: 'Politique de confidentialité', 
+  description: 'Politique de confidentialité de Plinkk : découvrez comment nous protégeons vos données personnelles et respectons votre vie privée.',
+  metaKeywords: 'confidentialité, données personnelles, vie privée, RGPD, protection, sécurité',
+  pageThemeColor: 'dark',
+  canonical: 'https://plinkk.fr/privacy',
+  robots: 'index,follow'
+}) %>
 <%- include('partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
 
 <main class="relative isolate overflow-hidden min-h-screen">

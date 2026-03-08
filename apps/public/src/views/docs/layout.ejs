@@ -1,19 +1,47 @@
-<%- include('partials/head', { title: (__DOC__ ? `Documentation — ${__DOC__.title}` : 'Plinkk — Documentation' ),
-    description: (__DOC__ && __DOC__.excerpt) ? __DOC__.excerpt
-    : 'Guide complet Plinkk: démarrage, thèmes, admin, auto-hébergement, sécurité et plus.' , extraHead: ` <meta
-    name="robots" content="index,follow" />
-<link rel="canonical" href="${__DOC__ ? __DOC__.path : '/docs'}" />
-<meta property="og:title" content="${__DOC__ ? `Plinkk — ${__DOC__.title}` : 'Plinkk — Documentation'}" />
-<meta property="og:description"
-    content="${(__DOC__ && __DOC__.excerpt) ? __DOC__.excerpt : 'Tout Plinkk, bien organisé.'}" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="${__DOC__ ? __DOC__.path : '/docs'}" />
-<meta property="og:image" content="https://cdn.plinkk.fr/logo.svg" />
+<%- include('partials/head', { 
+    title: (__DOC__ ? `Documentation — ${__DOC__.title}` : 'Documentation'),
+    description: (__DOC__ && __DOC__.excerpt) ? __DOC__.excerpt : 'Guide complet Plinkk: démarrage, thèmes, admin, auto-hébergement, sécurité et plus.',
+    metaKeywords: `documentation Plinkk, guide, tutoriel, ${__DOC__ && __DOC__.title ? __DOC__.title : 'aide'}`,
+    metaAuthor: 'Équipe Plinkk',
+    pageThemeColor: 'success',
+    canonical: `https://plinkk.fr${__DOC__ ? __DOC__.path : '/docs'}`,
+    image: 'https://cdn.plinkk.fr/og-image-docs.png',
+    robots: 'index,follow',
+    extraHead: `
+    <meta property="og:title" content="${__DOC__ ? `Plinkk — ${__DOC__.title}` : 'Plinkk — Documentation'}" />
+    <meta property="og:description" content="${(__DOC__ && __DOC__.excerpt) ? __DOC__.excerpt : 'Tout Plinkk, bien organisé.'}" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://plinkk.fr${__DOC__ ? __DOC__.path : '/docs'}" />
+    <meta property="og:image" content="https://cdn.plinkk.fr/og-image-docs.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "${__DOC__ ? __DOC__.title.replace(/"/g, '\\"') : 'Documentation Plinkk'}",
+      "description": "${(__DOC__ && __DOC__.excerpt) ? __DOC__.excerpt.replace(/"/g, '\\"') : 'Guide complet Plinkk'}",
+      "url": "https://plinkk.fr${__DOC__ ? __DOC__.path : '/docs'}",
+      "author": {
+        "@type": "Organization",
+        "name": "Plinkk"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Plinkk",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://cdn.plinkk.fr/logo.svg"
+        }
+      }
+    }
+    </script>
 <style>
     /* Liens plus lisibles dans la prose */
     .prose a {
-        color: #a5b4fc;
+        color: #a78bfa;
         text-decoration: none;
+        transition: color 0.2s ease;
     }
 
     .prose a:hover {

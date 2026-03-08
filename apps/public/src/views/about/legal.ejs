@@ -1,4 +1,11 @@
-<%- include('partials/head', { title: 'Mentions légales' , description: 'Mentions légales de Plinkk.' }) %>
+<%- include('partials/head', { 
+  title: 'Mentions légales',
+  description: 'Mentions légales de Plinkk : informations sur l’éditeur, l’hébergement et les responsabilités légales de notre plateforme.',
+  metaKeywords: 'mentions légales, éditeur, hébergement, responsabilité légale, informations juridiques',
+  pageThemeColor: 'dark',
+  canonical: 'https://plinkk.fr/legal',
+  robots: 'index,follow'
+}) %>
   <%- include('partials/header', { user: (typeof user !=='undefined' ? user : null) }) %>
 
     <main class="relative isolate overflow-hidden min-h-screen">

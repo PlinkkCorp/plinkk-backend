@@ -1,15 +1,34 @@
 <%- include('partials/head', {
-  title: 'Plinkk — Documentation (En construction)',
-  description: 'La documentation est en construction. Revenez bientôt pour le guide complet et les fonctionnalités détaillées.',
+  title: 'Documentation',
+  description: 'Documentation complète de Plinkk : guides de démarrage, tutoriels, API, thèmes personnalisés, et bien plus. Tout ce dont vous avez besoin pour maîtriser Plinkk.',
+  metaKeywords: 'documentation Plinkk, guide, tutoriel, aide, API, thèmes, personnalisation, self-hosting',
+  metaAuthor: 'Équipe Plinkk',
+  pageThemeColor: 'success',
+  canonical: 'https://plinkk.fr/docs',
+  image: 'https://cdn.plinkk.fr/og-image-docs.png',
+  robots: 'index,follow',
   extraHead: `
-    <meta name="robots" content="index,follow" />
-    <meta name="author" content="Plinkk Devs" />
-    <link rel="canonical" href="/docs" />
-    <meta property="og:title" content="Plinkk — Documentation (En construction)" />
-    <meta property="og:description" content="La documentation arrive très bientôt. Merci pour votre patience !" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="/docs" />
-    <meta property="og:image" content="https://cdn.plinkk.fr/logo.svg" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "Documentation Plinkk",
+      "description": "Guide complet pour utiliser Plinkk et créer votre page de liens parfaite.",
+      "url": "https://plinkk.fr/docs",
+      "author": {
+        "@type": "Organization",
+        "name": "Plinkk"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Plinkk",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://cdn.plinkk.fr/logo.svg"
+        }
+      }
+    }
+    </script>
   `
 }) %>
 

@@ -1,6 +1,32 @@
-<%- include('partials/head', { title: 'À propos' ,
-  description: "En savoir plus sur Plinkk, le projet open‑source pour créer des pages de liens rapides et personnalisables."
-  }) %>
+<%- include('partials/head', { 
+  title: 'À propos',
+  description: "En savoir plus sur Plinkk, le projet open-source qui révolutionne les pages de liens. Créez des profils rapides, personnalisables et entièrement gratuits.",
+  metaKeywords: 'à propos Plinkk, open source, projet, équipe, mission, histoire, valeurs, communauté',
+  metaAuthor: 'Équipe Plinkk',
+  pageThemeColor: 'secondary',
+  canonical: 'https://plinkk.fr/about',
+  image: 'https://cdn.plinkk.fr/og-image-about.png',
+  robots: 'index,follow',
+  extraHead: `
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "AboutPage",
+      "name": "À propos de Plinkk",
+      "description": "Découvrez l'histoire et la mission de Plinkk, le projet open-source pour des pages de liens personnalisées.",
+      "url": "https://plinkk.fr/about",
+      "mainEntity": {
+        "@type": "Organization",
+        "name": "Plinkk",
+        "url": "https://plinkk.fr",
+        "logo": "https://cdn.plinkk.fr/logo.svg",
+        "description": "Plateforme open-source de création de pages de liens personnalisables",
+        "foundingDate": "2023"
+      }
+    }
+    </script>
+  `
+}) %>
   <%- include('partials/header', { user: (typeof user !=='undefined' ? user : null) }) %>
 
     <main class="relative isolate overflow-hidden">

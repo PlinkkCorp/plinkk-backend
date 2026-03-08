@@ -1,5 +1,11 @@
-<%- include('partials/head', { title: 'Conditions d’utilisation' ,
-  description: 'Conditions générales d’utilisation de Plinkk.' }) %>
+<%- include('partials/head', { 
+  title: 'Conditions d’utilisation',
+  description: 'Conditions générales d’utilisation de Plinkk : droits, obligations et règles pour utiliser notre plateforme de pages de liens.',
+  metaKeywords: 'conditions utilisation, CGU, règles, obligations, droits, termes service',
+  pageThemeColor: 'dark',
+  canonical: 'https://plinkk.fr/terms',
+  robots: 'index,follow'
+}) %>
   <%- include('partials/header', { user: (typeof user !=='undefined' ? user : null) }) %>
 
     <main class="relative isolate overflow-hidden min-h-screen">

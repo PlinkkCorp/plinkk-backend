@@ -1,7 +1,33 @@
 <%- include('partials/head', {
   title: 'Fonctionnalités',
-  description: 'Découvrez toutes les fonctionnalités de Plinkk : pages personnalisables, thèmes, analytics, liens intelligents, domaines personnalisés et bien plus.',
-  robots: 'index,follow'
+  description: 'Découvrez toutes les fonctionnalités de Plinkk : pages personnalisables, thèmes illimités, analytics avancés, liens intelligents, domaines personnalisés, SEO optimisé et bien plus.',
+  metaKeywords: 'fonctionnalités Plinkk, thèmes personnalisés, analytics, liens intelligents, SEO, domaines personnalisés, QR codes, open source',
+  metaAuthor: 'Équipe Plinkk',
+  pageThemeColor: 'info',
+  canonical: 'https://plinkk.fr/features',
+  image: 'https://cdn.plinkk.fr/og-image-features.png',
+  robots: 'index,follow',
+  extraHead: `
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Fonctionnalités Plinkk",
+      "description": "Découvrez toutes les fonctionnalités de Plinkk pour créer votre page de liens parfaite.",
+      "url": "https://plinkk.fr/features",
+      "mainEntity": {
+        "@type": "ItemList",
+        "itemListElement": [
+          {"@type": "ListItem", "position": 1, "name": "Thèmes personnalisables"},
+          {"@type": "ListItem", "position": 2, "name": "Analytics intégrés"},
+          {"@type": "ListItem", "position": 3, "name": "SEO optimisé"},
+          {"@type": "ListItem", "position": 4, "name": "Liens intelligents"},
+          {"@type": "ListItem", "position": 5, "name": "Domaines personnalisés"}
+        ]
+      }
+    }
+    </script>
+  `
 }) %>
 <%- include('partials/header') %>
 

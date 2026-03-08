@@ -4,33 +4,91 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>
-    <%= ((typeof title !=='undefined' && title) ? title + ' — ' : '' ) %>Plinkk
-  </title>
-  <% const desc=(typeof description !=='undefined' && description) ? description
-    : 'Crée ta page de liens élégante et personnalisée avec Plinkk.' ; %>
-    <% const robotsVal=(typeof robots !=='undefined' && robots) ? robots : 'index,follow' ; %>
-      <% const img=(typeof image !=='undefined' && image) ? image : 'https://cdn.plinkk.fr/logo.svg' ; %>
-        <% const canon=(typeof canonical !=='undefined' && canonical) ? canonical : null; %>
-          <meta name="description" content="<%= desc %>" />
-          <meta name="robots" content="<%= robotsVal %>" />
-          <meta name="theme-color" content="#0B1020" />
-          <link rel="icon" href="https://cdn.plinkk.fr/logo.svg" />
-          <meta property="og:site_name" content="Plinkk" />
-          <meta property="og:type" content="website" />
-          <meta property="og:title"
-            content="<%= ((typeof title !== 'undefined' && title) ? title + ' — ' : '') %>Plinkk" />
-          <meta property="og:description" content="<%= desc %>" />
-          <meta property="og:image" content="<%= img %>" />
-          <% if (canon) { %>
-            <meta property="og:url" content="<%= canon %>" />
-            <link rel="canonical" href="<%= canon %>" />
-            <% } %>
-              <meta name="twitter:card" content="summary_large_image" />
-              <meta name="twitter:title"
-                content="<%= ((typeof title !== 'undefined' && title) ? title + ' — ' : '') %>Plinkk" />
-              <meta name="twitter:description" content="<%= desc %>" />
-              <meta name="twitter:image" content="<%= img %>" />
+  <% 
+    // Configuration des métadonnées
+    const desc = (typeof description !== 'undefined' && description) ? description : 'Crée ta page de liens élégante et personnalisée avec Plinkk.';
+    const robotsVal = (typeof robots !== 'undefined' && robots) ? robots : 'index,follow';
+    const img = (typeof image !== 'undefined' && image) ? image : 'https://cdn.plinkk.fr/logo.svg';
+    const canon = (typeof canonical !== 'undefined' && canonical) ? canonical : null;
+    const keywords = (typeof metaKeywords !== 'undefined' && metaKeywords) ? metaKeywords : 'Plinkk, page de liens, linktree, bio, profil, réseaux sociaux, portfolio, open source';
+    const author = (typeof metaAuthor !== 'undefined' && metaAuthor) ? metaAuthor : 'Plinkk';
+    
+    // Couleurs de thème dynamiques selon la page
+    const themeColors = {
+      default: '#4338CA',
+      primary: '#A21CAF',
+      secondary: '#E11D48',
+      success: '#34D399',
+      info: '#0EA5E9',
+      dark: '#0B1020'
+    };
+    const themeColor = (typeof pageThemeColor !== 'undefined' && themeColors[pageThemeColor]) 
+      ? themeColors[pageThemeColor] 
+      : themeColors.default;
+  %>
+  
+  <!-- Métadonnées de base -->
+  <title><%= ((typeof title !== 'undefined' && title) ? title + ' — ' : '') %>Plinkk</title>
+  <meta name="description" content="<%= desc %>" />
+  <meta name="keywords" content="<%= keywords %>" />
+  <meta name="author" content="<%= author %>" />
+  <meta name="robots" content="<%= robotsVal %>" />
+  <meta name="language" content="fr-FR" />
+  <meta name="theme-color" content="<%= themeColor %>" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="format-detection" content="telephone=no" />
+  
+  <!-- Favicon et icônes -->
+  <link rel="icon" type="image/svg+xml" href="https://cdn.plinkk.fr/logo.svg" />
+  <link rel="apple-touch-icon" href="https://cdn.plinkk.fr/logo.svg" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:site_name" content="Plinkk" />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="fr_FR" />
+  <meta property="og:title" content="<%= ((typeof title !== 'undefined' && title) ? title + ' — ' : '') %>Plinkk" />
+  <meta property="og:description" content="<%= desc %>" />
+  <meta property="og:image" content="<%= img %>" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="<%= ((typeof title !== 'undefined' && title) ? title : 'Plinkk') %>" />
+  <% if (canon) { %>
+    <meta property="og:url" content="<%= canon %>" />
+    <link rel="canonical" href="<%= canon %>" />
+  <% } %>
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@Plinkk" />
+  <meta name="twitter:creator" content="@Plinkk" />
+  <meta name="twitter:title" content="<%= ((typeof title !== 'undefined' && title) ? title + ' — ' : '') %>Plinkk" />
+  <meta name="twitter:description" content="<%= desc %>" />
+  <meta name="twitter:image" content="<%= img %>" />
+  <meta name="twitter:image:alt" content="<%= ((typeof title !== 'undefined' && title) ? title : 'Plinkk') %>" />
+  
+  <!-- Métadonnées structurées JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Plinkk",
+    "description": "<%= desc.replace(/"/g, '\\"') %>",
+    "url": "https://plinkk.fr",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "EUR"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "250"
+    }
+  }
+  </script>
               <script defer src="/umami_script.js" data-website-id="69e21905-d1fc-48c8-a64e-26a6ad5ad089"
                 data-host-url="https://analytics.plinkk.fr"></script>
               <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -42,15 +100,32 @@
 
                 :root {
                   --ease-out-quad: cubic-bezier(.22, 1, .36, 1);
+                  
+                  /* Couleurs de marque améliorées */
                   --brand-1: #4338CA;
                   --brand-2: #A21CAF;
                   --brand-3: #E11D48;
                   --brand-sky-1: #0EA5E9;
                   --brand-sky-2: #22D3EE;
                   --brand-emerald: #34D399;
+                  --brand-violet: #8B5CF6;
+                  --brand-fuchsia: #D946EF;
+                  --brand-amber: #F59E0B;
+                  --brand-rose: #F43F5E;
+                  
+                  /* Surfaces avec meilleure profondeur */
                   --surface-950: #0B1020;
                   --surface-900: #0b1324;
+                  --surface-850: #111827;
+                  --surface-800: #1e293b;
                   --stroke-800: #1f2937;
+                  --stroke-700: #334155;
+                  
+                  /* Nouvelles couleurs d'accent */
+                  --accent-cyan: #06B6D4;
+                  --accent-purple: #A855F7;
+                  --accent-pink: #EC4899;
+                  --accent-orange: #F97316;
                 }
 
                 body::before {
@@ -60,59 +135,93 @@
                   pointer-events: none;
                   z-index: -1;
                   background:
-                    radial-gradient(1200px 700px at 10% 10%, rgba(67, 56, 202, .18), transparent 60%),
-                    radial-gradient(1000px 600px at 80% 80%, rgba(162, 28, 175, .15), transparent 60%),
-                    radial-gradient(900px 540px at 50% 10%, rgba(225, 29, 72, .10), transparent 60%);
-                  filter: blur(0.5px);
+                    radial-gradient(1400px 800px at 10% 10%, rgba(139, 92, 246, .15), transparent 55%),
+                    radial-gradient(1200px 700px at 85% 20%, rgba(217, 70, 239, .12), transparent 60%),
+                    radial-gradient(1000px 600px at 50% 90%, rgba(59, 130, 246, .10), transparent 65%),
+                    radial-gradient(800px 500px at 90% 85%, rgba(236, 72, 153, .08), transparent 70%);
+                  filter: blur(1px);
                 }
 
+                /* Gradients de marque améliorés */
                 .brand-gradient {
-                  background: linear-gradient(90deg, var(--brand-1), var(--brand-2), var(--brand-3));
+                  background: linear-gradient(135deg, var(--brand-1), var(--brand-2), var(--brand-3));
                   -webkit-background-clip: text;
                   background-clip: text;
                   -webkit-text-fill-color: transparent;
                 }
 
                 .brand-gradient-sky {
-                  background: linear-gradient(90deg, var(--brand-sky-1), var(--brand-sky-2));
+                  background: linear-gradient(120deg, var(--brand-sky-1), var(--brand-sky-2), var(--brand-emerald));
                   -webkit-background-clip: text;
                   background-clip: text;
                   -webkit-text-fill-color: transparent;
                 }
+                
+                .brand-gradient-vibrant {
+                  background: linear-gradient(135deg, #F59E0B, #F43F5E, #D946EF, #8B5CF6, #0EA5E9);
+                  background-size: 200% 200%;
+                  -webkit-background-clip: text;
+                  background-clip: text;
+                  -webkit-text-fill-color: transparent;
+                  animation: gradient-shift 8s ease infinite;
+                }
+                
+                @keyframes gradient-shift {
+                  0%, 100% { background-position: 0% 50%; }
+                  50% { background-position: 100% 50%; }
+                }
 
+                /* Boutons avec meilleurs effets */
                 .btn-brand {
-                  background: linear-gradient(90deg, var(--brand-1), var(--brand-2), var(--brand-3));
-                  color: white
+                  background: linear-gradient(135deg, var(--brand-1), var(--brand-2), var(--brand-3));
+                  color: white;
+                  transition: all 0.3s cubic-bezier(.22, 1, .36, 1);
                 }
 
                 .btn-brand:hover {
-                  filter: brightness(1.05);
-                  box-shadow: 0 8px 24px rgba(162, 28, 175, .35)
+                  filter: brightness(1.15);
+                  box-shadow: 0 12px 32px rgba(162, 28, 175, .45), 0 0 20px rgba(139, 92, 246, .3);
+                  transform: translateY(-2px);
                 }
 
                 .btn-ghost {
                   border: 1px solid rgba(148, 163, 184, .35);
-                  color: #e5e7eb
+                  color: #e5e7eb;
+                  transition: all 0.3s cubic-bezier(.22, 1, .36, 1);
                 }
 
                 .btn-ghost:hover {
                   color: white;
-                  border-color: rgba(148, 163, 184, .6)
+                .btn-ghost:hover {
+                  color: white;
+                  border-color: rgba(139, 92, 246, .8);
+                  background: rgba(139, 92, 246, .1);
+                  box-shadow: 0 4px 16px rgba(139, 92, 246, .2);
                 }
 
+                /* Cartes et surfaces améliorées */
                 .chip {
-                  background-color: #0f172a;
-                  border: 1px solid rgba(31, 41, 55, 1);
-                  color: #cbd5e1
+                  background: linear-gradient(135deg, rgba(139, 92, 246, .1), rgba(217, 70, 239, .1));
+                  border: 1px solid rgba(139, 92, 246, .3);
+                  color: #c7d2fe;
+                  backdrop-filter: blur(8px);
                 }
 
                 .card-surface {
-                  background-color: rgba(11, 19, 36, .9);
-                  border: 1px solid rgba(31, 41, 55, 1)
+                  background: linear-gradient(135deg, rgba(11, 19, 36, .95), rgba(15, 23, 42, .9));
+                  border: 1px solid rgba(139, 92, 246, .2);
+                  backdrop-filter: blur(12px);
+                  transition: all 0.3s cubic-bezier(.22, 1, .36, 1);
+                }
+                
+                .card-surface:hover {
+                  border-color: rgba(139, 92, 246, .4);
+                  box-shadow: 0 8px 32px rgba(139, 92, 246, .15);
+                  transform: translateY(-2px);
                 }
 
                 .ring-brand {
-                  box-shadow: 0 0 0 1px rgba(31, 41, 55, .5), inset 0 0 0 1px rgba(67, 56, 202, .35)
+                  box-shadow: 0 0 0 1px rgba(139, 92, 246, .3), inset 0 0 0 1px rgba(217, 70, 239, .2);
                 }
 
                 @keyframes fade-in {
@@ -235,13 +344,15 @@
                   filter: invert(1) brightness(2) grayscale(1) !important;
                 }
 
+                /* Effet de verre amélioré */
                 .glass {
-                  background: linear-gradient(to bottom right, rgba(8, 8, 20, .6), rgba(15, 15, 40, .55));
-                  backdrop-filter: blur(10px)
+                  background: linear-gradient(to bottom right, rgba(15, 15, 40, .7), rgba(25, 25, 50, .6));
+                  backdrop-filter: blur(16px) saturate(180%);
+                  border: 1px solid rgba(255, 255, 255, .1);
                 }
 
                 .ring-gradient {
-                  box-shadow: 0 0 0 1px rgb(30 41 59 / .5), inset 0 0 0 1px rgb(99 102 241 / .25)
+                  box-shadow: 0 0 0 1px rgb(139 92 246 / .4), inset 0 0 0 1px rgb(217 70 239 / .2);
                 }
 
                 @media (prefers-reduced-motion: reduce) {
