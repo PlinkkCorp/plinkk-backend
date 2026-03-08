@@ -8,6 +8,7 @@ import { replyView } from "../../lib/replyView";
 import { createUserSession } from "../../services/sessionService";
 import { redirectWithError } from "../../utils/errorRedirect";
 import { logUserAction } from "../../lib/userLogger";
+import { sendOtp } from "../../services/otpService";
 
 export function loginRoutes(fastify: FastifyInstance) {
   fastify.get("/login", async (request, reply) => {
@@ -39,12 +40,77 @@ export function loginRoutes(fastify: FastifyInstance) {
 
     const returnToQuery =
       (request.query as { returnTo: string })?.returnTo || "";
+    const emailQuery = (request.query as { email?: string })?.email || "";
+    const stepQuery = (request.query as { step?: string })?.step || "";
 
     const googleClientId = process.env.GOOGLE_OAUTH2_ID || process.env.ID_CLIENT;
     return await replyView(reply, "connect.ejs", currentUser, {
       returnTo: returnToQuery,
+      email: emailQuery,
+      step: stepQuery,
       googleClientId,
     });
+  });
+
+  fastify.post("/login/email", async (request, reply) => {
+    const currentUserId = request.session.get("data");
+    if (currentUserId && !String(currentUserId).includes("__totp")) {
+      return reply.redirect("/");
+    }
+
+    const { email, returnTo } = request.body as { email?: string; returnTo?: string };
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+
+    try {
+      z.string().email().parse(normalizedEmail);
+    } catch {
+      return redirectWithError(reply, "/login", "Email invalide", {
+        email: normalizedEmail,
+      });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { email: normalizedEmail },
+      include: { role: true },
+    });
+
+    if (!user) {
+      return redirectWithError(reply, "/login", "Utilisateur introuvable", {
+        email: normalizedEmail,
+      });
+    }
+
+    const banCheckResult = await checkUserBan(user.email, normalizedEmail);
+    if (banCheckResult) {
+      return redirectWithError(reply, "/login", banCheckResult, {
+        email: normalizedEmail,
+      });
+    }
+
+    if (!user.hasPassword) {
+      const otpResult = await sendOtp(normalizedEmail);
+      if (!otpResult.ok) {
+        const msgs: Record<string, string> = {
+          cooldown: `Attends encore ${otpResult.cooldownSeconds || 0}s avant de renvoyer un email.`,
+          max_sends: "Tu as atteint la limite d'envois. Réessaie dans 15 minutes.",
+          quota_exceeded: "Le service de connexion OTP est temporairement indisponible.",
+          registration_disabled: "La connexion OTP est temporairement indisponible.",
+          send_failed: "Impossible d'envoyer le code OTP pour le moment.",
+        };
+        return redirectWithError(reply, "/login", msgs[otpResult.error || "send_failed"], {
+          email: normalizedEmail,
+        });
+      }
+
+      return reply.redirect(`/join/verify?email=${encodeURIComponent(normalizedEmail)}`);
+    }
+
+    const params = new URLSearchParams({
+      step: "password",
+      email: normalizedEmail,
+    });
+    if (returnTo) params.set("returnTo", String(returnTo));
+    return reply.redirect(`/login?${params.toString()}`);
   });
 
   fastify.post("/login", async (request, reply) => {
@@ -58,42 +124,33 @@ export function loginRoutes(fastify: FastifyInstance) {
       password: string;
     };
 
-    const identifier = (email || "").trim();
-    const isEmail = identifier.includes("@");
+    const identifier = String(email || "").trim().toLowerCase();
 
-    if (isEmail) {
-      try {
-        z.string().email().parse(identifier);
-      } catch {
-        return redirectWithError(reply, "/login", "Email invalide", {
-          email: identifier,
-        });
-      }
-    }
-
-    let user: any = null;
-
-    if (isEmail) {
-      user = await prisma.user.findFirst({
-        where: { email: identifier },
-        include: { role: true },
-      });
-    } else {
-      const withoutAt = identifier.startsWith("@")
-        ? identifier.slice(1)
-        : identifier;
-      const candidateId = slugify(withoutAt);
-      user = await prisma.user.findFirst({
-        where: {
-          OR: [{ id: candidateId }, { userName: identifier }],
-        },
-        include: { role: true },
+    try {
+      z.string().email().parse(identifier);
+    } catch {
+      return redirectWithError(reply, "/login", "Email invalide", {
+        email: identifier,
+        step: "password",
       });
     }
+
+    const user = await prisma.user.findFirst({
+      where: { email: identifier },
+      include: { role: true },
+    });
 
     if (!user) {
       return redirectWithError(reply, "/login", "Utilisateur introuvable", {
         email: identifier,
+        step: "password",
+      });
+    }
+
+    if (!user.hasPassword) {
+      return redirectWithError(reply, "/login", "Ce compte utilise la connexion par email (OTP).", {
+        email: identifier,
+        step: "password",
       });
     }
 
@@ -101,6 +158,7 @@ export function loginRoutes(fastify: FastifyInstance) {
     if (!valid) {
       return redirectWithError(reply, "/login", "Mot de passe incorrect", {
         email: identifier,
+        step: "password",
       });
     }
 
@@ -108,6 +166,7 @@ export function loginRoutes(fastify: FastifyInstance) {
     if (banCheckResult) {
       return redirectWithError(reply, "/login", banCheckResult, {
         email: identifier,
+        step: "password",
       });
     }
 

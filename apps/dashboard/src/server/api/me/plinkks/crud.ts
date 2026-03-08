@@ -16,6 +16,14 @@ import { calculateObjectDiff } from "../../../../lib/diffUtils";
 
 
 export function plinkksCrudRoutes(fastify: FastifyInstance) {
+  const cannotPublish = async (userId: string) => {
+    const me = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { hasPassword: true, emailVerified: true },
+    });
+    return !!(me && me.hasPassword && !me.emailVerified);
+  };
+
   fastify.patch("/:id", async (request, reply) => {
     const userId = request.session.get("data") as string | undefined;
     if (!userId) return reply.code(401).send({ error: "unauthorized" });
@@ -26,6 +34,12 @@ export function plinkksCrudRoutes(fastify: FastifyInstance) {
     const body = request.body as { isPublic: boolean; isDefault: boolean };
     const patch: { isPublic?: boolean; visibility?: "PUBLIC" | "PRIVATE" } = {};
     if (typeof body.isPublic === "boolean") {
+      if (body.isPublic && (await cannotPublish(userId))) {
+        return reply.code(403).send({
+          error: "email_not_verified",
+          message: "Vérifie ton email avant de publier ton Plinkk.",
+        });
+      }
       patch.isPublic = Boolean(body.isPublic);
       patch.visibility = body.isPublic ? "PUBLIC" : "PRIVATE";
     }
@@ -48,6 +62,9 @@ export function plinkksCrudRoutes(fastify: FastifyInstance) {
         }),
       ]);
       await reindexNonDefault(prisma, userId);
+    }
+    if (Object.keys(patch).length > 0) {
+      await prisma.plinkk.update({ where: { id }, data: patch });
     }
     const updated = await prisma.plinkk.findUnique({ where: { id } });
     const actions: string[] = [];
@@ -75,6 +92,12 @@ export function plinkksCrudRoutes(fastify: FastifyInstance) {
     const body = request.body as { isPublic: boolean; isDefault: boolean };
     const patch: { isPublic?: boolean; visibility?: "PUBLIC" | "PRIVATE" } = {};
     if (typeof body.isPublic === "boolean") {
+      if (body.isPublic && (await cannotPublish(userId))) {
+        return reply.code(403).send({
+          error: "email_not_verified",
+          message: "Vérifie ton email avant de publier ton Plinkk.",
+        });
+      }
       patch.isPublic = Boolean(body.isPublic);
       patch.visibility = body.isPublic ? "PUBLIC" : "PRIVATE";
     }
@@ -97,6 +120,9 @@ export function plinkksCrudRoutes(fastify: FastifyInstance) {
         }),
       ]);
       await reindexNonDefault(prisma, userId);
+    }
+    if (Object.keys(patch).length > 0) {
+      await prisma.plinkk.update({ where: { id }, data: patch });
     }
     const updated = await prisma.plinkk.findUnique({ where: { id } });
     const actions: string[] = [];
@@ -175,9 +201,13 @@ export function plinkksCrudRoutes(fastify: FastifyInstance) {
         }
       }
 
+      const shouldForcePrivate = await cannotPublish(userId);
+
       const created = await createPlinkkForUser(prisma, userId, {
         name: rawName,
         slugBase: base,
+        visibility: shouldForcePrivate ? "PRIVATE" : undefined,
+        isActive: shouldForcePrivate ? false : undefined,
       });
       await logDetailedAction(userId, "CREATE_PLINKK", created.id, {}, created, request.ip, {
         formatted: `Created Plinkk '${created.name}' (${created.slug})`

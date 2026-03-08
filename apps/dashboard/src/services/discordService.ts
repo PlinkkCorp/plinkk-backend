@@ -33,6 +33,7 @@ interface DiscordEmbed {
 class DiscordService {
   private botToken: string | undefined;
   private channelId: string | undefined;
+  private initDisabled = false;
 
   constructor() {
     this.botToken = process.env.DISCORD_BOT_TOKEN;
@@ -50,6 +51,10 @@ class DiscordService {
    * Initialise le service Discord et vérifie la connexion au démarrage
    */
   async initialize(): Promise<void> {
+    if (this.initDisabled) {
+      return;
+    }
+
     if (!this.isConfigured()) {
       console.log("[Discord] ⚠️  Service Discord non configuré");
       console.log("[Discord] Configurez DISCORD_BOT_TOKEN et DISCORD_ANNOUNCEMENT_CHANNEL_ID pour activer les annonces automatiques");
@@ -59,18 +64,24 @@ class DiscordService {
     console.log("[Discord] 🔧 Initialisation du service Discord...");
 
     try {
+      const timeoutMs = Number(process.env.DISCORD_INIT_TIMEOUT_MS || 4000);
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
       // Vérifier que le bot peut accéder au channel
       const response = await fetch(`https://discord.com/api/v10/channels/${this.channelId}`, {
         method: "GET",
+        signal: controller.signal,
         headers: {
           Authorization: `Bot ${this.botToken}`,
         },
       });
+      clearTimeout(timer);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("[Discord] ❌ Impossible d'accéder au channel:", response.status, errorText);
-        console.error("[Discord] Vérifiez que le bot a les permissions nécessaires et que l'ID du channel est correct");
+        console.warn("[Discord] ⚠️ Impossible d'accéder au channel:", response.status, errorText);
+        console.warn("[Discord] Vérifiez que le bot a les permissions nécessaires et que l'ID du channel est correct");
         return;
       }
 
@@ -83,9 +94,15 @@ class DiscordService {
       } else {
         console.log("[Discord] ℹ️  Pour activer le crosspost, utilisez un channel d'annonces");
       }
-    } catch (error) {
-      console.error("[Discord] ❌ Erreur lors de l'initialisation:", error);
-      console.error("[Discord] Le service Discord sera désactivé");
+    } catch (error: any) {
+      const code = error?.code || error?.cause?.code;
+      if (code === "UND_ERR_CONNECT_TIMEOUT" || error?.name === "AbortError") {
+        console.warn("[Discord] ⚠️ Timeout réseau pendant l'initialisation. Service Discord désactivé pour cette session.");
+      } else {
+        console.warn("[Discord] ⚠️ Erreur lors de l'initialisation:", error?.message || String(error));
+      }
+      this.initDisabled = true;
+      console.warn("[Discord] Le service Discord est désactivé jusqu'au prochain redémarrage.");
     }
   }
 

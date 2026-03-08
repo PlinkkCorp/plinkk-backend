@@ -77,6 +77,11 @@ export async function requireAuthRedirect(request: FastifyRequest, reply: Fastif
     return reply.redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
 
+  // Rediriger vers l'onboarding si non terminé (sauf si on y est déjà)
+  if (!user.onboardingCompleted && !request.url.startsWith('/onboarding')) {
+    return reply.redirect('/onboarding');
+  }
+
   request.userId = userId;
   request.currentUser = user;
   request.publicPath = await getPublicPath(user.id);

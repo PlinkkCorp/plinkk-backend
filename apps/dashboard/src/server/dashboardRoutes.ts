@@ -113,8 +113,11 @@ export function dashboardRoutes(fastify: FastifyInstance) {
       orderBy: [{ isDefault: "desc" }, { index: "asc" }],
     });
 
+    const defaultPlinkk = plinkks.find((p) => p.isDefault) ?? plinkks[0] ?? null;
+
     return replyView(reply, "dashboard.ejs", userInfo, {
       plinkks,
+      plinkk: defaultPlinkk,
       publicPath: request.publicPath,
     });
   });

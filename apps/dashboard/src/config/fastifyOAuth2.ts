@@ -90,13 +90,9 @@ export async function registerOAuth2(fastify: FastifyInstance) {
 
       await createDefaultPlinkk(request, plinkkUserDB.id, user.name);
 
-      const returnTo =
-        (request.body as { returnTo: string })?.returnTo ||
-        (request.query as { returnTo: string })?.returnTo;
-
       await createUserSession(plinkkUserDB.id, request);
 
-      return reply.redirect(returnTo || "/");
+      return reply.redirect("/onboarding");
     }
     await createUserSession(plinkkUser.id, request);
 
@@ -142,13 +138,9 @@ export async function registerOAuth2(fastify: FastifyInstance) {
 
       await createDefaultPlinkk(request, plinkkUserDB.id, user.username);
 
-      const returnTo =
-        (request.body as { returnTo: string })?.returnTo ||
-        (request.query as { returnTo: string })?.returnTo;
-
       await createUserSession(plinkkUserDB.id, request);
 
-      return reply.redirect(returnTo || "/");
+      return reply.redirect("/onboarding");
     }
     await createUserSession(plinkkUser.id, request);
 

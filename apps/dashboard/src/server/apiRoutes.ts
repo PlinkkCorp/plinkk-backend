@@ -23,6 +23,7 @@ import { apiBugReportsRoutes } from "./api/bug-reports";
 import { apiAdminPartnersRoutes } from "./api/admin/partners";
 import { apiAdminAffiliateRoutes } from "./api/admin/affiliate";
 import { apiAdminPatchNotesRoutes } from "./api/admin/patchnotes";
+import { apiAdminAcquisitionRoutes } from "./api/admin/acquisition";
 
 // const prisma = new PrismaClient();
 
@@ -42,6 +43,7 @@ export function apiRoutes(fastify: FastifyInstance) {
   fastify.register(apiAdminPatchNotesRoutes, { prefix: "/admin/patchnotes" });
   fastify.register(apiStripeRoutes, { prefix: "/stripe" });
   fastify.register(apiBugReportsRoutes, { prefix: "/bug-reports" });
+  fastify.register(apiAdminAcquisitionRoutes, { prefix: "/admin/acquisition" });
 
   // ─── Funnel Event Tracking ──────────────────────────────────────────────────
   const ALLOWED_EVENTS = ['landing_visit', 'signup', 'premium_view', 'config_view', 'purchase', 'cancel'];

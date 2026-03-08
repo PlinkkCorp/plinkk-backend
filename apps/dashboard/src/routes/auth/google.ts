@@ -165,15 +165,11 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 
 			if (user) {
 				await createUserSession(user.id, request);
-				// Determines if it was a login or register
-				// Actually, we can check if we just created it.
-				// But simpler: if we are here, we are logging in.
-				// If we created a new user, we should have logged REGISTER.
-				// Let's rely on simple LOGIN log here for all successful sessions.
 				await logUserAction(user.id, "LOGIN", null, { method: "GOOGLE" }, request.ip);
 			}
 
-			return reply.send({ success: true, redirect: "/" });
+			const redirectTo = user && !user.onboardingCompleted ? "/onboarding" : "/";
+			return reply.send({ success: true, redirect: redirectTo });
 		} catch (e) {
 			request.log?.warn({ e }, "google callback error");
 			return reply.code(500).send({ success: false, error: "server_error" });
