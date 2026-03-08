@@ -19,7 +19,7 @@ ENV CI=true
 
 RUN bun install
 
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" bun --filter @plinkk/prisma run generate
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" bun run --filter @plinkk/prisma generate
 
 RUN bun run --filter @plinkk/prisma build
 
