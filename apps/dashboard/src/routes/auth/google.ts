@@ -5,6 +5,7 @@ import { slugify } from "@plinkk/shared";
 import { createUserSession } from "../../services/sessionService";
 import { createDefaultPlinkk } from "./register";
 import { logUserAction } from "../../lib/userLogger";
+import { ensureOnboardingCompletedForLegacyAccount } from "../../lib/onboarding";
 
 export function googleAuthRoutes(fastify: FastifyInstance) {
 	interface GoogleTokenPayload {
@@ -168,7 +169,10 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 				await logUserAction(user.id, "LOGIN", null, { method: "GOOGLE" }, request.ip);
 			}
 
-			const redirectTo = user && !user.onboardingCompleted ? "/onboarding" : "/";
+			const onboardingCompleted = user
+				? await ensureOnboardingCompletedForLegacyAccount(user)
+				: true;
+			const redirectTo = onboardingCompleted ? "/" : "/onboarding";
 			return reply.send({ success: true, redirect: redirectTo });
 		} catch (e) {
 			request.log?.warn({ e }, "google callback error");

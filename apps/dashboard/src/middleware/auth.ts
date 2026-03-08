@@ -3,6 +3,7 @@ import { prisma } from "@plinkk/prisma";
 import { verifyRoleIsStaff, verifyRoleAdmin } from "@plinkk/shared";
 import { getPublicPath } from "../services/plinkkService";
 import { UnauthorizedError, ForbiddenError } from "@plinkk/shared";
+import { ensureOnboardingCompletedForLegacyAccount } from "../lib/onboarding";
 
 export function registerAuthDecorators(fastify: FastifyInstance) {
   fastify.decorateRequest("userId", null);
@@ -77,10 +78,14 @@ export async function requireAuthRedirect(request: FastifyRequest, reply: Fastif
     return reply.redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
 
+  const onboardingCompleted = await ensureOnboardingCompletedForLegacyAccount(user);
+
   // Rediriger vers l'onboarding si non terminé (sauf si on y est déjà)
-  if (!user.onboardingCompleted && !request.url.startsWith('/onboarding')) {
+  if (!onboardingCompleted && !request.url.startsWith('/onboarding')) {
     return reply.redirect('/onboarding');
   }
+
+  user.onboardingCompleted = onboardingCompleted;
 
   request.userId = userId;
   request.currentUser = user;

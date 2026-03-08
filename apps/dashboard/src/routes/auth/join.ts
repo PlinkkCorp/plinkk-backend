@@ -14,6 +14,7 @@ import { replyView } from "../../lib/replyView";
 import { createUserSession } from "../../services/sessionService";
 import { logUserAction } from "../../lib/userLogger";
 import { generateNanoId } from "../../utils/generateId";
+import { ensureOnboardingCompletedForLegacyAccount } from "../../lib/onboarding";
 
 export function joinRoutes(fastify: FastifyInstance) {
   async function getCurrentUserForJoin(request: any) {
@@ -155,7 +156,8 @@ export function joinRoutes(fastify: FastifyInstance) {
       );
     }
 
-    return reply.redirect(user.onboardingCompleted ? "/" : "/onboarding");
+    const onboardingCompleted = await ensureOnboardingCompletedForLegacyAccount(user);
+    return reply.redirect(onboardingCompleted ? "/" : "/onboarding");
   });
 
   // ─── GET /join/magic/:token ─────────────────────────────────────────────────
@@ -178,7 +180,8 @@ export function joinRoutes(fastify: FastifyInstance) {
     await createUserSession(user.id, request);
     await logUserAction(user.id, "JOIN_MAGIC_LINK", null, { email: result.email }, request.ip);
 
-    return reply.redirect(user.onboardingCompleted ? "/" : "/onboarding");
+    const onboardingCompleted = await ensureOnboardingCompletedForLegacyAccount(user);
+    return reply.redirect(onboardingCompleted ? "/" : "/onboarding");
   });
 }
 
@@ -188,7 +191,7 @@ export function joinRoutes(fastify: FastifyInstance) {
 async function createOrLoginUser(email: string, request: any) {
   const existing = await prisma.user.findFirst({
     where: { email },
-    select: { id: true, onboardingCompleted: true, emailVerified: true },
+    select: { id: true, onboardingCompleted: true, emailVerified: true, createdAt: true },
   });
   if (existing) {
     if (!existing.emailVerified) {
@@ -197,7 +200,11 @@ async function createOrLoginUser(email: string, request: any) {
         data: { emailVerified: true },
       });
     }
-    return { id: existing.id, onboardingCompleted: existing.onboardingCompleted };
+    return {
+      id: existing.id,
+      onboardingCompleted: existing.onboardingCompleted,
+      createdAt: existing.createdAt,
+    };
   }
 
   // Générer un ID temporaire basé sur l'email (sera utilisé comme slug)
@@ -222,7 +229,7 @@ async function createOrLoginUser(email: string, request: any) {
       },
       cosmetics: { create: {} },
     },
-    select: { id: true, onboardingCompleted: true },
+    select: { id: true, onboardingCompleted: true, createdAt: true },
   });
 
   // Tracking funnel
