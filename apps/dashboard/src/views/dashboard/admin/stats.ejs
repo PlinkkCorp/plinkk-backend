@@ -805,7 +805,7 @@
 
                         <!-- Tunnel Détaillé -->
                         <div id="sub-funnel-detail" class="space-y-6 hidden">
-                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-9 gap-3">
                                 <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
                                     <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Landing</p>
                                     <p class="text-xl font-bold text-violet-400" id="fc-kpi-landing">-</p>
@@ -822,6 +822,18 @@
                                     <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Configuration
                                     </p>
                                     <p class="text-xl font-bold text-indigo-400" id="fc-kpi-configview">-</p>
+                                </div>
+                                <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                                    <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Onboarding 1</p>
+                                    <p class="text-xl font-bold text-cyan-400" id="fc-kpi-onboarding-step1">-</p>
+                                </div>
+                                <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                                    <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Onboarding 2</p>
+                                    <p class="text-xl font-bold text-sky-400" id="fc-kpi-onboarding-step2">-</p>
+                                </div>
+                                <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                                    <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Onboarding 3</p>
+                                    <p class="text-xl font-bold text-teal-400" id="fc-kpi-onboarding-step3">-</p>
                                 </div>
                                 <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
                                     <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Achats</p>
@@ -1438,7 +1450,13 @@
                     }
                 };
 
-                function init() { setupDates(); setTab('signups'); }
+                function init() {
+                    setupDates();
+                    const url = new URL(window.location.href);
+                    const initialTab = url.searchParams.get('tab');
+                    const allowedTabs = new Set(['signups', 'logins', 'plinkks', 'redirections', 'qrcodes', 'premium', 'bans', 'accounts', 'funnel']);
+                    setTab(allowedTabs.has(initialTab || '') ? initialTab : 'signups');
+                }
                 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
             })();
 
@@ -1564,6 +1582,9 @@
                         setText('fc-kpi-signups', fmt.format(f.signups || 0));
                         setText('fc-kpi-premview', fmt.format(f.premiumViews || 0));
                         setText('fc-kpi-configview', fmt.format(f.configViews || 0));
+                        setText('fc-kpi-onboarding-step1', fmt.format(f.onboardingStep1 || 0));
+                        setText('fc-kpi-onboarding-step2', fmt.format(f.onboardingStep2 || 0));
+                        setText('fc-kpi-onboarding-step3', fmt.format(f.onboardingStep3 || 0));
                         setText('fc-kpi-funpurchase', fmt.format(f.purchases || 0));
                         setText('fc-kpi-funcancels', fmt.format(f.cancels || 0));
 
@@ -1575,6 +1596,9 @@
                                 { label: "Inscription", value: f.signups || 0, color: "bg-blue-500" },
                                 { label: "Page Premium", value: f.premiumViews || 0, color: "bg-fuchsia-500" },
                                 { label: "Configuration", value: f.configViews || 0, color: "bg-indigo-500" },
+                                { label: "Onboarding 1", value: f.onboardingStep1 || 0, color: "bg-cyan-500" },
+                                { label: "Onboarding 2", value: f.onboardingStep2 || 0, color: "bg-sky-500" },
+                                { label: "Onboarding 3", value: f.onboardingStep3 || 0, color: "bg-teal-500" },
                                 { label: "Achat", value: f.purchases || 0, color: "bg-emerald-500" },
                             ];
                             var maxVal = Math.max(1, steps[0].value);

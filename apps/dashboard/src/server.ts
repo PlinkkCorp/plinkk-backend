@@ -6,6 +6,7 @@ import { registerCronJobs } from "./config/cron";
 import "./types";
 import { registerReservedRootsHook } from "./middleware/reservedRoots";
 import { registerSessionValidator } from "./middleware/sessionValidator";
+import { registerActionAuditHook } from "./middleware/actionAudit";
 import { apiRoutes } from "./server/apiRoutes";
 import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkPagesRoutes } from "./server/plinkkPagesRoutes";
@@ -30,6 +31,7 @@ async function bootstrap() {
 
   registerReservedRootsHook(fastify);
   registerSessionValidator(fastify);
+  registerActionAuditHook(fastify);
 
   fastify.register(apiRoutes, { prefix: "/api" });
   fastify.register(dashboardRoutes);

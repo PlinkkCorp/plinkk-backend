@@ -10,6 +10,7 @@ import { filterScheduledLinks } from "@plinkk/shared";
 import { generateBundle } from "../lib/generateBundle";
 import { replyView } from "../lib/replyView";
 import { PlinkkSnapshot } from "../types/plinkk";
+import { limitProfileViews, limitLinkClicks } from "../middleware/ipRateLimit";
 
 type CanvasMod = typeof import("canvas") | null;
 let _canvasMod: CanvasMod = null;
@@ -137,7 +138,10 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     "/:username",
-    { config: { rateLimit: false } },
+    { 
+      config: { rateLimit: false },
+      preHandler: limitProfileViews
+    },
     async function (request, reply) {
       const { username } = request.params as { username: string };
       const isPreview = (request.query as { preview: string })?.preview === "1";
@@ -1062,7 +1066,9 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     });
   });
 
-  fastify.get("/click/:linkId", async (req, reply) => {
+  fastify.get("/click/:linkId", {
+    preHandler: limitLinkClicks
+  }, async (req, reply) => {
     const linkId = String((req.params as { linkId: string }).linkId);
 
     const link = await prisma.link.findUnique({ where: { id: linkId } });

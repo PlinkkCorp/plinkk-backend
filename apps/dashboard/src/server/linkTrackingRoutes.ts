@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { recordRedirectClick } from "../services/redirectService";
+import { limitQrScans, limitRedirects, limitLinkClicks } from "../middleware/ipRateLimit";
 
 /**
  * Routes pour le tracking des clics sur les liens et les redirections
@@ -10,7 +11,9 @@ import { recordRedirectClick } from "../services/redirectService";
  * 3. Enregistrer les clics côté API pour les liens affichés
  */
 export function linkTrackingRoutes(fastify: FastifyInstance) {
-  fastify.get("/q/:shortCode", async (request, reply) => {
+  fastify.get("/q/:shortCode", {
+    preHandler: limitQrScans
+  }, async (request, reply) => {
     const { shortCode } = request.params as { shortCode: string };
 
     if (!shortCode) {
@@ -60,7 +63,9 @@ export function linkTrackingRoutes(fastify: FastifyInstance) {
    * GET /r/:slug
    * Redirection publique via slug personnalisé (ex: plinkk.fr/r/github)
    */
-  fastify.get("/r/:slug", async (request, reply) => {
+  fastify.get("/r/:slug", {
+    preHandler: limitRedirects
+  }, async (request, reply) => {
     const { slug } = request.params as { slug: string };
     
     if (!slug) {
@@ -94,7 +99,9 @@ export function linkTrackingRoutes(fastify: FastifyInstance) {
    * Redirige vers l'URL du lien tout en enregistrant le clic
    * Le lien affiché à l'utilisateur montre l'URL finale mais passe par ce endpoint
    */
-  fastify.get("/go/:linkId", async (request, reply) => {
+  fastify.get("/go/:linkId", {
+    preHandler: limitLinkClicks
+  }, async (request, reply) => {
     const { linkId } = request.params as { linkId: string };
     
     if (!linkId) {
@@ -131,7 +138,9 @@ export function linkTrackingRoutes(fastify: FastifyInstance) {
    * POST /api/links/:linkId/click
    * Endpoint pour enregistrer un clic sans redirection (pour les clics JS)
    */
-  fastify.post("/api/links/:linkId/click", async (request, reply) => {
+  fastify.post("/api/links/:linkId/click", {
+    preHandler: limitLinkClicks
+  }, async (request, reply) => {
     const { linkId } = request.params as { linkId: string };
     
     if (!linkId) {

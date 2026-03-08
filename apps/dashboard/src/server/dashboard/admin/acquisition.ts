@@ -3,7 +3,6 @@
  * Suivi du funnel inscription + quota email
  */
 import { FastifyInstance } from "fastify";
-import { replyView } from "../../../lib/replyView";
 import { ensurePermission } from "../../../lib/permissions";
 import { requireAuthRedirect } from "../../../middleware/auth";
 
@@ -13,14 +12,11 @@ export function adminAcquisitionRoutes(fastify: FastifyInstance) {
     { preHandler: [requireAuthRedirect] },
     async function (request, reply) {
       const ok = await ensurePermission(request, reply, "VIEW_STATS", {
-        mode: "view",
-        active: "acquisition",
+        mode: "redirect",
       });
       if (!ok) return;
 
-      return replyView(reply, "dashboard/admin/acquisition.ejs", request.currentUser!, {
-        publicPath: request.publicPath,
-      });
+      return reply.redirect("/admin/stats?tab=funnel");
     }
   );
 }
