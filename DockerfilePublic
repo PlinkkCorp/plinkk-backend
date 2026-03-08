@@ -21,15 +21,15 @@ RUN bun install
 
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 
-RUN bun --filter @plinkk/prisma run generate
-RUN bun --filter @plinkk/prisma run build
+RUN bun run --filter @plinkk/prisma generate
+RUN bun run --filter @plinkk/prisma build
 
-RUN bun --filter @plinkk/shared run build
+RUN bun run --filter @plinkk/shared build
 
 RUN bunx @fastify/secure-session > apps/public/src/secret-key
 
-RUN bun --filter @plinkk/public run build
+RUN bun run --filter @plinkk/public build
 
-CMD ["bun", "--filter", "@plinkk/public", "run", "start"]
+CMD ["bun", "run", "--filter", "@plinkk/public", "start"]
 
 EXPOSE 3002

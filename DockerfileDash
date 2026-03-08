@@ -21,14 +21,14 @@ RUN bun install
 
 RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" bun --filter @plinkk/prisma run generate
 
-RUN bun --filter @plinkk/prisma run build
+RUN bun run --filter @plinkk/prisma build
 
-RUN bun --filter @plinkk/shared run build
+RUN bun run --filter @plinkk/shared build
 
 RUN bunx @fastify/secure-session > apps/dashboard/src/secret-key
 
-RUN bun --filter @plinkk/dashboard run build
+RUN bun run --filter @plinkk/dashboard build
 
-CMD ["bun", "--filter", "@plinkk/dashboard", "run", "start"]
+CMD ["bun", "run", "--filter", "@plinkk/dashboard", "start"]
 
 EXPOSE 3001
