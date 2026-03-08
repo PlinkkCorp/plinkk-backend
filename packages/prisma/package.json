@@ -10,14 +10,14 @@
     }
   },
   "scripts": {
-    "build": "tsc && node copy-generated.js",
+    "build": "bunx tsc && bun copy-generated.js",
     "generate": "prisma generate",
     "migrate:dev": "prisma migrate dev",
     "migrate": "prisma migrate",
     "deploy": "prisma migrate deploy",
     "dev": "prisma dev",
     "studio": "prisma studio",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "bun prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.3.0",

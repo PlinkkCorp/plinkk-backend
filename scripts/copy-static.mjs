@@ -6,7 +6,11 @@ const srcDir = path.join(root, 'src');
 const distDir = path.join(root, 'dist');
 
 async function ensureDir(p) {
-  await fs.mkdir(p, { recursive: true });
+  try {
+    await fs.mkdir(p, { recursive: true });
+  } catch (e) {
+    if (e && e.code !== 'EEXIST') throw e;
+  }
 }
 
 async function copyFile(src, dest) {

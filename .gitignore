@@ -10,3 +10,4 @@ dist
 pnpm-lock.yaml
 /.github
 .env_utf8
+/~*
