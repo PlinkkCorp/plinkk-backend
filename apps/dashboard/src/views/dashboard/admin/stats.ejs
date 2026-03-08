@@ -52,9 +52,6 @@
                             <button
                                 class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
                                 data-tab="accounts" aria-selected="false">Comptes</button>
-                            <button
-                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
-                                data-tab="funnel" aria-selected="false">Tunnel</button>
                         </nav>
                     </div>
 
@@ -506,8 +503,7 @@
                         </div>
                     </section>
 
-                    <!-- ─── TUNNEL D'ACQUISITION ─── -->
-                    <section id="panel-funnel" class="tab-panel hidden space-y-6">
+                </main>
 
                         <!-- Sub-tab toggle -->
                         <div class="flex items-center gap-2 p-1 bg-slate-800/50 rounded-xl w-fit">
@@ -1454,35 +1450,12 @@
                     setupDates();
                     const url = new URL(window.location.href);
                     const initialTab = url.searchParams.get('tab');
-                    const allowedTabs = new Set(['signups', 'logins', 'plinkks', 'redirections', 'qrcodes', 'premium', 'bans', 'accounts', 'funnel']);
+                    const allowedTabs = new Set(['signups', 'logins', 'plinkks', 'redirections', 'qrcodes', 'premium', 'bans', 'accounts']);
                     setTab(allowedTabs.has(initialTab || '') ? initialTab : 'signups');
                 }
                 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
             })();
-
-            // Funnel tab logic
-            (function () {
-                let funnelLoaded = false;
-                const subPlinkk = document.getElementById('funnelSubPlinkk');
-                const subPurchase = document.getElementById('funnelSubPurchase');
-                const subDetail = document.getElementById('funnelSubDetail');
-                const panelPlinkk = document.getElementById('funnelPlinkk');
-                const panelPurchase = document.getElementById('funnelPurchase');
-                const panelDetail = document.getElementById('sub-funnel-detail');
-
-                if (subPlinkk && subPurchase && subDetail) {
-                    subPlinkk.addEventListener('click', () => {
-                        panelPlinkk.classList.remove('hidden');
-                        panelPurchase.classList.add('hidden');
-                        panelDetail.classList.add('hidden');
-                        subPlinkk.classList.add('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                        subPlinkk.classList.remove('text-slate-400');
-                        subPurchase.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                        subPurchase.classList.add('text-slate-400');
-                        subDetail.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                        subDetail.classList.add('text-slate-400');
-                    });
-                    subPurchase.addEventListener('click', () => {
+        </script>
                         panelPlinkk.classList.add('hidden');
                         panelPurchase.classList.remove('hidden');
                         panelDetail.classList.add('hidden');

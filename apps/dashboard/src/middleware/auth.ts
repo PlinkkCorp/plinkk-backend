@@ -80,11 +80,9 @@ export async function requireAuthRedirect(request: FastifyRequest, reply: Fastif
 
   const onboardingCompleted = await ensureOnboardingCompletedForLegacyAccount(user);
 
-  // Rediriger vers l'onboarding si non terminé (sauf si on y est déjà)
-  if (!onboardingCompleted && !request.url.startsWith('/onboarding')) {
-    return reply.redirect('/onboarding');
-  }
-
+  // L'onboarding ne se déclenche plus automatiquement ici
+  // Il doit être déclenché uniquement après l'inscription (voir routes auth/join.ts, google.ts, etc.)
+  
   user.onboardingCompleted = onboardingCompleted;
 
   request.userId = userId;
