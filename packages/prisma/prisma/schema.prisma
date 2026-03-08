@@ -72,6 +72,8 @@ model User {
   patchNotes            PatchNote[]
   qrCodes               QrCode[]
   qrCodeScans           QrCodeScan[]
+  onboardingCompleted   Boolean              @default(false)
+  onboardingDraft       OnboardingDraft?
 }
 
 model Connection {
@@ -191,13 +193,13 @@ model Cosmetic {
 
 model Link {
   id                     String    @id @default(nanoid(16))
-  icon                   String?   @default("https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png")
+  icon                   String?   @default("https://cdn.plinkk.fr/icons/link-generic.svg")
   url                    String    @default("https://github.com/link")
   text                   String?   @default("Link")
-  name                   String?   @default("Github")
-  description            String?   @default("Ma description")
+  name                   String?   @default("Link")
+  description            String?
   showDescriptionOnHover Boolean?  @default(true)
-  showDescription        Boolean?  @default(true)
+  showDescription        Boolean?  @default(false)
   clicks                 Int       @default(0)
   userId                 String
   plinkkId               String?
@@ -797,6 +799,56 @@ model EmailCampaign {
 
   @@index([createdById])
   @@index([createdAt])
+}
+
+// ─── Inscription Email-only (OTP + Magic Link) ────────────────────────────────
+
+model OtpCode {
+  id             String    @id @default(nanoid(16))
+  email          String
+  codeHash       String
+  magicToken     String    @unique
+  expiresAt      DateTime
+  verifyAttempts Int       @default(0)
+  sendCount      Int       @default(1)
+  lastSentAt     DateTime  @default(now())
+  blockedUntil   DateTime?
+  used           Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+
+  @@index([email])
+  @@index([magicToken])
+  @@index([createdAt])
+}
+
+// ─── Brouillon auto-save onboarding ──────────────────────────────────────────
+
+model OnboardingDraft {
+  userId    String   @id
+  step      Int      @default(1)
+  data      Json     @default("{}")
+  updatedAt DateTime @default(now()) @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Suivi quota email mensuel ────────────────────────────────────────────────
+
+model EmailQuotaLog {
+  month     String
+  type      String
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@id([month, type])
+  @@index([month])
+}
+
+// ─── Configuration système (clé/valeur) ──────────────────────────────────────
+
+model SystemConfig {
+  key       String   @id
+  value     String
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model PatchNote {
