@@ -11,6 +11,7 @@ import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkPagesRoutes } from "./server/plinkkPagesRoutes";
 import { linkTrackingRoutes } from "./server/linkTrackingRoutes";
 import { authRoutes } from "./routes/auth";
+import { onboardingRoutes } from "./routes/onboarding";
 import { registerOAuth2 } from "./config/fastifyOAuth2";
 import { AppError, generateTheme } from "@plinkk/shared";
 import { discordService } from "./services/discordService";
@@ -24,8 +25,8 @@ async function bootstrap() {
   await registerCronJobs(fastify);
   await registerOAuth2(fastify)
 
-  // Initialiser le service Discord
-  await discordService.initialize();
+  // Initialiser Discord sans bloquer le démarrage du serveur
+  void discordService.initialize();
 
   registerReservedRootsHook(fastify);
   registerSessionValidator(fastify);
@@ -35,6 +36,7 @@ async function bootstrap() {
   fastify.register(plinkkPagesRoutes);
   fastify.register(linkTrackingRoutes);
   authRoutes(fastify);
+  onboardingRoutes(fastify);
 
   fastify.get(
     "/themes.json",
