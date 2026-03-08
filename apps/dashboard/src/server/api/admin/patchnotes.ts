@@ -10,12 +10,14 @@ const createPatchNoteSchema = z.object({
   version: z.string().min(1, "La version est requise").regex(/^\d+\.\d+\.\d+$/, "La version doit être au format X.Y.Z"),
   content: z.string().min(1, "Le contenu est requis"),
   isPublished: z.boolean().default(false),
+  notifyEveryone: z.boolean().default(true),
 });
 
 const updatePatchNoteSchema = z.object({
   title: z.string().min(1).optional(),
   content: z.string().min(1).optional(),
   isPublished: z.boolean().optional(),
+  notifyEveryone: z.boolean().optional(),
 });
 
 // Helper function to check specific permission
@@ -96,6 +98,7 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
           version: body.version,
           content: body.content,
           isPublished: body.isPublished,
+          notifyEveryone: body.notifyEveryone,
           publishedAt: body.isPublished ? new Date() : null,
           createdById: currentUser.id,
         },
@@ -157,6 +160,7 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
         data: {
           ...(body.title && { title: body.title }),
           ...(body.content && { content: body.content }),
+          ...(body.notifyEveryone !== undefined && { notifyEveryone: body.notifyEveryone }),
           ...(body.isPublished !== undefined && {
             isPublished: body.isPublished,
             publishedAt: body.isPublished && !patchNote.publishedAt ? new Date() : patchNote.publishedAt,

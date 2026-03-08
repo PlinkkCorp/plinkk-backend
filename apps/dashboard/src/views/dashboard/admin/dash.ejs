@@ -2063,20 +2063,87 @@
                             })();
                         }
                     }
-                }
 
-                async function openUserModal(li) {
-                    currentLI = li;
-                    const displayName = li.dataset.username || li.dataset.id;
-                    const id = li.dataset.id;
-                    const role = li.dataset.role || 'USER';
-                    const twofa = (li.dataset.twofa === '1');
-                    const views = Number(li.dataset.views || 0) || 0;
-                    const plCount = Number(li.dataset.plinkksCount || 0) || 0;
-                    const plActiveCount = Number(li.dataset.plinkksActive || 0) || 0;
-                    const mustChange = (li.dataset.mustChange === '1');
-                    const createdAt = Number(li.dataset.created || 0);
+                    // Populate Plinkks List
+                    const plListEl = document.getElementById('umPlList');
+                    const plCountEl = document.getElementById('umPlCount');
+                    if (plListEl) {
+                        if (Array.isArray(d.plinkks) && d.plinkks.length > 0) {
+                            plListEl.innerHTML = d.plinkks.map(p => {
+                                const activeClass = p.isActive ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-slate-800/50 border-slate-700 text-slate-500';
+                                const statusText = p.isActive ? 'Actif' : 'Inactif';
+                                const defaultBadge = p.isDefault ? '<span class="px-2 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/20 text-violet-400 text-[10px] font-bold uppercase">Défaut</span>' : '';
+                                return `
+                                    <div class="group p-4 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 transition-all">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-center gap-2 mb-2">
+                                                    <h4 class="text-sm font-bold text-white truncate">/${p.slug}</h4>
+                                                    ${defaultBadge}
+                                                </div>
+                                                <div class="flex items-center gap-4 text-xs text-slate-500">
+                                                    <span class="flex items-center gap-1">
+                                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                        </svg>
+                                                        ${(p.views || 0).toLocaleString()} vues
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="px-2 py-1 rounded-lg ${activeClass} text-[10px] font-bold uppercase">${statusText}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
+                            if (plCountEl) plCountEl.textContent = d.plinkks.length;
+                        } else {
+                            plListEl.innerHTML = '<div class="text-slate-600 text-sm italic p-8 text-center border border-dashed border-slate-800 rounded-xl">Aucun plinkk créé</div>';
+                            if (plCountEl) plCountEl.textContent = '0';
+                        }
+                    }
 
+                    // Populate Redirects List
+                    const rdListEl = document.getElementById('umRdList');
+                    const rdCountEl = document.getElementById('umRdCount');
+                    if (rdListEl) {
+                        if (Array.isArray(d.redirects) && d.redirects.length > 0) {
+                            rdListEl.innerHTML = d.redirects.map(r => {
+                                const activeClass = r.isActive ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-slate-800/50 border-slate-700 text-slate-500';
+                                const statusText = r.isActive ? 'Actif' : 'Inactif';
+                                return `
+                                    <div class="group p-4 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 transition-all">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="flex-1 min-w-0">
+                                                <h4 class="text-sm font-bold text-white truncate mb-2">/${r.slug}</h4>
+                                                <div class="flex items-center gap-2 mb-2">
+                                                    <svg class="w-3 h-3 text-slate-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                                    </svg>
+                                                    <span class="text-xs text-slate-400 truncate">${r.targetUrl || 'N/A'}</span>
+                                                </div>
+                                                <div class="flex items-center gap-4 text-xs text-slate-500">
+                                                    <span class="flex items-center gap-1">
+                                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                                                        </svg>
+                                                        ${(r.clicks || 0).toLocaleString()} clics
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="px-2 py-1 rounded-lg ${activeClass} text-[10px] font-bold uppercase">${statusText}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
+                            if (rdCountEl) rdCountEl.textContent = d.redirects.length;
+                        } else {
+                            rdListEl.innerHTML = '<div class="text-slate-600 text-sm italic p-8 text-center border border-dashed border-slate-800 rounded-xl">Aucune redirection créée</div>';
+                            if (rdCountEl) rdCountEl.textContent = '0';
                     // Populate Sidebar
                     if (um.sidebarName) um.sidebarName.textContent = displayName;
                     if (um.sidebarId) um.sidebarId.textContent = '@' + id;

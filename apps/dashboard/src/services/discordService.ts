@@ -252,13 +252,17 @@ class DiscordService {
   /**
    * Publie un message via l'API Discord (bot)
    */
-  private async publishViaBot(embed: DiscordEmbed): Promise<boolean> {
+  private async publishViaBot(embed: DiscordEmbed, notifyEveryone: boolean = true): Promise<boolean> {
     if (!this.botToken || !this.channelId) {
       console.warn("[Discord] Bot token ou channel ID non configurés");
       return false;
     }
 
     try {
+      const messageContent = notifyEveryone 
+        ? "@everyone 🚀 Nouvelle mise à jour disponible !"
+        : "🚀 Nouvelle mise à jour disponible !";
+
       const response = await fetch(`https://discord.com/api/v10/channels/${this.channelId}/messages`, {
         method: "POST",
         headers: {
@@ -266,7 +270,7 @@ class DiscordService {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          content: "@everyone 🚀 Nouvelle mise à jour disponible !",
+          content: messageContent,
           embeds: [embed],
         }),
       });
@@ -335,7 +339,7 @@ class DiscordService {
 
     const embed = this.createPatchNoteEmbed(patchNote);
 
-    return await this.publishViaBot(embed);
+    return await this.publishViaBot(embed, patchNote.notifyEveryone ?? true);
   }
 }
 

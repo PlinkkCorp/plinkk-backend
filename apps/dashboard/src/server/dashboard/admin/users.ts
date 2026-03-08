@@ -83,8 +83,16 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
     // Total Views
     const totalViews = plinkks.reduce((acc, p) => acc + (p.views || 0), 0);
 
-    // Clicks (Links + Redirects)
-    const [linkClicksAgg, redirectClicksAgg] = await Promise.all([
+    // Get Links and Redirects
+    const [links, redirects, linkClicksAgg, redirectClicksAgg] = await Promise.all([
+      prisma.link.findMany({ 
+        where: { userId: user.id },
+        orderBy: { index: 'asc' }
+      }),
+      prisma.redirect.findMany({ 
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' }
+      }),
       prisma.link.aggregate({ where: { userId: user.id }, _sum: { clicks: true } }),
       prisma.redirect.aggregate({ where: { userId: user.id }, _sum: { clicks: true } })
     ]);
@@ -117,6 +125,8 @@ export function adminUsersRoutes(fastify: FastifyInstance) {
           plinkkCount: user._count.plinkks
         },
         plinkks,
+        links,
+        redirects,
         banInfo,
         roles,
         publicPath: request.publicPath || process.env.FRONTEND_URL || "https://plinkk.fr"

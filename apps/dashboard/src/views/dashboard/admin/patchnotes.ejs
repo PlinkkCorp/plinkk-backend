@@ -64,12 +64,20 @@
                             </div>
 
                             <!-- Options de publication -->
-                            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4">
+                            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 space-y-3">
                                 <label class="flex items-center gap-3 cursor-pointer">
                                     <input type="checkbox" name="isPublished" class="w-5 h-5 rounded">
                                     <span class="text-white font-medium">Publier immédiatement</span>
                                 </label>
-                                <p class="text-xs text-slate-400 mt-2 ml-8">Si désactivé, la patch note sera en brouillon</p>
+                                <p class="text-xs text-slate-400 ml-8">Si désactivé, la patch note sera en brouillon</p>
+                                
+                                <div class="border-t border-slate-700 pt-3">
+                                    <label class="flex items-center gap-3 cursor-pointer">
+                                        <input type="checkbox" name="notifyEveryone" class="w-5 h-5 rounded" checked>
+                                        <span class="text-white font-medium">Notifier @everyone sur Discord</span>
+                                    </label>
+                                    <p class="text-xs text-slate-400 ml-8">Mentionne @everyone lors de la publication sur Discord</p>
+                                </div>
                             </div>
 
                             <!-- Aperçu -->
@@ -168,11 +176,18 @@
                         <textarea id="editContent" rows="8" required class="w-full bg-slate-800 border border-slate-700 rounded-2xl p-4 text-white font-mono text-sm placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors resize-none"></textarea>
                     </div>
 
-                    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4">
+                    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 space-y-3">
                         <label class="flex items-center gap-3 cursor-pointer">
                             <input type="checkbox" id="editIsPublished" class="w-5 h-5 rounded">
                             <span class="text-white font-medium">Publier</span>
                         </label>
+                        
+                        <div class="border-t border-slate-700 pt-3">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="editNotifyEveryone" class="w-5 h-5 rounded">
+                                <span class="text-white font-medium">Notifier @everyone sur Discord</span>
+                            </label>
+                        </div>
                     </div>
 
                     <div class="flex gap-3">
@@ -283,7 +298,8 @@
                             title: formData.get('title'),
                             version: formData.get('version'),
                             content: formData.get('content'),
-                            isPublished: formData.get('isPublished') === 'on'
+                            isPublished: formData.get('isPublished') === 'on',
+                            notifyEveryone: formData.get('notifyEveryone') === 'on'
                         })
                     });
 
@@ -310,6 +326,7 @@
                     document.getElementById('editTitle').value = patchNote.title;
                     document.getElementById('editContent').value = patchNote.content;
                     document.getElementById('editIsPublished').checked = patchNote.isPublished;
+                    document.getElementById('editNotifyEveryone').checked = patchNote.notifyEveryone ?? true;
 
                     document.getElementById('editModal').classList.remove('hidden');
                 } catch (err) {
@@ -332,7 +349,8 @@
                         body: JSON.stringify({
                             title: document.getElementById('editTitle').value,
                             content: document.getElementById('editContent').value,
-                            isPublished: document.getElementById('editIsPublished').checked
+                            isPublished: document.getElementById('editIsPublished').checked,
+                            notifyEveryone: document.getElementById('editNotifyEveryone').checked
                         })
                     });
 
