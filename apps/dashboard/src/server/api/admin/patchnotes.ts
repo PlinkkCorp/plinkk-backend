@@ -3,6 +3,7 @@ import { prisma } from "@plinkk/prisma";
 import { UnauthorizedError, ForbiddenError, BadRequestError, NotFoundError } from "@plinkk/shared";
 import { logAdminAction, logDetailedAdminAction } from "../../../lib/adminLogger";
 import { discordService } from "../../../services/discordService";
+import { createPatchNoteInboxAnnouncement } from "../../../services/inboxNotificationService";
 import z from "zod";
 
 const createPatchNoteSchema = z.object({
@@ -109,6 +110,10 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
 
       // Publier sur Discord si le patch note est publié
       if (body.isPublished) {
+        await createPatchNoteInboxAnnouncement(patchNote.version, patchNote.title).catch((error) => {
+          request.log.error(error, "Failed to create inbox announcement for patch note");
+        });
+
         try {
           await discordService.publishPatchNote(patchNote);
         } catch (error) {
@@ -174,6 +179,10 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
 
       // Publier sur Discord si le patch note vient d'être publié
       if (body.isPublished === true && !patchNote.isPublished) {
+        await createPatchNoteInboxAnnouncement(updated.version, updated.title).catch((error) => {
+          request.log.error(error, "Failed to create inbox announcement for patch note");
+        });
+
         try {
           await discordService.publishPatchNote(updated);
         } catch (error) {

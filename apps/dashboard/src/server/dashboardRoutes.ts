@@ -4,6 +4,7 @@ import { replyView } from "../lib/replyView";
 import { requireAuthRedirect } from "../middleware/auth";
 import { dashboardAdminRoutes } from "./dashboard/admin/index";
 import dashboardUserSessionsRoutes from "./dashboard/user/sessions";
+import dashboardUserInboxRoutes from "./dashboard/user/inbox";
 import { dashboardStatsRoutes } from "./dashboard/stats";
 import { dashboardCosmeticsRoutes } from "./dashboard/cosmetics";
 import { dashboardEditRoutes } from "./dashboard/edit";
@@ -18,6 +19,7 @@ import { dashboardQrCodesRoutes } from "./dashboard/qrcodes";
 export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.register(dashboardAdminRoutes, { prefix: "/admin" });
   fastify.register(dashboardUserSessionsRoutes, { prefix: "/sessions" });
+  fastify.register(dashboardUserInboxRoutes, { prefix: "/inbox" });
   fastify.register(dashboardStatsRoutes, { prefix: "/stats" });
   fastify.register(dashboardCosmeticsRoutes, { prefix: "/cosmetics" });
   fastify.register(dashboardEditRoutes, { prefix: "/edit" });

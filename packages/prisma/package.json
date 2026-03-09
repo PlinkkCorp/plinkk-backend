@@ -11,12 +11,12 @@
   },
   "scripts": {
     "build": "bunx tsc && bun copy-generated.js",
-    "generate": "prisma generate",
-    "migrate:dev": "prisma migrate dev",
-    "migrate": "prisma migrate",
-    "deploy": "prisma migrate deploy",
-    "dev": "prisma dev",
-    "studio": "prisma studio",
+    "generate": "bunx prisma generate --config=prisma.config.ts --schema=prisma/schema.prisma",
+    "migrate:dev": "bunx prisma migrate dev --config=prisma.config.ts --schema=prisma/schema.prisma",
+    "migrate": "bunx prisma migrate --config=prisma.config.ts --schema=prisma/schema.prisma",
+    "deploy": "bunx prisma migrate deploy --config=prisma.config.ts --schema=prisma/schema.prisma",
+    "dev": "bunx prisma dev --config=prisma.config.ts --schema=prisma/schema.prisma",
+    "studio": "bunx prisma studio --config=prisma.config.ts --schema=prisma/schema.prisma",
     "seed": "bun prisma/seed.ts"
   },
   "dependencies": {

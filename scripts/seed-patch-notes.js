@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../apps/dashboard/.env') });
@@ -186,7 +186,7 @@ Que vous soyez Créateur, Développeur, Artiste ou Streamer, Plinkk est votre so
 
 ## 🔧 Core & Config
 - **Dynamic Frontend URL** : Injection de \`window.__PLINKK_FRONTEND_URL__\` via \`head.ejs\` pour une configuration plus flexible des environnements
-- **Prisma Build** : Ajout de \`@prisma/engines\` et \`prisma\` dans \`onlyBuiltDependencies\` (pnpm) pour assurer un build correct dans le workspace
+- **Prisma Build** : Ajout de \`@prisma/engines\` et \`prisma\` dans \`onlyBuiltDependencies\` pour assurer un build correct dans le workspace Bun
 
 ## 👮 Admin Dashboard
 - **Logs Filtering** : Support backend et frontend pour le filtrage par \`targetId\` dans les logs d'audit. Validation des dates améliorée`,

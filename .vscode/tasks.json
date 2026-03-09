@@ -4,9 +4,9 @@
 		{
 			"label": "build",
 			"type": "shell",
-			"command": "pnpm",
+			"command": "bun",
 			"args": [
-				"-s",
+				"run",
 				"build"
 			],
 			"isBackground": false,
@@ -18,9 +18,9 @@
 		{
 			"label": "build",
 			"type": "shell",
-			"command": "pnpm",
+			"command": "bun",
 			"args": [
-				"-s",
+				"run",
 				"build"
 			],
 			"isBackground": false,
@@ -32,9 +32,9 @@
 		{
 			"label": "build",
 			"type": "shell",
-			"command": "pnpm",
+			"command": "bun",
 			"args": [
-				"-s",
+				"run",
 				"build"
 			],
 			"isBackground": false,
@@ -46,10 +46,13 @@
 		{
 			"label": "prisma-migrate-dev",
 			"type": "shell",
-			"command": "pnpm",
+			"command": "bunx",
 			"args": [
-				"-s",
-				"prisma:devdb"
+				"prisma",
+				"db",
+				"push",
+				"--config=packages/prisma/prisma.config.ts",
+				"--schema=packages/prisma/prisma/schema.prisma"
 			],
 			"isBackground": false,
 			"group": "build"
@@ -57,12 +60,13 @@
 		{
 			"label": "prisma-db-push",
 			"type": "shell",
-			"command": "npx",
+			"command": "bunx",
 			"args": [
-				"-y",
 				"prisma",
 				"db",
-				"push"
+				"push",
+				"--config=packages/prisma/prisma.config.ts",
+				"--schema=packages/prisma/prisma/schema.prisma"
 			],
 			"isBackground": false,
 			"group": "build"
@@ -70,9 +74,9 @@
 		{
 			"label": "prisma-generate",
 			"type": "shell",
-			"command": "pnpm",
+			"command": "bun",
 			"args": [
-				"-s",
+				"run",
 				"postinstall"
 			],
 			"isBackground": false,
@@ -81,12 +85,13 @@
 		{
 			"label": "prisma-db-push-force",
 			"type": "shell",
-			"command": "npx",
+			"command": "bunx",
 			"args": [
-				"-y",
 				"prisma",
 				"db",
 				"push",
+				"--config=packages/prisma/prisma.config.ts",
+				"--schema=packages/prisma/prisma/schema.prisma",
 				"--accept-data-loss"
 			],
 			"isBackground": false,
@@ -95,9 +100,9 @@
 		{
 			"label": "build",
 			"type": "shell",
-			"command": "pnpm",
+			"command": "bun",
 			"args": [
-				"-s",
+				"run",
 				"build"
 			],
 			"isBackground": false,

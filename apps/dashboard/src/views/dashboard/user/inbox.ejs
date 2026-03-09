@@ -1,0 +1,164 @@
+<%- include('partials/head.ejs', {
+  title: 'Inbox',
+  description: 'Retrouvez vos messages admin, mises à jour et réponses aux bugs.',
+  metaKeywords: 'notifications, inbox, patch notes, messages admin',
+  robots: 'noindex,nofollow'
+}) %>
+
+<%- include('partials/header-dash.ejs', { user: user }) %>
+
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+  <%- include('partials/asside_dash.ejs', { user: user, active: 'inbox' }) %>
+
+  <main class="col-span-12 lg:col-span-10 space-y-6">
+    <section class="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-white">Inbox</h1>
+          <p class="text-sm text-slate-400 mt-1">Messages de l'équipe, patch notes et retours sur vos signalements.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" id="markAllReadBtn" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 transition-colors">
+            Tout marquer lu
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-6 flex flex-wrap gap-2" id="inboxFilters">
+        <button data-filter="all" class="inbox-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-violet-500/15 text-violet-300 border border-violet-500/30">Tous</button>
+        <button data-filter="admin" class="inbox-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">Admin</button>
+        <button data-filter="patch-note" class="inbox-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">Patch notes</button>
+        <button data-filter="bug-response" class="inbox-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">Retours bugs</button>
+      </div>
+    </section>
+
+    <section class="space-y-3" id="inboxList">
+      <% if (!inboxItems || inboxItems.length === 0) { %>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center text-slate-400">
+          Votre inbox est vide pour le moment.
+        </div>
+      <% } else { %>
+        <% inboxItems.forEach(function(item) { %>
+          <article
+            class="inbox-item bg-slate-900 border border-slate-800 rounded-2xl p-5 transition-all"
+            data-item-id="<%= item.id %>"
+            data-item-type="<%= item.type %>">
+            <div class="flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full border border-slate-700 bg-slate-800 text-slate-300"><%= item.type %></span>
+                  <span class="text-xs text-slate-500"><%= new Date(item.createdAt).toLocaleString('fr-FR') %></span>
+                </div>
+                <h2 class="text-white font-semibold text-base"><%= item.title %></h2>
+                <p class="text-sm text-slate-300 mt-1 whitespace-pre-wrap"><%= item.text %></p>
+                <% if (item.link) { %>
+                  <a class="inline-flex mt-3 text-xs text-violet-300 hover:text-violet-200" href="<%= item.link %>">Voir le détail</a>
+                <% } %>
+              </div>
+              <button type="button" class="mark-read-btn shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-colors">
+                Marquer lu
+              </button>
+            </div>
+          </article>
+        <% }) %>
+      <% } %>
+    </section>
+  </main>
+</div>
+
+<script>
+(function () {
+  const currentUserId = '<%= user.id %>';
+  const storageKey = 'plinkk_inbox_read_' + currentUserId;
+  const filtersWrap = document.getElementById('inboxFilters');
+  const list = document.getElementById('inboxList');
+  const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+  function getReadSet() {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return new Set(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      return new Set();
+    }
+  }
+
+  function saveReadSet(set) {
+    localStorage.setItem(storageKey, JSON.stringify(Array.from(set)));
+  }
+
+  function applyReadState() {
+    const readSet = getReadSet();
+    document.querySelectorAll('.inbox-item').forEach(function (item) {
+      const id = item.getAttribute('data-item-id');
+      if (id && readSet.has(id)) {
+        item.classList.add('opacity-60');
+      } else {
+        item.classList.remove('opacity-60');
+      }
+    });
+  }
+
+  function setActiveFilterButton(type) {
+    document.querySelectorAll('.inbox-filter').forEach(function (btn) {
+      const t = btn.getAttribute('data-filter');
+      if (t === type) {
+        btn.classList.add('bg-violet-500/15', 'text-violet-300', 'border-violet-500/30');
+        btn.classList.remove('bg-slate-800', 'text-slate-300', 'border-slate-700');
+      } else {
+        btn.classList.remove('bg-violet-500/15', 'text-violet-300', 'border-violet-500/30');
+        btn.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-700');
+      }
+    });
+  }
+
+  function applyFilter(type) {
+    document.querySelectorAll('.inbox-item').forEach(function (item) {
+      const itemType = item.getAttribute('data-item-type');
+      const visible = type === 'all' || itemType === type;
+      item.style.display = visible ? '' : 'none';
+    });
+    setActiveFilterButton(type);
+  }
+
+  if (filtersWrap) {
+    filtersWrap.addEventListener('click', function (event) {
+      const btn = event.target.closest('.inbox-filter');
+      if (!btn) return;
+      applyFilter(btn.getAttribute('data-filter') || 'all');
+    });
+  }
+
+  if (list) {
+    list.addEventListener('click', function (event) {
+      const btn = event.target.closest('.mark-read-btn');
+      if (!btn) return;
+      const card = btn.closest('.inbox-item');
+      const id = card ? card.getAttribute('data-item-id') : null;
+      if (!id) return;
+      const readSet = getReadSet();
+      readSet.add(id);
+      saveReadSet(readSet);
+      applyReadState();
+    });
+  }
+
+  if (markAllReadBtn) {
+    markAllReadBtn.addEventListener('click', function () {
+      const readSet = getReadSet();
+      document.querySelectorAll('.inbox-item').forEach(function (item) {
+        const id = item.getAttribute('data-item-id');
+        if (id) readSet.add(id);
+      });
+      saveReadSet(readSet);
+      applyReadState();
+    });
+  }
+
+  applyReadState();
+  applyFilter('all');
+})();
+</script>
+</body>
+</html>

@@ -216,7 +216,7 @@ export function apiRoutes(fastify: FastifyInstance) {
         return reply.code(500).send({
           error: "bannedslug_table_missing",
           message:
-            "La table BannedSlug est absente; exécutez `npx prisma db push` ou appliquez la migration.",
+            "La table BannedSlug est absente; exécutez `bunx prisma db push --config=packages/prisma/prisma.config.ts --schema=packages/prisma/prisma/schema.prisma` ou appliquez la migration.",
         });
       }
       if (
@@ -250,7 +250,7 @@ export function apiRoutes(fastify: FastifyInstance) {
         return reply.code(500).send({
           error: "bannedslug_table_missing",
           message:
-            "La table BannedSlug est absente; exécutez `npx prisma db push` ou appliquez la migration.",
+            "La table BannedSlug est absente; exécutez `bunx prisma db push --config=packages/prisma/prisma.config.ts --schema=packages/prisma/prisma/schema.prisma` ou appliquez la migration.",
         });
       }
       return reply.code(404).send({ error: "not_found" });

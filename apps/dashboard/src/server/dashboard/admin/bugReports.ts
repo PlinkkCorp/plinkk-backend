@@ -71,7 +71,7 @@ export function dashboardAdminBugReportsRoutes(fastify: FastifyInstance) {
                 // Create a site message for the user
                 await prisma.announcement.create({
                     data: {
-                        text: `[RÉPONSE BUG] ${message}`,
+                        text: `[RÉPONSE BUG #${id}] ${message}`,
                         level: level || "info",
                         displayType: displayType || "notification",
                         global: false,

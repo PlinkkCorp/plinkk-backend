@@ -1041,7 +1041,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
   fastify.get("/og/:id", async (request, reply) => {
     const canvasMod = await ensureCanvas();
     if (!canvasMod) {
-      // Si canvas indisponible (ex: Node 22 sous Windows sans précompilé),
+      // Si canvas indisponible (ex: runtime sans binaire précompilé sous Windows),
       // on renvoie une image statique par défaut pour débloquer le dev.
       try {
         return reply.redirect(
@@ -1050,7 +1050,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       } catch {
         return reply.code(501).send({
           error: "canvas_unavailable",
-          hint: "Le module 'canvas' n'est pas chargé. Utilisez Node 20 LTS ou installez une version compatible de canvas.",
+          hint: "Le module 'canvas' n'est pas chargé. Utilisez Bun (ou Node LTS) et installez une version compatible de canvas.",
         });
       }
     }

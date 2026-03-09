@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../apps/dashboard/.env') });

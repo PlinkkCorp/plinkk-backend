@@ -63,7 +63,7 @@ Infrastructure backend moderne basée sur **Bun**, **Fastify** et **TypeScript s
 
 ## 🏗️ Architecture
 
-**Monorepo pnpm workspaces** avec une séparation claire des responsabilités :
+**Monorepo Bun workspaces** avec une séparation claire des responsabilités :
 
 ```
 plinkk-backend/
@@ -147,7 +147,7 @@ plinkk-backend/
 
 ### Prérequis
 
-- [Bun](https://bun.sh) 1.3.10+ (ou Node.js 18+ avec pnpm)
+- [Bun](https://bun.sh) 1.3.10+
 - PostgreSQL 14+ (ou SQLite pour développement local)
 - Git
 
