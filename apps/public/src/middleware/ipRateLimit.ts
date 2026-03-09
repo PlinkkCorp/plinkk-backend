@@ -1,8 +1,8 @@
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyRequest } from "fastify";
 
 /**
- * Cache en mémoire pour le rate limiting par IP  
- * Clé: `${type}:${ip}` - Valeur: timestamp de la dernière action
+ * Cache en mémoire pour limiter les écritures BDD par IP.
+ * Clé: `${type}:${scope}:${ip}` - Valeur: timestamp de la dernière écriture.
  */
 const ipCache = new Map<string, number>();
 
@@ -28,61 +28,59 @@ function cleanupExpiredEntries(maxAgeMs: number) {
 setInterval(() => cleanupExpiredEntries(60 * 60 * 1000), 10 * 60 * 1000);
 
 /**
- * Middleware de rate limiting par IP
- * 
- * @param type - Type d'action ('view' ou 'click')
- * @param cooldownMs - Temps de cooldown en millisecondes (par défaut 1 heure)
- * @returns Middleware Fastify
+ * Retourne true si l'action doit être enregistrée en BDD.
+ * Cette fonction est non bloquante: elle ne renvoie jamais de 429.
  */
-export function createIpRateLimiter(
+function shouldTrackByIp(
+  request: FastifyRequest,
   type: "view" | "click",
+  scope: string,
   cooldownMs: number = 60 * 60 * 1000 // 1 heure par défaut
 ) {
-  return async (request: FastifyRequest, reply: FastifyReply) => {
-    // Récupérer l'IP réelle (en tenant compte des proxies)
-    const ip = (
-      request.headers["x-forwarded-for"] as string ||
-      request.headers["x-real-ip"] as string ||
-      request.ip ||
-      ""
-    ).split(",")[0].trim();
+  const ip = (
+    (request.headers["x-forwarded-for"] as string) ||
+    (request.headers["x-real-ip"] as string) ||
+    request.ip ||
+    ""
+  )
+    .split(",")[0]
+    .trim();
 
-    if (!ip) {
-      // Si on ne peut pas déterminer l'IP, on laisse passer
-      // (mieux vaut permettre l'accès que de bloquer tout le monde)
-      return;
-    }
+  if (!ip) {
+    // Si l'IP est introuvable, on privilégie la comptabilisation.
+    return true;
+  }
 
-    const cacheKey = `${type}:${ip}`;
-    const now = Date.now();
-    const lastAction = ipCache.get(cacheKey);
+  const cacheKey = `${type}:${scope}:${ip}`;
+  const now = Date.now();
+  const lastAction = ipCache.get(cacheKey);
 
-    if (lastAction) {
-      const timeElapsed = now - lastAction;
-      
-      if (timeElapsed < cooldownMs) {
-        const remainingSeconds = Math.ceil((cooldownMs - timeElapsed) / 1000);
-        const remainingMinutes = Math.ceil(remainingSeconds / 60);
-        
-        return reply.code(429).send({
-          error: "rate_limit_exceeded",
-          message: `Trop de requêtes. Veuillez réessayer dans ${remainingMinutes} minute${remainingMinutes > 1 ? "s" : ""}.`,
-          retryAfter: remainingSeconds,
-        });
-      }
-    }
+  if (lastAction && now - lastAction < cooldownMs) {
+    return false;
+  }
 
-    // Enregistrer le timestamp de cette action
-    ipCache.set(cacheKey, now);
-  };
+  ipCache.set(cacheKey, now);
+  return true;
 }
 
 /**
- * Middleware pour limiter les vues de profils
+ * Indique si une vue de profil doit être enregistrée en BDD.
  */
-export const limitProfileViews = createIpRateLimiter("view", 60 * 60 * 1000); // 1 heure
+export function shouldRecordProfileView(
+  request: FastifyRequest,
+  plinkkId: string,
+  cooldownMs: number = 60 * 60 * 1000,
+) {
+  return shouldTrackByIp(request, "view", plinkkId, cooldownMs);
+}
 
 /**
- * Middleware pour limiter les clics de liens
+ * Indique si un clic de lien doit être enregistré en BDD.
  */
-export const limitLinkClicks = createIpRateLimiter("click", 60 * 60 * 1000); // 1 heure
+export function shouldRecordLinkClick(
+  request: FastifyRequest,
+  linkId: string,
+  cooldownMs: number = 60 * 60 * 1000,
+) {
+  return shouldTrackByIp(request, "click", linkId, cooldownMs);
+}

@@ -9,7 +9,7 @@ import { filterScheduledLinks } from "@plinkk/shared";
 import { generateBundle } from "../lib/generateBundle";
 import { replyView } from "../lib/replyView";
 import { PlinkkSnapshot } from "../types/plinkk";
-import { limitProfileViews, limitLinkClicks } from "../middleware/ipRateLimit";
+import { shouldRecordProfileView, shouldRecordLinkClick } from "../middleware/ipRateLimit";
 
 type CanvasMod = typeof import("canvas") | null;
 let _canvasMod: CanvasMod = null;
@@ -137,10 +137,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
   fastify.get(
     "/:username",
-    { 
-      config: { rateLimit: false },
-      preHandler: limitProfileViews
-    },
+    { config: { rateLimit: false } },
     async function (request, reply) {
       const { username } = request.params as { username: string };
       const isPreview = (request.query as { preview: string })?.preview === "1";
@@ -246,7 +243,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
               resolved.page && resolved.page.slug
                 ? resolved.page.slug
                 : resolved.user.id;
-            if (!isPreview) {
+            if (!isPreview && shouldRecordProfileView(request, resolved.page.id)) {
               await recordPlinkkView(
                 prisma,
                 resolved.page.id,
@@ -305,7 +302,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       }
 
       // En mode aperçu on n'incrémente pas les vues ni les agrégations journalières
-      if (!isPreview && resolved.page) {
+      if (!isPreview && resolved.page && shouldRecordProfileView(request, resolved.page.id)) {
         await recordPlinkkView(
           prisma,
           resolved.page.id,
@@ -981,7 +978,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       resolved.page && resolved.page.slug
         ? resolved.page.slug
         : resolved.user.id;
-    if (!isPreview) {
+    if (!isPreview && shouldRecordProfileView(request, resolved.page.id)) {
       await recordPlinkkView(
         prisma,
         resolved.page.id,
@@ -1047,7 +1044,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     const sessionData = request.session.get("data");
     const isOwner =
       ((typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined) === resolved.user.id;
-    if (!isPreview) {
+    if (!isPreview && shouldRecordProfileView(request, resolved.page.id)) {
       await recordPlinkkView(
         prisma,
         resolved.page.id,
@@ -1065,50 +1062,53 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     });
   });
 
-  fastify.get("/click/:linkId", {
-    preHandler: limitLinkClicks
-  }, async (req, reply) => {
+  fastify.get("/click/:linkId", async (req, reply) => {
     const linkId = String((req.params as { linkId: string }).linkId);
 
     const link = await prisma.link.findUnique({ where: { id: linkId } });
     if (!link) return reply.code(404).send({ error: "Lien introuvable" });
 
-    await prisma.link.update({
-      where: { id: linkId },
-      data: { clicks: { increment: 1 } },
-    });
+    const shouldTrackClick = shouldRecordLinkClick(req, linkId);
 
-    // Enregistrer le clic daté (agrégation quotidienne)
-    try {
-      await prisma.$executeRawUnsafe(
-        'CREATE TABLE IF NOT EXISTS "LinkClickDaily" ("linkId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("linkId","date"))',
-      );
-      const now = new Date();
-      const y = now.getUTCFullYear();
-      const m = String(now.getUTCMonth() + 1).padStart(2, "0");
-      const d = String(now.getUTCDate()).padStart(2, "0");
-      const dateStr = `${y}-${m}-${d}`;
-      await prisma.$executeRawUnsafe(
-        'INSERT INTO "LinkClickDaily" ("linkId","date","count") VALUES (?,?,1) ON CONFLICT("linkId","date") DO UPDATE SET "count" = "count" + 1',
-        linkId,
-        dateStr,
-      );
-    } catch (e) { }
+    if (shouldTrackClick) {
+      await prisma.link.update({
+        where: { id: linkId },
+        data: { clicks: { increment: 1 } },
+      });
 
-    try {
-      if (link.plinkkId) {
-        await prisma.pageStat.create({
-          data: {
-            plinkkId: link.plinkkId,
-            eventType: "click",
-            ip: String(req.ip || req.headers?.["x-forwarded-for"] || ""),
-            meta: { linkId, userId: link.userId },
-          },
-        });
+      // Enregistrer le clic daté (agrégation quotidienne)
+      try {
+        await prisma.$executeRawUnsafe(
+          'CREATE TABLE IF NOT EXISTS "LinkClickDaily" ("linkId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("linkId","date"))',
+        );
+        const now = new Date();
+        const y = now.getUTCFullYear();
+        const m = String(now.getUTCMonth() + 1).padStart(2, "0");
+        const d = String(now.getUTCDate()).padStart(2, "0");
+        const dateStr = `${y}-${m}-${d}`;
+        await prisma.$executeRawUnsafe(
+          'INSERT INTO "LinkClickDaily" ("linkId","date","count") VALUES (?,?,1) ON CONFLICT("linkId","date") DO UPDATE SET "count" = "count" + 1',
+          linkId,
+          dateStr,
+        );
+      } catch (e) { }
+
+      try {
+        if (link.plinkkId) {
+          await prisma.pageStat.create({
+            data: {
+              plinkkId: link.plinkkId,
+              eventType: "click",
+              ip: String(req.ip || req.headers?.["x-forwarded-for"] || ""),
+              meta: { linkId, userId: link.userId },
+            },
+          });
+        }
+      } catch (e) {
+        req.log?.warn({ err: e }, "record click pageStat failed");
       }
-    } catch (e) {
-      req.log?.warn({ err: e }, "record click pageStat failed");
     }
+
     return reply.redirect(link.url);
   });
 
