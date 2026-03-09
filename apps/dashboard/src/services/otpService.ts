@@ -224,6 +224,7 @@ async function sendOtpEmail(
     subject: `${code} — Ton code de connexion Plinkk`,
     html: buildOtpEmailHtml(code, magicLink),
     tags: [{ name: "type", value: "otp" }],
+    critical: true, // OTP = critique, ignore le mode économie
   });
 
   return sentId !== null;

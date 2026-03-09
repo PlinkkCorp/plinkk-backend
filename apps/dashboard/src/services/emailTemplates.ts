@@ -235,13 +235,18 @@ export function genericNotificationTemplate(
   title: string,
   message: string,
   actionUrl?: string,
-  actionText?: string
+  actionText?: string,
+  trackingPixelUrl?: string
 ): string {
   const action = actionUrl && actionText ? ctaButton(actionUrl, actionText) : "";
+  const trackingPixel = trackingPixelUrl
+    ? `<img src="${trackingPixelUrl}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;opacity:0;" />`
+    : "";
   const content = `
     ${heading(title)}
     ${paragraph(message)}
     ${action}
+    ${trackingPixel}
   `;
   return baseEmailTemplate(title, content);
 }

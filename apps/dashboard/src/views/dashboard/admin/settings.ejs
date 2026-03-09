@@ -1,0 +1,270 @@
+<%- include('partials/head.ejs', { title: 'Paramètres - Administration' , description: 'Configuration des intégrations et paramètres système.' , robots: 'noindex,nofollow' }) %>
+    <%- include('partials/header-dash.ejs', { user: user }) %>
+
+        <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+            <%- include('partials/admin-nav.ejs', { user: user, active: 'settings' }) %>
+
+                <main class="col-span-12 lg:col-span-10 space-y-6">
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8">
+                        <div class="mb-4 pb-4 border-b border-slate-800">
+                            <h1 class="text-2xl font-semibold text-white flex items-center gap-2">
+                                <svg class="size-5" viewBox="0 0 24 24" fill="white">
+                                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.58 1.62-.94l2.39.96c.21.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+                                </svg>
+                                Paramètres système
+                            </h1>
+                            <p class="text-sm text-slate-400 mt-1">Configuration des intégrations et du comportement global de la plateforme.</p>
+                        </div>
+                    </div>
+
+                    <!-- Webhooks Discord -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-6">
+                        <div class="mb-4 pb-4 border-b border-slate-800 flex items-center justify-between">
+                            <div>
+                                <h2 class="text-lg font-semibold text-white">Webhooks Discord</h2>
+                                <p class="text-sm text-slate-400">Notifications automatiques pour patch notes et alertes quota.</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm font-medium text-slate-300">Alertes activées</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="discordAlertsToggle" class="sr-only peer" <%= settings.discord_alerts_enabled === 'true' ? 'checked' : '' %>>
+                                    <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Webhook Patchnotes -->
+                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-6 space-y-4">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-white mb-1">Patch Notes</h3>
+                                    <p class="text-sm text-slate-400">Notifications lors de la publication de nouvelles versions</p>
+                                </div>
+                                <button type="button" class="test-webhook-btn px-4 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors" data-type="patchnotes">
+                                    Tester
+                                </button>
+                            </div>
+                            <input type="url" id="webhook_patchnotes" value="<%= settings.discord_webhook_patchnotes || '' %>" placeholder="https://discord.com/api/webhooks/..." class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 placeholder-slate-500 focus:border-violet-500 outline-none font-mono text-sm">
+                            <button type="button" class="save-webhook-btn w-full px-6 py-3 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors" data-key="discord_webhook_patchnotes" data-input-id="webhook_patchnotes">
+                                Enregistrer
+                            </button>
+                        </div>
+
+                        <!-- Webhook Quota Emails -->
+                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-6 space-y-4">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-white mb-1">Alertes Quota Emails</h3>
+                                    <p class="text-sm text-slate-400">Notifications quand le quota d'emails atteint 90% ou 97%</p>
+                                </div>
+                                <button type="button" class="test-webhook-btn px-4 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors" data-type="quota">
+                                    Tester
+                                </button>
+                            </div>
+                            <input type="url" id="webhook_quota_alerts" value="<%= settings.discord_webhook_quota_alerts || '' %>" placeholder="https://discord.com/api/webhooks/..." class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 placeholder-slate-500 focus:border-violet-500 outline-none font-mono text-sm">
+                            <button type="button" class="save-webhook-btn w-full px-6 py-3 text-sm font-medium rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-colors" data-key="discord_webhook_quota_alerts" data-input-id="webhook_quota_alerts">
+                                Enregistrer
+                            </button>
+                        </div>
+
+                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                            <p class="text-sm text-slate-300 flex items-start gap-2">
+                                <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"/></svg>
+                                <span>Les webhooks Discord permettent d'envoyer des notifications automatiques dans vos salons Discord. Créez un webhook depuis les paramètres de votre salon.</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Mode Économie Emails -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-6">
+                        <div class="mb-4 pb-4 border-b border-slate-800 flex items-center justify-between">
+                            <div>
+                                <h2 class="text-lg font-semibold text-white">Mode économie automatique</h2>
+                                <p class="text-slate-400 text-sm">Limitation automatique des emails non-critiques au-delà de 90% du quota</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="economyModeToggle" class="sr-only peer" <%= settings.email_economy_mode_enabled === 'true' ? 'checked' : '' %>>
+                                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                            </label>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                                <h4 class="font-semibold text-emerald-400 mb-2 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                                    Emails prioritaires (toujours envoyés)
+                                </h4>
+                                <ul class="text-sm text-slate-300 space-y-1">
+                                    <li>• Codes OTP de connexion</li>
+                                    <li>• Réinitialisation de mot de passe</li>
+                                    <li>• Notifications de sécurité</li>
+                                </ul>
+                            </div>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                                <h4 class="font-semibold text-amber-400 mb-2 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                                    Emails différés (mode économie)
+                                </h4>
+                                <ul class="text-sm text-slate-300 space-y-1">
+                                    <li>• Emails de bienvenue</li>
+                                    <li>• Campagnes marketing</li>
+                                    <li>• Newsletters</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                            <p class="text-sm text-slate-300 flex items-start gap-2">
+                                <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                                <span>Quand activé, le mode économie se déclenche automatiquement à partir de <strong>2700 emails</strong> (90% du quota mensuel) pour préserver les emails critiques.</span>
+                            </p>
+                        </div>
+                    </div>
+                </main>
+        </div>
+
+        <script>
+            // Sauvegarder un webhook
+            document.querySelectorAll('.save-webhook-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const key = btn.dataset.key;
+                    const inputId = btn.dataset.inputId;
+                    const input = document.getElementById(inputId);
+                    const value = input?.value || '';
+
+                    try {
+                        const response = await fetch('/admin/settings/update', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ key, value })
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            alert('Erreur : ' + (data.error || 'Échec de la sauvegarde'));
+                            return;
+                        }
+
+                        showNotification('Webhook enregistré avec succès', 'success');
+                    } catch (error) {
+                        alert('Erreur réseau : ' + error.message);
+                    }
+                });
+            });
+
+            // Tester un webhook
+            document.querySelectorAll('.test-webhook-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const type = btn.dataset.type;
+                    const input = type === 'patchnotes' ? 
+                        document.getElementById('webhook_patchnotes') : 
+                        document.getElementById('webhook_quota_alerts');
+                    const webhookUrl = input?.value;
+
+                    if (!webhookUrl) {
+                        alert('Veuillez d\'abord entrer une URL de webhook');
+                        return;
+                    }
+
+                    btn.disabled = true;
+                    btn.textContent = 'Envoi...';
+
+                    try {
+                        const response = await fetch('/admin/settings/test-webhook', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ webhookUrl, type })
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            alert('Erreur : ' + (data.error || 'Échec du test'));
+                            return;
+                        }
+
+                        showNotification('Message de test envoyé sur Discord !', 'success');
+                    } catch (error) {
+                        alert('Erreur réseau : ' + error.message);
+                    } finally {
+                        btn.disabled = false;
+                        btn.textContent = 'Tester';
+                    }
+                });
+            });
+
+            // Toggle alertes Discord
+            document.getElementById('discordAlertsToggle').addEventListener('change', async (e) => {
+                const enabled = e.target.checked;
+                try {
+                    const response = await fetch('/admin/settings/update', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            key: 'discord_alerts_enabled', 
+                            value: enabled.toString() 
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        alert('Erreur : ' + (data.error || 'Échec'));
+                        e.target.checked = !enabled;
+                        return;
+                    }
+
+                    showNotification(`Alertes Discord ${enabled ? 'activées' : 'désactivées'}`, 'success');
+                } catch (error) {
+                    alert('Erreur : ' + error.message);
+                    e.target.checked = !enabled;
+                }
+            });
+
+            // Toggle mode économie
+            document.getElementById('economyModeToggle').addEventListener('change', async (e) => {
+                const enabled = e.target.checked;
+                try {
+                    const response = await fetch('/admin/settings/update', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            key: 'email_economy_mode_enabled', 
+                            value: enabled.toString() 
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        alert('Erreur : ' + (data.error || 'Échec'));
+                        e.target.checked = !enabled;
+                        return;
+                    }
+
+                    showNotification(`Mode économie ${enabled ? 'activé' : 'désactivé'}`, 'success');
+                } catch (error) {
+                    alert('Erreur : ' + error.message);
+                    e.target.checked = !enabled;
+                }
+            });
+
+            // Helper pour notifications
+            function showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 px-6 py-3 rounded-2xl shadow-lg text-white font-medium z-50 transition-all ${
+                    type === 'success' ? 'bg-emerald-600' : 
+                    type === 'error' ? 'bg-red-600' : 'bg-blue-600'
+                }`;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+        </script>
+
+        <%- include('partials/footer.ejs') %>

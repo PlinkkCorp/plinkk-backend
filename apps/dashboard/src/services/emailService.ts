@@ -1,5 +1,8 @@
 import { Resend } from "resend";
 import * as emailTemplates from "./emailTemplates";
+import { prisma } from "@plinkk/prisma";
+import { emailQuotaService } from "./emailQuotaService";
+import { emailQueueService } from "./emailQueueService";
 
 // Configuration Resend
 const resendApiKey = process.env.RESEND_API_KEY;
@@ -26,6 +29,7 @@ export interface SendEmailOptions {
   cc?: string | string[];
   bcc?: string | string[];
   tags?: { name: string; value: string }[];
+  critical?: boolean; // Si true, ignore le mode économie
 }
 
 /**
@@ -35,13 +39,87 @@ export class EmailService {
   private static fromEmail = "noreply@plinkk.fr";
 
   /**
+   * Vérifie si l'email peut être envoyé selon le mode économie
+   * Si non, met en queue pour envoi ultérieur
+   */
+  private static async canSendEmail(
+    critical: boolean = false,
+    options?: SendEmailOptions,
+    emailType?: string
+  ): Promise<{ canSend: boolean; reason?: string; queued?: boolean; queueId?: string }> {
+    // Les emails critiques passent toujours
+    if (critical) {
+      return { canSend: true };
+    }
+
+    // Vérifier si le mode économie est activé
+    const economyModeSetting = await prisma.siteSetting.findUnique({
+      where: { key: "email_economy_mode_enabled" }
+    });
+
+    if (economyModeSetting?.value !== "true") {
+      return { canSend: true }; // Mode économie désactivé
+    }
+
+    // Mode économie activé - vérifier le quota
+    const now = new Date();
+    const currentMonth = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+    const quota = await emailQuotaService.getQuota(currentMonth);
+
+    if (quota.total >= emailQuotaService.ALERT_90) {
+      // On a dépassé 90% du quota - mettre en queue au lieu de bloquer
+      if (options) {
+        try {
+          const queueId = await emailQueueService.enqueue(
+            options,
+            emailType || "other",
+            0 // Priorité normale
+          );
+          console.log(`📬 Email mis en queue (${queueId}) : quota à ${quota.percentUsed}%`);
+          return { 
+            canSend: false, 
+            reason: `Mode économie actif : quota à ${quota.percentUsed}% (${quota.total}/${quota.limit})`,
+            queued: true,
+            queueId
+          };
+        } catch (error) {
+          console.error("❌ Erreur mise en queue:", error);
+          return { 
+            canSend: false, 
+            reason: "Erreur mise en queue"
+          };
+        }
+      }
+      
+      return { 
+        canSend: false, 
+        reason: `Mode économie actif : quota à ${quota.percentUsed}% (${quota.total}/${quota.limit})`
+      };
+    }
+
+    return { canSend: true };
+  }
+
+  /**
    * Envoyer un email
    * @param options Options d'envoi
-   * @returns ID de l'email envoyé ou null si échec
+   * @returns ID de l'email envoyé, ID de queue si mis en attente, ou null si échec
    */
-  static async send(options: SendEmailOptions): Promise<string | null> {
+  static async send(options: SendEmailOptions, emailType: string = "other"): Promise<string | null> {
     if (!resend) {
       console.error("❌ Service d'email non configuré (RESEND_API_KEY manquante)");
+      return null;
+    }
+
+    // Vérifier le mode économie
+    const { canSend, reason, queued, queueId } = await this.canSendEmail(options.critical, options, emailType);
+    if (!canSend) {
+      if (queued) {
+        // Email mis en queue, retourner l'ID de la queue
+        return `queued:${queueId}`;
+      }
+      console.warn(`⚠️ Email non envoyé : ${reason}`);
+      console.warn(`   Destinataire: ${options.to}, Sujet: ${options.subject}`);
       return null;
     }
 
@@ -72,7 +150,7 @@ export class EmailService {
   }
 
   /**
-   * Envoyer un email de bienvenue
+   * Envoyer un email de bienvenue (non-critique, respect mode économie)
    */
   static async sendWelcomeEmail(to: string, userName: string): Promise<boolean> {
     const result = await this.send({
@@ -81,13 +159,14 @@ export class EmailService {
       html: emailTemplates.welcomeEmailTemplate(userName),
       text: `Bienvenue sur Plinkk, ${userName} ! Commencez à créer votre page de liens : https://plinkk.fr/dashboard`,
       tags: [{ name: "category", value: "welcome" }],
-    });
+      critical: false,
+    }, "welcome");
 
     return result !== null;
   }
 
   /**
-   * Envoyer un email de confirmation de changement d'email
+   * Envoyer un email de confirmation de changement d'email (critique)
    */
   static async sendEmailChangeConfirmation(
     to: string,
@@ -99,13 +178,14 @@ export class EmailService {
       html: emailTemplates.emailChangeConfirmationTemplate(userName, to),
       text: `Bonjour ${userName}, votre adresse email a été modifiée avec succès sur Plinkk.`,
       tags: [{ name: "category", value: "security" }],
-    });
+      critical: true,
+    }, "other");
 
     return result !== null;
   }
 
   /**
-   * Envoyer un email de réinitialisation de mot de passe
+   * Envoyer un email de réinitialisation de mot de passe (critique)
    */
   static async sendPasswordResetEmail(
     to: string,
@@ -118,7 +198,8 @@ export class EmailService {
       html: emailTemplates.passwordResetTemplate(userName, resetToken),
       text: `Bonjour ${userName}, réinitialisez votre mot de passe ici : https://dash.plinkk.fr/reset-password?token=${resetToken}`,
       tags: [{ name: "category", value: "security" }],
-    });
+      critical: true,
+    }, "other");
 
     return result !== null;
   }
@@ -171,14 +252,16 @@ export class EmailService {
     title: string,
     message: string,
     actionUrl?: string,
-    actionText?: string
+    actionText?: string,
+    trackingPixelUrl?: string,
+    emailType: string = "other"
   ): Promise<boolean> {
     const result = await this.send({
       to,
       subject,
-      html: emailTemplates.genericNotificationTemplate(title, message, actionUrl, actionText),
+      html: emailTemplates.genericNotificationTemplate(title, message, actionUrl, actionText, trackingPixelUrl),
       text: message,
-    });
+    }, emailType);
 
     return result !== null;
   }

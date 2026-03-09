@@ -4,62 +4,243 @@
         <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
             <%- include('partials/admin-nav.ejs', { user: user, active: 'emails' }) %>
 
-                <main class="col-span-12 lg:col-span-10 space-y-8">
-                    <!-- Header -->
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-                        <div class="relative z-10">
-                            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center gap-2">
-                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                <main class="col-span-12 lg:col-span-10 space-y-6">
+                    <!-- Header compact -->
+                    <div class="flex items-center justify-between bg-gradient-to-r from-slate-900 to-slate-800 p-6 rounded-2xl border border-slate-800">
+                        <div>
+                            <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
                                 Gestion d'Emails
                             </h1>
-                            <p class="text-slate-400 text-lg">Envoyer des emails personnalisés aux utilisateurs</p>
+                            <p class="text-slate-400 text-sm mt-1">Campagnes, quotas & file d'attente</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="emailToggle" class="sr-only peer" <%= emailsEnabled ? 'checked' : '' %>>
+                            <div class="w-11 h-6 bg-slate-700 peer-focus:ring-2 peer-focus:ring-blue-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            <span class="ml-2 text-sm font-medium text-slate-300">Envoi actif</span>
+                        </label>
+                    </div>
+
+                    <!-- Stats compactes -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+                            <div class="text-slate-500 text-xs mb-1">Campagnes</div>
+                            <div class="text-2xl font-bold text-blue-400" id="statCampaigns">0</div>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+                            <div class="text-slate-500 text-xs mb-1">Envoyés</div>
+                            <div class="text-2xl font-bold text-blue-400" id="statEmailsSent">0</div>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+                            <div class="text-slate-500 text-xs mb-1">Ouvertures</div>
+                            <div class="text-2xl font-bold text-emerald-400" id="statOpenRate">0%</div>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+                            <div class="text-slate-500 text-xs mb-1">Clics</div>
+                            <div class="text-2xl font-bold text-amber-400" id="statClickRate">0%</div>
                         </div>
                     </div>
 
-                    <!-- Stats -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl">
-                            <div class="text-slate-400 text-sm font-medium mb-2">Campagnes envoyées</div>
-                            <div class="text-3xl font-bold text-blue-400">0</div>
-                        </div>
-                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl">
-                            <div class="text-slate-400 text-sm font-medium mb-2">Emails envoyés</div>
-                            <div class="text-3xl font-bold text-blue-400">0</div>
-                        </div>
-                    </div>
+                    <!-- Quota & File d'attente (sections accordéon) -->
+                    <div class="space-y-3">
+                        <!-- Section Quota -->
+                        <details class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group" open>
+                            <summary class="cursor-pointer p-4 hover:bg-slate-800/50 transition-colors flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                                    <span class="font-semibold text-white">Quota Mensuel</span>
+                                    <span class="text-xs px-2 py-1 rounded-full <%= quota.alert === 'critical' ? 'bg-red-500/20 text-red-300' : quota.alert === 'warning' ? 'bg-amber-500/20 text-amber-300' : 'bg-emerald-500/20 text-emerald-300' %>">
+                                        <%= quota.total %> / <%= quota.limit %>
+                                    </span>
+                                </div>
+                                <svg class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-180" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                            </summary>
+                            <div class="p-4 pt-0 space-y-4">
+                                <!-- Compteurs compacts -->
+                                <div class="grid grid-cols-4 gap-2">
+                                    <div class="bg-slate-950/50 p-2 rounded-lg text-center">
+                                        <div class="text-xs text-slate-500">OTP</div>
+                                        <div class="text-lg font-bold text-blue-400"><%= quota.otp %></div>
+                                    </div>
+                                    <div class="bg-slate-950/50 p-2 rounded-lg text-center">
+                                        <div class="text-xs text-slate-500">Campagnes</div>
+                                        <div class="text-lg font-bold text-purple-400"><%= quota.campaign %></div>
+                                    </div>
+                                    <div class="bg-slate-950/50 p-2 rounded-lg text-center">
+                                        <div class="text-xs text-slate-500">Bienvenue</div>
+                                        <div class="text-lg font-bold text-emerald-400"><%= quota.welcome %></div>
+                                    </div>
+                                    <div class="bg-slate-950/50 p-2 rounded-lg text-center">
+                                        <div class="text-xs text-slate-500">Autres</div>
+                                        <div class="text-lg font-bold text-amber-400"><%= quota.other %></div>
+                                    </div>
+                                </div>
 
-                    <!-- Formulaire d'envoi -->
-                    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-6">
-                        <div>
-                            <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                                Nouvelle Campagne
-                            </h2>
-                        </div>
+                                <!-- Barre de progression -->
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="text-slate-400">Utilisation</span>
+                                        <span class="font-bold <%= quota.alert === 'critical' ? 'text-red-400' : quota.alert === 'warning' ? 'text-amber-400' : 'text-emerald-400' %>">
+                                            <%= Number(quota.percentUsed || 0).toLocaleString('fr-FR', { minimumFractionDigits: 3, maximumFractionDigits: 6 }) %>%
+                                        </span>
+                                    </div>
+                                    <div class="relative h-4 bg-slate-800 rounded-full overflow-hidden">
+                                        <div class="absolute inset-y-0 left-0 <%= quota.alert === 'critical' ? 'bg-red-500' : quota.alert === 'warning' ? 'bg-amber-500' : 'bg-emerald-500' %> transition-all rounded-full" style="width: <%= quota.percentUsed %>%"></div>
+                                    </div>
+                                </div>
 
-                        <form id="emailForm" class="space-y-6">
+                                <!-- Alerte -->
+                                <% if (quota.alert === 'critical') { %>
+                                <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-xs text-red-200 flex items-start gap-2">
+                                    <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                                    <span>Quota critique atteint. Envois limités.</span>
+                                </div>
+                                <% } else if (quota.alert === 'warning') { %>
+                                <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-xs text-amber-200 flex items-start gap-2">
+                                    <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                                    <span>Attention au quota (<%= quota.percentUsed %>%).</span>
+                                </div>
+                                <% } %>
+                            </div>
+                        </details>
+
+                        <!-- Section File d'attente -->
+                        <details class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group">
+                            <summary class="cursor-pointer p-4 hover:bg-slate-800/50 transition-colors flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <svg class="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                                    <span class="font-semibold text-white">File d'attente</span>
+                                    <span class="text-xs px-2 py-1 rounded-full bg-orange-500/20 text-orange-300">
+                                        <%= queueStats.pending %> en attente
+                                    </span>
+                                </div>
+                                <svg class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-180" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                            </summary>
+                            <div class="p-4 pt-0 space-y-4">
+                                <!-- Stats queue -->
+                                <div class="grid grid-cols-4 gap-2">
+                                    <div class="bg-orange-500/10 p-2 rounded-lg text-center border border-orange-500/20">
+                                        <div class="text-xs text-orange-300">En attente</div>
+                                        <div class="text-lg font-bold text-orange-400"><%= queueStats.pending %></div>
+                                    </div>
+                                    <div class="bg-blue-500/10 p-2 rounded-lg text-center border border-blue-500/20">
+                                        <div class="text-xs text-blue-300">En cours</div>
+                                        <div class="text-lg font-bold text-blue-400"><%= queueStats.processing %></div>
+                                    </div>
+                                    <div class="bg-emerald-500/10 p-2 rounded-lg text-center border border-emerald-500/20">
+                                        <div class="text-xs text-emerald-300">Envoyés</div>
+                                        <div class="text-lg font-bold text-emerald-400"><%= queueStats.sent %></div>
+                                    </div>
+                                    <div class="bg-red-500/10 p-2 rounded-lg text-center border border-red-500/20">
+                                        <div class="text-xs text-red-300">Échoués</div>
+                                        <div class="text-lg font-bold text-red-400"><%= queueStats.failed %></div>
+                                    </div>
+                                </div>
+
+                                <!-- Bouton traiter -->
+                                <button onclick="processQueue()" id="processBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm">
+                                    🚀 Traiter la queue maintenant
+                                </button>
+
+                                <!-- Table queue -->
+                                <% if (queue.length > 0) { %>
+                                <div class="overflow-x-auto -mx-4 px-4">
+                                    <table class="w-full text-xs">
+                                        <thead class="text-slate-400 border-b border-slate-700">
+                                            <tr>
+                                                <th class="text-left py-2 px-2">Date</th>          
+                                                <th class="text-left py-2 px-2">Destinataire</th>
+                                                <th class="text-left py-2 px-2">Type</th>
+                                                <th class="text-center py-2 px-2">Priorité</th>
+                                                <th class="text-center py-2 px-2">Statut</th>
+                                                <th class="text-center py-2 px-2">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="text-slate-300">
+                                            <% queue.slice(0, 10).forEach(email => { %>
+                                            <tr class="border-b border-slate-800/50 hover:bg-slate-800/30">
+                                                <td class="py-2 px-2"><%= new Date(email.createdAt).toLocaleDateString('fr-FR') %></td>
+                                                <td class="py-2 px-2 truncate max-w-[150px]" title="<%= email.to.join(', ') %>"><%= email.to[0] %></td>
+                                                <td class="py-2 px-2"><%= email.emailType %></td>
+                                                <td class="py-2 px-2 text-center">
+                                                    <span class="px-1.5 py-0.5 rounded <%= email.priority >= 7 ? 'bg-red-500/20 text-red-300' : 'bg-slate-700 text-slate-300' %>">
+                                                        <%= email.priority %>
+                                                    </span>
+                                                </td>
+                                                <td class="py-2 px-2 text-center">
+                                                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold uppercase <%= email.status === 'PENDING' ? 'bg-orange-500/20 text-orange-300' : email.status === 'PROCESSING' ? 'bg-blue-500/20 text-blue-300' : email.status === 'SENT' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300' %>">
+                                                        <%= email.status %>
+                                                    </span>
+                                                </td>
+                                                <td class="py-2 px-2 text-center">
+                                                    <% if (email.status === 'PENDING') { %>
+                                                    <button onclick="cancelEmail('<%= email.id %>')" class="text-red-400 hover:text-red-300 text-xs">
+                                                        ❌
+                                                    </button>
+                                                    <% } else { %>
+                                                    -
+                                                    <% } %>
+                                                </td>
+                                            </tr>
+                                            <% }); %>
+                                        </tbody>
+                                    </table>
+                                    <% if (queue.length > 10) { %>
+                                    <p class="text-center text-xs text-slate-500 mt-2">+ <%= queue.length - 10 %> autres emails en queue</p>
+                                    <% } %>
+                                </div>
+                                <% } else { %>
+                                <p class="text-center text-slate-500 text-sm py-4">✅ Aucun email en attente</p>
+                                <% } %>
+                            </div>
+                        </details>
+
+                        <!-- Section Formulaire d'envoi -->
+                        <details class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group">
+                            <summary class="cursor-pointer p-4 hover:bg-slate-800/50 transition-colors flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <svg class="w-5 h-5 text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                                    <span class="font-semibold text-white">Nouvelle Campagne</span>
+                                </div>
+                                <svg class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-180" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                            </summary>
+                            <div class="p-4 pt-0">
+                                <form id="emailForm" class="space-y-4">
                             <!-- Type de destinataires -->
                             <div>
-                                <label class="block text-sm font-semibold text-white mb-3">Destinataires</label>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <label class="flex items-center p-4 border border-slate-700 rounded-2xl cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
-                                        <input type="radio" name="recipientType" value="all" checked class="mr-3 w-5 h-5">
-                                        <span class="text-white font-medium">Tous les utilisateurs</span>
+                                <label class="block text-xs font-semibold text-slate-400 mb-2">Destinataires</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <label class="flex items-center p-2 border border-slate-700 rounded-lg cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
+                                        <input type="radio" name="recipientType" value="all" checked class="mr-2 w-4 h-4">
+                                        <span class="text-white text-sm">Tous</span>
                                     </label>
-                                    <label class="flex items-center p-4 border border-slate-700 rounded-2xl cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
-                                        <input type="radio" name="recipientType" value="staff" class="mr-3 w-5 h-5">
-                                        <span class="text-white font-medium">Staff uniquement</span>
+                                    <label class="flex items-center p-2 border border-slate-700 rounded-lg cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
+                                        <input type="radio" name="recipientType" value="staff" class="mr-2 w-4 h-4">
+                                        <span class="text-white text-sm">Staff</span>
                                     </label>
-                                    <label class="flex items-center p-4 border border-slate-700 rounded-2xl cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
-                                        <input type="radio" name="recipientType" value="admin" class="mr-3 w-5 h-5">
-                                        <span class="text-white font-medium">Admin uniquement</span>
+                                    <label class="flex items-center p-2 border border-slate-700 rounded-lg cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
+                                        <input type="radio" name="recipientType" value="admin" class="mr-2 w-4 h-4">
+                                        <span class="text-white text-sm">Admin</span>
                                     </label>
-                                    <label class="flex items-center p-4 border border-slate-700 rounded-2xl cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
-                                        <input type="radio" name="recipientType" value="custom" class="mr-3 w-5 h-5">
-                                        <span class="text-white font-medium">Destinataires spécifiques</span>
+                                    <label class="flex items-center p-2 border border-slate-700 rounded-lg cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
+                                        <input type="radio" name="recipientType" value="role" class="mr-2 w-4 h-4">
+                                        <span class="text-white text-sm">Par rôle</span>
+                                    </label>
+                                    <label class="flex items-center p-2 border border-slate-700 rounded-lg cursor-pointer hover:border-blue-500 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
+                                        <input type="radio" name="recipientType" value="custom" class="mr-2 w-4 h-4">
+                                        <span class="text-white text-sm">Personnalisé</span>
                                     </label>
                                 </div>
+                            </div>
+
+                            <div id="roleRecipientsField" class="hidden">
+                                <label class="block text-sm font-semibold text-white mb-2">Rôle ciblé</label>
+                                <select name="roleId" id="roleSelect" class="w-full bg-slate-800 border border-slate-700 rounded-2xl p-3 text-white focus:border-blue-500 focus:outline-none transition-colors">
+                                    <option value="">Sélectionner un rôle</option>
+                                    <% (roles || []).forEach(role => { %>
+                                        <option value="<%= role.id %>"><%= role.name %><%= role.isStaff ? ' (staff)' : '' %></option>
+                                    <% }) %>
+                                </select>
                             </div>
 
                             <!-- Destinataires customisés -->
@@ -78,6 +259,18 @@
                                     <option value="security">Sécurité</option>
                                     <option value="other">Autre</option>
                                 </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-white mb-2">Template (optionnel)</label>
+                                <div class="flex gap-3">
+                                    <select name="templateId" id="templateSelect" class="flex-1 bg-slate-800 border border-slate-700 rounded-2xl p-3 text-white focus:border-blue-500 focus:outline-none transition-colors">
+                                        <option value="">Aucun template (saisie manuelle)</option>
+                                    </select>
+                                    <button type="button" id="saveAsTemplateBtn" class="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-2xl transition-colors">
+                                        Sauver template
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Sujet -->
@@ -146,6 +339,7 @@
                             </div>
                         </form>
                     </div>
+                    </details>
 
                     <!-- Historique des campagnes -->
                     <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8">
@@ -169,6 +363,7 @@
                         all: 'tous les utilisateurs',
                         staff: 'tous les membres du staff',
                         admin: 'tous les administrateurs',
+                        role: 'les utilisateurs du rôle sélectionné',
                         custom: 'les destinataires spécifiés'
                     };
                     
@@ -176,11 +371,36 @@
                         displayTexts[radio.value] || 'tous les utilisateurs';
                     
                     customField.classList.toggle('hidden', radio.value !== 'custom');
+                    document.getElementById('roleRecipientsField')?.classList.toggle('hidden', radio.value !== 'role');
                 });
+            });
+
+            const roleSelect = document.getElementById('roleSelect');
+            roleSelect?.addEventListener('change', () => {
+                const roleLabel = roleSelect.options[roleSelect.selectedIndex]?.text || 'rôle sélectionné';
+                const recipientText = roleSelect.value ? `les utilisateurs avec le rôle ${roleLabel}` : 'les utilisateurs du rôle sélectionné';
+                const selected = document.querySelector('input[name="recipientType"]:checked');
+                if (selected?.value === 'role') {
+                    document.getElementById('recipientCountDisplay').textContent = recipientText;
+                }
             });
 
             // Mise à jour de l'aperçu
             const form = document.getElementById('emailForm');
+            const templateSelect = document.getElementById('templateSelect');
+            const saveAsTemplateBtn = document.getElementById('saveAsTemplateBtn');
+            let loadedTemplates = [];
+
+            async function parseJsonSafe(response) {
+                const raw = await response.text();
+                if (!raw) return {};
+                try {
+                    return JSON.parse(raw);
+                } catch {
+                    throw new Error(`Réponse non JSON (${response.status})`);
+                }
+            }
+
             ['subject', 'title', 'message', 'category', 'actionText', 'actionUrl'].forEach(field => {
                 const input = form.querySelector(`[name="${field}"]`);
                 input?.addEventListener('input', () => {
@@ -198,6 +418,85 @@
                 });
             });
 
+            async function loadStats() {
+                try {
+                    const response = await fetch('/api/admin/emails/stats');
+                    const stats = await parseJsonSafe(response);
+                    if (!response.ok) return;
+
+                    document.getElementById('statCampaigns').textContent = String(stats.totalCampaigns || 0);
+                    document.getElementById('statEmailsSent').textContent = String(stats.totalEmailsSent || 0);
+                    document.getElementById('statOpenRate').textContent = `${stats.openRate || 0}%`;
+                    document.getElementById('statClickRate').textContent = `${stats.clickRate || 0}%`;
+                } catch (error) {
+                    console.error('Erreur chargement stats emails:', error);
+                }
+            }
+
+            async function loadTemplates() {
+                try {
+                    const response = await fetch('/api/admin/emails/templates');
+                    const templates = await parseJsonSafe(response);
+                    if (!response.ok) return;
+
+                    loadedTemplates = templates;
+                    templateSelect.innerHTML = '<option value="">Aucun template (saisie manuelle)</option>' +
+                        templates.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+                } catch (error) {
+                    console.error('Erreur chargement templates:', error);
+                }
+            }
+
+            templateSelect.addEventListener('change', () => {
+                const selected = loadedTemplates.find(t => t.id === templateSelect.value);
+                if (!selected) return;
+
+                form.querySelector('[name="subject"]').value = selected.subject || '';
+                form.querySelector('[name="title"]').value = selected.title || '';
+                form.querySelector('[name="message"]').value = selected.message || '';
+                form.querySelector('[name="category"]').value = selected.category || 'announcement';
+                form.querySelector('[name="actionText"]').value = selected.actionText || '';
+                form.querySelector('[name="actionUrl"]').value = selected.actionUrl || '';
+
+                ['subject', 'title', 'message', 'category', 'actionText', 'actionUrl'].forEach(field => {
+                    const input = form.querySelector(`[name="${field}"]`);
+                    input?.dispatchEvent(new Event('input'));
+                });
+            });
+
+            saveAsTemplateBtn.addEventListener('click', async () => {
+                const name = prompt('Nom du template :');
+                if (!name) return;
+
+                const payload = {
+                    name,
+                    subject: form.querySelector('[name="subject"]').value,
+                    title: form.querySelector('[name="title"]').value,
+                    message: form.querySelector('[name="message"]').value,
+                    actionUrl: form.querySelector('[name="actionUrl"]').value || undefined,
+                    actionText: form.querySelector('[name="actionText"]').value || undefined,
+                    category: form.querySelector('[name="category"]').value,
+                };
+
+                try {
+                    const response = await fetch('/api/admin/emails/templates', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                    });
+                    const data = await parseJsonSafe(response);
+                    if (!response.ok) {
+                        alert('Erreur: ' + (data.error || 'Impossible de créer le template'));
+                        return;
+                    }
+                    showNotification('Template enregistré', 'success');
+                    await loadTemplates();
+                    templateSelect.value = data.id;
+                } catch (error) {
+                    alert('Erreur réseau: ' + error.message);
+                }
+            });
+
             // Envoi du formulaire
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -207,15 +506,23 @@
                 const recipients = recipientType === 'custom' 
                     ? formData.get('recipients')?.split('\n').map(e => e.trim()).filter(e => e)
                     : undefined;
+                const roleId = recipientType === 'role' ? formData.get('roleId') : undefined;
+
+                if (recipientType === 'role' && !roleId) {
+                    alert('Veuillez sélectionner un rôle.');
+                    return;
+                }
 
                 const payload = {
                     recipientType,
+                    roleId,
                     recipients,
                     subject: formData.get('subject'),
                     title: formData.get('title'),
                     message: formData.get('message'),
                     actionUrl: formData.get('actionUrl') || undefined,
                     actionText: formData.get('actionText') || undefined,
+                    templateId: formData.get('templateId') || undefined,
                     category: formData.get('category'),
                 };
 
@@ -226,7 +533,7 @@
                         body: JSON.stringify(payload)
                     });
 
-                    const data = await response.json();
+                    const data = await parseJsonSafe(response);
 
                     if (!response.ok) {
                         alert('Erreur: ' + (data.error || 'Impossible d\'envoyer l\'email'));
@@ -236,6 +543,7 @@
                     alert(data.message);
                     form.reset();
                     loadCampaigns();
+                    loadStats();
                 } catch (error) {
                     alert('Erreur: ' + error.message);
                 }
@@ -245,7 +553,7 @@
             async function loadCampaigns() {
                 try {
                     const response = await fetch('/api/admin/emails/campaigns');
-                    const campaigns = await response.json();
+                    const campaigns = await parseJsonSafe(response);
 
                     const historyDiv = document.getElementById('campaignsHistory');
                     if (!campaigns.length) {
@@ -271,6 +579,8 @@
                                 <div class="text-right">
                                     <div class="text-blue-400 font-bold">${campaign.sentCount}</div>
                                     <div class="text-xs text-slate-400">emails envoyés</div>
+                                    <div class="text-xs text-emerald-400 mt-2">Ouvertures: ${campaign.openRate}%</div>
+                                    <div class="text-xs text-amber-400">Clics: ${campaign.clickRate}%</div>
                                     <div class="text-xs text-slate-500 mt-2">
                                         ${new Date(campaign.createdAt).toLocaleDateString('fr-FR')}
                                     </div>
@@ -285,4 +595,95 @@
 
             // Charger les campagnes au chargement
             loadCampaigns();
+            loadStats();
+            loadTemplates();
+
+            // Gestion du toggle d'envoi d'emails
+            const emailToggle = document.getElementById('emailToggle');
+            emailToggle.addEventListener('change', async (e) => {
+                const enabled = e.target.checked;
+                
+                try {
+                    const response = await fetch('/admin/emails/toggle', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ enabled })
+                    });
+
+                    const data = await parseJsonSafe(response);
+
+                    if (!response.ok) {
+                        alert('Erreur lors de la mise à jour : ' + (data.error || 'Erreur inconnue'));
+                        e.target.checked = !enabled;
+                        return;
+                    }
+
+                    // Notification visuelle
+                    const statusText = enabled ? 'activées' : 'désactivées';
+                    showNotification(`Campagnes d'emails ${statusText} avec succès`, 'success');
+                } catch (error) {
+                    alert('Erreur réseau : ' + error.message);
+                    e.target.checked = !enabled;
+                }
+            });
+
+            // Notification visual helper
+            function showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 px-6 py-3 rounded-2xl shadow-lg text-white font-medium z-50 transition-all ${
+                    type === 'success' ? 'bg-emerald-600' : 
+                    type === 'error' ? 'bg-red-600' : 'bg-blue-600'
+                }`;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+
+            // Fonctions pour la file d'attente
+            async function processQueue() {
+                const btn = document.getElementById('processBtn');
+                if (!btn) return;
+                
+                btn.disabled = true;
+                btn.textContent = '⏳ Traitement...';
+
+                try {
+                    const res = await fetch('/admin/emails/queue/process', { method: 'POST' });
+                    const data = await parseJsonSafe(res);
+
+                    if (data.success) {
+                        showNotification(`✅ ${data.sent} envoyés, ${data.failed} échoués, ${data.remaining} restants`, 'success');
+                        setTimeout(() => location.reload(), 2000);
+                    } else {
+                        showNotification('❌ Erreur lors du traitement', 'error');
+                    }
+                } catch (err) {
+                    showNotification('❌ Erreur réseau', 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = '🚀 Traiter la queue maintenant';
+                }
+            }
+
+            async function cancelEmail(id) {
+                if (!confirm('Êtes-vous sûr de vouloir annuler cet email ?')) return;
+
+                try {
+                    const res = await fetch(`/admin/emails/queue/cancel/${id}`, { method: 'POST' });
+                    const data = await parseJsonSafe(res);
+
+                    if (data.success) {
+                        showNotification('✅ Email annulé', 'success');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showNotification('❌ ' + (data.error || 'Erreur'), 'error');
+                    }
+                } catch (err) {
+                    showNotification('❌ Erreur réseau', 'error');
+                }
+            }
         </script>

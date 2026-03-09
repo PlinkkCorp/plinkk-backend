@@ -520,7 +520,16 @@ fastify.addHook('onSend', async (request, reply, payload) => {
 });
 
 fastify.setErrorHandler((error, request, reply) => {
-  fastify.log.error(error);
+  const statusCode = error instanceof AppError ? error.statusCode : 500;
+  request.log.error(
+    {
+      err: error,
+      method: request.method,
+      url: request.url,
+      statusCode,
+    },
+    "Request failed"
+  );
 
   if (error instanceof AppError) {
     if (request.raw.url?.startsWith("/api")) {

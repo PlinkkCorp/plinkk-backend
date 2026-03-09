@@ -14,6 +14,7 @@
     "migrate:plinkks": "bun scripts/migrate-plinkks.cjs",
     "delete_inactive": "bun scripts/delete_inactive_user.js",
     "seed-permissions": "bun scripts/seed-permissions.js",
+    "seed-email-templates": "bun scripts/seed-email-templates.js",
     "prisma:generate": "bunx prisma generate --schema=packages/prisma/prisma/schema.prisma",
     "build": "cd packages/prisma && bun run build && cd ../../packages/shared && bun run build && cd ../../apps/dashboard && bun run build && cd ../../apps/public && bun run build",
     "build:dashboard": "cd apps/dashboard && bun run build",

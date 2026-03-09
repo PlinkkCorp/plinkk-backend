@@ -41,6 +41,9 @@ Infrastructure backend moderne basée sur **Bun**, **Fastify** et **TypeScript s
 - **Email Alias/Forwarding** — Création d'adresses personnalisées avec relais
 - **Templates HTML** — Bienvenue, vérification, reset password, notifications
 - **Quota Management** — Limitation mensuelle configurable (3000 emails/mois gratuit)
+- **Mode Économie** — File d'attente automatique pour emails non-critiques au-delà de 90% du quota
+- **Tracking Avancé** — Suivi des ouvertures et clics avec dédoublonnage automatique
+- **Templates Réutilisables** — Système de templates emails avec 6 modèles prédéfinis
 
 ### 🛠️ Administration
 - **Bug Reports System** — Interface complète de gestion des rapports utilisateurs
@@ -221,6 +224,9 @@ bun run prisma:studio
 ```bash
 # Seed permissions & rôles
 bun run seed-permissions
+
+# Seed templates d'emails système
+bun run seed-email-templates
 
 # Promouvoir un utilisateur admin
 bun run set-admin

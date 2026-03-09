@@ -3,6 +3,15 @@ import { FastifyInstance, FastifyRequest } from "fastify";
 import { logAdminAction } from "../lib/adminLogger";
 import { logUserAction } from "../lib/userLogger";
 
+type AuditRequest = FastifyRequest & {
+  auditError?: {
+    message: string;
+    name?: string;
+    code?: string;
+    statusCode?: number;
+  };
+};
+
 const IGNORED_PATH_PREFIXES = [
   "/public/",
   "/css/",
@@ -116,7 +125,18 @@ function isAdminAction(pathname: string): boolean {
 }
 
 export function registerActionAuditHook(fastify: FastifyInstance) {
+  fastify.addHook("onError", async (request, _reply, error) => {
+    const req = request as AuditRequest;
+    req.auditError = {
+      message: error.message,
+      name: error.name,
+      code: (error as { code?: string }).code,
+      statusCode: (error as { statusCode?: number }).statusCode,
+    };
+  });
+
   fastify.addHook("onResponse", async (request, reply) => {
+    const req = request as AuditRequest;
     const pathname = getPathname(request);
 
     if (!pathname || isIgnoredPath(pathname)) {
@@ -137,6 +157,9 @@ export function registerActionAuditHook(fastify: FastifyInstance) {
       route: request.routeOptions?.url || pathname,
       method,
       statusCode: reply.statusCode,
+      ...(method === "GET" && reply.statusCode >= 500 && req.auditError
+        ? { error: sanitizeValue(req.auditError) }
+        : {}),
       params: sanitizeValue(request.params),
       query: sanitizeValue(request.query),
       body: sanitizeValue(request.body),

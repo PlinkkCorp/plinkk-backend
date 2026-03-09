@@ -69,6 +69,7 @@ model User {
   affiliateLinks        AffiliateLink[]
   partner               Partner?
   emailCampaigns        EmailCampaign[]
+  emailTemplates        EmailTemplate[]
   patchNotes            PatchNote[]
   qrCodes               QrCode[]
   qrCodeScans           QrCodeScan[]
@@ -641,6 +642,46 @@ model Maintenance {
   maintenancePages String[]  @default([])
 }
 
+/// Paramètres globaux du site (webhooks, features flags, etc.)
+model SiteSetting {
+  key       String   @id
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// File d'attente pour emails différés (mode économie)
+model EmailQueue {
+  id        String   @id @default(nanoid(16))
+  to        String[] // Destinataires
+  subject   String
+  html      String?  @db.Text
+  text      String?  @db.Text
+  from      String?
+  replyTo   String?
+  tags      Json?    // Tags Resend
+  emailType String   // "campaign", "welcome", etc.
+  priority  Int      @default(0) // 0 = normal, 10 = haute priorité
+  status    EmailQueueStatus @default(PENDING)
+  scheduledFor DateTime? // Date d'envoi planifiée
+  attempts  Int      @default(0)
+  lastAttempt DateTime?
+  error     String?  @db.Text
+  sentAt    DateTime?
+  createdAt DateTime @default(now())
+  
+  @@index([status, scheduledFor])
+  @@index([createdAt])
+}
+
+enum EmailQueueStatus {
+  PENDING    // En attente
+  PROCESSING // En cours de traitement
+  SENT       // Envoyé avec succès
+  FAILED     // Échec définitif
+  CANCELLED  // Annulé manuellement
+}
+
 enum ThemeStatus {
   DRAFT
   SUBMITTED
@@ -791,14 +832,63 @@ model EmailCampaign {
   recipientType String   @default("all") // all, staff, admin, custom
   sentCount     Int      @default(0)
   failedCount   Int      @default(0)
+  openCount     Int      @default(0)
+  clickCount    Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
   createdById   String
+  templateId    String?
 
-  createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdBy      User                 @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  template       EmailTemplate?       @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  trackingEvents EmailTrackingEvent[]
 
   @@index([createdById])
   @@index([createdAt])
+  @@index([templateId])
+}
+
+model EmailTemplate {
+  id          String          @id @default(nanoid(16))
+  name        String          @unique
+  subject     String
+  title       String
+  message     String
+  actionText  String?
+  actionUrl   String?
+  category    String          @default("announcement")
+  isSystem    Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @default(now()) @updatedAt
+  createdById String?
+
+  createdBy User?           @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  campaigns EmailCampaign[]
+
+  @@index([createdById])
+  @@index([createdAt])
+}
+
+model EmailTrackingEvent {
+  id             String         @id @default(nanoid(16))
+  campaignId     String
+  recipientEmail String
+  type           EmailEventType
+  createdAt      DateTime       @default(now())
+  userAgent      String?
+  ip             String?
+
+  campaign EmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, type])
+  @@index([createdAt])
+  @@index([recipientEmail])
+  @@unique([campaignId, recipientEmail, type])
+}
+
+enum EmailEventType {
+  OPEN
+  CLICK
 }
 
 // ─── Inscription Email-only (OTP + Magic Link) ────────────────────────────────
