@@ -36,6 +36,7 @@ import { staticPagesRoutes } from "./server/staticPagesRoutes";
 import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
 import { partnersRoutes } from "./server/partnersRoutes";
 import { patchNotesRoutes } from "./server/patchNotesRoutes";
+import { trackingRoutes } from "./server/trackingRoutes";
 import { replyView } from "./lib/replyView";
 import fastifyRateLimit from "@fastify/rate-limit";
 import fastifyCompress from "@fastify/compress";
@@ -254,6 +255,7 @@ staticPagesRoutes(fastify);
 plinkkFrontUserRoutes(fastify);
 partnersRoutes(fastify);
 patchNotesRoutes(fastify);
+trackingRoutes(fastify);
 
 // ─── Funnel Event Tracking ──────────────────────────────────────────────────
 const ALLOWED_EVENTS = ['landing_visit', 'signup', 'premium_view', 'config_view', 'purchase', 'cancel'];
