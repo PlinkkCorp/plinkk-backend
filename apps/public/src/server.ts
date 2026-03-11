@@ -361,19 +361,40 @@ fastify.get("/users", async (request, reply) => {
       include: { role: true },
     })
     : null;
-  const plinkks = await prisma.plinkk.findMany({
-    where: { isPublic: true },
-    include: {
-      settings: true,
-      user: {
-        include: {
-          cosmetics: true,
-          role: true,
+  const [plinkks, bannedEmailRows] = await Promise.all([
+    prisma.plinkk.findMany({
+      where: { isPublic: true },
+      include: {
+        settings: true,
+        user: {
+          include: {
+            cosmetics: true,
+            role: true,
+          },
         },
       },
-    },
-    orderBy: { createdAt: "asc" },
-  });
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.bannedEmail.findMany({
+      where: { revoquedAt: null },
+      select: { email: true, reason: true, time: true, createdAt: true },
+    }),
+  ]);
+  // Build a map of banned emails -> ban info (only currently active bans)
+  const bannedEmailsMap = new Map<string, { reason: string; until: string | null }>();
+  for (const ban of bannedEmailRows) {
+    const isActive =
+      ban.time == null ||
+      ban.time < 0 ||
+      new Date(ban.createdAt).getTime() + ban.time * 60000 > Date.now();
+    if (isActive) {
+      const until =
+        typeof ban.time === "number" && ban.time > 0
+          ? new Date(new Date(ban.createdAt).getTime() + ban.time * 60000).toISOString()
+          : null;
+      bannedEmailsMap.set(ban.email, { reason: ban.reason, until });
+    }
+  }
   let msgs: Announcement[] = [];
   try {
     const now = new Date();
@@ -406,6 +427,7 @@ fastify.get("/users", async (request, reply) => {
   } catch (e) { }
   return await replyView(reply, "users.ejs", currentUser, {
     plinkks: plinkks,
+    bannedEmails: Object.fromEntries(bannedEmailsMap),
   });
 });
 

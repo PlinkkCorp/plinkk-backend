@@ -354,7 +354,7 @@
   .horizontal-section {
       position: relative;
       width: 100%;
-      background: linear-gradient(180deg, transparent 0%, rgba(139, 92, 246, 0.03) 50%, transparent 100%);
+      background: #0a0a0f;
   }
 
   .horizontal-section.is-pinned {
