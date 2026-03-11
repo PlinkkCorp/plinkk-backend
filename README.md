@@ -61,6 +61,66 @@ Infrastructure backend moderne basée sur **Bun**, **Fastify** et **TypeScript s
 
 ---
 
+## 🥊 Pourquoi Plinkk ?
+
+Si tu cherches une alternative aux géants classiques comme Linktree ou Lnk.Bio, Plinkk se démarque par une philosophie très différente. C'est un outil pensé pour les créateurs qui veulent allier design, liberté et respect des données.
+
+Voici une décomposition claire de ce que propose Plinkk, de ses avantages pratiques et de ses véritables atouts sur le marché.
+
+### Les services proposés par Plinkk
+
+* **Création de page centrale (Link in bio) :** La création d'une page d'atterrissage unique regroupant l'ensemble de tes liens importants (réseaux sociaux, portfolio, boutique, articles, etc.).
+* **Éditeur visuel "No-Code" :** Une interface simplifiée et minimaliste qui permet de construire et modifier ta page en quelques clics, sans écrire une seule ligne de code.
+* **Modèles web prêts à l'emploi :** L'accès à des templates modernes basés sur des technologies web récentes et performantes, conçus pour être réutilisés et adaptés à ton image.
+* **Hébergement flexible :** En tant que projet technique, Plinkk offre la possibilité d'utiliser leur solution clé en main, mais aussi d'héberger toi-même ton propre "Link in bio" sur ton serveur si tu as des compétences techniques.
+
+---
+
+### Tes avantages au quotidien (Pourquoi l'utiliser)
+
+* **Personnalisation poussée et sans friction :** Là où de nombreuses plateformes bloquent la personnalisation des couleurs, des polices ou des boutons derrière un abonnement payant, Plinkk est pensé pour te laisser refléter ton identité visuelle sans te brider.
+* **Design minimaliste et élégant :** L'outil va à l'essentiel. Le rendu final est propre, professionnel et ne donne pas une impression de page "surchargée" ou bas de gamme.
+* **Performances et rapidité :** Le code généré est ultra-léger. Conséquence directe : ta page se charge instantanément sur les smartphones de tes abonnés, ce qui réduit le taux d'abandon et augmente tes clics.
+* **Économique :** C'est une excellente façon d'obtenir un rendu premium sans avoir à payer les abonnements mensuels souvent onéreux des leaders du marché.
+
+---
+
+### Les atouts majeurs (Ce qui rend Plinkk unique)
+
+* **Un modèle 100 % Open-Source :** C'est la grande force de Plinkk. Le code de la plateforme est ouvert, transparent et disponible (sur GitHub). Tu n'es pas enfermé dans un système propriétaire.
+* **Une philosophie éthique :** Plinkk se revendique comme une alternative éthique. Cela signifie un meilleur respect de la vie privée, sans traçage agressif ni revente des données de tes visiteurs à des tiers.
+* **Indépendance et souveraineté :** Si un jour la plateforme change de politique, la nature open-source du projet te garantit de pouvoir récupérer ton code et garder le contrôle total de ta page et de tes statistiques.
+* **L'ADN francophone :** Développé par Plinkk Corp, c'est un projet ancré dans la communauté francophone, ce qui facilite grandement la compréhension de l'outil et les échanges en cas de besoin.
+
+---
+
+### Comparatif : Plinkk face à la concurrence
+
+| Critère de comparaison | Plinkk | Linktree | Bento | Lnk.Bio |
+| :--- | :---: | :---: | :---: | :---: |
+| **Modèle de Prix** | 💰 **100% Gratuit** | Limité (Pro payant) | Propriétaire | Limité (Pro payant) |
+| **Philosophie & Code**| 🌍 **Open Source & Éthique**| ❌ Fermé | ❌ Fermé | ❌ Fermé |
+| **Interface & Rendu** | ✨ **Premium (Glassmorphism)**| Basique (Boutons) | Grille visuelle | Basique |
+| **Personnalisation** | 🎨 **Libre & Illimitée** | ❌ Verrouillée (Payant)| ⚠️ Figée | ⚠️ Restreinte |
+| **Vitesse (Code)** | ⚡ **Ultra rapide (Bun)** | 🐌 Moyenne | 🐌 Moyenne | 🐌 Moyenne |
+| **Respect Vie Privée**| 🛡️ **Total (zéro tracking)** | ❌ Partage de données | ⚠️ Moyen | ⚠️ Moyen |
+| **Filigranes / Pubs** | 🚫 **Aucun logo imposé** | ❌ Gros Logo imposé | ⚠️ Logo Bento | ⚠️ Logo Lnk.Bio |
+| **Sécurité Native** | 🔒 **2FA + Magic Links** | ⚠️ Partielle / Payante| ❌ Basique | ❌ Basique |
+| **Emails Inclus** | 📧 **Alias & Relais inclus**| ❌ Non | ❌ Non | ❌ Non |
+| **Prévisualisation** | 📱 **Temps Réel (Sync)** | ⚠️ Standard | ⚠️ Standard | ⚠️ Standard |
+| **Analytics (Stats)** | 📊 **Détaillées (Inclus)** | ❌ Payant | ⚠️ Basique | ❌ Payant |
+| **Monétisation** | 💳 **Intégration Plinkk Pro**| ⚠️ Payante / Restreinte | ❌ Non | ⚠️ Restreinte |
+| **Auto-Hébergement** | 🐳 **Oui (Héberge-le toi)** | ❌ Non (Locataire) | ❌ Non | ❌ Non |
+| **Support / Écoute** | 💬 **Communauté Discord** | ❌ Entreprise distant | ❌ Entreprise distant | ❌ Classique |
+| **Mises à jour** | 🚀 **Très Rapides / Hebdo** | 🐢 Lentes | 🐢 Lentes | 🐢 Lentes |
+
+### Ce qu'il faut retenir de ce face-à-face :
+* **Si tu choisis Linktree ou Lnk.Bio :** Tu choisis la facilité, mais tu sacrifies ton identité visuelle (à moins de payer un abonnement mensuel) et tu abandonnes le contrôle sur les données de tes visiteurs.
+* **Si tu choisis Bento :** Tu auras une page très visuelle, mais tu restes dans un écosystème fermé (et tu appartiens au géant Linktree).
+* **Si tu choisis Plinkk :** Tu fais le choix de **l'indépendance**. Tu obtiens un rendu professionnel, rapide et sans fioritures, tout en soutenant un modèle ouvert et respectueux de tes abonnés.
+
+---
+
 ## 🏗️ Architecture
 
 **Monorepo Bun workspaces** avec une séparation claire des responsabilités :
