@@ -37,15 +37,7 @@ export function verifyRoutes(fastify: FastifyInstance) {
         where: { id: magicLink.userId },
         data: { emailVerified: true },
         include: {
-          accounts: true,
-          profile: true,
-          plan: true,
-          socials: true,
-          stats: true,
-          referral: true,
-          referredBy: true,
-          settings: true,
-          featureFlags: true,
+          role: true,
         }
       }) as UserWithInclude;
 

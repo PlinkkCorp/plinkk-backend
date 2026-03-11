@@ -137,7 +137,7 @@ export function dashboardAccountRoutes(fastify: FastifyInstance) {
 
     // Generate or get existing magic link/token for verification
     // Since EmailService.sendEmailVerification expects a token, we should generate one
-    const { EmailService } = await import("../../services/emailService");
+    const { EmailService } = await import("../../services/emailService.js");
     const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     
     // Store token in MagicLink table (assuming it's used for this based on schema)
