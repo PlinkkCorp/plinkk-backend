@@ -2144,17 +2144,30 @@
                         } else {
                             rdListEl.innerHTML = '<div class="text-slate-600 text-sm italic p-8 text-center border border-dashed border-slate-800 rounded-xl">Aucune redirection créée</div>';
                             if (rdCountEl) rdCountEl.textContent = '0';
+                        }
+                    }
+                }
+
+                async function openUserModal(li) {
+                    if (!li) return;
+                    currentLI = li;
+                    const { id, username: displayName, views, created, role, twofa, mustChange } = li.dataset;
+                    const numViews = Number(views || 0);
+                    const createdAt = Number(created || 0);
+                    const has2fa = twofa === '1';
+                    const hasMustChange = mustChange === '1';
+
                     // Populate Sidebar
                     if (um.sidebarName) um.sidebarName.textContent = displayName;
                     if (um.sidebarId) um.sidebarId.textContent = '@' + id;
                     if (um.footerId) um.footerId.textContent = id;
 
-                    um.role.value = role;
-                    um.view.href = "<%= frontendUrl %>" + '/' + id;
-                    um.disable2fa.disabled = !twofa;
+                    if (um.role) um.role.value = role || 'USER';
+                    if (um.view) um.view.href = "<%= frontendUrl %>" + '/' + id;
+                    if (um.disable2fa) um.disable2fa.disabled = !has2fa;
 
                     // Stats (Basic from LI)
-                    if (um.statViews) um.statViews.textContent = views.toLocaleString();
+                    if (um.statViews) um.statViews.textContent = numViews.toLocaleString();
                     if (um.statAge) {
                         const days = Math.floor((Date.now() - createdAt) / (1000 * 60 * 60 * 24));
                         um.statAge.textContent = days + " jours";
@@ -2162,7 +2175,7 @@
                     if (um.statSessions) um.statSessions.textContent = '...';
                     if (um.statCTR) um.statCTR.textContent = '...';
 
-                    const fp = document.getElementById('umForcePwd'); if (fp) fp.checked = !!mustChange;
+                    const fp = document.getElementById('umForcePwd'); if (fp) fp.checked = hasMustChange;
 
                     // Fetch Details
                     try {
