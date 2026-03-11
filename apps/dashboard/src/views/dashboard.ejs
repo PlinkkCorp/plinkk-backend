@@ -82,7 +82,8 @@
                                         Voir ma page
                                     </a>
                                     <button
-                                        onclick="navigator.clipboard.writeText('<%= frontendUrl %>/<% if (typeof plinkk !== 'undefined' && plinkk && plinkk.slug) { %><%= plinkk.slug %><% } else { %><%= user.id %><% } %>')"
+                                        data-copy-url="<%= `${frontendUrl}/${(typeof plinkk !== 'undefined' && plinkk && plinkk.slug) ? plinkk.slug : user.id}` %>"
+                                        onclick="navigator.clipboard.writeText(this.getAttribute('data-copy-url') || '')"
                                         class="px-5 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl shadow-lg shadow-violet-900/20 transition-all flex items-center gap-2 font-medium">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
                                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -509,7 +510,7 @@
                                 <script>
                                     (function () {
                                         const ONBOARD_KEY = 'plinkk_onboarding_done';
-                                        const createdAt = '<%= userCreatedAt %>';
+                                        const createdAt = <%- JSON.stringify(userCreatedAt || '') %>;
 
                                         if (!createdAt || localStorage.getItem(ONBOARD_KEY)) return;
 
@@ -558,7 +559,7 @@
                                         document.getElementById('onboardingBackdrop').addEventListener('click', close);
 
                                         // Copy buttons
-                                        const LINK = '<%= plinkkUrl %>';
+                                        const LINK = <%- JSON.stringify(plinkkUrl || '') %>;
                                         function setupCopy(btnId, textId) {
                                             const btn = document.getElementById(btnId);
                                             const txt = document.getElementById(textId);

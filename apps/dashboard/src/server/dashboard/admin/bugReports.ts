@@ -5,6 +5,65 @@ import { ensurePermission } from "../../../lib/permissions";
 import { requireAuthRedirect } from "../../../middleware/auth";
 import { logAdminAction } from "../../../lib/adminLogger";
 
+type ThreadMessage = {
+    id: string;
+    from: "user" | "admin";
+    message: string;
+    createdAt: Date;
+};
+
+function extractUserThreadMessages(raw: string, createdAt: Date, reportId: string): ThreadMessage[] {
+    const lines = String(raw || "").split("\n");
+    const messages: ThreadMessage[] = [];
+
+    let base: string[] = [];
+    let replyBuffer: string[] = [];
+    let replyIso: string | null = null;
+
+    const flushReply = () => {
+        if (!replyIso) return;
+        const text = replyBuffer.join("\n").trim();
+        if (text) {
+            messages.push({
+                id: `user-reply-${reportId}-${messages.length + 1}`,
+                from: "user",
+                message: text,
+                createdAt: new Date(replyIso),
+            });
+        }
+        replyIso = null;
+        replyBuffer = [];
+    };
+
+    for (const line of lines) {
+        const marker = line.match(/^\[USER_REPLY\s+([^\]]+)\]\s*(.*)$/);
+        if (marker) {
+            flushReply();
+            replyIso = marker[1];
+            if (marker[2]) replyBuffer.push(marker[2]);
+            continue;
+        }
+        if (replyIso) {
+            replyBuffer.push(line);
+        } else {
+            base.push(line);
+        }
+    }
+    flushReply();
+
+    const baseMessage = base.join("\n").trim();
+    if (baseMessage) {
+        messages.unshift({
+            id: `origin-${reportId}`,
+            from: "user",
+            message: baseMessage,
+            createdAt,
+        });
+    }
+
+    return messages;
+}
+
 export function dashboardAdminBugReportsRoutes(fastify: FastifyInstance) {
     fastify.get(
         "/",
@@ -19,8 +78,36 @@ export function dashboardAdminBugReportsRoutes(fastify: FastifyInstance) {
                 take: 100,
             });
 
+            const adminReplies = bugReports.length
+                ? await prisma.announcement.findMany({
+                      where: { text: { startsWith: "[RÉPONSE BUG #" } },
+                      orderBy: { createdAt: "asc" },
+                      select: { id: true, text: true, createdAt: true },
+                  })
+                : [];
+
+            const bugReportsWithThreads = bugReports.map((report) => {
+                const token = `[RÉPONSE BUG #${report.id}]`;
+                const adminMessages: ThreadMessage[] = adminReplies
+                    .filter((r) => r.text.startsWith(token))
+                    .map((r) => ({
+                        id: r.id,
+                        from: "admin" as const,
+                        message: r.text.replace(token, "").trim(),
+                        createdAt: r.createdAt,
+                    }));
+
+                const userMessages = extractUserThreadMessages(report.message, report.createdAt, report.id);
+
+                const thread: ThreadMessage[] = [...userMessages, ...adminMessages].sort(
+                    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+                );
+
+                return { ...report, thread };
+            });
+
             return replyView(reply, "dashboard/admin/bugReports.ejs", request.currentUser!, {
-                bugReports,
+                bugReports: bugReportsWithThreads,
             });
         }
     );
@@ -60,15 +147,19 @@ export function dashboardAdminBugReportsRoutes(fastify: FastifyInstance) {
             if (!ok) return;
 
             const { id } = request.params as { id: string };
-            const { message, level, displayType } = request.body as { message: string, level: string, displayType: string };
+            const { message, level, displayType, status } = request.body as {
+                message: string;
+                level: string;
+                displayType: string;
+                status?: string;
+            };
 
             const bugReport = await prisma.bugReport.findUnique({
                 where: { id },
-                include: { user: true }
+                include: { user: true },
             });
 
             if (bugReport && bugReport.userId) {
-                // Create a site message for the user
                 await prisma.announcement.create({
                     data: {
                         text: `[RÉPONSE BUG #${id}] ${message}`,
@@ -76,22 +167,25 @@ export function dashboardAdminBugReportsRoutes(fastify: FastifyInstance) {
                         displayType: displayType || "notification",
                         global: false,
                         targets: {
-                            create: { userId: bugReport.userId }
-                        }
-                    }
+                            create: { userId: bugReport.userId },
+                        },
+                    },
                 });
 
-                // Update bug report status if needed
-                await prisma.bugReport.update({
-                    where: { id },
-                    data: { status: "RESOLVED" }
-                });
+                const allowedStatuses = ["PENDING", "IN_PROGRESS", "RESOLVED"];
+                const newStatus = status && allowedStatuses.includes(status) ? status : null;
+                if (newStatus) {
+                    await prisma.bugReport.update({
+                        where: { id },
+                        data: { status: newStatus },
+                    });
+                }
 
                 await logAdminAction(
                     request.currentUser!.id,
                     "RESPOND_BUG_REPORT",
                     bugReport.userId || undefined,
-                    { bugReportId: id, message, level, displayType },
+                    { bugReportId: id, message, level, displayType, status: newStatus },
                     request.ip
                 );
             }

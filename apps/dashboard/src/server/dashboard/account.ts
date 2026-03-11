@@ -124,4 +124,37 @@ export function dashboardAccountRoutes(fastify: FastifyInstance) {
 
     return reply.send({ success: true });
   });
+
+  fastify.post("/verify-email", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
+    const userId = request.userId!;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, userName: true, emailVerified: true }
+    });
+
+    if (!user) return reply.code(404).send({ success: false, error: "USER_NOT_FOUND" });
+    if (user.emailVerified) return reply.code(400).send({ success: false, error: "EMAIL_ALREADY_VERIFIED" });
+
+    // Generate or get existing magic link/token for verification
+    // Since EmailService.sendEmailVerification expects a token, we should generate one
+    const { EmailService } = await import("../../services/emailService");
+    const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    
+    // Store token in MagicLink table (assuming it's used for this based on schema)
+    await prisma.magicLink.create({
+      data: {
+        token,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+      }
+    });
+
+    const sent = await EmailService.sendEmailVerification(user.email, user.userName, token);
+
+    if (!sent) {
+      return reply.code(500).send({ success: false, error: "EMAIL_SEND_FAILED" });
+    }
+
+    return reply.send({ success: true });
+  });
 }

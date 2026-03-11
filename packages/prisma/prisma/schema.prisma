@@ -73,6 +73,7 @@ model User {
   patchNotes            PatchNote[]
   qrCodes               QrCode[]
   qrCodeScans           QrCodeScan[]
+  inboxReads            InboxRead[]
   onboardingCompleted   Boolean              @default(false)
   onboardingDraft       OnboardingDraft?
 }
@@ -140,6 +141,19 @@ model BugReport {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
   user      User?    @relation(fields: [userId], references: [id])
+}
+
+model InboxRead {
+  id        String   @id @default(nanoid(16))
+  userId    String
+  itemId    String
+  itemType  String
+  readAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId, itemType])
+  @@index([userId, readAt])
 }
 
 model Role {
@@ -304,16 +318,17 @@ model PlinkkStatusbar {
 }
 
 model Announcement {
-  id          String                   @id @default(nanoid(16))
-  level       String                   @default("info")
+  id          String                    @id @default(nanoid(16))
+  level       String                    @default("info")
   text        String
-  dismissible Boolean                  @default(true)
+  dismissible Boolean                   @default(true)
   startAt     DateTime?
   endAt       DateTime?
-  createdAt   DateTime                 @default(now())
-  global      Boolean                  @default(false)
-  displayType String                   @default("banner")
-  platform    String                   @default("all")
+  createdAt   DateTime                  @default(now())
+  global      Boolean                   @default(false)
+  displayType String                    @default("banner")
+  platform    String                    @default("all")
+  priority    NotificationPriority      @default(NORMAL)
   roleTargets AnnouncementRoleTarget[]
   targets     AnnouncementTarget[]
 }
@@ -703,6 +718,12 @@ enum PlinkkEventType {
 enum GravatarSource {
   PRIMARY
   PUBLIC
+}
+
+enum NotificationPriority {
+  URGENT
+  NORMAL
+  INFO
 }
 
 enum QrTargetType {

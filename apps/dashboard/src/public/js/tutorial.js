@@ -205,6 +205,13 @@
       description:
         'Ces raccourcis te font gagner du temps: ajout de lien, apparence, stats ou parametres.',
     },
+    {
+      target: '#inboxBellBtn',
+      position: 'bottom',
+      title: 'Centre de notifications',
+      description:
+        'Retrouve ici toutes les annonces, notes de mise à jour et réponses du support. Tu peux marquer les notifications comme lues, voir toutes les notifications, ou encore cacher celles que tu ne veux plus voir avec l\'icône corbeille.',
+    },
   ];
 
   const STATS_STEPS = [

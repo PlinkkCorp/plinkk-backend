@@ -1,403 +1,481 @@
 <%- include('partials/head.ejs', { title: 'Tableau de bord - Administration' ,
     description: "Gestion des signalements de bugs" , robots: 'noindex,nofollow' }) %>
 
-    <%- include('partials/header-dash.ejs', { user: user }) %>
+<%- include('partials/header-dash.ejs', { user: user }) %>
 
-        <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-            <%- include('partials/admin-nav.ejs', { user: user, active: 'bug-reports' }) %>
+<%
+const total = bugReports ? bugReports.length : 0;
+const countPending   = bugReports ? bugReports.filter(r => r.status === 'PENDING').length : 0;
+const countProgress  = bugReports ? bugReports.filter(r => r.status === 'IN_PROGRESS').length : 0;
+const countResolved  = bugReports ? bugReports.filter(r => r.status === 'RESOLVED').length : 0;
+%>
 
-                <main class="col-span-12 lg:col-span-10 space-y-6">
-                    <!-- Header -->
-                    <div
-                        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl">
-                        <div>
-                            <h1 class="text-2xl font-bold text-white">Signalements de Bugs</h1>
-                            <p class="text-sm text-slate-400 mt-1">Gérez les bugs signalés par les utilisateurs.</p>
-                        </div>
-                    </div>
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+    <%- include('partials/admin-nav.ejs', { user: user, active: 'bug-reports' }) %>
 
-                    <!-- Table -->
-                    <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left text-slate-400">
-                                <thead
-                                    class="text-xs text-slate-500 uppercase bg-slate-950/50 border-b border-slate-800">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-4">Informations</th>
-                                        <th scope="col" class="px-6 py-4">Utilisateur</th>
-                                        <th scope="col" class="px-6 py-4">Statut</th>
-                                        <th scope="col" class="px-6 py-4 text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% if (bugReports && bugReports.length> 0) { %>
-                                        <% bugReports.forEach((r, i)=> { %>
-                                            <tr
-                                                class="border-b border-slate-800 hover:bg-slate-800/50 transition-colors group">
-                                                <td class="px-6 py-4">
-                                                    <div class="flex flex-col">
-                                                        <span
-                                                            class="text-slate-200 font-medium truncate max-w-[400px] mb-2 text-[13px]">
-                                                            <%= r.message %>
-                                                        </span>
-                                                        <div class="flex items-center gap-3">
-                                                            <span
-                                                                class="text-[10px] text-slate-500 flex items-center gap-1.5 font-mono">
-                                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
-                                                                    stroke="currentColor">
-                                                                    <path
-                                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                                        stroke-width="2" />
-                                                                </svg>
-                                                                <%= new Date(r.createdAt).toLocaleString('fr-FR') %>
-                                                            </span>
-                                                            <% if (r.url) { %>
-                                                                <span
-                                                                    class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-violet-500/10 text-violet-400 border border-violet-500/20 truncate max-w-[150px]"
-                                                                    title="<%= r.url %>">
-                                                                    <%= r.url.replace(/^https?:\/\/[^\/]+/, '' ) ||
-                                                                        r.url %>
-                                                                </span>
-                                                                <% } %>
-                                                                    <% if (typeof r.browser==='object' &&
-                                                                        r.browser?.platform) { %>
-                                                                        <span
-                                                                            class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-slate-800 text-slate-400 border border-slate-700">
-                                                                            <%= r.browser.platform %>
-                                                                        </span>
-                                                                        <% } %>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    <% if (r.user) { %>
-                                                        <a href="/dashboard/admin?search=<%= r.user.email %>"
-                                                            class="flex items-center gap-3 group/user hover:opacity-80 transition-opacity">
-                                                            <div
-                                                                class="h-8 w-8 rounded-full bg-slate-800 border border-white/5 overflow-hidden shrink-0 shadow-inner">
-                                                                <% if (r.user.image) { %>
-                                                                    <img src="<%= r.user.image %>"
-                                                                        class="h-full w-full object-cover">
-                                                                    <% } else { %>
-                                                                        <div
-                                                                            class="h-full w-full flex items-center justify-center bg-violet-600/10 text-violet-400 text-xs font-bold uppercase">
-                                                                            <%= r.user.userName?.substring(0,2) %>
-                                                                        </div>
-                                                                        <% } %>
-                                                            </div>
-                                                            <div class="flex flex-col">
-                                                                <span
-                                                                    class="text-sm font-medium text-slate-200 group-hover/user:text-white">
-                                                                    <%= r.user.userName %>
-                                                                </span>
-                                                                <span class="text-[10px] text-slate-500">
-                                                                    <%= r.user.email %>
-                                                                </span>
-                                                            </div>
-                                                        </a>
-                                                        <% } else { %>
-                                                            <div class="flex items-center gap-3 text-slate-500 italic">
-                                                                <div
-                                                                    class="h-8 w-8 rounded-full bg-slate-800/50 border border-white/5 flex items-center justify-center text-[10px]">
-                                                                    ?</div>
-                                                                Anonyme
-                                                            </div>
-                                                            <% } %>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <% if (r.status==='PENDING' ) { %>
-                                                        <span
-                                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-amber-500/10 text-amber-500 border-amber-500/20">
-                                                            <span
-                                                                class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                                                            En attente
-                                                        </span>
-                                                        <% } else if (r.status==='RESOLVED' ) { %>
-                                                            <span
-                                                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
-                                                                <span
-                                                                    class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                                                Résolu
-                                                            </span>
-                                                            <% } else { %>
-                                                                <span
-                                                                    class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-slate-800 text-slate-400 border-slate-700">
-                                                                    <%= r.status %>
-                                                                </span>
-                                                                <% } %>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-right">
-                                                    <button onclick="openDetails(<%= i %>)"
-                                                        class="inline-flex items-center gap-2 text-violet-400 hover:text-white font-semibold text-xs bg-violet-500/10 hover:bg-violet-500 px-4 py-2 rounded-xl border border-violet-500/20 hover:border-violet-500 transition-all shadow-lg shadow-violet-900/20">
-                                                        Traiter
-                                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
-                                                            stroke="currentColor">
-                                                            <path d="M9 5l7 7-7 7" stroke-width="2.5" />
-                                                        </svg>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <% }) %>
-                                                <% } else { %>
-                                                    <tr>
-                                                        <td colspan="4" class="px-6 py-12 text-center">
-                                                            <div class="flex flex-col items-center gap-2 opacity-50">
-                                                                <svg class="w-12 h-12 text-slate-600" fill="none"
-                                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path
-                                                                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                                        stroke-width="1.5" />
-                                                                </svg>
-                                                                <span class="text-slate-400 font-medium">Aucun bug
-                                                                    signalé.</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                    <% } %>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </main>
-        </div>
+    <main class="col-span-12 lg:col-span-10 space-y-5">
 
-        <!-- Details Modal -->
-        <div id="detailsModal"
-            class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
-            aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div class="fixed inset-0" onclick="closeModal()"></div>
-            <div
-                class="relative w-full max-w-4xl transform overflow-hidden rounded-[2.5rem] bg-[#0B1020] border border-white/10 text-left shadow-2xl transition-all flex flex-col max-h-[90vh]">
-                <!-- Modal Top Bar -->
-                <div class="px-8 py-6 border-b border-white/5 flex items-center justify-between shrink-0">
-                    <div>
-                        <h3 class="text-xl font-bold text-white" id="modal-title">Détails du Signalement</h3>
-                        <p class="text-xs text-slate-500 mt-0.5" id="modalIdDisplay"></p>
-                    </div>
-                    <button onclick="closeModal()"
-                        class="p-2 rounded-full hover:bg-white/5 text-slate-500 hover:text-white transition-colors">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path d="M6 18L18 6M6 6l12 12" stroke-width="2" />
-                        </svg>
-                    </button>
-                </div>
-
-                <div class="flex-1 overflow-y-auto p-8 space-y-8">
-                    <div class="grid grid-cols-12 gap-8">
-                        <!-- Left Col: Content -->
-                        <div class="col-span-12 lg:col-span-8 space-y-8">
-                            <div
-                                class="bg-white/5 p-6 rounded-3xl border border-white/5 relative overflow-hidden group shadow-inner">
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                                </div>
-                                <label
-                                    class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    Description du problème
-                                </label>
-                                <div id="modalMessage"
-                                    class="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap selection:bg-violet-500/30 relative z-10 font-medium">
-                                </div>
-                            </div>
-
-                            <div id="modalStackContainer" class="hidden">
-                                <label
-                                    class="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                                        </path>
-                                    </svg>
-                                    Contexte technique / Erreur
-                                </label>
-                                <div
-                                    class="bg-rose-500/5 border border-rose-500/20 rounded-3xl overflow-hidden relative shadow-inner">
-                                    <div class="absolute top-0 left-0 w-1 h-full bg-rose-500"></div>
-                                    <pre id="modalStack"
-                                        class="p-6 pl-8 text-[11px] text-rose-300 font-mono overflow-x-auto selection:bg-rose-500/30 leading-relaxed"></pre>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Right Col: Meta -->
-                        <div class="col-span-12 lg:col-span-4 space-y-6">
-                            <!-- Information Card -->
-                            <div class="bg-slate-900/50 p-6 rounded-3xl border border-white/5 space-y-6 shadow-inner">
-                                <div>
-                                    <label
-                                        class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
-                                            </path>
-                                        </svg>
-                                        Provenance
-                                    </label>
-                                    <p id="modalUrl"
-                                        class="text-[11px] text-violet-400 break-all font-mono hover:text-violet-300 hover:underline cursor-pointer transition-colors">
-                                    </p>
-                                </div>
-
-                                <div id="modalBrowserContainer" class="hidden">
-                                    <label
-                                        class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
-                                            </path>
-                                        </svg>
-                                        Environnement Client
-                                    </label>
-                                    <div id="modalBrowser"
-                                        class="space-y-1 bg-black/20 p-4 rounded-2xl border border-white/5"></div>
-                                </div>
-
-                                <div>
-                                    <label
-                                        class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                            </path>
-                                        </svg>
-                                        Date du rapport
-                                    </label>
-                                    <p id="modalDate" class="text-xs text-slate-300 font-medium"></p>
-                                </div>
-                            </div>
-
-                            <!-- Admin Response -->
-                            <div
-                                class="bg-gradient-to-br from-violet-600/10 to-transparent p-6 rounded-3xl border border-violet-500/20 space-y-4 shadow-[0_0_30px_-15px_rgba(139,92,246,0.3)]">
-                                <h4 class="text-sm font-bold text-violet-400 flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path
-                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                            stroke-width="2" />
-                                    </svg>
-                                    Répondre à l'utilisateur
-                                </h4>
-                                <form id="respondForm" method="POST" class="space-y-3">
-                                    <textarea name="message" required placeholder="Expliquez la résolution..."
-                                        class="w-full bg-black/40 border border-violet-500/20 rounded-2xl p-4 text-[13px] text-white focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none transition-all placeholder:text-violet-500/30 resize-none"
-                                        rows="4"></textarea>
-                                    <div class="flex flex-col gap-2">
-                                        <div class="flex gap-2">
-                                            <select name="displayType"
-                                                class="flex-1 bg-black/40 border border-violet-500/20 rounded-xl px-3 py-2.5 text-[11px] font-medium text-violet-300 outline-none focus:border-violet-500 transition-colors">
-                                                <option value="notification">Notification</option>
-                                                <option value="banner">Bannière</option>
-                                                <option value="popup">Popup</option>
-                                            </select>
-                                            <select name="level"
-                                                class="flex-1 bg-black/40 border border-violet-500/20 rounded-xl px-3 py-2.5 text-[11px] font-medium text-violet-300 outline-none focus:border-violet-500 transition-colors">
-                                                <option value="info">Info</option>
-                                                <option value="success">Succès</option>
-                                                <option value="warning">Avertissement</option>
-                                            </select>
-                                        </div>
-                                        <button type="submit"
-                                            class="w-full bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold uppercase tracking-wider py-3 rounded-xl transition-all shadow-lg shadow-violet-900/20 hover:shadow-violet-900/40 mt-1">
-                                            Envoyer la réponse
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal Footer -->
-                <div
-                    class="bg-slate-950/50 px-8 py-6 sm:flex sm:flex-row-reverse sm:px-10 gap-3 shrink-0 border-t border-white/5">
-                    <form id="resolveForm" method="POST" action="">
-                        <input type="hidden" name="status" value="RESOLVED">
-                        <button type="submit" id="resolveSubmitBtn"
-                            class="inline-flex w-full justify-center rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-900/20 hover:bg-emerald-500 sm:w-auto transition-all">Marquer
-                            comme Résolu</button>
-                    </form>
-                    <button type="button" onclick="closeModal()"
-                        class="mt-3 inline-flex w-full justify-center rounded-2xl bg-slate-800 px-6 py-3 text-sm font-bold text-slate-300 shadow-sm ring-1 ring-inset ring-white/10 hover:bg-slate-700 sm:mt-0 sm:w-auto transition-all">Fermer</button>
-                </div>
+        <!-- ── Header ──────────────────────────────────────────── -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+                    <span class="inline-flex items-center justify-center w-9 h-9 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
+                        <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </span>
+                    Signalements de bugs
+                </h1>
+                <p class="text-sm text-slate-500 mt-1 ml-12">Gérez les tickets signalés par vos utilisateurs.</p>
             </div>
         </div>
 
-        <script>
-            // Safely embed JSON to prevent issues with quotes, newlines, and XSS
-            const rawData = '<%- Buffer.from(JSON.stringify(bugReports || [])).toString("base64") %>';
-            const bugReportsData = JSON.parse(atob(rawData));
+        <!-- ── Stats bar ────────────────────────────────────────── -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <button onclick="setFilter('all')" data-filter="all"
+                class="filter-btn active-filter group flex flex-col p-4 rounded-2xl border bg-slate-900 border-slate-800 hover:border-slate-700 transition-all text-left cursor-pointer">
+                <span class="text-2xl font-black text-white tabular-nums"><%= total %></span>
+                <span class="text-[11px] font-semibold text-slate-500 mt-0.5 uppercase tracking-wider">Total</span>
+            </button>
+            <button onclick="setFilter('PENDING')" data-filter="PENDING"
+                class="filter-btn group flex flex-col p-4 rounded-2xl border bg-slate-900 border-slate-800 hover:border-amber-500/40 transition-all text-left cursor-pointer">
+                <span class="text-2xl font-black text-amber-400 tabular-nums"><%= countPending %></span>
+                <span class="text-[11px] font-semibold text-slate-500 mt-0.5 uppercase tracking-wider">En attente</span>
+            </button>
+            <button onclick="setFilter('IN_PROGRESS')" data-filter="IN_PROGRESS"
+                class="filter-btn group flex flex-col p-4 rounded-2xl border bg-slate-900 border-slate-800 hover:border-blue-500/40 transition-all text-left cursor-pointer">
+                <span class="text-2xl font-black text-blue-400 tabular-nums"><%= countProgress %></span>
+                <span class="text-[11px] font-semibold text-slate-500 mt-0.5 uppercase tracking-wider">En cours</span>
+            </button>
+            <button onclick="setFilter('RESOLVED')" data-filter="RESOLVED"
+                class="filter-btn group flex flex-col p-4 rounded-2xl border bg-slate-900 border-slate-800 hover:border-emerald-500/40 transition-all text-left cursor-pointer">
+                <span class="text-2xl font-black text-emerald-400 tabular-nums"><%= countResolved %></span>
+                <span class="text-[11px] font-semibold text-slate-500 mt-0.5 uppercase tracking-wider">Résolus</span>
+            </button>
+        </div>
 
-            function openDetails(index) {
-                const r = bugReportsData[index];
-                if (!r) return;
+        <!-- ── Ticket list ──────────────────────────────────────── -->
+        <div id="ticketList" class="space-y-2">
+            <% if (bugReports && bugReports.length > 0) { %>
+                <% bugReports.forEach(function(r, i) {
+                    const preview = (r.thread && r.thread[0])
+                        ? r.thread[0].message.slice(0, 140) + (r.thread[0].message.length > 140 ? '…' : '')
+                        : r.message.replace(/\[USER_REPLY[^\]]*\][\s\S]*/g, '').trim().slice(0, 140);
+                    const hasReplies = r.thread && r.thread.length > 1;
+                    const adminReplied = r.thread && r.thread.some(function(m) { return m.from === 'admin'; });
+                %>
+                <div class="ticket-card group relative flex items-center gap-4 bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl px-5 py-4 transition-all hover:shadow-xl hover:shadow-slate-950/50 cursor-pointer"
+                    data-status="<%= r.status %>"
+                    onclick="openDetails(<%= i %>)">
+                    <!-- Status stripe -->
+                    <div class="absolute left-0 top-3 bottom-3 w-1 rounded-full
+                        <% if (r.status==='PENDING') { %>bg-amber-500<% } else if (r.status==='IN_PROGRESS') { %>bg-blue-500<% } else if (r.status==='RESOLVED') { %>bg-emerald-500<% } else { %>bg-slate-600<% } %>">
+                    </div>
 
-                document.getElementById('modalIdDisplay').textContent = '#' + r.id;
-                document.getElementById('modalMessage').textContent = r.message || "Aucun message.";
+                    <!-- Avatar -->
+                    <div class="shrink-0 ml-2">
+                        <% if (r.user && r.user.image) { %>
+                            <img src="<%= r.user.image %>" class="w-9 h-9 rounded-full object-cover ring-1 ring-white/10">
+                        <% } else if (r.user) { %>
+                            <div class="w-9 h-9 rounded-full bg-violet-600/15 border border-violet-500/20 flex items-center justify-center text-[11px] font-bold text-violet-400 uppercase">
+                                <%= r.user.userName?.substring(0, 2) %>
+                            </div>
+                        <% } else { %>
+                            <div class="w-9 h-9 rounded-full bg-slate-800 border border-white/5 flex items-center justify-center text-slate-600">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            </div>
+                        <% } %>
+                    </div>
 
-                const urlEl = document.getElementById('modalUrl');
-                urlEl.textContent = r.url || "-";
-                urlEl.onclick = () => { if (r.url) window.open(r.url, '_blank'); };
+                    <!-- Content -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1 flex-wrap">
+                            <span class="text-[11px] font-bold text-slate-400 font-mono">#<%= r.id.slice(-8) %></span>
+                            <% if (r.user) { %>
+                                <span class="text-[11px] font-semibold text-slate-300"><%= r.user.userName %></span>
+                                <span class="text-[10px] text-slate-600"><%= r.user.email %></span>
+                            <% } else { %>
+                                <span class="text-[11px] text-slate-500 italic">Anonyme</span>
+                            <% } %>
+                            <% if (adminReplied) { %>
+                                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                                    <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"/></svg>
+                                    Répondu
+                                </span>
+                            <% } %>
+                        </div>
+                        <p class="text-[13px] text-slate-300 truncate leading-snug"><%= preview %></p>
+                        <div class="flex items-center gap-3 mt-1.5 flex-wrap">
+                            <span class="text-[10px] text-slate-600 font-mono"><%= new Date(r.createdAt).toLocaleString('fr-FR') %></span>
+                            <% if (hasReplies) { %>
+                                <span class="text-[10px] text-slate-500 flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                    <%= r.thread.length %> messages
+                                </span>
+                            <% } %>
+                            <% if (r.url) { %>
+                                <span class="text-[10px] text-violet-500/70 font-mono truncate max-w-[200px]" title="<%= r.url %>">
+                                    <%= r.url.replace(/^https?:\/\/[^\/]+/, '') || r.url %>
+                                </span>
+                            <% } %>
+                            <% if (typeof r.browser === 'object' && r.browser?.platform) { %>
+                                <span class="text-[10px] text-slate-600 font-mono">
+                                    <%= r.browser.platform %>
+                                </span>
+                            <% } %>
+                        </div>
+                    </div>
 
-                document.getElementById('modalDate').textContent = new Date(r.createdAt).toLocaleString('fr-FR', {
-                    dateStyle: 'full',
-                    timeStyle: 'medium'
-                });
+                    <!-- Status + action -->
+                    <div class="shrink-0 flex flex-col items-end gap-2">
+                        <% if (r.status==='PENDING') { %>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>En attente
+                            </span>
+                        <% } else if (r.status==='IN_PROGRESS') { %>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>En cours
+                            </span>
+                        <% } else if (r.status==='RESOLVED') { %>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Résolu
+                            </span>
+                        <% } else { %>
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-800 text-slate-400 border border-slate-700"><%= r.status %></span>
+                        <% } %>
+                        <svg class="w-4 h-4 text-slate-700 group-hover:text-slate-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </div>
+                <% }); %>
+            <% } else { %>
+                <div class="flex flex-col items-center justify-center py-20 gap-3 text-slate-600">
+                    <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <p class="text-sm font-medium text-slate-500">Aucun signalement de bug.</p>
+                </div>
+            <% } %>
+        </div>
 
-                if (r.stack) {
-                    document.getElementById('modalStack').textContent = r.stack;
-                    document.getElementById('modalStackContainer').classList.remove('hidden');
-                } else {
-                    document.getElementById('modalStackContainer').classList.add('hidden');
-                }
+        <!-- Empty filter state -->
+        <div id="emptyFilter" class="hidden flex-col items-center justify-center py-16 gap-3 text-slate-600">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+            <p class="text-sm font-medium text-slate-500">Aucun ticket dans cette catégorie.</p>
+        </div>
 
-                // Browser info
-                const browserContainer = document.getElementById('modalBrowserContainer');
-                const browserEl = document.getElementById('modalBrowser');
-                browserEl.innerHTML = '';
-                if (r.browser && typeof r.browser === 'object') {
-                    browserContainer.classList.remove('hidden');
-                    const info = r.browser;
-                    const items = [
-                        { label: 'OS', val: info.platform },
-                        { label: 'Écran', val: info.screen },
-                        { label: 'Viewport', val: info.viewport },
-                        { label: 'Langue', val: info.lang }
-                    ];
-                    items.forEach(item => {
-                        const div = document.createElement('div');
-                        div.className = 'flex items-center justify-between text-[11px] py-1 border-b border-white/5 last:border-0';
-                        div.innerHTML = `<span class="text-slate-500 font-medium">${item.label}</span><span class="text-slate-300 font-mono">${item.val || '-'}</span>`;
-                        browserEl.appendChild(div);
-                    });
-                } else {
-                    browserContainer.classList.add('hidden');
-                }
+    </main>
+</div>
 
-                document.getElementById('resolveForm').action = `/admin/bug-reports/${r.id}/resolve`;
-                document.getElementById('respondForm').action = `/admin/bug-reports/${r.id}/respond`;
+<!-- ══════════════════════════════════════════════════════════
+     TICKET MODAL
+══════════════════════════════════════════════════════════ -->
+<div id="detailsModal"
+    class="fixed inset-0 z-[100] hidden items-end sm:items-center justify-center sm:p-4 bg-slate-950/80 backdrop-blur-sm"
+    aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0" onclick="closeModal()"></div>
 
-                const resolveBtn = document.getElementById('resolveSubmitBtn');
-                if (r.status === 'RESOLVED') {
-                    resolveBtn.disabled = true;
-                    resolveBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                    resolveBtn.textContent = 'Déjà Résolu';
-                } else {
-                    resolveBtn.disabled = false;
-                    resolveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    resolveBtn.textContent = 'Marquer comme Résolu';
-                }
+    <!-- Modal shell — wider, split layout -->
+    <div class="relative w-full max-w-5xl flex flex-col bg-[#080E1E] border border-white/8 rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl shadow-slate-950 max-h-[92vh] overflow-hidden transition-all">
 
-                document.getElementById('detailsModal').classList.remove('hidden');
-                document.getElementById('detailsModal').classList.add('flex');
-            }
+        <!-- ── Top bar ── -->
+        <div class="flex items-center gap-4 px-6 py-4 border-b border-white/6 shrink-0 bg-slate-950/60 backdrop-blur">
+            <!-- Status pill (clickable — opens quick-change menu) -->
+            <div id="modalStatusBadge" class="shrink-0"></div>
 
-            function closeModal() {
-                const modal = document.getElementById('detailsModal');
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-        </script>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                    <span class="text-[11px] font-mono text-slate-500" id="modalIdDisplay"></span>
+                    <span id="modalUserChip" class="text-[11px] text-slate-400 truncate"></span>
+                </div>
+                <p class="text-[10px] text-slate-600 font-mono mt-0.5" id="modalDate"></p>
+            </div>
+
+            <!-- Quick resolve -->
+            <form id="resolveForm" method="POST" action="" class="shrink-0">
+                <input type="hidden" name="status" value="RESOLVED">
+                <button type="submit" id="resolveSubmitBtn"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    Résoudre
+                </button>
+            </form>
+
+            <button onclick="closeModal()" class="shrink-0 p-2 rounded-xl hover:bg-white/5 text-slate-600 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <!-- ── Body: split ── -->
+        <div class="flex flex-col md:flex-row flex-1 overflow-hidden min-h-0">
+
+            <!-- LEFT — Thread + stack -->
+            <div class="flex-1 min-w-0 flex flex-col overflow-hidden border-b md:border-b-0 md:border-r border-white/6">
+                <!-- Thread scroll area -->
+                <div id="modalThread" class="flex-1 overflow-y-auto p-5 space-y-3 min-h-0">
+                    <!-- injected by JS -->
+                </div>
+
+                <!-- Stack (collapsible) -->
+                <div id="modalStackContainer" class="hidden border-t border-white/6 shrink-0">
+                    <button onclick="toggleStack()" class="w-full flex items-center gap-2 px-5 py-3 text-[10px] font-bold text-rose-400 uppercase tracking-widest hover:bg-rose-500/5 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span id="stackToggleLabel">Voir le contexte technique</span>
+                        <svg id="stackChevron" class="w-3.5 h-3.5 ml-auto transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div id="stackBody" class="hidden bg-rose-500/5 border-t border-rose-500/20">
+                        <pre id="modalStack" class="p-5 text-[10.5px] text-rose-300 font-mono overflow-x-auto leading-relaxed max-h-40"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT — Meta + Respond -->
+            <div class="w-full md:w-80 shrink-0 flex flex-col overflow-y-auto bg-slate-950/30">
+
+                <!-- Meta -->
+                <div class="p-5 border-b border-white/6 space-y-4">
+                    <p class="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Informations</p>
+
+                    <!-- URL -->
+                    <div class="space-y-1">
+                        <p class="text-[10px] text-slate-600 uppercase tracking-wider">Page</p>
+                        <p id="modalUrl" class="text-[11px] text-violet-400 font-mono break-all cursor-pointer hover:text-violet-300 hover:underline transition-colors leading-snug"></p>
+                    </div>
+
+                    <!-- Browser -->
+                    <div id="modalBrowserContainer" class="hidden space-y-1">
+                        <p class="text-[10px] text-slate-600 uppercase tracking-wider">Environnement</p>
+                        <div id="modalBrowser" class="space-y-0.5 rounded-xl bg-black/20 p-3 border border-white/5"></div>
+                    </div>
+
+                    <!-- User link -->
+                    <div id="modalUserLinkContainer" class="hidden">
+                        <a id="modalUserLink" href="#" class="inline-flex items-center gap-2 text-[11px] text-slate-400 hover:text-white transition-colors group/ul">
+                            <svg class="w-3.5 h-3.5 text-slate-600 group-hover/ul:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            Voir le profil admin
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Respond form -->
+                <div class="flex-1 p-5 space-y-3">
+                    <p class="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Répondre</p>
+                    <form id="respondForm" method="POST" class="space-y-3">
+                        <textarea name="message" required placeholder="Rédigez votre réponse…"
+                            class="w-full bg-black/30 border border-white/8 rounded-xl p-3 text-[13px] text-white focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 outline-none transition-all placeholder:text-slate-600 resize-none leading-relaxed"
+                            rows="5"></textarea>
+
+                        <select name="status"
+                            class="w-full bg-black/30 border border-white/8 rounded-xl px-3 py-2.5 text-[12px] text-slate-300 outline-none focus:border-violet-500 transition-colors appearance-none cursor-pointer">
+                            <option value="">— Statut inchangé —</option>
+                            <option value="PENDING">En attente</option>
+                            <option value="IN_PROGRESS">En cours de traitement</option>
+                            <option value="RESOLVED">Résolu</option>
+                        </select>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <select name="displayType"
+                                class="bg-black/30 border border-white/8 rounded-xl px-3 py-2.5 text-[11px] text-slate-400 outline-none focus:border-violet-500 transition-colors appearance-none cursor-pointer">
+                                <option value="notification">Notification</option>
+                                <option value="banner">Bannière</option>
+                                <option value="popup">Popup</option>
+                            </select>
+                            <select name="level"
+                                class="bg-black/30 border border-white/8 rounded-xl px-3 py-2.5 text-[11px] text-slate-400 outline-none focus:border-violet-500 transition-colors appearance-none cursor-pointer">
+                                <option value="info">Info</option>
+                                <option value="success">Succès</option>
+                                <option value="warning">Avertissement</option>
+                            </select>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-[12px] font-bold py-2.5 rounded-xl transition-all shadow-lg shadow-violet-900/30 hover:shadow-violet-900/50">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            Envoyer la réponse
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.filter-btn { transition: border-color .15s, box-shadow .15s; }
+.filter-btn.active-filter { border-color: rgb(139 92 246 / .4) !important; box-shadow: 0 0 0 1px rgb(139 92 246 / .15); }
+.ticket-card[data-filtered="true"] { display: none; }
+</style>
+
+<script>
+    const rawData = '<%- Buffer.from(JSON.stringify(bugReports || [])).toString("base64") %>';
+    const bugReportsData = JSON.parse(atob(rawData));
+
+    /* ── Filter ───────────────────────────────────── */
+    let currentFilter = 'all';
+    function setFilter(status) {
+        currentFilter = status;
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.toggle('active-filter', btn.dataset.filter === status);
+        });
+        let visibleCount = 0;
+        document.querySelectorAll('.ticket-card').forEach(card => {
+            const show = status === 'all' || card.dataset.status === status;
+            card.style.display = show ? '' : 'none';
+            if (show) visibleCount++;
+        });
+        const empty = document.getElementById('emptyFilter');
+        empty.style.display = visibleCount === 0 ? 'flex' : 'none';
+    }
+
+    /* ── Thread renderer ──────────────────────────── */
+    function renderThread(thread) {
+        const container = document.getElementById('modalThread');
+        container.innerHTML = '';
+        if (!thread || thread.length === 0) {
+            container.innerHTML = '<p class="text-slate-600 text-sm italic text-center py-8">Aucun message.</p>';
+            return;
+        }
+        thread.forEach(msg => {
+            const isAdmin = msg.from === 'admin';
+            const row = document.createElement('div');
+            row.className = 'flex gap-3 ' + (isAdmin ? 'flex-row-reverse' : '');
+
+            // Avatar dot
+            const dot = document.createElement('div');
+            dot.className = 'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-black uppercase mt-0.5 ' +
+                (isAdmin ? 'bg-violet-600/20 text-violet-400 border border-violet-500/30' : 'bg-slate-800 text-slate-400 border border-white/5');
+            dot.textContent = isAdmin ? 'ADM' : 'USR';
+
+            const col = document.createElement('div');
+            col.className = 'flex flex-col gap-1 max-w-[80%] ' + (isAdmin ? 'items-end' : 'items-start');
+
+            const bubble = document.createElement('div');
+            bubble.className = 'px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed whitespace-pre-wrap ' +
+                (isAdmin
+                    ? 'bg-violet-600/20 border border-violet-500/25 text-violet-100 rounded-tr-sm'
+                    : 'bg-slate-800/80 border border-white/5 text-slate-200 rounded-tl-sm');
+            bubble.textContent = msg.message;
+
+            const meta = document.createElement('div');
+            meta.className = 'text-[10px] text-slate-600 font-mono px-1';
+            meta.textContent = new Date(msg.createdAt).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+
+            col.appendChild(bubble);
+            col.appendChild(meta);
+            row.appendChild(dot);
+            row.appendChild(col);
+            container.appendChild(row);
+        });
+        requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; });
+    }
+
+    /* ── Stack toggle ─────────────────────────────── */
+    function toggleStack() {
+        const body = document.getElementById('stackBody');
+        const chevron = document.getElementById('stackChevron');
+        const label = document.getElementById('stackToggleLabel');
+        const hidden = body.classList.toggle('hidden');
+        chevron.style.transform = hidden ? '' : 'rotate(180deg)';
+        label.textContent = hidden ? 'Voir le contexte technique' : 'Masquer le contexte technique';
+    }
+
+    /* ── Status badge helper ──────────────────────── */
+    function statusBadgeHTML(status) {
+        const map = {
+            PENDING:     ['bg-amber-500/10 text-amber-400 border-amber-500/25',  'bg-amber-400 animate-pulse', 'En attente'],
+            IN_PROGRESS: ['bg-blue-500/10 text-blue-400 border-blue-500/25',     'bg-blue-400',                'En cours'],
+            RESOLVED:    ['bg-emerald-500/10 text-emerald-400 border-emerald-500/25', 'bg-emerald-400',         'Résolu'],
+        };
+        const [cls, dotCls, label] = map[status] || ['bg-slate-800 text-slate-400 border-slate-700', 'bg-slate-500', status];
+        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${cls}"><span class="w-1.5 h-1.5 rounded-full ${dotCls}"></span>${label}</span>`;
+    }
+
+    /* ── Open modal ───────────────────────────────── */
+    function openDetails(index) {
+        const r = bugReportsData[index];
+        if (!r) return;
+
+        // Reset stack toggle
+        document.getElementById('stackBody').classList.add('hidden');
+        document.getElementById('stackChevron').style.transform = '';
+        document.getElementById('stackToggleLabel').textContent = 'Voir le contexte technique';
+
+        document.getElementById('modalIdDisplay').textContent = '#' + r.id;
+        document.getElementById('modalStatusBadge').innerHTML = statusBadgeHTML(r.status);
+
+        // User chip
+        const userChip = document.getElementById('modalUserChip');
+        userChip.textContent = r.user ? r.user.userName + ' · ' + r.user.email : 'Anonyme';
+
+        // User profile link
+        const userLinkContainer = document.getElementById('modalUserLinkContainer');
+        const userLink = document.getElementById('modalUserLink');
+        if (r.user) {
+            userLink.href = '/dashboard/admin?search=' + encodeURIComponent(r.user.email);
+            userLinkContainer.classList.remove('hidden');
+        } else {
+            userLinkContainer.classList.add('hidden');
+        }
+
+        // Date
+        document.getElementById('modalDate').textContent = new Date(r.createdAt).toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' });
+
+        // Thread
+        renderThread(r.thread || []);
+
+        // Stack
+        if (r.stack) {
+            document.getElementById('modalStack').textContent = r.stack;
+            document.getElementById('modalStackContainer').classList.remove('hidden');
+        } else {
+            document.getElementById('modalStackContainer').classList.add('hidden');
+        }
+
+        // URL
+        const urlEl = document.getElementById('modalUrl');
+        urlEl.textContent = r.url || '—';
+        urlEl.onclick = () => { if (r.url) window.open(r.url, '_blank'); };
+
+        // Browser
+        const browserContainer = document.getElementById('modalBrowserContainer');
+        const browserEl = document.getElementById('modalBrowser');
+        browserEl.innerHTML = '';
+        if (r.browser && typeof r.browser === 'object') {
+            browserContainer.classList.remove('hidden');
+            [['OS', r.browser.platform], ['Écran', r.browser.screen], ['Viewport', r.browser.viewport], ['Langue', r.browser.lang]].forEach(([label, val]) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between text-[10.5px] py-1 border-b border-white/4 last:border-0';
+                div.innerHTML = `<span class="text-slate-600">${label}</span><span class="text-slate-400 font-mono">${val || '—'}</span>`;
+                browserEl.appendChild(div);
+            });
+        } else {
+            browserContainer.classList.add('hidden');
+        }
+
+        // Forms
+        document.getElementById('resolveForm').action = `/admin/bug-reports/${r.id}/resolve`;
+        document.getElementById('respondForm').action = `/admin/bug-reports/${r.id}/respond`;
+        document.querySelector('#respondForm select[name="status"]').value = '';
+
+        // Resolve button
+        const resolveBtn = document.getElementById('resolveSubmitBtn');
+        if (r.status === 'RESOLVED') {
+            resolveBtn.disabled = true;
+            resolveBtn.classList.add('opacity-40', 'cursor-not-allowed');
+            resolveBtn.querySelector('svg').style.display = 'none';
+            resolveBtn.childNodes[resolveBtn.childNodes.length - 1].textContent = 'Déjà résolu';
+        } else {
+            resolveBtn.disabled = false;
+            resolveBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+            resolveBtn.querySelector('svg').style.display = '';
+            resolveBtn.childNodes[resolveBtn.childNodes.length - 1].textContent = 'Résoudre';
+        }
+
+        const modal = document.getElementById('detailsModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('detailsModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>

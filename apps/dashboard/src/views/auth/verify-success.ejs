@@ -1,0 +1,40 @@
+<%- include('../partials/head.ejs', { 
+    title: 'Email vérifié',
+    description: 'Votre adresse email a été vérifiée avec succès sur Plinkk.',
+    robots: 'noindex,nofollow'
+}) %>
+
+<div class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full text-center space-y-8 animate-pop-in">
+        <!-- Success Icon -->
+        <div class="flex justify-center">
+            <div class="w-24 h-24 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shadow-lg shadow-emerald-500/10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+        </div>
+
+        <div class="space-y-3">
+            <h1 class="text-3xl font-bold text-white">Email vérifié !</h1>
+            <p class="text-slate-400 leading-relaxed">
+                Votre adresse email a bien été vérifiée. Vous pouvez maintenant fermer cette page ou continuer vers votre compte.
+            </p>
+        </div>
+
+        <div class="flex flex-col gap-3 pt-4">
+            <a href="/" class="w-full py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold shadow-lg shadow-violet-900/20 hover:shadow-violet-900/40 hover:-translate-y-0.5 transition-all text-lg">
+                Accéder au Dashboard
+            </a>
+            <a href="<%= frontendUrl %>" class="w-full py-4 rounded-2xl bg-slate-800/50 text-slate-300 font-semibold border border-slate-700 hover:bg-slate-800 hover:text-white transition-all">
+                Retour à l'accueil
+            </a>
+        </div>
+
+        <p class="text-xs text-slate-500 pt-4">
+            Merci d'utiliser Plinkk pour vos liens personnalisés.
+        </p>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs') %>
