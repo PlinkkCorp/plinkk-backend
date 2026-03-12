@@ -102,9 +102,8 @@ export default async function onRequestHook(
           return; // allow other hosts to be served by other apps on this machine
         }
 
-        // Si le domaine existe mais n'est pas vérifié, afficher "Accès restreint"
         if (hostDb && !hostDb.verified) {
-          return reply.code(409).view("erreurs/reserved.ejs");
+          request.log.info(`host ${host} exists but is not verified — allowing pass-through`);
         }
 
         if (hostDb && hostDb.verified === true) {
