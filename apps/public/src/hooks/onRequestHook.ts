@@ -96,9 +96,10 @@ export default async function onRequestHook(
           });
         }
 
-        // Si le domaine n'existe pas dans la base (DNS non configuré), afficher "Accès restreint"
+        // Si le domaine n'existe pas dans la base (DNS non configuré), ne pas bloquer
+        // -> on laisse la requête continuer vers les autres services/hosts sur la machine
         if (!hostDb) {
-          return reply.code(409).view("erreurs/reserved.ejs");
+          return; // allow other hosts to be served by other apps on this machine
         }
 
         // Si le domaine existe mais n'est pas vérifié, afficher "Accès restreint"
