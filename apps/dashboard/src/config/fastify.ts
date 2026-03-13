@@ -13,6 +13,7 @@ import path from "path";
 import ejs from "ejs";
 import { readFileSync } from "fs";
 import fastifyHttpProxy from "@fastify/http-proxy";
+import fastifyWebsocket from "@fastify/websocket";
 
 export async function registerPlugins(fastify: FastifyInstance) {
   await fastify.register(fastifyRateLimit, {
@@ -114,10 +115,13 @@ export async function registerPlugins(fastify: FastifyInstance) {
 
   await fastify.register(fastifyCors, corsConfig);
 
+  await fastify.register(fastifyWebsocket);
+
   await fastify.register(fastifyHttpProxy, {
     upstream: "https://analytics.plinkk.fr/",
     prefix: "/umami_script.js",
     rewritePrefix: "/script.js",
+    undici: false,
     replyOptions: {
       rewriteRequestHeaders: (req, headers: any) => {
         return {
@@ -130,10 +134,12 @@ export async function registerPlugins(fastify: FastifyInstance) {
     },
   });
 
+  // @ts-expect-error - undici property might be missing in types
   await fastify.register(fastifyHttpProxy, {
     upstream: "https://analytics.plinkk.fr/",
     prefix: "/api/send",
     rewritePrefix: "/api/send",
+    undici: false,
     replyOptions: {
       rewriteRequestHeaders: (req, headers: any) => {
         return {

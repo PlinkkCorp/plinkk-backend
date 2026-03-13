@@ -88,7 +88,7 @@ export async function getUserInboxItems(userId: string, query: InboxQuery = {}) 
     targetOr.push({ roleTargets: { some: { roleId: user.roleId } } });
   }
 
-  const [announcements, patchNotes, readRecords] = await Promise.all([
+  const [announcements, patchNotes, readRecords, _bugReportMessages] = await Promise.all([
     prisma.announcement.findMany({
       where: {
         AND: [
@@ -119,20 +119,55 @@ export async function getUserInboxItems(userId: string, query: InboxQuery = {}) 
       where: { userId },
       select: { itemId: true, itemType: true },
     }),
-  ]);
+    prisma.conversationMessage.findMany({
+        where: { 
+            conversation: {
+                bugReport: { userId }
+            },
+            from: "admin"
+        },
+        orderBy: { createdAt: "desc" },
+        include: { 
+            conversation: {
+                include: { bugReport: true }
+            } 
+        },
+        take: limit
+    })
+  ]) as [any[], any[], any[], any[]];
+
+  const bugReportMessages = _bugReportMessages;
 
   const readSet = new Set(readRecords.map((r) => `${r.itemId}:${r.itemType}`));
+
+  const bugResponseItems: InboxItem[] = bugReportMessages.map((msg) => {
+      const isRead = readSet.has(`${msg.id}:bug-response`);
+      return {
+          id: msg.id,
+          source: "announcement" as const,
+          type: "bug-response",
+          threadId: msg.conversation?.bugReport?.id,
+          title: "Réponse à votre signalement",
+          text: compact ? toPreviewText(msg.message) : msg.message,
+          level: "info",
+          priority: "NORMAL",
+          createdAt: msg.createdAt,
+          isRead,
+      };
+  });
 
   const announcementItems: InboxItem[] = announcements
     .map((ann) => {
       const type = classifyAnnouncement(ann.text);
-      const threadId = type === "bug-response" ? extractBugThreadId(ann.text) : undefined;
+      // Skip if it's a legacy bug response or patch note
+      if (type === "bug-response" || type === "patch-note") return null;
+      
       const isRead = readSet.has(`${ann.id}:announcement`);
       return {
         id: ann.id,
         source: "announcement" as const,
         type,
-        threadId,
+        threadId: undefined,
         title: titleForAnnouncement(type),
         text: compact ? toPreviewText(ann.text) : ann.text,
         level: ann.level || "info",
@@ -141,8 +176,7 @@ export async function getUserInboxItems(userId: string, query: InboxQuery = {}) 
         isRead,
       };
     })
-    // Patch notes are taken from PatchNote model to preserve markdown content.
-    .filter((item) => item.type !== "patch-note");
+    .filter((item): item is InboxItem => item !== null);
 
   const patchItems: InboxItem[] = await Promise.all(
     patchNotes.map(async (note) => {
@@ -164,7 +198,7 @@ export async function getUserInboxItems(userId: string, query: InboxQuery = {}) 
     })
   );
 
-  let items = [...announcementItems, ...patchItems]
+  let items = [...announcementItems, ...patchItems, ...bugResponseItems]
     // Sort by priority first, then by date
     .sort((a, b) => {
       const priorityOrder = { URGENT: 0, NORMAL: 1, INFO: 2 };
@@ -217,7 +251,7 @@ export async function markAllInboxAsRead(userId: string) {
     targetOr.push({ roleTargets: { some: { roleId: user.roleId } } });
   }
 
-  const [announcements, patchNotes] = await Promise.all([
+  const [announcements, patchNotes, bugMessages] = await Promise.all([
     prisma.announcement.findMany({
       where: {
         AND: [
@@ -231,11 +265,21 @@ export async function markAllInboxAsRead(userId: string) {
       where: { isPublished: true },
       select: { id: true },
     }),
+    prisma.conversationMessage.findMany({
+        where: { 
+            conversation: {
+                bugReport: { userId }
+            },
+            from: "admin" 
+        },
+        select: { id: true }
+    })
   ]);
 
   const reads = [
     ...announcements.map((a) => ({ userId, itemId: a.id, itemType: "announcement" })),
     ...patchNotes.map((p) => ({ userId, itemId: `patch-${p.id}`, itemType: "patch-note" })),
+    ...bugMessages.map((m) => ({ userId, itemId: m.id, itemType: "bug-response" })),
   ];
 
   // Bulk upsert

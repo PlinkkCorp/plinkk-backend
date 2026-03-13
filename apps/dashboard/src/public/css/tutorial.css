@@ -245,11 +245,23 @@
 }
 
 /* ---------- Bouton de lancement ---------- */
-#plinkk-tour-launcher {
+#plinkk-tour-launcher-wrapper {
   position: fixed;
   bottom: calc(24px + env(safe-area-inset-bottom, 0px));
   right: 24px;
   z-index: 8900;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Shift left if ticket widget is present to avoid overlap */
+html.has-active-tickets #plinkk-tour-launcher-wrapper {
+  right: 92px;
+}
+
+#plinkk-tour-launcher {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -308,6 +320,38 @@
 #plinkk-tour-launcher .launcher-text {
   letter-spacing: 0.01em;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+#plinkk-tour-dismiss {
+  margin-left: -12px;
+  margin-top: -36px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #1e293b;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 8901;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+#plinkk-tour-launcher-wrapper:hover #plinkk-tour-dismiss {
+  opacity: 1;
+  transform: scale(1);
+}
+
+#plinkk-tour-dismiss:hover {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #f87171;
+  transform: scale(1.1);
 }
 
 @keyframes launcher-pulse {

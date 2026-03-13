@@ -1,0 +1,360 @@
+<!-- Bug Ticket Modal -->
+<div id="bugTicketModal" class="hidden fixed inset-0 z-[10001] flex items-end sm:items-center justify-center sm:p-4 bg-slate-950/80 backdrop-blur-sm" onmousedown="if(event.target === this) window.closeBugTicket()">
+  <div class="relative w-full max-w-3xl flex flex-col bg-[#080E1E] border border-white/8 rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl shadow-slate-950" style="height: calc(100dvh - 1rem); max-height: calc(100dvh - 1rem);">
+
+    <!-- Header -->
+    <div class="flex items-center gap-4 px-6 py-4 border-b border-white/6 shrink-0 bg-slate-950/60 backdrop-blur rounded-t-[2rem]">
+      <div class="w-9 h-9 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <h2 class="text-base font-bold text-white leading-tight truncate" id="bugTicketTitle">Ticket</h2>
+        <p class="text-[11px] text-slate-500 font-medium uppercase tracking-wider mt-0.5">Support Client</p>
+      </div>
+      <button type="button" class="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-xl transition-all" onclick="closeBugTicket()">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg>
+      </button>
+    </div>
+
+    <!-- Messages Area -->
+    <div id="bugChatThread" class="flex-1 overflow-y-auto p-5 space-y-4 min-h-0 bg-slate-950/20 scroll-smooth"></div>
+
+    <!-- Input Area -->
+    <div class="p-4 bg-slate-900/40 border-t border-white/6 shrink-0">
+      <!-- Emoji Picker Popup -->
+      <div id="userEmojiPicker" class="hidden absolute bottom-24 left-4 right-4 mb-2 bg-[#111827] border border-white/10 rounded-2xl shadow-2xl p-3 z-[210] flex flex-col" style="height:260px">
+        <div class="flex items-center justify-between mb-2 px-1">
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Émojis</span>
+          <div class="flex gap-2">
+            <button onclick="setUserEmojiCat('faces')" class="text-sm" title="Visages">😀</button>
+            <button onclick="setUserEmojiCat('objects')" class="text-sm" title="Objets">💡</button>
+            <button onclick="setUserEmojiCat('symbols')" class="text-sm" title="Symboles">❤️</button>
+          </div>
+        </div>
+        <div id="userEmojiGrid" class="flex-1 overflow-y-auto grid grid-cols-7 gap-1 p-1"></div>
+      </div>
+
+      <!-- Image Gallery Popup -->
+      <div id="userImageGallery" class="hidden absolute bottom-24 left-4 right-4 mb-2 bg-[#111827] border border-white/10 rounded-2xl shadow-2xl p-4 z-[210] flex flex-col" style="max-height:280px">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Vos images</span>
+          <button onclick="toggleUserGallery()" class="text-slate-500 hover:text-white"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        </div>
+        <div id="userGalleryGrid" class="flex-1 overflow-y-auto grid grid-cols-4 gap-2"></div>
+      </div>
+
+      <!-- Input bar -->
+      <div class="relative flex items-end gap-2 bg-black/40 border border-white/8 rounded-2xl p-2 focus-within:border-violet-500/50 transition-all">
+        <!-- Attach -->
+        <button onclick="document.getElementById('userFileInput').click()" class="shrink-0 w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all" title="Joindre un fichier">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        </button>
+        <input type="file" id="userFileInput" class="hidden" onchange="uploadAndInsertUserFile(this)">
+
+        <textarea id="userChatInput"
+          rows="1"
+          placeholder="Écrivez votre message… (Markdown supporté)"
+          class="flex-1 bg-transparent border-none outline-none text-[13px] text-white placeholder:text-slate-600 py-2.5 resize-none max-h-32 overflow-y-auto leading-relaxed"
+          oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+
+        <div class="flex items-center gap-1">
+          <!-- Gallery -->
+          <button onclick="toggleUserGallery()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/5 text-slate-500 hover:text-white transition-all" title="Images">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          </button>
+          <!-- Emoji -->
+          <button onclick="toggleUserEmoji()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/5 text-slate-500 hover:text-white transition-all" title="Émojis">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </button>
+          <!-- Send -->
+          <button onclick="sendUserResponse()" id="userChatSubmitBtn" class="w-9 h-9 flex items-center justify-center rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-all">
+            <svg class="w-5 h-5 translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+  <% 
+    let _av_js_url = "";
+    if (user && user.image) {
+      _av_js_url = user.image;
+      if (!/^https?:\/\//i.test(_av_js_url) && _av_js_url[0] !== '/' && !/^data:/i.test(_av_js_url)) {
+        _av_js_url = '/public/uploads/avatars/' + _av_js_url;
+      }
+    }
+  %>
+  window.PLINKK_USER_AVATAR = "<%= _av_js_url %>";
+
+(function () {
+  let currentUserTicketId = null;
+  let userWs = null;
+
+  window.openBugTicket = async function (id, title) {
+    currentUserTicketId = id;
+    const titleEl = document.getElementById('bugTicketTitle');
+    if (titleEl) titleEl.textContent = title || 'Ticket';
+    const thread = document.getElementById('bugChatThread');
+    if (thread) thread.innerHTML = '<div class="flex items-center justify-center h-full"><div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-violet-500"></div></div>';
+    const modal = document.getElementById('bugTicketModal');
+    if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+    try {
+      const resp = await fetch('/api/me/bug-reports/' + id, { credentials: 'same-origin' });
+      const { bugReport } = await resp.json();
+      renderUserBugThread(bugReport);
+      connectUserWs(id);
+    } catch (e) {
+      console.error(e);
+      if (thread) thread.innerHTML = '<p class="text-rose-400 text-center py-8">Erreur lors du chargement.</p>';
+    }
+  };
+
+  window.closeBugTicket = function () {
+    const modal = document.getElementById('bugTicketModal');
+    if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+    if (userWs) { userWs.close(); userWs = null; }
+    currentUserTicketId = null;
+  };
+
+  function renderUserBugThread(bugReport) {
+    const container = document.getElementById('bugChatThread');
+    if (!container) return;
+    container.innerHTML = '';
+    appendUserMsg({ from: 'user', message: bugReport.message, userName: 'Vous', image: null, createdAt: bugReport.createdAt });
+    (bugReport.conversation?.messages || []).forEach(msg => {
+      appendUserMsg({ from: msg.from, message: msg.message, userName: msg.from === 'admin' ? 'Support Plinkk' : 'Vous', image: null, createdAt: msg.createdAt });
+    });
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function appendUserMsg(data) {
+    const container = document.getElementById('bugChatThread');
+    if (!container) return;
+    const isAdmin = data.from === 'admin';
+    const date = new Date(data.createdAt);
+    const timeStr = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const dateStr = date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+
+    const row = document.createElement('div');
+    row.className = 'flex gap-3 animate-bugmsg-in ' + (isAdmin ? '' : 'flex-row-reverse');
+
+    const avatar = document.createElement('div');
+    avatar.className = 'shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-[9px] font-black uppercase overflow-hidden ring-1 ring-white/10 ' +
+      (isAdmin ? 'bg-violet-600/20 text-violet-400' : 'bg-slate-800 text-slate-400');
+    
+    let avatarUrl = data.image;
+    if (!avatarUrl) {
+      avatarUrl = isAdmin ? 'https://cdn.plinkk.fr/logo.svg' : window.PLINKK_USER_AVATAR;
+    }
+
+    if (avatarUrl) {
+      avatar.innerHTML = '<img src="' + avatarUrl + '" class="w-full h-full object-cover">';
+    } else {
+      avatar.textContent = (data.userName || (isAdmin ? 'SP' : 'ME')).substring(0, 2).toUpperCase();
+    }
+
+    const col = document.createElement('div');
+    col.className = 'flex flex-col gap-1 max-w-[82%] ' + (isAdmin ? 'items-start' : 'items-end');
+
+    const nameLine = document.createElement('div');
+    nameLine.className = 'flex items-center gap-2 px-1';
+    if (isAdmin) {
+      nameLine.innerHTML = '<span class="text-[10px] font-bold text-violet-400">' + (data.userName || 'Support Plinkk') + '</span>' +
+        '<span class="text-[9px] text-slate-600 font-mono">' + dateStr + ' · ' + timeStr + '</span>';
+    } else {
+      nameLine.innerHTML = '<span class="text-[9px] text-slate-600 font-mono">' + dateStr + ' · ' + timeStr + '</span>' +
+        '<span class="text-[10px] font-bold text-slate-300">Vous</span>';
+    }
+
+    const bubble = document.createElement('div');
+    bubble.className = 'px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed markdown-content shadow-sm ' +
+      (isAdmin
+        ? 'bg-violet-600/20 border border-violet-500/25 text-white rounded-tl-sm'
+        : 'bg-slate-800 border border-white/8 text-slate-200 rounded-tr-sm');
+    try {
+      bubble.innerHTML = typeof marked !== 'undefined' ? marked.parse(data.message || '') : escapeHtmlMsg(data.message || '');
+    } catch (e) { bubble.textContent = data.message || ''; }
+
+    col.appendChild(nameLine);
+    col.appendChild(bubble);
+    row.appendChild(avatar);
+    row.appendChild(col);
+    container.appendChild(row);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function escapeHtmlMsg(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  /* ─────────────────── WebSocket ─────────────────── */
+  function connectUserWs(id) {
+    if (userWs) userWs.close();
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    userWs = new WebSocket(proto + '//' + location.host + '/api/me/bug-reports/' + id + '/ws');
+    userWs.onmessage = (ev) => {
+      try {
+        const { type, data } = JSON.parse(ev.data);
+        if (type === 'message') appendUserMsg(data);
+      } catch (e) {}
+    };
+    userWs.onclose = () => { userWs = null; };
+  }
+
+  /* ─────────────────── Send Message ─────────────────── */
+  window.sendUserResponse = async function () {
+    const input = document.getElementById('userChatInput');
+    const msg = input ? input.value.trim() : '';
+    if (!msg || !currentUserTicketId) return;
+    const btn = document.getElementById('userChatSubmitBtn');
+    if (btn) btn.disabled = true;
+    try {
+      const resp = await fetch('/api/me/bug-reports/' + currentUserTicketId + '/respond', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ message: msg })
+      });
+      if (resp.ok) {
+        if (input) { input.value = ''; input.style.height = 'auto'; }
+      }
+    } catch (e) { console.error(e); }
+    if (btn) btn.disabled = false;
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const inp = document.getElementById('userChatInput');
+    if (inp) {
+      inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); window.sendUserResponse(); }
+      });
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { const m = document.getElementById('bugTicketModal'); if (m && !m.classList.contains('hidden')) window.closeBugTicket(); }
+  });
+
+  const EMOJI_CATS = {
+    faces: ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲'],
+    objects: ['💡','🔥','✨','⚡','🎯','🎮','📱','💻','⌨️','🖥️','🎵','🎶','📷','🎬','🚀','⭐','🌟','💎','🎁','🔑','🛡️','⚙️','🔧','📦','📊','📈','📉','💰','🏆'],
+    symbols: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','✅','❌','⚠️','ℹ️','🔴','🟢','🔵','⚪','👍','👎','👌','✌️','🤞','👋','🙏','💪']
+  };
+
+  window.setUserEmojiCat = function (cat) {
+    const grid = document.getElementById('userEmojiGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    (EMOJI_CATS[cat] || []).forEach(e => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'text-xl p-1 hover:bg-white/10 rounded-lg transition-all';
+      btn.textContent = e;
+      btn.onclick = () => { insertUserEmoji(e); };
+      grid.appendChild(btn);
+    });
+  };
+
+  window.toggleUserEmoji = function () {
+    const picker = document.getElementById('userEmojiPicker');
+    if (!picker) return;
+    const hidden = picker.classList.toggle('hidden');
+    if (!hidden) {
+      document.getElementById('userImageGallery')?.classList.add('hidden');
+      if (!document.getElementById('userEmojiGrid')?.children.length) window.setUserEmojiCat('faces');
+    }
+  };
+
+  function insertUserEmoji(e) {
+    const inp = document.getElementById('userChatInput');
+    if (inp) { inp.value += e; inp.focus(); }
+    document.getElementById('userEmojiPicker')?.classList.add('hidden');
+  }
+
+  /* ─────────────────── Image Gallery ─────────────────── */
+  window.toggleUserGallery = function () {
+    const gallery = document.getElementById('userImageGallery');
+    if (!gallery) return;
+    const hidden = gallery.classList.toggle('hidden');
+    if (!hidden) {
+      document.getElementById('userEmojiPicker')?.classList.add('hidden');
+      loadUserGallery();
+    }
+  };
+
+  async function loadUserGallery() {
+    const grid = document.getElementById('userGalleryGrid');
+    if (!grid) return;
+    grid.innerHTML = '<div class="col-span-4 text-center py-4 text-slate-500 text-xs">Chargement…</div>';
+    try {
+      const resp = await fetch('/api/me/uploads', { credentials: 'same-origin' });
+      const { uploads } = await resp.json();
+      if (!uploads?.length) { grid.innerHTML = '<div class="col-span-4 text-center py-4 text-slate-500 text-xs">Aucun upload.</div>'; return; }
+      grid.innerHTML = '';
+      uploads.filter(u => /\.(jpe?g|png|webp|gif|svg)$/i.test(u.url)).forEach(u => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'aspect-square rounded-xl overflow-hidden hover:scale-95 transition-transform border border-white/5 hover:border-violet-500';
+        btn.innerHTML = '<img src="' + u.url + '" class="w-full h-full object-cover">';
+        btn.onclick = () => { insertUserImage(u.url); };
+        grid.appendChild(btn);
+      });
+    } catch (e) { if (grid) grid.innerHTML = '<div class="col-span-4 text-center py-4 text-rose-400 text-xs">Erreur.</div>'; }
+  }
+
+  function insertUserImage(url) {
+    const inp = document.getElementById('userChatInput');
+    if (inp) { inp.value += '\n![image](' + url + ')\n'; inp.focus(); }
+    document.getElementById('userImageGallery')?.classList.add('hidden');
+  }
+
+  /* ─────────────────── File Upload ─────────────────── */
+  window.uploadAndInsertUserFile = async function (input) {
+    if (!input?.files?.[0]) return;
+    const file = input.files[0];
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+      const resp = await fetch('/api/me/upload?field=misc', { method: 'POST', body: fd, credentials: 'same-origin' });
+      const data = await resp.json();
+      if (data.url) {
+        const inp = document.getElementById('userChatInput');
+        if (inp) {
+          if (file.type.startsWith('image/')) {
+            inp.value += '\n![image](' + data.url + ')\n';
+          } else {
+            inp.value += '\n[' + file.name + '](' + data.url + ')\n';
+          }
+          inp.focus();
+        }
+      }
+    } catch (e) { console.error('Upload failed', e); }
+    input.value = '';
+  };
+
+})();
+</script>
+
+<style>
+@keyframes bugmsg-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-bugmsg-in { animation: bugmsg-in 0.25s ease-out forwards; }
+
+#bugChatThread::-webkit-scrollbar { width: 6px; }
+#bugChatThread::-webkit-scrollbar-track { background: transparent; }
+#bugChatThread::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+#bugChatThread::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+/* Markdown bubbles */
+#bugChatThread .markdown-content p { margin-bottom: 0.4rem; }
+#bugChatThread .markdown-content p:last-child { margin-bottom: 0; }
+#bugChatThread .markdown-content img { max-width: 240px; max-height: 200px; border-radius: 0.75rem; margin: 0.5rem 0; display: block; object-fit: cover; }
+#bugChatThread .markdown-content a { color: #a78bfa; text-decoration: underline; }
+#bugChatThread .markdown-content code { background: rgba(0,0,0,0.35); padding: 0.1rem 0.35rem; border-radius: 0.3rem; font-family: monospace; font-size: 0.82em; }
+#bugChatThread .markdown-content pre { background: rgba(0,0,0,0.35); padding: 0.75rem; border-radius: 0.5rem; overflow-x: auto; margin: 0.5rem 0; }
+#bugChatThread .markdown-content ul, #bugChatThread .markdown-content ol { margin: 0.35rem 0 0.35rem 1rem; padding-left: 0.8rem; }
+#bugChatThread .markdown-content strong { color: #f1f5f9; }
+</style>

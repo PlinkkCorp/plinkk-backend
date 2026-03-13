@@ -765,6 +765,18 @@
                                                                         return String(text || '').replace(/^\[RÉPONSE BUG\s*#?[^\]]*\]\s*/i, '');
                                                                     }
 
+                                                                    function formatMsgPreview(text) {
+                                                                        var s = stripBugPrefix(String(text || ''));
+                                                                        s = s.replace(/!\[[^\]]*\]\([^)]+\)/g, '🖼️ Image envoyée');
+                                                                        s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(_, label, url) {
+                                                                            if (/\.(pdf|docx?|xlsx?|zip|rar|txt|csv)$/i.test(url)) return '📎 ' + label;
+                                                                            if (/\.(jpe?g|png|webp|gif|svg)$/i.test(url)) return '🖼️ Image envoyée';
+                                                                            return label;
+                                                                        });
+                                                                        s = s.replace(/https?:\/\/\S+\.(?:jpe?g|png|webp|gif|svg)(?:\?\S*)?/gi, '🖼️ Image envoyée');
+                                                                        return s;
+                                                                    }
+
                                                                     function getReadType(item) {
                                                                         return item && item.source === 'patch-note' ? 'patch-note' : 'announcement';
                                                                     }
@@ -824,16 +836,15 @@
                                                                         const fullText = item.fullText || item.text || '';
                                                                         const contentHtml = item.type === 'patch-note'
                                                                             ? (isExpanded ? (item.htmlText || escapeHtml(fullText).replace(/\n/g, '<br>')) : escapeHtml(previewText).replace(/\n/g, '<br>'))
-                                                                            : escapeHtml(stripBugPrefix(item.text || '')).replace(/\n/g, '<br>');
+                                                                            : escapeHtml(formatMsgPreview(item.text || '')).replace(/\n/g, '<br>');
                                                                         const contentClass = item.type === 'patch-note' && isExpanded ? ' inbox-expand-open' : '';
                                                                         const when = new Date(item.createdAt).toLocaleString('fr-FR');
                                                                         const bugThreadBtn = item.type === 'bug-response' && item.threadId
-                                                                            ? '<button class="inbox-open-thread shrink-0 text-[10px] text-amber-300 hover:text-amber-200" data-thread-id="' + item.threadId + '">Thread</button>'
+                                                                            ? '<a href="/inbox" class="inbox-open-thread shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold text-violet-300 hover:text-violet-200 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/25 px-2 py-0.5 rounded-full transition-all" data-thread-id="' + item.threadId + '">Ouvrir le ticket →</a>'
                                                                             : '';
                                                                         let expandBtn = '';
                                                                         if (!compact) {
                                                                             if (item.type === 'patch-note') {
-                                                                                // For patch-notes, redirect to the public patch-note page
                                                                                 const baseUrl = "<%= typeof frontendUrl !== 'undefined' ? frontendUrl : '' %>".replace(/\/$/, '');
                                                                                 let href = item.link || '/patch-notes';
                                                                                 if (href.startsWith('/')) href = baseUrl + href;
@@ -1108,6 +1119,15 @@
                                                                     if (inboxBellBtn && inboxBellPanel && inboxBellWrap) {
                                                                         inboxLoadBell().then(function (items) { inboxItems = items; });
                                                                         refreshUnreadCount();
+
+                                                                        window.openHeaderInbox = function(e) {
+                                                                            if (e) { e.preventDefault(); e.stopPropagation(); }
+                                                                            if (typeof openFullModal === 'function') {
+                                                                                openFullModal();
+                                                                                const panel = document.getElementById('ticketWidgetPanel');
+                                                                                if (panel) panel.classList.add('hidden');
+                                                                            }
+                                                                        };
 
                                                                         inboxBellBtn.addEventListener('click', function (e) {
                                                                             e.stopPropagation();
@@ -1425,7 +1445,6 @@
                                                                             }
                                                                         };
 
-                                                                        // Email Verification Trigger
                                                                         const btn = document.getElementById('verifyEmailBtn');
                                                                         if (btn) {
                                                                             btn.addEventListener('click', async () => {
@@ -1462,3 +1481,152 @@
                                                                         }
                                                                     })();
                                                                 </script>
+
+<!-- ══ Floating Ticket Widget ══ -->
+<div id="ticketWidget" class="hidden fixed bottom-6 right-6 z-[10000] flex flex-col items-end gap-3" style="max-width:360px">
+
+  <!-- Dropdown panel -->
+  <div id="ticketWidgetPanel" class="hidden w-80 max-w-[90vw] rounded-2xl border border-white/10 bg-[#0d1526] shadow-2xl shadow-black/60 overflow-hidden animate-ticketpanel-in">
+    <!-- Header -->
+    <div class="px-4 py-3 border-b border-white/6 flex items-center justify-between bg-slate-950/60">
+      <div class="flex items-center gap-2">
+        <p class="text-sm font-bold text-white">Mes tickets actifs</p>
+      </div>
+      <button onclick="openHeaderInbox(event)" class="text-[11px] text-slate-300 hover:text-white transition-colors">Voir tout</button>
+    </div>
+    <!-- Ticket list -->
+    <div id="ticketWidgetList" class="max-h-72 overflow-y-auto divide-y divide-white/5"></div>
+  </div>
+
+  <button id="ticketWidgetBtn" onclick="toggleTicketWidget()" class="relative w-14 h-14 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 shadow-lg shadow-violet-900/40 flex items-center justify-center text-white hover:scale-105 transition-transform focus:outline-none" title="Mes tickets actifs">
+    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+    <span id="ticketWidgetBadge" class="hidden absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-5 text-center">0</span>
+  </button>
+</div>
+
+<style>
+@keyframes ticketpanel-in {
+  from { opacity:0; transform: translateY(12px) scale(0.96); }
+  to { opacity:1; transform: translateY(0) scale(1); }
+}
+.animate-ticketpanel-in { animation: ticketpanel-in 0.22s ease-out both; }
+#ticketWidgetList::-webkit-scrollbar { width:4px; }
+#ticketWidgetList::-webkit-scrollbar-thumb { background:#1e293b; border-radius:6px; }
+</style>
+
+<script>
+(function () {
+  const widget = document.getElementById('ticketWidget');
+  const panel = document.getElementById('ticketWidgetPanel');
+  const list = document.getElementById('ticketWidgetList');
+  const badge = document.getElementById('ticketWidgetBadge');
+  let activeTickets = [];
+  let widgetOpen = false;
+
+  function statusLabel(s) {
+    if (s === 'PENDING') return '<span class="text-amber-400 text-[9px] font-bold uppercase">En attente</span>';
+    if (s === 'IN_PROGRESS') return '<span class="text-blue-400 text-[9px] font-bold uppercase">En cours</span>';
+    return '<span class="text-slate-500 text-[9px] font-bold uppercase">' + (s || '') + '</span>';
+  }
+
+  function fmtPreview(msg) {
+    if (!msg) return '';
+    var s = String(msg);
+    s = s.replace(/!\[[^\]]*\]\([^)]+\)/g, '🖼️ Image');
+    s = s.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+    s = s.replace(/[#*`_>~]/g, '');
+    return s.replace(/\s+/g, ' ').trim().slice(0, 80) + (s.length > 80 ? '…' : '');
+  }
+
+  function renderList() {
+    if (!list) return;
+    if (!activeTickets.length) {
+      list.innerHTML = '<div class="px-4 py-6 text-center text-slate-500 text-xs">Aucun ticket actif.</div>';
+      return;
+    }
+    list.innerHTML = activeTickets.map(function (t) {
+      const lastMsg = (t.messages || []).slice(-1)[0];
+      const preview = fmtPreview(lastMsg ? lastMsg.message : t.message);
+      const fromAdmin = lastMsg && lastMsg.from === 'admin';
+      return '<button onclick="openTicketFromWidget(\'' + t.id + '\')" class="w-full text-left px-4 py-3 hover:bg-white/5 transition-colors flex flex-col gap-1">' +
+        '<div class="flex items-center justify-between gap-2">' +
+        '<span class="text-[11px] font-mono text-slate-500">#' + t.id.slice(-8) + '</span>' +
+        statusLabel(t.status) +
+        '</div>' +
+        '<p class="text-xs text-white font-medium truncate">' + (t.message || '').slice(0, 60) + '</p>' +
+        (preview ? '<p class="text-[11px] text-slate-400 truncate">' + (fromAdmin ? '← ' : '') + preview + '</p>' : '') +
+        '</button>';
+    }).join('');
+  }
+
+  window.openTicketFromWidget = function (id) {
+    panelClose();
+    if (typeof window.openBugTicket === 'function') {
+      window.openBugTicket(id, 'Ticket #' + id.slice(-8));
+    }
+  };
+
+  function panelClose() {
+    widgetOpen = false;
+    if (panel) { panel.classList.add('hidden'); panel.classList.remove('animate-ticketpanel-in'); }
+  }
+
+  window.toggleTicketWidget = function () {
+    if (!panel) return;
+    widgetOpen = !widgetOpen;
+    if (widgetOpen) {
+      panel.classList.remove('hidden');
+      void panel.offsetHeight; 
+      panel.classList.add('animate-ticketpanel-in');
+    } else {
+      panelClose();
+    }
+  };
+
+  document.addEventListener('click', function (e) {
+    const w = document.getElementById('ticketWidget');
+    if (w && !w.contains(e.target)) panelClose();
+  });
+  async function loadActiveTickets() {
+    try {
+      const resp = await fetch('/api/bug-reports/mine', { credentials: 'same-origin' });
+      if (!resp.ok) return;
+      const data = await resp.json();
+      const threads = Array.isArray(data.threads) ? data.threads : [];
+      activeTickets = threads.filter(function (t) { return t.status !== 'RESOLVED'; });
+      if (activeTickets.length > 0) {
+        if (widget) widget.classList.remove('hidden');
+        document.documentElement.classList.add('has-active-tickets');
+        
+        const hasUnread = activeTickets.some(function(t) {
+          const lastMsg = (t.messages || []).slice(-1)[0];
+          return lastMsg && lastMsg.from === 'admin';
+        });
+
+        const btn = document.getElementById('ticketWidgetBtn');
+        if (btn) {
+          if (hasUnread) {
+            btn.className = 'relative w-14 h-14 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 shadow-lg shadow-violet-900/40 flex items-center justify-center text-white hover:scale-105 transition-transform focus:outline-none';
+          } else {
+            btn.className = 'relative w-14 h-14 rounded-full bg-[#1e293b] border border-white/10 shadow-lg shadow-black/20 flex items-center justify-center text-slate-400 hover:scale-105 transition-transform focus:outline-none';
+          }
+        }
+
+        if (badge) {
+          badge.textContent = String(activeTickets.length);
+          badge.classList.toggle('hidden', activeTickets.length === 0);
+        }
+        renderList();
+      }
+    } catch (e) { /* silently ignore */ }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadActiveTickets);
+  } else {
+    loadActiveTickets();
+  }
+})();
+</script>
+
+<%- include('bug-ticket-modal.ejs') %>

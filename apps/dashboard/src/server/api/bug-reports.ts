@@ -62,39 +62,54 @@ export async function apiBugReportsRoutes(fastify: FastifyInstance) {
 
     const reports = await prisma.bugReport.findMany({
       where: { userId },
+      include: {
+        conversation: {
+          include: {
+            messages: {
+              orderBy: { createdAt: "asc" }
+            }
+          }
+        }
+      },
       orderBy: { createdAt: "desc" },
       take: 40,
     });
 
-    const adminReplies = reports.length
-      ? await prisma.announcement.findMany({
-          where: {
-            targets: { some: { userId } },
-            text: { startsWith: "[RÉPONSE BUG #" },
-          },
-          orderBy: { createdAt: "asc" },
-        })
-      : [];
-
     const threads = reports.map((report) => {
-      const token = `[RÉPONSE BUG #${report.id}]`;
-      const replies = adminReplies
-        .filter((r) => r.text.startsWith(token))
-        .map((r) => ({
-          id: r.id,
+      const convMessages = report.conversation?.messages || [];
+      const replies = convMessages
+        .filter((msg: any) => msg.from === "admin")
+        .map((msg: any) => ({
+          id: msg.id,
           from: "admin" as const,
-          message: r.text.replace(token, "").trim(),
-          createdAt: r.createdAt,
+          message: msg.message,
+          createdAt: msg.createdAt,
         }));
+
+      const userMessages = convMessages
+        .filter((msg: any) => msg.from === "user")
+        .map((msg: any) => ({
+             id: msg.id,
+             from: "user" as const,
+             message: msg.message,
+             createdAt: msg.createdAt,
+        }));
+
+      // Combine with extracted user replies from the legacy blob if any
+      const legacyUserMessages = extractUserThreadMessages(report.message, report.createdAt, report.id);
+      
+      const allMessages = [...legacyUserMessages, ...userMessages, ...replies].sort((a, b) => {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      });
 
       return {
         id: report.id,
         status: report.status,
+        message: report.message.slice(0, 150),
+        url: report.url || null,
         createdAt: report.createdAt,
         updatedAt: report.updatedAt,
-        messages: [...extractUserThreadMessages(report.message, report.createdAt, report.id), ...replies].sort((a, b) => {
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        }),
+        messages: allMessages,
       };
     });
 

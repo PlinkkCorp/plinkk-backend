@@ -42,6 +42,7 @@ import fastifyRateLimit from "@fastify/rate-limit";
 import fastifyCompress from "@fastify/compress";
 import fastifyHttpProxy from "@fastify/http-proxy";
 import { AppError } from "@plinkk/shared";
+import { apiBugReportsRoutes } from "../../dashboard/src/server/api/bug-reports";
 
 const fastify = Fastify({
   logger: true,
@@ -154,6 +155,7 @@ fastify.register(fastifyHttpProxy, {
   prefix: "/umami_script.js",
   rewritePrefix: "/script.js",
   replyOptions: {
+    undici: false,
     rewriteRequestHeaders: (req, headers) => {
       return {
         ...headers,
@@ -170,6 +172,7 @@ fastify.register(fastifyHttpProxy, {
   prefix: "/api/send",
   rewritePrefix: "/api/send",
   replyOptions: {
+    undici: false,
     rewriteRequestHeaders: (req, headers) => {
       return {
         ...headers,
@@ -256,6 +259,8 @@ plinkkFrontUserRoutes(fastify);
 partnersRoutes(fastify);
 patchNotesRoutes(fastify);
 trackingRoutes(fastify);
+
+fastify.register(apiBugReportsRoutes, { prefix: "/api/me/bug-reports" });
 
 // ─── Funnel Event Tracking ──────────────────────────────────────────────────
 const ALLOWED_EVENTS = ['landing_visit', 'signup', 'premium_view', 'config_view', 'purchase', 'cancel'];

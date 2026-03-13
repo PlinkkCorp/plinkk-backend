@@ -62,8 +62,12 @@
                   class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">Patch Notes</a>
                 <a href="/pricing"
                   class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">Tarifs</a>
+                <a href="/partners"
+                  class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">Partenaires</a>
                 <a href="/users"
                   class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">Utilisateurs</a>
+                <a href="javascript:void(0)" onclick="openSupportModal()"
+                  class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">Support</a>
                 <a href="<%= dashboardUrl %>"
                   class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/5 hover:text-white">Dashboard</a>
                 <% } %>
@@ -196,8 +200,12 @@
               propos</a>
             <a href="/pricing"
               class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Tarifs</a>
+            <a href="/partners"
+              class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Partenaires</a>
             <a href="/users"
               class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Utilisateurs</a>
+            <a href="javascript:void(0)" onclick="openSupportModal()"
+              class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Support</a>
             <a href="<%= dashboardUrl %>"
               class="block rounded-lg px-3 py-2 text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Dashboard</a>
             <% } %>
@@ -496,6 +504,43 @@
                                     function looksLikeHtmlRequest(url) { return isSameOrigin(url) && !/\.(?:png|jpe?g|webp|gif|svg|ico|css|js|map|json|txt|woff2?|ttf|otf)(?:[?#].*)?$/i.test(url); }
                                     document.addEventListener('click', (e) => { const a = e.target && (e.target.closest ? e.target.closest('a') : null); if (!a) return; const href = a.getAttribute('href') || ''; if (!href || href.startsWith('#')) return; if (a.target === '_blank' || a.download != null) return; if (isModifiedClick(e)) return; if (!looksLikeHtmlRequest(href)) return; try { window.dispatchEvent(new Event('spa:loading-start')); } catch { } setTimeout(() => { try { window.dispatchEvent(new Event('spa:loading-end')); } catch { } }, 8000); }, true);
                                   })();
+                                </script>
+                                 <%- include('partials/bug-ticket-modal.ejs') %>
+                                <script>
+                                  async function openSupportModal(initialMessage) {
+                                    const isLogged = <%= !!_user %>;
+                                    if (!isLogged) {
+                                      window.location.href = '<%= dashboardUrl %>/login?alert=Pour ouvrir un ticket de support, veuillez vous connecter.';
+                                      return;
+                                    }
+
+                                    // Si on est connecté, on essaye de trouver un ticket existant ou on en crée un
+                                    try {
+                                      const res = await fetch('/api/me/bug-reports/mine');
+                                      const { threads } = await res.json();
+                                      
+                                      if (threads && threads.length > 0 && !initialMessage) {
+                                        // Ouvrir le plus récent (seulement si pas de message initial spécifique demandé)
+                                        window.openBugTicket(threads[0].id, 'Support - ' + threads[0].id.substring(0,8));
+                                      } else {
+                                        // En créer un nouveau par défaut si aucun n'existe ou si message spécifique
+                                        const createRes = await fetch('/api/me/bug-reports', {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({ 
+                                            message: initialMessage || "Nouveau ticket de support (Site Public)", 
+                                            url: window.location.href 
+                                          })
+                                        });
+                                        const createData = await createRes.json();
+                                        if (createData.ok) {
+                                          window.openBugTicket(createData.bugReportId, 'Support - ' + createData.bugReportId.substring(0,8));
+                                        }
+                                      }
+                                    } catch (e) {
+                                      console.error("Failed to open support ticket", e);
+                                    }
+                                  }
                                 </script>
                                 <script>
                                   (function () {

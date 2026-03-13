@@ -132,15 +132,36 @@ model Report {
 }
 
 model BugReport {
-  id        String   @id @default(nanoid(16))
-  message   String
-  url       String?
-  stack     String?
-  status    String   @default("PENDING")
-  userId    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  user      User?    @relation(fields: [userId], references: [id])
+  id             String        @id @default(nanoid(16))
+  message        String // Original report message
+  url            String?
+  stack          String?
+  status         String        @default("PENDING")
+  userId         String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now()) @updatedAt
+  user           User?         @relation(fields: [userId], references: [id])
+  conversationId String?       @unique
+  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+}
+
+model Conversation {
+  id               String                @id @default(nanoid(16))
+  type             String? // e.g., "BUG_REPORT"
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @default(now()) @updatedAt
+  messages         ConversationMessage[]
+  bugReport        BugReport?
+}
+
+model ConversationMessage {
+  id             String       @id @default(nanoid(16))
+  conversationId String
+  from           String // "user" or "admin"
+  message        String
+  senderId       String? // userId of the sender
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }
 
 model InboxRead {

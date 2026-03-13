@@ -4,13 +4,7 @@ import { replyView } from "../../../lib/replyView";
 import { ensurePermission } from "../../../lib/permissions";
 import { requireAuthRedirect } from "../../../middleware/auth";
 import { logAdminAction } from "../../../lib/adminLogger";
-
-type ThreadMessage = {
-    id: string;
-    from: "user" | "admin";
-    message: string;
-    createdAt: Date;
-};
+import { bugReportClients, broadcastToBugReport, ThreadMessage } from "../../../services/bugReportSocketService";
 
 function extractUserThreadMessages(raw: string, createdAt: Date, reportId: string): ThreadMessage[] {
     const lines = String(raw || "").split("\n");
@@ -28,6 +22,8 @@ function extractUserThreadMessages(raw: string, createdAt: Date, reportId: strin
                 id: `user-reply-${reportId}-${messages.length + 1}`,
                 from: "user",
                 message: text,
+                userName: "Utilisateur",
+                image: null,
                 createdAt: new Date(replyIso),
             });
         }
@@ -57,6 +53,8 @@ function extractUserThreadMessages(raw: string, createdAt: Date, reportId: strin
             id: `origin-${reportId}`,
             from: "user",
             message: baseMessage,
+            userName: "Utilisateur", // Will be overridden
+            image: null,
             createdAt,
         });
     }
@@ -74,40 +72,75 @@ export function dashboardAdminBugReportsRoutes(fastify: FastifyInstance) {
 
             const bugReports = await prisma.bugReport.findMany({
                 orderBy: { createdAt: "desc" },
-                include: { user: true },
+                include: { 
+                    user: true, 
+                    conversation: {
+                        include: {
+                            messages: {
+                                orderBy: { createdAt: "asc" }
+                            }
+                        }
+                    }
+                },
                 take: 100,
-            });
+            }) as any[];
 
-            const adminReplies = bugReports.length
-                ? await prisma.announcement.findMany({
-                      where: { text: { startsWith: "[RÉPONSE BUG #" } },
-                      orderBy: { createdAt: "asc" },
-                      select: { id: true, text: true, createdAt: true },
-                  })
-                : [];
-
+            // For each bug report, construct the thread including the original message and all replies
             const bugReportsWithThreads = bugReports.map((report) => {
-                const token = `[RÉPONSE BUG #${report.id}]`;
-                const adminMessages: ThreadMessage[] = adminReplies
-                    .filter((r) => r.text.startsWith(token))
-                    .map((r) => ({
-                        id: r.id,
-                        from: "admin" as const,
-                        message: r.text.replace(token, "").trim(),
-                        createdAt: r.createdAt,
-                    }));
+                const thread: ThreadMessage[] = [];
 
-                const userMessages = extractUserThreadMessages(report.message, report.createdAt, report.id);
+                // Add original message
+                thread.push({
+                    id: `origin-${report.id}`,
+                    from: "user",
+                    message: report.message,
+                    userName: report.user?.userName || "Anonyme",
+                    image: report.user?.image || null,
+                    createdAt: report.createdAt,
+                });
 
-                const thread: ThreadMessage[] = [...userMessages, ...adminMessages].sort(
-                    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-                );
+                // Add all subsequent messages
+                const messages = report.conversation?.messages || [];
+                messages.forEach((msg: any) => {
+                    thread.push({
+                        id: msg.id,
+                        from: msg.from as "user" | "admin",
+                        message: msg.message,
+                        userName: msg.from === "admin" ? "Admin" : (report.user?.userName || "Utilisateur"),
+                        image: null,
+                        createdAt: msg.createdAt,
+                    });
+                });
 
                 return { ...report, thread };
             });
 
             return replyView(reply, "dashboard/admin/bugReports.ejs", request.currentUser!, {
                 bugReports: bugReportsWithThreads,
+                adminName: request.currentUser!.userName,
+                adminAvatar: request.currentUser!.image
+            });
+        }
+    );
+
+    fastify.get(
+        "/:id/ws",
+        { websocket: true, preHandler: [requireAuthRedirect] },
+        (socket, request) => {
+            const { id } = request.params as { id: string };
+            if (!bugReportClients.has(id)) {
+                bugReportClients.set(id, new Set());
+            }
+            bugReportClients.get(id)!.add(socket);
+
+            socket.on("close", () => {
+                const clients = bugReportClients.get(id);
+                if (clients) {
+                    clients.delete(socket);
+                    if (clients.size === 0) {
+                        bugReportClients.delete(id);
+                    }
+                }
             });
         }
     );
@@ -135,7 +168,11 @@ export function dashboardAdminBugReportsRoutes(fastify: FastifyInstance) {
                 request.ip
             );
 
-            return reply.redirect("/dashboard/admin/bug-reports");
+            if (request.headers.accept?.includes('application/json')) {
+                return reply.send({ success: true, status: body.status || "RESOLVED" });
+            }
+
+            return reply.redirect("/admin/bug-reports");
         }
     );
 
@@ -147,10 +184,9 @@ export function dashboardAdminBugReportsRoutes(fastify: FastifyInstance) {
             if (!ok) return;
 
             const { id } = request.params as { id: string };
-            const { message, level, displayType, status } = request.body as {
+            const { message, level, status } = request.body as {
                 message: string;
                 level: string;
-                displayType: string;
                 status?: string;
             };
 
@@ -160,18 +196,6 @@ export function dashboardAdminBugReportsRoutes(fastify: FastifyInstance) {
             });
 
             if (bugReport && bugReport.userId) {
-                await prisma.announcement.create({
-                    data: {
-                        text: `[RÉPONSE BUG #${id}] ${message}`,
-                        level: level || "info",
-                        displayType: displayType || "notification",
-                        global: false,
-                        targets: {
-                            create: { userId: bugReport.userId },
-                        },
-                    },
-                });
-
                 const allowedStatuses = ["PENDING", "IN_PROGRESS", "RESOLVED"];
                 const newStatus = status && allowedStatuses.includes(status) ? status : null;
                 if (newStatus) {
@@ -181,16 +205,53 @@ export function dashboardAdminBugReportsRoutes(fastify: FastifyInstance) {
                     });
                 }
 
+                // Ensure conversation exists
+                let conversationId = bugReport.conversationId;
+                if (!conversationId) {
+                    const conv = await prisma.conversation.create({
+                        data: { type: "BUG_REPORT" }
+                    });
+                    conversationId = conv.id;
+                    await prisma.bugReport.update({
+                        where: { id },
+                        data: { conversationId }
+                    });
+                }
+
+                // Create structured message
+                await prisma.conversationMessage.create({
+                    data: {
+                        conversationId: conversationId,
+                        from: "admin",
+                        message: message.trim(),
+                        senderId: request.currentUser!.id,
+                    }
+                });
+
                 await logAdminAction(
                     request.currentUser!.id,
                     "RESPOND_BUG_REPORT",
                     bugReport.userId || undefined,
-                    { bugReportId: id, message, level, displayType, status: newStatus },
-                    request.ip
+                    { bugReportId: id, message, level, status: newStatus },
                 );
+
+                // WebSocket broadcast
+                const messageData: ThreadMessage = {
+                    id: `admin-new-${Date.now()}`,
+                    from: "admin",
+                    message,
+                    userName: request.currentUser!.userName,
+                    image: request.currentUser!.image,
+                    createdAt: new Date(),
+                };
+                broadcastToBugReport(id, messageData);
             }
 
-            return reply.redirect("/dashboard/admin/bug-reports");
+            if (request.headers.accept?.includes('application/json')) {
+                return reply.send({ success: true });
+            }
+
+            return reply.redirect("/admin/bug-reports");
         }
     );
 }

@@ -8,6 +8,7 @@ import { apiMeThemesRoutes } from "./me/theme";
 import { apiMePlinkksRoutes } from "./me/plinkks/index";
 import { apiMeRedirectsRoutes } from "./me/redirects";
 import { apiMeInboxRoutes } from "./me/inbox";
+import { apiMeBugReportsRoutes } from "./me/bugReports";
 import crypto from "crypto";
 import { ListObjectsV2Command, _Object, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getS3Client } from "@plinkk/shared";
@@ -32,6 +33,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.register(apiMePlinkksRoutes, { prefix: "/plinkks" });
   fastify.register(apiMeRedirectsRoutes, { prefix: "/redirects" });
   fastify.register(apiMeInboxRoutes, { prefix: "/inbox" });
+  fastify.register(apiMeBugReportsRoutes, { prefix: "/bug-reports" });
 
   fastify.get("/dashboard-summary", async (request, reply) => {
     const userId = request.session.get("data") as string | { id: string } | null | undefined;

@@ -1,5 +1,6 @@
 <%- include('partials/head.ejs', { title: 'Tableau de bord - Administration' ,
     description: "Gestion des signalements de bugs" , robots: 'noindex,nofollow' }) %>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <%- include('partials/header-dash.ejs', { user: user }) %>
 
@@ -10,7 +11,7 @@ const countProgress  = bugReports ? bugReports.filter(r => r.status === 'IN_PROG
 const countResolved  = bugReports ? bugReports.filter(r => r.status === 'RESOLVED').length : 0;
 %>
 
-<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8 min-h-[calc(100vh-72px)]">
     <%- include('partials/admin-nav.ejs', { user: user, active: 'bug-reports' }) %>
 
     <main class="col-span-12 lg:col-span-10 space-y-5">
@@ -56,9 +57,7 @@ const countResolved  = bugReports ? bugReports.filter(r => r.status === 'RESOLVE
         <div id="ticketList" class="space-y-2">
             <% if (bugReports && bugReports.length > 0) { %>
                 <% bugReports.forEach(function(r, i) {
-                    const preview = (r.thread && r.thread[0])
-                        ? r.thread[0].message.slice(0, 140) + (r.thread[0].message.length > 140 ? '…' : '')
-                        : r.message.replace(/\[USER_REPLY[^\]]*\][\s\S]*/g, '').trim().slice(0, 140);
+                    const preview = r.message.slice(0, 140) + (r.message.length > 140 ? '…' : '');
                     const hasReplies = r.thread && r.thread.length > 1;
                     const adminReplied = r.thread && r.thread.some(function(m) { return m.from === 'admin'; });
                 %>
@@ -162,6 +161,9 @@ const countResolved  = bugReports ? bugReports.filter(r => r.status === 'RESOLVE
     </main>
 </div>
 
+<!-- Hidden inputs for file upload -->
+<input type="file" id="bugAttachmentInput" class="hidden" accept="image/*,application/pdf,text/*">
+
 <!-- ══════════════════════════════════════════════════════════
      TICKET MODAL
 ══════════════════════════════════════════════════════════ -->
@@ -204,28 +206,69 @@ const countResolved  = bugReports ? bugReports.filter(r => r.status === 'RESOLVE
         <!-- ── Body: split ── -->
         <div class="flex flex-col md:flex-row flex-1 overflow-hidden min-h-0">
 
-            <!-- LEFT — Thread + stack -->
-            <div class="flex-1 min-w-0 flex flex-col overflow-hidden border-b md:border-b-0 md:border-r border-white/6">
+            <!-- LEFT — Thread -->
+            <div class="relative flex-1 min-w-0 flex flex-col overflow-hidden border-b md:border-b-0 md:border-r border-white/6">
                 <!-- Thread scroll area -->
-                <div id="modalThread" class="flex-1 overflow-y-auto p-5 space-y-3 min-h-0">
+                <div id="modalThread" class="flex-1 overflow-y-auto p-5 space-y-4 min-h-0 bg-slate-950/20">
                     <!-- injected by JS -->
                 </div>
 
-                <!-- Stack (collapsible) -->
-                <div id="modalStackContainer" class="hidden border-t border-white/6 shrink-0">
-                    <button onclick="toggleStack()" class="w-full flex items-center gap-2 px-5 py-3 text-[10px] font-bold text-rose-400 uppercase tracking-widest hover:bg-rose-500/5 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        <span id="stackToggleLabel">Voir le contexte technique</span>
-                        <svg id="stackChevron" class="w-3.5 h-3.5 ml-auto transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </button>
-                    <div id="stackBody" class="hidden bg-rose-500/5 border-t border-rose-500/20">
-                        <pre id="modalStack" class="p-5 text-[10.5px] text-rose-300 font-mono overflow-x-auto leading-relaxed max-h-40"></pre>
+                <!-- Chat Input Area -->
+                <div class="p-4 bg-slate-900/40 border-t border-white/6">
+                    <div class="relative flex items-center gap-2 bg-black/40 border border-white/8 rounded-2xl p-2 focus-within:border-violet-500/50 transition-all">
+                        <!-- Add button -->
+                        <button onclick="document.getElementById('bugAttachmentInput').click()" class="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all" title="Joindre un fichier">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                        </button>
+
+                        <textarea id="chatInput" placeholder="Rédigez votre réponse…" 
+                            class="flex-1 bg-transparent border-none outline-none text-[13px] text-white placeholder:text-slate-600 py-2.5 resize-none max-h-32 overflow-y-auto leading-relaxed"
+                            rows="1"></textarea>
+
+                        <div class="flex items-center gap-1">
+                            <!-- Image Gallery button -->
+                            <button onclick="toggleGallery()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/5 text-slate-500 hover:text-white transition-all" title="Mes images">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            </button>
+                            <!-- Emoji button -->
+                            <button id="emojiBtn" onclick="toggleEmojiPicker()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/5 text-slate-500 hover:text-white transition-all" title="Émojis">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </button>
+                            <!-- Send button -->
+                            <button onclick="sendChatResponse()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/20 transition-all">
+                                <svg class="w-5 h-5 translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emoji Picker Popup -->
+                <div id="emojiPicker" class="hidden absolute bottom-20 right-8 z-[110] bg-[#111827] border border-white/10 rounded-2xl shadow-2xl p-3 w-72 h-80 flex flex-col">
+                    <div class="flex items-center justify-between mb-2 px-1">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Émojis</span>
+                        <div class="flex gap-2">
+                            <button onclick="setEmojiCat('faces')" class="text-sm">😀</button>
+                            <button onclick="setEmojiCat('objects')" class="text-sm">💡</button>
+                            <button onclick="setEmojiCat('symbols')" class="text-sm">❤️</button>
+                        </div>
+                    </div>
+                    <div id="emojiGrid" class="flex-1 overflow-y-auto grid grid-cols-6 gap-2 p-1"></div>
+                </div>
+
+                <!-- Image Gallery Popup -->
+                <div id="imageGallery" class="hidden absolute bottom-20 right-8 z-[110] bg-[#111827] border border-white/10 rounded-2xl shadow-2xl p-4 w-80 h-96 flex flex-col">
+                    <div class="flex items-center justify-between mb-3 px-1">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Vos images</span>
+                        <button onclick="toggleGallery()" class="text-slate-500 hover:text-white"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                    </div>
+                    <div id="galleryGrid" class="flex-1 overflow-y-auto grid grid-cols-3 gap-2 p-1">
+                        <!-- Loaded via JS -->
                     </div>
                 </div>
             </div>
 
-            <!-- RIGHT — Meta + Respond -->
-            <div class="w-full md:w-80 shrink-0 flex flex-col overflow-y-auto bg-slate-950/30">
+            <!-- RIGHT — Meta + Status + Stack -->
+            <div class="w-full md:w-80 shrink-0 flex flex-col overflow-y-auto bg-slate-900/30">
 
                 <!-- Meta -->
                 <div class="p-5 border-b border-white/6 space-y-4">
@@ -246,51 +289,72 @@ const countResolved  = bugReports ? bugReports.filter(r => r.status === 'RESOLVE
                     <!-- User link -->
                     <div id="modalUserLinkContainer" class="hidden">
                         <a id="modalUserLink" href="#" class="inline-flex items-center gap-2 text-[11px] text-slate-400 hover:text-white transition-colors group/ul">
-                            <svg class="w-3.5 h-3.5 text-slate-600 group-hover/ul:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                            Voir le profil admin
+                            <svg class="w-3.5 h-3.5 text-slate-600 group-hover/ul:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            Voir le profil utilisateur
                         </a>
                     </div>
                 </div>
 
-                <!-- Respond form -->
-                <div class="flex-1 p-5 space-y-3">
-                    <p class="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Répondre</p>
-                    <form id="respondForm" method="POST" class="space-y-3">
-                        <textarea name="message" required placeholder="Rédigez votre réponse…"
-                            class="w-full bg-black/30 border border-white/8 rounded-xl p-3 text-[13px] text-white focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 outline-none transition-all placeholder:text-slate-600 resize-none leading-relaxed"
-                            rows="5"></textarea>
+                <!-- Status -->
+                <div class="p-5 border-b border-white/6 space-y-4">
+                    <p class="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Statut du ticket</p>
+                    
+                    <div class="flex flex-col gap-2">
+                        <label class="relative flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all hover:bg-white/5 has-[:checked]:bg-amber-500/10 has-[:checked]:border-amber-500/30 border-white/5">
+                            <input type="radio" name="ticketStatus" value="PENDING" onchange="updateTicketOption('status', this.value)" class="peer sr-only">
+                            <div class="w-4 h-4 rounded-full border border-slate-600 peer-checked:border-amber-400 flex items-center justify-center transition-colors">
+                                <div class="w-1.5 h-1.5 rounded-full bg-amber-400 opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                            </div>
+                            <span class="text-[12px] font-bold text-slate-400 peer-checked:text-amber-400 transition-colors">En attente</span>
+                        </label>
+                        
+                        <label class="relative flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all hover:bg-white/5 has-[:checked]:bg-blue-500/10 has-[:checked]:border-blue-500/30 border-white/5">
+                            <input type="radio" name="ticketStatus" value="IN_PROGRESS" onchange="updateTicketOption('status', this.value)" class="peer sr-only">
+                            <div class="w-4 h-4 rounded-full border border-slate-600 peer-checked:border-blue-400 flex items-center justify-center transition-colors">
+                                <div class="w-1.5 h-1.5 rounded-full bg-blue-400 opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                            </div>
+                            <span class="text-[12px] font-bold text-slate-400 peer-checked:text-blue-400 transition-colors">En cours</span>
+                        </label>
+                        
+                        <label class="relative flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all hover:bg-white/5 has-[:checked]:bg-emerald-500/10 has-[:checked]:border-emerald-500/30 border-white/5">
+                            <input type="radio" name="ticketStatus" value="RESOLVED" onchange="updateTicketOption('status', this.value)" class="peer sr-only">
+                            <div class="w-4 h-4 rounded-full border border-slate-600 peer-checked:border-emerald-400 flex items-center justify-center transition-colors">
+                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                            </div>
+                            <span class="text-[12px] font-bold text-slate-400 peer-checked:text-emerald-400 transition-colors">Résolu</span>
+                        </label>
+                    </div>
+                </div>
 
-                        <select name="status"
-                            class="w-full bg-black/30 border border-white/8 rounded-xl px-3 py-2.5 text-[12px] text-slate-300 outline-none focus:border-violet-500 transition-colors appearance-none cursor-pointer">
-                            <option value="">— Statut inchangé —</option>
-                            <option value="PENDING">En attente</option>
-                            <option value="IN_PROGRESS">En cours de traitement</option>
-                            <option value="RESOLVED">Résolu</option>
-                        </select>
+                <!-- Stack (collapsible) -->
+                <div id="modalStackContainer" class="hidden shrink-0 mt-auto">
+                    <button onclick="toggleStack()" class="w-full flex items-center gap-2 px-5 py-3 text-[10px] font-bold text-rose-400 uppercase tracking-widest hover:bg-rose-500/5 transition-colors border-t border-white/6">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span>Contexte technique</span>
+                        <svg id="stackChevron" class="w-3.5 h-3.5 ml-auto transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div id="stackBody" class="hidden bg-rose-500/5 border-t border-rose-500/20">
+                        <pre id="modalStack" class="p-5 text-[10.5px] text-rose-300 font-mono overflow-x-auto leading-relaxed max-h-40"></pre>
+                    </div>
+                </div>
 
-                        <div class="grid grid-cols-2 gap-2">
-                            <select name="displayType"
-                                class="bg-black/30 border border-white/8 rounded-xl px-3 py-2.5 text-[11px] text-slate-400 outline-none focus:border-violet-500 transition-colors appearance-none cursor-pointer">
-                                <option value="notification">Notification</option>
-                                <option value="banner">Bannière</option>
-                                <option value="popup">Popup</option>
-                            </select>
-                            <select name="level"
-                                class="bg-black/30 border border-white/8 rounded-xl px-3 py-2.5 text-[11px] text-slate-400 outline-none focus:border-violet-500 transition-colors appearance-none cursor-pointer">
-                                <option value="info">Info</option>
-                                <option value="success">Succès</option>
-                                <option value="warning">Avertissement</option>
-                            </select>
-                        </div>
-
-                        <button type="submit"
-                            class="w-full flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-[12px] font-bold py-2.5 rounded-xl transition-all shadow-lg shadow-violet-900/30 hover:shadow-violet-900/50">
-                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                            Envoyer la réponse
-                        </button>
-                    </form>
+                <!-- Footer Resolve -->
+                <div class="p-5 pt-2">
+                    <button onclick="quickResolve()" id="modalResolveBtn"
+                        class="w-full flex items-center justify-center gap-2 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white border border-emerald-500/20 py-2.5 rounded-xl text-[12px] font-bold transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        Marquer comme résolu
+                    </button>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+<!-- 
+  Delete legacy resolve form 
+  <form id="resolveForm"...> 
+  <textarea name="message"...> (replaced by new input style)
+-->
         </div>
     </div>
 </div>
@@ -304,11 +368,17 @@ const countResolved  = bugReports ? bugReports.filter(r => r.status === 'RESOLVE
 <script>
     const rawData = '<%- Buffer.from(JSON.stringify(bugReports || [])).toString("base64") %>';
     const bugReportsData = JSON.parse(atob(rawData));
+    
+    // Inject admin info from server
+    const currentAdminName = '<%= (typeof adminName !== "undefined" ? adminName : user.userName) %>';
+    const currentAdminAvatar = '<%= (typeof adminAvatar !== "undefined" ? adminAvatar : user.image) %>';
+
+    let openTicketIndex = -1;
+    let selectedStatus = '';
+    let currentSocket = null;
 
     /* ── Filter ───────────────────────────────────── */
-    let currentFilter = 'all';
     function setFilter(status) {
-        currentFilter = status;
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.classList.toggle('active-filter', btn.dataset.filter === status);
         });
@@ -335,90 +405,246 @@ const countResolved  = bugReports ? bugReports.filter(r => r.status === 'RESOLVE
             const row = document.createElement('div');
             row.className = 'flex gap-3 ' + (isAdmin ? 'flex-row-reverse' : '');
 
-            // Avatar dot
-            const dot = document.createElement('div');
-            dot.className = 'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-black uppercase mt-0.5 ' +
+            // Avatar
+            const avatar = document.createElement('div');
+            avatar.className = 'shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-[9px] font-black uppercase overflow-hidden ' +
                 (isAdmin ? 'bg-violet-600/20 text-violet-400 border border-violet-500/30' : 'bg-slate-800 text-slate-400 border border-white/5');
-            dot.textContent = isAdmin ? 'ADM' : 'USR';
+            
+            const avatarImg = (isAdmin && !msg.image) ? currentAdminAvatar : msg.image;
+            if (avatarImg) {
+                avatar.innerHTML = `<img src="${avatarImg}" class="w-full h-full object-cover">`;
+            } else {
+                avatar.textContent = (isAdmin ? (msg.userName || 'ADM') : (msg.userName || 'USR')).substring(0, 2);
+            }
 
             const col = document.createElement('div');
-            col.className = 'flex flex-col gap-1 max-w-[80%] ' + (isAdmin ? 'items-end' : 'items-start');
+            col.className = 'flex flex-col gap-1 max-w-[85%] ' + (isAdmin ? 'items-end' : 'items-start');
+
+            // Name
+            const name = document.createElement('div');
+            name.className = 'text-[10px] font-bold text-slate-500 px-1 mb-0.5';
+            name.textContent = isAdmin ? (msg.userName === 'Admin' ? currentAdminName : msg.userName) : msg.userName;
 
             const bubble = document.createElement('div');
-            bubble.className = 'px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed whitespace-pre-wrap ' +
+            bubble.className = 'px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed markdown-content ' +
                 (isAdmin
-                    ? 'bg-violet-600/20 border border-violet-500/25 text-violet-100 rounded-tr-sm'
-                    : 'bg-slate-800/80 border border-white/5 text-slate-200 rounded-tl-sm');
-            bubble.textContent = msg.message;
+                    ? 'bg-violet-600/30 border border-violet-500/30 text-white rounded-tr-sm'
+                    : 'bg-slate-800 border border-white/10 text-slate-200 rounded-tl-sm');
+            
+            // Use marked to parse markdown
+            bubble.innerHTML = marked.parse(msg.message);
 
             const meta = document.createElement('div');
-            meta.className = 'text-[10px] text-slate-600 font-mono px-1';
+            meta.className = 'text-[9px] text-slate-600 font-mono px-1 flex items-center gap-2';
             meta.textContent = new Date(msg.createdAt).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
 
+            col.appendChild(name);
             col.appendChild(bubble);
             col.appendChild(meta);
-            row.appendChild(dot);
+            row.appendChild(avatar);
             row.appendChild(col);
             container.appendChild(row);
         });
         requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; });
     }
 
-    /* ── Stack toggle ─────────────────────────────── */
+    /* ── Actions ─────────────────────────────── */
+    async function updateTicketOption(key, val) {
+        if (key === 'status') {
+            selectedStatus = val;
+            const ticket = bugReportsData[openTicketIndex];
+            if (!ticket) return;
+
+            try {
+                const resp = await fetch(`/admin/bug-reports/${ticket.id}/resolve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    body: `status=${val}`
+                });
+                if (resp.ok) {
+                    ticket.status = val;
+                    // Mettre à jour la liste à gauche et ré-ouvrir le détail
+                    document.querySelector(`[onclick="openDetails(${openTicketIndex})"] .status-dot`)?.classList.replace(
+                        document.querySelector(`[onclick="openDetails(${openTicketIndex})"] .status-dot`).classList[1],
+                        val === 'RESOLVED' ? 'bg-emerald-400' : val === 'IN_PROGRESS' ? 'bg-blue-400' : 'bg-amber-400'
+                    );
+                    openDetails(openTicketIndex);
+                }
+            } catch (e) {
+                console.error('Failed to update status', e);
+            }
+        }
+    }
+
+    async function sendChatResponse() {
+        const input = document.getElementById('chatInput');
+        const message = input.value.trim();
+        if (!message) return;
+
+        const ticket = bugReportsData[openTicketIndex];
+        if (!ticket) return;
+
+        const formData = new FormData();
+        formData.append('message', message);
+        formData.append('status', selectedStatus || ticket.status);
+        formData.append('level', 'info');
+
+        // Send via AJAX
+        try {
+            const resp = await fetch(`/admin/bug-reports/${ticket.id}/respond`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Accept': 'application/json'
+                },
+                body: new URLSearchParams(formData)
+            });
+            if (resp.ok) {
+                input.value = '';
+                input.style.height = 'auto';
+                // Success - the WebSocket will handle the UI update
+            } else {
+                alert('Erreur lors de l\'envoi');
+            }
+        } catch (e) {
+            alert('Erreur lors de l\'envoi');
+        }
+    }
+
+    async function quickResolve() {
+        const ticket = bugReportsData[openTicketIndex];
+        if (!ticket) return;
+        try {
+            const resp = await fetch(`/admin/bug-reports/${ticket.id}/resolve`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Accept': 'application/json'
+                },
+                body: 'status=RESOLVED'
+            });
+            if (resp.ok) {
+                // Update local data
+                ticket.status = 'RESOLVED';
+                const statusRadio = document.querySelector(`input[name="ticketStatus"][value="RESOLVED"]`);
+                if (statusRadio) statusRadio.checked = true;
+                openDetails(openTicketIndex); // Re-render
+            }
+        } catch (e) { alert('Erreur'); }
+    }
+
+    /* ── UI Helpers ─────────────────────────────── */
     function toggleStack() {
         const body = document.getElementById('stackBody');
         const chevron = document.getElementById('stackChevron');
-        const label = document.getElementById('stackToggleLabel');
         const hidden = body.classList.toggle('hidden');
         chevron.style.transform = hidden ? '' : 'rotate(180deg)';
-        label.textContent = hidden ? 'Voir le contexte technique' : 'Masquer le contexte technique';
     }
 
-    /* ── Status badge helper ──────────────────────── */
-    function statusBadgeHTML(status) {
-        const map = {
-            PENDING:     ['bg-amber-500/10 text-amber-400 border-amber-500/25',  'bg-amber-400 animate-pulse', 'En attente'],
-            IN_PROGRESS: ['bg-blue-500/10 text-blue-400 border-blue-500/25',     'bg-blue-400',                'En cours'],
-            RESOLVED:    ['bg-emerald-500/10 text-emerald-400 border-emerald-500/25', 'bg-emerald-400',         'Résolu'],
+    function toggleEmojiPicker() {
+        const picker = document.getElementById('emojiPicker');
+        const hidden = picker.classList.toggle('hidden');
+        if (!hidden) {
+            document.getElementById('imageGallery').classList.add('hidden');
+            if (!document.getElementById('emojiGrid').children.length) setEmojiCat('faces');
+        }
+    }
+
+    function setEmojiCat(cat) {
+        const grid = document.getElementById('emojiGrid');
+        grid.innerHTML = '';
+        const emojis = {
+            faces: ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','🧐'],
+            objects: ['⌚','📱','💻','⌨️','🖥️','🖨️','🖱️','🖱','🖲️','🕹️','🗜️','💽','💾','💿','📀','📼','📷','📸','📹','🎥','📽️','🎞️','📞','☎️','📟','📠','📺','📻','🎙️','🎚️','🎛️','🧭','⏱️','⏲️','⏰','🕰️','⌛','⏳'],
+            symbols: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟']
         };
-        const [cls, dotCls, label] = map[status] || ['bg-slate-800 text-slate-400 border-slate-700', 'bg-slate-500', status];
-        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${cls}"><span class="w-1.5 h-1.5 rounded-full ${dotCls}"></span>${label}</span>`;
+        emojis[cat].forEach(e => {
+            const btn = document.createElement('button');
+            btn.className = 'text-xl p-1 hover:bg-white/10 rounded-lg transition-all';
+            btn.textContent = e;
+            btn.onclick = () => {
+                document.getElementById('chatInput').value += e;
+                document.getElementById('emojiPicker').classList.add('hidden');
+            };
+            grid.appendChild(btn);
+        });
     }
 
-    /* ── Open modal ───────────────────────────────── */
+    async function toggleGallery() {
+        const gallery = document.getElementById('imageGallery');
+        const hidden = gallery.classList.toggle('hidden');
+        if (!hidden) {
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = '<div class="col-span-3 py-10 text-center text-slate-600 text-[10px]">Chargement...</div>';
+            try {
+                const resp = await fetch('/api/me/uploads');
+                const { uploads } = await resp.json();
+                grid.innerHTML = '';
+                uploads.forEach(u => {
+                    if (u.url.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)) {
+                        const img = document.createElement('img');
+                        img.src = u.url;
+                        img.className = 'w-full aspect-square object-cover rounded-lg border border-white/5 hover:border-violet-500 cursor-pointer transition-all';
+                        img.onclick = () => {
+                            document.getElementById('chatInput').value += `![image](${u.url})`;
+                            gallery.classList.add('hidden');
+                        };
+                        grid.appendChild(img);
+                    }
+                });
+            } catch (e) { grid.innerHTML = '<div class="col-span-3 text-rose-500 text-[10px]">Erreur de chargement.</div>'; }
+        }
+    }
+
+    /* ── File Upload ────────────────────────────── */
+    document.getElementById('bugAttachmentInput').onchange = async function() {
+        const file = this.files[0];
+        if (!file) return;
+        const btn = document.querySelector('button[onclick*="bugAttachmentInput"]');
+        const originalIcon = btn.innerHTML;
+        btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+        
+        const fd = new FormData();
+        fd.append('file', file);
+        try {
+            const resp = await fetch('/api/me/upload?field=misc', { method: 'POST', body: fd });
+            const data = await resp.json();
+            if (data.url) {
+                const input = document.getElementById('chatInput');
+                input.value += (file.type.startsWith('image/') ? `\n![file](${data.url})` : `\n[Fichier joint](${data.url})`);
+            }
+        } catch (e) { alert('Upload échoué'); }
+        btn.innerHTML = originalIcon;
+    };
+
+    /* ── Modal Control ────────────────────────────── */
     function openDetails(index) {
+        openTicketIndex = index;
         const r = bugReportsData[index];
         if (!r) return;
 
-        // Reset stack toggle
-        document.getElementById('stackBody').classList.add('hidden');
-        document.getElementById('stackChevron').style.transform = '';
-        document.getElementById('stackToggleLabel').textContent = 'Voir le contexte technique';
+        // Sync Sidebar
+        const statusRadio = document.querySelector(`input[name="ticketStatus"][value="${r.status}"]`);
+        if (statusRadio) statusRadio.checked = true;
+        selectedStatus = r.status;
 
         document.getElementById('modalIdDisplay').textContent = '#' + r.id;
-        document.getElementById('modalStatusBadge').innerHTML = statusBadgeHTML(r.status);
-
-        // User chip
-        const userChip = document.getElementById('modalUserChip');
-        userChip.textContent = r.user ? r.user.userName + ' · ' + r.user.email : 'Anonyme';
-
-        // User profile link
-        const userLinkContainer = document.getElementById('modalUserLinkContainer');
-        const userLink = document.getElementById('modalUserLink');
-        if (r.user) {
-            userLink.href = '/dashboard/admin?search=' + encodeURIComponent(r.user.email);
-            userLinkContainer.classList.remove('hidden');
-        } else {
-            userLinkContainer.classList.add('hidden');
-        }
-
-        // Date
+        document.getElementById('modalUserChip').textContent = r.user ? r.user.userName + ' · ' + r.user.email : 'Anonyme';
         document.getElementById('modalDate').textContent = new Date(r.createdAt).toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' });
 
-        // Thread
+        const userLink = document.getElementById('modalUserLink');
+        if (r.user) {
+            userLink.href = '/dashboard/admin/users?search=' + encodeURIComponent(r.user.email);
+            document.getElementById('modalUserLinkContainer').classList.remove('hidden');
+        } else {
+            document.getElementById('modalUserLinkContainer').classList.add('hidden');
+        }
+
         renderThread(r.thread || []);
 
-        // Stack
         if (r.stack) {
             document.getElementById('modalStack').textContent = r.stack;
             document.getElementById('modalStackContainer').classList.remove('hidden');
@@ -426,56 +652,98 @@ const countResolved  = bugReports ? bugReports.filter(r => r.status === 'RESOLVE
             document.getElementById('modalStackContainer').classList.add('hidden');
         }
 
-        // URL
         const urlEl = document.getElementById('modalUrl');
         urlEl.textContent = r.url || '—';
         urlEl.onclick = () => { if (r.url) window.open(r.url, '_blank'); };
 
-        // Browser
         const browserContainer = document.getElementById('modalBrowserContainer');
         const browserEl = document.getElementById('modalBrowser');
         browserEl.innerHTML = '';
         if (r.browser && typeof r.browser === 'object') {
             browserContainer.classList.remove('hidden');
-            [['OS', r.browser.platform], ['Écran', r.browser.screen], ['Viewport', r.browser.viewport], ['Langue', r.browser.lang]].forEach(([label, val]) => {
-                const div = document.createElement('div');
-                div.className = 'flex items-center justify-between text-[10.5px] py-1 border-b border-white/4 last:border-0';
-                div.innerHTML = `<span class="text-slate-600">${label}</span><span class="text-slate-400 font-mono">${val || '—'}</span>`;
-                browserEl.appendChild(div);
+            [['OS', r.browser.platform], ['Écran', r.browser.screen], ['Viewport', r.browser.viewport]].forEach(([l, v]) => {
+                const d = document.createElement('div');
+                d.className = 'flex items-center justify-between text-[10px] py-1 border-b border-white/4 last:border-0';
+                d.innerHTML = `<span class="text-slate-600">${l}</span><span class="text-slate-400 font-mono">${v || '—'}</span>`;
+                browserEl.appendChild(d);
             });
-        } else {
-            browserContainer.classList.add('hidden');
-        }
+        } else { browserContainer.classList.add('hidden'); }
 
-        // Forms
-        document.getElementById('resolveForm').action = `/admin/bug-reports/${r.id}/resolve`;
-        document.getElementById('respondForm').action = `/admin/bug-reports/${r.id}/respond`;
-        document.querySelector('#respondForm select[name="status"]').value = '';
-
-        // Resolve button
-        const resolveBtn = document.getElementById('resolveSubmitBtn');
+        const resolveBtn = document.getElementById('modalResolveBtn');
         if (r.status === 'RESOLVED') {
-            resolveBtn.disabled = true;
-            resolveBtn.classList.add('opacity-40', 'cursor-not-allowed');
-            resolveBtn.querySelector('svg').style.display = 'none';
-            resolveBtn.childNodes[resolveBtn.childNodes.length - 1].textContent = 'Déjà résolu';
+            resolveBtn.classList.add('opacity-40', 'pointer-events-none');
+            resolveBtn.textContent = 'Ticket résolu';
         } else {
-            resolveBtn.disabled = false;
-            resolveBtn.classList.remove('opacity-40', 'cursor-not-allowed');
-            resolveBtn.querySelector('svg').style.display = '';
-            resolveBtn.childNodes[resolveBtn.childNodes.length - 1].textContent = 'Résoudre';
+            resolveBtn.classList.remove('opacity-40', 'pointer-events-none');
+            resolveBtn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> Marquer comme résolu`;
         }
 
-        const modal = document.getElementById('detailsModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+        document.getElementById('detailsModal').classList.replace('hidden', 'flex');
+
+        // WebSocket setup
+        if (currentSocket) currentSocket.close();
+        
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        currentSocket = new WebSocket(`${protocol}//${window.location.host}/admin/bug-reports/${r.id}/ws`);
+        
+        currentSocket.onmessage = (event) => {
+            const payload = JSON.parse(event.data);
+            if (payload.type === 'message') {
+                const newMsg = payload.data;
+                if (!r.thread) r.thread = [];
+                // Check if already exists (avoid duplicates if optimistic UI is added later)
+                if (!r.thread.find(m => m.id === newMsg.id)) {
+                    r.thread.push(newMsg);
+                    renderThread(r.thread);
+                }
+            }
+        };
+
+        currentSocket.onclose = () => { currentSocket = null; };
     }
 
     function closeModal() {
-        const modal = document.getElementById('detailsModal');
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        if (currentSocket) {
+            currentSocket.close();
+            currentSocket = null;
+        }
+        document.getElementById('detailsModal').classList.replace('flex', 'hidden');
+        document.getElementById('emojiPicker').classList.add('hidden');
+        document.getElementById('imageGallery').classList.add('hidden');
     }
 
+    // Auto-resize search input
+    document.getElementById('chatInput').addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // Handle click outside to close popups
+    document.addEventListener('mousedown', (e) => {
+        const picker = document.getElementById('emojiPicker');
+        const gallery = document.getElementById('imageGallery');
+        const emojiBtn = document.getElementById('emojiBtn');
+        const galleryBtn = document.querySelector('button[onclick*="toggleGallery"]');
+
+        if (!picker.classList.contains('hidden')) {
+            if (!picker.contains(e.target) && !emojiBtn.contains(e.target)) {
+                picker.classList.add('hidden');
+            }
+        }
+        if (!gallery.classList.contains('hidden')) {
+            if (!gallery.contains(e.target) && !galleryBtn.contains(e.target)) {
+                gallery.classList.add('hidden');
+            }
+        }
+    });
 </script>
+
+<style>
+.markdown-content p { margin-bottom: 0.5rem; }
+.markdown-content p:last-child { margin-bottom: 0; }
+.markdown-content img { max-width: 200px; border-radius: 0.5rem; margin: 0.5rem 0; display: block; }
+.markdown-content a { color: #8b5cf6; text-decoration: underline; }
+.markdown-content code { background: rgba(0,0,0,0.3); padding: 0.1rem 0.3rem; border-radius: 0.25rem; font-family: monospace; }
+</style>

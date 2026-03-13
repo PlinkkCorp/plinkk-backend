@@ -667,19 +667,38 @@
     document.body.appendChild(welcomeEl);
 
     /* --- Bouton de lancement --- */
-    launcherEl = document.createElement('button');
-    launcherEl.id = 'plinkk-tour-launcher';
-    launcherEl.setAttribute('aria-label', 'Lancer le tutoriel');
+    if (localStorage.getItem('plinkk_tour_dismissed') === 'true') return;
+
+    launcherEl = document.createElement('div');
+    launcherEl.id = 'plinkk-tour-launcher-wrapper';
     launcherEl.innerHTML = `
-      <span class="launcher-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+      <button id="plinkk-tour-launcher" aria-label="Lancer le tutoriel">
+        <span class="launcher-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+          </svg>
+        </span>
+        <span class="launcher-text">Guide interactif</span>
+      </button>
+      <button id="plinkk-tour-dismiss" title="Ne plus afficher" aria-label="Masquer définitivement">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
-      </span>
-      <span class="launcher-text">Guide interactif</span>
+      </button>
     `;
-    launcherEl.addEventListener('click', startTour);
+
     document.body.appendChild(launcherEl);
+
+    const btn = launcherEl.querySelector('#plinkk-tour-launcher');
+    const dismiss = launcherEl.querySelector('#plinkk-tour-dismiss');
+
+    btn.addEventListener('click', startTour);
+    dismiss.addEventListener('click', (e) => {
+      e.stopPropagation();
+      localStorage.setItem('plinkk_tour_dismissed', 'true');
+      launcherEl.remove();
+    });
   }
 
   function buildWelcomeHTML() {
@@ -945,7 +964,7 @@
       welcomeEl.classList.add('hidden');
     }
     isActive = true;
-    launcherEl.classList.add('launcher-hidden');
+    if (launcherEl) launcherEl.classList.add('launcher-hidden');
     currentStep = 0;
     showStep(0);
 
@@ -961,7 +980,7 @@
     highlightEl.style.display = 'none';
     cardEl.style.display = 'none';
     cardEl.classList.remove('visible', 'entering');
-    launcherEl.classList.remove('launcher-hidden');
+    if (launcherEl) launcherEl.classList.remove('launcher-hidden');
     document.removeEventListener('keydown', onKeyDown);
     window.removeEventListener('resize', onResize);
     window.removeEventListener('scroll', onScroll);

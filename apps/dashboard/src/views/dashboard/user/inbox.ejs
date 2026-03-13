@@ -7,7 +7,7 @@
 
 <%- include('partials/header-dash.ejs', { user: user }) %>
 
-<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8 min-h-[calc(100vh-72px)]">
   <%- include('partials/asside_dash.ejs', { user: user, active: 'inbox' }) %>
 
   <main class="col-span-12 lg:col-span-10 space-y-6">
@@ -201,7 +201,7 @@
         const textElem = card ? card.querySelector('p') : null;
         const title = titleElem ? titleElem.textContent : 'Ticket';
         const text = textElem ? textElem.textContent : '';
-        window.showBugTicket(id, title, text);
+        window.openBugTicket(id, title);
         return;
       }
     });
@@ -225,7 +225,29 @@
 })();
 </script>
 
-<%- include('partials/bug-ticket-modal.ejs') %>
+
+<script>
+// Auto-open ticket from ?open= query param (used by floating widget redirect)
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const openId = params.get('open');
+  if (openId) {
+    // Wait for openBugTicket to be defined
+    function tryOpen() {
+      if (typeof window.openBugTicket === 'function') {
+        window.openBugTicket(openId, 'Ticket #' + openId.slice(-8));
+      } else {
+        setTimeout(tryOpen, 50);
+      }
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() { setTimeout(tryOpen, 100); });
+    } else {
+      setTimeout(tryOpen, 100);
+    }
+  }
+})();
+</script>
 
 </body>
 </html>
