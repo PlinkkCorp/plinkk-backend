@@ -176,7 +176,7 @@ export async function getUserInboxItems(userId: string, query: InboxQuery = {}) 
         isRead,
       };
     })
-    .filter((item): item is InboxItem => item !== null);
+    .filter(Boolean) as InboxItem[];
 
   const patchItems: InboxItem[] = await Promise.all(
     patchNotes.map(async (note) => {

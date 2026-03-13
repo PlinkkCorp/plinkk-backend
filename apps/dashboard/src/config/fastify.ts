@@ -117,11 +117,10 @@ export async function registerPlugins(fastify: FastifyInstance) {
 
   await fastify.register(fastifyWebsocket);
 
-  await fastify.register(fastifyHttpProxy, {
+  await fastify.register(fastifyHttpProxy as any, {
     upstream: "https://analytics.plinkk.fr/",
     prefix: "/umami_script.js",
     rewritePrefix: "/script.js",
-    undici: false,
     replyOptions: {
       rewriteRequestHeaders: (req, headers: any) => {
         return {
@@ -134,12 +133,10 @@ export async function registerPlugins(fastify: FastifyInstance) {
     },
   });
 
-  // @ts-expect-error - undici property might be missing in types
-  await fastify.register(fastifyHttpProxy, {
+  await fastify.register(fastifyHttpProxy as any, {
     upstream: "https://analytics.plinkk.fr/",
     prefix: "/api/send",
     rewritePrefix: "/api/send",
-    undici: false,
     replyOptions: {
       rewriteRequestHeaders: (req, headers: any) => {
         return {

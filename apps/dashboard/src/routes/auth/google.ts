@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { request as undiciRequest } from "undici";
+// use global fetch instead of undici
 import { prisma } from "@plinkk/prisma";
 import { slugify } from "@plinkk/shared";
 import { createUserSession } from "../../services/sessionService";
@@ -27,15 +27,15 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 				return reply.code(400).send({ success: false, error: "missing_token" });
 			}
 
-			const res = await undiciRequest(
+			const res = await fetch(
 				`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`
 			);
 
-			if (res.statusCode !== 200) {
+			if (res.status !== 200) {
 				return reply.code(400).send({ success: false, error: "invalid_token" });
 			}
 
-			const payload = (await res.body.json()) as GoogleTokenPayload;
+			const payload = (await res.json()) as GoogleTokenPayload;
 
 			const googleClientId = process.env.GOOGLE_OAUTH2_ID || process.env.ID_CLIENT;
 			if (googleClientId && payload.aud && payload.aud !== googleClientId) {

@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { request } from "undici";
+// Use the global fetch API (bun/node) instead of undici
 import "../types/index";
 import { GithubUser } from "../types/githubUser";
 import { prisma } from "@plinkk/prisma";
@@ -9,7 +9,7 @@ import { createDefaultPlinkk } from "../routes/auth/register";
 import { discordUser } from "../types/discordUser";
 
 async function getGitHubUserDetails(token: { access_token: string }) {
-  const res = await request("https://api.github.com/user", {
+  const res = await fetch("https://api.github.com/user", {
     headers: {
       "User-Agent": "plinkk-authentication-server",
       Accept: "application/vnd.github+json",
@@ -17,7 +17,7 @@ async function getGitHubUserDetails(token: { access_token: string }) {
     },
   });
 
-  const resEmail = await request("https://api.github.com/user/emails", {
+  const resEmail = await fetch("https://api.github.com/user/emails", {
     headers: {
       "User-Agent": "plinkk-authentication-server",
       Accept: "application/vnd.github+json",
@@ -25,10 +25,10 @@ async function getGitHubUserDetails(token: { access_token: string }) {
     },
   });
 
-  const user = (await res.body.json()) as GithubUser;
+  const user = (await res.json()) as GithubUser;
 
   const primaryEmail = (
-    (await resEmail.body.json()) as { email: string; primary: boolean }[]
+    (await resEmail.json()) as { email: string; primary: boolean }[]
   ).find((email) => email.primary)?.email;
 
   if (user.email === null) {
@@ -39,14 +39,14 @@ async function getGitHubUserDetails(token: { access_token: string }) {
 }
 
 async function getDiscordUserDetails(token: { access_token: string }) {
-  const res = await request("https://discord.com/api/users/@me", {
+  const res = await fetch("https://discord.com/api/users/@me", {
     headers: {
       "User-Agent": "plinkk-authentication-server",
-      Accept: "application/vnd.github+json",
+      Accept: "application/json",
       Authorization: `Bearer ${token.access_token}`,
     },
   });
-  const user = (await res.body.json()) as discordUser;
+  const user = (await res.json()) as discordUser;
 
   return user;
 }
