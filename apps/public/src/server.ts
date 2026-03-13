@@ -42,7 +42,7 @@ import fastifyRateLimit from "@fastify/rate-limit";
 import fastifyCompress from "@fastify/compress";
 import fastifyHttpProxy from "@fastify/http-proxy";
 import { AppError } from "@plinkk/shared";
-import { apiBugReportsRoutes } from "../../dashboard/src/server/api/bug-reports";
+import { apiBugReportsRoutes } from "@plinkk/shared";
 
 const fastify = Fastify({
   logger: true,

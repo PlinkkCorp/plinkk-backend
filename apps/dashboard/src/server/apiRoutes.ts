@@ -19,7 +19,7 @@ import { apiStripeRoutes } from "./api/stripe";
 import { UnauthorizedError, ForbiddenError, BadRequestError, ConflictError } from "@plinkk/shared";
 import { apiAdminMaintenanceRoutes } from "./api/admin/maintenance";
 import { apiAdminEmailsRoutes } from "./api/admin/emails";
-import { apiBugReportsRoutes } from "./api/bug-reports";
+import { apiBugReportsRoutes } from "@plinkk/shared";
 import { apiAdminPartnersRoutes } from "./api/admin/partners";
 import { apiAdminAffiliateRoutes } from "./api/admin/affiliate";
 import { apiAdminPatchNotesRoutes } from "./api/admin/patchnotes";
