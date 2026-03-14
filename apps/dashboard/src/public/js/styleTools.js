@@ -8,11 +8,11 @@ function getProfileData() {
     try {
         if (typeof profileData !== 'undefined') return profileData;
     }
-    catch (e) { }
+    catch (e) { console.error('Caught error', e); }
     try {
         if (typeof window !== 'undefined' && window.__PLINKK_PROFILE_DATA__) return window.__PLINKK_PROFILE_DATA__;
     }
-    catch (e) { }
+    catch (e) { console.error('Caught error', e); }
     return undefined;
 }
 export function applyFirstTheme(theme) {

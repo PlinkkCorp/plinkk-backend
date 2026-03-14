@@ -30,8 +30,8 @@ try {
   if (typeof window !== 'undefined') {
     window.__DASH_PICKERS__ = window.__DASH_PICKERS__ || {};
     window.__DASH_PICKERS__.iconSelect = (v) => {
-      try { if (iconSelectCallback) iconSelectCallback(v); } catch (e) { }
-      try { closeIconModal(); } catch (e) { }
+      try { if (iconSelectCallback) iconSelectCallback(v); } catch (e) { console.error('Caught error', e); }
+      try { closeIconModal(); } catch (e) { console.error('Caught error', e); }
     };
     window.__DASH_PICKERS__.openPicker = openPicker;
     window.__DASH_PICKERS__.closePicker = closePicker;
@@ -42,7 +42,7 @@ try {
       userUploadsCache = null;
     };
   }
-} catch (e) { }
+} catch (e) { console.error('Caught error', e); }
 
 async function switchTab(tabName) {
   document.querySelectorAll('.icon-tab-btn').forEach(btn => {
@@ -507,7 +507,7 @@ export function ensurePlatformEntryModal() {
       country: fieldCountry.value.trim(),
       path: fieldPath.value.trim(),
     };
-    try { submitCb(payload); } catch { }
+    try { submitCb(payload); } catch (e) { console.error('Caught error', e); }
     close();
   });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !wrapper.classList.contains('hidden')) close(); });
@@ -520,7 +520,7 @@ export function openPlatformEntryModal(platform, cb) {
   const m = ensurePlatformEntryModal();
   m.open(platform, cb);
 }
-try { window.__OPEN_PLATFORM_MODAL__ = openPlatformEntryModal; } catch { }
+try { window.__OPEN_PLATFORM_MODAL__ = openPlatformEntryModal; } catch (e) { console.error('Caught error', e); }
 
 export function getPickerContext() {
   return { pickerGrid, openPicker, closePicker, openPlatformEntryModal };

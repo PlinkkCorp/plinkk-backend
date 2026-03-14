@@ -818,10 +818,10 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
         if (p.description !== undefined) modalDesc.value = p.description || '';
         if (p.categoryId !== undefined && modalCat) modalCat.value = p.categoryId || '';
         if (p.newTab !== undefined && modalNewTab) modalNewTab.checked = !!p.newTab;
-      } catch (e) { }
+      } catch (e) { console.error('Caught error', e); }
       if (opts.onSave && modal) modal._externalSaveHandler = opts.onSave;
     };
-  } catch (e) { }
+  } catch (e) { console.error('Caught error', e); }
   // Separate social modal helper that reuses link modal DOM but marks mode and allows different save handling
   try {
     window.__OPEN_SOCIAL_MODAL__ = (idx, opts) => {
@@ -853,10 +853,10 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
         if (p.description !== undefined) modalDesc.value = p.description || '';
         if (p.categoryId !== undefined && modalCat) modalCat.value = p.categoryId || '';
         if (p.newTab !== undefined && modalNewTab) modalNewTab.checked = !!p.newTab;
-      } catch (e) { }
+      } catch (e) { console.error('Caught error', e); }
       if (opts.onSave && modal) modal._externalSaveHandler = opts.onSave;
     };
-  } catch (e) { }
+  } catch (e) { console.error('Caught error', e); }
 
   // When opening in social mode, adapt the modal DOM: hide category/newTab, change header, ensure platform button visible
   try {
@@ -868,25 +868,25 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       try {
         const header = modal.querySelector('h2') || modal.querySelector('.modal-title');
         if (header) header.textContent = isSocial ? 'Modifier le réseau social' : 'Modifier le lien';
-      } catch (e) { }
+      } catch (e) { console.error('Caught error', e); }
       // hide title and description and category for social mode
       try {
         const titleEl = document.getElementById('linkModalTitleInput');
         if (titleEl && titleEl.parentElement) titleEl.parentElement.style.display = isSocial ? 'none' : '';
-      } catch (e) { }
+      } catch (e) { console.error('Caught error', e); }
       try {
         const desc = document.getElementById('linkModalDescInput');
         if (desc && desc.parentElement) desc.parentElement.style.display = isSocial ? 'none' : '';
-      } catch (e) { }
+      } catch (e) { console.error('Caught error', e); }
       try {
         const cat = document.getElementById('linkModalCategory');
         if (cat && cat.parentElement) cat.parentElement.style.display = isSocial ? 'none' : '';
-      } catch (e) { }
+      } catch (e) { console.error('Caught error', e); }
       // show newTab checkbox wrapper for social mode
       try {
         const newTab = document.getElementById('linkModalNewTab');
         if (newTab && newTab.parentElement) newTab.parentElement.style.display = isSocial ? '' : '';
-      } catch (e) { }
+      } catch (e) { console.error('Caught error', e); }
       // add presets button above URL for social mode
       try {
         const modalContent = document.querySelector('#linkModal .space-y-3');
@@ -1093,7 +1093,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
         });
       });
 
-    } catch (e) { }
+    } catch (e) { console.error('Caught error', e); }
     // scheme menu toggle and selection handlers
     if (modalSchemeBtn && modalSchemeMenu && !modalSchemeBtn._bound) {
       modalSchemeBtn.addEventListener('click', (e) => {

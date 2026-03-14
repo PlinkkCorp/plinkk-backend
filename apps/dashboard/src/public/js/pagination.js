@@ -27,7 +27,7 @@
         url.search = params.toString();
         if (push) window.history.pushState({[urlParamName]: page}, '', url.toString());
         else window.history.replaceState({[urlParamName]: page}, '', url.toString());
-      }catch(e){ /* ignore */ }
+      }catch (e) { console.error('Caught error', e); }
     }
 
     window.addEventListener('popstate', () => {

@@ -70,7 +70,7 @@ export function createProfileContainer(profileData) {
             }
         }
         catch (e) {
-            try { this.style.display = 'none'; profilePicWrapper.classList.remove('animate-pulse', 'bg-white/10'); } catch (e) { }
+            try { this.style.display = 'none'; profilePicWrapper.classList.remove('animate-pulse', 'bg-white/10'); } catch (e) { console.error('Caught error', e); }
         }
     };
     profilePic.alt = "Profile Picture";
@@ -114,13 +114,13 @@ export function createProfileContainer(profileData) {
                 return;
             }
         }
-        catch (e) { }
+        catch (e) { console.error('Caught error', e); }
         try {
             this.onerror = null;
             this.style.display = 'none';
             profileIconWrapper.style.display = 'none';
         }
-        catch (e) { }
+        catch (e) { console.error('Caught error', e); }
     };
     profileIcon.onload = function () {
         this.classList.remove('opacity-0');
@@ -1135,7 +1135,7 @@ export function createLinkBoxes(profileData) {
             } else if (isAndroid && link.androidUrl && link.androidUrl.trim()) {
                 finalUrl = link.androidUrl;
             }
-        } catch (e) { }
+        } catch (e) { console.error('Caught error', e); }
 
         if (isSafeUrl(finalUrl)) {
             // Apply redirection

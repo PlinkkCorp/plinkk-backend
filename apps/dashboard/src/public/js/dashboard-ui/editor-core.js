@@ -72,7 +72,7 @@ async function saveLayout(order) {
         if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.layoutOrder = res.layoutOrder;
         if (window.__EDITOR_STORE__) window.__EDITOR_STORE__.set({ layoutOrder: res.layoutOrder });
         if (window.__PLINKK_SYNC_LAYOUT__) {
-            try { window.__PLINKK_SYNC_LAYOUT__(res.layoutOrder); } catch { }
+            try { window.__PLINKK_SYNC_LAYOUT__(res.layoutOrder); } catch (e) { console.error('Caught error', e); }
         }
         renderPlinkk(currentConfig);
     }
@@ -361,7 +361,7 @@ function renderPlinkk(config) {
                         isSpotify = true;
                         if (!urlObj.pathname.includes('/embed')) embedUrl = `https://open.spotify.com/embed${urlObj.pathname}`;
                     }
-                } catch (e) { }
+                } catch (e) { console.error('Caught error', e); }
 
                 let style = 'width:100%;border:none;display:block;';
                 if (isSpotify) style += 'height:152px;';

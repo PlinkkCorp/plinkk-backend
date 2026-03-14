@@ -211,7 +211,7 @@ export class HistoryManager {
                 // user returned to original view — show a small toast
                 window.showPreviewToast('Retour à la vue originale');
             }
-        } catch (e) { /* ignore DOM errors */ }
+        } catch (e) { console.error('Caught error', e); }
         if (window.switchSidebarMode) window.switchSidebarMode('live');
     }
 
