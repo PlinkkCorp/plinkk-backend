@@ -105,7 +105,7 @@ export const emailQueueService = {
           text: email.text,
           from: email.from,
           replyTo: email.replyTo,
-          tags: email.tags as any,
+          tags: email.tags,
           critical: false, // Les emails en queue ne sont jamais critiques
         }, email.emailType || "other");
 
@@ -210,7 +210,7 @@ export const emailQueueService = {
     limit: number = 100
   ): Promise<QueuedEmail[]> {
     return prisma.emailQueue.findMany({
-      where: status ? { status: status as any } : {},
+      where: status ? { status: status } : {},
       orderBy: [
         { priority: "desc" },
         { createdAt: "desc" }

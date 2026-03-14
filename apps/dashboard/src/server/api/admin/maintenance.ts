@@ -55,7 +55,7 @@ export async function apiAdminMaintenanceRoutes(fastify: FastifyInstance) {
             });
 
             if (userId) {
-                await logDetailedAdminAction(userId, 'UPDATE_MAINTENANCE', undefined, current, updated, (request as any).ip);
+                await logDetailedAdminAction(userId, 'UPDATE_MAINTENANCE', undefined, current, updated, (request).ip);
             }
 
             return reply.send(updated);

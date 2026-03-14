@@ -83,7 +83,7 @@ export function dashboardAdminBugReportsRoutes(fastify: FastifyInstance) {
                     }
                 },
                 take: 100,
-            }) as any[];
+            });
 
             // For each bug report, construct the thread including the original message and all replies
             const bugReportsWithThreads = bugReports.map((report) => {

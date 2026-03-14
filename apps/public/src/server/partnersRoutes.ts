@@ -21,19 +21,19 @@ export function partnersRoutes(fastify: FastifyInstance) {
                 by: ['partnerId'],
                 where: { partnerId: { in: partnerIds } },
                 _sum: { views: true, clicks: true }
-            }) : [] as any[];
+            }) : [];
 
             const quests = partnerIds.length > 0 ? await prisma.partnerQuest.findMany({
                 where: { partnerId: { in: partnerIds } },
                 select: { id: true, partnerId: true }
-            }) : [] as any[];
+            }) : [];
 
             const questIds = quests.map(q => q.id);
             const userQuestSums = questIds.length > 0 ? await prisma.userQuest.groupBy({
                 by: ['partnerQuestId'],
                 where: { partnerQuestId: { in: questIds } },
                 _sum: { gemsRewarded: true }
-            }) : [] as any[];
+            }) : [];
 
             const statsMap = new Map<string, { views: number; clicks: number }>();
             statsAgg.forEach(s => {
@@ -54,7 +54,7 @@ export function partnersRoutes(fastify: FastifyInstance) {
             // Attach aggregated stats to partner objects (non-breaking: added field `stats`)
             partners.forEach(p => {
                 const s = statsMap.get(p.id) || { views: 0, clicks: 0 };
-                (p as any).stats = {
+                p.stats = {
                     views: s.views,
                     clicks: s.clicks,
                     gemsAwarded: gemsMap.get(p.id) || 0

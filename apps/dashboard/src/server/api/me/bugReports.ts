@@ -87,7 +87,7 @@ export function apiMeBugReportsRoutes(fastify: FastifyInstance) {
                     }
                 }
             }
-        }) as any;
+        });
 
         if (!bugReport || bugReport.userId !== id) {
             throw new NotFoundError("Bug report not found");

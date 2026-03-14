@@ -87,8 +87,8 @@ export function onboardingRoutes(fastify: FastifyInstance) {
 
       await prisma.onboardingDraft.upsert({
         where: { userId },
-        create: { userId, step, data: safeData as any },
-        update: { step, data: safeData as any },
+        create: { userId, step, data: safeData },
+        update: { step, data: safeData },
       });
 
       return reply.send({ ok: true });
