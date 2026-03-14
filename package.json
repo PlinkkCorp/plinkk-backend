@@ -38,4 +38,7 @@
     "schema": "packages/prisma/prisma/schema.prisma"
   },
   "private": true
+  ,"overrides": {
+    "@types/pg": "8.18.0"
+  }
 }

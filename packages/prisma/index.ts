@@ -40,6 +40,8 @@ const poolConfig = {
   ssl: config.ssl ? config.ssl as boolean | { rejectUnauthorized?: boolean } : undefined,
 } satisfies PoolConfig;
 
+// Create a Pool instance and pass it to PrismaPg. With the workspace override
+// for `@types/pg` this should avoid cross-version type identity issues.
 const pool = new Pool(poolConfig);
 const adapter = new PrismaPg(pool);
 export const prisma = new PrismaClient({ adapter });
