@@ -18,7 +18,7 @@
                         class="absolute top-0 right-0 inline-flex items-center gap-2 px-4 py-2 bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl shadow-xl shadow-violet-900/20 transform hover:scale-105 transition-transform cursor-default">
                         <div
                             class="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-inner">
-                            <img src="/public/images/gems.svg" alt="Gems" class="w-5 h-5 shrink-0" />
+                            <img src="<% cdnUrl %>/icons/gems.svg" alt="Gems" class="w-5 h-5 shrink-0" />
                         </div>
                         <div class="text-left">
                             <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Vos Plinkk Gems
@@ -33,7 +33,7 @@
 
                         <div
                             class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400 text-sm font-medium mb-6">
-                            <img src="/public/images/gems.svg" alt="Gems" class="w-4 h-4 shrink-0" />
+                            <img src="<% cdnUrl %>/icons/gems.svg" alt="Gems" class="w-4 h-4 shrink-0" />
                             Partenaires & Récompenses
                         </div>
                         <h1 class="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
@@ -196,7 +196,7 @@
 
                                         const btnIcon = completed
                                             ? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>'
-                                            : `<span class="flex items-center gap-1 font-bold"><img src="/public/images/gems.svg" alt="Gems" class="w-4 h-4 shrink-0 gem-icon" /> +${quest.rewardGems}</span>`;
+                                            : `<span class="flex items-center gap-1 font-bold"><img src="${window.__PLINKK_CDN_URL__}/icons/gems.svg" alt="Gems" class="w-4 h-4 shrink-0 gem-icon" /> +${quest.rewardGems}</span>`;
 
                                         const btnAction = completed
                                             ? `onclick="window.open('${quest.actionUrl}', '_blank')"`
@@ -254,7 +254,7 @@
             
             <div class="border-t border-slate-800/60 pt-4">
               <div class="flex items-center gap-2 mb-2">
-                <img src="/public/images/gems.svg" alt="Gems" class="w-4 h-4 shrink-0" />
+                <img src="${window.__PLINKK_CDN_URL__}/icons/gems.svg" alt="Gems" class="w-4 h-4 shrink-0" />
                 <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Quêtes disponibles</span>
               </div>
               <div class="space-y-1">
