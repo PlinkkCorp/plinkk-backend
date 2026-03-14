@@ -1,5 +1,11 @@
-<%- include('partials/head.ejs', { title: 'Soumissions' , description: 'Consultez les soumissions de vos formulaires.' ,
-    robots: 'noindex,nofollow' }) %>
+<%- include('partials/head.ejs', { 
+    title: 'Soumissions',
+    description: 'Consultez les soumissions de vos formulaires. Suivez et gérez vos leads efficacement.',
+    metaKeywords: 'soumissions, formulaires, leads, données, collecte, gestion',
+    metaAuthor: 'Plinkk',
+    pageThemeColor: 'success',
+    robots: 'noindex,nofollow'
+}) %>
     <%- include('partials/header-dash.ejs', { user: user }) %>
 
         <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
@@ -184,6 +190,9 @@
                     </div>
 
                 </main>
+
+    <!-- Tutorial -->
+    <script src="/public/js/tutorial.js" defer></script>
         </div>
 
         <script>

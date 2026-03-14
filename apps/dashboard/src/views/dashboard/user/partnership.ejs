@@ -1,6 +1,11 @@
-<%- include('partials/head.ejs', { title: 'Gestion Partenariat' ,
-    description: 'Gérez vos liens affiliés et suivez vos statistiques de partenariat.' , robots: 'noindex,nofollow' })
-    %>
+<%- include('partials/head.ejs', { 
+    title: 'Gestion Partenariat',
+    description: 'Gérez vos liens affiliés et suivez vos statistiques de partenariat. Monitorez vos revenus.',
+    metaKeywords: 'partenariat, affiliation, statistiques, revenus, gestion, suivi',
+    metaAuthor: 'Plinkk',
+    pageThemeColor: 'success',
+    robots: 'noindex,nofollow'
+}) %>
     <%- include('partials/header-dash.ejs', { user: user }) %>
 
         <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
@@ -144,6 +149,9 @@
                         </div>
                     </div>
                 </main>
+
+    <!-- Tutorial -->
+    <script src="/public/js/tutorial.js" defer></script>
         </div>
 
         <!-- MODAL CREATE LINK -->

@@ -204,6 +204,14 @@
                             <span class="font-medium">Maintenance</span>
                         </a>
                     <% } %>
+
+                    <a href="<%= hasPerm('MANAGE_SITE_SETTINGS') ? '/admin/settings' : '#' %>"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 <%= linkClass('settings', 'MANAGE_SITE_SETTINGS') %>">
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 2a4 4 0 100 8 4 4 0 000-8zM2 18a8 8 0 0116 0H2z" />
+                        </svg>
+                        <span class="font-medium">Paramètres</span>
+                    </a>
                 </div>
         </nav>
 

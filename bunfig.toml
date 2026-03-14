@@ -1,0 +1,23 @@
+[install]
+# Workspace configuration
+workspaces = ["apps/*", "packages/*"]
+
+# Installation options
+production = false
+optional = true
+dev = true
+peer = true
+
+# Lockfile
+frozenLockfile = false
+
+# Trust
+registry = "https://registry.npmjs.org/"
+
+[install.cache]
+# Cache directory
+dir = "~/.bun/install/cache"
+
+# Scoped registries
+# [install.scopes]
+# "@myorg" = { url = "https://registry.myorg.com/", token = "$NPM_TOKEN" }

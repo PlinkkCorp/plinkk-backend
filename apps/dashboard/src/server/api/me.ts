@@ -2,12 +2,13 @@ import { FastifyInstance } from "fastify";
 import { authenticator } from "otplib";
 import z from "zod";
 import { verifyDomain } from "../../lib/verifyDNS";
-import bcrypt from "bcrypt";
 import QRCode from "qrcode";
 import { User, prisma, Prisma } from "@plinkk/prisma";
 import { apiMeThemesRoutes } from "./me/theme";
 import { apiMePlinkksRoutes } from "./me/plinkks/index";
 import { apiMeRedirectsRoutes } from "./me/redirects";
+import { apiMeInboxRoutes } from "./me/inbox";
+import { apiMeBugReportsRoutes } from "./me/bugReports";
 import crypto from "crypto";
 import { ListObjectsV2Command, _Object, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getS3Client } from "@plinkk/shared";
@@ -31,6 +32,8 @@ export function apiMeRoutes(fastify: FastifyInstance) {
   fastify.register(apiMeThemesRoutes, { prefix: "/themes" });
   fastify.register(apiMePlinkksRoutes, { prefix: "/plinkks" });
   fastify.register(apiMeRedirectsRoutes, { prefix: "/redirects" });
+  fastify.register(apiMeInboxRoutes, { prefix: "/inbox" });
+  fastify.register(apiMeBugReportsRoutes, { prefix: "/bug-reports" });
 
   fastify.get("/dashboard-summary", async (request, reply) => {
     const userId = request.session.get("data") as string | { id: string } | null | undefined;
@@ -210,15 +213,15 @@ export function apiMeRoutes(fastify: FastifyInstance) {
 
     if (hasPwd) {
       if (!currentPassword) return reply.code(400).send({ error: "Mot de passe actuel requis" });
-      const ok = await bcrypt.compare(currentPassword, user.password);
+      const ok = await Bun.password.verify(currentPassword, user.password);
       if (!ok) return reply.code(403).send({ error: "Mot de passe actuel incorrect" });
     }
 
-    if (await bcrypt.compare(newPassword, user.password))
+    if (await Bun.password.verify(newPassword, user.password))
       return reply
         .code(400)
         .send({ error: "Nouveau mot de passe identique à l'actuel" });
-    const hashed = await bcrypt.hash(newPassword, 10);
+    const hashed = await Bun.password.hash(newPassword);
     await prisma.user.update({
       where: { id: userId as string },
       data: { password: hashed, hasPassword: true },
@@ -244,7 +247,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     if (!password)
       return reply.code(400).send({ error: "Mot de passe requis" });
 
-    const ok = await bcrypt.compare(password, me.password);
+    const ok = await Bun.password.verify(password, me.password);
     if (!ok) return reply.code(403).send({ error: "Mot de passe incorrect" });
     if (me.twoFactorEnabled) {
       if (!otp || typeof otp !== "string")

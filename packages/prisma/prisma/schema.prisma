@@ -69,9 +69,13 @@ model User {
   affiliateLinks        AffiliateLink[]
   partner               Partner?
   emailCampaigns        EmailCampaign[]
+  emailTemplates        EmailTemplate[]
   patchNotes            PatchNote[]
   qrCodes               QrCode[]
   qrCodeScans           QrCodeScan[]
+  inboxReads            InboxRead[]
+  onboardingCompleted   Boolean              @default(false)
+  onboardingDraft       OnboardingDraft?
 }
 
 model Connection {
@@ -128,15 +132,49 @@ model Report {
 }
 
 model BugReport {
+  id             String        @id @default(nanoid(16))
+  message        String // Original report message
+  url            String?
+  stack          String?
+  status         String        @default("PENDING")
+  userId         String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now()) @updatedAt
+  user           User?         @relation(fields: [userId], references: [id])
+  conversationId String?       @unique
+  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+}
+
+model Conversation {
+  id               String                @id @default(nanoid(16))
+  type             String? // e.g., "BUG_REPORT"
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @default(now()) @updatedAt
+  messages         ConversationMessage[]
+  bugReport        BugReport?
+}
+
+model ConversationMessage {
+  id             String       @id @default(nanoid(16))
+  conversationId String
+  from           String // "user" or "admin"
+  message        String
+  senderId       String? // userId of the sender
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+model InboxRead {
   id        String   @id @default(nanoid(16))
-  message   String
-  url       String?
-  stack     String?
-  status    String   @default("PENDING")
-  userId    String?
+  userId    String
+  itemId    String
+  itemType  String
+  readAt    DateTime @default(now())
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  user      User?    @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId, itemType])
+  @@index([userId, readAt])
 }
 
 model Role {
@@ -191,13 +229,13 @@ model Cosmetic {
 
 model Link {
   id                     String    @id @default(nanoid(16))
-  icon                   String?   @default("https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png")
+  icon                   String?   @default("https://cdn.plinkk.fr/icons/link-generic.svg")
   url                    String    @default("https://github.com/link")
   text                   String?   @default("Link")
-  name                   String?   @default("Github")
-  description            String?   @default("Ma description")
+  name                   String?   @default("Link")
+  description            String?
   showDescriptionOnHover Boolean?  @default(true)
-  showDescription        Boolean?  @default(true)
+  showDescription        Boolean?  @default(false)
   clicks                 Int       @default(0)
   userId                 String
   plinkkId               String?
@@ -301,16 +339,17 @@ model PlinkkStatusbar {
 }
 
 model Announcement {
-  id          String                   @id @default(nanoid(16))
-  level       String                   @default("info")
+  id          String                    @id @default(nanoid(16))
+  level       String                    @default("info")
   text        String
-  dismissible Boolean                  @default(true)
+  dismissible Boolean                   @default(true)
   startAt     DateTime?
   endAt       DateTime?
-  createdAt   DateTime                 @default(now())
-  global      Boolean                  @default(false)
-  displayType String                   @default("banner")
-  platform    String                   @default("all")
+  createdAt   DateTime                  @default(now())
+  global      Boolean                   @default(false)
+  displayType String                    @default("banner")
+  platform    String                    @default("all")
+  priority    NotificationPriority      @default(NORMAL)
   roleTargets AnnouncementRoleTarget[]
   targets     AnnouncementTarget[]
 }
@@ -639,6 +678,46 @@ model Maintenance {
   maintenancePages String[]  @default([])
 }
 
+/// Paramètres globaux du site (webhooks, features flags, etc.)
+model SiteSetting {
+  key       String   @id
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// File d'attente pour emails différés (mode économie)
+model EmailQueue {
+  id        String   @id @default(nanoid(16))
+  to        String[] // Destinataires
+  subject   String
+  html      String?  @db.Text
+  text      String?  @db.Text
+  from      String?
+  replyTo   String?
+  tags      Json?    // Tags Resend
+  emailType String   // "campaign", "welcome", etc.
+  priority  Int      @default(0) // 0 = normal, 10 = haute priorité
+  status    EmailQueueStatus @default(PENDING)
+  scheduledFor DateTime? // Date d'envoi planifiée
+  attempts  Int      @default(0)
+  lastAttempt DateTime?
+  error     String?  @db.Text
+  sentAt    DateTime?
+  createdAt DateTime @default(now())
+  
+  @@index([status, scheduledFor])
+  @@index([createdAt])
+}
+
+enum EmailQueueStatus {
+  PENDING    // En attente
+  PROCESSING // En cours de traitement
+  SENT       // Envoyé avec succès
+  FAILED     // Échec définitif
+  CANCELLED  // Annulé manuellement
+}
+
 enum ThemeStatus {
   DRAFT
   SUBMITTED
@@ -660,6 +739,12 @@ enum PlinkkEventType {
 enum GravatarSource {
   PRIMARY
   PUBLIC
+}
+
+enum NotificationPriority {
+  URGENT
+  NORMAL
+  INFO
 }
 
 enum QrTargetType {
@@ -789,26 +874,126 @@ model EmailCampaign {
   recipientType String   @default("all") // all, staff, admin, custom
   sentCount     Int      @default(0)
   failedCount   Int      @default(0)
+  openCount     Int      @default(0)
+  clickCount    Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
   createdById   String
+  templateId    String?
 
-  createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdBy      User                 @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  template       EmailTemplate?       @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  trackingEvents EmailTrackingEvent[]
+
+  @@index([createdById])
+  @@index([createdAt])
+  @@index([templateId])
+}
+
+model EmailTemplate {
+  id          String          @id @default(nanoid(16))
+  name        String          @unique
+  subject     String
+  title       String
+  message     String
+  actionText  String?
+  actionUrl   String?
+  category    String          @default("announcement")
+  isSystem    Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @default(now()) @updatedAt
+  createdById String?
+
+  createdBy User?           @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  campaigns EmailCampaign[]
 
   @@index([createdById])
   @@index([createdAt])
 }
 
+model EmailTrackingEvent {
+  id             String         @id @default(nanoid(16))
+  campaignId     String
+  recipientEmail String
+  type           EmailEventType
+  createdAt      DateTime       @default(now())
+  userAgent      String?
+  ip             String?
+
+  campaign EmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, type])
+  @@index([createdAt])
+  @@index([recipientEmail])
+  @@unique([campaignId, recipientEmail, type])
+}
+
+enum EmailEventType {
+  OPEN
+  CLICK
+}
+
+// ─── Inscription Email-only (OTP + Magic Link) ────────────────────────────────
+
+model OtpCode {
+  id             String    @id @default(nanoid(16))
+  email          String
+  codeHash       String
+  magicToken     String    @unique
+  expiresAt      DateTime
+  verifyAttempts Int       @default(0)
+  sendCount      Int       @default(1)
+  lastSentAt     DateTime  @default(now())
+  blockedUntil   DateTime?
+  used           Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+
+  @@index([email])
+  @@index([magicToken])
+  @@index([createdAt])
+}
+
+// ─── Brouillon auto-save onboarding ──────────────────────────────────────────
+
+model OnboardingDraft {
+  userId    String   @id
+  step      Int      @default(1)
+  data      Json     @default("{}")
+  updatedAt DateTime @default(now()) @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Suivi quota email mensuel ────────────────────────────────────────────────
+
+model EmailQuotaLog {
+  month     String
+  type      String
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@id([month, type])
+  @@index([month])
+}
+
+// ─── Configuration système (clé/valeur) ──────────────────────────────────────
+
+model SystemConfig {
+  key       String   @id
+  value     String
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
 model PatchNote {
-  id          String   @id @default(nanoid(16))
-  title       String
-  version     String   @unique
-  content     String   // Markdown content
-  isPublished Boolean  @default(false)
-  publishedAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
-  createdById String
+  id             String   @id @default(nanoid(16))
+  title          String
+  version        String   @unique
+  content        String   // Markdown content
+  isPublished    Boolean  @default(false)
+  notifyEveryone Boolean  @default(true) // Mention @everyone dans Discord
+  publishedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+  createdById    String
 
   createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
 

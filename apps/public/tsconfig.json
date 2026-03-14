@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "moduleResolution": "node16",
-        "types": ["node"],
+        "types": ["node", "bun"],
         "lib": ["ES2021"],
         "module": "node16",
         "target": "es2022",

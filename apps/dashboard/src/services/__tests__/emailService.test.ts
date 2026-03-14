@@ -2,10 +2,10 @@
  * Script de test pour le service d'email
  * 
  * Usage:
- *   ts-node apps/dashboard/src/services/__tests__/emailService.test.ts
+ *   bun apps/dashboard/src/services/__tests__/emailService.test.ts
  * 
  * Ou:
- *   pnpm --filter @plinkk/dashboard exec ts-node src/services/__tests__/emailService.test.ts
+ *   bun src/services/__tests__/emailService.test.ts
  */
 
 import { EmailService } from "../emailService";

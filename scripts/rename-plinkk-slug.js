@@ -16,7 +16,7 @@ async function findAvailable(base) {
 async function main() {
   const slug = process.argv[2];
   if (!slug) {
-    console.error('Usage: node scripts/rename-plinkk-slug.js <existing-slug>');
+    console.error('Usage: bun scripts/rename-plinkk-slug.js <existing-slug>');
     process.exit(2);
   }
   const p = await prisma.plinkk.findFirst({ where: { slug } });

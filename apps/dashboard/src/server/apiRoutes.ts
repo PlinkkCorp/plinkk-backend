@@ -19,7 +19,7 @@ import { apiStripeRoutes } from "./api/stripe";
 import { UnauthorizedError, ForbiddenError, BadRequestError, ConflictError } from "@plinkk/shared";
 import { apiAdminMaintenanceRoutes } from "./api/admin/maintenance";
 import { apiAdminEmailsRoutes } from "./api/admin/emails";
-import { apiBugReportsRoutes } from "./api/bug-reports";
+import { apiBugReportsRoutes } from "@plinkk/shared";
 import { apiAdminPartnersRoutes } from "./api/admin/partners";
 import { apiAdminAffiliateRoutes } from "./api/admin/affiliate";
 import { apiAdminPatchNotesRoutes } from "./api/admin/patchnotes";
@@ -42,6 +42,81 @@ export function apiRoutes(fastify: FastifyInstance) {
   fastify.register(apiAdminPatchNotesRoutes, { prefix: "/admin/patchnotes" });
   fastify.register(apiStripeRoutes, { prefix: "/stripe" });
   fastify.register(apiBugReportsRoutes, { prefix: "/bug-reports" });
+
+  // Tracking emails: endpoint pixel d'ouverture
+  fastify.get("/email-track/open", async (request, reply) => {
+    const query = request.query as { c?: string; r?: string };
+    const campaignId = String(query.c || "");
+    const recipientEmail = String(query.r || "").toLowerCase();
+
+    if (campaignId && recipientEmail) {
+      try {
+        await prisma.emailTrackingEvent.create({
+          data: {
+            campaignId,
+            recipientEmail,
+            type: "OPEN",
+            userAgent: request.headers["user-agent"] || null,
+            ip: request.ip,
+          },
+        });
+
+        await prisma.emailCampaign.update({
+          where: { id: campaignId },
+          data: { openCount: { increment: 1 } },
+        }).catch(() => undefined);
+      } catch (e) {
+        // Ignore les doublons (ouverture multiple du même email)
+        if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")) {
+          request.log.error(e, "Failed to track email open");
+        }
+      }
+    }
+
+    // Pixel transparent 1x1
+    const pixel = Buffer.from("R0lGODlhAQABAIABAP///wAAACwAAAAAAQABAAACAkQBADs=", "base64");
+    reply.header("Content-Type", "image/gif");
+    reply.header("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    return reply.send(pixel);
+  });
+
+  // Tracking emails: endpoint de clic (puis redirection)
+  fastify.get("/email-track/click", async (request, reply) => {
+    const query = request.query as { c?: string; r?: string; u?: string };
+    const campaignId = String(query.c || "");
+    const recipientEmail = String(query.r || "").toLowerCase();
+    const destination = String(query.u || "");
+
+    if (!destination) {
+      return reply.code(400).send({ error: "missing_destination" });
+    }
+
+    if (campaignId && recipientEmail) {
+      try {
+        await prisma.emailTrackingEvent.create({
+          data: {
+            campaignId,
+            recipientEmail,
+            type: "CLICK",
+            userAgent: request.headers["user-agent"] || null,
+            ip: request.ip,
+          },
+        });
+
+        await prisma.emailCampaign.update({
+          where: { id: campaignId },
+          data: { clickCount: { increment: 1 } },
+        }).catch(() => undefined);
+      } catch (e) {
+        // Ignore les doublons (clic multiple du même email)
+        if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")) {
+          request.log.error(e, "Failed to track email click");
+        }
+      }
+    }
+
+    return reply.redirect(destination);
+  });
 
   // ─── Funnel Event Tracking ──────────────────────────────────────────────────
   const ALLOWED_EVENTS = ['landing_visit', 'signup', 'premium_view', 'config_view', 'purchase', 'cancel'];
@@ -141,7 +216,7 @@ export function apiRoutes(fastify: FastifyInstance) {
         return reply.code(500).send({
           error: "bannedslug_table_missing",
           message:
-            "La table BannedSlug est absente; exécutez `npx prisma db push` ou appliquez la migration.",
+            "La table BannedSlug est absente; exécutez `bunx prisma db push --config=packages/prisma/prisma.config.ts --schema=packages/prisma/prisma/schema.prisma` ou appliquez la migration.",
         });
       }
       if (
@@ -175,7 +250,7 @@ export function apiRoutes(fastify: FastifyInstance) {
         return reply.code(500).send({
           error: "bannedslug_table_missing",
           message:
-            "La table BannedSlug est absente; exécutez `npx prisma db push` ou appliquez la migration.",
+            "La table BannedSlug est absente; exécutez `bunx prisma db push --config=packages/prisma/prisma.config.ts --schema=packages/prisma/prisma/schema.prisma` ou appliquez la migration.",
         });
       }
       return reply.code(404).send({ error: "not_found" });

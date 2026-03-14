@@ -4,8 +4,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Connexion / Inscription - Plinkk</title>
-  <link rel="icon" href="https://cdn.plinkk.fr/logo.svg" />
+  
+  <!-- Métadonnées enrichies -->
+  <title>Connexion — Accédez à votre compte Plinkk</title>
+  <meta name="description" content="Connectez-vous à votre compte Plinkk pour gérer vos pages, statistiques et personnaliser votre profil." />
+  <meta name="keywords" content="connexion, login, sign in, accès compte, Plinkk" />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#4338CA" />
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Connexion à Plinkk" />
+  <meta property="og:description" content="Accédez à votre tableau de bord Plinkk" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://cdn.plinkk.fr/og-image-login.png" />
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Connexion à Plinkk" />
+  <meta name="twitter:description" content="Accédez à votre compte" />
+  
+  <link rel="icon" type="image/svg+xml" href="https://cdn.plinkk.fr/logo.svg" />
+  <link rel="apple-touch-icon" href="https://cdn.plinkk.fr/logo.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="/umami_script.js" data-website-id="69e21905-d1fc-48c8-a64e-26a6ad5ad089"
     data-host-url="https://analytics.plinkk.fr"></script>
@@ -208,11 +227,6 @@
       box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1), 0 0 30px rgba(139, 92, 246, 0.1);
     }
 
-    .input-field-signup:focus {
-      border-color: rgba(16, 185, 129, 0.5);
-      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1), 0 0 30px rgba(16, 185, 129, 0.1);
-    }
-
     .btn-primary {
       background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -225,14 +239,6 @@
 
     .btn-primary:active {
       transform: translateY(0) scale(0.98);
-    }
-
-    .btn-signup {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    }
-
-    .btn-signup:hover {
-      box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
     }
 
     .orb {
@@ -307,40 +313,66 @@
       <div id="authCard" class="glass-card rounded-3xl shadow-2xl overflow-hidden animate-fade-up"
         style="animation-delay: 0.2s; opacity: 0;">
         <div class="relative">
-          <nav id="tabs" class="grid grid-cols-2 relative z-10">
+          <nav id="tabs" class="grid grid-cols-1 relative z-10">
             <button id="tabLogin" type="button"
               class="py-4 text-sm font-semibold transition-colors duration-300 text-white" aria-selected="true">
               Connexion
             </button>
-            <button id="tabSignup" type="button"
-              class="py-4 text-sm font-semibold transition-colors duration-300 text-slate-400 hover:text-slate-200"
-              aria-selected="false">
-              Inscription
-            </button>
           </nav>
           <div class="absolute bottom-0 left-0 right-0 h-px bg-slate-800"></div>
           <div id="tabIndicator"
-            class="tab-indicator absolute bottom-0 left-0 w-1/2 h-0.5 bg-gradient-to-r from-violet-500 to-indigo-500">
+            class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-violet-500 to-indigo-500">
           </div>
         </div>
 
         <section id="loginForm" class="form-section p-6 sm:p-8 pt-2">
-          <form action="/login" method="post" class="space-y-5">
-            <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
+          <div id="loginChoiceStep" class="space-y-5">
+            <input type="hidden" id="loginReturnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
 
-            <div class="space-y-2">
-              <label class="block text-sm font-medium text-slate-300">E-mail ou nom d'utilisateur</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <input type="text" name="email" required
-                  class="input-field w-full pl-12 pr-4 py-3.5 rounded-xl text-white placeholder-slate-500 outline-none"
-                  placeholder="vous@exemple.com" />
+            <div class="space-y-3">
+              <p class="text-sm text-slate-400">Choisis d'abord une méthode de connexion :</p>
+              <div id="g_id_onload" data-client_id="<%= googleClientId %>" data-context="signin" data-ux_mode="popup"
+                data-callback="handleGoogleCredentialResponse" data-auto_prompt="false">
               </div>
+              <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_black"
+                data-text="continue_with" data-size="large" data-logo_alignment="left" data-width="100%">
+              </div>
+            </div>
+
+            <form action="/login/email" method="post" class="space-y-4" id="loginEmailForm">
+              <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-slate-300">Adresse e-mail</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <input id="loginEmail" type="email" name="email" required
+                    value="<%= typeof email !== 'undefined' ? email : '' %>"
+                    class="input-field w-full pl-12 pr-4 py-3.5 rounded-xl text-white placeholder-slate-500 outline-none"
+                    placeholder="vous@exemple.com" />
+                </div>
+              </div>
+
+              <p class="errorClass"></p>
+
+              <button type="submit" class="btn-primary w-full py-4 rounded-xl text-white font-semibold shadow-lg">
+                Continuer
+              </button>
+            </form>
+          </div>
+
+          <form id="loginPasswordStep" action="/login" method="post" class="space-y-5 hidden">
+            <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
+            <input type="hidden" id="loginPasswordEmailHidden" name="email"
+              value="<%= typeof email !== 'undefined' ? email : '' %>">
+
+            <div class="space-y-1">
+              <p class="text-xs uppercase tracking-wider text-slate-500">Connexion par mot de passe</p>
+              <p class="text-sm text-slate-300" id="loginPasswordEmailText"><%= typeof email !== 'undefined' ? email : '' %></p>
             </div>
 
             <div class="space-y-2">
@@ -370,7 +402,9 @@
                   </svg>
                 </button>
               </div>
-              <div class="flex items-center justify-end">
+              <div class="flex items-center justify-between">
+                <button id="backToEmailChoice" type="button"
+                  class="text-xs text-slate-400 hover:text-slate-300 transition-colors">Changer d'email</button>
                 <a href="/auth/forgot-password"
                   class="text-xs text-violet-400 hover:text-violet-300 transition-colors">Mot de passe oublié ?</a>
               </div>
@@ -380,15 +414,16 @@
               <button type="submit" class="btn-primary w-full py-4 rounded-xl text-white font-semibold shadow-lg">
                 Se connecter
               </button>
+            </div>
           </form>
 
           <div class="mt-6 text-center">
             <p class="text-sm text-slate-400">
               Pas encore de compte ?
-              <button id="switchToSignup" type="button"
-                class="text-violet-400 hover:text-violet-300 font-medium ml-1 transition-colors">
-                S'inscrire ici !
-              </button>
+              <a href="/join"
+                class="text-violet-400 hover:text-violet-300 font-medium ml-1 transition-colors underline underline-offset-2">
+                Continuer avec Email (OTP)
+              </a>
 
               <!-- <div class="mt-6 text-center">
             <p class="text-sm text-slate-400">
@@ -398,128 +433,7 @@
           </div> -->
         </section>
 
-        <section id="signupForm" class="form-section p-6 sm:p-8 hidden">
-          <form action="/register" method="post" class="space-y-4" id="signupFormEl">
-            <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
-
-            <div class="space-y-2">
-              <label class="block text-sm font-medium text-slate-300">Adresse e-mail</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <input type="email" name="email" id="signupEmail" required
-                  class="input-field input-field-signup w-full pl-12 pr-4 py-3.5 rounded-xl text-white placeholder-slate-500 outline-none"
-                  placeholder="vous@exemple.com" />
-              </div>
-            </div>
-
-            <div class="space-y-2">
-              <label class="block text-sm font-medium text-slate-300">Nom d'utilisateur</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <span class="text-slate-500 font-medium">@</span>
-                </div>
-                <input type="text" name="username" id="signupUsername" required minlength="3" maxlength="30"
-                  class="input-field input-field-signup w-full pl-10 pr-4 py-3.5 rounded-xl text-white placeholder-slate-500 outline-none"
-                  placeholder="votrepseudo" />
-              </div>
-              <p class="text-xs text-slate-500">Généré depuis votre e-mail — modifiable</p>
-            </div>
-
-            <!-- Password Field -->
-            <div class="space-y-2">
-              <label class="block text-sm font-medium text-slate-300">Mot de passe</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <input id="signupPassword" type="password" name="password" required minlength="8"
-                  class="input-field input-field-signup w-full pl-12 pr-12 py-3.5 rounded-xl text-white placeholder-slate-500 outline-none"
-                  placeholder="Minimum 8 caractères" />
-                <button type="button" data-toggle="#signupPassword"
-                  class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-slate-300 transition-colors"
-                  aria-label="Afficher/masquer le mot de passe">
-                  <svg class="eye-open h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  <svg class="eye-closed h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                  </svg>
-                </button>
-              </div>
-              <!-- Password strength indicator -->
-              <div class="flex gap-1 mt-2" id="pwdStrengthBar">
-                <div class="h-1 flex-1 rounded-full bg-slate-700 transition-colors duration-300" data-bar="0"></div>
-                <div class="h-1 flex-1 rounded-full bg-slate-700 transition-colors duration-300" data-bar="1"></div>
-                <div class="h-1 flex-1 rounded-full bg-slate-700 transition-colors duration-300" data-bar="2"></div>
-                <div class="h-1 flex-1 rounded-full bg-slate-700 transition-colors duration-300" data-bar="3"></div>
-              </div>
-              <p id="pwdStrengthText" class="text-xs text-slate-500 mt-1"></p>
-            </div>
-
-            <!-- Terms Checkbox -->
-            <div class="flex items-start gap-3 pt-2">
-              <div class="flex items-center h-6">
-                <input type="checkbox" name="acceptTerms" required checked
-                  class="h-5 w-5 rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0 cursor-pointer" />
-              </div>
-              <label class="text-sm text-slate-400 leading-relaxed">
-                J'accepte les <a href="<%= frontendUrl %>/terms"
-                  class="text-emerald-400 hover:text-emerald-300 underline underline-offset-2">CGU</a> et la <a
-                  href="<%= frontendUrl %>/privacy"
-                  class="text-emerald-400 hover:text-emerald-300 underline underline-offset-2">politique de
-                  confidentialité</a>
-              </label>
-            </div>
-
-            <!-- Error Message -->
-            <p class="errorClass"></p>
-
-            <!-- Submit Button -->
-            <button type="submit"
-              class="btn-primary btn-signup w-full py-4 rounded-xl text-white font-semibold shadow-lg mt-2">
-              Créer mon compte
-            </button>
-          </form>
-
-          <!-- Switch Link -->
-          <div class="mt-6 text-center">
-            <p class="text-sm text-slate-400">
-              Déjà un compte ?
-              <button id="switchToLogin" type="button"
-                class="text-emerald-400 hover:text-emerald-300 font-medium ml-1 transition-colors">
-                Se connecter
-              </button>
-            </p>
-          </div>
-        </section>
-
-        <!-- Google Sign-In Section -->
-        <div class="px-6 sm:px-8 pb-8">
-          <div class="relative w-full flex items-center justify-center mb-6">
-            <div class="absolute w-full border-t border-slate-800"></div>
-            <span class="relative bg-slate-900 px-4 text-sm text-slate-500">Ou</span>
-          </div>
-
-          <div id="g_id_onload" data-client_id="<%= googleClientId %>" data-context="signin" data-ux_mode="popup"
-            data-callback="handleGoogleCredentialResponse" data-auto_prompt="false">
-          </div>
-
-          <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_black"
-            data-text="continue_with" data-size="large" data-logo_alignment="left" data-width="100%">
-          </div>
-        </div>
+        <!-- Google Sign-In moved into login first-step -->
 
         <!-- Loading Overlay -->
         <div id="loadingOverlay"
@@ -562,49 +476,25 @@
       });
     }
 
-    const state = { current: 'login' };
+    function setLoginStep(which, email) {
+      const choice = document.getElementById('loginChoiceStep');
+      const password = document.getElementById('loginPasswordStep');
+      const hiddenEmail = document.getElementById('loginPasswordEmailHidden');
+      const emailText = document.getElementById('loginPasswordEmailText');
+      const emailInput = document.getElementById('loginEmail');
 
-    function updateTabsUI(which) {
-      const tabLogin = document.getElementById('tabLogin');
-      const tabSignup = document.getElementById('tabSignup');
-      const indicator = document.getElementById('tabIndicator');
-      const isLogin = which === 'login';
+      const safeEmail = (email || '').trim();
+      if (hiddenEmail) hiddenEmail.value = safeEmail;
+      if (emailText) emailText.textContent = safeEmail;
+      if (emailInput && safeEmail) emailInput.value = safeEmail;
 
-      tabLogin.className = `py-4 text-sm font-semibold transition-colors duration-300 ${isLogin ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`;
-      tabSignup.className = `py-4 text-sm font-semibold transition-colors duration-300 ${!isLogin ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`;
-      tabLogin.setAttribute('aria-selected', isLogin);
-      tabSignup.setAttribute('aria-selected', !isLogin);
-
-      indicator.style.transform = isLogin ? 'translateX(0%)' : 'translateX(100%)';
-      indicator.className = `tab-indicator absolute bottom-0 left-0 w-1/2 h-0.5 ${isLogin ? 'bg-gradient-to-r from-violet-500 to-indigo-500' : 'bg-gradient-to-r from-emerald-500 to-teal-500'}`;
-    }
-
-    function activateTab(which) {
-      if (which === state.current) return;
-
-      const login = document.getElementById('loginForm');
-      const signup = document.getElementById('signupForm');
-      const fromEl = state.current === 'login' ? login : signup;
-      const toEl = which === 'login' ? login : signup;
-
-      fromEl.style.opacity = '0';
-      fromEl.style.transform = which === 'login' ? 'translateX(20px)' : 'translateX(-20px)';
-
-      setTimeout(() => {
-        fromEl.classList.add('hidden');
-        toEl.classList.remove('hidden');
-        toEl.style.opacity = '0';
-        toEl.style.transform = which === 'login' ? 'translateX(-20px)' : 'translateX(20px)';
-
-        requestAnimationFrame(() => {
-          toEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-          toEl.style.opacity = '1';
-          toEl.style.transform = 'translateX(0)';
-        });
-      }, 200);
-
-      state.current = which;
-      updateTabsUI(which);
+      if (which === 'password') {
+        choice.classList.add('hidden');
+        password.classList.remove('hidden');
+      } else {
+        password.classList.add('hidden');
+        choice.classList.remove('hidden');
+      }
     }
 
     function attachPasswordToggles() {
@@ -659,97 +549,21 @@
       }
     }
 
-
-    // Auto-generate username from email
-    function generateUsernameFromEmail(email) {
-      if (!email || !email.includes('@')) return '';
-      let local = email.split('@')[0];
-      // Remove special chars, keep alphanumeric and dots/dashes/underscores
-      local = local.replace(/[^a-zA-Z0-9._-]/g, '').toLowerCase();
-      // Trim to max length
-      if (local.length > 30) local = local.substring(0, 30);
-      if (local.length < 3) local = local + Math.floor(Math.random() * 900 + 100);
-      return local;
-    }
-
-    // Password strength checker 
-    function checkPasswordStrength(pwd) {
-      let score = 0;
-      if (pwd.length >= 8) score++;
-      if (pwd.length >= 12) score++;
-      if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
-      if (/[0-9]/.test(pwd) && /[^a-zA-Z0-9]/.test(pwd)) score++;
-      return Math.min(score, 4);
-    }
-
-    function updatePasswordStrength(pwd) {
-      const bars = document.querySelectorAll('#pwdStrengthBar [data-bar]');
-      const text = document.getElementById('pwdStrengthText');
-      if (!bars.length || !text) return;
-
-      const score = checkPasswordStrength(pwd);
-      const colors = ['bg-rose-500', 'bg-orange-500', 'bg-amber-400', 'bg-emerald-500'];
-      const labels = ['Faible', 'Moyen', 'Bon', 'Excellent'];
-
-      bars.forEach((bar, i) => {
-        bar.className = bar.className.replace(/bg-\S+/g, '');
-        if (i < score) {
-          bar.classList.add('h-1', 'flex-1', 'rounded-full', 'transition-colors', 'duration-300', colors[score - 1]);
-        } else {
-          bar.classList.add('h-1', 'flex-1', 'rounded-full', 'transition-colors', 'duration-300', 'bg-slate-700');
-        }
-      });
-
-      if (pwd.length > 0) {
-        text.textContent = labels[score - 1] || 'Trop court';
-        text.className = 'text-xs mt-1 ' + (score >= 3 ? 'text-emerald-400' : score >= 2 ? 'text-amber-400' : 'text-rose-400');
-      } else {
-        text.textContent = '';
-        text.className = 'text-xs text-slate-500 mt-1';
-      }
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
       const err = getQueryVariable('error');
       if (err) showError(err);
 
-      document.getElementById('tabLogin').addEventListener('click', () => activateTab('login'));
-      document.getElementById('tabSignup').addEventListener('click', () => activateTab('signup'));
-      document.getElementById('switchToSignup').addEventListener('click', () => activateTab('signup'));
-      document.getElementById('switchToLogin').addEventListener('click', () => activateTab('login'));
-
       // Pre-fill email from query param
       const prefillEmail = getQueryVariable('email');
-      const signupEmail = document.getElementById('signupEmail');
-      const signupUsername = document.getElementById('signupUsername');
+      const prefillStep = getQueryVariable('step');
 
-      if (prefillEmail && signupEmail) {
-        signupEmail.value = prefillEmail;
-        // Auto-generate username
-        if (signupUsername) {
-          signupUsername.value = generateUsernameFromEmail(prefillEmail);
-        }
+      setLoginStep(prefillStep === 'password' ? 'password' : 'choice', prefillEmail);
+
+      const backBtn = document.getElementById('backToEmailChoice');
+      if (backBtn) {
+        backBtn.addEventListener('click', () => setLoginStep('choice', prefillEmail));
       }
 
-      // Auto-generate username as user types email
-      if (signupEmail && signupUsername) {
-        let userEditedUsername = false;
-        signupUsername.addEventListener('input', () => { userEditedUsername = true; });
-        signupEmail.addEventListener('input', () => {
-          if (!userEditedUsername) {
-            signupUsername.value = generateUsernameFromEmail(signupEmail.value);
-          }
-        });
-      }
-
-      // Password strength indicator
-      const pwdInput = document.getElementById('signupPassword');
-      if (pwdInput) {
-        pwdInput.addEventListener('input', () => updatePasswordStrength(pwdInput.value));
-      }
-
-      if (location.hash === '#signup') activateTab('signup');
-      updateTabsUI(state.current);
       attachPasswordToggles();
 
       // Trigger animations

@@ -6,11 +6,13 @@ import { registerCronJobs } from "./config/cron";
 import "./types";
 import { registerReservedRootsHook } from "./middleware/reservedRoots";
 import { registerSessionValidator } from "./middleware/sessionValidator";
+import { registerActionAuditHook } from "./middleware/actionAudit";
 import { apiRoutes } from "./server/apiRoutes";
 import { dashboardRoutes } from "./server/dashboardRoutes";
 import { plinkkPagesRoutes } from "./server/plinkkPagesRoutes";
 import { linkTrackingRoutes } from "./server/linkTrackingRoutes";
 import { authRoutes } from "./routes/auth";
+import { onboardingRoutes } from "./routes/onboarding";
 import { registerOAuth2 } from "./config/fastifyOAuth2";
 import { AppError, generateTheme } from "@plinkk/shared";
 import { discordService } from "./services/discordService";
@@ -24,17 +26,19 @@ async function bootstrap() {
   await registerCronJobs(fastify);
   await registerOAuth2(fastify)
 
-  // Initialiser le service Discord
-  await discordService.initialize();
+  // Initialiser Discord sans bloquer le démarrage du serveur
+  void discordService.initialize();
 
   registerReservedRootsHook(fastify);
   registerSessionValidator(fastify);
+  registerActionAuditHook(fastify);
 
   fastify.register(apiRoutes, { prefix: "/api" });
   fastify.register(dashboardRoutes);
   fastify.register(plinkkPagesRoutes, { prefix: "/plinkks" });
   fastify.register(linkTrackingRoutes);
   authRoutes(fastify);
+  onboardingRoutes(fastify);
 
   fastify.get(
     "/themes.json",
@@ -140,7 +144,16 @@ async function bootstrap() {
   });
 
   fastify.setErrorHandler((error, request, reply) => {
-    fastify.log.error(error);
+    const statusCode = error instanceof AppError ? error.statusCode : 500;
+    request.log.error(
+      {
+        err: error,
+        method: request.method,
+        url: request.url,
+        statusCode,
+      },
+      "Request failed"
+    );
 
     if (error instanceof AppError) {
       if (request.raw.url?.startsWith("/api")) {

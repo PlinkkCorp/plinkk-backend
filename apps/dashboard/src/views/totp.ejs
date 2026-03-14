@@ -1,4 +1,11 @@
-<%- include('partials/head', { title: 'Activer l’authentification à deux facteurs (TOTP)', description: 'Sécurisez votre compte avec l\'authentification à deux facteurs (TOTP).' }) %>
+<%- include('partials/head', { 
+  title: 'Authentification à deux facteurs (2FA)',
+  description: 'Sécurisez votre compte Plinkk avec l’authentification à deux facteurs (TOTP). Protection supplémentaire pour votre profil.',
+  metaKeywords: '2FA, TOTP, authentification, sécurité, protection compte, deux facteurs',
+  metaAuthor: 'Plinkk',
+  pageThemeColor: 'dark',
+  robots: 'noindex,nofollow'
+}) %>
 <%- include('partials/header', { user: (typeof user !== 'undefined' ? user : null) }) %>
 
 <div class="totp-root" style="max-width:720px;margin:24px auto;padding:20px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;">

@@ -1,6 +1,12 @@
-<%- include('partials/head.ejs', { title: 'Tableau de bord - Édition' ,
-    description: 'Configure les sections, apparence et arrière‑plan de ta page.' , robots: 'noindex,nofollow' ,
-    extraHead: '<link rel="stylesheet" href="/public/css/button-themes.css">' }) %>
+<%- include('partials/head.ejs', { 
+    title: 'Édition',
+    description: 'Configure les sections, apparence et arrière-plan de ta page Plinkk. Personnalise chaque détail.',
+    metaKeywords: 'édition, personnalisation, thèmes, apparence, Plinkk, customisation',
+    metaAuthor: 'Plinkk',
+    pageThemeColor: 'info',
+    robots: 'noindex,nofollow',
+    extraHead: '<link rel="stylesheet" href="/public/css/button-themes.css"><link rel="stylesheet" href="/public/css/tutorial.css">' 
+}) %>
 
     <%- include('partials/header-dash.ejs', { user: user }) %>
 
@@ -58,6 +64,17 @@
                                 <div class="flex items-center gap-3">
                                     <%- include('partials/changePlinkkDropdown.ejs') %>
                                 </div>
+                                <button
+                                    onclick="window.plinkkTour ? window.plinkkTour.start() : null"
+                                    id="tourLaunchBtn"
+                                    title="Lancer le guide interactif"
+                                    class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-violet-600/10 hover:bg-violet-600/20 text-violet-400 hover:text-violet-300 border border-violet-600/20 hover:border-violet-600/40 transition-all">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 8v4M12 16h.01"/>
+                                    </svg>
+                                    Guide
+                                </button>
                             </div>
                         </div>
 
@@ -131,15 +148,6 @@
                                         Status
                                     </button>
                                 </li>
-                                <li>
-                                    <button data-target="#section-qrcodes"
-                                        class="tab-btn px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-all aria-selected:bg-violet-600 aria-selected:text-white aria-selected:shadow-lg aria-selected:shadow-violet-900/20 flex items-center gap-2">
-                                        <svg class="size-4" viewBox="0 0 24 24" fill="white">
-                                            <path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h2v2H3z" />
-                                        </svg>
-                                        QR Codes
-                                    </button>
-                                </li>
                             </ul>
                         </nav>
 
@@ -177,11 +185,6 @@
                             <div id="section-statusbar"
                                 class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
                                 <%- include('./partials/editor-sections/statusbar.ejs') %>
-                            </div>
-
-                            <div id="section-qrcodes"
-                                class="bg-slate-900 border border-slate-800 rounded-3xl p-6 hidden shadow-lg animate-slide-up">
-                                <%- include('./partials/editor-sections/qrcodes.ejs') %>
                             </div>
 
                         </div>
@@ -467,18 +470,30 @@
 
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
                     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                    <script type="application/json" id="plinkk-data"><%- JSON.stringify(locals.plinkk || {}) %></script>
                     <script>
-                        try {
-                            const rawData = JSON.parse(document.getElementById('plinkk-data').textContent);
-                            window.__INITIAL_STATE__ = {
-                                ...rawData,
-                                categories: <%- JSON.stringify(locals.categories || []) %>
-                            };
-                        } catch (e) {
-                            console.error('Failed to parse initial state:', e);
-                            window.__INITIAL_STATE__ = { categories: [] };
-                        }
+                        // Initialisation sécurisée de l'état via textContent (prévient XSS)
+                        (function() {
+                            try {
+                                const dataElement = document.createElement('script');
+                                dataElement.type = 'application/json';
+                                dataElement.textContent = <%- JSON.stringify(JSON.stringify({
+                                    ...(locals.plinkk || {}),
+                                    categories: locals.categories || []
+                                })) %>;
+
+                                const parsedData = JSON.parse(dataElement.textContent);
+
+                                // Validation basique des données
+                                if (parsedData && typeof parsedData === 'object') {
+                                    window.__INITIAL_STATE__ = parsedData;
+                                } else {
+                                    throw new Error('Format de données invalide');
+                                }
+                            } catch (e) {
+                                console.error('Erreur lors de l\'initialisation de l\'état:', e);
+                                window.__INITIAL_STATE__ = { categories: [] };
+                            }
+                        })();
                     </script>
 
                     <script>
@@ -525,6 +540,7 @@
                     </script>
                     <script src="/public/js/dashboard-ui/editor-core.js"></script>
                     <script type="module" src="/public/js/dashboard-ui/index.js"></script>
+                    <script src="/public/js/tutorial.js" defer></script>
 
                     <style>
                         .masked-field {

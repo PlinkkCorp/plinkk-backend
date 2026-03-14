@@ -36,6 +36,7 @@ export async function replyView(
     return reply.code(statusCode).view(template, {
       __SITE_MESSAGES__: await getActiveAnnouncementsForUser(null, extraData.__platform),
       user: null,
+      currentUser: null,
       isAdmin: false,
       isStaff: false,
       getGravatarUrl,
@@ -56,6 +57,7 @@ export async function replyView(
   return reply.code(statusCode).view(template, {
     __SITE_MESSAGES__: await getActiveAnnouncementsForUser(user.id, extraData.__platform),
     user: toSafeUser(user),
+    currentUser: toSafeUser(user),
     isAdmin: isAdmin,
     isStaff: isStaff,
     getGravatarUrl,

@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import fastifyCron from "fastify-cron";
 import { prisma } from "@plinkk/prisma";
 import { cleanExpiredSessions } from "../services/sessionService";
+import { emailQueueService } from "../services/emailQueueService";
 
 export async function registerCronJobs(fastify: FastifyInstance) {
   await fastify.register(fastifyCron, {
@@ -34,6 +35,30 @@ export async function registerCronJobs(fastify: FastifyInstance) {
             console.log(`Cleaned ${count} expired sessions`);
           } catch (e) {
             console.error("Failed to clean expired sessions", e);
+          }
+        },
+      },
+      {
+        name: "Process email queue",
+        cronTime: "0 * * * *", // Toutes les heures
+        onTick: async () => {
+          try {
+            const result = await emailQueueService.processQueue();
+            console.log(`Email queue processed: ${result.sent} sent, ${result.failed} failed, ${result.remaining} remaining`);
+          } catch (e) {
+            console.error("Failed to process email queue", e);
+          }
+        },
+      },
+      {
+        name: "Clean old email queue records",
+        cronTime: "0 2 * * *", // Tous les jours à 2h du matin
+        onTick: async () => {
+          try {
+            const count = await emailQueueService.cleanup();
+            console.log(`Cleaned ${count} old email queue records`);
+          } catch (e) {
+            console.error("Failed to clean email queue", e);
           }
         },
       },

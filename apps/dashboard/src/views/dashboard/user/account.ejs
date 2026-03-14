@@ -1,5 +1,11 @@
-<%- include('partials/head.ejs', { title: 'Tableau de bord - Mon compte' ,
-  description: 'Gère ton email, mot de passe et confidentialité du profil.' , robots: 'noindex,nofollow' }) %>
+<%- include('partials/head.ejs', { 
+  title: 'Mon compte',
+  description: 'Gère ton compte Plinkk : email, mot de passe, sécurité et confidentialité du profil.',
+  metaKeywords: 'compte, profil, paramètres, sécurité, email, mot de passe',
+  metaAuthor: 'Plinkk',
+  pageThemeColor: 'default',
+  robots: 'noindex,nofollow'
+}) %>
   <%- include('partials/header-dash.ejs') %>
 
     <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
@@ -881,7 +887,7 @@
                       </div>
                       <div>
                         <% if (googleConn) { %>
-                          <button onclick="unlinkProvider('google', '<%= googleConn.email %>')"
+                          <button onclick="unlinkProvider('google', <%- JSON.stringify(googleConn.email || '') %>)"
                             class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">
                             Déconnecter
                           </button>
@@ -1071,6 +1077,9 @@
             </div>
           </div>
         </main>
+
+    <!-- Tutorial -->
+    <script src="/public/js/tutorial.js" defer></script>
     </div>
 
     <!-- Modals (kept mostly same structure but updated classes) -->

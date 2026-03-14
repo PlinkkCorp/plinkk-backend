@@ -2,14 +2,14 @@ import { FastifyInstance } from "fastify";
 import "@fastify/static";
 import { existsSync } from "fs";
 import path from "path";
-import { generateProfileConfig, resolvePlinkkPage, parseIdentifier, recordPlinkkView, coerceThemeData, generateTheme, roundedRect, wrapText } from "@plinkk/shared";
+import { generateProfileConfig, resolvePlinkkPage, parseIdentifier, coerceThemeData, generateTheme, roundedRect, wrapText } from "@plinkk/shared";
 import { minify } from "uglify-js";
 import { prisma } from "@plinkk/prisma";
-import bcrypt from "bcrypt";
 import { filterScheduledLinks } from "@plinkk/shared";
 import { generateBundle } from "../lib/generateBundle";
 import { replyView } from "../lib/replyView";
 import { PlinkkSnapshot } from "../types/plinkk";
+import { shouldRecordLinkClick } from "../middleware/ipRateLimit";
 
 type CanvasMod = typeof import("canvas") | null;
 let _canvasMod: CanvasMod = null;
@@ -73,7 +73,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const isValid = await bcrypt.compare(
+      const isValid = await Bun.password.verify(
         password,
         resolved.page.passwordHash || "",
       );
@@ -243,14 +243,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
               resolved.page && resolved.page.slug
                 ? resolved.page.slug
                 : resolved.user.id;
-            if (!isPreview) {
-              await recordPlinkkView(
-                prisma,
-                resolved.page.id,
-                resolved.user.id,
-                request,
-              );
-            }
+            // Tracking des vues géré côté client via localStorage
 
             // HISTORY PREVIEW LOGIC
             const { versionId } = request.query as unknown as { versionId?: string };
@@ -301,60 +294,15 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           .view("erreurs/404.ejs", { user: null });
       }
 
-      // En mode aperçu on n'incrémente pas les vues ni les agrégations journalières
-      if (!isPreview && resolved.page) {
-        await recordPlinkkView(
-          prisma,
-          resolved.page.id,
-          resolved.user.id,
-          request,
-        );
-        if (!isPreview) {
-          // Incrément des vues utilisateur, robuste aux erreurs SQLite (code 14)
-          try {
-            await prisma.user.updateMany({
-              where: { id: resolved.user.id },
-              data: { views: { increment: 1 } },
-            });
-          } catch (e) {
-            request.log?.warn(
-              { err: e },
-              "user.updateMany failed (views increment) - skipping",
-            );
-          }
+      // Tracking des vues géré côté client via localStorage
 
-          // Agrégation quotidienne des vues (UserViewDaily)
-          try {
-            const now = new Date();
-            const y = now.getUTCFullYear();
-            const m = String(now.getUTCMonth() + 1).padStart(2, "0");
-            const d = String(now.getUTCDate()).padStart(2, "0");
-            const dateStr = `${y}-${m}-${d}`; // YYYY-MM-DD (UTC)
-            await prisma.userViewDaily.upsert({
-              where: {
-                userId_date: {
-                  userId: resolved.user.id,
-                  date: dateStr,
-                },
-              },
-              create: { userId: resolved.user.id, date: dateStr, count: 1 },
-              update: { count: { increment: 1 } },
-            });
-          } catch (e) {
-            request.log?.warn(
-              { err: e },
-              "Failed to record daily view (userViewDaily upsert)",
-            );
-          }
-        }
-
-        // Si utilisateur banni -> afficher page bannie
-        try {
-          const u = await prisma.user.findUnique({
-            where: { id: resolved.user.id },
-            select: { email: true },
-          });
-          if (u?.email) {
+      // Si utilisateur banni -> afficher page bannie
+      try {
+        const u = await prisma.user.findUnique({
+          where: { id: resolved.user.id },
+          select: { email: true },
+        });
+        if (u?.email) {
             const ban = await prisma.bannedEmail.findFirst({
               where: { email: u.email, revoquedAt: null },
             });
@@ -411,14 +359,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           resolved.page && resolved.page.slug
             ? resolved.page.slug
             : resolved.user.id;
-        if (!isPreview) {
-          await recordPlinkkView(
-            prisma,
-            resolved.page.id,
-            resolved.user.id,
-            request,
-          );
-        }
+        // Tracking des vues géré côté client via localStorage
 
         // HISTORY PREVIEW LOGIC
         const { versionId } = request.query as unknown as { versionId?: string };
@@ -446,7 +387,6 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           publicPath,
           settings,
         });
-      }
     },
   );
 
@@ -978,14 +918,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       resolved.page && resolved.page.slug
         ? resolved.page.slug
         : resolved.user.id;
-    if (!isPreview) {
-      await recordPlinkkView(
-        prisma,
-        resolved.page.id,
-        resolved.user.id,
-        request,
-      );
-    }
+    // Tracking des vues géré côté client via localStorage
     const currentUser = await getCurrentUser(request);
     return await replyView(reply, "plinkk/show.ejs", currentUser as any, {
       page: resolved.page,
@@ -1044,14 +977,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     const sessionData = request.session.get("data");
     const isOwner =
       ((typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined) === resolved.user.id;
-    if (!isPreview) {
-      await recordPlinkkView(
-        prisma,
-        resolved.page.id,
-        resolved.user.id,
-        request,
-      );
-    }
+    // Tracking des vues géré côté client via localStorage
     const currentUser = await getCurrentUser(request);
     return await replyView(reply, "plinkk/show.ejs", currentUser as any, {
       page: resolved.page,
@@ -1068,49 +994,54 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     const link = await prisma.link.findUnique({ where: { id: linkId } });
     if (!link) return reply.code(404).send({ error: "Lien introuvable" });
 
-    await prisma.link.update({
-      where: { id: linkId },
-      data: { clicks: { increment: 1 } },
-    });
+    const shouldTrackClick = shouldRecordLinkClick(req, linkId);
 
-    // Enregistrer le clic daté (agrégation quotidienne)
-    try {
-      await prisma.$executeRawUnsafe(
-        'CREATE TABLE IF NOT EXISTS "LinkClickDaily" ("linkId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("linkId","date"))',
-      );
-      const now = new Date();
-      const y = now.getUTCFullYear();
-      const m = String(now.getUTCMonth() + 1).padStart(2, "0");
-      const d = String(now.getUTCDate()).padStart(2, "0");
-      const dateStr = `${y}-${m}-${d}`;
-      await prisma.$executeRawUnsafe(
-        'INSERT INTO "LinkClickDaily" ("linkId","date","count") VALUES (?,?,1) ON CONFLICT("linkId","date") DO UPDATE SET "count" = "count" + 1',
-        linkId,
-        dateStr,
-      );
-    } catch (e) { }
+    if (shouldTrackClick) {
+      await prisma.link.update({
+        where: { id: linkId },
+        data: { clicks: { increment: 1 } },
+      });
 
-    try {
-      if (link.plinkkId) {
-        await prisma.pageStat.create({
-          data: {
-            plinkkId: link.plinkkId,
-            eventType: "click",
-            ip: String(req.ip || req.headers?.["x-forwarded-for"] || ""),
-            meta: { linkId, userId: link.userId },
-          },
-        });
+      // Enregistrer le clic daté (agrégation quotidienne)
+      try {
+        await prisma.$executeRawUnsafe(
+          'CREATE TABLE IF NOT EXISTS "LinkClickDaily" ("linkId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("linkId","date"))',
+        );
+        const now = new Date();
+        const y = now.getUTCFullYear();
+        const m = String(now.getUTCMonth() + 1).padStart(2, "0");
+        const d = String(now.getUTCDate()).padStart(2, "0");
+        const dateStr = `${y}-${m}-${d}`;
+        await prisma.$executeRawUnsafe(
+          'INSERT INTO "LinkClickDaily" ("linkId","date","count") VALUES (?,?,1) ON CONFLICT("linkId","date") DO UPDATE SET "count" = "count" + 1',
+          linkId,
+          dateStr,
+        );
+      } catch (e) { }
+
+      try {
+        if (link.plinkkId) {
+          await prisma.pageStat.create({
+            data: {
+              plinkkId: link.plinkkId,
+              eventType: "click",
+              ip: String(req.ip || req.headers?.["x-forwarded-for"] || ""),
+              meta: { linkId, userId: link.userId },
+            },
+          });
+        }
+      } catch (e) {
+        req.log?.warn({ err: e }, "record click pageStat failed");
       }
-    } catch (e) {
-      req.log?.warn({ err: e }, "record click pageStat failed");
     }
+
     return reply.redirect(link.url);
   });
 
   fastify.get("/og/:id", async (request, reply) => {
     const canvasMod = await ensureCanvas();
     if (!canvasMod) {
-      // Si canvas indisponible (ex: Node 22 sous Windows sans précompilé),
+      // Si canvas indisponible (ex: runtime sans binaire précompilé sous Windows),
       // on renvoie une image statique par défaut pour débloquer le dev.
       try {
         return reply.redirect(
@@ -1119,7 +1050,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       } catch {
         return reply.code(501).send({
           error: "canvas_unavailable",
-          hint: "Le module 'canvas' n'est pas chargé. Utilisez Node 20 LTS ou installez une version compatible de canvas.",
+          hint: "Le module 'canvas' n'est pas chargé. Utilisez Bun (ou Node LTS) et installez une version compatible de canvas.",
         });
       }
     }

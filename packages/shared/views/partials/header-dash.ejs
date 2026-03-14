@@ -56,6 +56,47 @@
         .animate-popup-in {
             animation: popupIn 0.25s ease-out both;
         }
+
+        .inbox-md h1,
+        .inbox-md h2,
+        .inbox-md h3,
+        .inbox-md h4 {
+            margin: .35rem 0;
+            font-weight: 700;
+        }
+
+        .inbox-md p {
+            margin: .2rem 0;
+        }
+
+        .inbox-md ul,
+        .inbox-md ol {
+            margin: .25rem 0 .25rem 1rem;
+            padding-left: .8rem;
+        }
+
+        .inbox-md code {
+            background: rgba(148, 163, 184, 0.18);
+            padding: 0 4px;
+            border-radius: 4px;
+        }
+
+        @keyframes inboxExpandOpen {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .inbox-expand-open {
+            animation: inboxExpandOpen 0.22s ease-out both;
+            transform-origin: top;
+        }
     </style>
 
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -105,6 +146,36 @@
                                     <a href="/admin"
                                         class="inline-flex items-center justify-center rounded-full bg-rose-500/10 px-4 py-1.5 text-sm font-medium text-rose-400 ring-1 ring-inset ring-rose-500/20 transition-colors hover:bg-rose-500/20 hover:text-rose-300">Admin</a>
                                     <% } %>
+
+                                        <div class="relative" id="inboxBellWrap">
+                                            <button id="inboxBellBtn"
+                                                class="relative inline-flex items-center justify-center rounded-full bg-white/5 p-2.5 ring-1 ring-white/10 transition-all hover:bg-white/10 hover:ring-white/20 focus:outline-none"
+                                                aria-label="Ouvrir la boîte de réception" aria-expanded="false">
+                                                <svg id="inboxBellIcon" class="h-5 w-5 text-slate-300" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
+                                                    <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5"></path>
+                                                    <path d="M9 17a3 3 0 0 0 6 0"></path>
+                                                </svg>
+                                                <span id="inboxBellBadge"
+                                                    class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-[18px] text-center">0</span>
+                                            </button>
+
+                                            <div id="inboxBellPanel"
+                                                class="hidden absolute right-0 top-full mt-2 w-[380px] max-w-[90vw] rounded-2xl border border-white/10 bg-[#161b2e] shadow-2xl overflow-hidden">
+                                                <div class="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+                                                    <p class="text-sm font-semibold text-white">Inbox</p>
+                                                    <div class="flex items-center gap-3">
+                                                        <button id="inboxMarkAllRead"
+                                                            class="text-[11px] text-violet-300 hover:text-violet-200">Tout marquer comme lu</button>
+                                                        <button id="inboxOpenFull"
+                                                            class="text-[11px] text-slate-300 hover:text-white">Voir tout</button>
+                                                    </div>
+                                                </div>
+                                                <div id="inboxBellList" class="max-h-[420px] overflow-y-auto divide-y divide-white/5"></div>
+                                            </div>
+
+                                        </div>
 
                                         <div class="relative" id="profileMenu">
                                             <button id="profileMenuBtn"
@@ -307,6 +378,75 @@
         <div class="prog" id="spaTopLoaderDashProg"></div>
     </div>
 </header>
+
+<% if (user && typeof user.emailVerified !== 'undefined' && user.emailVerified === false) { %>
+<!-- Banner for Unverified Email -->
+<div class="bg-rose-500/10 border-b border-rose-500/20 py-3 relative z-40">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-rose-500/20 rounded-lg text-rose-400">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+            <p class="text-sm font-medium text-rose-300">
+                Votre adresse email (<strong class="text-rose-200"><%= user.email %></strong>) n'a pas encore été vérifiée. Certaines fonctionnalités peuvent être limitées.
+            </p>
+        </div>
+        <button id="verifyEmailBtn" class="px-4 py-2 rounded-xl bg-rose-500 text-white text-sm font-bold shadow-lg shadow-rose-900/20 hover:bg-rose-400 transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">
+            Vérifier mon compte
+        </button>
+    </div>
+</div>
+<% } %>
+
+<div id="inboxFullModal" class="hidden fixed inset-0 z-[95] p-4">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" id="inboxFullBackdrop"></div>
+    <div class="relative mx-auto mt-8 w-full max-w-5xl rounded-2xl border border-white/10 bg-[#12172a] shadow-2xl overflow-hidden">
+        <div class="px-5 py-4 border-b border-white/5 flex items-center justify-between gap-4">
+            <div>
+                <p class="text-base font-semibold text-white">Inbox complete</p>
+                <p class="text-xs text-slate-400 mt-0.5">Filtres et chargement progressif</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="inboxFullToggleHiddenBtn" class="text-[11px] font-semibold text-slate-400 hover:text-slate-200 border border-slate-700/50 bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg transition-colors">Voir éléments masqués</button>
+                <button id="inboxFullMarkAllReadBtn" class="text-[11px] font-semibold text-violet-300 hover:text-violet-200 bg-violet-500/10 hover:bg-violet-500/20 px-3 py-1.5 rounded-lg border border-violet-500/30 transition-colors">Tout marquer comme lu</button>
+                <button id="inboxFullClose" class="text-slate-400 hover:text-white text-sm">Fermer</button>
+            </div>
+        </div>
+        <div class="px-5 py-3 border-b border-white/5" id="inboxFullFilters">
+            <div class="flex flex-wrap gap-2">
+                <button data-filter="all" class="inbox-full-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-violet-500/15 text-violet-300 border border-violet-500/30">Tous</button>
+                <button data-filter="admin" class="inbox-full-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">Admin</button>
+                <button data-filter="patch-note" class="inbox-full-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">Patch notes</button>
+                <button data-filter="bug-response" class="inbox-full-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">Retours bugs</button>
+            </div>
+        </div>
+        <div id="inboxFullList" class="max-h-[68vh] overflow-y-auto divide-y divide-white/5"></div>
+        <div id="inboxFullLoading" class="hidden px-5 py-3 text-center text-xs text-slate-400 border-t border-white/5">
+            Chargement des notifications...
+        </div>
+        <div id="inboxFullSentinel" class="h-10"></div>
+    </div>
+</div>
+
+<div id="inboxThreadModal" class="hidden fixed inset-0 z-[110] p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="inboxThreadBackdrop"></div>
+    <div class="relative mx-auto mt-12 w-full max-w-2xl rounded-2xl border border-white/10 bg-[#12172a] shadow-2xl overflow-hidden">
+        <div class="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+            <p id="inboxThreadTitle" class="text-sm font-semibold text-white">Discussion bug</p>
+            <button id="inboxThreadClose" class="text-slate-400 hover:text-white">Fermer</button>
+        </div>
+        <div id="inboxThreadMessages" class="max-h-[420px] overflow-y-auto p-4 space-y-3"></div>
+        <form id="inboxThreadReplyForm" class="border-t border-white/5 p-4 flex gap-2">
+            <input type="text" id="inboxThreadReplyInput" maxlength="1000" placeholder="Répondre..."
+                class="flex-1 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 px-3 py-2 text-sm outline-none focus:border-violet-500" />
+            <button type="submit" class="rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm px-4 py-2">Envoyer</button>
+        </form>
+    </div>
+</div>
 
 <% const __SMS__=(typeof __SITE_MESSAGES__ !=='undefined' && Array.isArray(__SITE_MESSAGES__)) ? __SITE_MESSAGES__ :
     ((typeof __SITE_MESSAGE__ !=='undefined' && __SITE_MESSAGE__ && __SITE_MESSAGE__.message) ?
@@ -558,6 +698,678 @@
                                                                         mBtn.addEventListener('click', (e) => { e.stopPropagation(); mMenu.classList.toggle('hidden'); });
                                                                         document.addEventListener('click', (e) => { if (!mMenu.contains(e.target) && e.target !== mBtn) mMenu.classList.add('hidden'); });
                                                                     }
+
+                                                                    const inboxBellWrap = document.getElementById('inboxBellWrap');
+                                                                    const inboxBellBtn = document.getElementById('inboxBellBtn');
+                                                                    const inboxBellPanel = document.getElementById('inboxBellPanel');
+                                                                    const inboxBellList = document.getElementById('inboxBellList');
+                                                                    const inboxBellBadge = document.getElementById('inboxBellBadge');
+                                                                    const inboxBellIcon = document.getElementById('inboxBellIcon');
+                                                                    const inboxMarkAllRead = document.getElementById('inboxMarkAllRead');
+                                                                    const inboxOpenFull = document.getElementById('inboxOpenFull');
+                                                                    const inboxFullModal = document.getElementById('inboxFullModal');
+                                                                    const inboxFullBackdrop = document.getElementById('inboxFullBackdrop');
+                                                                    const inboxFullClose = document.getElementById('inboxFullClose');
+                                                                    const inboxFullList = document.getElementById('inboxFullList');
+                                                                    const inboxFullLoading = document.getElementById('inboxFullLoading');
+                                                                    const inboxFullFilters = document.getElementById('inboxFullFilters');
+                                                                    const inboxFullSentinel = document.getElementById('inboxFullSentinel');
+                                                                    const inboxFullMarkAllReadBtn = document.getElementById('inboxFullMarkAllReadBtn');
+                                                                    const inboxThreadModal = document.getElementById('inboxThreadModal');
+                                                                    const inboxThreadBackdrop = document.getElementById('inboxThreadBackdrop');
+                                                                    const inboxThreadClose = document.getElementById('inboxThreadClose');
+                                                                    const inboxThreadMessages = document.getElementById('inboxThreadMessages');
+                                                                    const inboxThreadTitle = document.getElementById('inboxThreadTitle');
+                                                                    const inboxThreadReplyForm = document.getElementById('inboxThreadReplyForm');
+                                                                    const inboxThreadReplyInput = document.getElementById('inboxThreadReplyInput');
+
+                                                                    let inboxItems = [];
+                                                                    let activeThreadId = null;
+                                                                    let inboxFullObserver = null;
+                                                                    const fullExpandedIds = new Set();
+                                                                    const fullLoadingDetailIds = new Set();
+                                                                    let inboxShowHiddenOnly = false;
+                                                                    let fullState = {
+                                                                        page: 1,
+                                                                        limit: 16,
+                                                                        type: 'all',
+                                                                        loading: false,
+                                                                        hasMore: true,
+                                                                        items: []
+                                                                    };
+
+                                                                    function escapeHtml(text) {
+                                                                        return String(text || '')
+                                                                            .replace(/&/g, '&amp;')
+                                                                            .replace(/</g, '&lt;')
+                                                                            .replace(/>/g, '&gt;');
+                                                                    }
+
+                                                                    function getHiddenInboxIds() {
+                                                                        try {
+                                                                            return JSON.parse(localStorage.getItem('plinkk_hidden_inbox_items') || '[]');
+                                                                        } catch(e) { return []; }
+                                                                    }
+                                                                    function hideInboxItem(id) {
+                                                                        const hidden = getHiddenInboxIds();
+                                                                        if (!hidden.includes(id)) {
+                                                                            hidden.push(id);
+                                                                            localStorage.setItem('plinkk_hidden_inbox_items', JSON.stringify(hidden));
+                                                                        }
+                                                                    }
+                                                                    function isInboxHidden(id) {
+                                                                        return getHiddenInboxIds().includes(id);
+                                                                    }
+
+                                                                    function stripBugPrefix(text) {
+                                                                        return String(text || '').replace(/^\[RÉPONSE BUG\s*#?[^\]]*\]\s*/i, '');
+                                                                    }
+
+                                                                    function formatMsgPreview(text) {
+                                                                        var s = stripBugPrefix(String(text || ''));
+                                                                        s = s.replace(/!\[[^\]]*\]\([^)]+\)/g, '🖼️ Image envoyée');
+                                                                        s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(_, label, url) {
+                                                                            if (/\.(pdf|docx?|xlsx?|zip|rar|txt|csv)$/i.test(url)) return '📎 ' + label;
+                                                                            if (/\.(jpe?g|png|webp|gif|svg)$/i.test(url)) return '🖼️ Image envoyée';
+                                                                            return label;
+                                                                        });
+                                                                        s = s.replace(/https?:\/\/\S+\.(?:jpe?g|png|webp|gif|svg)(?:\?\S*)?/gi, '🖼️ Image envoyée');
+                                                                        return s;
+                                                                    }
+
+                                                                    function getReadType(item) {
+                                                                        return item && item.source === 'patch-note' ? 'patch-note' : 'announcement';
+                                                                    }
+
+                                                                    function setBellUnread(unread) {
+                                                                        if (inboxBellBadge) {
+                                                                            inboxBellBadge.textContent = String(unread);
+                                                                            inboxBellBadge.classList.toggle('hidden', unread <= 0);
+                                                                        }
+
+                                                                        if (inboxBellIcon) {
+                                                                            if (unread > 0) {
+                                                                                inboxBellIcon.setAttribute('fill', 'currentColor');
+                                                                                inboxBellIcon.classList.remove('text-slate-300');
+                                                                                inboxBellIcon.classList.add('text-violet-300');
+                                                                            } else {
+                                                                                inboxBellIcon.setAttribute('fill', 'none');
+                                                                                inboxBellIcon.classList.remove('text-violet-300');
+                                                                                inboxBellIcon.classList.add('text-slate-300');
+                                                                            }
+                                                                        }
+                                                                    }
+
+                                                                    async function refreshUnreadCount() {
+                                                                        try {
+                                                                            const res = await fetch('/api/me/inbox/unread-count', { credentials: 'same-origin' });
+                                                                            if (!res.ok) throw new Error('unread_fetch_failed');
+                                                                            const data = await res.json();
+                                                                            setBellUnread(Number(data.unreadCount || 0));
+                                                                        } catch (_) {
+                                                                            const localUnread = inboxItems.filter(function (item) { return !item.isRead; }).length;
+                                                                            setBellUnread(localUnread);
+                                                                        }
+                                                                    }
+
+                                                                    function renderSkeletonRows(container, count) {
+                                                                        if (!container) return;
+                                                                        const rows = [];
+                                                                        for (let i = 0; i < count; i += 1) {
+                                                                            rows.push('' +
+                                                                                '<div class="px-4 py-3 animate-pulse">' +
+                                                                                '<div class="h-3 w-28 bg-slate-800 rounded mb-2"></div>' +
+                                                                                '<div class="h-4 w-2/3 bg-slate-800 rounded mb-2"></div>' +
+                                                                                '<div class="h-3 w-full bg-slate-800/80 rounded mb-1"></div>' +
+                                                                                '<div class="h-3 w-4/5 bg-slate-800/60 rounded"></div>' +
+                                                                                '</div>'
+                                                                            );
+                                                                        }
+                                                                        container.innerHTML = rows.join('');
+                                                                    }
+
+                                                                    function renderInboxItem(item, compact) {
+                                                                        const isRead = !!item.isRead;
+                                                                        const isExpanded = !compact && fullExpandedIds.has(item.id);
+                                                                        const isLoadingDetail = !compact && fullLoadingDetailIds.has(item.id);
+                                                                        const previewText = item.previewText || item.text || '';
+                                                                        const fullText = item.fullText || item.text || '';
+                                                                        const contentHtml = item.type === 'patch-note'
+                                                                            ? (isExpanded ? (item.htmlText || escapeHtml(fullText).replace(/\n/g, '<br>')) : escapeHtml(previewText).replace(/\n/g, '<br>'))
+                                                                            : escapeHtml(formatMsgPreview(item.text || '')).replace(/\n/g, '<br>');
+                                                                        const contentClass = item.type === 'patch-note' && isExpanded ? ' inbox-expand-open' : '';
+                                                                        const when = new Date(item.createdAt).toLocaleString('fr-FR');
+                                                                        const bugThreadBtn = item.type === 'bug-response' && item.threadId
+                                                                            ? '<a href="/inbox" class="inbox-open-thread shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold text-violet-300 hover:text-violet-200 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/25 px-2 py-0.5 rounded-full transition-all" data-thread-id="' + item.threadId + '">Ouvrir le ticket →</a>'
+                                                                            : '';
+                                                                        let expandBtn = '';
+                                                                        if (!compact) {
+                                                                            if (item.type === 'patch-note') {
+                                                                                const baseUrl = "<%= typeof frontendUrl !== 'undefined' ? frontendUrl : '' %>".replace(/\/$/, '');
+                                                                                let href = item.link || '/patch-notes';
+                                                                                if (href.startsWith('/')) href = baseUrl + href;
+                                                                                expandBtn = '<a href="' + href + '" class="inbox-see-more-link shrink-0 text-[10px] text-sky-300 hover:text-sky-200">Voir plus</a>';
+                                                                            } else {
+                                                                                expandBtn = '<button class="inbox-see-more shrink-0 text-[10px] ' + (isExpanded ? 'text-slate-400' : 'text-sky-300 hover:text-sky-200') + '" data-inbox-id="' + item.id + '">' + (isExpanded ? 'Réduire' : (isLoadingDetail ? 'Chargement...' : 'Voir plus')) + '</button>';
+                                                                            }
+                                                                        }
+                                                                        const wrapperPad = compact ? 'px-4 py-3' : 'px-5 py-4';
+
+                                                                        return '' +
+                                                                            '<div class="' + wrapperPad + ' ' + (isRead ? 'opacity-60' : '') + '" data-inbox-id="' + item.id + '">' +
+                                                                            '<div class="flex items-start justify-between gap-2">' +
+                                                                            '<div class="min-w-0 flex-1">' +
+                                                                            '<div class="flex items-center gap-2 mb-1 flex-wrap">' +
+                                                                            '<span class="text-[10px] uppercase tracking-wider font-bold text-slate-400">' + item.type + '</span>' +
+                                                                            '<span class="text-[10px] text-slate-500">' + when + '</span>' +
+                                                                            '</div>' +
+                                                                            '<p class="text-xs font-semibold text-white truncate">' + escapeHtml(String(item.title || '')) + '</p>' +
+                                                                            '<div class="text-xs text-slate-300 mt-1 inbox-md' + contentClass + '">' + contentHtml + '</div>' +
+                                                                            '</div>' +
+                                                                            '<div class="flex flex-col items-end gap-1">' +
+                                                                            bugThreadBtn +
+                                                                            expandBtn +
+                                                                            '<div class="flex items-center gap-2 mt-1">' +
+                                                                            (isRead
+                                                                                ? '<button class="shrink-0 text-[10px] text-emerald-300 cursor-default" disabled>Marqué comme lu</button>'
+                                                                                : '<button class="inbox-mark-read shrink-0 text-[10px] text-violet-300 hover:text-violet-200" data-inbox-id="' + item.id + '">Marquer comme lu</button>') +
+                                                                            (inboxShowHiddenOnly
+                                                                             ? '<button class="inbox-restore-item shrink-0 text-slate-500 hover:text-emerald-400" data-inbox-id="' + item.id + '" title="Restaurer la notification">' +
+                                                                               '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>' +
+                                                                               '</button>'
+                                                                             : '<button class="inbox-delete-item shrink-0 text-slate-500 hover:text-rose-400" data-inbox-id="' + item.id + '" title="Cacher la notification">' +
+                                                                               '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>' +
+                                                                               '</button>') +
+                                                                            '</div>' +
+                                                                            '</div>' +
+                                                                            '</div>' +
+                                                                            '</div>';
+                                                                    }
+
+                                                                    async function inboxMarkRead(itemId) {
+                                                                        if (!itemId) return;
+                                                                        try {
+                                                                            const target = inboxItems.find(function (item) { return item.id === itemId; })
+                                                                                || fullState.items.find(function (item) { return item.id === itemId; });
+                                                                            await fetch('/api/me/inbox/' + encodeURIComponent(itemId) + '/read', {
+                                                                                method: 'POST',
+                                                                                headers: { 'Content-Type': 'application/json' },
+                                                                                credentials: 'same-origin',
+                                                                                body: JSON.stringify({ itemType: getReadType(target) })
+                                                                            });
+                                                                        } catch (_) { }
+                                                                    }
+
+                                                                    async function inboxMarkAllReadRemote() {
+                                                                        try {
+                                                                            await fetch('/api/me/inbox/read-all', {
+                                                                                method: 'POST',
+                                                                                credentials: 'same-origin'
+                                                                            });
+                                                                        } catch (_) { }
+                                                                    }
+
+                                                                    function inboxRender(items) {
+                                                                        if (!inboxBellList) return;
+                                                                        if (!items.length) {
+                                                                            inboxBellList.innerHTML = '<div class="px-4 py-8 text-center text-sm text-slate-400">Aucune notification.</div>';
+                                                                            return;
+                                                                        }
+                                                                        inboxBellList.innerHTML = items.map(function (item) {
+                                                                            return renderInboxItem(item, true);
+                                                                        }).join('');
+                                                                    }
+
+                                                                    function syncReadState(itemId) {
+                                                                        inboxItems = inboxItems.map(function (item) {
+                                                                            if (item.id === itemId) {
+                                                                                item.isRead = true;
+                                                                            }
+                                                                            return item;
+                                                                        });
+                                                                        fullState.items = fullState.items.map(function (item) {
+                                                                            if (item.id === itemId) {
+                                                                                item.isRead = true;
+                                                                            }
+                                                                            return item;
+                                                                        });
+                                                                    }
+
+                                                                    function renderFullFilterButtons(type) {
+                                                                        if (!inboxFullFilters) return;
+                                                                        inboxFullFilters.querySelectorAll('.inbox-full-filter').forEach(function (btn) {
+                                                                            const btnType = btn.getAttribute('data-filter');
+                                                                            if (btnType === type) {
+                                                                                btn.classList.add('bg-violet-500/15', 'text-violet-300', 'border-violet-500/30');
+                                                                                btn.classList.remove('bg-slate-800', 'text-slate-300', 'border-slate-700');
+                                                                            } else {
+                                                                                btn.classList.remove('bg-violet-500/15', 'text-violet-300', 'border-violet-500/30');
+                                                                                btn.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-700');
+                                                                            }
+                                                                        });
+                                                                    }
+
+                                                                    function renderFullItems(items, append) {
+                                                                        if (!inboxFullList) return;
+                                                                        if (!append) {
+                                                                            inboxFullList.innerHTML = '';
+                                                                        }
+                                                                        if (!items.length && !append) {
+                                                                            inboxFullList.innerHTML = '<div class="px-4 py-8 text-center text-sm text-slate-400">Aucune notification pour ce filtre.</div>';
+                                                                            return;
+                                                                        }
+                                                                        inboxFullList.insertAdjacentHTML('beforeend', items.map(function (item) {
+                                                                            return renderInboxItem(item, false);
+                                                                        }).join(''));
+                                                                    }
+
+                                                                    function toggleFullLoading(visible) {
+                                                                        if (!inboxFullLoading) return;
+                                                                        inboxFullLoading.classList.toggle('hidden', !visible);
+                                                                    }
+
+                                                                    async function loadItemFullDetail(itemId) {
+                                                                        if (!itemId || fullLoadingDetailIds.has(itemId)) return;
+                                                                        const item = fullState.items.find(function (it) { return it.id === itemId; });
+                                                                        if (!item) return;
+
+                                                                        if (fullExpandedIds.has(itemId)) {
+                                                                            fullExpandedIds.delete(itemId);
+                                                                            renderFullItems(fullState.items, false);
+                                                                            return;
+                                                                        }
+
+                                                                        if (item.type !== 'patch-note') {
+                                                                            fullExpandedIds.add(itemId);
+                                                                            renderFullItems(fullState.items, false);
+                                                                            return;
+                                                                        }
+
+                                                                        fullLoadingDetailIds.add(itemId);
+                                                                        renderFullItems(fullState.items, false);
+                                                                        try {
+                                                                            const res = await fetch('/api/me/inbox/' + encodeURIComponent(itemId) + '/detail', {
+                                                                                credentials: 'same-origin'
+                                                                            });
+                                                                            if (!res.ok) throw new Error('detail_fetch_failed');
+                                                                            const data = await res.json();
+                                                                            const detailed = data && data.item ? data.item : null;
+                                                                            if (detailed) {
+                                                                                fullState.items = fullState.items.map(function (it) {
+                                                                                    if (it.id !== itemId) return it;
+                                                                                    return {
+                                                                                        ...it,
+                                                                                        previewText: it.previewText || it.text,
+                                                                                        fullText: detailed.text || it.fullText || it.text,
+                                                                                        htmlText: detailed.htmlText || it.htmlText
+                                                                                    };
+                                                                                });
+                                                                            }
+                                                                            fullExpandedIds.add(itemId);
+                                                                        } catch (_) {
+                                                                        } finally {
+                                                                            fullLoadingDetailIds.delete(itemId);
+                                                                            renderFullItems(fullState.items, false);
+                                                                        }
+                                                                    }
+
+                                                                    async function inboxLoadBell() {
+                                                                        if (!inboxBellList) return [];
+                                                                        try {
+                                                                            renderSkeletonRows(inboxBellList, 4);
+                                                                            const res = await fetch('/api/me/inbox?page=1&limit=8&type=all&compact=1', { credentials: 'same-origin' });
+                                                                            if (!res.ok) throw new Error('inbox_fetch_failed');
+                                                                            const data = await res.json();
+                                                                            const items = (Array.isArray(data.items) ? data.items : []).filter(function(item) { return !isInboxHidden(item.id); });
+                                                                            inboxRender(items);
+                                                                            refreshUnreadCount();
+                                                                            return items;
+                                                                        } catch (_) {
+                                                                            inboxBellList.innerHTML = '<div class="px-4 py-8 text-center text-sm text-rose-300">Impossible de charger l\'inbox.</div>';
+                                                                            return [];
+                                                                        }
+                                                                    }
+
+                                                                    async function inboxLoadFull(reset) {
+                                                                        if (!inboxFullList || fullState.loading) return;
+                                                                        if (reset) {
+                                                                            fullState.page = 1;
+                                                                            fullState.hasMore = true;
+                                                                            fullState.items = [];
+                                                                            fullExpandedIds.clear();
+                                                                            renderSkeletonRows(inboxFullList, 6);
+                                                                        }
+                                                                        if (!fullState.hasMore) return;
+
+                                                                        fullState.loading = true;
+                                                                        toggleFullLoading(true);
+                                                                        try {
+                                                                            const res = await fetch('/api/me/inbox?page=' + fullState.page + '&limit=' + fullState.limit + '&type=' + encodeURIComponent(fullState.type) + '&compact=1', {
+                                                                                credentials: 'same-origin'
+                                                                            });
+                                                                            if (!res.ok) throw new Error('inbox_full_fetch_failed');
+                                                                            const data = await res.json();
+                                                                            const items = (Array.isArray(data.items) ? data.items : []).filter(function(item) { 
+                                                                                return inboxShowHiddenOnly ? isInboxHidden(item.id) : !isInboxHidden(item.id); 
+                                                                            });
+                                                                            const pagination = data.pagination || {};
+
+                                                                            fullState.items = reset ? items.slice() : fullState.items.concat(items);
+                                                                            renderFullItems(items, !reset);
+
+                                                                            fullState.hasMore = !!pagination.hasMore;
+                                                                            if (fullState.hasMore) {
+                                                                                fullState.page += 1;
+                                                                            }
+                                                                        } catch (_) {
+                                                                            if (reset) {
+                                                                                inboxFullList.innerHTML = '<div class="px-4 py-8 text-center text-sm text-rose-300">Impossible de charger l\'inbox.</div>';
+                                                                            }
+                                                                        } finally {
+                                                                            fullState.loading = false;
+                                                                            toggleFullLoading(false);
+                                                                        }
+                                                                    }
+
+                                                                    function openFullModal() {
+                                                                        if (!inboxFullModal) return;
+                                                                        inboxFullModal.classList.remove('hidden');
+                                                                        renderFullFilterButtons(fullState.type);
+                                                                        inboxLoadFull(true);
+                                                                    }
+
+                                                                    function closeFullModal() {
+                                                                        inboxFullModal && inboxFullModal.classList.add('hidden');
+                                                                    }
+
+                                                                    async function openBugThread(threadId) {
+                                                                        if (!threadId || !inboxThreadModal || !inboxThreadMessages) return;
+                                                                        activeThreadId = threadId;
+                                                                        inboxThreadTitle && (inboxThreadTitle.textContent = 'Discussion bug #' + threadId);
+                                                                        inboxThreadMessages.innerHTML = '<p class="text-sm text-slate-400">Chargement...</p>';
+                                                                        inboxThreadModal.classList.remove('hidden');
+
+                                                                        try {
+                                                                            const res = await fetch('/api/bug-reports/mine', { credentials: 'same-origin' });
+                                                                            if (!res.ok) throw new Error('thread_fetch_failed');
+                                                                            const data = await res.json();
+                                                                            const threads = Array.isArray(data.threads) ? data.threads : [];
+                                                                            const thread = threads.find(function (t) { return String(t.id) === String(threadId); });
+                                                                            if (!thread) {
+                                                                                inboxThreadMessages.innerHTML = '<p class="text-sm text-rose-300">Thread introuvable.</p>';
+                                                                                return;
+                                                                            }
+
+                                                                            const msgs = Array.isArray(thread.messages) ? thread.messages : [];
+                                                                            inboxThreadMessages.innerHTML = msgs.map(function (m) {
+                                                                                const isAdmin = m.from === 'admin';
+                                                                                return '<div class="' + (isAdmin ? 'ml-6' : 'mr-6') + '">' +
+                                                                                    '<div class="rounded-xl border ' + (isAdmin ? 'border-violet-500/20 bg-violet-500/10' : 'border-slate-700 bg-slate-900') + ' p-3">' +
+                                                                                    '<p class="text-[10px] uppercase tracking-wide ' + (isAdmin ? 'text-violet-300' : 'text-slate-400') + '">' + (isAdmin ? 'admin' : 'vous') + '</p>' +
+                                                                                    '<p class="text-sm text-slate-200 mt-1 whitespace-pre-wrap">' + escapeHtml(m.message || '') + '</p>' +
+                                                                                    '<p class="text-[10px] text-slate-500 mt-2">' + new Date(m.createdAt).toLocaleString('fr-FR') + '</p>' +
+                                                                                    '</div>' +
+                                                                                    '</div>';
+                                                                            }).join('');
+                                                                        } catch (_) {
+                                                                            inboxThreadMessages.innerHTML = '<p class="text-sm text-rose-300">Impossible de charger la discussion.</p>';
+                                                                        }
+                                                                    }
+
+                                                                    if (inboxBellBtn && inboxBellPanel && inboxBellWrap) {
+                                                                        inboxLoadBell().then(function (items) { inboxItems = items; });
+                                                                        refreshUnreadCount();
+
+                                                                        window.openHeaderInbox = function(e) {
+                                                                            if (e) { e.preventDefault(); e.stopPropagation(); }
+                                                                            if (typeof openFullModal === 'function') {
+                                                                                openFullModal();
+                                                                                const panel = document.getElementById('ticketWidgetPanel');
+                                                                                if (panel) panel.classList.add('hidden');
+                                                                            }
+                                                                        };
+
+                                                                        inboxBellBtn.addEventListener('click', function (e) {
+                                                                            e.stopPropagation();
+                                                                            const hidden = inboxBellPanel.classList.contains('hidden');
+                                                                            inboxBellPanel.classList.toggle('hidden');
+                                                                            inboxBellBtn.setAttribute('aria-expanded', hidden ? 'true' : 'false');
+                                                                            if (hidden) {
+                                                                                inboxLoadBell().then(function (items) { inboxItems = items; });
+                                                                            }
+                                                                        });
+
+                                                                        document.addEventListener('click', function (e) {
+                                                                            if (!inboxBellWrap.contains(e.target)) {
+                                                                                inboxBellPanel.classList.add('hidden');
+                                                                                inboxBellBtn.setAttribute('aria-expanded', 'false');
+                                                                            }
+                                                                        });
+
+                                                                        inboxBellList && inboxBellList.addEventListener('click', function (e) {
+                                                                            const btn = e.target.closest('.inbox-mark-read');
+                                                                            if (btn) {
+                                                                                e.preventDefault();
+                                                                                e.stopPropagation();
+                                                                                if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                                                                                const id = btn.getAttribute('data-inbox-id');
+                                                                                if (!id) return;
+                                                                                const target = inboxItems.find(function (item) { return item.id === id; });
+                                                                                if (!target) return;
+                                                                                target.isRead = true;
+                                                                                inboxMarkRead(id);
+                                                                                inboxRender(inboxItems);
+                                                                                refreshUnreadCount();
+                                                                                return;
+                                                                            }
+                                                                            
+                                                                            const deleteBtn = e.target.closest('.inbox-delete-item');
+                                                                            if (deleteBtn) {
+                                                                                e.preventDefault();
+                                                                                e.stopPropagation();
+                                                                                if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                                                                                const id = deleteBtn.getAttribute('data-inbox-id');
+                                                                                if (!id) return;
+                                                                                hideInboxItem(id);
+                                                                                const target = inboxItems.find(function (item) { return item.id === id; }) || fullState.items.find(function (item) { return item.id === id; });
+                                                                                if (target && !target.isRead) {
+                                                                                    target.isRead = true;
+                                                                                    inboxMarkRead(id);
+                                                                                }
+                                                                                inboxItems = inboxItems.filter(function(item) { return item.id !== id; });
+                                                                                fullState.items = fullState.items.filter(function(item) { return item.id !== id; });
+                                                                                inboxRender(inboxItems);
+                                                                                renderFullItems(fullState.items, false);
+                                                                                refreshUnreadCount();
+                                                                                return;
+                                                                            }
+
+                                                                            const threadBtn = e.target.closest('.inbox-open-thread');
+                                                                            if (!threadBtn) return;
+                                                                            const threadId = threadBtn.getAttribute('data-thread-id');
+                                                                            if (!threadId) return;
+                                                                            openBugThread(threadId);
+                                                                        });
+
+                                                                        inboxMarkAllRead && inboxMarkAllRead.addEventListener('click', function (e) {
+                                                                            if (e) e.stopPropagation();
+                                                                            inboxMarkAllReadRemote();
+                                                                            inboxItems = inboxItems.map(function (item) {
+                                                                                item.isRead = true;
+                                                                                return item;
+                                                                            });
+                                                                            inboxRender(inboxItems);
+                                                                            refreshUnreadCount();
+                                                                        });
+
+                                                                        inboxFullMarkAllReadBtn && inboxFullMarkAllReadBtn.addEventListener('click', function (e) {
+                                                                            if (e) e.stopPropagation();
+                                                                            inboxMarkAllReadRemote();
+                                                                            inboxItems = inboxItems.map(function (item) { item.isRead = true; return item; });
+                                                                            fullState.items = fullState.items.map(function (item) { item.isRead = true; return item; });
+                                                                            inboxRender(inboxItems);
+                                                                            renderFullItems(fullState.items, false);
+                                                                            refreshUnreadCount();
+                                                                        });
+
+                                                                        inboxOpenFull && inboxOpenFull.addEventListener('click', function (e) {
+                                                                            e.preventDefault();
+                                                                            e.stopPropagation();
+                                                                            openFullModal();
+                                                                        });
+                                                                    }
+
+                                                                    if (inboxFullFilters) {
+                                                                        inboxFullFilters.addEventListener('click', function (e) {
+                                                                            const btn = e.target.closest('.inbox-full-filter');
+                                                                            if (!btn) return;
+                                                                            const type = btn.getAttribute('data-filter') || 'all';
+                                                                            fullState.type = type;
+                                                                            renderFullFilterButtons(type);
+                                                                            inboxLoadFull(true);
+                                                                        });
+                                                                    }
+
+                                                                    if (inboxFullList) {
+                                                                        inboxFullList.addEventListener('click', function (e) {
+                                                                            const expandBtn = e.target.closest('.inbox-see-more');
+                                                                            if (expandBtn) {
+                                                                                e.preventDefault();
+                                                                                e.stopPropagation();
+                                                                                const id = expandBtn.getAttribute('data-inbox-id');
+                                                                                if (!id) return;
+                                                                                loadItemFullDetail(id);
+                                                                                return;
+                                                                            }
+
+                                                                            const btn = e.target.closest('.inbox-mark-read');
+                                                                            if (btn) {
+                                                                                e.preventDefault();
+                                                                                e.stopPropagation();
+                                                                                if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                                                                                const id = btn.getAttribute('data-inbox-id');
+                                                                                if (!id) return;
+                                                                                syncReadState(id);
+                                                                                inboxRender(inboxItems);
+                                                                                renderFullItems(fullState.items, false);
+                                                                                inboxMarkRead(id);
+                                                                                refreshUnreadCount();
+                                                                                return;
+                                                                            }
+                                                                            
+                                                                            const deleteBtn = e.target.closest('.inbox-delete-item');
+                                                                            if (deleteBtn) {
+                                                                                e.preventDefault();
+                                                                                e.stopPropagation();
+                                                                                if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                                                                                const id = deleteBtn.getAttribute('data-inbox-id');
+                                                                                if (!id) return;
+                                                                                hideInboxItem(id);
+                                                                                const target = inboxItems.find(function (item) { return item.id === id; }) || fullState.items.find(function (item) { return item.id === id; });
+                                                                                if (target && !target.isRead) {
+                                                                                    target.isRead = true;
+                                                                                    inboxMarkRead(id);
+                                                                                }
+                                                                                inboxItems = inboxItems.filter(function(item) { return item.id !== id; });
+                                                                                fullState.items = fullState.items.filter(function(item) { return item.id !== id; });
+                                                                                inboxRender(inboxItems);
+                                                                                renderFullItems(fullState.items, false);
+                                                                                refreshUnreadCount();
+                                                                                return;
+                                                                            }
+
+                                                                            const restoreBtn = e.target.closest('.inbox-restore-item');
+                                                                            if (restoreBtn) {
+                                                                                e.preventDefault();
+                                                                                e.stopPropagation();
+                                                                                if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                                                                                const id = restoreBtn.getAttribute('data-inbox-id');
+                                                                                if (!id) return;
+                                                                                
+                                                                                const hidden = getHiddenInboxIds();
+                                                                                const newHidden = hidden.filter(function(i) { return i !== id; });
+                                                                                localStorage.setItem('plinkk_hidden_inbox_items', JSON.stringify(newHidden));
+                                                                                
+                                                                                inboxItems = inboxItems.filter(function(item) { return item.id !== id; });
+                                                                                fullState.items = fullState.items.filter(function(item) { return item.id !== id; });
+                                                                                inboxRender(inboxItems);
+                                                                                renderFullItems(fullState.items, false);
+                                                                                refreshUnreadCount();
+                                                                                return;
+                                                                            }
+
+                                                                            const threadBtn = e.target.closest('.inbox-open-thread');
+                                                                            if (!threadBtn) return;
+                                                                            const threadId = threadBtn.getAttribute('data-thread-id');
+                                                                            if (!threadId) return;
+                                                                            openBugThread(threadId);
+                                                                        });
+                                                                    }
+
+                                                                    if (inboxFullSentinel && 'IntersectionObserver' in window) {
+                                                                        inboxFullObserver = new IntersectionObserver(function (entries) {
+                                                                            entries.forEach(function (entry) {
+                                                                                if (entry.isIntersecting && !fullState.loading && fullState.hasMore && inboxFullModal && !inboxFullModal.classList.contains('hidden')) {
+                                                                                    inboxLoadFull(false);
+                                                                                }
+                                                                            });
+                                                                        }, { root: null, rootMargin: '200px', threshold: 0.01 });
+                                                                        inboxFullObserver.observe(inboxFullSentinel);
+                                                                    }
+
+                                                                    inboxFullBackdrop && inboxFullBackdrop.addEventListener('click', closeFullModal);
+                                                                    inboxFullClose && inboxFullClose.addEventListener('click', closeFullModal);
+                                                                    document.addEventListener('keydown', function (e) {
+                                                                        if (e.key === 'Escape') {
+                                                                            closeFullModal();
+                                                                        }
+                                                                    });
+                                                                    
+                                                                    const toggleHiddenBtn = document.getElementById('inboxFullToggleHiddenBtn');
+                                                                    if (toggleHiddenBtn) {
+                                                                        toggleHiddenBtn.addEventListener('click', function(e) {
+                                                                            e.preventDefault();
+                                                                            inboxShowHiddenOnly = !inboxShowHiddenOnly;
+                                                                            toggleHiddenBtn.textContent = inboxShowHiddenOnly ? 'Masquer éléments supprimés' : 'Voir éléments masqués';
+                                                                            if (inboxShowHiddenOnly) {
+                                                                                toggleHiddenBtn.classList.add('text-rose-400', 'border-rose-500/50', 'bg-rose-500/10');
+                                                                                toggleHiddenBtn.classList.remove('text-slate-400', 'border-slate-700/50', 'bg-slate-800');
+                                                                            } else {
+                                                                                toggleHiddenBtn.classList.remove('text-rose-400', 'border-rose-500/50', 'bg-rose-500/10');
+                                                                                toggleHiddenBtn.classList.add('text-slate-400', 'border-slate-700/50', 'bg-slate-800');
+                                                                            }
+                                                                            inboxLoadFull(true);
+                                                                        });
+                                                                    }
+
+                                                                    function closeThreadModal() {
+                                                                        inboxThreadModal && inboxThreadModal.classList.add('hidden');
+                                                                        activeThreadId = null;
+                                                                    }
+
+                                                                    inboxThreadBackdrop && inboxThreadBackdrop.addEventListener('click', closeThreadModal);
+                                                                    inboxThreadClose && inboxThreadClose.addEventListener('click', closeThreadModal);
+
+                                                                    inboxThreadReplyForm && inboxThreadReplyForm.addEventListener('submit', async function (e) {
+                                                                        e.preventDefault();
+                                                                        if (!activeThreadId || !inboxThreadReplyInput) return;
+                                                                        const message = String(inboxThreadReplyInput.value || '').trim();
+                                                                        if (!message) return;
+
+                                                                        try {
+                                                                            const res = await fetch('/api/bug-reports/' + encodeURIComponent(activeThreadId) + '/reply', {
+                                                                                method: 'POST',
+                                                                                headers: { 'Content-Type': 'application/json' },
+                                                                                credentials: 'same-origin',
+                                                                                body: JSON.stringify({ message })
+                                                                            });
+                                                                            if (!res.ok) throw new Error('thread_reply_failed');
+                                                                            inboxThreadReplyInput.value = '';
+                                                                            openBugThread(activeThreadId);
+                                                                        } catch (_) {
+                                                                            alert('Impossible d\'envoyer la réponse.');
+                                                                        }
+                                                                    });
                                                                     try {
                                                                         /* ── Dismiss logic for all message types (banner, notification, popup) ── */
                                                                         document.querySelectorAll('.site-msg-item').forEach(function (wrap) {
@@ -619,7 +1431,7 @@
                                                                 })();
                                                             </script>
 
-                                                            <%- include('bug-report-modal.ejs') %>
+                                                            <%- include('ticket-modal.ejs') %>
                                                                 <script>
                                                                     (function () {
                                                                         const originalOpenModal = window.openGlobalBugReportModal;
@@ -632,5 +1444,189 @@
                                                                                 panel.classList.add('hidden');
                                                                             }
                                                                         };
+
+                                                                        const btn = document.getElementById('verifyEmailBtn');
+                                                                        if (btn) {
+                                                                            btn.addEventListener('click', async () => {
+                                                                                const originalText = btn.textContent;
+                                                                                btn.disabled = true;
+                                                                                btn.textContent = 'Envoi...';
+                                                                                try {
+                                                                                    const res = await fetch('/account/verify-email', {
+                                                                                        method: 'POST',
+                                                                                        headers: { 'Content-Type': 'application/json' },
+                                                                                        body: JSON.stringify({})
+                                                                                    });
+                                                                                    const data = await res.json();
+                                                                                    if (data.success) {
+                                                                                        btn.textContent = 'Email envoyé !';
+                                                                                        btn.classList.replace('bg-rose-500', 'bg-emerald-500');
+                                                                                        setTimeout(() => {
+                                                                                            btn.textContent = originalText;
+                                                                                            btn.disabled = false;
+                                                                                            btn.classList.replace('bg-emerald-500', 'bg-rose-500');
+                                                                                        }, 5000);
+                                                                                    } else {
+                                                                                        throw new Error(data.error);
+                                                                                    }
+                                                                                } catch (e) {
+                                                                                    console.error('Email verification error:', e);
+                                                                                    btn.textContent = 'Erreur';
+                                                                                    setTimeout(() => {
+                                                                                        btn.textContent = originalText;
+                                                                                        btn.disabled = false;
+                                                                                    }, 3000);
+                                                                                }
+                                                                            });
+                                                                        }
                                                                     })();
                                                                 </script>
+
+<!-- ══ Floating Ticket Widget ══ -->
+<div id="ticketWidget" class="hidden fixed bottom-6 right-6 z-[10000] flex flex-col items-end gap-3" style="max-width:360px">
+
+  <!-- Dropdown panel -->
+  <div id="ticketWidgetPanel" class="hidden w-80 max-w-[90vw] rounded-2xl border border-white/10 bg-[#0d1526] shadow-2xl shadow-black/60 overflow-hidden animate-ticketpanel-in">
+    <!-- Header -->
+    <div class="px-4 py-3 border-b border-white/6 flex items-center justify-between bg-slate-950/60">
+      <div class="flex items-center gap-2">
+        <p class="text-sm font-bold text-white">Mes tickets actifs</p>
+      </div>
+      <button onclick="openHeaderInbox(event)" class="text-[11px] text-slate-300 hover:text-white transition-colors">Voir tout</button>
+    </div>
+    <!-- Ticket list -->
+    <div id="ticketWidgetList" class="max-h-72 overflow-y-auto divide-y divide-white/5"></div>
+  </div>
+
+  <button id="ticketWidgetBtn" onclick="toggleTicketWidget()" class="relative w-14 h-14 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 shadow-lg shadow-violet-900/40 flex items-center justify-center text-white hover:scale-105 transition-transform focus:outline-none" title="Mes tickets actifs">
+    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+    <span id="ticketWidgetBadge" class="hidden absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-5 text-center">0</span>
+  </button>
+</div>
+
+<style>
+@keyframes ticketpanel-in {
+  from { opacity:0; transform: translateY(12px) scale(0.96); }
+  to { opacity:1; transform: translateY(0) scale(1); }
+}
+.animate-ticketpanel-in { animation: ticketpanel-in 0.22s ease-out both; }
+#ticketWidgetList::-webkit-scrollbar { width:4px; }
+#ticketWidgetList::-webkit-scrollbar-thumb { background:#1e293b; border-radius:6px; }
+</style>
+
+<script>
+(function () {
+  const widget = document.getElementById('ticketWidget');
+  const panel = document.getElementById('ticketWidgetPanel');
+  const list = document.getElementById('ticketWidgetList');
+  const badge = document.getElementById('ticketWidgetBadge');
+  let activeTickets = [];
+  let widgetOpen = false;
+
+  function statusLabel(s) {
+    if (s === 'PENDING') return '<span class="text-amber-400 text-[9px] font-bold uppercase">En attente</span>';
+    if (s === 'IN_PROGRESS') return '<span class="text-blue-400 text-[9px] font-bold uppercase">En cours</span>';
+    return '<span class="text-slate-500 text-[9px] font-bold uppercase">' + (s || '') + '</span>';
+  }
+
+  function fmtPreview(msg) {
+    if (!msg) return '';
+    var s = String(msg);
+    s = s.replace(/!\[[^\]]*\]\([^)]+\)/g, '🖼️ Image');
+    s = s.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+    s = s.replace(/[#*`_>~]/g, '');
+    return s.replace(/\s+/g, ' ').trim().slice(0, 80) + (s.length > 80 ? '…' : '');
+  }
+
+  function renderList() {
+    if (!list) return;
+    if (!activeTickets.length) {
+      list.innerHTML = '<div class="px-4 py-6 text-center text-slate-500 text-xs">Aucun ticket actif.</div>';
+      return;
+    }
+    list.innerHTML = activeTickets.map(function (t) {
+      const lastMsg = (t.messages || []).slice(-1)[0];
+      const preview = fmtPreview(lastMsg ? lastMsg.message : t.message);
+      const fromAdmin = lastMsg && lastMsg.from === 'admin';
+      return '<button onclick="openTicketFromWidget(\'' + t.id + '\')" class="w-full text-left px-4 py-3 hover:bg-white/5 transition-colors flex flex-col gap-1">' +
+        '<div class="flex items-center justify-between gap-2">' +
+        '<span class="text-[11px] font-mono text-slate-500">#' + t.id.slice(-8) + '</span>' +
+        statusLabel(t.status) +
+        '</div>' +
+        '<p class="text-xs text-white font-medium truncate">' + (t.message || '').slice(0, 60) + '</p>' +
+        (preview ? '<p class="text-[11px] text-slate-400 truncate">' + (fromAdmin ? '← ' : '') + preview + '</p>' : '') +
+        '</button>';
+    }).join('');
+  }
+
+  window.openTicketFromWidget = function (id) {
+    panelClose();
+    if (typeof window.openBugTicket === 'function') {
+      window.openBugTicket(id, 'Ticket #' + id.slice(-8));
+    }
+  };
+
+  function panelClose() {
+    widgetOpen = false;
+    if (panel) { panel.classList.add('hidden'); panel.classList.remove('animate-ticketpanel-in'); }
+  }
+
+  window.toggleTicketWidget = function () {
+    if (!panel) return;
+    widgetOpen = !widgetOpen;
+    if (widgetOpen) {
+      panel.classList.remove('hidden');
+      void panel.offsetHeight; 
+      panel.classList.add('animate-ticketpanel-in');
+    } else {
+      panelClose();
+    }
+  };
+
+  document.addEventListener('click', function (e) {
+    const w = document.getElementById('ticketWidget');
+    if (w && !w.contains(e.target)) panelClose();
+  });
+  async function loadActiveTickets() {
+    try {
+      const resp = await fetch('/api/bug-reports/mine', { credentials: 'same-origin' });
+      if (!resp.ok) return;
+      const data = await resp.json();
+      const threads = Array.isArray(data.threads) ? data.threads : [];
+      activeTickets = threads.filter(function (t) { return t.status !== 'RESOLVED'; });
+      if (activeTickets.length > 0) {
+        if (widget) widget.classList.remove('hidden');
+        document.documentElement.classList.add('has-active-tickets');
+        
+        const hasUnread = activeTickets.some(function(t) {
+          const lastMsg = (t.messages || []).slice(-1)[0];
+          return lastMsg && lastMsg.from === 'admin';
+        });
+
+        const btn = document.getElementById('ticketWidgetBtn');
+        if (btn) {
+          if (hasUnread) {
+            btn.className = 'relative w-14 h-14 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 shadow-lg shadow-violet-900/40 flex items-center justify-center text-white hover:scale-105 transition-transform focus:outline-none';
+          } else {
+            btn.className = 'relative w-14 h-14 rounded-full bg-[#1e293b] border border-white/10 shadow-lg shadow-black/20 flex items-center justify-center text-slate-400 hover:scale-105 transition-transform focus:outline-none';
+          }
+        }
+
+        if (badge) {
+          badge.textContent = String(activeTickets.length);
+          badge.classList.toggle('hidden', activeTickets.length === 0);
+        }
+        renderList();
+      }
+    } catch (e) { /* silently ignore */ }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadActiveTickets);
+  } else {
+    loadActiveTickets();
+  }
+})();
+</script>
+
+<%- include('bug-ticket-modal.ejs') %>

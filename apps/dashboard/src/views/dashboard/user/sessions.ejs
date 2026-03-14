@@ -1,4 +1,11 @@
-<%- include('partials/head.ejs', { title: 'Mes Sessions' , description: 'Gérez vos sessions actives.' , robots: 'noindex,nofollow' }) %>
+<%- include('partials/head.ejs', { 
+  title: 'Mes Sessions',
+  description: 'Gérez vos sessions actives. Contrôlez les appareils connectés à votre compte Plinkk.',
+  metaKeywords: 'sessions, sécurité, appareils, connexions, gestion compte',
+  metaAuthor: 'Plinkk',
+  pageThemeColor: 'dark',
+  robots: 'noindex,nofollow'
+}) %>
 
 <%- include('partials/header-dash.ejs', { user: user }) %>
 
@@ -78,6 +85,9 @@
             </div>
         </div>
     </main>
+
+    <!-- Tutorial -->
+    <script src="/public/js/tutorial.js" defer></script>
 </div>
 
 <!-- Revoke Session Modal -->

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vérifie ton email — Plinkk</title>
+  <link rel="icon" href="https://cdn.plinkk.fr/logo.svg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', system-ui, sans-serif; }
+    @keyframes fade-up { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    .fade-up { animation: fade-up .4s ease forwards; }
+    @keyframes blob { 0%,100% { border-radius:60% 40% 30% 70%/60% 30% 70% 40%; } 50% { border-radius:30% 60% 70% 40%/50% 60% 30% 60%; } }
+    .blob { animation: blob 8s ease-in-out infinite; }
+    .otp-digit { transition: border-color .15s, box-shadow .15s; }
+    .otp-digit:focus { border-color: #8b5cf6; box-shadow: 0 0 0 1px #8b5cf6; outline: none; }
+    .otp-digit.filled { border-color: #7c3aed; }
+    .otp-digit.error { border-color: #f43f5e !important; box-shadow: 0 0 0 1px #f43f5e !important; animation: shake .3s ease; }
+    @keyframes shake { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-4px); } 75% { transform:translateX(4px); } }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 flex flex-col items-center justify-center px-4 py-12 relative overflow-hidden">
+
+  <div class="absolute inset-0 pointer-events-none overflow-hidden">
+    <div class="blob absolute -top-32 -left-32 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl"></div>
+    <div class="blob absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl" style="animation-delay:4s"></div>
+  </div>
+
+  <div class="relative w-full max-w-sm fade-up">
+    <!-- Logo -->
+    <div class="flex flex-col items-center mb-8">
+      <img src="https://cdn.plinkk.fr/logo.svg" alt="Plinkk" class="w-12 h-12 rounded-2xl mb-3" />
+      <span class="text-xl font-bold text-white tracking-tight">Plinkk</span>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+      <!-- Icône + titre -->
+      <div class="flex flex-col items-center mb-6">
+        <div class="w-14 h-14 bg-violet-500/10 rounded-2xl flex items-center justify-center mb-3">
+          <svg class="w-7 h-7 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <h1 class="text-lg font-semibold text-white mb-1">Vérifie ton email</h1>
+        <p class="text-slate-400 text-sm text-center">
+          On a envoyé un code à<br/>
+          <span class="text-violet-400 font-medium"><%= email %></span>
+        </p>
+      </div>
+
+      <% if (typeof error !== 'undefined' && error) { %>
+      <div class="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm rounded-xl px-4 py-3 mb-5 flex items-start gap-2">
+        <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span><%= error %></span>
+      </div>
+      <% } %>
+
+      <!-- Saisie OTP 6 chiffres -->
+      <form action="/join/verify" method="POST" id="otpForm" novalidate>
+        <input type="hidden" name="email" value="<%= email %>" />
+
+        <div class="flex justify-center gap-2 mb-6" id="otpBoxes">
+          <% for (let i = 0; i < 6; i++) { %>
+          <input
+            type="text"
+            inputmode="numeric"
+            maxlength="1"
+            pattern="[0-9]"
+            data-index="<%= i %>"
+            class="otp-digit w-11 h-14 text-center text-xl font-bold text-white bg-slate-800 border border-slate-700 rounded-xl"
+            autocomplete="<%= i === 0 ? 'one-time-code' : 'off' %>"
+          />
+          <% } %>
+        </div>
+
+        <!-- Champ hidden qui recevra le code complet -->
+        <input type="hidden" name="code" id="codeInput" />
+
+        <button
+          type="submit"
+          id="submitBtn"
+          disabled
+          class="w-full bg-violet-600 hover:bg-violet-500 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-semibold rounded-xl py-3 text-sm transition-all duration-150 flex items-center justify-center gap-2"
+        >
+          <span id="btnText">Vérifier</span>
+          <svg id="btnSpinner" class="w-4 h-4 hidden animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="white" stroke-width="4"/><path class="opacity-75" fill="white" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        </button>
+      </form>
+
+      <!-- Renvoyer le code -->
+      <div class="flex items-center justify-center gap-2 mt-5">
+        <span class="text-slate-500 text-sm">Tu n'as pas reçu le code ?</span>
+        <button
+          id="resendBtn"
+          disabled
+          class="text-sm font-medium text-violet-400 hover:text-violet-300 disabled:text-slate-600 disabled:cursor-not-allowed transition-colors"
+          onclick="resendCode()"
+        >
+          Renvoyer <span id="resendTimer" class="text-slate-600">(60s)</span>
+        </button>
+      </div>
+
+      <div class="mt-4 text-center">
+        <a href="/join?email=<%= encodeURIComponent(email) %>" class="text-xs text-slate-500 hover:text-slate-400 transition-colors">
+          ← Changer d'email
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const digits = document.querySelectorAll('.otp-digit');
+    const submitBtn = document.getElementById('submitBtn');
+    const codeInput = document.getElementById('codeInput');
+    const otpForm = document.getElementById('otpForm');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+    let isSubmitting = false;
+
+    // — OTP input logic —
+    function getCode() {
+      return Array.from(digits).map(d => d.value).join('');
+    }
+
+    function updateSubmitState() {
+      const code = getCode();
+      const full = code.length === 6 && /^\d{6}$/.test(code);
+      submitBtn.disabled = !full;
+      digits.forEach((d, i) => {
+        d.classList.toggle('filled', d.value.length === 1);
+      });
+    }
+
+    function submitIfComplete() {
+      const code = getCode();
+      if (isSubmitting) return;
+      if (!/^\d{6}$/.test(code)) return;
+      codeInput.value = code;
+      isSubmitting = true;
+      otpForm.requestSubmit();
+    }
+
+    digits.forEach((input, idx) => {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !input.value && idx > 0) {
+          digits[idx - 1].focus();
+          digits[idx - 1].value = '';
+          updateSubmitState();
+        }
+      });
+
+      input.addEventListener('input', () => {
+        // N'accepte que les chiffres
+        input.value = input.value.replace(/\D/g, '').slice(-1);
+        updateSubmitState();
+        if (input.value && idx < digits.length - 1) {
+          digits[idx + 1].focus();
+        }
+        // Auto-submit si dernier chiffre
+        if (idx === 5 && getCode().length === 6) {
+          setTimeout(submitIfComplete, 80);
+        }
+      });
+
+      // Gérer le paste
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData?.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+        text.split('').forEach((ch, i) => {
+          if (digits[i]) digits[i].value = ch;
+        });
+        updateSubmitState();
+        const next = Math.min(text.length, 5);
+        digits[next].focus();
+        if (text.length === 6) {
+          setTimeout(submitIfComplete, 80);
+        }
+      });
+    });
+
+    otpForm.addEventListener('submit', (e) => {
+      const code = getCode();
+      if (!/^\d{6}$/.test(code)) { e.preventDefault(); return; }
+      codeInput.value = code;
+      isSubmitting = true;
+      btnText.textContent = 'Vérification…';
+      btnSpinner.classList.remove('hidden');
+      submitBtn.disabled = true;
+    });
+
+    // Animer les boxes en erreur
+    <% if (typeof error !== 'undefined' && error) { %>
+    digits.forEach(d => d.classList.add('error'));
+    setTimeout(() => digits.forEach(d => d.classList.remove('error')), 500);
+    <% } %>
+
+    // Focus auto sur le premier digit vide
+    digits[0].focus();
+
+    // — Countdown renvoyer —
+    const resendBtn = document.getElementById('resendBtn');
+    const resendTimer = document.getElementById('resendTimer');
+    let countdown = 60;
+
+    function tick() {
+      countdown--;
+      if (countdown <= 0) {
+        resendTimer.textContent = '';
+        resendBtn.disabled = false;
+      } else {
+        resendTimer.textContent = `(${countdown}s)`;
+        setTimeout(tick, 1000);
+      }
+    }
+    setTimeout(tick, 1000);
+
+    async function resendCode() {
+      resendBtn.disabled = true;
+      resendTimer.textContent = '(envoi…)';
+      const email = '<%= email %>';
+      try {
+        const res = await fetch('/join', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `email=${encodeURIComponent(email)}`,
+          redirect: 'manual',
+        });
+        countdown = 60;
+        resendTimer.textContent = `(${countdown}s)`;
+        setTimeout(tick, 1000);
+        // Flash de confirmation
+        const flash = document.createElement('p');
+        flash.className = 'text-emerald-400 text-xs text-center mt-3 animate-pulse';
+        flash.textContent = '✓ Email renvoyé !';
+        resendBtn.parentElement.after(flash);
+        setTimeout(() => flash.remove(), 3000);
+      } catch {
+        resendTimer.textContent = '';
+        resendBtn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

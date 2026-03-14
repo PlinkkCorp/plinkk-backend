@@ -64,12 +64,20 @@
                             </div>
 
                             <!-- Options de publication -->
-                            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4">
+                            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 space-y-3">
                                 <label class="flex items-center gap-3 cursor-pointer">
                                     <input type="checkbox" name="isPublished" class="w-5 h-5 rounded">
                                     <span class="text-white font-medium">Publier immédiatement</span>
                                 </label>
-                                <p class="text-xs text-slate-400 mt-2 ml-8">Si désactivé, la patch note sera en brouillon</p>
+                                <p class="text-xs text-slate-400 ml-8">Si désactivé, la patch note sera en brouillon</p>
+                                
+                                <div class="border-t border-slate-700 pt-3">
+                                    <label class="flex items-center gap-3 cursor-pointer">
+                                        <input type="checkbox" name="notifyEveryone" class="w-5 h-5 rounded" checked>
+                                        <span class="text-white font-medium">Notifier @everyone sur Discord</span>
+                                    </label>
+                                    <p class="text-xs text-slate-400 ml-8">Mentionne @everyone lors de la publication sur Discord</p>
+                                </div>
                             </div>
 
                             <!-- Aperçu -->
@@ -168,11 +176,18 @@
                         <textarea id="editContent" rows="8" required class="w-full bg-slate-800 border border-slate-700 rounded-2xl p-4 text-white font-mono text-sm placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors resize-none"></textarea>
                     </div>
 
-                    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4">
+                    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 space-y-3">
                         <label class="flex items-center gap-3 cursor-pointer">
                             <input type="checkbox" id="editIsPublished" class="w-5 h-5 rounded">
                             <span class="text-white font-medium">Publier</span>
                         </label>
+                        
+                        <div class="border-t border-slate-700 pt-3">
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <input type="checkbox" id="editNotifyEveryone" class="w-5 h-5 rounded">
+                                <span class="text-white font-medium">Notifier @everyone sur Discord</span>
+                            </label>
+                        </div>
                     </div>
 
                     <div class="flex gap-3">
@@ -187,7 +202,74 @@
             </div>
         </div>
 
+        <div id="toasts" class="fixed top-4 right-4 z-50 flex flex-col items-end gap-2 pointer-events-none"></div>
+
         <script>
+            function showConfirm(message, actionText = 'Confirmer') {
+                return new Promise(resolve => {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'fixed inset-0 z-[100000] flex items-center justify-center bg-black/70 backdrop-blur-sm';
+                    overlay.style.cssText = 'animation: fadeIn 0.15s ease-out';
+                    overlay.innerHTML = `
+                        <style>@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}</style>
+                        <div class="w-full max-w-sm mx-4 bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-2xl" style="animation: scaleIn 0.2s ease-out">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                </div>
+                                <h3 class="font-semibold text-lg text-white">Confirmation</h3>
+                            </div>
+                            <p class="text-slate-300 mb-6 text-sm">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+                            <div class="flex justify-end gap-3">
+                                <button class="cancelBtn px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium transition-colors">Annuler</button>
+                                <button class="confirmBtn px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-colors">${actionText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</button>
+                            </div>
+                        </div>`;
+                    function cleanup(result) { overlay.remove(); document.removeEventListener('keydown', onKey); resolve(result); }
+                    function onKey(e) { if (e.key === 'Escape') cleanup(false); if (e.key === 'Enter') cleanup(true); }
+                    overlay.querySelector('.cancelBtn').addEventListener('click', () => cleanup(false));
+                    overlay.querySelector('.confirmBtn').addEventListener('click', () => cleanup(true));
+                    overlay.addEventListener('click', e => { if (e.target === overlay) cleanup(false); });
+                    document.body.appendChild(overlay);
+                    document.addEventListener('keydown', onKey);
+                    overlay.querySelector('.cancelBtn').focus();
+                });
+            }
+
+            function showAlert(message, type = 'info', opts = {}) {
+                const container = document.getElementById('siteNotifsWrap') || document.getElementById('toasts');
+                if (!container) return console.log(message);
+
+                const el = document.createElement('div');
+                el.className = 'pointer-events-auto max-w-sm w-full rounded-xl px-4 py-3 text-sm shadow-lg border flex items-center gap-3 animate-slide-in-right';
+
+                let bg = 'bg-slate-900 text-white border-slate-800';
+                let icon = '';
+
+                if (type === 'success') {
+                    bg = 'bg-slate-900 text-emerald-400 border-emerald-500/30';
+                    icon = '<svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+                } else if (type === 'error') {
+                    bg = 'bg-slate-900 text-rose-400 border-rose-500/30';
+                    icon = '<svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+                }
+
+                el.className += ' ' + bg;
+                el.innerHTML = `${icon}<span>${message}</span>`;
+
+                container.appendChild(el);
+
+                const timeout = opts.timeout || 3500;
+                const remove = () => {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateX(100%)';
+                    setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
+                };
+                el.addEventListener('click', remove);
+                setTimeout(remove, timeout);
+                return el;
+            }
+
             // Mise à jour de l'aperçu
             const form = document.getElementById('patchnoteForm');
             ['title', 'version'].forEach(field => {
@@ -216,20 +298,21 @@
                             title: formData.get('title'),
                             version: formData.get('version'),
                             content: formData.get('content'),
-                            isPublished: formData.get('isPublished') === 'on'
+                            isPublished: formData.get('isPublished') === 'on',
+                            notifyEveryone: formData.get('notifyEveryone') === 'on'
                         })
                     });
 
                     if (!response.ok) {
                         const error = await response.json();
-                        alert('Erreur: ' + error.message);
+                        showAlert('Erreur: ' + (error.message || 'Impossible de creer la patch note.'), 'error');
                         return;
                     }
 
-                    alert('Patch note créée avec succès!');
+                    showAlert('Patch note creee avec succes.', 'success');
                     location.reload();
                 } catch (err) {
-                    alert('Erreur lors de la création: ' + err.message);
+                    showAlert('Erreur lors de la creation: ' + err.message, 'error');
                 }
             });
 
@@ -243,10 +326,11 @@
                     document.getElementById('editTitle').value = patchNote.title;
                     document.getElementById('editContent').value = patchNote.content;
                     document.getElementById('editIsPublished').checked = patchNote.isPublished;
+                    document.getElementById('editNotifyEveryone').checked = patchNote.notifyEveryone ?? true;
 
                     document.getElementById('editModal').classList.remove('hidden');
                 } catch (err) {
-                    alert('Erreur: ' + err.message);
+                    showAlert('Erreur: ' + err.message, 'error');
                 }
             }
 
@@ -265,39 +349,41 @@
                         body: JSON.stringify({
                             title: document.getElementById('editTitle').value,
                             content: document.getElementById('editContent').value,
-                            isPublished: document.getElementById('editIsPublished').checked
+                            isPublished: document.getElementById('editIsPublished').checked,
+                            notifyEveryone: document.getElementById('editNotifyEveryone').checked
                         })
                     });
 
                     if (!response.ok) {
                         const error = await response.json();
-                        alert('Erreur: ' + error.message);
+                        showAlert('Erreur: ' + (error.message || 'Impossible de mettre a jour la patch note.'), 'error');
                         return;
                     }
 
-                    alert('Patch note mise à jour!');
+                    showAlert('Patch note mise a jour.', 'success');
                     location.reload();
                 } catch (err) {
-                    alert('Erreur: ' + err.message);
+                    showAlert('Erreur: ' + err.message, 'error');
                 }
             });
 
             // Suppression d'une patch note
             async function deletePatchNote(id) {
-                if (!confirm('Êtes-vous sûr de vouloir supprimer cette patch note?')) return;
+                const confirmed = await showConfirm('Cette action est irreversible. Voulez-vous vraiment supprimer cette patch note ?', 'Supprimer');
+                if (!confirmed) return;
 
                 try {
                     const response = await fetch(`/api/admin/patchnotes/${id}`, { method: 'DELETE' });
 
                     if (!response.ok) {
-                        alert('Erreur lors de la suppression');
+                        showAlert('Erreur lors de la suppression', 'error');
                         return;
                     }
 
-                    alert('Patch note supprimée!');
+                    showAlert('Patch note supprimee.', 'success');
                     location.reload();
                 } catch (err) {
-                    alert('Erreur: ' + err.message);
+                    showAlert('Erreur: ' + err.message, 'error');
                 }
             }
         </script>

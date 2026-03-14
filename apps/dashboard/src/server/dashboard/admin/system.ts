@@ -58,7 +58,7 @@ export function adminSystemRoutes(fastify: FastifyInstance) {
 
     await logAdminAction(request.userId!, "RUN_TASK", undefined, { script }, request.ip);
 
-    const cmd = `node apps/dashboard/scripts/${script}`;
+    const cmd = `bun apps/dashboard/scripts/${script}`;
 
     return new Promise((resolve) => {
       exec(cmd, (error, stdout, stderr) => {

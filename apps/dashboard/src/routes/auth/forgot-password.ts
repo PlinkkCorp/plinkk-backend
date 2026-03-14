@@ -1,5 +1,4 @@
 import { FastifyInstance } from "fastify";
-import bcrypt from "bcrypt";
 import z from "zod";
 import { prisma } from "@plinkk/prisma";
 import { replyView } from "../../lib/replyView";
@@ -104,7 +103,7 @@ export function forgotPasswordRoutes(fastify: FastifyInstance) {
             return reply.redirect("/login?error=Lien expiré ou invalide.");
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await Bun.password.hash(password);
 
         await prisma.$transaction([
             prisma.user.update({

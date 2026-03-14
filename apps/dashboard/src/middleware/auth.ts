@@ -3,6 +3,7 @@ import { prisma } from "@plinkk/prisma";
 import { verifyRoleIsStaff, verifyRoleAdmin } from "@plinkk/shared";
 import { getPublicPath } from "../services/plinkkService";
 import { UnauthorizedError, ForbiddenError } from "@plinkk/shared";
+import { ensureOnboardingCompletedForLegacyAccount } from "../lib/onboarding";
 
 export function registerAuthDecorators(fastify: FastifyInstance) {
   fastify.decorateRequest("userId", null);
@@ -76,6 +77,13 @@ export async function requireAuthRedirect(request: FastifyRequest, reply: Fastif
   if (!user) {
     return reply.redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
+
+  const onboardingCompleted = await ensureOnboardingCompletedForLegacyAccount(user);
+
+  // L'onboarding ne se déclenche plus automatiquement ici
+  // Il doit être déclenché uniquement après l'inscription (voir routes auth/join.ts, google.ts, etc.)
+  
+  user.onboardingCompleted = onboardingCompleted;
 
   request.userId = userId;
   request.currentUser = user;

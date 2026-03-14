@@ -1,54 +1,130 @@
-<%- include("partials/head")%>
+<%- include("partials/head", { title: 'Profil banni - Plinkk', description: 'Ce profil Plinkk a été suspendu.' })%>
 <%- include("partials/header", { title: "Profil banni - Plinkk" }) %>
-  <div class="max-w-2xl w-full mx-auto mt-10 px-4">
-    <div class="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-b from-slate-900/80 to-slate-900/40">
-      <div class="absolute inset-0 pointer-events-none" aria-hidden="true"
-           style="background: radial-gradient(60% 60% at 50% 0%, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.05) 40%, transparent 70%);"></div>
-      <div class="p-6 md:p-8 relative">
-        <div class="flex items-start gap-4">
-          <div class="shrink-0 h-12 w-12 rounded-xl bg-rose-500/10 ring-1 ring-rose-400/30 flex items-center justify-center text-rose-400">
-            <!-- Heroicon: Exclamation Circle -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-7 w-7">
-              <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-.75 5.25a.75.75 0 0 1 1.5 0v6a.75.75 0 0 1-1.5 0v-6Zm.75 9a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z" clip-rule="evenodd" />
+
+  <style>
+    .ban-page { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1rem; position: relative; overflow: hidden; }
+    .ban-page::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.04) 50%, transparent 80%); pointer-events: none; }
+    .ban-page::after { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.015'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); pointer-events: none; }
+
+    .ban-card { position: relative; max-width: 520px; width: 100%; z-index: 1; }
+    .ban-card-inner { background: linear-gradient(145deg, rgba(15,23,42,0.95), rgba(30,41,59,0.9)); border: 1px solid rgba(239,68,68,0.15); border-radius: 1.5rem; backdrop-filter: blur(20px); overflow: hidden; }
+
+    .ban-glow { position: absolute; top: -1px; left: 50%; transform: translateX(-50%); width: 60%; height: 2px; background: linear-gradient(90deg, transparent, rgba(239,68,68,0.6), rgba(251,113,133,0.8), rgba(239,68,68,0.6), transparent); animation: ban-glow-pulse 3s ease-in-out infinite; }
+    @keyframes ban-glow-pulse { 0%, 100% { opacity: 0.5; width: 50%; } 50% { opacity: 1; width: 70%; } }
+
+    .ban-icon-container { width: 80px; height: 80px; border-radius: 1.25rem; background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(190,18,60,0.15)); border: 1px solid rgba(239,68,68,0.2); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; position: relative; }
+    .ban-icon-container::before { content: ''; position: absolute; inset: -4px; border-radius: 1.5rem; background: radial-gradient(circle at center, rgba(239,68,68,0.15), transparent 70%); z-index: -1; animation: ban-icon-glow 4s ease-in-out infinite; }
+    @keyframes ban-icon-glow { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.05); } }
+
+    .ban-icon { width: 40px; height: 40px; color: #f87171; animation: ban-icon-spin 8s linear infinite; }
+    @keyframes ban-icon-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .ban-tag { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.75rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+    .ban-tag-reason { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #fca5a5; }
+    .ban-tag-time { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2); color: #fde68a; }
+    .ban-tag-dot { width: 6px; height: 6px; border-radius: 50%; animation: dot-pulse 2s ease-in-out infinite; }
+    .ban-tag-reason .ban-tag-dot { background: #f87171; }
+    .ban-tag-time .ban-tag-dot { background: #fbbf24; }
+    @keyframes dot-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+
+    .ban-divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(148,163,184,0.1), transparent); margin: 1.5rem 0; }
+
+    .ban-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1.25rem; border-radius: 0.75rem; font-size: 0.8125rem; font-weight: 600; transition: all 0.2s ease; text-decoration: none; }
+    .ban-btn-home { background: rgba(30,41,59,0.8); border: 1px solid rgba(71,85,105,0.4); color: #e2e8f0; }
+    .ban-btn-home:hover { background: rgba(51,65,85,0.8); border-color: rgba(100,116,139,0.5); transform: translateY(-1px); }
+    .ban-btn-contact { background: linear-gradient(135deg, rgba(239,68,68,0.9), rgba(190,18,60,0.9)); border: 1px solid rgba(239,68,68,0.3); color: #fff; box-shadow: 0 4px 15px rgba(239,68,68,0.2); }
+    .ban-btn-contact:hover { background: linear-gradient(135deg, rgba(220,38,38,1), rgba(159,18,57,1)); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(239,68,68,0.3); }
+
+    .ban-footer { margin-top: 2rem; text-align: center; }
+    .ban-footer a { color: #94a3b8; text-decoration: underline; text-underline-offset: 2px; transition: color 0.2s; }
+    .ban-footer a:hover { color: #e2e8f0; }
+
+    .ban-rules-box { background: rgba(30,41,59,0.4); border: 1px solid rgba(71,85,105,0.2); border-radius: 0.75rem; padding: 0.875rem 1rem; }
+    .ban-rules-box p { font-size: 0.8125rem; color: #94a3b8; line-height: 1.6; }
+    .ban-rules-box p + p { margin-top: 0.375rem; }
+    .ban-rules-icon { width: 16px; height: 16px; color: #64748b; flex-shrink: 0; margin-top: 2px; }
+  </style>
+
+  <div class="ban-page">
+    <div class="ban-card">
+      <div class="ban-card-inner">
+        <!-- Glow line -->
+        <div class="ban-glow"></div>
+
+        <div style="padding: 2.5rem 2rem;">
+          <!-- Icon -->
+          <div class="ban-icon-container">
+            <svg class="ban-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
             </svg>
           </div>
-          <div class="min-w-0">
-            <h1 class="text-xl md:text-2xl font-semibold text-slate-100">Ce profil est indisponible</h1>
-            <p class="text-sm text-slate-300 mt-1">Cet utilisateur a été banni.</p>
-            <div class="mt-3 flex flex-wrap items-center gap-2">
-              <span class="inline-flex items-center gap-2 rounded-full border border-rose-400/30 bg-rose-500/10 px-3 py-1 text-xs text-rose-300">
-                <span class="h-1.5 w-1.5 rounded-full bg-rose-400"></span>
-                Raison: <strong class="font-semibold text-rose-200"><%= reason %></strong>
+
+          <!-- Title -->
+          <div style="text-align: center; margin-bottom: 1.5rem;">
+            <h1 style="font-size: 1.5rem; font-weight: 700; color: #f1f5f9; margin: 0 0 0.5rem; letter-spacing: -0.025em;">
+              Profil suspendu
+            </h1>
+            <p style="font-size: 0.875rem; color: #94a3b8; margin: 0;">
+              Ce profil Plinkk a été désactivé suite à une violation de nos conditions.
+            </p>
+          </div>
+
+          <!-- Tags -->
+          <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+            <span class="ban-tag ban-tag-reason">
+              <span class="ban-tag-dot"></span>
+              Raison : <strong style="color: #fecaca; font-weight: 600;"><%= reason %></strong>
+            </span>
+            <% if (typeof until !== 'undefined' && until) { %>
+              <span class="ban-tag ban-tag-time">
+                <span class="ban-tag-dot"></span>
+                Expire : <strong style="color: #fef3c7; font-weight: 600;"><%= new Date(until).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }) %></strong>
               </span>
-              <% if (typeof until !== 'undefined' && until) { %>
-                <span class="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-xs text-amber-300">
-                  <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
-                  Expire: <strong class="font-semibold text-amber-200"><%= new Date(until).toLocaleString() %></strong>
-                </span>
-              <% } %>
+            <% } %>
+          </div>
+
+          <div class="ban-divider"></div>
+
+          <!-- Info box -->
+          <div class="ban-rules-box" style="display: flex; gap: 0.75rem; align-items: flex-start;">
+            <svg class="ban-rules-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+            </svg>
+            <div>
+              <p>Si vous pensez qu'il s'agit d'une erreur ou souhaitez contester cette décision, vous pouvez contacter notre équipe.</p>
+              <p style="font-size: 0.75rem; color: #64748b;">Assurez-vous d'avoir lu nos <strong style="color: #94a3b8;">conditions d'utilisation</strong> avant de nous écrire.</p>
             </div>
           </div>
-        </div>
 
-        <div class="mt-6 text-sm text-slate-300 space-y-2">
-          <p>Si vous pensez qu’il s’agit d’une erreur ou souhaitez contester ce bannissement, vous pouvez nous contacter.</p>
-          <p class="text-xs text-slate-400">Avant de nous écrire, assurez-vous d’avoir lu les règles d’utilisation.</p>
-        </div>
+          <div class="ban-divider"></div>
 
-        <div class="mt-6 flex flex-wrap items-center gap-3">
-          <a href="/" class="inline-flex items-center gap-2 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700 px-4 py-2 text-sm text-slate-100 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 opacity-80"><path fill-rule="evenodd" d="M19.5 12a.75.75 0 0 1-.75.75H7.56l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 1.06l-3.22 3.22h11.19c.414 0 .75.336.75.75Z" clip-rule="evenodd"/></svg>
-            Retour à l’accueil
-          </a>
-          <a href="mailto:contact@plinkk.fr?subject=Demande%20suite%20%C3%A0%20bannissement%20pour%20<%= email %>" class="inline-flex items-center gap-2 rounded-md bg-rose-600 hover:bg-rose-700 px-4 py-2 text-sm text-white transition">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 opacity-90"><path d="M21.75 6.75v10.5A2.25 2.25 0 0 1 19.5 19.5h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.5a2.25 2.25 0 0 1-2.31 0l-7.5-4.5A2.25 2.25 0 0 1 2.25 6.993V6.75"/></svg>
-            Contacter l’administration
-          </a>
+          <!-- Buttons -->
+          <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center;">
+            <a href="/" class="ban-btn ban-btn-home">
+              <svg style="width: 18px; height: 18px; opacity: 0.8;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+              Retour à l'accueil
+            </a>
+            <a href="mailto:contact@plinkk.fr?subject=Demande%20suite%20%C3%A0%20bannissement%20pour%20<%= email %>" class="ban-btn ban-btn-contact">
+              <svg style="width: 18px; height: 18px; opacity: 0.9;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0l-7.5-4.615A2.25 2.25 0 012.25 6.993V6.75" />
+              </svg>
+              Contacter l'administration
+            </a>
+          </div>
         </div>
       </div>
     </div>
-    <p class="mt-4 text-center text-xs text-slate-500">Besoin d’aide ? Écrivez-nous: <a class="underline" href="mailto:contact@plinkk.fr">contact@plinkk.fr</a></p>
+
+    <!-- Footer link -->
+    <div class="ban-footer">
+      <p style="font-size: 0.75rem; color: #475569;">
+        Besoin d'aide ? Écrivez-nous : <a href="mailto:contact@plinkk.fr">contact@plinkk.fr</a>
+      </p>
+    </div>
   </div>
+
   <%- include("partials/footer") %>
   </body>
   </html>

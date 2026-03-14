@@ -1,0 +1,295 @@
+<%- include('partials/head.ejs', { title: "File d'attente emails", description: "Gestion de la file d'attente des emails.", robots: 'noindex,nofollow' }) %>
+<%- include('partials/header-dash.ejs', { user: user }) %>
+
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+  <%- include('partials/admin-nav.ejs', { user: user, active: 'emails' }) %>
+
+  <main class="col-span-12 lg:col-span-10 space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl border border-slate-800 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-amber-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+      <div class="relative z-10">
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-2 flex items-center gap-2">
+          <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+          </svg>
+          File d'attente des emails
+        </h1>
+        <p class="text-slate-400 text-lg">Gestion des emails en attente (mode économie)</p>
+      </div>
+      <div class="relative z-10">
+        <a href="/admin/emails" class="inline-flex items-center gap-2 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-xl transition-colors">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+          </svg>
+          Retour
+        </a>
+      </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-slate-900 border border-amber-600/30 p-6 rounded-3xl">
+        <div class="text-slate-400 text-sm font-medium mb-2">En attente</div>
+        <div class="text-3xl font-bold text-amber-400"><%= stats.pending %></div>
+        <div class="text-xs text-slate-500 mt-2">Emails à envoyer</div>
+      </div>
+      <div class="bg-slate-900 border border-blue-600/30 p-6 rounded-3xl">
+        <div class="text-slate-400 text-sm font-medium mb-2">En cours</div>
+        <div class="text-3xl font-bold text-blue-400"><%= stats.processing %></div>
+        <div class="text-xs text-slate-500 mt-2">Traitement actif</div>
+      </div>
+      <div class="bg-slate-900 border border-emerald-600/30 p-6 rounded-3xl">
+        <div class="text-slate-400 text-sm font-medium mb-2">Envoyés</div>
+        <div class="text-3xl font-bold text-emerald-400"><%= stats.sent %></div>
+        <div class="text-xs text-slate-500 mt-2">Avec succès</div>
+      </div>
+      <div class="bg-slate-900 border border-red-600/30 p-6 rounded-3xl">
+        <div class="text-slate-400 text-sm font-medium mb-2">Échoués</div>
+        <div class="text-3xl font-bold text-red-400"><%= stats.failed %></div>
+        <div class="text-xs text-slate-500 mt-2">Après 3 tentatives</div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-white mb-1">Actions rapides</h2>
+          <p class="text-sm text-slate-400">Traitement manuel de la file d'attente</p>
+        </div>
+        <button 
+          onclick="processQueue()" 
+          id="processBtn"
+          class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+          <span>Traiter la queue maintenant</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Table des emails -->
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden">
+      <div class="p-6 border-b border-slate-800">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <svg class="w-6 h-6 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M22 5.72l-4.6-3.86-1.29 1.53 4.6 3.86L22 5.72zM7.88 3.39L6.6 1.86 2 5.71l1.29 1.53 4.59-3.85zM12.5 8H11v6l4.75 2.85.75-1.23-4-2.37V8zM12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+          </svg>
+          Emails en file d'attente
+        </h2>
+        <p class="text-sm text-slate-400 mt-1">
+          <%= queue.length %> email<%= queue.length > 1 ? 's' : '' %> dans la queue
+        </p>
+      </div>
+
+      <% if (queue.length === 0) { %>
+        <div class="text-center py-16 px-6">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-emerald-500/20 rounded-full mb-4">
+            <svg class="w-8 h-8 text-emerald-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+            </svg>
+          </div>
+          <p class="text-lg font-semibold text-white mb-1">Aucun email en attente</p>
+          <p class="text-sm text-slate-400">La file d'attente est vide</p>
+        </div>
+      <% } else { %>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-slate-950 border-b border-slate-800">
+              <tr>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Date</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Destinataire</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Sujet</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Type</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Priorité</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Statut</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Tentatives</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Envoi prévu</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800">
+              <% queue.forEach(email => { 
+                const statusColors = {
+                  'PENDING': 'bg-amber-500/10 text-amber-400 border border-amber-500/30',
+                  'PROCESSING': 'bg-blue-500/10 text-blue-400 border border-blue-500/30',
+                  'SENT': 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
+                  'FAILED': 'bg-red-500/10 text-red-400 border border-red-500/30',
+                  'CANCELLED': 'bg-slate-500/10 text-slate-400 border border-slate-500/30'
+                };
+              %>
+              <tr class="hover:bg-slate-800/50 transition-colors">
+                <td class="px-6 py-4 text-sm text-slate-300">
+                  <%= new Date(email.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' }) %>
+                  <div class="text-xs text-slate-500">
+                    <%= new Date(email.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-slate-300 max-w-xs">
+                  <div class="truncate" title="<%= email.to.join(', ') %>">
+                    <%= email.to.join(', ') %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-white max-w-sm">
+                  <div class="truncate font-medium" title="<%= email.subject %>">
+                    <%= email.subject %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300">
+                    <%= email.emailType %>
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-sm">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold <%= email.priority >= 7 ? 'bg-red-500/20 text-red-400' : 'bg-slate-800 text-slate-400' %>">
+                    <%= email.priority %>
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-sm">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium <%= statusColors[email.status] || '' %>">
+                    <%= email.status %>
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-slate-300">
+                  <span class="<%= email.attempts >= 2 ? 'text-red-400 font-semibold' : '' %>">
+                    <%= email.attempts %>/3
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-slate-400">
+                  <% if (email.scheduledFor) { %>
+                    <%= new Date(email.scheduledFor).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) %>
+                    <div class="text-xs text-slate-500">
+                      <%= new Date(email.scheduledFor).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) %>
+                    </div>
+                  <% } else { %>
+                    <span class="text-slate-500">Immédiat</span>
+                  <% } %>
+                </td>
+                <td class="px-6 py-4 text-sm">
+                  <% if (email.status === 'PENDING') { %>
+                    <button 
+                      onclick="cancelEmail('<%= email.id %>')" 
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 text-red-400 text-xs font-medium rounded-lg transition-colors group"
+                    >
+                      <svg class="w-3.5 h-3.5 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+                      </svg>
+                      Annuler
+                    </button>
+                  <% } else { %>
+                    <span class="text-slate-600">—</span>
+                  <% } %>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Info sur le mode économie -->
+    <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6">
+      <div class="flex items-start gap-4">
+        <div class="flex-shrink-0">
+          <svg class="w-6 h-6 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"/>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-white font-semibold mb-1">Mode économie activé</h3>
+          <p class="text-sm text-amber-200 leading-relaxed">
+            Les emails non-critiques sont automatiquement mis en file d'attente lorsque le quota atteint <strong>90%</strong> (2700 emails). 
+            Ils seront envoyés lors du prochain cycle mensuel ou via traitement manuel. 
+            Les emails prioritaires (OTP, sécurité) sont toujours envoyés immédiatement.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  async function processQueue() {
+    const btn = document.getElementById('processBtn');
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = `
+      <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span>Traitement en cours...</span>
+    `;
+
+    try {
+      const res = await fetch('/admin/emails/queue/process', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        showNotification(
+          `✅ ${data.sent} envoyés, ${data.failed} échoués, ${data.remaining} restants`, 
+          'success'
+        );
+        setTimeout(() => location.reload(), 2000);
+      } else {
+        showNotification('❌ Erreur lors du traitement', 'error');
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    } catch (err) {
+      showNotification('❌ Erreur réseau', 'error');
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+
+  async function cancelEmail(id) {
+    if (!confirm('Êtes-vous sûr de vouloir annuler cet email ?')) return;
+
+    try {
+      const res = await fetch(`/admin/emails/queue/cancel/${id}`, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        showNotification('✅ Email annulé', 'success');
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        showNotification('❌ ' + (data.error || 'Erreur'), 'error');
+      }
+    } catch (err) {
+      showNotification('❌ Erreur réseau', 'error');
+    }
+  }
+
+  function showNotification(message, type = 'info') {
+    const colors = {
+      success: 'bg-emerald-600',
+      error: 'bg-red-600',
+      info: 'bg-blue-600'
+    };
+    
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-xl shadow-lg font-medium z-50 transition-all transform translate-x-0 opacity-100`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateX(400px)';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+</script>
+
+<%- include('partials/footer.ejs') %>

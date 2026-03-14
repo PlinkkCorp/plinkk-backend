@@ -1,10 +1,11 @@
 import { FastifyInstance } from "fastify";
-import { request as undiciRequest } from "undici";
+// use global fetch instead of undici
 import { prisma } from "@plinkk/prisma";
 import { slugify } from "@plinkk/shared";
 import { createUserSession } from "../../services/sessionService";
 import { createDefaultPlinkk } from "./register";
 import { logUserAction } from "../../lib/userLogger";
+import { ensureOnboardingCompletedForLegacyAccount } from "../../lib/onboarding";
 
 export function googleAuthRoutes(fastify: FastifyInstance) {
 	interface GoogleTokenPayload {
@@ -26,15 +27,15 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 				return reply.code(400).send({ success: false, error: "missing_token" });
 			}
 
-			const res = await undiciRequest(
+			const res = await fetch(
 				`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`
 			);
 
-			if (res.statusCode !== 200) {
+			if (res.status !== 200) {
 				return reply.code(400).send({ success: false, error: "invalid_token" });
 			}
 
-			const payload = (await res.body.json()) as GoogleTokenPayload;
+			const payload = (await res.json()) as GoogleTokenPayload;
 
 			const googleClientId = process.env.GOOGLE_OAUTH2_ID || process.env.ID_CLIENT;
 			if (googleClientId && payload.aud && payload.aud !== googleClientId) {
@@ -165,15 +166,14 @@ export function googleAuthRoutes(fastify: FastifyInstance) {
 
 			if (user) {
 				await createUserSession(user.id, request);
-				// Determines if it was a login or register
-				// Actually, we can check if we just created it.
-				// But simpler: if we are here, we are logging in.
-				// If we created a new user, we should have logged REGISTER.
-				// Let's rely on simple LOGIN log here for all successful sessions.
 				await logUserAction(user.id, "LOGIN", null, { method: "GOOGLE" }, request.ip);
 			}
 
-			return reply.send({ success: true, redirect: "/" });
+			const onboardingCompleted = user
+				? await ensureOnboardingCompletedForLegacyAccount(user)
+				: true;
+			const redirectTo = onboardingCompleted ? "/" : "/onboarding";
+			return reply.send({ success: true, redirect: redirectTo });
 		} catch (e) {
 			request.log?.warn({ e }, "google callback error");
 			return reply.code(500).send({ success: false, error: "server_error" });

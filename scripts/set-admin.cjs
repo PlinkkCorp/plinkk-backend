@@ -1,6 +1,6 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // Promote a user to ADMIN role.
-// Usage: node scripts/set-admin.cjs <identifier>
+// Usage: bun scripts/set-admin.cjs <identifier>
 // identifier can be user id, userName or email
 
 const fs = require('fs');
@@ -19,7 +19,7 @@ async function findUser(identifier) {
 async function main() {
   const identifier = process.argv[2];
   if (!identifier) {
-    console.error('Usage: node scripts/set-admin.cjs <identifier>');
+    console.error('Usage: bun scripts/set-admin.cjs <identifier>');
     process.exit(2);
   }
 

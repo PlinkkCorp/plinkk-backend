@@ -865,7 +865,46 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       providers: connections.map(c => ({ provider: c.provider, count: c._count.provider }))
     });
   });
-  // ─── Tunnel d'acquisition ──────────────────────────────────────────────────
+
+  fastify.get<{ Querystring: StatsQuery }>("/notifications", { preHandler: [requireAuth] }, async function (request, reply) {
+    const ok = await ensurePermission(request, reply, "VIEW_STATS");
+    if (!ok) return;
+
+    const { from, to, granularity = "day" } = request.query;
+    const { start, end } = getDateRange(from, to);
+
+    const [announcements, patchNotes, reads] = await Promise.all([
+      prisma.announcement.findMany({ where: { createdAt: { gte: start, lte: end } }, select: { createdAt: true } }),
+      prisma.patchNote.findMany({ where: { createdAt: { gte: start, lte: end } }, select: { createdAt: true } }),
+      prisma.inboxRead.findMany({ where: { readAt: { gte: start, lte: end } }, select: { readAt: true } })
+    ]);
+
+    const byDate = initDateMap(start, end, granularity, () => ({ announcements: 0, patchNotes: 0, reads: 0 }));
+
+    for (const a of announcements) {
+      const key = formatDate(new Date(a.createdAt), granularity);
+      if (byDate.has(key)) byDate.get(key)!.announcements++;
+    }
+    for (const p of patchNotes) {
+      const key = formatDate(new Date(p.createdAt), granularity);
+      if (byDate.has(key)) byDate.get(key)!.patchNotes++;
+    }
+    for (const r of reads) {
+      const key = formatDate(new Date(r.readAt), granularity);
+      if (byDate.has(key)) byDate.get(key)!.reads++;
+    }
+
+    const series = Array.from(byDate.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, data]) => ({ date, ...data }));
+
+    return reply.send({
+      totalAnnouncements: announcements.length,
+      totalPatchNotes: patchNotes.length,
+      totalReads: reads.length,
+      series
+    });
+  });
 
   fastify.get("/funnel", { preHandler: [requireAuth] }, async function (request, reply) {
     const ok = await ensurePermission(request, reply, "VIEW_STATS");
@@ -879,67 +918,58 @@ export function adminStatsRoutes(fastify: FastifyInstance) {
       totalClicksAgg,
       premiumUsers,
       totalPurchases,
-      allPurchases,
-      usersWithLinks,
-      churned,
-      // FunnelEvent counts
-      landingVisits,
-      signups,
-      premiumViews,
-      configViews,
-      funnelPurchases,
-      funnelCancels,
+      totalRevenueAgg,
+      funnelEvents
     ] = await Promise.all([
       prisma.user.count(),
-      prisma.user.count({ where: { plinkks: { some: {} } } }),
+      prisma.plinkk.groupBy({ by: ["userId"] }).then(res => res.length),
       prisma.plinkk.count(),
       prisma.plinkk.aggregate({ _sum: { views: true } }),
-      prisma.pageStat.count({ where: { eventType: "click" } }),
+      prisma.link.aggregate({ _sum: { clicks: true } }),
       prisma.user.count({ where: { isPremium: true } }),
       prisma.purchase.count(),
-      prisma.purchase.findMany({ select: { amount: true, quantity: true } }),
-      prisma.user.count({ where: { links: { some: {} } } }),
-      prisma.user.count({ where: { isPremium: false, purchases: { some: {} } } }),
-      // FunnelEvent tracking data
-      prisma.funnelEvent.count({ where: { event: "landing_visit" } }),
-      prisma.funnelEvent.count({ where: { event: "signup" } }),
-      prisma.funnelEvent.count({ where: { event: "premium_view" } }),
-      prisma.funnelEvent.count({ where: { event: "config_view" } }),
-      prisma.funnelEvent.count({ where: { event: "purchase" } }),
-      prisma.funnelEvent.count({ where: { event: "cancel" } }),
+      prisma.purchase.aggregate({ _sum: { amount: true } }),
+      prisma.funnelEvent.groupBy({
+        by: ['event'],
+        _count: { _all: true }
+      })
     ]);
 
-    const totalViews = totalViewsAgg._sum.views || 0;
-    const totalRevenue = allPurchases.reduce((sum, p) => sum + p.amount * p.quantity, 0);
+    const eventsMap = Object.fromEntries(funnelEvents.map(e => [e.event, e._count._all]));
+
+    // Simple churn/retention estimation
+    const totalEverPremium = await prisma.purchase.groupBy({ by: ['userId'] }).then(res => res.length);
+    const activePremium = await prisma.user.count({ where: { isPremium: true, premiumUntil: { gt: new Date() } } });
+    const churned = Math.max(0, totalEverPremium - activePremium);
+    const retention = totalEverPremium > 0 ? Math.round((activePremium / totalEverPremium) * 100) : 100;
 
     return reply.send({
       plinkk: {
         totalUsers,
         usersWithPlinkk,
         totalPlinkks,
-        usersWithLinks,
-        totalViews,
-        totalClicks: totalClicksAgg,
+        totalViews: totalViewsAgg._sum.views || 0,
+        totalClicks: totalClicksAgg._sum.clicks || 0
       },
       purchase: {
         totalUsers,
         premiumUsers,
         totalPurchases,
-        totalRevenue,
-        churned,
-        activePremium: premiumUsers,
-        retention: premiumUsers > 0 && (premiumUsers + churned) > 0
-          ? Math.round((premiumUsers / (premiumUsers + churned)) * 100)
-          : 100,
+        totalRevenue: totalRevenueAgg._sum.amount || 0,
+        retention,
+        churned
       },
       funnel: {
-        landingVisits,
-        signups,
-        premiumViews,
-        configViews,
-        purchases: funnelPurchases,
-        cancels: funnelCancels,
-      },
+        landingVisits: eventsMap['landing_visit'] || 0,
+        signups: eventsMap['signup'] || 0,
+        premiumViews: eventsMap['premium_view'] || 0,
+        configViews: eventsMap['config_view'] || 0,
+        onboardingStep1: eventsMap['onboarding_step1'] || 0,
+        onboardingStep2: eventsMap['onboarding_step2'] || 0,
+        onboardingStep3: eventsMap['onboarding_step3'] || 0,
+        purchases: eventsMap['purchase'] || 0,
+        cancels: eventsMap['cancel'] || 0
+      }
     });
   });
 }

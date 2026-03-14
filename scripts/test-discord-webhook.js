@@ -2,9 +2,9 @@
  * Script de test pour publier un patch note sur Discord
  * 
  * Usage:
- * - Tester avec des données de demo: node scripts/test-discord-webhook.js demo
- * - Tester avec un patch note existant: node scripts/test-discord-webhook.js <patchnote-id>
- * - Lister les patch notes: node scripts/test-discord-webhook.js list
+ * - Tester avec des données de demo: bun scripts/test-discord-webhook.js demo
+ * - Tester avec un patch note existant: bun scripts/test-discord-webhook.js <patchnote-id>
+ * - Lister les patch notes: bun scripts/test-discord-webhook.js list
  */
 
 require("dotenv/config");
@@ -204,7 +204,7 @@ function createPatchNoteEmbed(patchNote) {
 
 async function testWithExistingPatchNote(patchNoteId) {
   if (!prisma) {
-    console.error("❌ Prisma non disponible. Utilisez le mode demo: node scripts/test-discord-webhook.js demo");
+    console.error("❌ Prisma non disponible. Utilisez le mode demo: bun scripts/test-discord-webhook.js demo");
     return false;
   }
 
@@ -333,8 +333,8 @@ async function main() {
     console.log('   DISCORD_ANNOUNCEMENT_CHANNEL_ID="id_du_channel_ici"\n');
     process.exit(1);
   }demo            # Tester avec des données de demo (recommandé)');
-    console.log('   node scripts/test-discord-webhook.js <patchnote-id>  # Tester avec un patch note existant');
-    console.log('   node scripts/test-discord-webhook.js list            # Lister les patch notes\n');
+    console.log('   bun scripts/test-discord-webhook.js <patchnote-id>  # Tester avec un patch note existant');
+    console.log('   bun scripts/test-discord-webhook.js list            # Lister les patch notes\n');
   } else if (args[0].toLowerCase() === 'demo') {
     await testWithDemoData();
   } else {

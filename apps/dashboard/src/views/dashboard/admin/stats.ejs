@@ -25,38 +25,30 @@
                     </div>
 
                     <!--  TAB BAR  -->
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-2">
-                        <nav class="flex gap-1 flex-wrap lg:flex-nowrap" role="tablist"
-                            aria-label="Sections Admin Stats">
-                            <button
-                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
-                                data-tab="signups" aria-selected="true">Inscriptions</button>
-                            <button
-                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
-                                data-tab="logins" aria-selected="false">Connexions</button>
-                            <button
-                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
-                                data-tab="plinkks" aria-selected="false">Plinkks</button>
-                            <button
-                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
-                                data-tab="redirections" aria-selected="false">Redirections</button>
-                            <button
-                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
-                                data-tab="qrcodes" aria-selected="false">QR Codes</button>
-                            <button
-                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
-                                data-tab="premium" aria-selected="false">Premium</button>
-                            <button
-                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
-                                data-tab="bans" aria-selected="false">Modération</button>
-                            <button
-                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
-                                data-tab="accounts" aria-selected="false">Comptes</button>
-                            <button
-                                class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300"
-                                data-tab="funnel" aria-selected="false">Tunnel</button>
-                        </nav>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-slate-950 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                        <div class="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-slate-950 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                        
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-2 overflow-x-auto no-scrollbar scroll-smooth">
+                            <nav class="flex gap-1 min-w-max" role="tablist" aria-label="Sections Admin Stats">
+                                <button class="tab-btn px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300 whitespace-nowrap" data-tab="signups" aria-selected="true">Inscriptions</button>
+                                <button class="tab-btn px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300 whitespace-nowrap" data-tab="logins" aria-selected="false">Connexions</button>
+                                <button class="tab-btn px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300 whitespace-nowrap" data-tab="plinkks" aria-selected="false">Plinkks</button>
+                                <button class="tab-btn px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300 whitespace-nowrap" data-tab="redirections" aria-selected="false">Redirections</button>
+                                <button class="tab-btn px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300 whitespace-nowrap" data-tab="qrcodes" aria-selected="false">QR Codes</button>
+                                <button class="tab-btn px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300 whitespace-nowrap" data-tab="premium" aria-selected="false">Premium</button>
+                                <button class="tab-btn px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300 whitespace-nowrap" data-tab="bans" aria-selected="false">Modération</button>
+                                <button class="tab-btn px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300 whitespace-nowrap" data-tab="accounts" aria-selected="false">Comptes</button>
+                                <button class="tab-btn px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300 whitespace-nowrap" data-tab="notifications" aria-selected="false">Notifications</button>
+                                <button class="tab-btn px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-slate-300 whitespace-nowrap" data-tab="funnel" aria-selected="false">Tunnel</button>
+                            </nav>
+                        </div>
                     </div>
+                    
+                    <style>
+                        .no-scrollbar::-webkit-scrollbar { display: none; }
+                        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                    </style>
 
                     <!--  CONTROL BAR  -->
                     <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6">
@@ -506,9 +498,38 @@
                         </div>
                     </section>
 
-                    <!-- ─── TUNNEL D'ACQUISITION ─── -->
+                    <!--  PANEL: NOTIFICATIONS  -->
+                    <section id="panel-notifications" class="tab-panel hidden space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Total Annonces</p>
+                                <p id="statTotalAnnouncements" class="text-3xl font-bold text-white tracking-tight">-</p>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Total Patch Notes</p>
+                                <p id="statTotalPatchNotes" class="text-3xl font-bold text-white tracking-tight">-</p>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                                <p class="text-sm text-slate-400 mb-1">Notifs Lues</p>
+                                <p id="statTotalReads" class="text-3xl font-bold text-emerald-400 tracking-tight">-</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950/30 border border-slate-800 rounded-3xl p-6 md:p-8">
+                            <h3 class="text-lg font-bold text-white mb-6">Activité Notifications</h3>
+                            <div class="h-[400px] relative">
+                                <div
+                                    class="chart-loader hidden absolute inset-0 z-10 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm rounded-xl">
+                                    <div
+                                        class="w-8 h-8 border-4 border-slate-800 border-t-violet-600 rounded-full animate-spin">
+                                    </div>
+                                </div>
+                                <canvas id="chartNotifications"></canvas>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!--  PANEL: FUNNEL  -->
                     <section id="panel-funnel" class="tab-panel hidden space-y-6">
-
                         <!-- Sub-tab toggle -->
                         <div class="flex items-center gap-2 p-1 bg-slate-800/50 rounded-xl w-fit">
                             <button id="funnelSubPlinkk"
@@ -804,8 +825,8 @@
                         </div>
 
                         <!-- Tunnel Détaillé -->
-                        <div id="sub-funnel-detail" class="space-y-6 hidden">
-                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div id="funnelDetail" class="space-y-6 hidden">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-9 gap-3">
                                 <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
                                     <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Landing</p>
                                     <p class="text-xl font-bold text-violet-400" id="fc-kpi-landing">-</p>
@@ -824,6 +845,18 @@
                                     <p class="text-xl font-bold text-indigo-400" id="fc-kpi-configview">-</p>
                                 </div>
                                 <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                                    <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Onboarding 1</p>
+                                    <p class="text-xl font-bold text-cyan-400" id="fc-kpi-onboarding-step1">-</p>
+                                </div>
+                                <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                                    <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Onboarding 2</p>
+                                    <p class="text-xl font-bold text-sky-400" id="fc-kpi-onboarding-step2">-</p>
+                                </div>
+                                <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
+                                    <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Onboarding 3</p>
+                                    <p class="text-xl font-bold text-teal-400" id="fc-kpi-onboarding-step3">-</p>
+                                </div>
+                                <div class="glass-card rounded-2xl border border-white/5 p-4 text-center">
                                     <p class="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Achats</p>
                                     <p class="text-xl font-bold text-emerald-400" id="fc-kpi-funpurchase">-</p>
                                 </div>
@@ -837,12 +870,9 @@
                             <p class="text-[10px] text-slate-600 mt-3">Données issues du tracking réel des événements
                                 utilisateurs.</p>
                         </div>
-        </div>
-        </div>
-
-        </section>
-
-        </main>
+                    </section>
+                </main>
+            </div>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1198,6 +1228,18 @@
                     </div>`;
                             }).join('');
                         }
+                    },
+                    notifications: async () => {
+                        const d = await fetchAPI('/admin/stats/notifications');
+                        currentData = { type: 'notifications', data: d };
+                        qs('#statTotalAnnouncements').textContent = fmt(d.totalAnnouncements);
+                        qs('#statTotalPatchNotes').textContent = fmt(d.totalPatchNotes);
+                        qs('#statTotalReads').textContent = fmt(d.totalReads);
+                        drawLine('chartNotifications', d.series.map(x => x.date), [
+                            { label: 'Annonces', data: d.series.map(x => x.announcements), borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.05)' },
+                            { label: 'Patch Notes', data: d.series.map(x => x.patchNotes), borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.05)' },
+                            { label: 'Lues', data: d.series.map(x => x.reads), borderColor: '#10b981', backgroundColor: 'transparent' }
+                        ]);
                     }
                 };
 
@@ -1290,7 +1332,8 @@
                         'qrcodes': 'chartQRCodes',
                         'premium': 'chartPremium',
                         'bans': 'chartBans',
-                        'accounts': 'chartDoughnut'
+                        'accounts': 'chartDoughnut',
+                        'notifications': 'chartNotifications'
                     };
                     const chartId = chartIdMap[activeTab];
 
@@ -1396,6 +1439,14 @@
                             });
                         }
                     }
+                    else if (type === 'notifications') {
+                        rows = [['Date', 'Annonces', 'Patch Notes', 'Lues']];
+                        if (d.series) {
+                            d.series.forEach(x => {
+                                rows.push([x.date, x.announcements, x.patchNotes, x.reads]);
+                            });
+                        }
+                    }
                     else if (type === 'accounts') {
                         rows = [['Provider', 'Count']];
                         if (d.providers) {
@@ -1438,164 +1489,178 @@
                     }
                 };
 
-                function init() { setupDates(); setTab('signups'); }
+                function init() {
+                    setupDates();
+                    const url = new URL(window.location.href);
+                    const initialTab = url.searchParams.get('tab');
+                    const allowedTabs = new Set(['signups', 'logins', 'plinkks', 'redirections', 'qrcodes', 'premium', 'bans', 'accounts', 'notifications', 'funnel']);
+                    setTab(allowedTabs.has(initialTab || '') ? initialTab : 'signups');
+                }
                 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
             })();
-
-            // Funnel tab logic
-            (function () {
-                let funnelLoaded = false;
-                const subPlinkk = document.getElementById('funnelSubPlinkk');
-                const subPurchase = document.getElementById('funnelSubPurchase');
-                const subDetail = document.getElementById('funnelSubDetail');
-                const panelPlinkk = document.getElementById('funnelPlinkk');
-                const panelPurchase = document.getElementById('funnelPurchase');
-                const panelDetail = document.getElementById('sub-funnel-detail');
-
-                if (subPlinkk && subPurchase && subDetail) {
-                    subPlinkk.addEventListener('click', () => {
-                        panelPlinkk.classList.remove('hidden');
-                        panelPurchase.classList.add('hidden');
-                        panelDetail.classList.add('hidden');
-                        subPlinkk.classList.add('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                        subPlinkk.classList.remove('text-slate-400');
-                        subPurchase.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                        subPurchase.classList.add('text-slate-400');
-                        subDetail.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                        subDetail.classList.add('text-slate-400');
-                    });
-                    subPurchase.addEventListener('click', () => {
-                        panelPlinkk.classList.add('hidden');
-                        panelPurchase.classList.remove('hidden');
-                        panelDetail.classList.add('hidden');
-                        subPurchase.classList.add('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                        subPurchase.classList.remove('text-slate-400');
-                        subPlinkk.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                        subPlinkk.classList.add('text-slate-400');
-                        subDetail.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                        subDetail.classList.add('text-slate-400');
-                    });
-                    subDetail.addEventListener('click', () => {
-                        panelPlinkk.classList.add('hidden');
-                        panelPurchase.classList.add('hidden');
-                        panelDetail.classList.remove('hidden');
-                        subDetail.classList.add('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                        subDetail.classList.remove('text-slate-400');
-                        subPlinkk.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                        subPlinkk.classList.add('text-slate-400');
-                        subPurchase.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
-                        subPurchase.classList.add('text-slate-400');
-                    });
-                }
-
-                // Observe tab switch
-                const observer = new MutationObserver(() => {
-                    const panel = document.getElementById('panel-funnel');
-                    if (panel && !panel.classList.contains('hidden') && !funnelLoaded) {
-                        funnelLoaded = true;
-                        loadFunnelData();
-                    }
-                });
-                const funnelPanel = document.getElementById('panel-funnel');
-                if (funnelPanel) observer.observe(funnelPanel, { attributes: true, attributeFilter: ['class'] });
-
-                async function loadFunnelData() {
-                    try {
-                        const res = await fetch('/admin/stats/funnel');
-                        if (!res.ok) throw new Error('Failed');
-                        const data = await res.json();
-                        const fmt = new Intl.NumberFormat('fr-FR');
-
-                        // Plinkk funnel
-                        const p = data.plinkk;
-                        setText('fp-users', fmt.format(p.totalUsers));
-                        setText('fp-withPlinkk', fmt.format(p.usersWithPlinkk));
-                        setText('fp-views', fmt.format(p.totalViews));
-                        setText('fp-clicks', fmt.format(p.totalClicks));
-
-                        if (p.totalUsers > 0) {
-                            setBar('fp-bar-withPlinkk', 'fp-pct-withPlinkk', p.usersWithPlinkk, p.totalUsers);
-                        }
-                        if (p.usersWithPlinkk > 0) {
-                            const viewsRatio = Math.min(100, Math.round((p.totalViews / (p.usersWithPlinkk * 100)) * 100));
-                            setEl('fp-bar-views', viewsRatio);
-                            setText('fp-pct-views', viewsRatio + '%');
-                        }
-                        if (p.totalViews > 0) {
-                            setBar('fp-bar-clicks', 'fp-pct-clicks', p.totalClicks, p.totalViews);
-                        }
-
-                        // KPIs
-                        setText('fp-kpi-activation', p.totalUsers > 0 ? Math.round((p.usersWithPlinkk / p.totalUsers) * 100) + '%' : '0%');
-                        setText('fp-kpi-ctr', p.totalViews > 0 ? Math.round((p.totalClicks / p.totalViews) * 100) + '%' : '0%');
-                        setText('fp-kpi-vpg', p.totalPlinkks > 0 ? Math.round(p.totalViews / p.totalPlinkks) : '0');
-
-                        // Purchase funnel
-                        const c = data.purchase;
-                        setText('fc-users', fmt.format(c.totalUsers));
-                        setText('fc-premium', fmt.format(c.premiumUsers));
-                        setText('fc-purchases', fmt.format(c.totalPurchases));
-                        setText('fc-revenue', (c.totalRevenue / 100).toFixed(2) + ' €');
-
-                        if (c.totalUsers > 0) {
-                            setBar('fc-bar-premium', 'fc-pct-premium', c.premiumUsers, c.totalUsers);
-                        }
-                        if (c.premiumUsers > 0) {
-                            setBar('fc-bar-purchases', 'fc-pct-purchases', c.totalPurchases, c.premiumUsers);
-                        }
-                        // Revenue bar relative to a hypothetical max
-                        if (c.totalPurchases > 0) {
-                            setEl('fc-bar-revenue', Math.min(100, Math.round((c.totalRevenue / (c.totalPurchases * 1000)) * 100)));
-                            setText('fc-pct-revenue', '');
-                        }
-
-                        // KPIs
-                        setText('fc-kpi-conv', c.totalUsers > 0 ? (c.premiumUsers / c.totalUsers * 100).toFixed(1) + '%' : '0%');
-                        setText('fc-kpi-arpu', c.premiumUsers > 0 ? ((c.totalRevenue / 100) / c.premiumUsers).toFixed(2) + ' €' : '0 €');
-                        setText('fc-kpi-avgorder', c.totalPurchases > 0 ? ((c.totalRevenue / 100) / c.totalPurchases).toFixed(2) + ' €' : '0 €');
-
-                        // Churn & Retention
-                        setText('fc-kpi-retention', c.retention + '%');
-                        setText('fc-kpi-churn', fmt.format(c.churned));
-
-                        // Funnel Détaillé
-                        var f = data.funnel || {};
-                        setText('fc-kpi-landing', fmt.format(f.landingVisits || 0));
-                        setText('fc-kpi-signups', fmt.format(f.signups || 0));
-                        setText('fc-kpi-premview', fmt.format(f.premiumViews || 0));
-                        setText('fc-kpi-configview', fmt.format(f.configViews || 0));
-                        setText('fc-kpi-funpurchase', fmt.format(f.purchases || 0));
-                        setText('fc-kpi-funcancels', fmt.format(f.cancels || 0));
-
-                        // Build funnel bars
-                        var barsContainer = document.getElementById("funnel-bars");
-                        if (barsContainer) {
-                            var steps = [
-                                { label: "Landing", value: f.landingVisits || 0, color: "bg-violet-500" },
-                                { label: "Inscription", value: f.signups || 0, color: "bg-blue-500" },
-                                { label: "Page Premium", value: f.premiumViews || 0, color: "bg-fuchsia-500" },
-                                { label: "Configuration", value: f.configViews || 0, color: "bg-indigo-500" },
-                                { label: "Achat", value: f.purchases || 0, color: "bg-emerald-500" },
-                            ];
-                            var maxVal = Math.max(1, steps[0].value);
-                            barsContainer.innerHTML = steps.map(function (s) {
-                                var pct = Math.max(2, Math.round((s.value / maxVal) * 100));
-                                var rate = steps[0].value > 0 ? ((s.value / steps[0].value) * 100).toFixed(1) : "0.0";
-                                return '<div class="flex items-center gap-3"><span class="text-[11px] text-slate-400 w-24 text-right shrink-0">' + s.label + '</span><div class="flex-1 bg-slate-800/50 rounded-full h-6 overflow-hidden"><div class="' + s.color + ' h-full rounded-full flex items-center px-2 transition-all duration-500" style="width:' + pct + '%"><span class="text-[10px] text-white font-bold">' + fmt.format(s.value) + '</span></div></div><span class="text-[11px] text-slate-500 w-12 shrink-0">' + rate + '%</span></div>';
-                            }).join("");
-                        }
-
-                    } catch (e) {
-                        console.error('Funnel load error:', e);
-                    }
-                }
-
-                function setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
-                function setEl(id, pct) { const el = document.getElementById(id); if (el) el.style.width = Math.max(pct, 2) + '%'; }
-                function setBar(barId, pctId, value, total) {
-                    const pct = Math.round((value / total) * 100);
-                    setEl(barId, pct);
-                    setText(pctId, pct + '%');
-                }
-            })();
         </script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const subPlinkk = document.getElementById('funnelSubPlinkk');
+        const subPurchase = document.getElementById('funnelSubPurchase');
+        const subDetail = document.getElementById('funnelSubDetail');
+        const panelPlinkk = document.getElementById('funnelPlinkk');
+        const panelPurchase = document.getElementById('funnelPurchase');
+        const panelDetail = document.getElementById('funnelDetail');
+        
+        let funnelLoaded = false;
+        
+        if (subPlinkk && subPurchase && subDetail && panelPlinkk && panelPurchase && panelDetail) {
+            subPlinkk.addEventListener('click', () => {
+                panelPlinkk.classList.remove('hidden');
+                panelPurchase.classList.add('hidden');
+                panelDetail.classList.add('hidden');
+                subPlinkk.classList.add('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                subPlinkk.classList.remove('text-slate-400');
+                subPurchase.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                subPurchase.classList.add('text-slate-400');
+                subDetail.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                subDetail.classList.add('text-slate-400');
+            });
+
+            subPurchase.addEventListener('click', () => {
+                panelPlinkk.classList.add('hidden');
+                panelPurchase.classList.remove('hidden');
+                panelDetail.classList.add('hidden');
+                subPurchase.classList.add('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                subPurchase.classList.remove('text-slate-400');
+                subPlinkk.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                subPlinkk.classList.add('text-slate-400');
+                subDetail.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                subDetail.classList.add('text-slate-400');
+            });
+
+            subDetail.addEventListener('click', () => {
+                panelPlinkk.classList.add('hidden');
+                panelPurchase.classList.add('hidden');
+                panelDetail.classList.remove('hidden');
+                subDetail.classList.add('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                subDetail.classList.remove('text-slate-400');
+                subPlinkk.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                subPlinkk.classList.add('text-slate-400');
+                subPurchase.classList.remove('bg-violet-500/20', 'text-violet-300', 'border', 'border-violet-500/30');
+                subPurchase.classList.add('text-slate-400');
+            });
+        }
+
+        // Observe tab switch
+        const observer = new MutationObserver(() => {
+            const panel = document.getElementById('panel-funnel');
+            if (panel && !panel.classList.contains('hidden') && !funnelLoaded) {
+                funnelLoaded = true;
+                loadFunnelData();
+            }
+        });
+        const funnelPanel = document.getElementById('panel-funnel');
+        if (funnelPanel) observer.observe(funnelPanel, { attributes: true, attributeFilter: ['class'] });
+
+        async function loadFunnelData() {
+            try {
+                const res = await fetch('/admin/stats/funnel');
+                if (!res.ok) throw new Error('Failed');
+                const data = await res.json();
+                const fmt = new Intl.NumberFormat('fr-FR');
+
+                // Plinkk funnel
+                const p = data.plinkk;
+                setText('fp-users', fmt.format(p.totalUsers));
+                setText('fp-withPlinkk', fmt.format(p.usersWithPlinkk));
+                setText('fp-views', fmt.format(p.totalViews));
+                setText('fp-clicks', fmt.format(p.totalClicks));
+
+                if (p.totalUsers > 0) {
+                    setBar('fp-bar-withPlinkk', 'fp-pct-withPlinkk', p.usersWithPlinkk, p.totalUsers);
+                }
+                if (p.usersWithPlinkk > 0) {
+                    const viewsRatio = Math.min(100, Math.round((p.totalViews / (p.usersWithPlinkk * 100)) * 100));
+                    setEl('fp-bar-views', viewsRatio);
+                    setText('fp-pct-views', viewsRatio + '%');
+                }
+                if (p.totalViews > 0) {
+                    setBar('fp-bar-clicks', 'fp-pct-clicks', p.totalClicks, p.totalViews);
+                }
+
+                // KPIs
+                setText('fp-kpi-activation', p.totalUsers > 0 ? Math.round((p.usersWithPlinkk / p.totalUsers) * 100) + '%' : '0%');
+                setText('fp-kpi-ctr', p.totalViews > 0 ? Math.round((p.totalClicks / p.totalViews) * 100) + '%' : '0%');
+                setText('fp-kpi-vpg', p.totalPlinkks > 0 ? Math.round(p.totalViews / p.totalPlinkks) : '0');
+
+                // Purchase funnel
+                const c = data.purchase;
+                setText('fc-users', fmt.format(c.totalUsers));
+                setText('fc-premium', fmt.format(c.premiumUsers));
+                setText('fc-purchases', fmt.format(c.totalPurchases));
+                setText('fc-revenue', (c.totalRevenue / 100).toFixed(2) + ' €');
+
+                if (c.totalUsers > 0) {
+                    setBar('fc-bar-premium', 'fc-pct-premium', c.premiumUsers, c.totalUsers);
+                }
+                if (c.premiumUsers > 0) {
+                    setBar('fc-bar-purchases', 'fc-pct-purchases', c.totalPurchases, c.premiumUsers);
+                }
+                if (c.totalPurchases > 0) {
+                    setEl('fc-bar-revenue', Math.min(100, Math.round((c.totalRevenue / (c.totalPurchases * 1000)) * 100)));
+                    setText('fc-pct-revenue', '');
+                }
+
+                // KPIs
+                setText('fc-kpi-conv', c.totalUsers > 0 ? (c.premiumUsers / c.totalUsers * 100).toFixed(1) + '%' : '0%');
+                setText('fc-kpi-arpu', c.premiumUsers > 0 ? ((c.totalRevenue / 100) / c.premiumUsers).toFixed(2) + ' €' : '0 €');
+                setText('fc-kpi-avgorder', c.totalPurchases > 0 ? ((c.totalRevenue / 100) / c.totalPurchases).toFixed(2) + ' €' : '0 €');
+
+                // Churn & Retention
+                setText('fc-kpi-retention', c.retention + '%');
+                setText('fc-kpi-churn', fmt.format(c.churned));
+
+                // Funnel Détaillé
+                var f = data.funnel || {};
+                setText('fc-kpi-landing', fmt.format(f.landingVisits || 0));
+                setText('fc-kpi-signups', fmt.format(f.signups || 0));
+                setText('fc-kpi-premview', fmt.format(f.premiumViews || 0));
+                setText('fc-kpi-configview', fmt.format(f.configViews || 0));
+                setText('fc-kpi-onboarding-step1', fmt.format(f.onboardingStep1 || 0));
+                setText('fc-kpi-onboarding-step2', fmt.format(f.onboardingStep2 || 0));
+                setText('fc-kpi-onboarding-step3', fmt.format(f.onboardingStep3 || 0));
+                setText('fc-kpi-funpurchase', fmt.format(f.purchases || 0));
+                setText('fc-kpi-funcancels', fmt.format(f.cancels || 0));
+
+                // Build funnel bars
+                var barsContainer = document.getElementById("funnel-bars");
+                if (barsContainer) {
+                    var steps = [
+                        { label: "Landing", value: f.landingVisits || 0, color: "bg-violet-500" },
+                        { label: "Inscription", value: f.signups || 0, color: "bg-blue-500" },
+                        { label: "Page Premium", value: f.premiumViews || 0, color: "bg-fuchsia-500" },
+                        { label: "Configuration", value: f.configViews || 0, color: "bg-indigo-500" },
+                        { label: "Onboarding 1", value: f.onboardingStep1 || 0, color: "bg-cyan-500" },
+                        { label: "Onboarding 2", value: f.onboardingStep2 || 0, color: "bg-sky-500" },
+                        { label: "Onboarding 3", value: f.onboardingStep3 || 0, color: "bg-teal-500" },
+                        { label: "Achat", value: f.purchases || 0, color: "bg-emerald-500" },
+                    ];
+                    var maxVal = Math.max(1, steps[0].value);
+                    barsContainer.innerHTML = steps.map(function (s) {
+                        var pct = Math.max(2, Math.round((s.value / maxVal) * 100));
+                        var rate = steps[0].value > 0 ? ((s.value / steps[0].value) * 100).toFixed(1) : "0.0";
+                        return '<div class="flex items-center gap-3"><span class="text-[11px] text-slate-400 w-24 text-right shrink-0">' + s.label + '</span><div class="flex-1 bg-slate-800/50 rounded-full h-6 overflow-hidden"><div class="' + s.color + ' h-full rounded-full flex items-center px-2 transition-all duration-500" style="width:' + pct + '%"><span class="text-[10px] text-white font-bold">' + fmt.format(s.value) + '</span></div></div><span class="text-[11px] text-slate-500 w-12 shrink-0">' + rate + '%</span></div>';
+                    }).join("");
+                }
+
+            } catch (e) {
+                console.error('Funnel load error:', e);
+            }
+        }
+
+        function setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
+        function setEl(id, pct) { const el = document.getElementById(id); if (el) el.style.width = Math.max(pct, 2) + '%'; }
+        function setBar(barId, pctId, value, total) {
+            const pct = Math.round((value / total) * 100);
+            setEl(barId, pct);
+            setText(pctId, pct + '%');
+        }
+    });
+</script>

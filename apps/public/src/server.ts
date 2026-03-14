@@ -36,17 +36,111 @@ import { staticPagesRoutes } from "./server/staticPagesRoutes";
 import { plinkkFrontUserRoutes } from "./server/plinkkFrontUserRoutes";
 import { partnersRoutes } from "./server/partnersRoutes";
 import { patchNotesRoutes } from "./server/patchNotesRoutes";
+import { trackingRoutes } from "./server/trackingRoutes";
 import { replyView } from "./lib/replyView";
 import fastifyRateLimit from "@fastify/rate-limit";
 import fastifyCompress from "@fastify/compress";
 import fastifyHttpProxy from "@fastify/http-proxy";
 import { AppError } from "@plinkk/shared";
+import { apiBugReportsRoutes } from "@plinkk/shared";
 
 const fastify = Fastify({
   logger: true,
   trustProxy: true,
 });
 const PORT = 3002;
+
+type PublicMetrics = {
+  userCount: number;
+  linkCount: number;
+  totalViews: number;
+};
+
+const METRICS_TTL_MS = 60_000;
+const METRICS_QUERY_TIMEOUT_MS = 2_000;
+let publicMetricsCache: { value: PublicMetrics; expiresAt: number } | null = null;
+let publicMetricsRefreshPromise: Promise<PublicMetrics> | null = null;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`${label}_timeout`)), ms);
+    promise
+      .then((value) => {
+        clearTimeout(timer);
+        resolve(value);
+      })
+      .catch((error) => {
+        clearTimeout(timer);
+        reject(error);
+      });
+  });
+}
+
+async function getPublicMetrics(request: any): Promise<PublicMetrics> {
+  const now = Date.now();
+  if (publicMetricsCache && publicMetricsCache.expiresAt > now) {
+    return publicMetricsCache.value;
+  }
+
+  if (publicMetricsRefreshPromise) {
+    return publicMetricsRefreshPromise;
+  }
+
+  const fallback: PublicMetrics = publicMetricsCache?.value ?? {
+    userCount: 0,
+    linkCount: 0,
+    totalViews: 0,
+  };
+
+  publicMetricsRefreshPromise = (async () => {
+    const [usersRes, linksRes, viewsRes] = await Promise.allSettled([
+      withTimeout(prisma.user.count(), METRICS_QUERY_TIMEOUT_MS, "user_count"),
+      withTimeout(prisma.link.count(), METRICS_QUERY_TIMEOUT_MS, "link_count"),
+      withTimeout(
+        prisma.plinkk.aggregate({
+          _sum: { views: true },
+        }),
+        METRICS_QUERY_TIMEOUT_MS,
+        "plinkk_views_sum"
+      ),
+    ]);
+
+    if (usersRes.status === "rejected") {
+      request.log.warn({ err: usersRes.reason }, "public metrics: user.count failed");
+    }
+    if (linksRes.status === "rejected") {
+      request.log.warn({ err: linksRes.reason }, "public metrics: link.count failed");
+    }
+    if (viewsRes.status === "rejected") {
+      request.log.warn({ err: viewsRes.reason }, "public metrics: plinkk.aggregate failed");
+    }
+
+    const next: PublicMetrics = {
+      userCount: usersRes.status === "fulfilled" ? usersRes.value : fallback.userCount,
+      linkCount: linksRes.status === "fulfilled" ? linksRes.value : fallback.linkCount,
+      totalViews:
+        viewsRes.status === "fulfilled"
+          ? viewsRes.value._sum.views || 0
+          : fallback.totalViews,
+    };
+
+    publicMetricsCache = {
+      value: next,
+      expiresAt: Date.now() + METRICS_TTL_MS,
+    };
+
+    return next;
+  })()
+    .catch((err) => {
+      request.log.warn({ err }, "public metrics: fallback used after refresh failure");
+      return fallback;
+    })
+    .finally(() => {
+      publicMetricsRefreshPromise = null;
+    });
+
+  return publicMetricsRefreshPromise;
+}
 
 fastify.register(fastifyRateLimit, {
   max: 500,
@@ -61,6 +155,7 @@ fastify.register(fastifyHttpProxy, {
   prefix: "/umami_script.js",
   rewritePrefix: "/script.js",
   replyOptions: {
+    undici: false,
     rewriteRequestHeaders: (req, headers) => {
       return {
         ...headers,
@@ -77,6 +172,7 @@ fastify.register(fastifyHttpProxy, {
   prefix: "/api/send",
   rewritePrefix: "/api/send",
   replyOptions: {
+    undici: false,
     rewriteRequestHeaders: (req, headers) => {
       return {
         ...headers,
@@ -117,15 +213,41 @@ fastify.register(fastifyMultipart, {
 
 fastify.register(fastifyCookie);
 
+// Configuration adaptée à l'environnement
+// En production, partager les cookies entre dash.plinkk.fr et plinkk.fr
+const isProduction = process.env.FRONTEND_URL?.includes("plinkk.fr") ?? false;
+const cookieConfig = isProduction
+  ? {
+      path: "/",
+      domain: ".plinkk.fr",
+      secure: true,
+      httpOnly: true,
+      sameSite: "lax" as const,
+    }
+  : {
+      path: "/",
+      httpOnly: true,
+    };
+
 fastify.register(fastifySecureSession, {
   sessionName: "session",
   cookieName: "plinkk-backend",
   key: readFileSync(path.join(__dirname, "secret-key")),
   expiry: 24 * 60 * 60,
-  cookie: { path: "/" },
+  cookie: cookieConfig,
 });
 
-fastify.register(fastifyCors, { origin: true });
+const corsConfig = isProduction
+  ? {
+      origin: ["https://dash.plinkk.fr", "https://plinkk.fr"],
+      credentials: true,
+    }
+  : {
+      origin: true, // Permet toutes les origines en dev
+      credentials: true,
+    };
+
+fastify.register(fastifyCors, corsConfig);
 
 import onRequestHook from "./hooks/onRequestHook";
 
@@ -136,6 +258,9 @@ staticPagesRoutes(fastify);
 plinkkFrontUserRoutes(fastify);
 partnersRoutes(fastify);
 patchNotesRoutes(fastify);
+trackingRoutes(fastify);
+
+fastify.register(apiBugReportsRoutes, { prefix: "/api/me/bug-reports" });
 
 // ─── Funnel Event Tracking ──────────────────────────────────────────────────
 const ALLOWED_EVENTS = ['landing_visit', 'signup', 'premium_view', 'config_view', 'purchase', 'cancel'];
@@ -193,16 +318,7 @@ fastify.get("/", async function (request, reply) {
     })
     : null;
 
-  const [userCount, linkCount, totalViewsResult] = await Promise.all([
-    prisma.user.count(),
-    prisma.link.count(),
-    prisma.plinkk.aggregate({
-      _sum: {
-        views: true,
-      },
-    }),
-  ]);
-  const totalViews = totalViewsResult._sum.views || 0;
+  const { userCount, linkCount, totalViews } = await getPublicMetrics(request);
 
   let msgs: Announcement[] = [];
   try {
@@ -250,19 +366,40 @@ fastify.get("/users", async (request, reply) => {
       include: { role: true },
     })
     : null;
-  const plinkks = await prisma.plinkk.findMany({
-    where: { isPublic: true },
-    include: {
-      settings: true,
-      user: {
-        include: {
-          cosmetics: true,
-          role: true,
+  const [plinkks, bannedEmailRows] = await Promise.all([
+    prisma.plinkk.findMany({
+      where: { isPublic: true },
+      include: {
+        settings: true,
+        user: {
+          include: {
+            cosmetics: true,
+            role: true,
+          },
         },
       },
-    },
-    orderBy: { createdAt: "asc" },
-  });
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.bannedEmail.findMany({
+      where: { revoquedAt: null },
+      select: { email: true, reason: true, time: true, createdAt: true },
+    }),
+  ]);
+  // Build a map of banned emails -> ban info (only currently active bans)
+  const bannedEmailsMap = new Map<string, { reason: string; until: string | null }>();
+  for (const ban of bannedEmailRows) {
+    const isActive =
+      ban.time == null ||
+      ban.time < 0 ||
+      new Date(ban.createdAt).getTime() + ban.time * 60000 > Date.now();
+    if (isActive) {
+      const until =
+        typeof ban.time === "number" && ban.time > 0
+          ? new Date(new Date(ban.createdAt).getTime() + ban.time * 60000).toISOString()
+          : null;
+      bannedEmailsMap.set(ban.email, { reason: ban.reason, until });
+    }
+  }
   let msgs: Announcement[] = [];
   try {
     const now = new Date();
@@ -295,6 +432,7 @@ fastify.get("/users", async (request, reply) => {
   } catch (e) { }
   return await replyView(reply, "users.ejs", currentUser, {
     plinkks: plinkks,
+    bannedEmails: Object.fromEntries(bannedEmailsMap),
   });
 });
 
@@ -409,7 +547,16 @@ fastify.addHook('onSend', async (request, reply, payload) => {
 });
 
 fastify.setErrorHandler((error, request, reply) => {
-  fastify.log.error(error);
+  const statusCode = error instanceof AppError ? error.statusCode : 500;
+  request.log.error(
+    {
+      err: error,
+      method: request.method,
+      url: request.url,
+      statusCode,
+    },
+    "Request failed"
+  );
 
   if (error instanceof AppError) {
     if (request.raw.url?.startsWith("/api")) {

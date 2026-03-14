@@ -65,7 +65,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
       );
     const me = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, role: true },
+      select: { id: true, role: true, hasPassword: true, emailVerified: true },
     });
     if (!me)
       return reply.redirect(
@@ -79,11 +79,12 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
         ? "PRIVATE"
         : "PUBLIC";
     const isActive = !!body.isActive;
+    const forcePrivate = !!(me.hasPassword && !me.emailVerified);
     const created = await createPlinkkForUser(prisma, me.id, {
       name: title || "Page",
       slugBase,
-      visibility,
-      isActive,
+      visibility: forcePrivate ? "PRIVATE" : visibility,
+      isActive: forcePrivate ? false : isActive,
     });
     await logUserAction(userId, "CREATE_PLINKK", userId, { plinkkId: created.id, name: created.name }, request.ip);
     return reply.redirect("/plinkks");
@@ -130,6 +131,11 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
     const page = await prisma.plinkk.findUnique({ where: { id } });
     if (!page || page.userId !== userId)
       return reply.code(404).view("erreurs/404.ejs", { user: { id: userId } });
+    const me = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { hasPassword: true, emailVerified: true },
+    });
+    const forcePrivate = !!(me && me.hasPassword && !me.emailVerified);
     const data: Partial<Plinkk> = {};
     if (typeof body.title === "string" && body.title.trim())
       data.name = body.title.trim();
@@ -147,9 +153,15 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
       }
     }
     if (typeof body.visibility === "string")
-      data.visibility =
-        body.visibility.toLowerCase() === "private" ? "PRIVATE" : "PUBLIC";
-    if (typeof body.isActive !== "undefined") data.isActive = !!body.isActive;
+      data.visibility = forcePrivate
+        ? "PRIVATE"
+        : body.visibility.toLowerCase() === "private"
+          ? "PRIVATE"
+          : "PUBLIC";
+    if (typeof body.isActive !== "undefined") {
+      data.isActive = forcePrivate ? false : !!body.isActive;
+    }
+    if (forcePrivate) data.isPublic = false;
     const setDefault = !!body.isDefault;
     if (setDefault && !page.isDefault) {
       const prev = await prisma.plinkk.findFirst({
