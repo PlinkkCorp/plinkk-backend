@@ -19,7 +19,7 @@ Infrastructure backend moderne basée sur **Bun**, **Fastify** et **TypeScript s
 ### 🎨 Expérience Utilisateur
 - **Live Preview Sync** — Prévisualisation temps réel dans l'iframe du dashboard via `postMessage`
 - **Thèmes Personnalisables** — Création et gestion de thèmes visuels pour les pages Plinkk
-- **Analytics Avancées** — Statistiques détaillées avec filtres temporels et granularité configurable
+- **Statistiques Avancées** — Statistiques détaillées avec filtres temporels et granularité configurable
 - **UI Moderne** — Design Glassmorphism pour l'interface Premium et le dashboard
 
 ### 🔐 Authentification & Sécurité
@@ -108,7 +108,7 @@ Voici une décomposition claire de ce que propose Plinkk, de ses avantages prati
 | **Sécurité Native** | 🔒 **2FA + Magic Links** | ⚠️ Partielle / Payante| ❌ Basique | ❌ Basique |
 | **Emails Inclus** | 📧 **Alias & Relais inclus**| ❌ Non | ❌ Non | ❌ Non |
 | **Prévisualisation** | 📱 **Temps Réel (Sync)** | ⚠️ Standard | ⚠️ Standard | ⚠️ Standard |
-| **Analytics (Stats)** | 📊 **Détaillées (Inclus)** | ❌ Payant | ⚠️ Basique | ❌ Payant |
+| **Statistiques (Stats)** | 📊 **Détaillées (Inclus)** | ❌ Payant | ⚠️ Basique | ❌ Payant |
 | **Monétisation** | 💳 **Intégration Plinkk Pro**| ⚠️ Payante / Restreinte | ❌ Non | ⚠️ Restreinte |
 | **Auto-Hébergement** | 🐳 **Oui (Héberge-le toi)** | ❌ Non (Locataire) | ❌ Non | ❌ Non |
 | **Support / Écoute** | 💬 **Communauté Discord** | ❌ Entreprise distant | ❌ Entreprise distant | ❌ Classique |
