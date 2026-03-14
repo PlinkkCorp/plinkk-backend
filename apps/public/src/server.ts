@@ -56,7 +56,6 @@ fastify.register(fastifyHelmet, {
       defaultSrc: ["'self'"],
       scriptSrc: [
         "'self'",
-        "'unsafe-inline'",
         "https://accounts.google.com",
         "https://cdn.tailwindcss.com",
         "https://analytics.plinkk.fr",
@@ -64,9 +63,6 @@ fastify.register(fastifyHelmet, {
         "https://cdn.plinkk.fr",
         "https://cdn.jsdelivr.net/npm",
       ],
-      // Allow inline event handlers temporarily (consider replacing inline handlers with addEventListener)
-      scriptSrcAttr: ["'unsafe-inline'"],
-      scriptSrcElem: ["'self'", "https://cdn.jsdelivr.net", "https://accounts.google.com", "https://cdn.tailwindcss.com"],
       styleSrc: [
         "'self'",
         "'unsafe-inline'",

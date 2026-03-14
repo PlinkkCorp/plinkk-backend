@@ -199,8 +199,8 @@
                                             : `<span class="flex items-center gap-1 font-bold"><img src="${window.__PLINKK_CDN_URL__}/icons/gems.svg" alt="Gems" class="w-4 h-4 shrink-0 gem-icon" /> +${quest.rewardGems}</span>`;
 
                                         const btnAction = completed
-                                            ? `onclick="window.open('${quest.actionUrl}', '_blank')"`
-                                            : `onclick="completeQuest(event, '${quest.id}')"`;
+                                            ? `data-action="open:${quest.actionUrl}"`
+                                            : `data-action="completeQuest:${quest.id}"`;
 
                                         const btnText = completed ? 'Quête accomplie' : 'Récupérer';
 
