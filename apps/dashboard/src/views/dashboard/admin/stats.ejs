@@ -1098,7 +1098,7 @@
                         <td class="p-4"><code class="text-[11px] text-violet-400 bg-violet-400/5 px-2 py-1 rounded-lg border border-violet-500/10">/${p.slug}</code></td>
                         <td class="p-4">
                              <div class="flex items-center gap-2">
-                                <img src="${p.user?.image || '/images/default-avatar.png'}" class="w-5 h-5 rounded-full border border-slate-700 object-cover" />
+                                <img src="${p.user?.image || `${window.__PLINKK_CDN_URL__}/default_profile.png`}" class="w-5 h-5 rounded-full border border-slate-700 object-cover" />
                                 <span class="text-slate-400 text-sm font-medium">@${p.user?.userName || 'inconnu'}</span>
                              </div>
                         </td>
@@ -1128,7 +1128,7 @@
                         <td class="px-6 py-4"><a href="${r.targetUrl}" target="_blank" class="text-xs text-slate-400 hover:text-white hover:underline truncate max-w-[200px] block">${r.targetUrl}</a></td>
                         <td class="px-6 py-4">
                              <div class="flex items-center gap-2">
-                                <img src="${r.user?.image || '/images/default-avatar.png'}" class="w-5 h-5 rounded-full border border-slate-700 object-cover" />
+                                <img src="${r.user?.image || `${window.__PLINKK_CDN_URL__}/default_profile.png`}" class="w-5 h-5 rounded-full border border-slate-700 object-cover" />
                                 <span class="text-slate-400 text-sm font-medium">@${r.user?.userName || 'inconnu'}</span>
                              </div>
                         </td>
@@ -1165,7 +1165,7 @@
                         <td class="px-6 py-4"><span class="text-xs text-slate-400">${q.targetType}</span></td>
                         <td class="px-6 py-4">
                              <div class="flex items-center gap-2">
-                                <img src="${q.user?.image || '/images/default-avatar.png'}" class="w-5 h-5 rounded-full border border-slate-700 object-cover" />
+                                <img src="${q.user?.image || `${window.__PLINKK_CDN_URL__}/default_profile.png`}" class="w-5 h-5 rounded-full border border-slate-700 object-cover" />
                                 <span class="text-slate-400 text-sm font-medium">@${q.user?.userName || 'inconnu'}</span>
                              </div>
                         </td>

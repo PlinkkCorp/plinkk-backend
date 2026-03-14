@@ -1529,8 +1529,7 @@ export function createIconList(profileData) {
         if (/^(https?:\/\/|\/|data:)/i.test(iconVal)) {
             iconImg.src = iconVal;
         } else {
-            const prefix = (window.__PLINKK_EXPORT_MODE__) ? '.' : '';
-            iconImg.src = `${prefix}/public/images/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
+            iconImg.src = `${window.__PLINKK_CDN_URL__}/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
         }
         setSafeText(iconImg, iconData.icon);
         iconImg.alt = iconData.icon;

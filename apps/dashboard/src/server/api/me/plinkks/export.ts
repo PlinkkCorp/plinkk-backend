@@ -10,6 +10,7 @@ import { canvaData } from "../../../../public/config/canvaConfig";
 import { logUserAction } from "../../../../lib/userLogger";
 
 export function plinkksExportRoutes(fastify: FastifyInstance) {
+  // TODO : Fix export images
   fastify.get("/:id/export.zip", async (request, reply) => {
     const userId = request.session.get("data");
     if (!userId) return reply.code(401).send({ error: "Unauthorized" });

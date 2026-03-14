@@ -1245,8 +1245,7 @@ function setupInlineEditing() {
                 if (e.key === 'Enter' && !isMultiline) {
                     e.preventDefault();
                     input.blur();
-                }
-                if (e.key === 'Escape') {
+                } else if (e.key === 'Escape') {
                     el.classList.remove('editing');
                     el.textContent = originalText;
                 }

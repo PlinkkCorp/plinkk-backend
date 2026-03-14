@@ -232,10 +232,10 @@ class DiscordService {
       timestamp: new Date().toISOString(),
       footer: {
         text: "Déployé avec ❤️ par l'équipe Plinkk",
-        icon_url: "https://plinkk.fr/images/logo.png",
+        icon_url: `${process.env.CDN_URL || "https://cdn.plinkk.fr"}/logo.svg`,
       },
       thumbnail: {
-        url: "https://plinkk.fr/images/logo.png",
+        url: `${process.env.CDN_URL || "https://cdn.plinkk.fr"}/logo.svg`,
       },
       author: patchNote.createdBy?.name
         ? {
