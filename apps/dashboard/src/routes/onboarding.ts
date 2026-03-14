@@ -10,7 +10,7 @@ import { replyView } from "../lib/replyView";
 import { requireAuthRedirect, requireAuth, requireAuthWithUser } from "../middleware/auth";
 import { createPlinkkForUser, slugify, isReservedSlug } from "@plinkk/shared";
 import { logUserAction } from "../lib/userLogger";
-import profileConfig from "../public/config/profileConfig";
+import { profileData as profileConfig } from "@plinkk/shared";
 
 interface OnboardingData {
   step?: number;

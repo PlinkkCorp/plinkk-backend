@@ -19,6 +19,8 @@ export * from "./lib/affiliateService.js";
 export * from "./lib/apiBugReports.js";
 export * from "./types/user.js";
 
+export { default as profileData } from "./lib/defaultConfig.js";
+
 declare module "@fastify/secure-session" {
   interface SessionData {
     data?: string | { id: string };
