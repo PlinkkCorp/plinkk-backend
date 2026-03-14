@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     try {
         window.profileData = profileData;
         window.__PLINKK_PROFILE_DATA__ = profileData;
-    } catch (e) { /* ignore */ }
+    } catch (e) { console.warn('Failed to set global profile data:', e); }
 
     // Récupérer l'article
     const article = document.getElementById('profile-article');
@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Attendre le chargement des thèmes
     try {
         await themesLoaded;
-    } catch (_) { /* ignore */ }
+    } catch (e) { console.warn('Themes loading failed:', e); }
 
     // Gérer le thème injecté
     try {
@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const linkBoxes = createLinkBoxes(profileData);
             linkBoxes?.forEach(box => article.appendChild(box));
         }
-    } catch (_) { /* ignore */ }
+    } catch (e) { console.warn('Links rendering safety check failed:', e); }
 
     // Titre et favicon
     document.title = profileData.userName
@@ -294,7 +294,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Désactiver le néon par défaut
     try {
         profileData.neonEnable = 0;
-    } catch (_) { /* ignore */ }
+    } catch (e) { console.warn('Failed to disable neon by default:', e); }
 
     // Appliquer les animations
     if (!animations?.length) {

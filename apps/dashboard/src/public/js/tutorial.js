@@ -985,7 +985,7 @@
     window.removeEventListener('resize', onResize);
     window.removeEventListener('scroll', onScroll);
     // Marque le tour comme vu globalement
-    try { localStorage.setItem(GLOBAL_STORAGE_KEY, '1'); } catch (e) { /* ignore */ }
+    try { localStorage.setItem(GLOBAL_STORAGE_KEY, '1'); } catch (e) { console.error('Caught error', e); }
   }
 
   function finishTour() {
@@ -1102,7 +1102,7 @@
       welcomeEl.style.opacity = '0';
       setTimeout(function () {
         welcomeEl.style.display = 'none';
-        try { localStorage.setItem(GLOBAL_STORAGE_KEY, '1'); } catch (e) { /* ignore */ }
+        try { localStorage.setItem(GLOBAL_STORAGE_KEY, '1'); } catch (e) { console.error('Caught error', e); }
         startTour();
       }, 280);
     });
@@ -1111,7 +1111,7 @@
       welcomeEl.style.opacity = '0';
       setTimeout(function () {
         welcomeEl.style.display = 'none';
-        try { localStorage.setItem(GLOBAL_STORAGE_KEY, '1'); } catch (e) { /* ignore */ }
+        try { localStorage.setItem(GLOBAL_STORAGE_KEY, '1'); } catch (e) { console.error('Caught error', e); }
       }, 280);
     });
   }
@@ -1125,7 +1125,7 @@
 
     // Vérifie si l'utilisateur a JAMAIS vu le tutoriel (clé globale)
     let seen = false;
-    try { seen = localStorage.getItem(GLOBAL_STORAGE_KEY) === '1'; } catch (e) { /* ignore */ }
+    try { seen = localStorage.getItem(GLOBAL_STORAGE_KEY) === '1'; } catch (e) { console.error('Caught error', e); }
 
     if (!seen) {
       // DASHBOARD: affiche l'écran de bienvenue
@@ -1146,7 +1146,7 @@
       prev: prevStep,
       goTo: showStep,
       reset: function () {
-        try { localStorage.removeItem(GLOBAL_STORAGE_KEY); } catch (e) { /* ignore */ }
+        try { localStorage.removeItem(GLOBAL_STORAGE_KEY); } catch (e) { console.error('Caught error', e); }
         stopTour();
         setTimeout(showWelcome, 200);
       },

@@ -571,6 +571,7 @@ class DashboardUI {
         });
       });
     } catch (e) {
+      console.warn('Failed to initialize canvas selection:', e);
     }
   }
 

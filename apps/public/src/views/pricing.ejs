@@ -3,7 +3,7 @@
   description: 'Découvrez les offres Plinkk : un plan gratuit pour démarrer et un plan Premium pour aller plus loin.',
   robots: 'index,follow'
 }) %>
-<%- include('partials/header') %>
+<%- include('partials/header', { user: (typeof user !=='undefined' ? user : null) }) %>
 
 <%- include('pricing/styles') %>
 

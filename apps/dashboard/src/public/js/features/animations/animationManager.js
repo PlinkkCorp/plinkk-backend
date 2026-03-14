@@ -14,11 +14,11 @@ import { animationBackground } from '../../../config/animationConfig.js';
 function getProfileData() {
     try {
         if (typeof profileData !== 'undefined') return profileData;
-    } catch (e) { /* ignore */ }
+    } catch (e) { console.error('Caught error', e); }
     
     try {
         if (window?.__PLINKK_PROFILE_DATA__) return window.__PLINKK_PROFILE_DATA__;
-    } catch (e) { /* ignore */ }
+    } catch (e) { console.error('Caught error', e); }
     
     return {};
 }

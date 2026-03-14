@@ -43,12 +43,53 @@ import fastifyCompress from "@fastify/compress";
 import fastifyHttpProxy from "@fastify/http-proxy";
 import { AppError } from "@plinkk/shared";
 import { apiBugReportsRoutes } from "@plinkk/shared";
+import fastifyHelmet from "@fastify/helmet";
 
 const fastify = Fastify({
   logger: true,
   trustProxy: true,
 });
-const PORT = 3002;
+
+fastify.register(fastifyHelmet, {
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "https://accounts.google.com",
+        "https://cdn.tailwindcss.com",
+        "https://analytics.plinkk.fr",
+      ],
+      styleSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "https://cdn.jsdelivr.net",
+        "https://fonts.googleapis.com",
+      ],
+      fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'", "https://analytics.plinkk.fr"],
+      frameSrc: ["'self'", "https://accounts.google.com"],
+      imgSrc: [
+        "'self'",
+        "data:",
+        "https://cdn.plinkk.fr",
+        "https://lh3.googleusercontent.com",
+      ],
+      objectSrc: ["'none'"],
+    },
+  },
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+  referrerPolicy: {
+    policy: "strict-origin-when-cross-origin",
+  },
+});
+const PORT = Number(process.env.PORT) || 3002;
 
 type PublicMetrics = {
   userCount: number;
@@ -155,7 +196,6 @@ fastify.register(fastifyHttpProxy, {
   prefix: "/umami_script.js",
   rewritePrefix: "/script.js",
   replyOptions: {
-    undici: false,
     rewriteRequestHeaders: (req, headers) => {
       return {
         ...headers,
@@ -172,7 +212,6 @@ fastify.register(fastifyHttpProxy, {
   prefix: "/api/send",
   rewritePrefix: "/api/send",
   replyOptions: {
-    undici: false,
     rewriteRequestHeaders: (req, headers) => {
       return {
         ...headers,
@@ -512,14 +551,21 @@ fastify.get("/*", async (request, reply) => {
   });
 });
 
-fastify.setNotFoundHandler((request, reply) => {
+fastify.setNotFoundHandler(async (request, reply) => {
   if (request.raw.url?.startsWith("/api")) {
     return reply.code(404).send({ error: "Not Found" });
   }
   const sessionData = request.session.get("data");
   const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+
+  const user = userId ? await prisma.user.findUnique({
+    where: { id: userId },
+    include: { role: true }
+  }) : null;
+
   return reply.code(404).view("erreurs/404.ejs", {
-    currentUser: userId ? { id: userId } : null,
+    user: user,
+    currentUser: user,
     dashboardUrl: process.env.DASHBOARD_URL,
   });
 });
@@ -534,8 +580,14 @@ fastify.addHook('onSend', async (request, reply, payload) => {
       // Remplacer par la vue d'erreur
       const sessionData = request.session.get("data");
       const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+      const user = userId ? await prisma.user.findUnique({
+        where: { id: userId },
+        include: { role: true }
+      }) : null;
+
       const viewData = {
-        currentUser: userId ? { id: userId } : null,
+        user: user,
+        currentUser: user,
         dashboardUrl: process.env.DASHBOARD_URL,
       };
       const html = await fastify.view(`erreurs/${statusCode}.ejs`, viewData);
@@ -546,7 +598,7 @@ fastify.addHook('onSend', async (request, reply, payload) => {
   return payload;
 });
 
-fastify.setErrorHandler((error, request, reply) => {
+fastify.setErrorHandler(async (error, request, reply) => {
   const statusCode = error instanceof AppError ? error.statusCode : 500;
   request.log.error(
     {
@@ -567,10 +619,16 @@ fastify.setErrorHandler((error, request, reply) => {
     }
     const sessionData = request.session.get("data");
     const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+    const user = userId ? await prisma.user.findUnique({
+      where: { id: userId },
+      include: { role: true }
+    }) : null;
+
     const template = error.statusCode === 404 ? "erreurs/404.ejs" : "erreurs/500.ejs";
     return reply.code(error.statusCode).view(template, {
       message: error.message,
-      currentUser: userId ? { id: userId } : null,
+      user: user,
+      currentUser: user,
       dashboardUrl: process.env.DASHBOARD_URL,
     });
   }
@@ -580,9 +638,15 @@ fastify.setErrorHandler((error, request, reply) => {
   }
   const sessionData = request.session.get("data");
   const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+  const user = userId ? await prisma.user.findUnique({
+    where: { id: userId },
+    include: { role: true }
+  }) : null;
+
   return reply.code(500).view("erreurs/500.ejs", {
     message: error && typeof error === 'object' && 'message' in error ? (error).message ?? "" : "",
-    currentUser: userId ? { id: userId } : null,
+    user: user,
+    currentUser: user,
     dashboardUrl: process.env.DASHBOARD_URL,
   });
 });

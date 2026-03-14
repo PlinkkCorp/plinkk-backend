@@ -80,8 +80,9 @@
 <script>
   <% 
     let _av_js_url = "";
-    if (user && user.image) {
-      _av_js_url = user.image;
+    const _u = (typeof user !== "undefined" && user) ? user : null;
+    if (_u && _u.image) {
+      _av_js_url = _u.image;
       if (!/^https?:\/\//i.test(_av_js_url) && _av_js_url[0] !== '/' && !/^data:/i.test(_av_js_url)) {
         _av_js_url = '/public/uploads/avatars/' + _av_js_url;
       }

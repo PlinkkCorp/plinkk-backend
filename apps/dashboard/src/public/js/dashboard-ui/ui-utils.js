@@ -13,9 +13,9 @@ export class UIUtils {
 
     getKey(inputId) { return `${this.LS_PREFIX}${this.userId}:${this.plinkkId}:${inputId}`; }
 
-    lsGet(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } }
-    lsSet(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch { } }
-    lsDel(key) { try { localStorage.removeItem(key); } catch { } }
+    lsGet(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { console.error('lsGet error:', e); return null; } }
+    lsSet(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { console.error('lsSet error:', e); } }
+    lsDel(key) { try { localStorage.removeItem(key); } catch (e) { console.error('lsDel error:', e); } }
 
     initMaskableInputs() {
         const buttons = Array.from(document.querySelectorAll('.mask-toggle'));
@@ -78,8 +78,8 @@ export class UIUtils {
         document.querySelectorAll('[data-maskable]').forEach(inp => {
             const key = this.getKey(inp.id);
             const saved = this.lsGet(key);
-            const isMasked = (typeof inp.dataset._originalValue !== 'undefined') || inp.classList.contains('masked-field') || (saved && saved.masked);
-            if (isMasked) inp.value = '';
+            const isFieldMasked = (typeof inp.dataset._originalValue !== 'undefined') || inp.classList.contains('masked-field') || (saved && saved.masked);
+            if (isFieldMasked) inp.value = '';
         });
     }
 

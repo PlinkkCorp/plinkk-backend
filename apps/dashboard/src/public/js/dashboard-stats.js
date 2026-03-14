@@ -1,6 +1,9 @@
 const qs = (s, r = document) => r.querySelector(s);
 const qsa = (s, r = document) => Array.from(r.querySelectorAll(s));
 
+const MS_PER_DAY = 86400000;
+const REVOKE_DELAY = 2000;
+
 function formatNumber(n) {
   return new Intl.NumberFormat().format(n || 0);
 }
@@ -24,7 +27,7 @@ function downloadBlob(content, filename, type = 'text/csv;charset=utf-8') {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  setTimeout(() => URL.revokeObjectURL(url), REVOKE_DELAY);
 }
 
 function buildBarChart(container, data, { maxBars = 10, isLoading = false } = {}) {
@@ -281,12 +284,16 @@ function renderTable(rows, isLoading = false) {
 async function fetchDailyViews(days) {
   const now = new Date();
   const to = now.toISOString().slice(0,10);
-  const fromDate = new Date(now.getTime() - (days - 1) * 86400000);
+  const fromDate = new Date(now.getTime() - (days - 1) * MS_PER_DAY);
   const from = fromDate.toISOString().slice(0,10);
   const res = await fetch(`/stats/views?from=${from}&to=${to}` , { credentials: 'same-origin' });
   if (!res.ok) {
     let msg = '';
-    try { msg = await res.text(); } catch {}
+    try {
+      msg = await res.text();
+    } catch (e) {
+      console.warn('Could not read error body:', e);
+    }
     const err = new Error(`HTTP ${res.status} ${res.statusText}${msg ? ' — ' + msg : ''}`);
     err.status = res.status;
     throw err;
@@ -328,15 +335,16 @@ async function main() {
       const { series } = await fetchDailyViews(days);
       drawLineChart(chartContainer, series);
     } catch (e) {
-
       const preloadRaw = root?.getAttribute('data-views-daily') || '[]';
       try {
         const preload = JSON.parse(preloadRaw) || [];
         if (Array.isArray(preload) && preload.length) {
-      drawLineChart(chartContainer, preload);
+          drawLineChart(chartContainer, preload);
           return;
         }
-      } catch {}
+      } catch (parseError) {
+        console.warn('Failed to parse daily views preload:', parseError);
+      }
       const statusMsg = e && e.status === 401 ? ' (non connecté)' : '';
       const details = (e && e.message) ? ` — ${e.message}` : '';
       chartContainer.innerHTML = `<div class="text-xs text-rose-400">Erreur de chargement des vues datées${statusMsg}${details}</div>`;
@@ -349,12 +357,12 @@ async function main() {
   async function fetchDailyClicks(days) {
     const now = new Date();
     const to = now.toISOString().slice(0,10);
-    const fromDate = new Date(now.getTime() - (days - 1) * 86400000);
+    const fromDate = new Date(now.getTime() - (days - 1) * MS_PER_DAY);
     const from = fromDate.toISOString().slice(0,10);
     const res = await fetch(`/stats/clicks?from=${from}&to=${to}`, { credentials: 'same-origin' });
     if (!res.ok) {
       let msg = '';
-      try { msg = await res.text(); } catch {}
+      try { msg = await res.text(); } catch (e) { console.warn('Could not read error body:', e); }
       const err = new Error(`HTTP ${res.status} ${res.statusText}${msg ? ' — ' + msg : ''}`);
       err.status = res.status;
       throw err;
@@ -374,7 +382,9 @@ async function main() {
           drawLineChart(chartClicks, preload);
           return;
         }
-      } catch {}
+      } catch (parseError) {
+        console.warn('Failed to parse daily clicks preload:', parseError);
+      }
       const statusMsg = e && e.status === 401 ? ' (non connecté)' : '';
       const details = (e && e.message) ? ` — ${e.message}` : '';
       chartClicks.innerHTML = `<div class="text-xs text-rose-400">Erreur de chargement des clics datés${statusMsg}${details}</div>`;

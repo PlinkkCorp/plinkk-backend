@@ -72,7 +72,7 @@ async function saveLayout(order) {
         if (window.__INITIAL_STATE__) window.__INITIAL_STATE__.layoutOrder = res.layoutOrder;
         if (window.__EDITOR_STORE__) window.__EDITOR_STORE__.set({ layoutOrder: res.layoutOrder });
         if (window.__PLINKK_SYNC_LAYOUT__) {
-            try { window.__PLINKK_SYNC_LAYOUT__(res.layoutOrder); } catch { }
+            try { window.__PLINKK_SYNC_LAYOUT__(res.layoutOrder); } catch (e) { console.error('Caught error', e); }
         }
         renderPlinkk(currentConfig);
     }
@@ -361,7 +361,7 @@ function renderPlinkk(config) {
                         isSpotify = true;
                         if (!urlObj.pathname.includes('/embed')) embedUrl = `https://open.spotify.com/embed${urlObj.pathname}`;
                     }
-                } catch (e) { }
+                } catch (e) { console.error('Caught error', e); }
 
                 let style = 'width:100%;border:none;display:block;';
                 if (isSpotify) style += 'height:152px;';
@@ -1222,6 +1222,7 @@ function setupInlineEditing() {
                     if (window.__PLINKK_SYNC_SIDEBAR__) window.__PLINKK_SYNC_SIDEBAR__();
 
                 } catch (err) {
+                    console.error('Failed to save inline edit in editor-core.js:', err);
                 }
             };
 
@@ -1606,12 +1607,10 @@ function initCanvas(canvasFileName) {
             const exts = configItem?.extension;
             if (exts) {
                 if (Array.isArray(exts)) {
-                    // load sequentially to preserve order
-                    for (const ext of exts) await loadScriptOnce(ext);
+                    await Promise.all(exts.map(ext => loadScriptOnce(ext)));
                 } else if (typeof exts === 'string') {
-                    // some entries use a comma-separated string
                     if (exts.includes(',')) {
-                        for (const e of exts.split(',').map(x => x.trim())) await loadScriptOnce(e);
+                        await Promise.all(exts.split(',').map(x => loadScriptOnce(x.trim())));
                     } else {
                         await loadScriptOnce(exts);
                     }
@@ -1626,6 +1625,7 @@ function initCanvas(canvasFileName) {
                         runCanvasAnimation(canvas.getContext('2d'), canvas);
                     }
                 } catch (e) {
+                    console.warn('Canvas animation execution failed:', e);
                 }
             };
             script.onerror = (e) => { };

@@ -9,7 +9,7 @@ function setupImageFallback(img, wrapper, userName) {
                 this.src = "https://cdn.plinkk.fr/logo.svg";
                 return;
             }
-        } catch (e) {}
+        } catch (e) { console.error('Caught error', e); }
         
         try {
             this.onerror = null;
@@ -24,7 +24,7 @@ function setupImageFallback(img, wrapper, userName) {
                 wrapper.appendChild(span);
             }
         } catch (e) {
-            try { this.style.display = 'none'; } catch (e) {}
+            try { this.style.display = 'none'; } catch (e) { console.error('Caught error', e); }
         }
     };
 }
@@ -72,11 +72,11 @@ export function createProfileContainer(profileData) {
                 this.src = "https://cdn.plinkk.fr/default_profile.png";
                 return;
             }
-        } catch (e) {}
+        } catch (e) { console.error('Caught error', e); }
         try {
             this.onerror = null;
             this.style.display = 'none';
-        } catch (e) {}
+        } catch (e) { console.error('Caught error', e); }
     };
     
     disableDrag(profileIcon);

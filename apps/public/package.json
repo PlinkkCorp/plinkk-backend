@@ -18,7 +18,8 @@
     "set-admin": "bun ../../scripts/set-admin.cjs",
     "migrate:plinkks": "bun ../../scripts/migrate-plinkks.cjs",
     "delete_inactive": "bun ../../scripts/delete_inactive_user.js",
-    "seed:role": "bun prisma/seed.ts"
+    "seed:role": "bun prisma/seed.ts",
+    "sri": "bun ../../scripts/compute-sri.ts"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +30,7 @@
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.1.0",
     "@fastify/formbody": "^8.0.2",
+    "@fastify/helmet": "^13.0.2",
     "@fastify/http-proxy": "^11.3.0",
     "@fastify/multipart": "^9.2.1",
     "@fastify/oauth2": "^8.1.2",
