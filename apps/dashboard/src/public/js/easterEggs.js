@@ -214,7 +214,6 @@ export function unlockEgg(eggName) {
         if (document.querySelector('.easter-egg-modal')) {
             updateEasterEggModal(document.querySelector('.easter-egg-modal'));
         }
-        umami.track('unlocked-' + eggName);
     }
     else {
         // toggle activation

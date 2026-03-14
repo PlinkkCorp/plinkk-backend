@@ -89,8 +89,6 @@
     }
   }
   </script>
-              <script defer src="/umami_script.js" data-website-id="69e21905-d1fc-48c8-a64e-26a6ad5ad089"
-                data-host-url="https://analytics.plinkk.fr"></script>
               <script src="https://accounts.google.com/gsi/client" async defer></script>
               <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
               <style>
@@ -366,15 +364,3 @@
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-[#0B1020] via-slate-950 to-[#0b1324] text-slate-100 animate-fade-in">
-  <script type="text/javascript">
-    window.__PLINKK_FRONTEND_URL__ = "<%= ((typeof frontendUrl !== 'undefined' && frontendUrl) ? frontendUrl : '') %>";
-    (() => {
-      const name = 'outbound-link-click';
-      document.querySelectorAll('a').forEach(a => {
-        if (a.host !== window.location.host && !a.getAttribute('data-umami-event')) {
-          a.setAttribute('data-umami-event', name);
-          a.setAttribute('data-umami-event-url', a.href);
-        }
-      });
-    })();
-  </script>

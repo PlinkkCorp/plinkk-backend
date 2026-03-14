@@ -19,7 +19,6 @@ const IGNORED_PATH_PREFIXES = [
   "/images/",
   "/uploads/",
   "/canvaAnimation/",
-  "/umami_script.js",
   "/favicon",
 ];
 

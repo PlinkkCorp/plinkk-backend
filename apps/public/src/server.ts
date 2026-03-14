@@ -60,7 +60,13 @@ fastify.register(fastifyHelmet, {
         "https://accounts.google.com",
         "https://cdn.tailwindcss.com",
         "https://analytics.plinkk.fr",
+        "https://cdn.jsdelivr.net",
+        "https://cdn.plinkk.fr",
+        "https://cdn.jsdelivr.net/npm",
       ],
+      // Allow inline event handlers temporarily (consider replacing inline handlers with addEventListener)
+      scriptSrcAttr: ["'unsafe-inline'"],
+      scriptSrcElem: ["'self'", "https://cdn.jsdelivr.net", "https://accounts.google.com", "https://cdn.tailwindcss.com"],
       styleSrc: [
         "'self'",
         "'unsafe-inline'",
@@ -75,6 +81,7 @@ fastify.register(fastifyHelmet, {
         "data:",
         "https://cdn.plinkk.fr",
         "https://lh3.googleusercontent.com",
+        "https://s3.marvideo.fr",
       ],
       objectSrc: ["'none'"],
     },
@@ -189,23 +196,6 @@ fastify.register(fastifyRateLimit, {
 });
 
 fastify.register(fastifyCompress);
-
-// Register proxy BEFORE body-parsers to avoid body consumption
-fastify.register(fastifyHttpProxy, {
-  upstream: "https://analytics.plinkk.fr",
-  prefix: "/umami_script.js",
-  rewritePrefix: "/script.js",
-  replyOptions: {
-    rewriteRequestHeaders: (req, headers) => {
-      return {
-        ...headers,
-        host: "analytics.plinkk.fr",
-        "x-forwarded-for": req.ip || (headers["x-forwarded-for"] as string),
-        "x-real-ip": req.ip || (headers["x-real-ip"] as string),
-      };
-    },
-  },
-});
 
 fastify.register(fastifyHttpProxy, {
   upstream: "https://analytics.plinkk.fr",
@@ -501,7 +491,6 @@ fastify.get("/*", async (request, reply) => {
   if (
     url.startsWith("/api") ||
     url.startsWith("/public") ||
-    url.startsWith("/umami_script.js") ||
     url.startsWith("/dashboard")
   ) {
     return reply.callNotFound();

@@ -127,13 +127,6 @@ export function plinkksExportRoutes(fastify: FastifyInstance) {
     archive.append(config, { name: "config.js" });
     archive.append(JSON.stringify(themes), { name: "themes.json" });
 
-    let analyticsScript = "";
-    try {
-      analyticsScript = await fetchRemoteFile("https://analytics.plinkk.fr/script.js");
-    } catch (e) {
-      console.error("Failed to fetch analytics script", e);
-    }
-    archive.append(analyticsScript, { name: "umami_script.js" });
 
     const canvaId = pageProfile.canvaEnable ? pageProfile.selectedCanvasIndex : null;
     if (canvaId !== null && canvaData[canvaId]) {

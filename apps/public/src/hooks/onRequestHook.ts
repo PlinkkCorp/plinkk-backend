@@ -26,7 +26,6 @@ export default async function onRequestHook(
     const bypassPrefixes = [
       "/public/",
       "/canvaAnimation/",
-      "/umami_script.js",
       "/api/",
       "/favicon.ico",
       "/themes.json",

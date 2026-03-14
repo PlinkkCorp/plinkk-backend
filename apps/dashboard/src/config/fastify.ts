@@ -116,36 +116,4 @@ export async function registerPlugins(fastify: FastifyInstance) {
   await fastify.register(fastifyCors, corsConfig);
 
   await fastify.register(fastifyWebsocket);
-
-  await fastify.register(fastifyHttpProxy as any, {
-    upstream: "https://analytics.plinkk.fr/",
-    prefix: "/umami_script.js",
-    rewritePrefix: "/script.js",
-    replyOptions: {
-      rewriteRequestHeaders: (req, headers: any) => {
-        return {
-          ...headers,
-          host: "analytics.plinkk.fr",
-          "x-forwarded-for": (req as import('fastify').FastifyRequest).ip || headers["x-forwarded-for"],
-          "x-real-ip": (req as import('fastify').FastifyRequest).ip || headers["x-real-ip"],
-        };
-      },
-    },
-  });
-
-  await fastify.register(fastifyHttpProxy as any, {
-    upstream: "https://analytics.plinkk.fr/",
-    prefix: "/api/send",
-    rewritePrefix: "/api/send",
-    replyOptions: {
-      rewriteRequestHeaders: (req, headers: any) => {
-        return {
-          ...headers,
-          host: "analytics.plinkk.fr",
-          "x-forwarded-for": (req as import('fastify').FastifyRequest).ip || headers["x-forwarded-for"],
-          "x-real-ip": (req as import('fastify').FastifyRequest).ip || headers["x-real-ip"],
-        };
-      },
-    },
-  });
 }

@@ -54,8 +54,7 @@ async function bootstrap() {
 
     if (
       url.startsWith("/api") ||
-      url.startsWith("/public") ||
-      url.startsWith("/umami_script.js")
+      url.startsWith("/public")
     ) {
       return reply.callNotFound();
     }

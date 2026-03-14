@@ -82,7 +82,6 @@ export const PERMISSIONS: PermissionDefinition[] = [
   { key: 'MANAGE_API_KEYS', category: 'Développement', description: 'Gérer les clés API', defaultRoles: ['ADMIN', 'DEVELOPER'] },
   { key: 'MANAGE_WEBHOOKS', category: 'Développement', description: 'Gérer les webhooks', defaultRoles: ['ADMIN', 'DEVELOPER'] },
   { key: 'MANAGE_INTEGRATIONS', category: 'Intégrations', description: 'Configurer des intégrations', defaultRoles: ['ADMIN', 'DEVELOPER'] },
-  { key: 'MANAGE_UMAMI', category: 'Intégrations', description: 'Configurer Umami / Analytics', defaultRoles: ['ADMIN', 'DEVELOPER'] },
   { key: 'MANAGE_ANALYTICS', category: 'Intégrations', description: 'Configurer les analytiques', defaultRoles: ['ADMIN', 'DEVELOPER'] },
 
   { key: 'IMPERSONATE_USER', category: 'Administration', description: 'Se connecter en tant qu’un autre utilisateur', defaultRoles: ['ADMIN', 'DEVELOPER'] },
