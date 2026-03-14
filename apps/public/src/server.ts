@@ -43,12 +43,53 @@ import fastifyCompress from "@fastify/compress";
 import fastifyHttpProxy from "@fastify/http-proxy";
 import { AppError } from "@plinkk/shared";
 import { apiBugReportsRoutes } from "@plinkk/shared";
+import fastifyHelmet from "@fastify/helmet";
 
 const fastify = Fastify({
   logger: true,
   trustProxy: true,
 });
-const PORT = 3002;
+
+fastify.register(fastifyHelmet, {
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "https://accounts.google.com",
+        "https://cdn.tailwindcss.com",
+        "https://analytics.plinkk.fr",
+      ],
+      styleSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "https://cdn.jsdelivr.net",
+        "https://fonts.googleapis.com",
+      ],
+      fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'", "https://analytics.plinkk.fr"],
+      frameSrc: ["'self'", "https://accounts.google.com"],
+      imgSrc: [
+        "'self'",
+        "data:",
+        "https://cdn.plinkk.fr",
+        "https://lh3.googleusercontent.com",
+      ],
+      objectSrc: ["'none'"],
+    },
+  },
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+  referrerPolicy: {
+    policy: "strict-origin-when-cross-origin",
+  },
+});
+const PORT = Number(process.env.PORT) || 3002;
 
 type PublicMetrics = {
   userCount: number;

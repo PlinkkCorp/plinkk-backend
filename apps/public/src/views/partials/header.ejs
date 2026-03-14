@@ -1,10 +1,12 @@
-<% if (typeof dashboardUrl==='undefined' || !dashboardUrl) { dashboardUrl='/dashboard' ; }
-  const _isDash=(typeof isDashboard !=='undefined' && isDashboard) || (typeof currentPath !=='undefined' && currentPath.startsWith('/admin')); 
- <% const _user = (typeof user !== 'undefined' && user) ? user : (typeof currentUser !== 'undefined' && currentUser ? currentUser : null); %>
-<% const _isLogged = !!_user; %>
-  const _roleName=_user && _user.role ? (_user.role.id || _user.role.name) : null; 
-  const _isPremiumUser=!!(_user && (_user.isPremium || _user.isPartner || (_user.role && ['ADMIN', 'DEVELOPER', 'MODERATOR'].includes(_user.role.id || _user.role.name)))); 
-  const _showPremiumUi=!!(_user && _user.showPremiumUi !==false); %>
+<% 
+  if (typeof dashboardUrl === 'undefined' || !dashboardUrl) { dashboardUrl = '/dashboard'; }
+  const _isDash = (typeof isDashboard !== 'undefined' && isDashboard) || (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin')); 
+  const _user = (typeof user !== 'undefined' && user) ? user : (typeof currentUser !== 'undefined' && currentUser ? currentUser : null);
+  const _isLogged = !!_user;
+  const _roleName = _user && _user.role ? (_user.role.id || _user.role.name) : null; 
+  const _isPremiumUser = !!(_user && (_user.isPremium || _user.isPartner || (_user.role && ['ADMIN', 'DEVELOPER', 'MODERATOR'].includes(_user.role.id || _user.role.name)))); 
+  const _showPremiumUi = !!(_user && _user.showPremiumUi !== false); 
+%>
 
   <header class="sticky top-0 z-50 border-b border-white/5 bg-[#0B1020]/80 backdrop-blur-md transition-all duration-300"
     id="mainHeader">
