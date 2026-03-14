@@ -32,7 +32,7 @@ async function bootstrap() {
 
   fastify.register(apiRoutes, { prefix: "/api" });
   fastify.register(dashboardRoutes);
-  fastify.register(plinkkPagesRoutes);
+  fastify.register(plinkkPagesRoutes, { prefix: "/plinkks" });
   fastify.register(linkTrackingRoutes);
   authRoutes(fastify);
 

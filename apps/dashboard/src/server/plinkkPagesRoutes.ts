@@ -56,7 +56,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
       visibility?: string;
       isActive?: string;
     };
-  }>("/plinkks", async (request, reply) => {
+  }>("/", async (request, reply) => {
     const sessionData = request.session.get("data");
     const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId)
@@ -119,7 +119,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
       isActive?: string;
       isDefault?: string;
     };
-  }>("/plinkks/:id", async (request, reply) => {
+  }>("/:id", async (request, reply) => {
     const userId = request.session.get("data") as string | undefined;
     if (!userId)
       return reply.redirect(
@@ -180,7 +180,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post<{ Params: { id: string }; Body: { mode?: string } }>(
-    "/plinkks/:id/delete",
+    "/:id/delete",
     async (request, reply) => {
       const userId = request.session.get("data") as string | undefined;
       if (!userId)
@@ -217,7 +217,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
   );
 
   fastify.post<{ Params: { id: string } }>(
-    "/plinkks/:id/set-default",
+    "/:id/set-default",
     async (request, reply) => {
       const userId = request.session.get("data") as string | undefined;
       if (!userId)
@@ -255,7 +255,7 @@ export function plinkkPagesRoutes(fastify: FastifyInstance) {
   );
 
   fastify.get<{ Params: { id: string } }>(
-    "/plinkks/:id/stats",
+    "/:id/stats",
     async (request, reply) => {
       const userId = request.session.get("data") as string | undefined;
       if (!userId)
