@@ -1222,6 +1222,7 @@ function setupInlineEditing() {
                     if (window.__PLINKK_SYNC_SIDEBAR__) window.__PLINKK_SYNC_SIDEBAR__();
 
                 } catch (err) {
+                    console.error('Failed to save inline edit in editor-core.js:', err);
                 }
             };
 
@@ -1607,12 +1608,10 @@ function initCanvas(canvasFileName) {
             const exts = configItem?.extension;
             if (exts) {
                 if (Array.isArray(exts)) {
-                    // load sequentially to preserve order
-                    for (const ext of exts) await loadScriptOnce(ext);
+                    await Promise.all(exts.map(ext => loadScriptOnce(ext)));
                 } else if (typeof exts === 'string') {
-                    // some entries use a comma-separated string
                     if (exts.includes(',')) {
-                        for (const e of exts.split(',').map(x => x.trim())) await loadScriptOnce(e);
+                        await Promise.all(exts.split(',').map(x => loadScriptOnce(x.trim())));
                     } else {
                         await loadScriptOnce(exts);
                     }
@@ -1627,6 +1626,7 @@ function initCanvas(canvasFileName) {
                         runCanvasAnimation(canvas.getContext('2d'), canvas);
                     }
                 } catch (e) {
+                    console.warn('Canvas animation execution failed:', e);
                 }
             };
             script.onerror = (e) => { };

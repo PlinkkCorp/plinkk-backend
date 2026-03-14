@@ -62,7 +62,11 @@ export function renderBackground({ container, addBtn, colors, scheduleAutoSave }
       color.addEventListener('input', () => { colors[idx] = color.value; scheduleAutoSave(); });
       const rmWrap = el('div', { class: 'w-10 flex justify-end' }); rmWrap.append(rm);
       row.append(gripBtn, color, rmWrap);
-      try { enableDragHandle(gripBtn, row, container, colors, () => renderBackground({ container, addBtn, colors, scheduleAutoSave }), scheduleAutoSave); } catch { }
+      try { 
+        enableDragHandle(gripBtn, row, container, colors, () => renderBackground({ container, addBtn, colors, scheduleAutoSave }), scheduleAutoSave); 
+      } catch (err) { 
+        console.warn('Failed to enable drag handle for background color:', err); 
+      }
       container.appendChild(row);
     });
   }
@@ -177,7 +181,11 @@ export function renderLabels({ container, addBtn, labels, scheduleAutoSave }) {
       rmWrap.append(rm);
 
       row.append(dataWrapper, color, fontColor, pickWrap, rmWrap);
-      try { enableDragHandle(gripBtn, row, container, labels, () => renderLabels({ container, addBtn, labels, scheduleAutoSave }), scheduleAutoSave); } catch { }
+      try { 
+        enableDragHandle(gripBtn, row, container, labels, () => renderLabels({ container, addBtn, labels, scheduleAutoSave }), scheduleAutoSave); 
+      } catch (err) { 
+        console.warn('Failed to enable drag handle for labels:', err); 
+      }
       container.appendChild(row);
     });
   }
@@ -250,7 +258,11 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
     { id: 'vrchat', name: 'VRChat', pattern: 'https://vrchat.com/home/user/{handle}', iconSlug: 'vrchat' },
     { id: 'line', name: 'LINE', pattern: 'https://line.me/ti/p/{handle}', iconSlug: 'line' },
   ];
-  try { window.__SOCIAL_PLATFORM_LIST__ = SOCIAL_PLATFORMS; } catch (e) { }
+  try { 
+    window.__SOCIAL_PLATFORM_LIST__ = SOCIAL_PLATFORMS; 
+  } catch (e) { 
+    console.warn('Failed to set global social platform list:', e); 
+  }
 
   if (!Array.isArray(socials) || socials.length === 0) {
     container.append(
@@ -272,9 +284,13 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
       grip.appendChild(createGripSVG(16));
 
       const iconContainer = el('div', { class: 'h-10 w-10 rounded bg-slate-800 animate-pulse shrink-0 overflow-hidden border border-slate-700 flex items-center justify-center' });
-      const srcUrl = s.icon ? (isUrlish(s.icon) ? s.icon : `https://cdn.plinkk.fr/icons/${s.icon}.svg`) : '';
+      let srcUrl = '';
+      if (s.icon) {
+        srcUrl = isUrlish(s.icon) ? s.icon : `https://cdn.plinkk.fr/icons/${s.icon}.svg`;
+      }
       const iconImg = el('img', {
-        class: 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + getIconClass(srcUrl)
+        class: 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + getIconClass(srcUrl),
+        alt: s.name || s.title || 'Social Icon'
       });
       iconImg.onload = () => { iconImg.classList.remove('opacity-0'); iconContainer.classList.remove('animate-pulse'); };
       iconImg.onerror = () => { iconContainer.classList.remove('animate-pulse'); };
@@ -356,14 +372,22 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
             window.__OPEN_SOCIAL_MODAL__(null, {
               prefill,
               onSave: (payload) => {
-                try { s.url = payload.url; s.icon = payload.icon; s.newTab = !!payload.newTab; } catch (e) { }
+                try { 
+                  s.url = payload.url; 
+                  s.icon = payload.icon; 
+                  s.newTab = !!payload.newTab; 
+                } catch (e) { 
+                  console.warn('Failed to update social link from payload:', e); 
+                }
                 renderSocial({ container, addBtn, socials, scheduleAutoSave });
                 scheduleAutoSave();
               }
             });
             return;
           }
-        } catch (err) { }
+        } catch (err) { 
+          console.warn('Failed to open social modal:', err); 
+        }
         // fallback to inline editor
         openEditor();
       });
@@ -371,7 +395,11 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
 
       actions.append(editBtn, dupBtn, rm);
       row.append(left, actions);
-      try { enableDragHandle(grip, row, container, socials, () => renderSocial({ container, addBtn, socials, scheduleAutoSave }), scheduleAutoSave); } catch { }
+      try { 
+        enableDragHandle(grip, row, container, socials, () => renderSocial({ container, addBtn, socials, scheduleAutoSave }), scheduleAutoSave); 
+      } catch (err) { 
+        console.warn('Failed to enable drag handle for social link:', err); 
+      }
       container.appendChild(row);
     });
   }
@@ -423,7 +451,11 @@ export function renderCategories({ container, addBtn, categories, links, schedul
       const rm = trashButton(() => { categories.splice(idx, 1); renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate }); triggerUpdate(); }, 'Supprimer la catégorie');
 
       row.append(gripBtn, contentWrap, rm);
-      try { enableDragHandle(gripBtn, row, listContainer, categories, () => { renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate }); triggerUpdate(); }, scheduleAutoSave); } catch { }
+      try { 
+        enableDragHandle(gripBtn, row, listContainer, categories, () => { renderCategories({ container, addBtn, categories, links, scheduleAutoSave, onUpdate }); triggerUpdate(); }, scheduleAutoSave); 
+      } catch (err) { 
+        console.warn('Failed to enable drag handle for category:', err); 
+      }
       listContainer.appendChild(row);
     });
   }
@@ -500,8 +532,8 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       // set scheme display based on existing url
       let scheme = 'https';
       if (/^http:/.test(String(raw))) scheme = 'http';
-      try { if (modal) modal.dataset.urlScheme = scheme; } catch { }
-      try { if (modalSchemeBtn) modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = scheme + '://'; } catch { }
+      try { if (modal) modal.dataset.urlScheme = scheme; } catch (err) { console.warn('Failed to set modal urlScheme dataset:', err); }
+      try { if (modalSchemeBtn) modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = scheme + '://'; } catch (err) { console.warn('Failed to set modal scheme label:', err); }
     } catch {
       modalUrl.value = l.url || '';
     }
@@ -625,16 +657,16 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
                         const h = (handle || '').trim();
                         final = plat.pattern.replace('{handle}', h);
                       }
-                      if (final) {
-                        if (url) url.value = final;
-                        try { modal.dataset.urlScheme = /^http:/.test(final) ? 'http' : 'https'; } catch { }
-                        const iconSourceEl = document.getElementById('linkModalIconSource');
-                        const iconInput = document.getElementById('linkModalIconInput');
-                        if (iconSourceEl) iconSourceEl.value = 'catalog';
-                        if (iconInput) iconInput.value = `https://cdn.plinkk.fr/icons/${plat.iconSlug}.svg`;
-                      }
-                    });
-                  } catch (e) { }
+                        if (final) {
+                          if (url) url.value = final;
+                          try { modal.dataset.urlScheme = /^http:/.test(final) ? 'http' : 'https'; } catch (err) { console.warn('Failed to update urlScheme dataset:', err); }
+                          const iconSourceEl = document.getElementById('linkModalIconSource');
+                          const iconInput = document.getElementById('linkModalIconInput');
+                          if (iconSourceEl) iconSourceEl.value = 'catalog';
+                          if (iconInput) iconInput.value = `https://cdn.plinkk.fr/icons/${plat.iconSlug}.svg`;
+                        }
+                      });
+                    } catch (e) { console.warn('Failed to open platform modal:', e); }
                 }
               });
             });
@@ -665,16 +697,16 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
                     const h = (handle || '').trim();
                     final = plat.pattern.replace('{handle}', h);
                   }
-                  if (final) {
-                    if (url) url.value = final;
-                    try { modal.dataset.urlScheme = /^http:/.test(final) ? 'http' : 'https'; } catch { }
-                    const iconSourceEl = document.getElementById('linkModalIconSource');
-                    const iconInput = document.getElementById('linkModalIconInput');
-                    if (iconSourceEl) iconSourceEl.value = 'catalog';
-                    if (iconInput) iconInput.value = `https://cdn.plinkk.fr/icons/${plat.iconSlug}.svg`;
-                  }
-                });
-              } catch (e) { }
+                    if (final) {
+                      if (url) url.value = final;
+                      try { modal.dataset.urlScheme = /^http:/.test(final) ? 'http' : 'https'; } catch (err) { console.warn('Failed to update urlScheme dataset:', err); }
+                      const iconSourceEl = document.getElementById('linkModalIconSource');
+                      const iconInput = document.getElementById('linkModalIconInput');
+                      if (iconSourceEl) iconSourceEl.value = 'catalog';
+                      if (iconInput) iconInput.value = `https://cdn.plinkk.fr/icons/${plat.iconSlug}.svg`;
+                    }
+                  });
+                } catch (e) { console.warn('Failed to open platform modal:', e); }
             });
             grid.appendChild(btn);
           });
@@ -682,7 +714,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
           presetsWrap._bound = true;
         }
       }
-    } catch (e) { }
+    } catch (e) { console.warn('Social mode presets initialization failed:', e); }
 
     modalIcon = document.getElementById('linkModalIconInput') || document.getElementById('linkModalIconInputUrl');
     modalDesc.value = l.description || '';
@@ -710,7 +742,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       if (formMsg) formMsg.value = (l.formData && l.formData.successMessage) || '';
 
       if (typeSel) typeSel.dispatchEvent(new Event('change'));
-    } catch (e) { }
+    } catch (e) { console.warn('Advanced fields initialization failed:', e); }
 
     // Set active type and trigger UI update
     try {
@@ -722,9 +754,12 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
         const first = modal.querySelector('button[data-type-select="LINK"]');
         if (first) first.click();
       }
-    } catch (e) { }
+    } catch (e) { console.warn('Active type initialization failed:', e); }
     // Persist editing index on modal element so the save handler (bound once) can read it
-    try { if (editingIndex !== null) modal.dataset.editingIndex = String(editingIndex); else delete modal.dataset.editingIndex; } catch { }
+    try { 
+      if (editingIndex !== null) modal.dataset.editingIndex = String(editingIndex); 
+      else delete modal.dataset.editingIndex; 
+    } catch (err) { console.warn('Failed to update editingIndex dataset:', err); }
     // If icon source is catalog, ensure the input is readonly (cannot edit the stored library link)
     try {
       if (iconSourceEl && iconSourceEl.value === 'catalog') {
@@ -732,17 +767,17 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       } else {
         if (iconInput) iconInput.removeAttribute('readonly');
       }
-    } catch { }
+    } catch (err) { console.warn('Failed to update icon input readonly state:', err); }
     modal.classList.remove('hidden');
     modal.setAttribute('aria-hidden', 'false');
-    try { modalTitle && modalTitle.focus(); } catch { }
+    try { modalTitle && modalTitle.focus(); } catch (err) { console.warn('Failed to focus modal title:', err); }
   }
 
   function closeLinkModal() {
     if (!modal) return;
     modal.classList.add('hidden');
     modal.setAttribute('aria-hidden', 'true');
-    try { if (modal) delete modal.dataset.editingIndex; } catch { }
+    try { if (modal) delete modal.dataset.editingIndex; } catch (err) { console.warn('Failed to delete editingIndex dataset:', err); }
     editingIndex = null;
   }
 
@@ -750,7 +785,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
   // Usage: window.__OPEN_LINK_MODAL__(idxOrNull, { prefill: {...}, onSave: (payload)=>{} })
   try {
     window.__OPEN_LINK_MODAL__ = (idx, opts) => {
-      try { if (modal) modal.dataset.mode = 'link'; } catch (e) { }
+      try { if (modal) modal.dataset.mode = 'link'; } catch (e) { console.warn('Failed to set modal mode to link:', e); }
       openLinkModal(idx);
       if (!opts) return;
       try {
@@ -759,8 +794,8 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
         if (p.url !== undefined) {
           // remove scheme for input
           modalUrl.value = String(p.url || '').replace(/^https?:\/\//i, '');
-          try { modal.dataset.urlScheme = p.url && /^http:/.test(p.url) ? 'http' : 'https'; } catch { }
-          try { modalSchemeBtn && (modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = (modal.dataset.urlScheme || 'https') + '://'); } catch { }
+          try { modal.dataset.urlScheme = p.url && /^http:/.test(p.url) ? 'http' : 'https'; } catch (err) { console.warn('Failed to update urlScheme dataset:', err); }
+          try { modalSchemeBtn && (modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = (modal.dataset.urlScheme || 'https') + '://'); } catch (err) { console.warn('Failed to update scheme label:', err); }
         }
         if (p.icon !== undefined) {
           const iconSourceEl = document.getElementById('linkModalIconSource');
@@ -790,7 +825,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
   // Separate social modal helper that reuses link modal DOM but marks mode and allows different save handling
   try {
     window.__OPEN_SOCIAL_MODAL__ = (idx, opts) => {
-      try { if (modal) modal.dataset.mode = 'social'; } catch (e) { }
+      try { if (modal) modal.dataset.mode = 'social'; } catch (e) { console.warn('Failed to set modal mode to social:', e); }
       openLinkModal(idx);
       if (!opts) return;
       try {
@@ -912,7 +947,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
                         if (iconInput) iconInput.value = `https://cdn.plinkk.fr/icons/${plat.iconSlug}.svg`;
                       }
                     });
-                  } catch (e) { }
+                  } catch (e) { console.warn('Failed to open platform modal:', e); }
                 });
                 grid.appendChild(btn);
                 platformBtns.push(btn);
@@ -948,7 +983,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
         } else {
           if (presetsBtn) presetsBtn.style.display = 'none';
         }
-      } catch (e) { }
+      } catch (e) { console.warn('Presets UI adjustment failed:', e); }
       // add Enter key handling for inputs
       try {
         const inputs = modalContent.querySelectorAll('input:not([type="checkbox"]), select');
@@ -969,15 +1004,15 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
             }
           });
         });
-      } catch (e) { }
+      } catch (e) { console.warn('Input keydown binding failed:', e); }
     };
     // observe modal dataset changes could be complex; call adjust when modal is opened/closed via existing handlers
     // patch openLinkModal and closeLinkModal points by wrapping existing functions: call adjust after openLinkModal sets modal visible
     const oldOpen = openLinkModal;
-    openLinkModal = function (idx) { oldOpen(idx); try { adjustSocialModeUI(); } catch (e) { } };
+    openLinkModal = function (idx) { oldOpen(idx); try { adjustSocialModeUI(); } catch (e) { console.warn('adjustSocialModeUI failed on open:', e); } };
     const oldClose = closeLinkModal;
-    closeLinkModal = function () { try { if (modal) { delete modal.dataset.mode; } } catch (e) { }; try { adjustSocialModeUI(); } catch (e) { }; oldClose(); };
-  } catch (e) { }
+    closeLinkModal = function () { try { if (modal) { delete modal.dataset.mode; } } catch (e) { console.warn('Failed to delete modal mode dataset:', e); }; try { adjustSocialModeUI(); } catch (e) { console.warn('adjustSocialModeUI failed on close:', e); }; oldClose(); };
+  } catch (e) { console.warn('Modal patching failed:', e); }
 
   // Initialize modal buttons only once
   if (modal && !modal._initialized) {
@@ -1069,15 +1104,15 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       Array.from(modalSchemeMenu.querySelectorAll('button[data-scheme]')).forEach(b => {
         b.addEventListener('click', (ev) => {
           const s = ev.currentTarget.getAttribute('data-scheme');
-          try { modal.dataset.urlScheme = s; } catch { }
-          try { modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = s + '://'; } catch { }
+          try { modal.dataset.urlScheme = s; } catch (err) { console.warn('Failed to set urlScheme dataset:', err); }
+          try { modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = s + '://'; } catch (err) { console.warn('Failed to set scheme label:', err); }
           modalSchemeMenu.classList.add('hidden');
           // focus url input
-          try { modalUrl && modalUrl.focus(); } catch { }
+          try { modalUrl && modalUrl.focus(); } catch (err) { console.warn('Failed to focus modal url input:', err); }
         });
       });
       // close on outside click
-      document.addEventListener('click', () => { try { modalSchemeMenu.classList.add('hidden'); } catch { } });
+      document.addEventListener('click', () => { try { modalSchemeMenu.classList.add('hidden'); } catch (err) { console.warn('Failed to hide scheme menu:', err); } });
       modalSchemeBtn._bound = true;
     }
     // auto-detect scheme if user pastes 'http(s)://' in the URL input
@@ -1091,13 +1126,13 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
             if (match) {
               const s = match[1].toLowerCase();
               const rest = match[2] || '';
-              try { modal.dataset.urlScheme = s; } catch { }
-              try { modalSchemeBtn && (modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = s + '://'); } catch { }
+              try { modal.dataset.urlScheme = s; } catch (err) { console.warn('Failed to auto-detect urlScheme dataset:', err); }
+              try { modalSchemeBtn && (modalSchemeBtn.querySelector('#linkModalSchemeLabel').textContent = s + '://'); } catch (err) { console.warn('Failed to update scheme label:', err); }
               // update input without the scheme
               if (modalUrl.value !== rest) modalUrl.value = rest;
             }
           }
-        } catch (err) { }
+        } catch (err) { console.warn('URL input scheme auto-detection failed:', err); }
       });
       modalUrl._schemeBound = true;
     }
@@ -1137,7 +1172,12 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       let rawUrl = (modalUrl.value || '').trim();
       rawUrl = rawUrl.replace(/^https?:\/\//i, '');
       let scheme = 'https';
-      try { scheme = modal && modal.dataset && modal.dataset.urlScheme ? modal.dataset.urlScheme : 'https'; } catch { scheme = 'https'; }
+      try { 
+        scheme = modal && modal.dataset && modal.dataset.urlScheme ? modal.dataset.urlScheme : 'https'; 
+      } catch (err) { 
+        console.warn('Failed to get urlScheme from dataset, defaulting to https:', err);
+        scheme = 'https'; 
+      }
       const fullUrl = rawUrl ? (scheme + '://' + rawUrl) : (scheme + '://');
       const payload = {
         text: modalTitle.value.trim(),
@@ -1176,17 +1216,31 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
       // If an external save handler was provided (via window.__OPEN_LINK_MODAL__), call it instead
       try {
         if (modal && modal._externalSaveHandler) {
-          try { modal._externalSaveHandler(payload); } catch (err) { }
-          try { delete modal._externalSaveHandler; } catch (e) { modal._externalSaveHandler = null; }
+          try { 
+            modal._externalSaveHandler(payload); 
+          } catch (err) { 
+            console.warn('External save handler failed:', err);
+          }
+          try { 
+            delete modal._externalSaveHandler; 
+          } catch (e) { 
+            modal._externalSaveHandler = null; 
+            console.warn('Failed to delete external save handler:', e);
+          }
           renderLinks({ container, addBtn, links, categories, scheduleAutoSave });
           scheduleAutoSave();
           closeLinkModal();
           return;
         }
-      } catch (e) { }
+      } catch (e) { console.warn('External save handler logic failed:', e); }
       // read editing index from modal dataset (safe across re-renders)
       let mi = null;
-      try { mi = modal && modal.dataset && modal.dataset.editingIndex ? parseInt(modal.dataset.editingIndex, 10) : null; } catch { mi = null; }
+      try { 
+        mi = modal && modal.dataset && modal.dataset.editingIndex ? parseInt(modal.dataset.editingIndex, 10) : null; 
+      } catch (err) { 
+        console.warn('Failed to parse editingIndex from dataset:', err);
+        mi = null; 
+      }
       if (mi !== null && !isNaN(mi)) {
         Object.assign(links[mi], payload);
       } else {
@@ -1208,7 +1262,7 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
         modal.addEventListener('click', (e) => { if (e.target === modal) closeLinkModal(); });
         modal._boundOuterClose = true;
       }
-    } catch (e) { }
+    } catch (e) { console.warn('Modal backdrop click binding failed:', e); }
     // close on Escape
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) closeLinkModal(); });
     modal._initialized = true;
@@ -1262,7 +1316,8 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
 
     const iconContainer = el('div', { class: 'h-10 w-10 rounded bg-slate-800 animate-pulse shrink-0 overflow-hidden border border-slate-700 flex items-center justify-center' });
     const iconImg = el('img', {
-      class: 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + getIconClass(l.icon)
+      class: 'h-full w-full object-contain opacity-0 transition-opacity duration-300' + getIconClass(l.icon),
+      alt: l.text || l.name || 'Link Icon'
     });
     iconImg.onload = () => { iconImg.classList.remove('opacity-0'); iconContainer.classList.remove('animate-pulse'); };
     iconImg.onerror = () => { iconContainer.classList.remove('animate-pulse'); };
@@ -1345,7 +1400,11 @@ export function renderLinks({ container, addBtn, links, categories, scheduleAuto
     actions.append(editBtn, dupBtn, rm);
 
     row.append(left, actions);
-    try { enableDragHandle(grip, row, container, links, () => renderLinks({ container, addBtn, links, categories, scheduleAutoSave }), scheduleAutoSave); } catch { }
+    try { 
+      enableDragHandle(grip, row, container, links, () => renderLinks({ container, addBtn, links, categories, scheduleAutoSave }), scheduleAutoSave); 
+    } catch (err) { 
+      console.warn('Failed to enable drag handle for link:', err);
+    }
 
     container.appendChild(row);
   });
@@ -1443,7 +1502,11 @@ export function renderLayout({ container, order, scheduleAutoSave, cfg = {} }) {
       row.append(note);
     }
 
-    try { enableDragHandle(gripBtn, row, container, order, () => renderLayout({ container, order, scheduleAutoSave, cfg }), scheduleAutoSave); } catch { }
+    try { 
+      enableDragHandle(gripBtn, row, container, order, () => renderLayout({ container, order, scheduleAutoSave, cfg }), scheduleAutoSave); 
+    } catch (err) { 
+      console.warn('Failed to enable drag handle for layout item:', err);
+    }
     container.appendChild(row);
   });
 }
