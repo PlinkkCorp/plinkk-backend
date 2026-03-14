@@ -510,15 +510,21 @@ fastify.get("/*", async (request, reply) => {
   });
 });
 
-fastify.setNotFoundHandler((request, reply) => {
+fastify.setNotFoundHandler(async (request, reply) => {
   if (request.raw.url?.startsWith("/api")) {
     return reply.code(404).send({ error: "Not Found" });
   }
   const sessionData = request.session.get("data");
   const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+
+  const user = userId ? await prisma.user.findUnique({
+    where: { id: userId },
+    include: { role: true }
+  }) : null;
+
   return reply.code(404).view("erreurs/404.ejs", {
-    user: userId ? { id: userId } : null,
-    currentUser: userId ? { id: userId } : null,
+    user: user,
+    currentUser: user,
     dashboardUrl: process.env.DASHBOARD_URL,
   });
 });
@@ -533,9 +539,14 @@ fastify.addHook('onSend', async (request, reply, payload) => {
       // Remplacer par la vue d'erreur
       const sessionData = request.session.get("data");
       const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+      const user = userId ? await prisma.user.findUnique({
+        where: { id: userId },
+        include: { role: true }
+      }) : null;
+
       const viewData = {
-        user: userId ? { id: userId } : null,
-        currentUser: userId ? { id: userId } : null,
+        user: user,
+        currentUser: user,
         dashboardUrl: process.env.DASHBOARD_URL,
       };
       const html = await fastify.view(`erreurs/${statusCode}.ejs`, viewData);
@@ -546,7 +557,7 @@ fastify.addHook('onSend', async (request, reply, payload) => {
   return payload;
 });
 
-fastify.setErrorHandler((error, request, reply) => {
+fastify.setErrorHandler(async (error, request, reply) => {
   const statusCode = error instanceof AppError ? error.statusCode : 500;
   request.log.error(
     {
@@ -567,11 +578,16 @@ fastify.setErrorHandler((error, request, reply) => {
     }
     const sessionData = request.session.get("data");
     const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+    const user = userId ? await prisma.user.findUnique({
+      where: { id: userId },
+      include: { role: true }
+    }) : null;
+
     const template = error.statusCode === 404 ? "erreurs/404.ejs" : "erreurs/500.ejs";
     return reply.code(error.statusCode).view(template, {
       message: error.message,
-      user: userId ? { id: userId } : null,
-      currentUser: userId ? { id: userId } : null,
+      user: user,
+      currentUser: user,
       dashboardUrl: process.env.DASHBOARD_URL,
     });
   }
@@ -581,10 +597,15 @@ fastify.setErrorHandler((error, request, reply) => {
   }
   const sessionData = request.session.get("data");
   const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
+  const user = userId ? await prisma.user.findUnique({
+    where: { id: userId },
+    include: { role: true }
+  }) : null;
+
   return reply.code(500).view("erreurs/500.ejs", {
     message: error && typeof error === 'object' && 'message' in error ? (error).message ?? "" : "",
-    user: userId ? { id: userId } : null,
-    currentUser: userId ? { id: userId } : null,
+    user: user,
+    currentUser: user,
     dashboardUrl: process.env.DASHBOARD_URL,
   });
 });

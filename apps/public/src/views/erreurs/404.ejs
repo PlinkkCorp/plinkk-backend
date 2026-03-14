@@ -1,5 +1,5 @@
 <%- include('partials/head', { title: 'Page introuvable - Plinkk' }) %>
-<%- include('partials/header') %>
+<%- include('partials/header', { user: (typeof user !=='undefined' ? user : null) }) %>
 
 <main class="relative flex min-h-[calc(100vh-4rem)] items-center justify-center overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
   <!-- Background Effects -->

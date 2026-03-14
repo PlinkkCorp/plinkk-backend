@@ -1,6 +1,6 @@
 <%- include('partials/head.ejs', { title: 'Plinkk - Partenaires & Plinkk Gems' ,
     description: 'Découvrez nos partenaires et gagnez des Plinkk Gems !' , robots: 'index,follow' }) %>
-    <%- include('partials/header.ejs', { user: user }) %>
+    <%- include('partials/header.ejs', { user: (typeof user !== 'undefined' ? user : null) }) %>
 
         <!-- Particles background base -->
         <div class="fixed inset-0 z-[-1] bg-slate-950">
