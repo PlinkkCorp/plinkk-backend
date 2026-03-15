@@ -88,6 +88,7 @@ fastify.addHook('onSend', async (request, reply, payload) => {
     "https://cdn.jsdelivr.net/npm",
     "https://cdnjs.cloudflare.com",
     "https://unpkg.com",
+    "'sha256-VDHJYfrC5LSSrjtGlBejsdD/ny3ifzXqnwtQqrNSD8I='",
     nonce ? `'nonce-${nonce}'` : null,
   ].filter(Boolean).join(' ');
 
