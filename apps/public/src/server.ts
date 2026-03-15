@@ -76,6 +76,7 @@ fastify.register(fastifyHelmet, {
         "'self'",
         "data:",
         "https://cdn.plinkk.fr",
+        "https://cdn.jsdelivr.net",
         "https://lh3.googleusercontent.com",
         "https://s3.marvideo.fr",
       ],
