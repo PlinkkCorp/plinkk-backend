@@ -32,9 +32,9 @@ export async function replyView(
   statusCode: number = 200
 ): Promise<string> {
   const frontendUrl = process.env.FRONTEND_URL || process.env.PUBLIC_URL || (process.env.NODE_ENV !== 'production' ? 'http://127.0.0.1:3002' : '');
+  const cdnUrl = process.env.CDN_URL || (process.env.NODE_ENV !== 'production' ? 'https://cdn.plinkk.fr' : 'https://cdn.plinkk.fr')
   const cspNonce = (reply.request as any)?.cspNonce || crypto.randomBytes(16).toString('base64');
 
-  const nonce = (reply.request as any)?.cspNonce || '';
   if (user === null) {
     return reply.code(statusCode).view(template, {
       __SITE_MESSAGES__: await getActiveAnnouncementsForUser(null, extraData.__platform),
@@ -42,6 +42,7 @@ export async function replyView(
       currentUser: null,
       isAdmin: false,
       isStaff: false,
+      cdnUrl,
       getGravatarUrl,
       frontendUrl,
       cspNonce,
@@ -64,6 +65,7 @@ export async function replyView(
     currentUser: toSafeUser(user),
     isAdmin: isAdmin,
     isStaff: isStaff,
+    cdnUrl,
     getGravatarUrl,
     frontendUrl,
     cspNonce,

@@ -14,7 +14,6 @@ export async function replyView(
 ): Promise<string> {
   return sharedReplyView(reply, template, user, data, {
     dashboardUrl: process.env.DASHBOARD_URL,
-    cdnUrl: process.env.CDN_URL || "https://cdn.plinkk.fr",
     __platform: 'public'
   }, statusCode);
 }

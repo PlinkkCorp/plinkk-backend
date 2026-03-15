@@ -31,7 +31,6 @@ export async function replyView(
 ): Promise<string> {
   return sharedReplyView(reply, template, user, data, {
     frontendUrl: computeFrontendUrl(reply),
-    cdnUrl: process.env.CDN_URL || "https://cdn.plinkk.fr",
     __platform: 'dashboard'
   }, statusCode);
 }
