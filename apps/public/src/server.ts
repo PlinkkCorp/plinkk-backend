@@ -88,8 +88,6 @@ fastify.addHook('onSend', async (request, reply, payload) => {
     "https://cdn.jsdelivr.net/npm",
     "https://cdnjs.cloudflare.com",
     "https://unpkg.com",
-    // Temporary: allow inline scripts while migrating templates to use nonces/hashes
-    "'unsafe-inline'",
     nonce ? `'nonce-${nonce}'` : null,
   ].filter(Boolean).join(' ');
 
@@ -98,7 +96,7 @@ fastify.addHook('onSend', async (request, reply, payload) => {
   const connectSrc = "'self' https://unpkg.com";
   const frameSrc = "'self' https://accounts.google.com";
   const frameAncestors = "'self' https://plinkk.fr https://dash.plinkk.fr";
-  const imgSrc = "'self' data: https://cdn.plinkk.fr https://cdn.jsdelivr.net https://lh3.googleusercontent.com https://s3.marvideo.fr https://unpkg.com";
+  const imgSrc = "'self' data: https://cdn.plinkk.fr https://cdn.jsdelivr.net https://lh3.googleusercontent.com https://s3.marvideo.fr https://unpkg.com https://cdn.discordapp.com https://www.vistemo.xyz";
 
   const csp = `default-src 'self'; script-src ${scriptSrc}; style-src ${styleSrc}; font-src ${fontSrc}; connect-src ${connectSrc}; frame-src ${frameSrc}; frame-ancestors ${frameAncestors}; img-src ${imgSrc}; object-src 'none';`;
 
