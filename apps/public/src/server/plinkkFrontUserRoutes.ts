@@ -829,8 +829,14 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
     async function (request, reply) {
       const { userId } = request.query as { userId: string };
 
-      // Return built-ins first, then community and mine
-      return reply.send(await generateTheme(userId));
+      try {
+        // Return built-ins first, then community and mine
+        const themes = await generateTheme(userId);
+        return reply.send(themes);
+      } catch (err) {
+        request.log.error({ err }, "Failed to generate themes.json");
+        return reply.code(500).send({ error: "internal_server_error" });
+      }
     },
   );
 

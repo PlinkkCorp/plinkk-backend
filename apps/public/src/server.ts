@@ -1,7 +1,7 @@
 import "dotenv/config";
 import fastifyStatic from "@fastify/static";
 import fastifyView from "@fastify/view";
-import Fastify, { FastifyError } from "fastify";
+import Fastify, { FastifyError, FastifyRequest } from "fastify";
 import path from "path";
 import ejs from "ejs";
 import { readFileSync } from "fs";
@@ -69,21 +69,15 @@ fastify.register(fastifyHelmet, {
 fastify.addHook('onRequest', async (request, reply) => {
   try {
     const nonce = crypto.randomBytes(16).toString('base64');
-    (request as any).cspNonce = nonce;
+    (request as FastifyRequest & { cspNonce?: string }).cspNonce = nonce;
   } catch (err) {
     // If crypto fails (very unlikely), use a fixed fallback to avoid breaking templates that expect a nonce.
-    (request as any).cspNonce = 'fallback';
+    (request as FastifyRequest & { cspNonce?: string }).cspNonce = 'fallback';
   }
 });
 
 fastify.addHook('onSend', async (request, reply, payload) => {
-  // In some cases (e.g. streaming replies), headers may already have been sent by the time
-  // we run this hook. Avoid attempting to set headers in that case.
-  if (reply.raw.headersSent || (reply as any).sent) {
-    return payload;
-  }
-
-  const nonce = (request as any).cspNonce || '';
+  const nonce = (request as FastifyRequest & { cspNonce?: string }).cspNonce || '';
   // Build CSP header string (keep same sources as before, add nonce and hashes)
   const scriptSrc = [
     "'self'",
@@ -94,6 +88,8 @@ fastify.addHook('onSend', async (request, reply, payload) => {
     "https://cdn.jsdelivr.net/npm",
     "https://cdnjs.cloudflare.com",
     "https://unpkg.com",
+    // Temporary: allow inline scripts while migrating templates to use nonces/hashes
+    "'unsafe-inline'",
     nonce ? `'nonce-${nonce}'` : null,
   ].filter(Boolean).join(' ');
 
@@ -556,7 +552,6 @@ fastify.setNotFoundHandler(async (request, reply) => {
 
 fastify.addHook('onSend', async (request, reply, payload) => {
   if (request.raw.url?.startsWith("/api")) return payload;
-  if (reply.raw.headersSent || (reply as any).sent) return payload;
 
   const statusCode = reply.statusCode;
   if ([401, 403, 410, 429, 503, 504].includes(statusCode)) {
