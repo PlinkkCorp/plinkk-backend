@@ -69,6 +69,7 @@ fastify.register(fastifyHelmet, {
         "'unsafe-inline'",
         "https://cdn.jsdelivr.net",
         "https://fonts.googleapis.com",
+        "https://unpkg.com"
       ],
       fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com"],
       connectSrc: ["'self'"],
@@ -81,6 +82,7 @@ fastify.register(fastifyHelmet, {
         "https://cdn.jsdelivr.net",
         "https://lh3.googleusercontent.com",
         "https://s3.marvideo.fr",
+        "https://unpkg.com"
       ],
       objectSrc: ["'none'"],
     },
