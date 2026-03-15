@@ -2,15 +2,20 @@
   "name": "@plinkk/dashboard",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "bun --watch src/server.ts",
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "dev:fastify": "bun --watch src/server.ts",
     "dev:tsx": "bun --watch src/server.ts",
     "init": "bun install && bun run prisma:init && bun run create-key && bun run dev",
     "create-key": "bunx @fastify/secure-session > src/secret-key",
-    "build": "bun build:tsc && bun ../../scripts/copy-static.mjs",
     "build:tsc": "bunx tsc -p tsconfig.json",
-    "start": "bun dist/server.js",
+    "start": "bun build/index.js",
     "prisma:migratedev": "bunx prisma migrate dev --config=../../packages/prisma/prisma.config.ts --schema=../../packages/prisma/prisma/schema.prisma",
     "prisma:dev": "bunx prisma dev --config=../../packages/prisma/prisma.config.ts --schema=../../packages/prisma/prisma/schema.prisma",
     "prisma:studio": "bunx prisma studio --config=../../packages/prisma/prisma.config.ts --schema=../../packages/prisma/prisma/schema.prisma",
@@ -68,13 +73,18 @@
   },
   "devDependencies": {
     "@prisma/adapter-pg": "^7.1.0",
+    "@sveltejs/adapter-node": "^5.2.11",
+    "@sveltejs/kit": "^2.15.2",
+    "@sveltejs/vite-plugin-svelte": "^5.0.1",
     "@types/bun": "latest",
     "@types/ejs": "^3.1.5",
     "@types/node": "^24.8.1",
     "concurrently": "^9.2.1",
     "pg": "^8.18.0",
+    "svelte": "^5.2.11",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^6.0.5"
   }
 }

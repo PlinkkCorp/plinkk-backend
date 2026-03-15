@@ -7,7 +7,6 @@ import dashboardUserSessionsRoutes from "./dashboard/user/sessions";
 import dashboardUserInboxRoutes from "./dashboard/user/inbox";
 import { dashboardStatsRoutes } from "./dashboard/stats";
 import { dashboardCosmeticsRoutes } from "./dashboard/cosmetics";
-import { dashboardEditRoutes } from "./dashboard/edit";
 import { dashboardAccountRoutes } from "./dashboard/account";
 import { dashboardThemesRoutes } from "./dashboard/themes";
 
@@ -22,7 +21,6 @@ export function dashboardRoutes(fastify: FastifyInstance) {
   fastify.register(dashboardUserInboxRoutes, { prefix: "/inbox" });
   fastify.register(dashboardStatsRoutes, { prefix: "/stats" });
   fastify.register(dashboardCosmeticsRoutes, { prefix: "/cosmetics" });
-  fastify.register(dashboardEditRoutes, { prefix: "/edit" });
   fastify.register(dashboardAccountRoutes, { prefix: "/account" });
   fastify.register(dashboardThemesRoutes, { prefix: "/themes" });
 

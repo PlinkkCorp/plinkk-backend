@@ -1,0 +1,718 @@
+<%- include('partials/head', {
+  title: 'Fonctionnalités',
+  description: 'Découvrez toutes les fonctionnalités de Plinkk : pages personnalisables, thèmes illimités, analytics avancés, liens intelligents, domaines personnalisés, SEO optimisé et bien plus.',
+  metaKeywords: 'fonctionnalités Plinkk, thèmes personnalisés, analytics, liens intelligents, SEO, domaines personnalisés, QR codes, open source',
+  metaAuthor: 'Équipe Plinkk',
+  pageThemeColor: 'info',
+  canonical: 'https://plinkk.fr/features',
+  image: 'https://cdn.plinkk.fr/og-image-features.png',
+  robots: 'index,follow',
+  extraHead: `
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Fonctionnalités Plinkk",
+      "description": "Découvrez toutes les fonctionnalités de Plinkk pour créer votre page de liens parfaite.",
+      "url": "https://plinkk.fr/features",
+      "mainEntity": {
+        "@type": "ItemList",
+        "itemListElement": [
+          {"@type": "ListItem", "position": 1, "name": "Thèmes personnalisables"},
+          {"@type": "ListItem", "position": 2, "name": "Analytics intégrés"},
+          {"@type": "ListItem", "position": 3, "name": "SEO optimisé"},
+          {"@type": "ListItem", "position": 4, "name": "Liens intelligents"},
+          {"@type": "ListItem", "position": 5, "name": "Domaines personnalisés"}
+        ]
+      }
+    }
+    </script>
+  `
+}) %>
+<%- include('partials/header', { user: (typeof user !=='undefined' ? user : null) }) %>
+
+<style>
+  .feat-reveal{opacity:0;transform:translateY(32px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
+  .feat-reveal.visible{opacity:1;transform:none}
+  .feat-card{transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+  .feat-card:hover{transform:translateY(-4px);box-shadow:0 8px 32px -8px rgba(139,92,246,.15)}
+  .section-badge{display:inline-flex;align-items:center;gap:.375rem;font-size:.75rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:.25rem .75rem;border-radius:9999px}
+  .feat-icon{width:2.5rem;height:2.5rem;display:flex;align-items:center;justify-content:center;border-radius:.75rem;flex-shrink:0;transition:background .2s}
+  .premium-tag{font-size:.625rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.125rem .5rem;border-radius:9999px;background:linear-gradient(135deg,#a78bfa,#f472b6);color:#fff}
+</style>
+
+<main class="relative isolate overflow-hidden min-h-screen">
+  <!-- Background Effects -->
+  <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div class="absolute left-[50%] top-0 -translate-x-1/2 blur-3xl opacity-20" aria-hidden="true">
+      <div class="aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-[#7c3aed] to-[#06b6d4]"
+        style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)">
+      </div>
+    </div>
+    <div class="absolute right-0 bottom-0 blur-3xl opacity-10" aria-hidden="true">
+      <div class="aspect-[1155/678] w-[50rem] bg-gradient-to-bl from-[#f472b6] to-[#7c3aed]"
+        style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)">
+      </div>
+    </div>
+  </div>
+
+  <div class="mx-auto max-w-7xl px-6 lg:px-8 py-24 sm:py-32">
+
+    <!-- Hero -->
+    <div class="mx-auto max-w-3xl text-center feat-reveal">
+      <span class="section-badge bg-violet-500/10 text-violet-400 ring-1 ring-inset ring-violet-500/20 mb-6">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456Z"/></svg>
+        Toutes les fonctionnalités
+      </span>
+      <h1 class="text-4xl font-bold tracking-tight text-white sm:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">
+        Tout ce dont vous avez besoin,<br>en une seule plateforme.
+      </h1>
+      <p class="mt-6 text-lg leading-8 text-slate-400 max-w-2xl mx-auto">
+        De la personnalisation avancée aux analytics en temps réel, Plinkk vous offre un outil complet pour créer des pages de liens uniques et performantes.
+      </p>
+      <div class="mt-8 flex items-center justify-center gap-4">
+        <a href="<%= dashboardUrl %>/login#signup" class="rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 hover:bg-violet-500 transition-all hover:scale-105 hover:shadow-violet-500/40">
+          Commencer gratuitement
+        </a>
+        <a href="/pricing" class="rounded-xl bg-white/5 px-6 py-3 text-sm font-semibold text-slate-300 ring-1 ring-inset ring-white/10 hover:bg-white/10 hover:text-white transition-all">
+          Voir les tarifs
+        </a>
+      </div>
+    </div>
+
+
+    <!-- ===================== SECTION 1 : Profils & Pages ===================== -->
+    <section class="mt-32 feat-reveal">
+      <div class="flex flex-col items-center text-center mb-12">
+        <span class="section-badge bg-indigo-500/10 text-indigo-400 ring-1 ring-inset ring-indigo-500/20 mb-4">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
+          Profils & Pages
+        </span>
+        <h2 class="text-3xl font-bold text-white sm:text-4xl">Votre page, votre identité</h2>
+        <p class="mt-3 text-slate-400 max-w-xl">Créez des pages de liens uniques qui reflètent parfaitement votre image.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-indigo-500/30 p-6">
+          <div class="feat-icon bg-indigo-500/10">
+            <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Multi-pages</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Créez plusieurs pages Plinkk : 1 en gratuit, 2 en Premium, et ajoutez-en plus à la carte.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-indigo-500/30 p-6">
+          <div class="feat-icon bg-indigo-500/10">
+            <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m9.86-2.032a4.5 4.5 0 0 0-1.242-7.244l4.5-4.5a4.5 4.5 0 0 1 6.364 6.364l-1.757 1.757"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Slug personnalisé</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Votre URL unique <code class="text-violet-400">plinkk.fr/votre-nom</code> avec validation intelligente.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-indigo-500/30 p-6">
+          <div class="feat-icon bg-indigo-500/10">
+            <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Avatar & Bannière</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Photo de profil, icône, bannière image ou GIF animé. Support Gravatar intégré.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-indigo-500/30 p-6">
+          <div class="feat-icon bg-indigo-500/10">
+            <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Visibilité</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Passez votre page en public ou privé en un clic. Page par défaut configurable.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-indigo-500/30 p-6">
+          <div class="flex items-center gap-2">
+            <div class="feat-icon bg-indigo-500/10">
+              <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+            </div>
+            <span class="premium-tag">Premium</span>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Page protégée par mot de passe</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Restreignez l'accès à votre page avec un mot de passe sécurisé.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-indigo-500/30 p-6">
+          <div class="feat-icon bg-indigo-500/10">
+            <svg class="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm-3.375 6.75h4.5a1.5 1.5 0 0 0 1.5-1.5 3 3 0 0 0-3-3h-1.5a3 3 0 0 0-3 3 1.5 1.5 0 0 0 1.5 1.5Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Profil complet</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Bio, email public, téléphone, texte de site, nom d'affichage personnalisable et barre de statut.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===================== SECTION 2 : Liens ===================== -->
+    <section class="mt-28 feat-reveal">
+      <div class="flex flex-col items-center text-center mb-12">
+        <span class="section-badge bg-cyan-500/10 text-cyan-400 ring-1 ring-inset ring-cyan-500/20 mb-4">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m9.86-2.032a4.5 4.5 0 0 0-1.242-7.244l4.5-4.5a4.5 4.5 0 0 1 6.364 6.364l-1.757 1.757"/></svg>
+          Gestion des liens
+        </span>
+        <h2 class="text-3xl font-bold text-white sm:text-4xl">Liens intelligents et puissants</h2>
+        <p class="mt-3 text-slate-400 max-w-xl">Bien plus qu'un simple répertoire de liens : Smart Links, programmation, catégories et capture de leads.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-cyan-500/30 p-6">
+          <div class="feat-icon bg-cyan-500/10">
+            <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m9.86-2.032a4.5 4.5 0 0 0-1.242-7.244l4.5-4.5a4.5 4.5 0 0 1 6.364 6.364l-1.757 1.757"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Liens personnalisables</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">URL, titre, description, icône, miniature et sous-titre. Organisez avec des catégories visuelles.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-cyan-500/30 p-6">
+          <div class="feat-icon bg-cyan-500/10">
+            <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-6.75 18h9"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Smart Links</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Redirigez automatiquement vers l'App Store ou le Play Store selon l'appareil du visiteur avec <code class="text-cyan-400">iosUrl</code> et <code class="text-cyan-400">androidUrl</code>.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-cyan-500/30 p-6">
+          <div class="flex items-center gap-2">
+            <div class="feat-icon bg-cyan-500/10">
+              <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+            </div>
+            <span class="premium-tag">Premium</span>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Liens programmés</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Planifiez l'activation et l'expiration automatique de vos liens avec des dates précises.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-cyan-500/30 p-6">
+          <div class="feat-icon bg-cyan-500/10">
+            <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Labels & Badges</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Ajoutez des labels colorés et des badges personnalisés à vos liens pour les mettre en valeur.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-cyan-500/30 p-6">
+          <div class="feat-icon bg-cyan-500/10">
+            <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Icônes sociales</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Affichez vos réseaux sociaux avec des icônes dédiées, ordonnables par glisser-déposer.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-cyan-500/30 p-6">
+          <div class="feat-icon bg-cyan-500/10">
+            <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Capture de leads</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Intégrez des formulaires dans vos liens et collectez les soumissions directement dans votre dashboard.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-cyan-500/30 p-6">
+          <div class="feat-icon bg-cyan-500/10">
+            <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm-3.375 6.75h4.5a1.5 1.5 0 0 0 1.5-1.5 3 3 0 0 0-3-3h-1.5a3 3 0 0 0-3 3 1.5 1.5 0 0 0 1.5 1.5Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">vCard</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Générez une carte de contact téléchargeable pour vos visiteurs en un clic.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-cyan-500/30 p-6">
+          <div class="feat-icon bg-cyan-500/10">
+            <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 0 1-.657.643 48.491 48.491 0 0 1-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 0 1-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 0 0-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 0 1-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 0 0 .657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 0 1-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 0 0 5.427-.63 48.05 48.05 0 0 0 .582-4.717.532.532 0 0 0-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 0 0 .658-.663 48.422 48.422 0 0 0-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 0 1-.61-.58Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Contenu embarqué</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Intégrez du contenu riche directement dans vos liens grâce aux données embed.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-cyan-500/30 p-6">
+          <div class="feat-icon bg-cyan-500/10">
+            <svg class="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5-6L16.5 15m0 0L12 10.5m4.5 4.5V1.5"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Tri & Priorités</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Réordonnez, épinglez et priorisez vos liens. Archivez ceux que vous n'utilisez plus.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===================== SECTION 3 : Thèmes & Design ===================== -->
+    <section class="mt-28 feat-reveal">
+      <div class="flex flex-col items-center text-center mb-12">
+        <span class="section-badge bg-fuchsia-500/10 text-fuchsia-400 ring-1 ring-inset ring-fuchsia-500/20 mb-4">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42"/></svg>
+          Thèmes & Design
+        </span>
+        <h2 class="text-3xl font-bold text-white sm:text-4xl">Un design qui vous ressemble</h2>
+        <p class="mt-3 text-slate-400 max-w-xl">Des thèmes prêts à l'emploi, un éditeur visuel avancé et une marketplace communautaire.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-fuchsia-500/30 p-6">
+          <div class="feat-icon bg-fuchsia-500/10">
+            <svg class="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">10+ thèmes intégrés</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Amethyst, Cobalt, Ruby, Emerald, Midnight, Neon Night… Chaque thème avec sa variante light/dark automatique.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-fuchsia-500/30 p-6">
+          <div class="feat-icon bg-fuchsia-500/10">
+            <svg class="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Thèmes communautaires</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Créez vos propres thèmes, soumettez-les à la marketplace et partagez-les avec toute la communauté.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-fuchsia-500/30 p-6">
+          <div class="feat-icon bg-fuchsia-500/10">
+            <svg class="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Dégradés & Images de fond</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Couleurs multiples, dégradés personnalisés, images ou vidéos en arrière-plan.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-fuchsia-500/30 p-6">
+          <div class="feat-icon bg-fuchsia-500/10">
+            <svg class="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Effets néon</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Ajoutez des couleurs néon dynamiques à vos pages pour un rendu lumineux unique.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-fuchsia-500/30 p-6">
+          <div class="feat-icon bg-fuchsia-500/10">
+            <svg class="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-2.625 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0 1 18 18.375M20.625 4.5H3.375m17.25 0c.621 0 1.125.504 1.125 1.125M20.625 4.5h-1.5C18.504 4.5 18 5.004 18 5.625m3.75 0v1.5c0 .621-.504 1.125-1.125 1.125M3.375 4.5c-.621 0-1.125.504-1.125 1.125M3.375 4.5h1.5C5.496 4.5 6 5.004 6 5.625m-2.625 0v1.5c0 .621.504 1.125 1.125 1.125m0 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m1.5-3.75C5.496 8.25 6 7.746 6 7.125v-1.5M4.875 8.25C5.496 8.25 6 8.754 6 9.375v1.5m0-5.25v5.25m0-5.25C6 5.004 6.504 4.5 7.125 4.5h9.75c.621 0 1.125.504 1.125 1.125m1.125 2.625h1.5m-1.5 0A1.125 1.125 0 0 1 18 7.125v-1.5m1.125 2.625c-.621 0-1.125.504-1.125 1.125v1.5m2.625-2.625c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125M18 5.625v5.25M7.125 12h9.75m-9.75 0A1.125 1.125 0 0 1 6 10.875M7.125 12C6.504 12 6 12.504 6 13.125m0-2.25c0 .621.504 1.125 1.125 1.125M18 12h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125M18 12c.621 0 1.125-.504 1.125-1.125m1.125 2.625v-1.5m-1.125 1.5c.621 0 1.125.504 1.125 1.125v1.5m-2.625-2.625c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125M4.875 12C5.496 12 6 12.504 6 13.125m-1.5 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m1.5-2.625c0 .621-.504 1.125-1.125 1.125m0 0v1.5c0 .621.504 1.125 1.125 1.125m-1.125-2.625c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Animations canvas</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Animations d'arrière-plan interactives pour des pages vivantes et captivantes.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-fuchsia-500/30 p-6">
+          <div class="flex items-center gap-2">
+            <div class="feat-icon bg-fuchsia-500/10">
+              <svg class="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+            </div>
+            <span class="premium-tag">Premium</span>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Effets visuels</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Sparkles, grain et autres effets visuels exclusifs pour rendre vos pages uniques.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-fuchsia-500/30 p-6">
+          <div class="feat-icon bg-fuchsia-500/10">
+            <svg class="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021.75 18V6a2.25 2.25 0 00-2.25-2.25H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Polices & Boutons personnalisés</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Choisissez votre police, personnalisez le style des boutons et l'ordre du layout.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-fuchsia-500/30 p-6">
+          <div class="feat-icon bg-fuchsia-500/10">
+            <svg class="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a2.25 2.25 0 002.25-2.25V5.25a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v13.5a2.25 2.25 0 002.25 2.25z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Cadres & Cosmétiques</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Cadres néon, glow, gold et autres cosmétiques pour habiller votre profil.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-fuchsia-500/30 p-6">
+          <div class="flex items-center gap-2">
+            <div class="feat-icon bg-fuchsia-500/10">
+              <svg class="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+            </div>
+            <span class="premium-tag">Premium</span>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Bannière GIF animée</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Utilisez un GIF comme bannière pour donner vie à votre page.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===================== SECTION 4 : Analytics ===================== -->
+    <section class="mt-28 feat-reveal">
+      <div class="flex flex-col items-center text-center mb-12">
+        <span class="section-badge bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20 mb-4">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+          Analytics & Statistiques
+        </span>
+        <h2 class="text-3xl font-bold text-white sm:text-4xl">Comprenez votre audience</h2>
+        <p class="mt-3 text-slate-400 max-w-xl">Statistiques détaillées sur vos vues, clics et performances, avec historique et export.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-emerald-500/30 p-6">
+          <div class="feat-icon bg-emerald-500/10">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Vues de page</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Suivez les vues quotidiennes de chaque page et de votre profil global avec agrégation journalière.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-emerald-500/30 p-6">
+          <div class="feat-icon bg-emerald-500/10">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Suivi des clics</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Chaque clic sur vos liens est enregistré. Visualisez les tendances par lien et par jour.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-emerald-500/30 p-6">
+          <div class="feat-icon bg-emerald-500/10">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">CTR automatique</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Calcul automatique du taux de clics (CTR) pour mesurer l'efficacité de vos liens.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-emerald-500/30 p-6">
+          <div class="flex items-center gap-2">
+            <div class="feat-icon bg-emerald-500/10">
+              <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+            </div>
+            <span class="premium-tag">Premium</span>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Historique étendu (365j)</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Accédez à un an d'historique complet contre 30 jours en gratuit.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-emerald-500/30 p-6">
+          <div class="flex items-center gap-2">
+            <div class="feat-icon bg-emerald-500/10">
+              <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+            </div>
+            <span class="premium-tag">Premium</span>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Export CSV</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Exportez vos statistiques en CSV pour les analyser dans vos outils favoris.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-emerald-500/30 p-6">
+          <div class="feat-icon bg-emerald-500/10">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Intégration Umami</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Analytics avancées et respectueuses de la vie privée intégrées directement dans vos pages.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===================== SECTION 5 : Raccourcisseur d'URL ===================== -->
+    <section class="mt-28 feat-reveal">
+      <div class="flex flex-col items-center text-center mb-12">
+        <span class="section-badge bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/20 mb-4">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>
+          Raccourcisseur d'URL
+        </span>
+        <h2 class="text-3xl font-bold text-white sm:text-4xl">Vos URLs, en plus court</h2>
+        <p class="mt-3 text-slate-400 max-w-xl">Créez des liens courts personnalisés avec statistiques de clics intégrées.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-amber-500/30 p-6">
+          <div class="feat-icon bg-amber-500/10">
+            <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m9.86-2.032a4.5 4.5 0 0 0-1.242-7.244l4.5-4.5a4.5 4.5 0 0 1 6.364 6.364l-1.757 1.757"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Slug personnalisé ou auto-généré</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Choisissez votre slug ou laissez Plinkk en générer un pour des URLs courtes et mémorables.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-amber-500/30 p-6">
+          <div class="feat-icon bg-amber-500/10">
+            <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Statistiques par redirection</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Suivez les clics sur chaque lien raccourci avec des statistiques journalières dédiées.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-amber-500/30 p-6">
+          <div class="feat-icon bg-amber-500/10">
+            <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Extensible</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">5 redirections en gratuit, 10 en Premium, et +5 supplémentaires à la carte.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===================== SECTION 6 : Domaines & SEO ===================== -->
+    <section class="mt-28 feat-reveal">
+      <div class="flex flex-col items-center text-center mb-12">
+        <span class="section-badge bg-sky-500/10 text-sky-400 ring-1 ring-inset ring-sky-500/20 mb-4">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+          Domaines & SEO
+        </span>
+        <h2 class="text-3xl font-bold text-white sm:text-4xl">Votre marque, votre domaine</h2>
+        <p class="mt-3 text-slate-400 max-w-xl">Connectez votre propre domaine et optimisez votre référencement.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-sky-500/30 p-6">
+          <div class="feat-icon bg-sky-500/10">
+            <svg class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Domaine personnalisé</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Liez votre propre domaine à votre Plinkk avec vérification DNS automatique via enregistrement TXT.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-sky-500/30 p-6">
+          <div class="feat-icon bg-sky-500/10">
+            <svg class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">SEO optimisé</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Slug personnalisé, meta description, Open Graph et URL canonique pour un référencement optimal.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===================== SECTION 7 : Sécurité & Auth ===================== -->
+    <section class="mt-28 feat-reveal">
+      <div class="flex flex-col items-center text-center mb-12">
+        <span class="section-badge bg-rose-500/10 text-rose-400 ring-1 ring-inset ring-rose-500/20 mb-4">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+          Sécurité
+        </span>
+        <h2 class="text-3xl font-bold text-white sm:text-4xl">Sécurité maximale</h2>
+        <p class="mt-3 text-slate-400 max-w-xl">Authentification multi-facteurs, OAuth2, sessions sécurisées et magic links.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-rose-500/30 p-6">
+          <div class="feat-icon bg-rose-500/10">
+            <svg class="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">2FA / TOTP</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Protégez votre compte avec l'authentification à deux facteurs via une app TOTP (Google Authenticator, etc.).</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-rose-500/30 p-6">
+          <div class="feat-icon bg-rose-500/10">
+            <svg class="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">OAuth2 multi-providers</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Connectez-vous avec GitHub, Discord ou Google en un clic. Liez plusieurs comptes à votre profil.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-rose-500/30 p-6">
+          <div class="feat-icon bg-rose-500/10">
+            <svg class="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Magic Links</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Connexion sans mot de passe via un lien magique envoyé par email, avec expiration automatique.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-rose-500/30 p-6">
+          <div class="feat-icon bg-rose-500/10">
+            <svg class="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Sessions sécurisées</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Sessions chiffrées avec gestion complète : liste, suppression individuelle et nettoyage automatique.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-rose-500/30 p-6">
+          <div class="feat-icon bg-rose-500/10">
+            <svg class="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0 1 19.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 0 0 4.5 10.5a48.667 48.667 0 0 0-1.46 7.838M11.377 2.39A48.452 48.452 0 0 1 15.5 2.5c.728.028 1.452.07 2.173.125m-9.2 12.378a3 3 0 1 0 3.758-4.678M11.377 2.39a3 3 0 0 0-2.925 5.024"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Hashage bcrypt</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Mots de passe hashés avec bcrypt (cost factor 10) pour une sécurité maximale.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===================== SECTION 8 : Versioning & Export ===================== -->
+    <section class="mt-28 feat-reveal">
+      <div class="flex flex-col items-center text-center mb-12">
+        <span class="section-badge bg-violet-500/10 text-violet-400 ring-1 ring-inset ring-violet-500/20 mb-4">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
+          Versioning & Export
+        </span>
+        <h2 class="text-3xl font-bold text-white sm:text-4xl">Ne perdez jamais rien</h2>
+        <p class="mt-3 text-slate-400 max-w-xl">Historique complet de vos modifications avec restauration et export de vos pages.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-violet-500/30 p-6">
+          <div class="feat-icon bg-violet-500/10">
+            <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Versioning automatique</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Chaque modification significative crée un snapshot complet. Restauration en un clic vers n'importe quel état.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-violet-500/30 p-6">
+          <div class="feat-icon bg-violet-500/10">
+            <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Backup manuel</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Créez un snapshot à la demande avant une modification importante.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-violet-500/30 p-6">
+          <div class="feat-icon bg-violet-500/10">
+            <svg class="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Export ZIP</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Exportez votre page en HTML, CSS, JS, images et configuration JSON dans un package complet.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===================== SECTION 9 : Partenariats ===================== -->
+    <section class="mt-28 feat-reveal">
+      <div class="flex flex-col items-center text-center mb-12">
+        <span class="section-badge bg-orange-500/10 text-orange-400 ring-1 ring-inset ring-orange-500/20 mb-4">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+          Partenariats & Affiliation
+        </span>
+        <h2 class="text-3xl font-bold text-white sm:text-4xl">Gagnez en collaborant</h2>
+        <p class="mt-3 text-slate-400 max-w-xl">Système de quêtes partenaires, gems et liens d'affiliation avec statistiques.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-orange-500/30 p-6">
+          <div class="feat-icon bg-orange-500/10">
+            <svg class="w-5 h-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Quêtes partenaires</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Complétez des missions (visiter un lien, rejoindre Discord, installer une app) et gagnez des Plinkk Gems.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-orange-500/30 p-6">
+          <div class="feat-icon bg-orange-500/10">
+            <svg class="w-5 h-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Streak journalier</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Maintenez votre streak quotidien pour maximiser vos récompenses.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-orange-500/30 p-6">
+          <div class="feat-icon bg-orange-500/10">
+            <svg class="w-5 h-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Liens d'affiliation</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Créez des liens d'affiliation avec slug custom et suivez vos clics quotidiens.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===================== SECTION 10 : Annonces & Communication ===================== -->
+    <section class="mt-28 feat-reveal">
+      <div class="flex flex-col items-center text-center mb-12">
+        <span class="section-badge bg-teal-500/10 text-teal-400 ring-1 ring-inset ring-teal-500/20 mb-4">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46"/></svg>
+          Annonces & Communication
+        </span>
+        <h2 class="text-3xl font-bold text-white sm:text-4xl">Restez connecté</h2>
+        <p class="mt-3 text-slate-400 max-w-xl">Système d'annonces riche et emails transactionnels personnalisés.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-teal-500/30 p-6">
+          <div class="feat-icon bg-teal-500/10">
+            <svg class="w-5 h-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Annonces système</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Bannières, modales ou toasts avec niveaux (info, warning, error, success), ciblage par rôle et dates de début/fin.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-teal-500/30 p-6">
+          <div class="feat-icon bg-teal-500/10">
+            <svg class="w-5 h-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Emails transactionnels</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Bienvenue, reset de mot de passe, changement d'email et campagnes ciblées via Resend.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===================== SECTION 11 : Premium & Monétisation ===================== -->
+    <section class="mt-28 feat-reveal">
+      <div class="flex flex-col items-center text-center mb-12">
+        <span class="section-badge bg-yellow-500/10 text-yellow-400 ring-1 ring-inset ring-yellow-500/20 mb-4">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+          Premium
+        </span>
+        <h2 class="text-3xl font-bold text-white sm:text-4xl">Débloquez tout le potentiel</h2>
+        <p class="mt-3 text-slate-400 max-w-xl">Plans flexibles avec paiement mensuel, annuel ou lifetime.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-yellow-500/30 p-6">
+          <div class="feat-icon bg-yellow-500/10">
+            <svg class="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Stripe intégré</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Paiement sécurisé via Stripe avec synchronisation automatique des abonnements et prorata.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-yellow-500/30 p-6">
+          <div class="feat-icon bg-yellow-500/10">
+            <svg class="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25a2.25 2.25 0 0 1-2.25-2.25v-2.25Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">3 formules</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Mensuel (4,99€), annuel (49,90€) ou lifetime (75€). Un plan pour chaque besoin.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-yellow-500/30 p-6">
+          <div class="feat-icon bg-yellow-500/10">
+            <svg class="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Extensions à la carte</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Ajoutez des pages (+1 pour 1€/mois) ou des redirections (+5 pour 1€/mois) selon vos besoins.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===================== SECTION 12 : Open Source ===================== -->
+    <section class="mt-28 feat-reveal">
+      <div class="flex flex-col items-center text-center mb-12">
+        <span class="section-badge bg-slate-500/10 text-slate-400 ring-1 ring-inset ring-slate-500/20 mb-4">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"/></svg>
+          Open Source & Technique
+        </span>
+        <h2 class="text-3xl font-bold text-white sm:text-4xl">Transparent et performant</h2>
+        <p class="mt-3 text-slate-400 max-w-xl">Code open source, architecture moderne et performances au rendez-vous.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-slate-500/30 p-6">
+          <div class="feat-icon bg-slate-500/10">
+            <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Backend open source</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Code source disponible sur GitHub sous Plinkk Communautary Licence. Consultable, forkable, contribuable.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-slate-500/30 p-6">
+          <div class="feat-icon bg-slate-500/10">
+            <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Fastify + Prisma</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Architecture Node.js ultra-rapide avec Fastify et Prisma ORM pour des performances optimales.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-slate-500/30 p-6">
+          <div class="feat-icon bg-slate-500/10">
+            <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">PostgreSQL</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Base de données robuste et fiable avec migrations automatiques et schéma versionné.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-slate-500/30 p-6">
+          <div class="feat-icon bg-slate-500/10">
+            <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 0 1-3-3m3 3a3 3 0 1 0 0 6h13.5a3 3 0 1 0 0-6m-16.5-3a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3m-19.5 0a4.5 4.5 0 0 1 .9-2.7L5.737 5.1a3.375 3.375 0 0 1 2.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 0 1 .9 2.7m0 0a3 3 0 0 1-3 3m0 3h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Zm-3 6h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Z"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">RBAC complet</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">70+ permissions réparties en 12 catégories avec système de rôles hiérarchique complet.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-slate-500/30 p-6">
+          <div class="feat-icon bg-slate-500/10">
+            <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Mode maintenance</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Maintenance globale ou par page avec planification, IPs et rôles autorisés, messages personnalisés.</p>
+        </div>
+        <div class="feat-card rounded-2xl bg-slate-900/50 backdrop-blur-sm border border-white/5 hover:border-slate-500/30 p-6">
+          <div class="feat-icon bg-slate-500/10">
+            <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>
+          </div>
+          <h3 class="mt-4 text-sm font-semibold text-white">Logs & Audit</h3>
+          <p class="mt-1.5 text-xs text-slate-400 leading-relaxed">Journalisation complète des actions admin et utilisateur pour un audit détaillé.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===================== CTA Final ===================== -->
+    <section class="mt-32 mb-8 feat-reveal">
+      <div class="relative rounded-3xl bg-gradient-to-br from-violet-600/20 via-slate-900/80 to-fuchsia-600/20 border border-white/10 p-12 sm:p-16 text-center overflow-hidden">
+        <div class="absolute inset-0 -z-10 overflow-hidden">
+          <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-violet-500/10 blur-3xl"></div>
+          <div class="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-fuchsia-500/10 blur-3xl"></div>
+        </div>
+        <h2 class="text-3xl font-bold text-white sm:text-4xl">Prêt à créer votre page ?</h2>
+        <p class="mt-4 text-lg text-slate-300 max-w-xl mx-auto">Rejoignez des milliers d'utilisateurs et créez votre page de liens en quelques minutes. Gratuit, sans engagement.</p>
+        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="<%= dashboardUrl %>/login#signup" class="rounded-xl bg-violet-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 hover:bg-violet-500 transition-all hover:scale-105 hover:shadow-violet-500/40">
+            Créer mon compte gratuitement
+          </a>
+          <a href="/pricing" class="rounded-xl bg-white/5 px-8 py-3.5 text-sm font-semibold text-slate-300 ring-1 ring-inset ring-white/10 hover:bg-white/10 hover:text-white transition-all">
+            Comparer les plans
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+(function() {
+  var obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.06, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.feat-reveal').forEach(function(el) { obs.observe(el); });
+})();
+</script>
+
+<%- include('partials/footer') %>

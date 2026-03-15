@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--ease-out-quad: cubic-bezier(.22, 1, .36, 1);
+	--brand-1: #4338CA;
+	--brand-2: #A21CAF;
+	--brand-3: #E11D48;
+	--brand-sky-1: #0EA5E9;
+	--brand-sky-2: #22D3EE;
+	--brand-emerald: #34D399;
+	--brand-violet: #8B5CF6;
+	--brand-fuchsia: #D946EF;
+	--brand-amber: #F59E0B;
+	--brand-rose: #F43F5E;
+	--surface-950: #0B1020;
+	--surface-900: #0b1324;
+	--surface-850: #111827;
+	--surface-800: #1e293b;
+	--stroke-800: #1f2937;
+	--stroke-700: #334155;
+	--accent-cyan: #06B6D4;
+	--accent-purple: #A855F7;
+	--accent-pink: #EC4899;
+	--accent-orange: #F97316;
+}
+
+body {
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.brand-gradient {
+	@apply bg-clip-text text-transparent;
+	background-image: linear-gradient(135deg, var(--brand-1), var(--brand-2), var(--brand-3));
+}
+
+.brand-gradient-sky {
+	@apply bg-clip-text text-transparent;
+	background-image: linear-gradient(120deg, var(--brand-sky-1), var(--brand-sky-2), var(--brand-emerald));
+}
+
+.brand-gradient-vibrant {
+	@apply bg-clip-text text-transparent;
+	background-image: linear-gradient(135deg, #F59E0B, #F43F5E, #D946EF, #8B5CF6, #0EA5E9);
+	background-size: 200% 200%;
+	animation: gradient-shift 8s ease infinite;
+}
+
+@keyframes gradient-shift {
+	0%, 100% { background-position: 0% 50%; }
+	50% { background-position: 100% 50%; }
+}
+
+.card-surface {
+	@apply rounded-xl border border-[rgba(139,92,246,0.2)] bg-gradient-to-br from-[rgba(11,19,36,0.95)] to-[rgba(15,23,42,0.9)] backdrop-blur-xl transition-all duration-300 ease-[var(--ease-out-quad)];
+}
+
+.card-surface:hover {
+	@apply -translate-y-0.5 border-[rgba(139,92,246,0.4)] shadow-[0_8px_32px_rgba(139,92,246,0.15)];
+}

@@ -1,7 +1,9 @@
-// Create a dedicated style element for animations
-const styleEl = document.createElement('style');
-document.head.appendChild(styleEl);
-const styleSheet = styleEl.sheet;
+let styleSheet = null;
+if (typeof document !== 'undefined') {
+    const styleEl = document.createElement('style');
+    document.head.appendChild(styleEl);
+    styleSheet = styleEl.sheet;
+}
 
 export { styleSheet };
 export const animations = [
@@ -84,25 +86,26 @@ export const animationBackground = [
         keyframes: "moveBackground linear infinite"
     }
 ];
-styleSheet.insertRule(`
+if (styleSheet) {
+    styleSheet.insertRule(`
 @keyframes fade {
     from { opacity: 0; }
     to { opacity: 1; }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes slide {
     from { transform: translateX(-100%); }
     to { transform: translateX(0); }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes zoom {
     from { transform: scale(0); }
     to { transform: scale(1); }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes bounce {
     0%, 20%, 50%, 80%, 100% {
         transform: translateY(0);
@@ -115,7 +118,7 @@ styleSheet.insertRule(`
     }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes shake {
     0%, 100% {
         transform: translateX(0);
@@ -128,7 +131,7 @@ styleSheet.insertRule(`
     }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes flip {
     from {
         transform: rotateY(0);
@@ -138,13 +141,13 @@ styleSheet.insertRule(`
     }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes rotate {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes pulse {
     0% {
         transform: scale(1);
@@ -157,7 +160,7 @@ styleSheet.insertRule(`
     }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes swing {
     20% {
         transform: rotate(15deg);
@@ -176,7 +179,7 @@ styleSheet.insertRule(`
     }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes wobble {
     0% {
         transform: translateX(0%);
@@ -201,7 +204,7 @@ styleSheet.insertRule(`
     }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes moveBackground {
     0% {
         background-position: 0% 50%;
@@ -214,7 +217,7 @@ styleSheet.insertRule(`
     }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes flash {
     0%, 50%, 100% {
         opacity: 1;
@@ -224,7 +227,7 @@ styleSheet.insertRule(`
     }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes rubberBand {
     0% {
         transform: scale(1);
@@ -249,7 +252,7 @@ styleSheet.insertRule(`
     }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes tada {
     0% {
         transform: scale(1);
@@ -268,7 +271,7 @@ styleSheet.insertRule(`
     }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes jello {
     0% {
         transform: none;
@@ -302,7 +305,7 @@ styleSheet.insertRule(`
     }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes heartBeat {
     0% {
         transform: scale(1);
@@ -321,7 +324,7 @@ styleSheet.insertRule(`
     }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes lightSpeedIn {
     0% {
         transform: translateX(100%) skewX(-30deg);
@@ -341,7 +344,7 @@ styleSheet.insertRule(`
     }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes rollIn {
     0% {
         opacity: 0;
@@ -353,7 +356,7 @@ styleSheet.insertRule(`
     }
 }
 `, styleSheet.cssRules.length);
-styleSheet.insertRule(`
+    styleSheet.insertRule(`
 @keyframes hinge {
     0% {
         transform: rotate(0);
@@ -376,3 +379,4 @@ styleSheet.insertRule(`
     }
 }
 `, styleSheet.cssRules.length);
+}

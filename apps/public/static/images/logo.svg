@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256" role="img" aria-label="Plinkk logo">
+  <defs>
+    <linearGradient id="brand" x1="8" y1="56" x2="56" y2="8" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="0.5" stop-color="#d946ef"/>
+      <stop offset="1" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <!-- Background disc for contrast -->
+  <circle cx="32" cy="32" r="28" fill="#0b1220"/>
+  <!-- Brand ring -->
+  <circle cx="32" cy="32" r="26" fill="none" stroke="url(#brand)" stroke-width="3"/>
+  <!-- Monogram P -->
+  <path d="M22 20h12c6 0 11 5 11 11s-5 11-11 11H26v12" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Little stars -->
+    <g id="stars">
+      <!-- tiny dots -->
+      <circle cx="18" cy="16" r="0.9" fill="#ffffff" opacity="0.95"/>
+      <circle cx="50" cy="24" r="0.8" fill="#ffffff" opacity="0.9"/>
+      <circle cx="14" cy="44" r="0.8" fill="#ffffff" opacity="0.85"/>
+      <!-- small sparkles (cross lines) -->
+      <g opacity="0.9" stroke="#ffffff" stroke-linecap="round" stroke-width="1">
+        <line x1="46.5" y1="12.5" x2="49.5" y2="12.5"/>
+        <line x1="48" y1="11" x2="48" y2="14"/>
+      </g>
+      <g opacity="0.85" stroke="#ffffff" stroke-linecap="round" stroke-width="0.9">
+        <line x1="20" y1="50.5" x2="22.2" y2="50.5"/>
+        <line x1="21.1" y1="49.4" x2="21.1" y2="51.6"/>
+      </g>
+    </g>
+</svg>

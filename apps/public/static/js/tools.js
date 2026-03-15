@@ -1,0 +1,1693 @@
+import { setSafeText, isSafeUrl, isSafeColor, disableDrag, disableContextMenuOnImage } from './security.js';
+import { btnIconThemeConfig } from '../config/btnIconThemeConfig.js';
+// themes are provided at runtime by src/public/js/init.js via the exported
+// `themes` array which is populated from the server-side DB. Do not import
+// the old static config file.
+export function createProfileContainer(profileData) {
+    const profileContainer = document.createElement("div");
+    profileContainer.className = "profile-container";
+    const profileLink = document.createElement("a");
+    if (isSafeUrl(profileData.profileLink)) {
+        profileLink.href = profileData.profileLink;
+        profileLink.target = "_blank";
+        profileLink.rel = "noopener noreferrer";
+    }
+    else {
+        profileLink.href = "#";
+        profileLink.title = "Lien non valide";
+    }
+    profileLink.tabIndex = 0;
+    const profilePicWrapper = document.createElement("div");
+    profilePicWrapper.className = "profile-pic-wrapper animate-pulse bg-white/10";
+
+    // --- Frame Logic (Cosmetics) ---
+    const cosmetics = profileData.cosmetics || {};
+    const frame = cosmetics.frame;
+    if (frame && frame !== 'none') {
+        const frameDiv = document.createElement("div");
+        frameDiv.className = "avatar-frame";
+        frameDiv.style.position = "absolute";
+        frameDiv.style.inset = "-4px"; // Slightly larger than avatar
+        frameDiv.style.borderRadius = "50%";
+        frameDiv.style.pointerEvents = "none";
+        frameDiv.style.zIndex = "10";
+
+        if (frame === 'neon') {
+            frameDiv.style.boxShadow = "0 0 0 2px rgba(139,92,246,0.8), 0 0 15px rgba(139,92,246,0.6), inset 0 0 10px rgba(139,92,246,0.4)";
+        } else if (frame === 'glow') {
+            frameDiv.style.boxShadow = "0 0 0 2px rgba(16,185,129,0.8), 0 0 15px rgba(16,185,129,0.6)";
+        } else if (frame === 'gold') {
+            frameDiv.style.boxShadow = "0 0 0 2px rgba(234,179,8,0.8), 0 0 15px rgba(234,179,8,0.4)";
+        }
+        profilePicWrapper.style.position = "relative";
+        profilePicWrapper.appendChild(frameDiv);
+    }
+    // -------------------------------
+
+    const profilePic = document.createElement("img");
+    if (isSafeUrl(profileData.profileImage)) {
+        profilePic.src = profileData.profileImage;
+    }
+    else {
+        profilePic.src = "https://cdn.plinkk.fr/logo.svg";
+    }
+    // Try a single fallback to the username logo, then stop retrying to avoid infinite loops
+    profilePic.onerror = function () {
+        try {
+            if (!this._triedFallback) {
+                this._triedFallback = true;
+                // Attempt a single fallback
+                this.src = "https://cdn.plinkk.fr/logo.svg";
+                return;
+            }
+        }
+        catch (e) {
+            // ignore
+        }
+        // If we reach here, the fallback failed too: remove the image and show an initial
+        try {
+            this.onerror = null;
+            this.style.display = 'none';
+            profilePicWrapper.classList.remove('animate-pulse', 'bg-white/10');
+            const span = document.createElement('span');
+            span.className = 'profile-pic-initial';
+            span.textContent = (profileData.userName || '').trim().charAt(0).toUpperCase() || '';
+            if (profilePicWrapper && profilePicWrapper.contains(this)) {
+                profilePicWrapper.removeChild(this);
+                profilePicWrapper.appendChild(span);
+            }
+        }
+        catch (e) {
+            // final fallback: hide the element
+            try { this.style.display = 'none'; profilePicWrapper.classList.remove('animate-pulse', 'bg-white/10'); } catch (e) { }
+        }
+    };
+    profilePic.alt = "Profile Picture";
+    profilePic.className = "profile-pic opacity-0 transition-opacity duration-300";
+    profilePic.onload = function () {
+        this.classList.remove('opacity-0');
+        profilePicWrapper.classList.remove('animate-pulse', 'bg-white/10');
+    };
+    profilePic.loading = "lazy";
+    disableDrag(profilePic);
+    disableContextMenuOnImage(profilePic);
+    profilePicWrapper.appendChild(profilePic);
+    const profileLinkDiv = document.createElement("div");
+    profileLinkDiv.className = "profile-link";
+    const profileLinkSpan = document.createElement("span");
+
+    // Icon wrapper for skeleton
+    const profileIconWrapper = document.createElement("span");
+    profileIconWrapper.className = "profile-icon-wrapper animate-pulse bg-white/10";
+    profileIconWrapper.style.display = "inline-flex";
+    profileIconWrapper.style.alignItems = "center";
+    profileIconWrapper.style.justifyContent = "center";
+    profileIconWrapper.style.borderRadius = "50%";
+    profileIconWrapper.style.width = "100px";
+    profileIconWrapper.style.height = "100px";
+    profileIconWrapper.style.marginRight = "6px";
+    profileIconWrapper.style.overflow = "hidden";
+
+    const profileIcon = document.createElement("img");
+    if (isSafeUrl(profileData.profileIcon)) {
+        profileIcon.src = profileData.profileIcon;
+    }
+    else {
+        profileIcon.src = "https://cdn.plinkk.fr/default_profile.png";
+    }
+    // Single-attempt fallback for the icon, then stop retrying
+    profileIcon.onerror = function () {
+        profileIconWrapper.classList.remove('animate-pulse', 'bg-white/10');
+        try {
+            if (!this._triedFallback) {
+                this._triedFallback = true;
+                this.src = "https://cdn.plinkk.fr/default_profile.png";
+                return;
+            }
+        }
+        catch (e) { }
+        // If fallback failed too, hide the icon
+        try {
+            this.onerror = null;
+            this.style.display = 'none';
+            profileIconWrapper.style.display = 'none';
+        }
+        catch (e) { }
+    };
+    profileIcon.onload = function () {
+        this.classList.remove('opacity-0');
+        profileIconWrapper.classList.remove('animate-pulse', 'bg-white/10');
+    };
+    profileIcon.alt = "globe";
+    profileIcon.className = "profile-icon opacity-0 transition-opacity duration-300";
+    profileIcon.style.width = "100%";
+    profileIcon.style.height = "100%";
+    profileIcon.style.objectFit = "contain";
+    profileIcon.loading = "lazy";
+    disableDrag(profileIcon);
+    disableContextMenuOnImage(profileIcon);
+    const profileSiteText = document.createElement("p");
+    setSafeText(profileSiteText, profileData.profileSiteText);
+    profileIconWrapper.appendChild(profileIcon);
+    profileLinkSpan.appendChild(profileIconWrapper);
+    profileLinkSpan.appendChild(profileSiteText);
+    profileLinkDiv.appendChild(profileLinkSpan);
+    profileLink.appendChild(profilePicWrapper);
+    profileLink.appendChild(profileLinkDiv);
+    profileContainer.appendChild(profileLink);
+    // "display:none;" si le texte est vide
+    if (profileData.profileSiteText.trim() === "") {
+        profileSiteText.style.display = "none";
+    }
+    if (profileData.profileImage.trim() === "") {
+        profilePic.style.display = "none";
+    }
+    if (profileData.profileIcon.trim() === "") {
+        profileIcon.style.display = "none";
+    }
+    if (profileData.profileLink.trim() === "") {
+        profileLink.style.display = "none";
+    }
+    if (profileData.profileHoverColor.trim() === "" || !isSafeColor(profileData.profileHoverColor)) {
+        profileContainer.style.display = "none";
+    }
+    return profileContainer;
+}
+export function createUserName(profileData) {
+    const userName = document.createElement("h1");
+    userName.className = "profile-name";
+
+    const nameSpan = document.createElement("span");
+    setSafeText(nameSpan, profileData.userName);
+    userName.appendChild(nameSpan);
+
+    // --- Badges Logic ---
+    if (profileData.isVerified && profileData.showVerifiedBadge) {
+        const verifiedBadge = document.createElement("span");
+        verifiedBadge.className = "verified-badge";
+        verifiedBadge.title = "Vérifié";
+        verifiedBadge.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.75 12.75L10.25 15.25L16.25 8.75" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        userName.appendChild(verifiedBadge);
+    }
+
+    if (profileData.isPartner && profileData.showPartnerBadge) {
+        const partnerBadge = document.createElement("span");
+        partnerBadge.className = "partner-badge";
+        partnerBadge.title = "Partenaire";
+        partnerBadge.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        userName.appendChild(partnerBadge);
+    }
+
+    if (!profileData.userName.trim()) {
+        userName.style.display = "none";
+    }
+    return userName;
+}
+export function createEmailAndDescription(profileData) {
+    const container = document.createElement("div");
+    container.className = "email-description-container";
+    const emailDiv = document.createElement("div");
+    emailDiv.className = "email";
+    emailDiv.style.position = "relative"; // Pour le positionnement du modal
+    emailDiv.style.padding = "0";
+    const emailLink = document.createElement("a");
+    emailLink.href = `mailto:${profileData.email}`;
+    setSafeText(emailLink, profileData.email);
+    emailLink.style.display = "block"; // pour que le padding s'applique sur toute la largeur
+    emailLink.style.padding = "12px"; // padding interne
+    emailLink.style.textAlign = "center"; // centrer le texte
+    emailDiv.appendChild(emailLink);
+    const copyBtn = document.createElement("button");
+    copyBtn.type = "button";
+    copyBtn.title = "Copier l'email";
+    copyBtn.className = "copy-btn";
+    copyBtn.innerHTML = `
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+    `;
+    emailDiv.appendChild(copyBtn);
+
+    // --- Système de spam & easter egg ---
+    let spamCount = 0;
+    let lastClick = 0;
+    let resetTimeout = null;
+    let iconTimeout = null;
+    let rpLaunched = false;
+    copyBtn.addEventListener("click", () => {
+        const now = Date.now();
+        if (now - lastClick < 400) {
+            spamCount++;
+        }
+        else {
+            spamCount = 1;
+            rpLaunched = false; // reset RP si on arrête de spam
+            // reset visuel si besoin
+            copyBtn.classList.remove("btn-crack", "btn-broken", "btn-explode");
+            copyBtn.style.cssText = "";
+        }
+        lastClick = now;
+        // Reset du compteur après 5s sans clic
+        if (resetTimeout)
+            clearTimeout(resetTimeout);
+        resetTimeout = setTimeout(() => {
+            spamCount = 0;
+            rpLaunched = false;
+            copyBtn.classList.remove("btn-crack", "btn-broken", "btn-explode");
+            copyBtn.style.cssText = "";
+        }, 5000);
+        // Vibrations
+        if (spamCount >= 3 && spamCount < 6) {
+            copyBtn.classList.add("vibrate_btn");
+            setTimeout(() => copyBtn.classList.remove("vibrate_btn"), 200);
+        }
+        else if (spamCount >= 6 && spamCount < 10) {
+            emailDiv.classList.add("vibrate_parent");
+            setTimeout(() => emailDiv.classList.remove("vibrate_parent"), 200);
+        }
+        else if (spamCount >= 10 && spamCount < 100) {
+            document.body.classList.add("vibrate_parent");
+            setTimeout(() => document.body.classList.remove("vibrate_parent"), 200);
+        }
+        // Copie dans le presse-papier
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(profileData.email)
+                .then(() => {
+                    copyBtn.innerHTML = `
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    `;
+                    // Timer indépendant pour l'icône
+                    if (iconTimeout)
+                        clearTimeout(iconTimeout);
+                    iconTimeout = setTimeout(() => {
+                        copyBtn.innerHTML = `
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        `;
+                    }, 2000);
+                })
+                .catch(() => {
+                    showCopyModal("Erreur lors de la copie", copyBtn);
+                });
+        }
+        else {
+            // Fallback : sélection manuelle
+            const tempInput = document.createElement("input");
+            tempInput.value = profileData.email;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            showCopyModal("Copié (fallback)", copyBtn);
+        }
+        // RP spécial à partir de 100
+        if (spamCount >= 100 && !rpLaunched) {
+            rpLaunched = true;
+            launchCopyRP(copyBtn, emailDiv, () => {
+                // callback à la fin du RP (optionnel)
+            });
+            return;
+        }
+        // Effets progressifs selon le spamCount
+        if (spamCount >= 200 && spamCount < 500) {
+            copyBtn.classList.add("btn-crack");
+        }
+        else if (spamCount >= 500 && spamCount < 1000) {
+            copyBtn.classList.remove("btn-crack");
+            copyBtn.classList.add("btn-broken");
+        }
+        else if (spamCount >= 1000) {
+            copyBtn.classList.remove("btn-broken");
+            copyBtn.classList.add("btn-explode");
+            copyBtn.innerHTML = "💥";
+            setTimeout(() => {
+                copyBtn.style.opacity = "0";
+                showCopyModal("Le bouton a explosé !", copyBtn);
+            }, 800);
+            return;
+        }
+        // Messages d'easter egg classiques
+        let msg = "";
+        if (spamCount === 1)
+            msg = "Copie !";
+        else if (spamCount === 2)
+            msg = "Super Copie !";
+        else if (spamCount === 3)
+            msg = "Hyper Copie !";
+        else if (spamCount === 4)
+            msg = "Ultra Copie !";
+        else if (spamCount === 5)
+            msg = "Mega Copie !";
+        else if (spamCount === 6)
+            msg = "Stop spam 😅";
+        else if (spamCount > 6 && spamCount < 10)
+            msg = "Trop de copies !";
+        else if (spamCount >= 10 && spamCount < 20)
+            msg = "Arrête de spammer !";
+        else if (spamCount >= 20 && spamCount < 30)
+            msg = "Tu es vraiment motivé à copier !";
+        else if (spamCount >= 30 && spamCount < 40)
+            msg = "Tu ne t'arrêtes jamais ?";
+        else if (spamCount >= 40 && spamCount < 50)
+            msg = "Toujours là ?";
+        else if (spamCount >= 50 && spamCount < 60)
+            msg = "C'est infini ?";
+        else if (spamCount >= 60 && spamCount < 70)
+            msg = "Tu veux casser le bouton ?";
+        else if (spamCount >= 70 && spamCount < 80)
+            msg = "Courageux !";
+        else if (spamCount >= 80 && spamCount < 90)
+            msg = "Toujours pas fatigué ?";
+        else if (spamCount >= 90 && spamCount < 100)
+            msg = "100 bientôt !";
+        else if (spamCount >= 100 && spamCount < 101)
+            msg = "Tu es un vrai spammeur !";
+        if (msg)
+            showCopyModal(msg, copyBtn);
+    });
+    // RP avec histoire et effets
+    function launchCopyRP(copyBtn, emailDiv, onEnd) {
+        const rpMessages = [
+            "💥 Le bouton commence à chauffer...",
+            "😱 Tu sens cette odeur de plastique brûlé ?",
+            "⚡ Des fissures apparaissent sur le bouton !",
+            "🛑 Le bouton crie : « Arrête de me copier ! »",
+            "🔥 Le bouton se fissure de plus en plus...",
+            "🤖 Le bouton : « Je vais craquer... »",
+            "🌈 Explosion de couleurs !",
+            "🎉 Le bouton se déforme et tremble...",
+            "👏 Tu es un vrai spammeur !"
+        ];
+        let i = 0;
+        let rpInterval = setInterval(() => {
+            showCopyModal(rpMessages[i], copyBtn);
+            // Effets visuels progressifs
+            if (i === 2) {
+                copyBtn.classList.add("btn-crack");
+            }
+            if (i === 4) {
+                copyBtn.classList.add("vibrate_btn");
+            }
+            if (i === 6) {
+                copyBtn.style.background = "linear-gradient(90deg, #ff00cc, #3333ff)";
+                copyBtn.style.color = "#fff";
+            }
+            if (i === 7) {
+                copyBtn.classList.add("btn-broken");
+            }
+            i++;
+            if (i >= rpMessages.length) {
+                clearInterval(rpInterval);
+                if (onEnd)
+                    onEnd();
+            }
+        }, 1200);
+    }
+    // Description
+    const descriptionDiv = document.createElement("div");
+    descriptionDiv.className = "profile-description";
+    const descriptionText = document.createElement("p");
+    // Escape HTML then convert newlines to <br> for line breaks
+    const escapedDescription = profileData.description
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+        .replace(/\n/g, '<br>');
+    descriptionText.innerHTML = escapedDescription;
+    descriptionDiv.appendChild(descriptionText);
+    container.appendChild(emailDiv);
+    container.appendChild(descriptionDiv);
+    // Affichage conditionnel
+    if (!profileData.description.trim()) {
+        descriptionDiv.style.display = "none";
+        container.style.background = "none";
+    }
+    if (!profileData.email.trim())
+        emailDiv.style.display = "none";
+    return container;
+}
+// Modal localisé au bouton, au-dessus ou en dessous selon la place
+export function showCopyModal(message, btn) {
+    let modal = btn.parentNode.querySelector(".copy-modal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.className = "copy-modal";
+        btn.parentNode.appendChild(modal);
+    }
+    modal.textContent = message;
+    modal.classList.add("show");
+    modal.style.position = "absolute";
+    modal.style.left = "50%";
+    modal.style.transform = "translate(-50%, -100%)";
+    modal.style.background = "rgba(40,40,40,0.95)";
+    modal.style.color = "#fff";
+    modal.style.padding = "8px 18px";
+    modal.style.borderRadius = "8px";
+    modal.style.fontSize = "1em";
+    modal.style.fontWeight = "bold";
+    modal.style.boxShadow = "0 4px 24px rgba(0,0,0,0.25)";
+    modal.style.pointerEvents = "none";
+    modal.style.zIndex = "100";
+    modal.style.transition = "opacity 0.3s cubic-bezier(0.4,0,0.2,1)";
+    // Calcul de la place à l'écran
+    const btnRect = btn.getBoundingClientRect();
+    const modalHeight = 60;
+    if (btnRect.top - modalHeight < 10) {
+        modal.style.top = "calc(100% + 10px)";
+        modal.style.transform = "translate(-50%, 0)";
+    }
+    else {
+        modal.style.top = "-10px";
+        modal.style.transform = "translate(-50%, -100%)";
+    }
+    modal.style.opacity = "1";
+    clearTimeout(modal._timeout);
+    modal._timeout = setTimeout(() => {
+        modal.classList.remove("show");
+        modal.style.opacity = "0";
+    }, 1500);
+}
+export function createLinkBoxes(profileData) {
+    const maxLinkNumber = 20;
+
+    function isLightTheme(color) {
+        if (!color) return false;
+        let r, g, b;
+        if (color.startsWith('#')) {
+            let hex = color.replace('#', '');
+            if (hex.length === 3 || hex.length === 4) hex = hex.substring(0, 3).split('').map(c => c + c).join('');
+            if (hex.length >= 6) {
+                r = parseInt(hex.substring(0, 2), 16) / 255;
+                g = parseInt(hex.substring(2, 4), 16) / 255;
+                b = parseInt(hex.substring(4, 6), 16) / 255;
+            } else {
+                return false;
+            }
+        } else if (color.startsWith('rgb')) {
+            const match = color.match(/\d+/g);
+            if (match && match.length >= 3) {
+                r = parseInt(match[0]) / 255;
+                g = parseInt(match[1]) / 255;
+                b = parseInt(match[2]) / 255;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+        const a = [r, g, b].map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+        const luminance = 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+        return luminance > 0.5;
+    }
+    const bgType = profileData.backgroundType || 'color';
+    let actualBgColor = profileData.backgroundColor || '#0c0c0c';
+    if (bgType === 'color' && Array.isArray(profileData.background) && profileData.background.length > 0) {
+        actualBgColor = profileData.background[0].color;
+    } else if (bgType !== 'color' && Array.isArray(profileData.background) && profileData.background.length > 0) {
+        actualBgColor = profileData.background[0].color;
+    }
+    const isLight = isLightTheme(actualBgColor);
+    console.log('[DEBUG-PLINKK-TOOLS] profileData.background:', profileData.background);
+    console.log('[DEBUG-PLINKK-TOOLS] actualBgColor tools.js:', actualBgColor);
+    console.log('[DEBUG-PLINKK-TOOLS] isLight tools.js:', isLight);
+
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (!profileData.links || !profileData.links.length) {
+        console.warn("No links found in profile data.");
+        return [];
+    }
+
+    // Helper to create a single link box
+    const createBox = (link) => {
+        // --- 0. Schedule & Expiration Check (Client-side) ---
+        const now = new Date();
+        if (link.scheduledAt && new Date(link.scheduledAt) > now) {
+            return document.createComment(`Link ${link.id} hidden due to schedule`);
+        }
+        if (link.expiresAt && new Date(link.expiresAt) < now) {
+            return document.createComment(`Link ${link.id} hidden due to expiration`);
+        }
+
+        // --- 1. Ephemeral Link Check (Client-side) ---
+        if (link.clickLimit > 0 && typeof link.clicks === 'number' && link.clicks >= link.clickLimit) {
+            return document.createComment(`Link ${link.id} hidden due to click limit`);
+        }
+
+        if (link.type === 'EMBED' && link.embedData) {
+            const container = document.createElement("div");
+            container.className = "discord-box embed-box";
+            container.style.padding = "0";
+            container.style.overflow = "hidden";
+            container.style.display = "flex";
+            container.style.flexDirection = "column";
+            container.style.borderRadius = "12px";
+            container.style.border = "1px solid rgba(255,255,255,0.1)";
+
+            if (link.embedData.url) {
+                let embedUrl = link.embedData.url;
+                let embedType = 'generic';
+
+                // --- SMART EMBED LOGIC ---
+                try {
+                    const urlObj = new URL(embedUrl);
+                    const host = urlObj.hostname.toLowerCase();
+
+                    // 1. YouTube
+                    if (host.includes('youtube.com') || host.includes('youtu.be')) {
+                        embedType = 'youtube';
+                        let videoId = null;
+                        if (host.includes('youtu.be')) {
+                            videoId = urlObj.pathname.slice(1);
+                        } else if (urlObj.pathname.includes('/watch')) {
+                            videoId = urlObj.searchParams.get('v');
+                        } else if (urlObj.pathname.includes('/embed/')) {
+                            videoId = urlObj.pathname.split('/embed/')[1];
+                        } else if (urlObj.pathname.includes('/shorts/')) {
+                            videoId = urlObj.pathname.split('/shorts/')[1];
+                        }
+                        if (videoId) {
+                            videoId = videoId.split(/[?&#]/)[0];
+                            embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1`;
+                        }
+                    }
+
+                    // 2. Spotify
+                    else if (host.includes('spotify.com')) {
+                        embedType = 'spotify';
+                        if (!urlObj.pathname.includes('/embed')) {
+                            let cleanPath = urlObj.pathname;
+                            const intlMatch = cleanPath.match(/^\/intl-[^/]+(\/.*)/);
+                            if (intlMatch) cleanPath = intlMatch[1];
+                            embedUrl = `https://open.spotify.com/embed${cleanPath}`;
+                        }
+                    }
+
+                    // 3. SoundCloud
+                    else if (host.includes('soundcloud.com')) {
+                        embedType = 'soundcloud';
+                        if (!host.includes('w.soundcloud.com')) {
+                            embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(embedUrl)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true`;
+                        }
+                    }
+
+                    // 4. Apple Music
+                    else if (host.includes('music.apple.com')) {
+                        embedType = 'apple-music';
+                        if (!urlObj.pathname.includes('/embed')) {
+                            embedUrl = embedUrl.replace('music.apple.com', 'embed.music.apple.com');
+                        }
+                    }
+
+                    // 5. Deezer
+                    else if (host.includes('deezer.com') || host.includes('deezer.page.link') || host.includes('link.deezer.com')) {
+                        const deezerMatch = urlObj.pathname.match(/\/(track|album|playlist|artist)\/(\d+)/);
+                        if (deezerMatch) {
+                            embedType = 'deezer';
+                            embedUrl = `https://widget.deezer.com/widget/dark/${deezerMatch[1]}/${deezerMatch[2]}`;
+                        } else {
+                            // Shortlinks (link.deezer.com) or others -> Styled Card
+                            embedType = 'deezer-card';
+                        }
+                    }
+
+                    // 6. Twitch
+                    else if (host.includes('twitch.tv')) {
+                        embedType = 'twitch';
+                        const parentHost = window.location.hostname || 'plinkk.fr';
+                        const channelMatch = urlObj.pathname.match(/^\/([a-zA-Z0-9_]+)\/?$/);
+                        const videoMatch = urlObj.pathname.match(/\/videos\/(\d+)/);
+                        if (videoMatch) {
+                            embedUrl = `https://player.twitch.tv/?video=${videoMatch[1]}&parent=${parentHost}`;
+                        } else if (channelMatch && !['directory', 'videos', 'settings', 'subscriptions', 'inventory', 'wallet'].includes(channelMatch[1])) {
+                            embedUrl = `https://player.twitch.tv/?channel=${channelMatch[1]}&parent=${parentHost}`;
+                        }
+                    }
+
+                    // 7. TikTok
+                    else if (host.includes('tiktok.com')) {
+                        embedType = 'tiktok';
+                        const tiktokMatch = urlObj.pathname.match(/\/video\/(\d+)/);
+                        if (tiktokMatch) {
+                            embedUrl = `https://www.tiktok.com/embed/v2/${tiktokMatch[1]}`;
+                        }
+                    }
+
+                    // 8. Discord (server widget or invite card)
+                    else if (host.includes('discord.gg') || host.includes('discord.com')) {
+                        const serverIdParam = urlObj.searchParams.get('id');
+                        if (serverIdParam || urlObj.pathname.includes('/widget')) {
+                            embedType = 'discord';
+                            if (serverIdParam) {
+                                embedUrl = `https://discord.com/widget?id=${serverIdParam}&theme=dark`;
+                            }
+                        } else {
+                            // Invite links (discord.gg/xxx) — can't iframe, render as styled card
+                            embedType = 'discord-invite';
+                        }
+                    }
+
+                    // 9. Calendly
+                    else if (host.includes('calendly.com')) {
+                        embedType = 'calendly';
+                        if (!embedUrl.includes('embed_type=')) {
+                            embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'embed_type=Inline&embed_domain=1';
+                        }
+                    }
+
+                    // 10. Typeform
+                    else if (host.includes('typeform.com')) {
+                        embedType = 'typeform';
+                        const typeformMatch = urlObj.pathname.match(/\/to\/([a-zA-Z0-9]+)/);
+                        if (typeformMatch) {
+                            embedUrl = `https://form.typeform.com/to/${typeformMatch[1]}?typeform-embed=embed-widget`;
+                        }
+                    }
+
+                    // 11. Tally
+                    else if (host.includes('tally.so')) {
+                        embedType = 'tally';
+                        const tallyMatch = urlObj.pathname.match(/\/(r|forms?)\/([a-zA-Z0-9]+)/);
+                        if (tallyMatch) {
+                            embedUrl = `https://tally.so/embed/${tallyMatch[2]}?alignLeft=1&hideTitle=1&dynamicHeight=1`;
+                        }
+                    }
+
+                    // 12. Google Maps
+                    else if ((host.includes('google.com') && urlObj.pathname.includes('/maps')) || host.includes('maps.google.com') || host.includes('goo.gl')) {
+                        embedType = 'google-maps';
+                        if (!embedUrl.includes('/embed')) {
+                            const q = urlObj.searchParams.get('q') || urlObj.pathname.replace('/maps/place/', '').replace('/maps/', '');
+                            if (q && q !== '/') {
+                                embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
+                            } else {
+                                embedUrl = link.embedData.url.replace('/maps/', '/maps/embed?');
+                            }
+                        }
+                    }
+
+                    // 13. Buy Me a Coffee
+                    else if (host.includes('buymeacoffee.com')) {
+                        embedType = 'buymeacoffee-card';
+                        // Keep original URL for the card link
+                    }
+
+                    // 14. Ko-fi
+                    else if (host.includes('ko-fi.com')) {
+                        embedType = 'kofi';
+                        const kofiUser = urlObj.pathname.replace(/^\//, '').split('/')[0];
+                        if (kofiUser) {
+                            embedUrl = `https://ko-fi.com/${kofiUser}/?hidefeed=true&widget=true&embed=true`;
+                        }
+                    }
+
+                    // 15. Gumroad
+                    else if (host.includes('gumroad.com')) {
+                        embedType = 'gumroad';
+                        if (!embedUrl.includes('wanted=true')) {
+                            embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'wanted=true';
+                        }
+                    }
+
+                    // 16. Substack
+                    else if (host.includes('substack.com')) {
+                        embedType = 'substack';
+                        if (!urlObj.pathname.includes('/embed')) {
+                            embedUrl = `https://${host}/embed`;
+                        }
+                    }
+
+                    // 17. Pinterest
+                    else if (host.includes('pinterest.com') || host.includes('pin.it')) {
+                        embedType = 'pinterest';
+                        const pinMatch = urlObj.pathname.match(/\/pin\/(\d+)/);
+                        if (pinMatch) {
+                            embedUrl = `https://assets.pinterest.com/ext/embed.html?id=${pinMatch[1]}`;
+                        }
+                    }
+
+                    // 18. Dailymotion
+                    else if (host.includes('dailymotion.com') || host.includes('dai.ly')) {
+                        embedType = 'dailymotion';
+                        let dmVideoId = null;
+                        if (host.includes('dai.ly')) {
+                            dmVideoId = urlObj.pathname.slice(1);
+                        } else {
+                            const dmMatch = urlObj.pathname.match(/\/video\/([a-zA-Z0-9]+)/);
+                            if (dmMatch) dmVideoId = dmMatch[1];
+                        }
+                        if (dmVideoId) {
+                            embedUrl = `https://www.dailymotion.com/embed/video/${dmVideoId}`;
+                        }
+                    }
+
+                    // 19. Vimeo
+                    else if (host.includes('vimeo.com')) {
+                        embedType = 'vimeo';
+                        const vimeoMatch = urlObj.pathname.match(/\/(\d+)/);
+                        if (vimeoMatch) {
+                            embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+                        }
+                    }
+
+                    // 20. Figma
+                    else if (host.includes('figma.com')) {
+                        embedType = 'figma';
+                        embedUrl = `https://www.figma.com/embed?embed_host=plinkk&url=${encodeURIComponent(embedUrl)}`;
+                    }
+
+                } catch (e) {
+                    console.warn("Invalid embed URL:", embedUrl);
+                }
+
+                // --- Discord invite: styled card instead of iframe ---
+                if (embedType === 'discord-invite') {
+                    const card = document.createElement('a');
+                    card.href = link.embedData.url;
+                    card.target = '_blank';
+                    card.rel = 'noopener noreferrer';
+                    card.style.cssText = 'display:flex;align-items:center;gap:12px;padding:16px;background:#5865F2;border-radius:12px;text-decoration:none;color:#fff;transition:filter 0.2s;';
+                    card.onmouseenter = () => card.style.filter = 'brightness(1.1)';
+                    card.onmouseleave = () => card.style.filter = '';
+                    const icon = document.createElement('img');
+                    icon.src = 'https://cdn.jsdelivr.net/gh/nicklvh/cdn@main/discord-mark-white.svg';
+                    icon.alt = 'Discord';
+                    icon.style.cssText = 'width:40px;height:40px;flex-shrink:0;';
+                    const textWrap = document.createElement('div');
+                    textWrap.style.cssText = 'display:flex;flex-direction:column;gap:2px;min-width:0;';
+                    const title = document.createElement('span');
+                    title.style.cssText = 'font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+                    title.textContent = link.text || 'Rejoindre le serveur Discord';
+                    const sub = document.createElement('span');
+                    sub.style.cssText = 'font-size:12px;opacity:0.8;';
+                    sub.textContent = 'Cliquer pour rejoindre';
+                    textWrap.appendChild(title);
+                    textWrap.appendChild(sub);
+                    card.appendChild(icon);
+                    card.appendChild(textWrap);
+                    container.appendChild(card);
+                    container.style.border = 'none';
+                } else if (embedType === 'buymeacoffee-card') {
+                    // --- Buy Me a Coffee: Custom Styled Card ---
+                    const card = document.createElement('a');
+                    card.href = link.embedData.url;
+                    card.target = '_blank';
+                    card.rel = 'noopener noreferrer';
+                    card.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:12px;padding:16px;background:#FFDD00;border-radius:12px;text-decoration:none;color:#000000;font-family:"Cookie", cursive, sans-serif;transition:transform 0.2s;';
+                    card.onmouseenter = () => card.style.transform = 'scale(1.02)';
+                    card.onmouseleave = () => card.style.transform = 'scale(1)';
+
+                    const icon = document.createElement('img');
+                    icon.src = 'https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg';
+                    icon.alt = 'BMC';
+                    icon.style.cssText = 'width:35px;height:auto;flex-shrink:0;';
+
+                    const text = document.createElement('span');
+                    text.style.cssText = 'font-weight:700;font-size:20px;letter-spacing:0.5px;';
+                    text.textContent = link.text || 'Buy me a coffee';
+
+                    card.appendChild(icon);
+                    card.appendChild(text);
+                    container.appendChild(card);
+                    container.style.border = 'none';
+
+                } else if (embedType === 'deezer-card') {
+                    // --- Deezer: Styled Card Fallback ---
+                    const card = document.createElement('a');
+                    card.href = link.embedData.url;
+                    card.target = '_blank';
+                    card.rel = 'noopener noreferrer';
+                    card.style.cssText = 'display:flex;align-items:center;gap:16px;padding:16px;background:linear-gradient(90deg, #323232 0%, #191414 100%);border-radius:12px;text-decoration:none;color:#fff;transition:opacity 0.2s;';
+                    card.onmouseenter = () => card.style.opacity = '0.9';
+                    card.onmouseleave = () => card.style.opacity = '1';
+
+                    const iconWrapper = document.createElement('div');
+                    iconWrapper.style.cssText = 'width:48px;height:48px;background:#EF5466;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+
+                    // Simple equalizer icon simulation
+                    const icon = document.createElement('div');
+                    icon.style.cssText = 'display:flex;gap:2px;align-items:center;height:20px;';
+                    ['12px', '20px', '16px', '24px'].forEach(h => {
+                        const bar = document.createElement('div');
+                        bar.style.cssText = `width:4px;height:${h};background:#fff;border-radius:2px;`;
+                        icon.appendChild(bar);
+                    });
+                    iconWrapper.appendChild(icon);
+
+                    const textWrap = document.createElement('div');
+                    textWrap.style.cssText = 'display:flex;flex-direction:column;gap:4px;min-width:0;';
+
+                    const title = document.createElement('span');
+                    title.style.cssText = 'font-weight:600;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+                    title.textContent = link.text || 'Ecouter sur Deezer';
+
+                    const sub = document.createElement('span');
+                    sub.style.cssText = 'font-size:13px;opacity:0.7;';
+                    sub.textContent = 'Ouvrir tracks/playlists';
+
+                    textWrap.appendChild(title);
+                    textWrap.appendChild(sub);
+                    card.appendChild(iconWrapper);
+                    card.appendChild(textWrap);
+                    container.appendChild(card);
+                    container.style.border = 'none';
+                } else {
+                    const iframe = document.createElement("iframe");
+                    iframe.src = embedUrl;
+                    iframe.style.width = "100%";
+                    iframe.style.border = "none";
+                    iframe.loading = "lazy";
+
+                    // --- Per-platform sizing & permissions ---
+                    switch (embedType) {
+                        case 'youtube':
+                        case 'twitch':
+                        case 'dailymotion':
+                        case 'vimeo':
+                            iframe.style.aspectRatio = "16/9";
+                            iframe.style.height = "auto";
+                            iframe.allow = "autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; fullscreen";
+                            iframe.allowFullscreen = true;
+                            break;
+                        case 'spotify':
+                            iframe.style.height = "152px";
+                            iframe.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+                            break;
+                        case 'soundcloud':
+                            iframe.style.height = "166px";
+                            iframe.allow = "autoplay";
+                            break;
+                        case 'apple-music':
+                            iframe.style.height = "175px";
+                            iframe.allow = "autoplay; encrypted-media; fullscreen";
+                            iframe.sandbox = "allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation";
+                            break;
+                        case 'deezer':
+                            iframe.style.height = "300px";
+                            iframe.allow = "autoplay; encrypted-media";
+                            break;
+                        case 'tiktok':
+                            iframe.style.height = "740px";
+                            iframe.style.maxWidth = "325px";
+                            iframe.style.margin = "0 auto";
+                            break;
+                        case 'discord':
+                            iframe.style.height = "400px";
+                            break;
+                        case 'calendly':
+                            iframe.style.height = "630px";
+                            break;
+                        case 'typeform':
+                        case 'tally':
+                            iframe.style.height = "500px";
+                            break;
+                        case 'google-maps':
+                            iframe.style.height = "300px";
+                            iframe.style.borderRadius = "8px";
+                            break;
+                        case 'buymeacoffee':
+                            iframe.style.height = "600px";
+                            break;
+                        case 'kofi':
+                            iframe.style.height = "712px";
+                            break;
+                        case 'gumroad':
+                            iframe.style.height = "600px";
+                            break;
+                        case 'substack':
+                            iframe.style.height = "320px";
+                            break;
+                        case 'pinterest':
+                            iframe.style.height = "500px";
+                            break;
+                        case 'figma':
+                            iframe.style.aspectRatio = "16/9";
+                            iframe.style.height = "auto";
+                            iframe.allowFullscreen = true;
+                            break;
+                        default:
+                            iframe.style.height = "100%";
+                            iframe.style.minHeight = "200px";
+                    }
+
+                    container.appendChild(iframe);
+                }
+            } else {
+                container.textContent = "Contenu intégré invalide";
+                container.style.padding = "16px";
+                container.style.textAlign = "center";
+                container.style.opacity = "0.7";
+            }
+            return container;
+        }
+
+        if (link.type === 'HEADER') {
+            const header = document.createElement('h3');
+            header.className = 'link-header';
+            header.textContent = link.text;
+            header.style.color = isLight ? '#000000' : (profileData.textColor || '#fff');
+            header.style.marginTop = '16px';
+            header.style.marginBottom = '8px';
+            header.style.textAlign = 'center';
+            header.style.width = '100%';
+            header.style.fontSize = '1.2rem';
+            return header;
+        }
+
+        // --- 2. Lead/Form Handling ---
+        if (link.type === 'FORM' && link.formData) {
+            const container = document.createElement("div");
+            container.className = "discord-box form-box transition-all duration-500 overflow-visible";
+            container.style.height = "auto";
+            container.style.minHeight = "60px";
+
+            // Create toggle button (looks like a link)
+            const toggle = document.createElement("button");
+            toggle.className = "form-toggle-btn";
+
+            const icon = document.createElement("img");
+            icon.src = link.icon || 'https://cdn.plinkk.fr/icons/mail.svg';
+            icon.className = "w-6 h-6 object-contain";
+            icon.loading = "lazy";
+            icon.style.position = "relative";
+            icon.style.zIndex = "5";
+            if (isLight) icon.style.filter = "brightness(0)";
+
+            const text = document.createElement("span");
+            text.textContent = link.text || "Contactez-nous";
+            text.style.position = "relative";
+            text.style.zIndex = "5";
+            text.style.color = isLight ? '#000000' : (profileData.buttonTextColor || '#fff');
+
+            const actionContainer = document.createElement("div");
+            actionContainer.style.marginLeft = "auto";
+            actionContainer.style.display = "flex";
+            actionContainer.style.alignItems = "center";
+            actionContainer.style.gap = "6px";
+            actionContainer.style.background = isLight ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.08)";
+            actionContainer.style.padding = "4px 12px";
+            actionContainer.style.borderRadius = "20px";
+            actionContainer.style.border = "1px solid rgba(255, 255, 255, 0.1)";
+            actionContainer.style.transition = "all 0.3s ease";
+            actionContainer.style.position = "relative";
+            actionContainer.style.zIndex = "5";
+
+            const actionText = document.createElement("span");
+            actionText.textContent = "Ouvrir";
+            actionText.style.fontSize = "0.75rem";
+            actionText.style.fontWeight = "600";
+
+            const chevron = document.createElement("div");
+            chevron.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
+            chevron.style.display = "flex";
+            chevron.style.transition = "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)";
+
+            actionContainer.appendChild(actionText);
+            actionContainer.appendChild(chevron);
+
+            toggle.appendChild(icon);
+            toggle.appendChild(text);
+            toggle.appendChild(actionContainer);
+
+            // Form Content Container
+            const formContent = document.createElement("div");
+            formContent.className = "form-content hidden";
+            formContent.style.opacity = "0";
+            formContent.style.transform = "translateY(8px)";
+            formContent.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+
+            // Build inputs from formData fields
+            const inputs = [];
+            const defaultFields = [
+                { label: 'Nom', type: 'text', required: true, name: 'name', placeholder: 'Votre nom' },
+                { label: 'Email', type: 'email', required: true, name: 'email', placeholder: 'votre@email.com' },
+                { label: 'Message', type: 'textarea', required: true, name: 'message', placeholder: 'Votre message...' }
+            ];
+            const fields = (link.formData.fields && link.formData.fields.length > 0) ? link.formData.fields : defaultFields;
+
+            fields.forEach(field => {
+                const wrapper = document.createElement("div");
+                wrapper.className = "form-field-wrapper";
+
+                const label = document.createElement("label");
+
+                // Add icons based on label text
+                let labelIcon = '';
+                const labelText = (field.label || '').toUpperCase();
+                if (labelText.includes('NOM') || labelText.includes('NAME')) {
+                    labelIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+                } else if (labelText.includes('MAIL')) {
+                    labelIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`;
+                } else if (labelText.includes('MESSAGE') || labelText.includes('SUJET')) {
+                    labelIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
+                }
+
+                label.innerHTML = `${labelIcon}${field.label}`;
+
+                let input;
+                if (field.type === 'textarea') {
+                    input = document.createElement("textarea");
+                    input.rows = 4;
+                } else {
+                    input = document.createElement("input");
+                    input.type = field.type || "text";
+                }
+                input.placeholder = field.placeholder || "";
+                input.name = field.name || field.label;
+                input.required = field.required !== false;
+
+                inputs.push({ name: field.name || field.label, element: input });
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(input);
+                formContent.appendChild(wrapper);
+            });
+
+            // Submit Button
+            const submitBtn = document.createElement("button");
+            submitBtn.className = "form-submit-btn";
+
+            const shine = document.createElement("div");
+            shine.className = "shine";
+            submitBtn.appendChild(shine);
+
+            const btnText = document.createElement("span");
+            btnText.textContent = link.formData.buttonText || "Envoyer";
+            btnText.style.position = "relative";
+            btnText.style.zIndex = "2";
+            submitBtn.appendChild(btnText);
+
+            const statusMsg = document.createElement("div");
+            statusMsg.className = "form-status hidden";
+
+            submitBtn.onclick = async (e) => {
+                e.preventDefault();
+                submitBtn.disabled = true;
+                btnText.textContent = "Envoi en cours...";
+
+                // Collect data
+                const data = {};
+                let valid = true;
+                inputs.forEach(item => {
+                    data[item.name] = item.element.value;
+                    if (item.element.required && !item.element.value) {
+                        valid = false;
+                        item.element.style.borderColor = "rgba(248, 113, 113, 0.5)";
+                        item.element.style.background = "rgba(248, 113, 113, 0.05)";
+                    } else {
+                        item.element.style.borderColor = "";
+                        item.element.style.background = "";
+                    }
+                });
+
+                if (!valid) {
+                    statusMsg.textContent = "Veuillez remplir tous les champs obligatoires.";
+                    statusMsg.className = "form-status error";
+                    statusMsg.classList.remove("hidden");
+                    submitBtn.disabled = false;
+                    btnText.textContent = link.formData.buttonText || "Envoyer";
+                    return;
+                }
+
+                try {
+                    const res = await fetch("/api/lead", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ linkId: link.id, data })
+                    });
+
+                    if (res.ok) {
+                        statusMsg.textContent = link.formData.successMessage || "Message envoyé avec succès !";
+                        statusMsg.className = "form-status success";
+                        // Clear inputs
+                        inputs.forEach(i => i.element.value = "");
+                        setTimeout(() => {
+                            if (!formContent.classList.contains("hidden")) toggle.click();
+                        }, 2500);
+                    } else {
+                        throw new Error("Erreur serveur");
+                    }
+                } catch (err) {
+                    statusMsg.textContent = "Une erreur est survenue. Veuillez réessayer plus tard.";
+                    statusMsg.className = "form-status error";
+                } finally {
+                    statusMsg.classList.remove("hidden");
+                    submitBtn.disabled = false;
+                    btnText.textContent = link.formData.buttonText || "Envoyer";
+                }
+            };
+
+            formContent.appendChild(submitBtn);
+            formContent.appendChild(statusMsg);
+
+            // Toggle logic with animations
+            toggle.onclick = () => {
+                const isHidden = formContent.classList.contains("hidden");
+                if (isHidden) {
+                    formContent.classList.remove("hidden");
+                    chevron.style.transform = "rotate(180deg)";
+                    actionText.textContent = "Fermer";
+                    actionContainer.style.background = "rgba(255, 255, 255, 0.15)";
+                    setTimeout(() => {
+                        formContent.style.opacity = "1";
+                        formContent.style.transform = "translateY(0)";
+                    }, 10);
+                } else {
+                    formContent.style.opacity = "0";
+                    formContent.style.transform = "translateY(8px)";
+                    chevron.style.transform = "rotate(0deg)";
+                    actionText.textContent = "Ouvrir";
+                    actionContainer.style.background = "rgba(255, 255, 255, 0.08)";
+                    setTimeout(() => {
+                        formContent.classList.add("hidden");
+                    }, 400);
+                }
+            };
+
+            container.appendChild(toggle);
+            container.appendChild(formContent);
+            return container;
+        }
+
+
+        // --- 4. Standard Link (with OS Redirection) ---
+        const discordBox = document.createElement("div");
+        const iconWrapper = document.createElement("div");
+        iconWrapper.className = "link-icon-wrapper animate-pulse bg-white/5 rounded flex items-center justify-center shrink-0";
+        iconWrapper.style.width = "32px";
+        iconWrapper.style.height = "32px";
+        iconWrapper.style.overflow = "hidden";
+
+        const discordIcon = document.createElement("img");
+        discordIcon.className = "opacity-0 transition-opacity duration-300";
+        discordIcon.onload = () => {
+            discordIcon.classList.remove('opacity-0');
+            iconWrapper.classList.remove('animate-pulse', 'bg-white/5');
+        };
+        discordIcon.onerror = () => {
+            iconWrapper.classList.remove('animate-pulse', 'bg-white/5');
+        };
+
+        const discordLink = document.createElement("a");
+
+        // --- OS Redirection & Direct Link Logic ---
+        let finalUrl = link.url;
+        try {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+            const isAndroid = /android/i.test(ua);
+
+            if (isIOS && link.iosUrl && link.iosUrl.trim()) {
+                finalUrl = link.iosUrl;
+            } else if (isAndroid && link.androidUrl && link.androidUrl.trim()) {
+                finalUrl = link.androidUrl;
+            }
+        } catch (e) { }
+
+        if (isSafeUrl(finalUrl)) {
+            // Apply redirection
+            // If forceAppOpen is true, use finalUrl directly (bypass tracking for deep links to ensure app opening)
+            // Otherwise, use /click/ tracking unless user is on localhost/preview
+
+            const isDirect = link.forceAppOpen || finalUrl !== link.url;
+
+            if (isDirect) {
+                discordLink.href = finalUrl;
+            } else {
+                discordLink.href = window.location.hostname === "plinkk.fr" ? "/click/" + link.id : finalUrl;
+            }
+
+            discordLink.id = link.id
+            discordLink.target = "_blank";
+            discordLink.rel = "noopener noreferrer";
+        }
+        else {
+            discordLink.href = "#";
+            discordLink.title = "Lien non valide";
+        }
+
+        if (profileData.buttonThemeEnable === 1) {
+            let themeConfig = null;
+            if (link.buttonTheme && link.buttonTheme !== 'system') {
+                themeConfig = btnIconThemeConfig?.find(config => config.themeClass === link.buttonTheme);
+            } else {
+                themeConfig = btnIconThemeConfig?.find(config => config.name === link.name);
+            }
+
+            if (themeConfig) {
+                const themeClass = themeConfig.themeClass;
+                discordBox.className = `button ${themeClass}`;
+                discordIcon.src = themeConfig.icon;
+                discordIcon.loading = "lazy";
+                discordIcon.classList.add("icon");
+            }
+            else {
+                discordBox.className = "discord-box";
+                discordIcon.src = String(link.icon || '').trim();
+                discordIcon.alt = link.text;
+                discordIcon.loading = "lazy";
+                discordIcon.classList.add("link-icon");
+            }
+        }
+        else {
+            discordBox.className = "discord-box";
+            discordIcon.src = String(link.icon || '').trim();
+            discordIcon.alt = link.text;
+            discordIcon.loading = "lazy";
+            discordIcon.classList.add("link-icon");
+        }
+
+        // Selective inversion logic based on source
+        const src = (discordIcon.src || '').toLowerCase();
+        const isCatalogue = src.includes('s3.marvideo.fr') || src.includes('cdn.plinkk.fr') || src.startsWith('/icons/');
+        const isBootstrap = src.includes('bi-') || src.includes('bootstrap-icons');
+        const isJsDelivr = src.includes('cdn.jsdelivr.net');
+
+        // Reset classes
+        discordIcon.classList.remove('bi-invert', 'icon-cdn');
+
+        if (isCatalogue || isBootstrap) {
+            discordIcon.classList.add('icon-cdn');
+        } else if (isJsDelivr) {
+            discordIcon.classList.add('icon-black-source');
+        }
+
+        // Créer un conteneur pour le contenu principal (icône + texte)
+        const mainContent = document.createElement("div");
+        mainContent.className = "link-content-header";
+        mainContent.style.padding = "0";
+        mainContent.style.display = "flex";
+        mainContent.style.alignItems = "center";
+
+        // Ajouter l'icône au conteneur principal
+        iconWrapper.appendChild(discordIcon);
+        mainContent.appendChild(iconWrapper);
+
+        // Créer un span pour le texte
+        const textSpan = document.createElement("span");
+        textSpan.className = "link-text-centered";
+        textSpan.textContent = link.text;
+        mainContent.appendChild(textSpan);
+
+        // Gérer les descriptions
+        if (link.description && link.description.trim() !== "" && link.showDescription) {
+            // Créer la description
+            const desc = document.createElement("div");
+            desc.className = "link-description";
+            setSafeText(desc, link.description);
+            desc.style.transition = "max-height 0.7s cubic-bezier(0.4,0,0.2,1), opacity 0.7s cubic-bezier(0.4,0,0.2,1), margin 0.7s cubic-bezier(0.4,0,0.2,1), padding 0.7s cubic-bezier(0.4,0,0.2,1)";
+            desc.style.overflow = "hidden";
+            desc.style.maxHeight = "0";
+            desc.style.opacity = "0";
+            desc.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
+            desc.style.padding = "0 12px";
+            desc.style.borderRadius = "12px";
+            desc.style.border = "1px solid rgba(255, 255, 255, 0.05)";
+            desc.style.marginTop = "0";
+            desc.style.marginBottom = "0";
+            desc.style.display = "block";
+            desc.style.width = "100%";
+            desc.style.fontSize = "0.85em";
+            desc.style.lineHeight = "1.6";
+            desc.style.color = "rgba(255, 255, 255, 0.7)";
+
+            if (isTouchDevice) {
+                // Sur mobile/tactile : bouton pour afficher/masquer la description
+                const showDescBtn = document.createElement("button");
+                showDescBtn.className = "show-desc-btn";
+                showDescBtn.innerHTML = `
+                    <span>Détails</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                `;
+
+                let descVisible = false;
+                showDescBtn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    descVisible = !descVisible;
+
+                    if (descVisible) {
+                        desc.style.maxHeight = "300px";
+                        desc.style.opacity = "1";
+                        desc.style.marginTop = "12px";
+                        desc.style.padding = "12px";
+                        showDescBtn.classList.add("active");
+                        showDescBtn.querySelector('span').textContent = "Moins";
+                    }
+                    else {
+                        desc.style.maxHeight = "0";
+                        desc.style.opacity = "0";
+                        desc.style.marginTop = "0";
+                        desc.style.padding = "0 12px";
+                        showDescBtn.classList.remove("active");
+                        showDescBtn.querySelector('span').textContent = "Détails";
+                    }
+                });
+
+                mainContent.appendChild(showDescBtn);
+            }
+            else {
+                // Desktop : indicator + hover
+                const arrowIndicator = document.createElement("div");
+                arrowIndicator.style.marginLeft = "auto";
+                arrowIndicator.style.opacity = "0.4";
+                arrowIndicator.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                `;
+                mainContent.appendChild(arrowIndicator);
+
+                discordLink.addEventListener("mouseenter", () => {
+                    desc.style.maxHeight = "300px";
+                    desc.style.opacity = "1";
+                    desc.style.marginTop = "12px";
+                    desc.style.padding = "12px";
+                    arrowIndicator.style.transform = "rotate(180deg)";
+                    arrowIndicator.style.opacity = "0.8";
+                });
+                discordLink.addEventListener("mouseleave", () => {
+                    desc.style.maxHeight = "0";
+                    desc.style.opacity = "0";
+                    desc.style.marginTop = "0";
+                    desc.style.padding = "0 12px";
+                    arrowIndicator.style.transform = "rotate(0deg)";
+                    arrowIndicator.style.opacity = "0.4";
+                });
+            }
+
+            discordLink.appendChild(mainContent);
+            discordLink.appendChild(desc);
+        }
+        else {
+            // Sans description, structure simple
+            discordLink.appendChild(mainContent);
+        }
+        discordBox.appendChild(discordLink);
+        if (!link.text || !link.text.trim()) {
+            discordBox.style.display = "none";
+        }
+
+        return discordBox;
+    };
+
+    const renderLinks = (profileData, maxLinkNumber, createBox) => {
+        if (!profileData.links || profileData.links.length === 0) return [];
+
+        const elements = [];
+        let currentHeader = null;
+
+        // Sort by index if present, though they should be sorted already
+        const sortedLinks = [...profileData.links].sort((a, b) => (a.index || 0) - (b.index || 0));
+
+        sortedLinks.forEach(link => {
+            if (link.type === 'HEADER') {
+                const header = document.createElement('h3');
+                header.className = 'link-header';
+                header.textContent = link.text || link.name || '';
+                header.style.color = isLight ? '#000000' : (profileData.textColor || '#fff');
+                header.style.marginTop = '16px';
+                header.style.marginBottom = '8px';
+                header.style.textAlign = 'center';
+                header.style.width = '100%';
+                header.style.fontSize = '1.2rem';
+                elements.push(header);
+            } else {
+                elements.push(createBox(link));
+            }
+        });
+
+        return elements.slice(0, maxLinkNumber + 20); // Extra buffer for headers
+    };
+
+    return renderLinks(profileData, maxLinkNumber, createBox);
+}
+export function validateProfileConfig(profileData, themes, btnIconThemeConfig, canvaData, animationBackground) {
+    const errors = [];
+    // Validate themes
+    if (!Array.isArray(themes) || themes.length === 0) {
+        errors.push("Themes array is missing or empty.");
+    }
+    else {
+        themes.forEach((theme, i) => {
+            if (!theme.background || !theme.textColor || !theme.buttonBackground || !theme.buttonHoverBackground) {
+                errors.push(`Theme at index ${i} is missing required properties.`);
+            }
+        });
+    }
+    // Validate profileData
+    if (typeof profileData !== "object" || profileData === null) {
+        errors.push("profileData is not an object.");
+    }
+    else {
+        const requiredProfileFields = [
+            "profileLink", "profileImage", "profileIcon", "profileSiteText", "profileHoverColor",
+            "userName", "email", "description", "links", "labels", "socialIcon", "statusbar", "background"
+        ];
+        requiredProfileFields.forEach(field => {
+            if (!(field in profileData)) {
+                errors.push(`profileData is missing field: ${field}`);
+            }
+        });
+        if (!Array.isArray(profileData.links)) {
+            errors.push("profileData.links is not an array.");
+        }
+        if (!Array.isArray(profileData.labels)) {
+            errors.push("profileData.labels is not an array.");
+        }
+        if (!Array.isArray(profileData.socialIcon)) {
+            errors.push("profileData.socialIcon is not an array.");
+        }
+        if (typeof profileData.statusbar !== "object" || profileData.statusbar === null) {
+            errors.push("profileData.statusbar is not an object.");
+        }
+    }
+    // Validate btnIconThemeConfig
+    if (!Array.isArray(btnIconThemeConfig)) {
+        errors.push("btnIconThemeConfig is not an array.");
+    }
+    // Validate canvaData
+    if (!Array.isArray(canvaData)) {
+        errors.push("canvaData is not an array.");
+    }
+    else {
+        canvaData.forEach((canva, i) => {
+            if (!canva.fileNames) {
+                errors.push(`canvaData at index ${i} is missing fileNames.`);
+            }
+        });
+    }
+    // Validate animationBackground
+    if (!Array.isArray(animationBackground)) {
+        errors.push("animationBackground is not an array.");
+    }
+    else {
+        animationBackground.forEach((anim, i) => {
+            if (!anim.keyframes) {
+                errors.push(`animationBackground at index ${i} is missing keyframes.`);
+            }
+        });
+    }
+    if (errors.length > 0) {
+        console.error("Validation errors:", errors);
+        return false;
+    }
+    return true;
+}
+export function createLabelButtons(profileData) {
+    const maxLabelNumber = 7;
+    if (!profileData.labels || !profileData.labels.length) {
+        console.warn("No labels found in profile data.");
+    }
+    else if (profileData.labels.length > maxLabelNumber) {
+        console.warn(`Too many labels found in profile data, only the first ${maxLabelNumber} will be displayed.`);
+    }
+    const container = document.createElement("div");
+    container.className = "label-buttons-container";
+    profileData.labels.slice(0, maxLabelNumber).forEach(label => {
+        const button = document.createElement("div");
+        button.className = "label-button";
+        button.style.backgroundColor = isSafeColor(label.color) ? `${label.color}80` : "#cccccc80";
+        button.style.border = isSafeColor(label.color) ? `2px solid ${label.color}` : "2px solid #ccc";
+        button.style.color = isSafeColor(label.fontColor) ? label.fontColor : "#222";
+        setSafeText(button, label.data);
+        button.addEventListener("mouseover", () => {
+            button.style.backgroundColor = isSafeColor(label.color) ? label.color : "#cccccc";
+        });
+        button.addEventListener("mouseout", () => {
+            button.style.backgroundColor = isSafeColor(label.color) ? `${label.color}80` : "#cccccc80";
+        });
+        container.appendChild(button);
+        if (!label.data.trim() || (!label.color.trim() || label.color.trim() === "#") || (!label.fontColor.trim() || label.fontColor.trim() === "#")) {
+            button.style.display = "none";
+        }
+    });
+    const article = document.getElementById("profile-article");
+    article.appendChild(container);
+}
+export function createIconList(profileData) {
+    const maxIconNumber = 10;
+    const iconList = document.createElement("div");
+    iconList.className = "icon-list";
+    if (!profileData.socialIcon || !profileData.socialIcon.length) {
+        console.warn("No social icons found in profile data.");
+    }
+    else if (profileData.socialIcon.length > maxIconNumber) {
+        console.warn(`Too many social icons found in profile data, only the first ${maxIconNumber} will be displayed.`);
+    }
+    profileData.socialIcon.slice(0, maxIconNumber).forEach(iconData => {
+        const iconItem = document.createElement("div");
+        iconItem.className = "icon-item animate-pulse";
+        const iconImg = document.createElement("img");
+        // Supporte slug (catalogue), URL absolue et data URI
+        const iconVal = String(iconData.icon || '').trim();
+        const isBootstrap = iconVal.startsWith('bi-');
+        if (/^(https?:\/\/|\/|data:)/i.test(iconVal)) {
+            iconImg.src = iconVal;
+        } else {
+            iconImg.src = `/icons/${iconVal.toLowerCase().replace(/ /g, '-')}.svg`;
+        }
+        iconImg.onload = () => {
+            iconImg.classList.remove('opacity-0');
+            iconItem.classList.remove('animate-pulse');
+        };
+        iconImg.onerror = () => {
+            iconItem.classList.remove('animate-pulse');
+        };
+        setSafeText(iconImg, iconData.icon);
+        iconImg.alt = iconData.icon;
+        const src = (iconImg.src || '').toLowerCase();
+        const isCatalogue = src.includes('s3.marvideo.fr') || src.includes('cdn.plinkk.fr') || src.startsWith('/icons/');
+        const isBootstrapIcon = isBootstrap || src.includes('bi-') || src.includes('bootstrap-icons');
+        const isJsDelivr = src.includes('cdn.jsdelivr.net');
+
+        // Use consistent inversion classes
+        iconImg.classList.remove('bi-invert', 'icon-cdn');
+
+        if (isJsDelivr || isCatalogue || isBootstrapIcon) {
+            iconImg.classList.add('icon-cdn');
+        }
+        iconImg.loading = "lazy";
+        disableDrag(iconImg);
+        disableContextMenuOnImage(iconImg);
+        const iconLink = document.createElement("a");
+        if (isSafeUrl(iconData.url)) {
+            iconLink.href = iconData.url;
+            iconLink.target = "_blank";
+            iconLink.rel = "noopener noreferrer";
+        }
+        else {
+            iconLink.href = "#";
+            iconLink.title = "Lien non valide";
+        }
+        iconLink.className = "flex items-center justify-center w-full h-full";
+        iconLink.appendChild(iconImg);
+        iconItem.appendChild(iconLink);
+        iconList.appendChild(iconItem);
+    });
+    if (profileData.socialIcon.length === 0) {
+        iconList.style.display = "none";
+    }
+    const article = document.getElementById("profile-article");
+    article.appendChild(iconList);
+}
+export function createStatusBar(profileData) {
+    const maxCaracter = 50;
+    // Récupérer le conteneur du profil
+    const profileContainer = document.querySelector(".profile-container");
+    if (!profileContainer) {
+        console.warn("Profile container not found for status bar");
+        return;
+    }
+    // Données statut robustes (gèrent null/undefined)
+    const sb = (profileData && typeof profileData === 'object' && profileData.statusbar) ? profileData.statusbar : {};
+    const rawText = typeof sb.text === 'string' ? sb.text : '';
+    const text = rawText.substring(0, maxCaracter);
+    // Si pas de texte: ne rien rendre (désactivé)
+    if (!text.trim()) {
+        return;
+    }
+    // Conteneur principal de la barre de statut
+    const statusBarContainer = document.createElement("div");
+    statusBarContainer.className = "status-bar-container";
+    statusBarContainer.style.opacity = "0";
+    // Texte de statut (ordre -1 pour apparaître à gauche)
+    const statusBarText = document.createElement("div");
+    statusBarText.className = "statusBarText";
+    statusBarText.textContent = text + (rawText.length > maxCaracter ? "..." : "");
+    // Cercle de statut avec état automatique
+    const circleStatusBar = document.createElement("div");
+    circleStatusBar.className = 'circle-status-bar';
+    // Déterminer automatiquement l'état basé sur la valeur explicite, sinon heuristique
+    const status = String(sb.statusText || '').toLowerCase();
+    let statusClass = "status-online"; // Par défaut
+    if (status.includes("busy") || status.includes("occupé") || status.includes("work")) {
+        statusClass = "status-busy";
+    } else if (status.includes("away") || status.includes("absent") || status.includes("afk")) {
+        statusClass = "status-away";
+    } else if (status.includes("offline") || status.includes("off") || status.includes("déconnecté")) {
+        statusClass = "status-offline";
+    } else if (status.includes("online") || status.includes("disponible") || status.includes("actif")) {
+        statusClass = "status-online";
+    }
+    circleStatusBar.classList.add(statusClass);
+    // Assemblage du conteneur (texte puis cercle pour position gauche)
+    statusBarContainer.appendChild(statusBarText);
+    statusBarContainer.appendChild(circleStatusBar);
+    // Ajouter au conteneur de profil (position relative)
+    profileContainer.appendChild(statusBarContainer);
+    // Interactions style Discord
+    let isTextVisible = false;
+    let hideTimeout;
+    const showText = () => {
+        clearTimeout(hideTimeout);
+        statusBarText.classList.add("show");
+        isTextVisible = true;
+    };
+    const hideText = () => {
+        hideTimeout = setTimeout(() => {
+            statusBarText.classList.remove("show");
+            isTextVisible = false;
+        }, 500);
+    };
+    // Gestion des événements
+    statusBarContainer.addEventListener("mouseenter", showText);
+    statusBarContainer.addEventListener("mouseleave", hideText);
+    // Clic pour basculer l'affichage du texte
+    circleStatusBar.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (isTextVisible) {
+            statusBarText.classList.remove("show");
+            isTextVisible = false;
+        }
+        else {
+            showText();
+        }
+    });
+    // Animation d'entrée
+    setTimeout(() => {
+        statusBarContainer.style.opacity = "1";
+    }, 800);
+}
+export default {
+    createProfileContainer,
+    createUserName,
+    createEmailAndDescription,
+    showCopyModal,
+    createLinkBoxes,
+    validateProfileConfig,
+    createLabelButtons,
+    createIconList,
+    createStatusBar
+};

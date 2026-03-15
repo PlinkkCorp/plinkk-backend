@@ -1,0 +1,52 @@
+{
+	"/": [
+		"src/routes/+page.server.ts"
+	],
+	"/about": [
+		"src/routes/about/+page.server.ts"
+	],
+	"/api/partners/[partnerId]/view": [
+		"src/routes/api/partners/[partnerId]/view/+server.ts"
+	],
+	"/api/quests/[questId]/complete": [
+		"src/routes/api/quests/[questId]/complete/+server.ts"
+	],
+	"/api/track-click/[linkId]": [
+		"src/routes/api/track-click/[linkId]/+server.ts"
+	],
+	"/api/track-view/[plinkkId]": [
+		"src/routes/api/track-view/[plinkkId]/+server.ts"
+	],
+	"/a/[slug]": [
+		"src/routes/a/[slug]/+server.ts"
+	],
+	"/cgv": [],
+	"/cookies": [],
+	"/docs": [
+		"src/routes/docs/+page.server.ts"
+	],
+	"/features": [
+		"src/routes/features/+page.server.ts"
+	],
+	"/legal": [],
+	"/partners": [
+		"src/routes/partners/+page.server.ts"
+	],
+	"/patch-notes": [
+		"src/routes/patch-notes/+page.server.ts"
+	],
+	"/patch-notes/[version]": [
+		"src/routes/patch-notes/[version]/+page.server.ts"
+	],
+	"/pricing": [
+		"src/routes/pricing/+page.server.ts"
+	],
+	"/privacy": [],
+	"/p/[slug]": [
+		"src/routes/p/[slug]/+page.server.ts"
+	],
+	"/terms": [],
+	"/users": [
+		"src/routes/users/+page.server.ts"
+	]
+}
