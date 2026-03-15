@@ -486,8 +486,13 @@ export default async function onRequestHook(
               injectedObj,
               finalCategories
             );
-            const mini = minify(generated);
-            return reply.type("text/javascript").send(mini.code || "");
+            try {
+              const mini = minify(generated);
+              return reply.type("text/javascript").send(mini && mini.code ? mini.code : generated);
+            } catch (err) {
+              request.log.warn({ err }, "minify failed in onRequestHook for config.js — sending unminified code");
+              return reply.type("text/javascript").send(generated);
+            }
           } else if (request.url === "/themes.json") {
             return reply.send(await generateTheme(hostDb.plinkk.userId));
           } else if (
