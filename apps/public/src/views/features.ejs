@@ -8,7 +8,7 @@
   image: 'https://cdn.plinkk.fr/og-image-features.png',
   robots: 'index,follow',
   extraHead: `
-    <script type="application/ld+json">
+    <script type="application/ld+json" nonce="${cspNonce}">
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
@@ -694,7 +694,7 @@
   </div>
 </main>
 
-<script>
+<script nonce="<%= cspNonce %>">
 (function() {
   var obs = new IntersectionObserver(function(entries) {
     entries.forEach(function(e) {

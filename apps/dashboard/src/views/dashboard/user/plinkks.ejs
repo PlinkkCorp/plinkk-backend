@@ -80,7 +80,7 @@
                                 class="h-full w-full object-cover opacity-0 transition-opacity duration-300"
                                 onload="this.classList.remove('opacity-0'); this.parentElement.classList.remove('animate-pulse');" />
                               <% } else { %>
-                                <script>document.currentScript.parentElement.classList.remove('animate-pulse');</script>
+                                <script nonce="<%= cspNonce %>">document.currentScript.parentElement.classList.remove('animate-pulse');</script>
                                 <%= plinkk.slug.substring(0, 1).toUpperCase() %>
                                   <% } %>
                           </div>
@@ -339,7 +339,7 @@
 
     <div id="toasts" class="fixed top-4 right-4 z-50 flex flex-col items-end gap-2 pointer-events-none"></div>
 
-    <script>
+    <script nonce="<%= cspNonce %>">
       function showAlert(message, type = 'info', opts = {}) {
         const container = document.getElementById('toasts');
         if (!container) return console.log(message);

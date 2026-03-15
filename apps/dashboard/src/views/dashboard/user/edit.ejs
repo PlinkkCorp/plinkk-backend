@@ -317,7 +317,7 @@
                         </div>
                     </div>
 
-                    <script>
+                    <script nonce="<%= cspNonce %>">
                         window.__PLINKK_USER_ID__ = "<%= user.id %>";
                         window.__PLINKK_SELECTED_ID__ = "<%= plinkk.id %>";
                         window.__USER_EMAIL__ = "<%= user.email %>";
@@ -356,11 +356,11 @@
                         };
                     </script>
 
-                    <script type="application/json" id="pages-data"><%- JSON.stringify(locals.pages || []) %></script>
-                    <script type="application/json"
+                    <script type="application/json" nonce="<%= cspNonce %>" id="pages-data"><%- JSON.stringify(locals.pages || []) %></script>
+                    <script type="application/json" nonce="<%= cspNonce %>"
                         id="autoopen-data"><%= (typeof autoOpenPlinkkModal !== 'undefined' && autoOpenPlinkkModal) ? 'true' : 'false' %></script>
 
-                    <script>
+                    <script nonce="<%= cspNonce %>">
                         // Mobile Notice Logic
                         (function () {
                             const notice = document.getElementById('mobileEditNotice');
@@ -470,7 +470,7 @@
 
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
                     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                    <script>
+                    <script nonce="<%= cspNonce %>">
                         // Initialisation sécurisée de l'état via textContent (prévient XSS)
                         (function() {
                             try {
@@ -496,7 +496,7 @@
                         })();
                     </script>
 
-                    <script>
+                    <script nonce="<%= cspNonce %>">
                         (function () {
                             const btnP = document.getElementById('btnPreview');
                             const btnH = document.getElementById('btnHistory');

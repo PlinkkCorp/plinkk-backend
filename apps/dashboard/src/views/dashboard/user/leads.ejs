@@ -195,7 +195,7 @@
     <script src="/public/js/tutorial.js" defer></script>
         </div>
 
-        <script>
+        <script nonce="<%= cspNonce %>">
             (function () {
                 const qs = (s) => document.querySelector(s);
                 const qsa = (s) => Array.from(document.querySelectorAll(s));

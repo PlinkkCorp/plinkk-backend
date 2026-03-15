@@ -271,7 +271,7 @@
                         class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl">Enregistrer</button>
                     </div>
                   </form>
-                  <script>
+                  <script nonce="<%= cspNonce %>">
                     document.getElementById('formUpdateProfile').addEventListener('submit', async (e) => {
                       e.preventDefault();
                       const username = e.target.username.value;
@@ -947,7 +947,7 @@
                     </div>
                 </div>
 
-                <script>
+                <script nonce="<%= cspNonce %>">
                   async function unlinkProvider(provider, email = null) {
                     const ok = await showConfirm('Êtes-vous sûr de vouloir supprimer cette connexion ? Vous ne pourrez plus vous connecter avec ce compte.', 'Supprimer');
                     if (!ok) return;
@@ -1076,7 +1076,7 @@
         </main>
 
         <!-- Tutorial -->
-        <script src="/public/js/tutorial.js" defer></script>
+        <script src="/public/js/tutorial.js" defer nonce="<%= cspNonce %>"></script>
     </div>
 
     <!-- Modals (kept mostly same structure but updated classes) -->
@@ -1243,7 +1243,7 @@
 
     <div id="toasts" class="fixed top-4 right-4 z-50 flex flex-col items-end gap-2 pointer-events-none"></div>
 
-    <script>
+    <script nonce="<%= cspNonce %>">
       function showConfirm(message, actionText = 'Confirmer') {
         return new Promise(resolve => {
           const overlay = document.createElement('div');
@@ -1309,7 +1309,7 @@
       }
     </script>
 
-    <script>
+    <script nonce="<%= cspNonce %>">
       (function () {
         const $ = (s, r = document) => r.querySelector(s);
         const input = $('#avatarInput');
@@ -1385,7 +1385,7 @@
       })();
     </script>
 
-    <script>
+    <script nonce="<%= cspNonce %>">
       (function () {
         const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
         const panels = {
@@ -1432,7 +1432,7 @@
       })();
     </script>
 
-    <script>
+    <script nonce="<%= cspNonce %>">
       const accountRoot = document.getElementById('accountRoot');
       const twoFactorEnabled = accountRoot ? accountRoot.getAttribute('data-twofactor') === 'true' : false;
       document.getElementById('formEmail')?.addEventListener('submit', async (e) => {
@@ -1971,7 +1971,7 @@
     <template id="account-plinkks-data"><%- JSON.stringify((typeof plinkks !=='undefined' ) ? plinkks : ((typeof pages
         !=='undefined' ) ? pages : [])) %></template>
 
-    <script>
+    <script nonce="<%= cspNonce %>">
       (function () {
         const selectPlinkk = document.getElementById('domainPlinkkSelect');
         const inputHost = document.getElementById('domainHostname');
@@ -2065,7 +2065,7 @@
       })();
     </script>
 
-    <script>
+    <script nonce="<%= cspNonce %>">
       (function () {
         const copyBtn = document.getElementById('copyApiKeyBtn');
         const regenBtn = document.getElementById('regenerateApiKeyBtn');
@@ -2108,7 +2108,7 @@
       })();
     </script>
 
-    <script>
+    <script nonce="<%= cspNonce %>">
       (function () {
         const gravatarSelect = document.getElementById('gravatarSourceSelect');
         if (gravatarSelect) {

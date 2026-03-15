@@ -123,7 +123,7 @@
                   onload="this.classList.remove('opacity-0'); this.parentElement.classList.remove('animate-pulse', 'bg-slate-800');"
                   onerror="this.onerror=null; this.style.display='none'; this.parentElement.classList.remove('animate-pulse', 'bg-slate-800'); if(this.parentNode) { this.parentNode.textContent = this.parentNode.getAttribute('data-fallback-initial') || 'U'; }" />
                 <% } else { %>
-                  <script>document.currentScript.parentElement.classList.remove('animate-pulse', 'bg-slate-800');</script>
+                  <script nonce="<%= cspNonce %>">document.currentScript.parentElement.classList.remove('animate-pulse', 'bg-slate-800');</script>
                   <%= _av_initial %>
                     <% } %>
           </div>

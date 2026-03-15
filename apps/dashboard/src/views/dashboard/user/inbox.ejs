@@ -92,7 +92,7 @@
 </div>
 
 
-<script>
+<script nonce="<%= cspNonce %>">
 (function () {
   const filtersWrap = document.getElementById('inboxFilters');
   const list = document.getElementById('inboxList');
@@ -226,7 +226,7 @@
 </script>
 
 
-<script>
+<script nonce="<%= cspNonce %>">
 // Auto-open ticket from ?open= query param (used by floating widget redirect)
 (function() {
   const params = new URLSearchParams(window.location.search);

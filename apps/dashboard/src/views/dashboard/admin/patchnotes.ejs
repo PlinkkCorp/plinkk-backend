@@ -204,7 +204,7 @@
 
         <div id="toasts" class="fixed top-4 right-4 z-50 flex flex-col items-end gap-2 pointer-events-none"></div>
 
-        <script>
+        <script nonce="<%= cspNonce %>">
             function showConfirm(message, actionText = 'Confirmer') {
                 return new Promise(resolve => {
                     const overlay = document.createElement('div');

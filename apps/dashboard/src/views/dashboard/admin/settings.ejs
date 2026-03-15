@@ -123,7 +123,7 @@
                 </main>
         </div>
 
-        <script>
+        <script nonce="<%= cspNonce %>">
             // Sauvegarder un webhook
             document.querySelectorAll('.save-webhook-btn').forEach(btn => {
                 btn.addEventListener('click', async () => {

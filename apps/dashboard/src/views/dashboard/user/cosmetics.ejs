@@ -313,7 +313,7 @@
           <!-- Toasts Container -->
           <div id="toasts" class="fixed top-4 right-4 z-50 flex flex-col items-end gap-2 pointer-events-none"></div>
 
-          <script>
+          <script nonce="<%= cspNonce %>">
             window.showAlert = function (message, type = 'info', opts = {}) {
               const container = document.getElementById('toasts');
               if (!container) return console.log(message);
@@ -353,12 +353,12 @@
             data.primaryColor || '#4c1d95' , accentColor: data.accentColor || '#0f172a' , gradientType:
             data.gradientType || 'linear' , effect: data.effect || 'none' , frame: cosmetics.frame || 'none' ,
             bannerUrl: cosmetics.bannerUrl || '' , banner: cosmetics.banner || 'none' }; %>
-            <script id="initialData" type="application/json"><%- JSON.stringify(initial) %></script>
+            <script id="initialData" type="application/json" nonce="<%= cspNonce %>"><%- JSON.stringify(initial) %></script>
 
         </main>
 
     <!-- Tutorial -->
-    <script src="/public/js/tutorial.js" defer></script>
+    <script src="/public/js/tutorial.js" defer nonce="<%= cspNonce %>"></script>
     </div>
 
     <style>
@@ -402,7 +402,7 @@
       }
     </style>
 
-    <script>
+    <script nonce="<%= cspNonce %>">
       const initial = JSON.parse(document.getElementById('initialData').textContent);
       const state = { ...initial };
 

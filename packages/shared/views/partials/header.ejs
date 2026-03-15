@@ -490,7 +490,7 @@
                               </div>
                               <% } %>
 
-                                <script>
+                                <script nonce="<%= cspNonce %>">
                                   (function () {
                                     const el = document.getElementById('spaTopLoader');
                                     const bar = document.getElementById('spaTopLoaderProg');
@@ -512,7 +512,7 @@
                                     document.addEventListener('click', (e) => { const a = e.target && (e.target.closest ? e.target.closest('a') : null); if (!a) return; const href = a.getAttribute('href') || ''; if (!href || href.startsWith('#')) return; if (a.target === '_blank' || a.download != null) return; if (isModifiedClick(e)) return; if (!looksLikeHtmlRequest(href)) return; try { window.dispatchEvent(new Event('spa:loading-start')); } catch { } setTimeout(() => { try { window.dispatchEvent(new Event('spa:loading-end')); } catch { } }, 8000); }, true);
                                   })();
                                 </script>
-                                <script>
+                                <script nonce="<%= cspNonce %>">
                                   (function () {
                                     const accountBtn = document.getElementById('accountBtn');
                                     const accountPanel = document.getElementById('accountPanel');

@@ -56,7 +56,7 @@
     <script src="/public/js/tutorial.js" defer></script>
       </div>
 
-      <script>
+      <script nonce="<%= cspNonce %>">
         (function () {
           const params = new URLSearchParams(window.location.search);
           if (params.get('payment') === 'success') {
@@ -71,7 +71,7 @@
           }
         })();
       </script>
-      <script>
+      <script nonce="<%= cspNonce %>">
         (function () { try { var ev = '<%= typeof mode !== "undefined" && mode === "configure" ? "config_view" : "premium_view" %>'; if (sessionStorage.getItem('plinkk_t_' + ev)) return; sessionStorage.setItem('plinkk_t_' + ev, '1'); navigator.sendBeacon('/api/track', new Blob([JSON.stringify({ event: ev })], { type: 'application/json' })); } catch (e) { } })();
       </script>
       <%- include('partials/footer.ejs') %>

@@ -50,7 +50,7 @@
     </div>
   </div>
 
-  <script>
+  <script nonce="<%= cspNonce %>">
     document.getElementById('plinkkSelectorSearch')?.addEventListener('input', (e) => {
       const val = e.target.value.toLowerCase();
       document.querySelectorAll('.plinkk-item').forEach(el => {
@@ -60,7 +60,7 @@
     });
   </script>
 <% } %>
-<script>
+<script nonce="<%= cspNonce %>">
 (function(){
   try {
     const params = new URLSearchParams(location.search);

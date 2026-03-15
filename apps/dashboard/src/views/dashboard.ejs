@@ -341,7 +341,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <script>
+                            <script nonce="<%= cspNonce %>">
                                 document.addEventListener('DOMContentLoaded', async () => {
                                     try {
                                         const res = await fetch('/api/me/dashboard-summary');
@@ -507,7 +507,7 @@
                                     }
                                 </style>
 
-                                <script>
+                                <script nonce="<%= cspNonce %>">
                                     (function () {
                                         const ONBOARD_KEY = 'plinkk_onboarding_done';
                                         const createdAt = <%- JSON.stringify(userCreatedAt || '') %>;
@@ -582,5 +582,5 @@
                 </main>
 
     <!-- Tutorial -->
-    <script src="/public/js/tutorial.js" defer></script>
+    <script src="/public/js/tutorial.js" defer nonce="<%= cspNonce %>"></script>
         </div>

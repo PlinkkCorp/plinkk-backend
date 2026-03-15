@@ -225,11 +225,11 @@
       </div>
     </section>
   </div>
-  <script id="rolesPayloadB64" type="text/plain"><%= rolesB64 || '' %></script>
+  <script id="rolesPayloadB64" type="text/plain" nonce="<%= cspNonce %>"><%= rolesB64 || '' %></script>
 </main>
 </div>
 
-<script>
+<script nonce="<%= cspNonce %>">
 (function(){
   const $ = (s,r=document)=>r.querySelector(s);
   const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));

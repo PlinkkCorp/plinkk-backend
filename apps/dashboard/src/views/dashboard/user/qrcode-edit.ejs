@@ -216,7 +216,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="<%= cspNonce %>">
 window.addEventListener('load', () => {
   const params = new URLSearchParams(window.location.search);
   const plinkkId = params.get('plinkkId');

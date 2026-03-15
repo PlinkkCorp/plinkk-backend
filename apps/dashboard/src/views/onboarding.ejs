@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <!-- Métadonnées enrichies -->
-  <title>Bienvenue sur Plinkk ! — Configuration de votre profil</title>
-  <meta name="description" content="Bienvenue sur Plinkk ! Configurez votre premier profil et découvrez toutes les possibilités de personnalisation." />
-  <meta name="keywords" content="onboarding, bienvenue, configuration, premier profil, démarrage" />
+  <!-- Mï¿½tadonnï¿½es enrichies -->
+  <title>Bienvenue sur Plinkk ! ï¿½ Configuration de votre profil</title>
+  <meta name="description" content="Bienvenue sur Plinkk ! Configurez votre premier profil et dï¿½couvrez toutes les possibilitï¿½s de personnalisation." />
+  <meta name="keywords" content="onboarding, bienvenue, configuration, premier profil, dï¿½marrage" />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#8B5CF6" />
   
@@ -158,14 +158,14 @@
           <span class="font-bold text-lg">Plinkk</span>
           <span class="ml-auto text-xs text-slate-500 flex items-center gap-1.5 transition-opacity duration-300" id="saveIndicator" style="opacity:0">
             <i class="bi bi-check-lg text-emerald-400"></i>
-            Sauvegardé
+            Sauvegardï¿½
           </span>
         </div>
 
         <!-- Progress -->
         <div class="mb-6 fade-up" style="animation-delay:.05s">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-medium text-slate-400" id="stepLabel">Étape 1 sur 3</span>
+            <span class="text-xs font-medium text-slate-400" id="stepLabel">ï¿½tape 1 sur 3</span>
             <button onclick="startTour()" class="text-xs text-violet-400 hover:text-violet-300 flex items-center gap-1 transition-colors">
               <i class="bi bi-question-circle"></i>
               Guide
@@ -179,7 +179,7 @@
         <!-- Card -->
         <div class="bg-slate-900/80 backdrop-blur border border-slate-800 rounded-2xl shadow-2xl fade-up" style="animation-delay:.1s">
 
-          <!-- -- STEP 1 : Identité ------------------------------------------- -->
+          <!-- -- STEP 1 : Identitï¿½ ------------------------------------------- -->
           <div class="step-panel active p-6" id="step-1">
             <div class="mb-5">
               <h2 class="text-xl font-bold mb-1 flex items-center gap-2">Qui es-tu ? <i class="bi bi-hand-wave text-2xl"></i></h2>
@@ -210,17 +210,17 @@
                 <span id="slugIcon" class="absolute right-24 top-1/2 -translate-y-1/2 text-sm leading-none"></span>
                 <button type="button" id="regenerateSlugBtn" onclick="regenerateSlug()" 
                   class="absolute right-3 top-1/2 -translate-y-1/2 px-2 py-1 rounded text-xs font-medium bg-violet-600/20 hover:bg-violet-600/35 text-violet-300 transition-colors select-none"
-                  title="Régénérer le slug depuis le nom">?</button>
+                  title="Rï¿½gï¿½nï¿½rer le slug depuis le nom">?</button>
               </div>
               <p id="slugMsg" class="text-xs mt-1.5 text-slate-500 min-h-[16px]"></p>
             </div>
 
-            <!-- Catégorie -->
+            <!-- Catï¿½gorie -->
             <div class="mb-6" id="field-category">
-              <label class="block text-sm font-medium text-slate-300 mb-2">Catégorie</label>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Catï¿½gorie</label>
               <div class="grid grid-cols-3 gap-2">
                 <% [
-                  { v:'créateur',  e:'<i class="bi bi-palette text-xl"></i>', l:'Créateur'  },
+                  { v:'crï¿½ateur',  e:'<i class="bi bi-palette text-xl"></i>', l:'Crï¿½ateur'  },
                   { v:'pro',       e:'<i class="bi bi-briefcase text-xl"></i>', l:'Pro'       },
                   { v:'perso',     e:'<i class="bi bi-person text-xl"></i>', l:'Perso'     },
                   { v:'musique',   e:'<i class="bi bi-music-note-beamed text-xl"></i>', l:'Musique'   },
@@ -269,7 +269,7 @@
                     <input id="avatarFileInput" type="file" accept="image/*" class="hidden" onchange="handleAvatarUpload(this)" />
                     <span id="avatarUploadStatus" class="hidden text-xs text-emerald-400"></span>
                   </div>
-                  <input id="avatarUrl" type="url" placeholder="ou colle une URL…"
+                  <input id="avatarUrl" type="url" placeholder="ou colle une URLï¿½"
                     value="<%- (typeof draft !== 'undefined' && draft.avatarUrl) ? draft.avatarUrl : '' %>"
                     class="field-input text-sm" />
                 </div>
@@ -281,18 +281,18 @@
               <label class="block text-sm font-medium text-slate-300 mb-1.5">
                 Bio <span class="text-slate-600 font-normal">(optionnel)</span>
               </label>
-              <textarea id="bioInput" rows="3" maxlength="160" placeholder="Dis quelque chose sur toi…"
+              <textarea id="bioInput" rows="3" maxlength="160" placeholder="Dis quelque chose sur toiï¿½"
                 class="field-input"><%- (typeof draft !== 'undefined' && draft.bio) ? draft.bio : '' %></textarea>
               <p class="text-right text-xs text-slate-600 mt-1"><span id="bioCount">0</span>/160</p>
             </div>
 
-            <!-- Thème Plinkk -->
+            <!-- Thï¿½me Plinkk -->
             <div class="mb-6" id="field-color">
-              <label class="block text-sm font-medium text-slate-300 mb-2">Thème Plinkk</label>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Thï¿½me Plinkk</label>
               <div class="grid grid-cols-5 gap-1.5">
                 <% const PLINKK_THEMES = [
                   {name:'Grey',       btn:'#7289DA'},
-                  {name:'Doré',       btn:'#FFA500'},
+                  {name:'Dorï¿½',       btn:'#FFA500'},
                   {name:'Vert',       btn:'#00FF00'},
                   {name:'Bleu',       btn:'#00A0DC'},
                   {name:'Rouge',      btn:'#FF0000'},
@@ -335,7 +335,7 @@
           <div class="step-panel p-6" id="step-3">
             <div class="mb-5">
               <h2 class="text-xl font-bold mb-1 flex items-center gap-2">Ton premier lien <i class="bi bi-link-45deg text-2xl"></i></h2>
-              <p class="text-sm text-slate-400">Ajoute un lien vers tes réseaux ou ton site (optionnel).</p>
+              <p class="text-sm text-slate-400">Ajoute un lien vers tes rï¿½seaux ou ton site (optionnel).</p>
             </div>
 
             <!-- Titre du lien -->
@@ -343,7 +343,7 @@
               <label class="block text-sm font-medium text-slate-300 mb-1.5">
                 Titre du lien <span class="text-slate-600 font-normal">(optionnel)</span>
               </label>
-              <input id="firstLinkTitle" type="text" maxlength="100" placeholder="Ex : Mon Instagram, Mon Site Web…"
+              <input id="firstLinkTitle" type="text" maxlength="100" placeholder="Ex : Mon Instagram, Mon Site Webï¿½"
                 value="<%- (typeof draft !== 'undefined' && draft.firstLinkTitle) ? draft.firstLinkTitle : '' %>"
                 class="field-input" />
             </div>
@@ -353,20 +353,20 @@
               <label class="block text-sm font-medium text-slate-300 mb-1.5">
                 URL du lien <span class="text-slate-600 font-normal">(optionnel)</span>
               </label>
-              <input id="firstLinkUrl" type="url" placeholder="https://…"
+              <input id="firstLinkUrl" type="url" placeholder="https://ï¿½"
                 value="<%- (typeof draft !== 'undefined' && draft.firstLinkUrl) ? draft.firstLinkUrl : '' %>"
                 class="field-input" />
             </div>
 
-            <!-- Icône du lien (Bibliothèque) -->
+            <!-- Icï¿½ne du lien (Bibliothï¿½que) -->
             <div class="mb-6" id="field-linkIcon">
               <label class="block text-sm font-medium text-slate-300 mb-2">
-                Icône du lien <span class="text-slate-600 font-normal">(optionnel)</span>
+                Icï¿½ne du lien <span class="text-slate-600 font-normal">(optionnel)</span>
               </label>
               
               <!-- Icons populaires -->
               <div class="mb-3">
-                <p class="text-xs text-slate-500 mb-2">Réseaux populaires :</p>
+                <p class="text-xs text-slate-500 mb-2">Rï¿½seaux populaires :</p>
                 <div class="grid grid-cols-4 gap-2 mb-4">
                   <% const LINK_ICONS = [
                     { name:'GitHub', url:'https://cdn.jsdelivr.net/npm/simple-icons@11/icons/github.svg' },
@@ -418,7 +418,7 @@
               </button>
               <button onclick="completeOnboarding()" id="completeBtn"
                 class="flex-1 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold rounded-xl py-3 text-sm transition-all flex items-center justify-center gap-2">
-                <span id="completeTxt" class="flex items-center gap-2">Créer mon Plinkk <i class="bi bi-rocket-takeoff text-lg"></i></span>
+                <span id="completeTxt" class="flex items-center gap-2">Crï¿½er mon Plinkk <i class="bi bi-rocket-takeoff text-lg"></i></span>
                 <span id="completeSpinner" class="hidden">
                   <i class="bi bi-arrow-clockwise animate-spin"></i>
                 </span>
@@ -433,7 +433,7 @@
 
     <!-- Right: live preview (desktop only) -->
     <div class="hidden lg:flex flex-col items-center justify-center w-[340px] xl:w-[400px] shrink-0 px-8 py-16 border-l border-slate-800/60 bg-slate-950/50">
-      <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-6">Aperçu en direct</p>
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-6">Aperï¿½u en direct</p>
 
       <div class="phone-mockup">
         <!-- Status bar -->
@@ -464,7 +464,7 @@
         </div>
       </div>
 
-      <p class="text-xs text-slate-600 mt-5 text-center max-w-[180px] leading-relaxed">Aperçu temps réel de ton profil public.</p>
+      <p class="text-xs text-slate-600 mt-5 text-center max-w-[180px] leading-relaxed">Aperï¿½u temps rï¿½el de ton profil public.</p>
     </div>
   </div>
 
@@ -473,7 +473,7 @@
   <div id="tourCard" class="hidden" style="animation:tooltipPop .22s ease both"></div>
   <div id="tourBackdrop" class="hidden fixed inset-0 z-[9997] cursor-pointer" onclick="nextTour()"></div>
 
-  <script>
+  <script nonce="<%= cspNonce %>">
   // --------------------------------------------------------------------
   //  STATE
   // --------------------------------------------------------------------
@@ -493,7 +493,7 @@
     currentStep = n;
     document.getElementById(`step-${currentStep}`).classList.add('active');
 
-    const labels = ['Étape 1 sur 3','Étape 2 sur 3','Étape 3 sur 3'];
+    const labels = ['ï¿½tape 1 sur 3','ï¿½tape 2 sur 3','ï¿½tape 3 sur 3'];
     const widths  = ['33%','66%','100%'];
     document.getElementById('stepLabel').textContent = labels[n-1];
     document.getElementById('progressFill').style.width = widths[n-1];
@@ -531,7 +531,7 @@
   }
 
   // --------------------------------------------------------------------
-  //  THÈME
+  //  THï¿½ME
   // ------------------------------------------------------------------
   function pickTheme(idx, btnColor) {
     document.getElementById('accentVal').value = btnColor;
@@ -578,7 +578,7 @@
     triggerSlugCheck(s);
     updatePreview();
     scheduleSave();
-    toast('URL régénérée !', 'success');
+    toast('URL rï¿½gï¿½nï¿½rï¿½e !', 'success');
   }
 
   // --------------------------------------------------------------------
@@ -596,7 +596,7 @@
     const file = input.files[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      toast('Veuillez sélectionner une image.', 'error');
+      toast('Veuillez sï¿½lectionner une image.', 'error');
       return;
     }
     const reader = new FileReader();
@@ -640,7 +640,7 @@
         const name = btn.querySelector('span').textContent;
         showLinkIconPreview(name, iconVal);
       } else {
-        const name = iconVal.includes('/') ? iconVal.split('/').pop() : 'Icône custom';
+        const name = iconVal.includes('/') ? iconVal.split('/').pop() : 'Icï¿½ne custom';
         showLinkIconPreview(name, iconVal);
       }
     }
@@ -678,7 +678,7 @@
         inp.classList.add('valid');
       } else {
         slugOk = false;
-        const msgs = { too_short:'Trop court', too_long:'Trop long (max 30)', reserved:'URL réservée', taken:'Déjà pris — essaie une variante' };
+        const msgs = { too_short:'Trop court', too_long:'Trop long (max 30)', reserved:'URL rï¿½servï¿½e', taken:'Dï¿½jï¿½ pris ï¿½ essaie une variante' };
         icon.innerHTML  = '<i class="bi bi-x-lg text-rose-400 text-lg"></i>';
         msg.textContent = msgs[d.reason] || 'Indisponible';
         msg.className   = 'text-xs mt-1.5 text-rose-400 min-h-[16px]';
@@ -695,7 +695,7 @@
     if (!file) return;
     const status = document.getElementById('avatarUploadStatus');
     const btn    = document.getElementById('avatarUploadBtn');
-    status.textContent = 'Envoi…';
+    status.textContent = 'Envoiï¿½';
     status.classList.remove('hidden');
     btn.disabled = true;
     try {
@@ -706,7 +706,7 @@
       if (!r.ok || !d.url) throw new Error(d.error || 'upload_failed');
       document.getElementById('avatarUrl').value = d.url;
       setAvatar(d.url);
-      status.textContent = 'Uploadé';
+      status.textContent = 'Uploadï¿½';
       scheduleSave();
       setTimeout(() => status.classList.add('hidden'), 2500);
     } catch {
@@ -768,7 +768,7 @@
 
     // Slug
     const slugEl = document.getElementById('previewSlug');
-    if (slugEl) slugEl.textContent = slug.slice(0,16) + (slug.length > 16 ? '…' : '');
+    if (slugEl) slugEl.textContent = slug.slice(0,16) + (slug.length > 16 ? 'ï¿½' : '');
 
     // Name
     document.getElementById('previewName').textContent = name;
@@ -780,14 +780,14 @@
 
     // Badge
     const catIcons = {
-      créateur: '<i class="bi bi-palette"></i>',
+      crï¿½ateur: '<i class="bi bi-palette"></i>',
       pro: '<i class="bi bi-briefcase"></i>',
       perso: '<i class="bi bi-person"></i>',
       musique: '<i class="bi bi-music-note-beamed"></i>',
       tech: '<i class="bi bi-laptop"></i>',
       sport: '<i class="bi bi-trophy"></i>',
     };
-    const catLabels = {créateur:'Créateur',pro:'Pro',perso:'Perso',musique:'Musique',tech:'Tech',sport:'Sport'};
+    const catLabels = {crï¿½ateur:'Crï¿½ateur',pro:'Pro',perso:'Perso',musique:'Musique',tech:'Tech',sport:'Sport'};
     const badge = document.getElementById('previewBadge');
     if (cat && catLabels[cat]) { 
       badge.innerHTML = (catIcons[cat] || '') + ' ' + catLabels[cat]; 
@@ -810,7 +810,7 @@
     // Accent on ring
     document.getElementById('avatarRing').style.borderColor = accent;
 
-    // Link button always hidden (links ajoutés depuis le dashboard)
+    // Link button always hidden (links ajoutï¿½s depuis le dashboard)
     const lBtn = document.getElementById('previewLinkBtn');
     if (lBtn) lBtn.classList.add('hidden');
   }
@@ -853,11 +853,11 @@
   //  COMPLETE
   // --------------------------------------------------------------------
   function completeOnboarding() {
-    // Valider les champs requis de l'étape 1
+    // Valider les champs requis de l'ï¿½tape 1
     const name = document.getElementById('displayName').value.trim();
     const slug = document.getElementById('slugInput').value.trim();
     if (!name) { toast('Le nom d\'affichage est requis.', 'error'); goStep(1); return; }
-    if (!slug || slug.length < 2) { toast('L\'URL est trop courte (2 caractères min).', 'error'); goStep(1); return; }
+    if (!slug || slug.length < 2) { toast('L\'URL est trop courte (2 caractï¿½res min).', 'error'); goStep(1); return; }
     complete();
   }
 
@@ -865,7 +865,7 @@
     const btn  = document.getElementById('completeBtn');
     const txt  = document.getElementById('completeTxt');
     const spin = document.getElementById('completeSpinner');
-    btn.disabled = true; txt.textContent = 'Création…'; spin.classList.remove('hidden');
+    btn.disabled = true; txt.textContent = 'Crï¿½ationï¿½'; spin.classList.remove('hidden');
 
     try {
       const res  = await fetch('/onboarding/complete', {
@@ -886,13 +886,13 @@
       const json = await res.json();
 
       if (!res.ok) {
-        btn.disabled = false; txt.innerHTML = '<span class="flex items-center gap-2">Créer mon Plinkk <i class="bi bi-rocket-takeoff text-lg"></i></span>'; spin.classList.add('hidden');
+        btn.disabled = false; txt.innerHTML = '<span class="flex items-center gap-2">Crï¿½er mon Plinkk <i class="bi bi-rocket-takeoff text-lg"></i></span>'; spin.classList.add('hidden');
         const msgs = {
           slug_invalid:'Slug invalide.',
-          slug_reserved:'URL réservée.',
-          slug_taken:'URL déjà prise.',
+          slug_reserved:'URL rï¿½servï¿½e.',
+          slug_taken:'URL dï¿½jï¿½ prise.',
           name_required:'Le nom d\'affichage est requis.',
-          email_not_verified:'Vérifie ton email avant de publier ton Plinkk.',
+          email_not_verified:'Vï¿½rifie ton email avant de publier ton Plinkk.',
         };
         toast(msgs[json.error] || 'Une erreur est survenue.', 'error'); return;
       }
@@ -901,8 +901,8 @@
       setTimeout(() => { window.location.href = json.redirect || '/?welcome=1'; }, 2600);
 
     } catch {
-      btn.disabled = false; txt.innerHTML = '<span class="flex items-center gap-2">Créer mon Plinkk <i class="bi bi-rocket-takeoff text-lg"></i></span>'; spin.classList.add('hidden');
-      toast('Erreur réseau. Vérifie ta connexion.', 'error');
+      btn.disabled = false; txt.innerHTML = '<span class="flex items-center gap-2">Crï¿½er mon Plinkk <i class="bi bi-rocket-takeoff text-lg"></i></span>'; spin.classList.add('hidden');
+      toast('Erreur rï¿½seau. Vï¿½rifie ta connexion.', 'error');
     }
   }
 
@@ -932,8 +932,8 @@
     overlay.innerHTML = `
       <div style="text-align:center;animation:fadeUp .5s ease both">
         <i class="bi bi-party-popper" style="font-size:60px;color:#8b5cf6;display:block;margin-bottom:14px"></i>
-        <h2 style="font-size:22px;font-weight:800;color:#fff;margin:0 0 8px">Ton Plinkk est créé !</h2>
-        <p style="font-size:14px;color:#a78bfa;margin:0">Redirection dans un instant…</p>
+        <h2 style="font-size:22px;font-weight:800;color:#fff;margin:0 0 8px">Ton Plinkk est crï¿½ï¿½ !</h2>
+        <p style="font-size:14px;color:#a78bfa;margin:0">Redirection dans un instantï¿½</p>
       </div>`;
     document.body.appendChild(overlay);
   }
@@ -945,40 +945,40 @@
     {
       target: '#field-displayName',
       title:  'Nom d\'affichage',
-      body:   'C\'est le nom visible par tous tes visiteurs. Utilise ton prénom, ton pseudo ou ton nom de marque.',
+      body:   'C\'est le nom visible par tous tes visiteurs. Utilise ton prï¿½nom, ton pseudo ou ton nom de marque.',
       placement: 'right',
     },
     {
       target: '#field-slug',
       title:  'Ton URL unique',
-      body:   'Chaque Plinkk a une adresse courte : <strong style="color:#c4b5fd">plinkk.fr/ton-slug</strong>. Choisis quelque chose de simple et mémorable, sans accents.',
+      body:   'Chaque Plinkk a une adresse courte : <strong style="color:#c4b5fd">plinkk.fr/ton-slug</strong>. Choisis quelque chose de simple et mï¿½morable, sans accents.',
       placement: 'right',
     },
     {
       target: '#field-category',
-      title:  'Catégorie',
-      body:   'La catégorie contextualise ton profil. Elle s\'affiche sous ton nom comme un badge coloré avec la couleur accent choisie.',
+      title:  'Catï¿½gorie',
+      body:   'La catï¿½gorie contextualise ton profil. Elle s\'affiche sous ton nom comme un badge colorï¿½ avec la couleur accent choisie.',
       placement: 'right',
     },
     {
       target: '#field-avatar',
       title:  'Ton avatar',
       stepTo: 2,
-      body:   'Upload une photo depuis ton appareil ou colle une URL d\'image. L\'aperçu se met à jour instantanément.',
+      body:   'Upload une photo depuis ton appareil ou colle une URL d\'image. L\'aperï¿½u se met ï¿½ jour instantanï¿½ment.',
       placement: 'right',
     },
     {
       target: '#field-bio',
       title:  'Ta bio',
       stepTo: 2,
-      body:   'Une courte description qui apparaît sous ton nom sur ton profil public. 160 caractères maximum.',
+      body:   'Une courte description qui apparaï¿½t sous ton nom sur ton profil public. 160 caractï¿½res maximum.',
       placement: 'right',
     },
     {
       target: '#field-color',
-      title:  'Thème Plinkk',
+      title:  'Thï¿½me Plinkk',
       stepTo: 2,
-      body:   'Choisis un thème Plinkk pour personnaliser les couleurs de tes boutons et badges. Tu pourras le changer à tout moment depuis le dashboard.',
+      body:   'Choisis un thï¿½me Plinkk pour personnaliser les couleurs de tes boutons et badges. Tu pourras le changer ï¿½ tout moment depuis le dashboard.',
       placement: 'right',
     },
   ];
@@ -1045,7 +1045,7 @@
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="display:flex;gap:4px;align-items:center">${dots}</div>
         <div style="display:flex;gap:10px;align-items:center">
-          ${!isFirst ? `<button onclick="prevTour()" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:12px;padding:0;transition:color .15s" onmouseover="this.style.color='#f8fafc'" onmouseout="this.style.color='#64748b'">? Préc.</button>` : ''}
+          ${!isFirst ? `<button onclick="prevTour()" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:12px;padding:0;transition:color .15s" onmouseover="this.style.color='#f8fafc'" onmouseout="this.style.color='#64748b'">? Prï¿½c.</button>` : ''}
           <button onclick="nextTour()" style="background:none;border:none;color:#a78bfa;cursor:pointer;font-size:12px;font-weight:600;padding:0;transition:color .15s" onmouseover="this.style.color='#d8b4fe'" onmouseout="this.style.color='#a78bfa'">
             ${isLast ? 'Terminer' : 'Suivant ?'}
           </button>
@@ -1126,12 +1126,12 @@
       document.getElementById('step-1').classList.remove('active');
       document.getElementById(`step-${safeStep}`).classList.add('active');
       const widths = ['33%','66%','100%'];
-      const labels = ['Étape 1 sur 3','Étape 2 sur 3','Étape 3 sur 3'];
+      const labels = ['ï¿½tape 1 sur 3','ï¿½tape 2 sur 3','ï¿½tape 3 sur 3'];
       document.getElementById('progressFill').style.width = widths[safeStep-1];
       document.getElementById('stepLabel').textContent    = labels[safeStep-1];
     }
 
-    // Tour disponible via le bouton "Guide" — pas d'auto-démarrage
+    // Tour disponible via le bouton "Guide" ï¿½ pas d'auto-dï¿½marrage
   })();
   </script>
 </body>

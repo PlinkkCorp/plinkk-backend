@@ -354,7 +354,7 @@
                 </main>
         </div>
 
-        <script>
+        <script nonce="<%= cspNonce %>">
             // Gérer l'affichage des destinataires personnalisés
             document.querySelectorAll('input[name="recipientType"]').forEach(radio => {
                 radio.addEventListener('change', () => {

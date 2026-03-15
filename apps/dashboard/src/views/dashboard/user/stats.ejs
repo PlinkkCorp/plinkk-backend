@@ -746,7 +746,7 @@
         </div>
 
         <!--  DATA  -->
-        <script type="application/json" id="stats-data"><%- JSON.stringify({
+        <script type="application/json" nonce="<%= cspNonce %>" id="stats-data"><%- JSON.stringify({
     views: _userViews,
     totalViews: _totalViews,
     totalClicks: _totalClicks,
@@ -764,7 +764,7 @@
 }) %></script>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
+        <script nonce="<%= cspNonce %>">
             (function () {
                 /*  helpers  */
                 const qs = (s) => document.querySelector(s);

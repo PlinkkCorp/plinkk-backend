@@ -477,7 +477,7 @@
                                                         </div>
                                                         <% } %>
 
-                                                            <script>
+                                                            <script nonce="<%= cspNonce %>">
                                                                 (function () {
                                                                     const el = document.getElementById('spaTopLoaderDash');
                                                                     const bar = document.getElementById('spaTopLoaderDashProg');
@@ -500,7 +500,7 @@
                                                                     try { const origFetch = window.fetch.bind(window); let inflight = 0; const onBegin = () => { if (inflight++ === 0) window.dispatchEvent(new Event('spa:loading-start')); }; const onEnd = () => { if (inflight > 0 && --inflight === 0) window.dispatchEvent(new Event('spa:loading-end')); }; window.fetch = function (input, init) { try { const url = typeof input === 'string' ? input : (input && input.url) || ''; const method = (init && (init.method || 'GET')) || (typeof input !== 'string' && input && input.method) || 'GET'; const headers = new Headers((init && init.headers) || (typeof input !== 'string' && input && input.headers) || undefined); const accept = (headers.get('Accept') || headers.get('accept') || '').toLowerCase(); const isHtmlAccept = accept.includes('text/html') || accept === ''; const qualifies = method.toUpperCase() === 'GET' && looksLikeHtmlRequest(url) && !url.startsWith('/api'); if (qualifies && isHtmlAccept) onBegin(); const p = origFetch(input, init); if (qualifies && isHtmlAccept) { p.finally(() => { setTimeout(onEnd, 80); }); } return p; } catch (e) { return origFetch(input, init); } }; } catch (e) { }
                                                                 })();
                                                             </script>
-                                                            <script>
+                                                            <script nonce="<%= cspNonce %>">
                                                                 (function () {
                                                                     const btn = document.getElementById('profileMenuBtn');
                                                                     const panel = document.getElementById('profileMenuPanel');

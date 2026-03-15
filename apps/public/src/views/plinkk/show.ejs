@@ -53,7 +53,7 @@
     <meta name="twitter:image:alt" content="<%= pageTitle %> - Profil Plinkk">
     
     <!-- Métadonnées structurées JSON-LD -->
-    <script type="application/ld+json">
+    <script type="application/ld+json" nonce="<%= cspNonce %>">
     {
       "@context": "https://schema.org",
       "@type": "ProfilePage",
@@ -117,10 +117,10 @@
             </div>
         </article>
     </body>
-    <script type="application/json" id="plinkk-ctx-username"><%- JSON.stringify(username || "") %></script>
-    <script type="application/json"
+    <script type="application/json" id="plinkk-ctx-username" nonce="<%= cspNonce %>"><%- JSON.stringify(username || "") %></script>
+    <script type="application/json" nonce="<%= cspNonce %>"
         id="plinkk-ctx-identifier"><%- JSON.stringify((page && page.slug) ? page.slug : "") %></script>
-    <script type="application/json" id="plinkk-page-id"><%- JSON.stringify(page?.id || "") %></script>
+    <script type="application/json" id="plinkk-page-id" nonce="<%= cspNonce %>"><%- JSON.stringify(page?.id || "") %></script>
     <script src="/public/js/plinkk-init.js"></script>
     <script type="module"
         src="/<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : ((page && page.slug) ? page.slug : username) %>.js?v=fix-icons"></script>

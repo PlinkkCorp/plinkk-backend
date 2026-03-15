@@ -8,7 +8,7 @@
   image: 'https://cdn.plinkk.fr/og-image-about.png',
   robots: 'index,follow',
   extraHead: `
-    <script type="application/ld+json">
+    <script type="application/ld+json" nonce="${cspNonce}">
     {
       "@context": "https://schema.org",
       "@type": "AboutPage",
@@ -135,7 +135,7 @@
                   <span class="text-xs text-slate-500">Pour toute demande d'autorisation spécifique, contactez l'équipe Plinkk.</span>
                   </div>
                 </p>
-                <script>
+                <script nonce="<%= cspNonce %>">
                   // Optionally rotate the arrow on open/close
                   document.addEventListener('DOMContentLoaded', function () {
                   const btn = document.querySelector('button[onclick*="pcl-usage-details"]');
@@ -244,7 +244,7 @@
 
       </div>
     </main>
-    <script>
+    <script nonce="<%= cspNonce %>">
       document.addEventListener('DOMContentLoaded', function () {
         const repos = ['PlinkkCorp/plinkk', 'PlinkkCorp/plinkk-backend'];
         const nf = new Intl.NumberFormat();

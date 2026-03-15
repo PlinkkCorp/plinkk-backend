@@ -170,7 +170,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="<%= cspNonce %>">
 (() => {
     const plinkkId = new URLSearchParams(window.location.search).get('plinkkId');
     const qrIdToEdit = new URLSearchParams(window.location.search).get('qrId');

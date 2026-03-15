@@ -68,7 +68,7 @@
   <meta name="twitter:image:alt" content="<%= ((typeof title !== 'undefined' && title) ? title : 'Plinkk') %>" />
   
   <!-- Métadonnées structurées JSON-LD -->
-  <script type="application/ld+json">
+  <script type="application/ld+json" nonce="<%= cspNonce %>">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",

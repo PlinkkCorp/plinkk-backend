@@ -478,7 +478,7 @@
                               </div>
                               <% } %>
 
-                                <script>
+                                <script nonce="<%= cspNonce %>">
                                   (function () {
                                     const el = document.getElementById('spaTopLoader');
                                     const bar = document.getElementById('spaTopLoaderProg');
@@ -501,7 +501,7 @@
                                   })();
                                 </script>
                                  <%- include('partials/bug-ticket-modal.ejs') %>
-                                <script>
+                                <script nonce="<%= cspNonce %>">
                                   async function openSupportModal(initialMessage) {
                                     const isLogged = <%= !!_user %>;
                                     if (!isLogged) {
@@ -537,7 +537,7 @@
                                     }
                                   }
                                 </script>
-                                <script>
+                                <script nonce="<%= cspNonce %>">
                                   (function () {
                                     const accountBtn = document.getElementById('accountBtn');
                                     const accountPanel = document.getElementById('accountPanel');

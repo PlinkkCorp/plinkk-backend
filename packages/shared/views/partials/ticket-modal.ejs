@@ -54,7 +54,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="<%= cspNonce %>">
     window.openGlobalTicketModal = function (category, defaultMessage, context) {
         const modal = document.getElementById('globalTicketModal');
         if (!modal) return;

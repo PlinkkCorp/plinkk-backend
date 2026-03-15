@@ -121,7 +121,7 @@
                   class="h-full w-full object-cover opacity-0 transition-opacity duration-300"
                   data-initial="<%= _av_initial %>" />
                 <% } else { %>
-                  <script>document.currentScript.parentElement.classList.remove('animate-pulse', 'bg-slate-800');</script>
+                  <script nonce="<%= cspNonce %>">document.currentScript.parentElement.classList.remove('animate-pulse', 'bg-slate-800');</script>
                   <%= _av_initial %>
                     <% } %>
           </div>

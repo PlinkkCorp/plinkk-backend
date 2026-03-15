@@ -183,7 +183,7 @@
     <script src="/public/js/tutorial.js" defer></script>
 </div>
 
-<script>
+<script nonce="<%= cspNonce %>">
 (() => {
   window.deleteQrCode = async (plinkkId, qrId, label) => {
     if (!confirm(`Êtes-vous sûr de vouloir supprimer le QR Code "${label}" ?`)) return;

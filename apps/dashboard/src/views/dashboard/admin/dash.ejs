@@ -1482,7 +1482,7 @@
             </div>
         </div>
 
-        <script>
+        <script nonce="<%= cspNonce %>">
             // Quick approve theme function
             async function quickApproveTheme(themeId) {
                 try {
@@ -1562,7 +1562,7 @@
             }
         </script>
 
-        <script>
+        <script nonce="<%= cspNonce %>">
             (function () {
                 const $ = (s, r = document) => r.querySelector(s);
                 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
@@ -1630,7 +1630,7 @@
         </body>
 
         <script src="/public/js/pagination.js"></script>
-        <script>
+        <script nonce="<%= cspNonce %>">
             (function () {
                 const $ = (s, r = document) => r.querySelector(s);
                 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));

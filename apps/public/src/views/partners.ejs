@@ -144,7 +144,7 @@
                 }
             </style>
 
-            <script>
+            <script nonce="<%= cspNonce %>">
                 document.addEventListener('DOMContentLoaded', async () => {
                     const isLoggedReified = <%- JSON.stringify(!!locals.currentUser) %>;
 

@@ -29,7 +29,7 @@
 
 </main>
 
-<script>
+<script nonce="<%= cspNonce %>">
 (function() {
     const obs = new IntersectionObserver(function(entries) {
         entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('visible'); });

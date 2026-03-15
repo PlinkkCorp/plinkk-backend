@@ -532,7 +532,7 @@
                 }
             </style>
 
-            <script>
+            <script nonce="<%= cspNonce %>">
                 const rawData = '<%- Buffer.from(JSON.stringify(bugReports || [])).toString("base64") %>';
                 const bugReportsData = JSON.parse(atob(rawData));
 

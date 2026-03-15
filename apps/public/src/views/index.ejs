@@ -33,7 +33,7 @@
     <meta name="twitter:image:alt" content="Plinkk - L'alternative open-source à Linktree" />
     
     <!-- JSON-LD amélioré pour la page d'accueil -->
-    <script type="application/ld+json">
+    <script type="application/ld+json" nonce="${cspNonce}">
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
@@ -1103,7 +1103,7 @@
 
   <%- include('partials/footer') %>
 
-    <script>
+    <script nonce="<%= cspNonce %>">
       // Hero email capture form
       document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('heroEmailForm');
@@ -1140,7 +1140,7 @@
       });
     </script>
 
-    <script>
+    <script nonce="<%= cspNonce %>">
       // Intersection Observer for reveal animations
       const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -1458,6 +1458,6 @@
         if (scrollWheelHint) scrollWheelHint.style.display = 'none';
       }
     </script>
-    <script>
+    <script nonce="<%= cspNonce %>">
       (function () { try { if (sessionStorage.getItem('plinkk_t_landing')) return; sessionStorage.setItem('plinkk_t_landing', '1'); navigator.sendBeacon('/api/track', new Blob([JSON.stringify({ event: 'landing_visit' })], { type: 'application/json' })); } catch (e) { } })();
     </script>

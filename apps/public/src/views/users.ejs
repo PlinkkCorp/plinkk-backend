@@ -305,7 +305,7 @@
     </main>
 
     <script src="/public/js/pagination.js"></script>
-    <script>
+    <script nonce="<%= cspNonce %>">
       (function () {
         const $ = (s, r = document) => r.querySelector(s);
         const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));

@@ -407,8 +407,8 @@
             }
         </style>
 
-        <script src="/public/js/pagination.js"></script>
-        <script>
+        <script nonce="<%= cspNonce %>" src="/public/js/pagination.js"></script>
+        <script nonce="<%= cspNonce %>">
             (function () {
                 function showConfirm(message, actionText = 'Confirmer') {
                     return new Promise(resolve => {

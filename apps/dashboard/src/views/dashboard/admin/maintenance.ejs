@@ -311,7 +311,7 @@
             data-ips="<%= JSON.stringify(maintenance.allowedIps || []) %>"
             data-roles="<%= JSON.stringify(maintenance.allowedRoles || []) %>"></div>
 
-        <script>
+        <script nonce="<%= cspNonce %>">
             // System Pages Definition
             const SYSTEM_PAGES = [
                 { path: '/', label: 'Page d\'accueil', icon: 'home' },
