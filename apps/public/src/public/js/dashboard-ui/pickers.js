@@ -31,7 +31,7 @@ export async function populateIconGrid(filterText) {
   await ensureIconCatalog();
   const term = (filterText || "").toLowerCase();
   while (iconGrid.firstChild) {
-    iconGrid.removeChild(div.firstChild);
+    iconGrid.removeChild(iconGrid.firstChild);
   }
   iconCatalog
     .filter(
@@ -137,7 +137,7 @@ function defaultRenderCard(item, idx) {
 export function renderPickerGrid(query) {
   const term = (query || "").toLowerCase();
   while (pickerGrid.firstChild) {
-    pickerGrid.removeChild(div.firstChild);
+    pickerGrid.removeChild(pickerGrid.firstChild);
   }
   pickerData.forEach((item, idx) => {
     const label = (item?.name || item?.animationName || "").toLowerCase();

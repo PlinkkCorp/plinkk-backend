@@ -457,7 +457,7 @@ export function setBackgroundStyles(profileData) {
       document.body.prepend(video);
     } else {
       while (bgContainer.firstChild) {
-        bgContainer.removeChild(div.firstChild);
+        bgContainer.removeChild(bgContainer.firstChild);
       }
       bgContainer.appendChild(video);
     }

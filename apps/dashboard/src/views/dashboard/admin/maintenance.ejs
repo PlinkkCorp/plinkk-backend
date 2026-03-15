@@ -434,7 +434,7 @@
                 const isGlobalOn = globalCheckbox ? globalCheckbox.checked : state.isGlobal;
 
                 while (container.firstChild) {
-                    container.removeChild(div.firstChild)
+                    container.removeChild(container.firstChild)
                 }
 
                 // Sort: System first, then Custom (alphabetical)
@@ -560,7 +560,7 @@
                 const container = document.getElementById(`list-${type}`);
                 if (!container) return;
                 while (container.firstChild) {
-                    container.removeChild(div.firstChild)
+                    container.removeChild(container.firstChild)
                 }
 
                 if (state[type].length === 0) {

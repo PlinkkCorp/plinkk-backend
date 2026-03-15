@@ -527,7 +527,7 @@
                 /* ═══════ User Selection (picked chips) ═══════ */
                 function renderPicked() {
                     while (selectedUsers.firstChild) {
-                        selectedUsers.removeChild(div.firstChild)
+                        selectedUsers.removeChild(selectedUsers.firstChild)
                     }
                     for (const u of picked.values()) {
                         const chip = document.createElement('div');

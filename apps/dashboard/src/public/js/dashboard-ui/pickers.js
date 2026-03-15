@@ -91,7 +91,7 @@ async function updateGravatar() {
     img.className = "w-full h-full object-cover";
     if (gravatarPreview) {
       while (gravatarPreview.firstChild) {
-        gravatarPreview.removeChild(div.firstChild);
+        gravatarPreview.removeChild(gravatarPreview.firstChild);
       }
       gravatarPreview.appendChild(img);
     }
@@ -142,7 +142,7 @@ async function populateUploadsGrid(filter) {
 
   const uploads = await ensureUserUploads();
   while (uploadsGrid.firstChild) {
-    uploadsGrid.removeChild(div.firstChild);
+    uploadsGrid.removeChild(uploadsGrid.firstChild);
   }
 
   if (!uploads.length) {
@@ -292,7 +292,7 @@ export async function populateIconGrid(filterText) {
   const catalog = await ensureIconCatalog();
   const term = (filterText || "").toLowerCase();
   while (iconGrid.firstChild) {
-    iconGrid.removeChild(div.firstChild);
+    iconGrid.removeChild(iconGrid.firstChild);
   }
   const items = catalog.filter(
     (i) =>
@@ -427,7 +427,7 @@ function defaultRenderCard(item, idx) {
 export function renderPickerGrid(query) {
   const term = (query || "").toLowerCase();
   while (pickerGrid.firstChild) {
-    pickerGrid.removeChild(div.firstChild);
+    pickerGrid.removeChild(pickerGrid.firstChild);
   }
   pickerData.forEach((item, idx) => {
     const label = (item?.name || item?.animationName || "").toLowerCase();

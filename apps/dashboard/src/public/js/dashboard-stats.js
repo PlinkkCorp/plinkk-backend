@@ -32,7 +32,7 @@ function downloadBlob(content, filename, type = 'text/csv;charset=utf-8') {
 
 function buildBarChart(container, data, { maxBars = 10, isLoading = false } = {}) {
   while (container.firstChild) {
-    container.removeChild(div.firstChild)
+    container.removeChild(container.firstChild)
   }
   
   if (isLoading) {
@@ -110,7 +110,7 @@ function buildBarChart(container, data, { maxBars = 10, isLoading = false } = {}
 
 function drawLineChart(container, series, isLoading = false) {
   while (container.firstChild) {
-    container.removeChild(div.firstChild)
+    container.removeChild(container.firstChild)
   }
 
   if (isLoading) {
@@ -256,7 +256,7 @@ function applyFilters(allLinks) {
 function renderTable(rows, isLoading = false) {
   const tbody = qs('#tblBody');
   while (tbody.firstChild) {
-    tbody.removeChild(div.firstChild)
+    tbody.removeChild(tbody.firstChild)
   }
   
   if (isLoading) {

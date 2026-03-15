@@ -18,7 +18,7 @@ async function renderCanvasInto(container, item) {
   if (!container || !item) return;
   // Reset container
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
   container.style.position = "relative";
   container.style.background = "#0b1220";
@@ -170,7 +170,7 @@ export function refreshSelectedCanvasPreview({
       selectedCanvasPreviewFrame.src = "about:blank";
     } else {
       while (selectedCanvasPreviewFrame.firstChild) {
-        selectedCanvasPreviewFrame.removeChild(div.firstChild);
+        selectedCanvasPreviewFrame.removeChild(selectedCanvasPreviewFrame.firstChild);
       }
     }
     return;

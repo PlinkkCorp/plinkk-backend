@@ -1474,7 +1474,7 @@
         function populateOptions() {
           if (!select) return;
           while (select.firstChild) {
-            select.removeChild(div.firstChild)
+            select.removeChild(select.firstChild)
           }
           if (!plinkkList.length) {
             const opt = document.createElement('option');
@@ -1825,7 +1825,7 @@
         async function open2faModalWith(data) {
           if (!modal) return;
           while (qrWrap.firstChild) {
-            qrWrap.removeChild(div.firstChild)
+            qrWrap.removeChild(qrWrap.firstChild)
           }
           if (otpauthEl) otpauthEl.value = '';
           if (data.qrCode) {
@@ -1991,7 +1991,7 @@
           list = JSON.parse(raw || '[]');
         } catch (_) { list = []; }
         while (selectPlinkk.firstChild) {
-          selectPlinkk.removeChild(div.firstChild)
+          selectPlinkk.removeChild(selectPlinkk.firstChild)
         }
         if (!list.length) {
           const opt = document.createElement('option');

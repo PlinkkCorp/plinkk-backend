@@ -343,7 +343,7 @@ export function fillSelect(selectEl, items, getLabel) {
   if (!selectEl) return;
   const current = selectEl.value;
   while (selectEl.firstChild) {
-    selectEl.removeChild(div.firstChild);
+    selectEl.removeChild(selectEl.firstChild);
   }
   items.forEach((item, idx) => {
     const opt = document.createElement("option");

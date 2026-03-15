@@ -38,7 +38,7 @@ export function renderBackground({
   scheduleAutoSave,
 }) {
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
   if (!Array.isArray(colors) || colors.length === 0) {
     container.append(
@@ -114,7 +114,7 @@ export function renderNeon({
   scheduleAutoSave,
 }) {
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
   if (!Array.isArray(colors) || colors.length === 0) {
     container.append(
@@ -181,7 +181,7 @@ export function renderNeon({
 
 export function renderLabels({ container, addBtn, labels, scheduleAutoSave }) {
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
   if (!Array.isArray(labels) || labels.length === 0) {
     container.append(
@@ -335,7 +335,7 @@ export function renderLabels({ container, addBtn, labels, scheduleAutoSave }) {
 
 export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
   const SOCIAL_PLATFORMS = [
     {
@@ -1034,7 +1034,7 @@ export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
 
 export function renderLinks({ container, addBtn, links, scheduleAutoSave }) {
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
   if (!Array.isArray(links) || links.length === 0) {
     container.append(
@@ -1315,7 +1315,7 @@ export function renderLayout({
 }) {
   if (!container) return;
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
   if (!Array.isArray(order)) order = [];
   // Normaliser: garder uniquement les clés connues et compléter l'ordre manquant

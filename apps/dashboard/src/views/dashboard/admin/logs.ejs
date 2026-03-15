@@ -918,7 +918,7 @@
 
                         const roleSelect = document.getElementById('umRole');
                         while (roleSelect.firstChild) {
-                            roleSelect.removeChild(div.firstChild)
+                            roleSelect.removeChild(roleSelect.firstChild)
                         }
                         const roles = ["USER", "PREMIUM", "PARTNER", "MODERATOR", "DEVELOPER", "ADMIN"];
                         roles.forEach(r => {
@@ -963,10 +963,10 @@
                         const plList = document.getElementById('umPlList');
                         const rdList = document.getElementById('umRdList');
                         while (plList.firstChild) {
-                            plList.removeChild(div.firstChild)
+                            plList.removeChild(plList.firstChild)
                         }
                         while (rdList.firstChild) {
-                            rdList.removeChild(div.firstChild)
+                            rdList.removeChild(rdList.firstChild)
                         }
                         document.getElementById('umPlCount').textContent = (data.plinkks || []).length;
                         document.getElementById('umRdCount').textContent = (data.redirects || []).length;
@@ -1320,7 +1320,7 @@
 
                 const jsonContainer = document.getElementById('modalJson');
                 while (jsonContainer.firstChild) {
-                    jsonContainer.removeChild(div.firstChild)
+                    jsonContainer.removeChild(jsonContainer.firstChild)
                 }
                 const details = log.details || {};
 

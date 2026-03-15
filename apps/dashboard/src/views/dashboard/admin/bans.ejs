@@ -514,7 +514,7 @@
                     }
 
                     while (tbody.firstChild) {
-                        tbody.removeChild(div.firstChild)
+                        tbody.removeChild(tbody.firstChild)
                     }
                     for (const b of filtered) {
                         const tr = document.createElement('tr');
@@ -650,7 +650,7 @@
                     if (list.length === 0) { emailTbody.innerHTML = `<tr><td class="px-6 py-8 text-center text-slate-500" colspan="5">Aucun email banni.</td></tr>`; return; }
 
                     while (emailTbody.firstChild) {
-                        emailTbody.removeChild(div.firstChild)
+                        emailTbody.removeChild(emailTbody.firstChild)
                     }
                     for (const b of list) {
                         const until = (b.time == null || b.time < 0) ? null : (new Date(b.createdAt).getTime() + b.time * 60000);
@@ -801,7 +801,7 @@
                     const arr = Array.from(selected.values()).sort();
                     if (arr.length === 0) { selectedTbody.innerHTML = `<tr><td colspan="2" class="px-4 py-4 text-center text-slate-500 text-xs">Aucune sélection.</td></tr>`; return; }
                     while (selectedTbody.firstChild) {
-                        selectedTbody.removeChild(div.firstChild)
+                        selectedTbody.removeChild(selectedTbody.firstChild)
                     }
                     for (const email of arr) {
                         const tr = document.createElement('tr');

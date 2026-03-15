@@ -2776,7 +2776,7 @@
 
                     const jsonContainer = document.getElementById('modalJson');
                     while (jsonContainer.firstChild) {
-                        jsonContainer.removeChild(div.firstChild)
+                        jsonContainer.removeChild(jsonContainer.firstChild)
                     }
                     const details = log.details || {};
 

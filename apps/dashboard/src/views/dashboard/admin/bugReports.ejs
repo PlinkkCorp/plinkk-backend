@@ -563,7 +563,7 @@
                 function renderThread(thread) {
                     const container = document.getElementById('modalThread');
                     while (container.firstChild) {
-                        container.removeChild(div.firstChild)
+                        container.removeChild(container.firstChild)
                     }
                     if (!thread || thread.length === 0) {
                         container.innerHTML = '<p class="text-slate-600 text-sm italic text-center py-8">Aucun message.</p>';
@@ -725,7 +725,7 @@
                 function setEmojiCat(cat) {
                     const grid = document.getElementById('emojiGrid');
                     while (grid.firstChild) {
-                        grid.removeChild(div.firstChild)
+                        grid.removeChild(grid.firstChild)
                     }
                     const emojis = {
                         faces: ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '🧐'],
@@ -754,7 +754,7 @@
                             const resp = await fetch('/api/me/uploads');
                             const { uploads } = await resp.json();
                             while (grid.firstChild) {
-                                grid.removeChild(div.firstChild)
+                                grid.removeChild(grid.firstChild)
                             }
                             uploads.forEach(u => {
                                 if (u.url.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)) {
@@ -832,7 +832,7 @@
                     const browserContainer = document.getElementById('modalBrowserContainer');
                     const browserEl = document.getElementById('modalBrowser');
                     while (browserEl.firstChild) {
-                        browserEl.removeChild(div.firstChild)
+                        browserEl.removeChild(browserEl.firstChild)
                     }
                     if (r.browser && typeof r.browser === 'object') {
                         browserContainer.classList.remove('hidden');

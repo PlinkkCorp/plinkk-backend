@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   async function renderPlinkk(profileData) {
     // Clear existing content except for essential elements if needed
     while (article.firstChild) {
-      article.removeChild(div.firstChild);
+      article.removeChild(article.firstChild);
     }
 
     // Rendu des sections selon l'ordre choisi (layoutOrder) si présent

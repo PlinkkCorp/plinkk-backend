@@ -543,7 +543,7 @@
 
           const actionsEl = document.getElementById('modalActions');
           while (actionsEl.firstChild) {
-            actionsEl.removeChild(div.firstChild)
+            actionsEl.removeChild(actionsEl.firstChild)
           }
           if (status === 'submitted') {
             const hasPending = card.querySelector('.badge-pending');
@@ -577,7 +577,7 @@
           const actionsDiv = card.querySelector('.actions-container');
           if (!actionsDiv) return;
           while (actionsDiv.firstChild) {
-            actionsDiv.removeChild(div.firstChild)
+            actionsDiv.removeChild(actionsDiv.firstChild)
           }
           if (status === 'submitted') { actionsDiv.innerHTML = '<button class="approveBtn action-btn action-btn-approve">Approuver</button><button class="rejectBtn action-btn action-btn-reject">Rejeter</button><button class="previewBtn action-btn action-btn-view">Aperçu</button>'; }
           else if (status === 'approved') { actionsDiv.innerHTML = '<button class="archiveBtn action-btn action-btn-archive">Archiver</button><button class="previewBtn action-btn action-btn-view">Aperçu</button>'; }

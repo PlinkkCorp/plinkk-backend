@@ -47,7 +47,7 @@ async function renderCanvasInto(container, item) {
     
     // Clear skeleton and add canvas
     while (container.firstChild) {
-      container.removeChild(div.firstChild)
+      container.removeChild(container.firstChild)
     }
     container.appendChild(canvas);
     const ro = new ResizeObserver(resize); ro.observe(canvas); resize();

@@ -1194,7 +1194,7 @@
                     const tbody = qs('#tblBody');
                     if (tbody) {
                         while (tbody.firstChild) {
-                            tbody.removeChild(div.firstChild)
+                            tbody.removeChild(tbody.firstChild)
                         }
                         rows.forEach(r => {
                             const tr = document.createElement('tr');
@@ -1278,7 +1278,7 @@
                     const legendEl = qs('#categoriesLegend');
                     if (legendEl) {
                         while (legendEl.firstChild) {
-                            legendEl.removeChild(div.firstChild)
+                            legendEl.removeChild(legendEl.firstChild)
                         }
                         const total = catEntries.reduce((a, x) => a + x[1], 0);
                         catEntries.forEach((e, i) => {
@@ -1324,7 +1324,7 @@
                     const tbody = qs('#qrTableBody');
                     if (!tbody) return;
                     while (tbody.firstChild) {
-                        tbody.removeChild(div.firstChild)
+                        tbody.removeChild(tbody.firstChild)
                     }
 
                     if (!qrCodes.length) {

@@ -13,7 +13,7 @@ import { btnIconThemeConfig } from "../../config/btnIconThemeConfig.js";
 export function renderSkeletons(container, count = 3) {
   if (!container) return;
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
   for (let i = 0; i < count; i++) {
     const row = el("div", {
@@ -74,7 +74,7 @@ export function renderBackground({
 }) {
   if (!container) return;
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
   if (!Array.isArray(colors) || colors.length === 0) {
     container.append(
@@ -154,7 +154,7 @@ export function renderNeon({
 }) {
   if (!container) return;
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
   if (!Array.isArray(colors) || colors.length === 0) {
     container.append(
@@ -223,7 +223,7 @@ export function renderNeon({
 export function renderLabels({ container, addBtn, labels, scheduleAutoSave }) {
   if (!container) return;
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
   if (!Array.isArray(labels) || labels.length === 0) {
     container.append(
@@ -381,7 +381,7 @@ export function renderLabels({ container, addBtn, labels, scheduleAutoSave }) {
 export function renderSocial({ container, addBtn, socials, scheduleAutoSave }) {
   if (!container) return;
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
   const SOCIAL_PLATFORMS = [
     {
@@ -1173,7 +1173,7 @@ export function renderCategories({
 }) {
   if (!container) return;
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
 
   const listContainer = container;
@@ -1314,7 +1314,7 @@ export function renderLinks({
 }) {
   if (!container) return;
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
 
   // Bind quick add controls if present in DOM
@@ -1341,7 +1341,7 @@ export function renderLinks({
   function fillCategorySelect() {
     if (!modalCat) return;
     while (modalCat.firstChild) {
-      modalCat.removeChild(div.firstChild);
+      modalCat.removeChild(modalCat.firstChild);
     }
     modalCat.append(el("option", { value: "", text: "Aucune catégorie" }));
     (categories || []).forEach((c) => {
@@ -1354,7 +1354,7 @@ export function renderLinks({
     if (!modalTheme) return;
     if (modalTheme._filled) return;
     while (modalTheme.firstChild) {
-      modalTheme.removeChild(div.firstChild);
+      modalTheme.removeChild(modalTheme.firstChild);
     }
     modalTheme.append(
       el("option", { value: "system", text: "Thème par défaut (Système)" }),
@@ -1494,7 +1494,7 @@ export function renderLinks({
         if (!presetsWrap._bound) {
           const platforms = window.__SOCIAL_PLATFORM_LIST__ || [];
           while (presetsWrap.firstChild) {
-            presetsWrap.removeChild(div.firstChild);
+            presetsWrap.removeChild(presetsWrap.firstChild);
           }
 
           // header with title and optional "Voir tout"
@@ -2776,7 +2776,7 @@ export function renderLinks({
 export function renderLayout({ container, order, scheduleAutoSave, cfg = {} }) {
   if (!container) return;
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
 
   const KNOWN = ["profile", "username", "labels", "social", "email", "links"];

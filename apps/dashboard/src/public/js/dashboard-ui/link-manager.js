@@ -25,7 +25,7 @@ export class LinkManager {
 
     // Clear
     while (sel.firstChild) {
-      sel.removeChild(div.firstChild);
+      sel.removeChild(sel.firstChild);
     }
 
     const opt = document.createElement("option");

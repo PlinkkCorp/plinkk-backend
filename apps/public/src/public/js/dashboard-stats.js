@@ -32,7 +32,7 @@ function downloadBlob(content, filename, type = "text/csv;charset=utf-8") {
 
 function buildBarChart(container, data, { maxBars = 10 } = {}) {
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
   if (!data.length) {
     container.innerHTML = '';
@@ -104,7 +104,7 @@ function buildBarChart(container, data, { maxBars = 10 } = {}) {
 // Graphique en ligne/aire pour séries journalières
 function drawLineChart(container, series) {
   while (container.firstChild) {
-    container.removeChild(div.firstChild);
+    container.removeChild(container.firstChild);
   }
   if (!series.length) {
     container.innerHTML = '';
@@ -287,7 +287,7 @@ function applyFilters(allLinks) {
 function renderTable(rows) {
   const tbody = qs("#tblBody");
   while (tbody.firstChild) {
-    tbody.removeChild(div.firstChild);
+    tbody.removeChild(tbody.firstChild);
   }
   rows.forEach((r) => {
     const tr = document.createElement("tr");

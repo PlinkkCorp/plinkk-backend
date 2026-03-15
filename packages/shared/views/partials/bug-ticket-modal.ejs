@@ -175,7 +175,7 @@
       const container = document.getElementById('bugChatThread');
       if (!container) return;
       while (container.firstChild) {
-        container.removeChild(div.firstChild)
+        container.removeChild(container.firstChild)
       }
       appendUserMsg({ from: 'user', message: bugReport.message, userName: 'Vous', image: null, createdAt: bugReport.createdAt });
       (bugReport.conversation?.messages || []).forEach(msg => {
@@ -313,7 +313,7 @@
       const grid = document.getElementById('userEmojiGrid');
       if (!grid) return;
       while (grid.firstChild) {
-        grid.removeChild(div.firstChild)
+        grid.removeChild(grid.firstChild)
       }
       (EMOJI_CATS[cat] || []).forEach(e => {
         const btn = document.createElement('button');

@@ -1864,7 +1864,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Préparer
     while (grid.firstChild) {
-      grid.removeChild(div.firstChild);
+      grid.removeChild(grid.firstChild);
     }
     title.textContent =
       kind === "theme" ? "Choisir un thème" : "Choisir un fond animé";
