@@ -813,8 +813,13 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       if (isDebug) {
         return reply.type("text/javascript").send(generated);
       }
-      const mini = minify(generated);
-      return reply.type("text/javascript").send(mini.code || "");
+      try {
+        const mini = minify(generated);
+        return reply.type("text/javascript").send(mini && mini.code ? mini.code : generated);
+      } catch (err) {
+        request.log.warn({ err }, "minify failed for config.js — sending unminified code");
+        return reply.type("text/javascript").send(generated);
+      }
     },
   );
 
