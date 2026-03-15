@@ -65,6 +65,7 @@ export async function replyView(
     isStaff: isStaff,
     getGravatarUrl,
     frontendUrl,
+    cspNonce,
     ...extraData,
     ...data,
   });
