@@ -94,7 +94,7 @@
 
 <%- include('./loader.ejs') %>
 
-    <body>
+    <body data-export="<%= !!(locals.isExport) %>">
         <div class="background"></div>
         <article id="profile-article">
             <!-- Skeleton Loading -->
@@ -120,92 +120,8 @@
     <script type="application/json" id="plinkk-ctx-username"><%- JSON.stringify(username || "") %></script>
     <script type="application/json"
         id="plinkk-ctx-identifier"><%- JSON.stringify((page && page.slug) ? page.slug : "") %></script>
-    <script>
-        (function () {
-            try {
-                const u = document.getElementById('plinkk-ctx-username')?.textContent || '';
-                const s = document.getElementById('plinkk-ctx-identifier')?.textContent || '';
-                window.__PLINKK_USERNAME__ = JSON.parse(u || '""');
-                window.__PLINKK_IDENTIFIER__ = JSON.parse(s || '""');
-            } catch (_) { }
-        })();
-        window.__PLINKK_EXPORT_MODE__ = <%= !!(locals.isExport) %>;
-        window.__PLINKK_IS_PREVIEW__ = (new URLSearchParams(location.search).get('preview') === '1');
-        if (!window.__PLINKK_IDENTIFIER__) {
-            try {
-                const parts = location.pathname.split('/').filter(Boolean);
-                if (parts[1] === '0') window.__PLINKK_IDENTIFIER__ = '';
-            } catch (_) { }
-        }
-    </script>
     <script type="application/json" id="plinkk-page-id"><%- JSON.stringify(page?.id || "") %></script>
-    <script>
-        // Client-side tracking avec localStorage
-        (function() {
-            try {
-                const pageId = JSON.parse(document.getElementById('plinkk-page-id')?.textContent || '""');
-                if (!pageId) return;
-
-                const isPreview = window.__PLINKK_IS_PREVIEW__;
-                const ttl = isPreview ? 1000 : 10000; // 1s en preview, 10s sinon
-                
-                // 1. Tracking des vues de page
-                const viewKey = `plinkk_view_${pageId}`;
-                const lastView = localStorage.getItem(viewKey);
-                const now = Date.now();
-                
-                if (!lastView || now - parseInt(lastView, 10) > ttl) {
-                    fetch(`/api/track-view/${pageId}`, { 
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    })
-                    .then(() => localStorage.setItem(viewKey, String(now)))
-                    .catch(() => {}); // Silencieux en cas d'erreur
-                }
-
-                // 2. Interception des clics sur les liens
-                document.addEventListener('click', function(e) {
-                    const link = e.target.closest('a[href^="/click/"]');
-                    if (!link) return;
-
-                    const href = link.getAttribute('href');
-                    const match = href?.match(/^\/click\/([^/?&#]+)/);
-                    if (!match) return;
-
-                    const linkId = match[1];
-                    const clickKey = `plinkk_click_${linkId}`;
-                    const lastClick = localStorage.getItem(clickKey);
-                    const now = Date.now();
-                    
-                    // Si le cache est valide, rediriger directement sans tracker
-                    if (lastClick && now - parseInt(lastClick, 10) <= ttl) {
-                        // Pas de preventDefault, laisser le navigateur suivre le lien normalement
-                        return;
-                    }
-
-                    // Sinon, faire le tracking puis rediriger
-                    e.preventDefault();
-                    fetch(`/api/track-click/${linkId}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        localStorage.setItem(clickKey, String(now));
-                        if (data.url) {
-                            window.location.href = data.url;
-                        }
-                    })
-                    .catch(() => {
-                        // En cas d'erreur, suivre le lien normalement
-                        window.location.href = href;
-                    });
-                });
-            } catch (err) {
-                console.warn('Tracking initialization failed:', err);
-            }
-        })();
-    </script>
+    <script src="/public/js/plinkk-init.js"></script>
     <script type="module"
         src="/<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : ((page && page.slug) ? page.slug : username) %>.js?v=fix-icons"></script>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
