@@ -12,6 +12,7 @@ import { IncomingMessage, ServerResponse } from "http";
 import { toSafeUser, UserWithInclude } from "../types/user.js";
 import { getGravatarUrl } from "./userUtils.js";
 import "dotenv/config"
+import crypto from "crypto";
 
 export async function replyView(
   reply: FastifyReply<
@@ -31,7 +32,7 @@ export async function replyView(
   statusCode: number = 200
 ): Promise<string> {
   const frontendUrl = process.env.FRONTEND_URL || process.env.PUBLIC_URL || (process.env.NODE_ENV !== 'production' ? 'http://127.0.0.1:3002' : '');
-  const cspNonce = (reply.request as any)?.cspNonce || '';
+  const cspNonce = (reply.request as any)?.cspNonce || crypto.randomBytes(16).toString('base64');
 
   const nonce = (reply.request as any)?.cspNonce || '';
   if (user === null) {

@@ -79,7 +79,7 @@ User-agent: *
 Allow: /
 Sitemap: ${base}/sitemap.xml
 `;
-    reply.type("text/plain").send(txt);
+    return reply.type("text/plain").send(txt);
   });
 
   fastify.get("/sitemap.xml", async (request, reply) => {
@@ -96,6 +96,6 @@ Sitemap: ${base}/sitemap.xml
       `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
       urls.map((loc) => `\n  <url><loc>${loc}</loc></url>`).join("") +
       "\n</urlset>\n";
-    reply.type("application/xml").send(xml);
+    return reply.type("application/xml").send(xml);
   });
 }
