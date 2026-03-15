@@ -61,7 +61,8 @@ fastify.register(fastifyHelmet, {
         "https://cdn.jsdelivr.net",
         "https://cdn.plinkk.fr",
         "https://cdn.jsdelivr.net/npm",
-        "https://cdnjs.cloudflare.com"
+        "https://cdnjs.cloudflare.com",
+        "https://unpkg.com"
       ],
       styleSrc: [
         "'self'",
