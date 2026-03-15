@@ -56,6 +56,7 @@ fastify.register(fastifyHelmet, {
       defaultSrc: ["'self'"],
       scriptSrc: [
         "'self'",
+        "'unsafe-inline'",
         "https://accounts.google.com",
         "https://cdn.tailwindcss.com",
         "https://cdn.jsdelivr.net",
