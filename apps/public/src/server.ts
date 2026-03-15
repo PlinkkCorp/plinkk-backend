@@ -63,6 +63,10 @@ fastify.register(fastifyHelmet, {
         "https://cdn.jsdelivr.net/npm",
         "https://cdnjs.cloudflare.com",
         "https://unpkg.com"
+        ,
+        "'sha256-E05C2+A6U6KP2YRfDlo6GVLqjo32DZ9zhgE4xdGULAg='",
+        "'sha256-fV9bq9dNpzBuSixT7jlM5gNtsUsFtOxuV66COdmxy4o='",
+        "'sha256-4B6evayykTYhXjxZVNdk+rUL0ZojmmAHZjDaNFnOBJ0='"
       ],
       styleSrc: [
         "'self'",
