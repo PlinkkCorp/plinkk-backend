@@ -38,7 +38,7 @@ const checkPermission = async (request: FastifyRequest, requiredPermission: stri
     throw new ForbiddenError();
   }
 
-  (request as any).currentUser = user;
+  (request).currentUser = user;
 };
 
 export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
@@ -85,7 +85,7 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
     await checkPermission(request, "CREATE_PATCHNOTES");
     try {
       const body = createPatchNoteSchema.parse(request.body);
-      const currentUser = (request as any).currentUser;
+      const currentUser = (request).currentUser;
 
       // Check if version already exists
       const existing = await prisma.patchNote.findUnique({ where: { version: body.version } });
@@ -106,7 +106,7 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
         include: { createdBy: { select: { id: true, userName: true, name: true, image: true } } },
       });
 
-      await logAdminAction(currentUser.id, 'CREATE_PATCHNOTE', patchNote.id, { title: body.title, version: body.version, isPublished: body.isPublished }, (request as any).ip);
+      await logAdminAction(currentUser.id, 'CREATE_PATCHNOTE', patchNote.id, { title: body.title, version: body.version, isPublished: body.isPublished }, (request).ip);
 
       // Publier sur Discord si le patch note est publié
       if (body.isPublished) {
@@ -151,11 +151,11 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
       throw new ForbiddenError();
     }
 
-    (request as any).currentUser = user;
+    (request).currentUser = user;
     try {
       const { id } = request.params as { id: string };
       const body = updatePatchNoteSchema.parse(request.body);
-      const currentUser = (request as any).currentUser;
+      const currentUser = (request).currentUser;
 
       const patchNote = await prisma.patchNote.findUnique({ where: { id } });
       if (!patchNote) throw new NotFoundError("Patch note not found");
@@ -175,7 +175,7 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
         include: { createdBy: { select: { id: true, userName: true, name: true, image: true } } },
       });
 
-      await logDetailedAdminAction(currentUser.id, 'UPDATE_PATCHNOTE', id, patchNote, updated, (request as any).ip);
+      await logDetailedAdminAction(currentUser.id, 'UPDATE_PATCHNOTE', id, patchNote, updated, (request).ip);
 
       // Publier sur Discord si le patch note vient d'être publié
       if (body.isPublished === true && !patchNote.isPublished) {
@@ -204,14 +204,14 @@ export async function apiAdminPatchNotesRoutes(fastify: FastifyInstance) {
   fastify.delete("/:id", async (request, reply) => {
     await checkPermission(request, "DELETE_PATCHNOTES");
     const { id } = request.params as { id: string };
-    const currentUser = (request as any).currentUser;
+    const currentUser = (request).currentUser;
 
     const patchNote = await prisma.patchNote.findUnique({ where: { id } });
     if (!patchNote) throw new NotFoundError("Patch note not found");
 
     await prisma.patchNote.delete({ where: { id } });
 
-    await logAdminAction(currentUser.id, 'DELETE_PATCHNOTE', id, { title: patchNote.title, version: patchNote.version }, (request as any).ip);
+    await logAdminAction(currentUser.id, 'DELETE_PATCHNOTE', id, { title: patchNote.title, version: patchNote.version }, (request).ip);
 
     return reply.code(204).send();
   });

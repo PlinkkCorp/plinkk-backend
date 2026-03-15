@@ -35,7 +35,7 @@ export async function dashboardPartnershipRoutes(fastify: FastifyInstance) {
         // Mais pour l'instant on se concentre sur les liens affiliés liés à l'utilisateur
 
         // If the user has a Partner entry, aggregate partner stats
-        let partnerInfo = null as any;
+        let partnerInfo = null;
         try {
             const partner = await prisma.partner.findUnique({ where: { userId } });
             if (partner) {
@@ -54,7 +54,7 @@ export async function dashboardPartnershipRoutes(fastify: FastifyInstance) {
                     by: ['partnerQuestId'],
                     where: { partnerQuestId: { in: questIds } },
                     _sum: { gemsRewarded: true }
-                }) : [] as any[];
+                }) : [];
 
                 const gemsPerQuest = new Map<string, number>();
                 gemsAgg.forEach(g => gemsPerQuest.set(g.partnerQuestId, g._sum.gemsRewarded || 0));

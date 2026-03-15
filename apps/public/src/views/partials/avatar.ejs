@@ -115,13 +115,11 @@
             <% if (_av_imgUrl) { %>
               <img src="<%= _av_imgUrl %>" alt="Avatar"
                 class="h-full w-full object-cover opacity-0 transition-opacity duration-300"
-                onload="this.classList.remove('opacity-0'); this.parentElement.classList.remove('animate-pulse', 'bg-slate-800');"
-                onerror="this.onerror=null; this.style.display='none'; this.parentElement.classList.remove('animate-pulse', 'bg-slate-800'); if(this.parentNode) { this.parentNode.textContent = '<%= _av_initial %>'; }" />
+                data-initial="<%= _av_initial %>" />
               <% } else if (_av_entity && _av_entity.profileImage) { %>
                 <img src="<%= _av_entity.profileImage %>" alt="Avatar"
                   class="h-full w-full object-cover opacity-0 transition-opacity duration-300"
-                  onload="this.classList.remove('opacity-0'); this.parentElement.classList.remove('animate-pulse', 'bg-slate-800');"
-                  onerror="this.onerror=null; this.style.display='none'; this.parentElement.classList.remove('animate-pulse', 'bg-slate-800'); if(this.parentNode) { this.parentNode.textContent = '<%= _av_initial %>'; }" />
+                  data-initial="<%= _av_initial %>" />
                 <% } else { %>
                   <script>document.currentScript.parentElement.classList.remove('animate-pulse', 'bg-slate-800');</script>
                   <%= _av_initial %>

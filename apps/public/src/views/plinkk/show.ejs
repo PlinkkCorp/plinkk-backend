@@ -73,8 +73,7 @@
     </script>
     <meta http-equiv="Permissions-Policy"
         content="autoplay=*, clipboard-write=*, encrypted-media=*, picture-in-picture=*, web-share=*, fullscreen=*, unload=*">
-    <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://plinkk.fr https://analytics.plinkk.fr s3.marvideo.fr https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; font-src 'self' https: data:; connect-src 'self' https:; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com https:;">
+    <!-- CSP is enforced via Helmet on the server; remove duplicate meta tag to avoid conflicts -->
 
     <% const viewSettings=(typeof settings !=='undefined' && settings) ? settings : (page && page.settings ?
         page.settings : {}); %>

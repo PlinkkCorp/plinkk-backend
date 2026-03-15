@@ -43,7 +43,7 @@ export function adminEmailQueueRoutes(fastify: FastifyInstance) {
         "email_queue_cancel",
         "EmailQueue",
         `Email ${id} annulé`,
-        (request as any).ip
+        (request).ip
       );
 
       return reply.send({ success: true, message: "Email annulé" });
@@ -71,7 +71,7 @@ export function adminEmailQueueRoutes(fastify: FastifyInstance) {
         "email_queue_process",
         "EmailQueue",
         `Traitement manuel: ${result.sent} envoyés, ${result.failed} échoués`,
-        (request as any).ip
+        (request).ip
       );
 
       return reply.send({

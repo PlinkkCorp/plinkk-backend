@@ -65,7 +65,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
       if (!password) {
         const currentUser = await getCurrentUser(request);
-        return await replyView(reply, "plinkk/password.ejs", currentUser as any, {
+        return await replyView(reply, "plinkk/password.ejs", currentUser, {
           page: resolved.page,
           username,
           identifier,
@@ -83,7 +83,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         return reply.redirect(targetUrl);
       } else {
         const currentUser = await getCurrentUser(request);
-        return await replyView(reply, "plinkk/password.ejs", currentUser as any, {
+        return await replyView(reply, "plinkk/password.ejs", currentUser, {
           page: resolved.page,
           username,
           identifier,
@@ -204,7 +204,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
                         ).toISOString()
                         : null;
                     const currentUser = await getCurrentUser(request);
-                    return await replyView(reply, "erreurs/banned.ejs", currentUser as any, {
+                    return await replyView(reply, "erreurs/banned.ejs", currentUser, {
                       reason: ban.reason || "Violation des règles",
                       email: u.email,
                       until,
@@ -220,7 +220,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
               const unlocked = request.session.get(sessionKey);
               if (!unlocked) {
                 const currentUser = await getCurrentUser(request);
-                return await replyView(reply, "plinkk/password.ejs", currentUser as any, {
+                return await replyView(reply, "plinkk/password.ejs", currentUser, {
                   page: resolved.page,
                   username,
                   identifier: undefined,
@@ -262,7 +262,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
             const settings = await prisma.plinkkSettings.findUnique({ where: { plinkkId: resolved.page.id } });
             const currentUser = await getCurrentUser(request);
-            return await replyView(reply, "plinkk/show.ejs", currentUser as any, {
+            return await replyView(reply, "plinkk/show.ejs", currentUser, {
               page: displayPage,
               userId: resolved.user.id,
               username: resolved.user.id,
@@ -320,7 +320,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
                     ).toISOString()
                     : null;
                 const currentUser = await getCurrentUser(request);
-                return await replyView(reply, "erreurs/banned.ejs", currentUser as any, {
+                return await replyView(reply, "erreurs/banned.ejs", currentUser, {
                   reason: ban.reason || "Violation des règles",
                   email: u.email,
                   until,
@@ -336,7 +336,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           const unlocked = request.session.get(sessionKey);
             if (!unlocked) {
               const currentUser = await getCurrentUser(request);
-              return await replyView(reply, "plinkk/password.ejs", currentUser as any, {
+              return await replyView(reply, "plinkk/password.ejs", currentUser, {
                 page: resolved.page,
                 username,
                 identifier: undefined,
@@ -378,7 +378,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
         const settings = await prisma.plinkkSettings.findUnique({ where: { plinkkId: resolved.page.id } });
         const currentUser = await getCurrentUser(request);
-        return await replyView(reply, "plinkk/show.ejs", currentUser as any, {
+        return await replyView(reply, "plinkk/show.ejs", currentUser, {
           page: displayPage,
           userId: resolved.user.id,
           username: resolved.user.id,
@@ -881,7 +881,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       request,
     );
     if (resolved.status !== 200) {
-      return await replyView(reply, "erreurs/404.ejs", null as any, { user: null }, resolved.status);
+      return await replyView(reply, "erreurs/404.ejs", null, { user: null }, resolved.status);
     }
 
     // Plinkk protégé par mot de passe
@@ -890,7 +890,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       const unlocked = request.session.get(sessionKey);
       if (!unlocked) {
         const currentUser = await getCurrentUser(request);
-        return await replyView(reply, "plinkk/password.ejs", currentUser as any, {
+        return await replyView(reply, "plinkk/password.ejs", currentUser, {
           page: resolved.page,
           username,
           identifier,
@@ -920,7 +920,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
         : resolved.user.id;
     // Tracking des vues géré côté client via localStorage
     const currentUser = await getCurrentUser(request);
-    return await replyView(reply, "plinkk/show.ejs", currentUser as any, {
+    return await replyView(reply, "plinkk/show.ejs", currentUser, {
       page: resolved.page,
       userId: resolved.user.id,
       username: resolved.user.id,
@@ -943,7 +943,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       request,
     );
     if (resolved.status !== 200) {
-      return await replyView(reply, "erreurs/404.ejs", null as any, { user: null }, resolved.status);
+      return await replyView(reply, "erreurs/404.ejs", null, { user: null }, resolved.status);
     }
 
     // Plinkk protégé par mot de passe
@@ -952,7 +952,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       const unlocked = request.session.get(sessionKey);
       if (!unlocked) {
         const currentUser = await getCurrentUser(request);
-        return await replyView(reply, "plinkk/password.ejs", currentUser as any, {
+        return await replyView(reply, "plinkk/password.ejs", currentUser, {
           page: resolved.page,
           username,
           identifier: "0",
@@ -979,7 +979,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
       ((typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined) === resolved.user.id;
     // Tracking des vues géré côté client via localStorage
     const currentUser = await getCurrentUser(request);
-    return await replyView(reply, "plinkk/show.ejs", currentUser as any, {
+    return await replyView(reply, "plinkk/show.ejs", currentUser, {
       page: resolved.page,
       userId: resolved.user.id,
       username: resolved.user.id,

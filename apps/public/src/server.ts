@@ -56,17 +56,12 @@ fastify.register(fastifyHelmet, {
       defaultSrc: ["'self'"],
       scriptSrc: [
         "'self'",
-        "'unsafe-inline'",
         "https://accounts.google.com",
         "https://cdn.tailwindcss.com",
-        "https://analytics.plinkk.fr",
         "https://cdn.jsdelivr.net",
         "https://cdn.plinkk.fr",
         "https://cdn.jsdelivr.net/npm",
       ],
-      // Allow inline event handlers temporarily (consider replacing inline handlers with addEventListener)
-      scriptSrcAttr: ["'unsafe-inline'"],
-      scriptSrcElem: ["'self'", "https://cdn.jsdelivr.net", "https://accounts.google.com", "https://cdn.tailwindcss.com"],
       styleSrc: [
         "'self'",
         "'unsafe-inline'",
@@ -74,8 +69,9 @@ fastify.register(fastifyHelmet, {
         "https://fonts.googleapis.com",
       ],
       fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com"],
-      connectSrc: ["'self'", "https://analytics.plinkk.fr"],
+      connectSrc: ["'self'"],
       frameSrc: ["'self'", "https://accounts.google.com"],
+      frameAncestors: ["'self'", "https://plinkk.fr", "https://dash.plinkk.fr"],
       imgSrc: [
         "'self'",
         "data:",
@@ -197,24 +193,7 @@ fastify.register(fastifyRateLimit, {
 
 fastify.register(fastifyCompress);
 
-fastify.register(fastifyHttpProxy, {
-  upstream: "https://analytics.plinkk.fr",
-  prefix: "/api/send",
-  rewritePrefix: "/api/send",
-  replyOptions: {
-    rewriteRequestHeaders: (req, headers) => {
-      return {
-        ...headers,
-        host: "analytics.plinkk.fr",
-        "x-forwarded-for": req.ip || (headers["x-forwarded-for"] as string),
-        "x-real-ip": req.ip || (headers["x-real-ip"] as string),
-        "user-agent": headers["user-agent"] || "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        referer: "https://plinkk.fr/",
-        origin: "https://plinkk.fr",
-      };
-    },
-  },
-});
+// Proxy vers analytics retiré (Umami/analytics supprimés)
 
 const sharedViewsRoot = path.join(__dirname, "..", "..", "..", "packages", "shared", "views");
 fastify.register(fastifyView, {

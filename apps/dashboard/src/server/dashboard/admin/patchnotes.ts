@@ -6,8 +6,7 @@ import { requireAuthRedirect } from "../../../middleware/auth";
 
 export function adminPatchNotesRoutes(fastify: FastifyInstance) {
   fastify.get("/", { preHandler: [requireAuthRedirect] }, async function (request, reply) {
-    // Check if user has any patch notes permission
-    const ok = await userHasAnyPermission(request.userId || (request.currentUser as any)?.id, [
+    const ok = await userHasAnyPermission(request.userId || (request.currentUser)?.id, [
       "CREATE_PATCHNOTES",
       "EDIT_PATCHNOTES",
       "PUBLISH_PATCHNOTES",
