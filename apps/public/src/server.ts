@@ -72,7 +72,7 @@ fastify.register(fastifyHelmet, {
         "https://unpkg.com"
       ],
       fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://fonts.gstatic.com"],
-      connectSrc: ["'self'"],
+      connectSrc: ["'self'", "https://unpkg.com"],
       frameSrc: ["'self'", "https://accounts.google.com"],
       frameAncestors: ["'self'", "https://plinkk.fr", "https://dash.plinkk.fr"],
       imgSrc: [
