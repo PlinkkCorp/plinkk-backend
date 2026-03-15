@@ -75,8 +75,7 @@ export async function ensurePermission(
       await replyView(reply, "dashboard/admin/forbidden.ejs", request.currentUser, { active: options?.active || "" }, {}, 403);
       return false;
     } else if (mode === "redirect") {
-      reply.redirect(options?.redirectTo || "/");
-      return false;
+      return reply.redirect(options?.redirectTo || "/");
     } else {
       throw new ForbiddenError();
     }
