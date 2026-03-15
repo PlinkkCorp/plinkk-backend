@@ -32,6 +32,7 @@ export async function replyView(
 ): Promise<string> {
   const frontendUrl = process.env.FRONTEND_URL || process.env.PUBLIC_URL || (process.env.NODE_ENV !== 'production' ? 'http://127.0.0.1:3002' : '');
 
+  const nonce = (reply.request as any)?.cspNonce || '';
   if (user === null) {
     return reply.code(statusCode).view(template, {
       __SITE_MESSAGES__: await getActiveAnnouncementsForUser(null, extraData.__platform),
@@ -41,6 +42,7 @@ export async function replyView(
       isStaff: false,
       getGravatarUrl,
       frontendUrl,
+      cspNonce: nonce,
       ...extraData,
       ...data,
     });
@@ -62,6 +64,7 @@ export async function replyView(
     isStaff: isStaff,
     getGravatarUrl,
     frontendUrl,
+    cspNonce: nonce,
     ...extraData,
     ...data,
   });

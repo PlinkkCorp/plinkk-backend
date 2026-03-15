@@ -506,7 +506,7 @@ export default async function onRequestHook(
             return reply.sendFile(
               `canvaAnimation/${request.url.replace("/canvaAnimation/", "")}`
             );
-          } else if (request.url.startsWith("/public")) {
+          } else if (request.url.startsWith("/public/images/")) {
             return reply.sendFile(
               `images/${request.url.replace("/public/images/", "")}`
             );
