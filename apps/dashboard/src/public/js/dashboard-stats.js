@@ -31,7 +31,9 @@ function downloadBlob(content, filename, type = 'text/csv;charset=utf-8') {
 }
 
 function buildBarChart(container, data, { maxBars = 10, isLoading = false } = {}) {
-  container.innerHTML = '';
+  while (container.firstChild) {
+    container.removeChild(div.firstChild)
+  }
   
   if (isLoading) {
     const barsCount = 5;
@@ -107,7 +109,9 @@ function buildBarChart(container, data, { maxBars = 10, isLoading = false } = {}
 }
 
 function drawLineChart(container, series, isLoading = false) {
-  container.innerHTML = '';
+  while (container.firstChild) {
+    container.removeChild(div.firstChild)
+  }
 
   if (isLoading) {
     container.innerHTML = `<div class="animate-pulse w-full h-full bg-slate-800/50 rounded-2xl flex items-center justify-center">
@@ -251,7 +255,9 @@ function applyFilters(allLinks) {
 
 function renderTable(rows, isLoading = false) {
   const tbody = qs('#tblBody');
-  tbody.innerHTML = '';
+  while (tbody.firstChild) {
+    tbody.removeChild(div.firstChild)
+  }
   
   if (isLoading) {
     for (let i = 0; i < 5; i++) {

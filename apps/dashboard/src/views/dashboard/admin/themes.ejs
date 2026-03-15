@@ -1,260 +1,429 @@
-<%- include('partials/head.ejs', { title: 'Admin - Thèmes', description: '', robots: 'noindex,nofollow' }) %>
-<%- include('partials/header-dash.ejs', { user: user }) %>
+<%- include('partials/head.ejs', { title: 'Admin - Thèmes' , description: '' , robots: 'noindex,nofollow' }) %>
+  <%- include('partials/header-dash.ejs', { user: user }) %>
 
-<style>
-  .stat-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    border-radius: 1rem;
-    border: 1px solid rgb(51 65 85 / 0.5);
-    background: rgb(15 23 42 / 0.5);
-    transition: all 0.2s;
-    cursor: pointer;
-  }
-  .stat-card:hover { border-color: rgb(71 85 105); }
-  .stat-card.active { border-color: rgb(139 92 246 / 0.5); background: rgb(139 92 246 / 0.1); }
-  .theme-admin-card {
-    position: relative;
-    background: rgb(15 23 42 / 0.5);
-    border: 1px solid rgb(51 65 85);
-    border-radius: 1rem;
-    overflow: hidden;
-    transition: all 0.2s;
-  }
-  .theme-admin-card:hover { border-color: rgb(71 85 105); box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.3); }
-  .theme-preview-box { width: 100%; aspect-ratio: 4/3; position: relative; overflow: hidden; background: rgb(30 41 59); }
-  .badge-pending { padding: 2px 8px; border-radius: 9999px; background: rgb(245 158 11 / 0.15); border: 1px solid rgb(245 158 11 / 0.3); color: rgb(251 191 36); font-size: 10px; font-weight: 600; text-transform: uppercase; }
-  .badge-new { padding: 2px 8px; border-radius: 9999px; background: rgb(34 197 94 / 0.15); border: 1px solid rgb(34 197 94 / 0.3); color: rgb(74 222 128); font-size: 10px; font-weight: 600; text-transform: uppercase; }
-  .action-btn { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 500; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px; }
-  .action-btn-approve { background: rgb(5 150 105); color: white; }
-  .action-btn-approve:hover { background: rgb(4 120 87); }
-  .action-btn-reject { background: rgb(225 29 72); color: white; }
-  .action-btn-reject:hover { background: rgb(190 18 60); }
-  .action-btn-archive { background: rgb(51 65 85); color: rgb(203 213 225); }
-  .action-btn-archive:hover { background: rgb(71 85 105); }
-  .action-btn-view { background: rgb(124 58 237); color: white; }
-  .action-btn-view:hover { background: rgb(109 40 217); }
-  .action-btn-delete { background: rgb(127 29 29 / 0.5); color: rgb(252 165 165); border: 1px solid rgb(127 29 29 / 0.5); }
-  .action-btn-delete:hover { background: rgb(127 29 29); }
-  .action-btn-restore { background: rgb(5 150 105); color: white; }
-  .action-btn-restore:hover { background: rgb(4 120 87); }
-  .section-hidden { display: none !important; }
-  @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
-</style>
+    <style>
+      .stat-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        border-radius: 1rem;
+        border: 1px solid rgb(51 65 85 / 0.5);
+        background: rgb(15 23 42 / 0.5);
+        transition: all 0.2s;
+        cursor: pointer;
+      }
 
-<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
-  <%- include('partials/admin-nav.ejs', { user: user, active: 'themes' }) %>
+      .stat-card:hover {
+        border-color: rgb(71 85 105);
+      }
 
-  <main class="col-span-12 lg:col-span-10 space-y-6">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-bold text-white">Gestion des thèmes</h1>
-        <p class="text-sm text-slate-400 mt-1">Validez, archivez et gérez les thèmes de la communauté</p>
-      </div>
-      <a href="/themes" class="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white text-sm font-medium transition-all shadow-lg shadow-violet-900/30">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        Créer un thème
-      </a>
-    </div>
+      .stat-card.active {
+        border-color: rgb(139 92 246 / 0.5);
+        background: rgb(139 92 246 / 0.1);
+      }
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="stat-card active" data-tab="submitted">
-        <div class="text-3xl font-bold text-amber-400" id="statSubmitted"><%= (submitted||[]).length %></div>
-        <div class="text-xs text-slate-400 mt-1">En attente</div>
-      </div>
-      <div class="stat-card" data-tab="approved">
-        <div class="text-3xl font-bold text-emerald-400" id="statApproved"><%= (approved||[]).length %></div>
-        <div class="text-xs text-slate-400 mt-1">Validés</div>
-      </div>
-      <div class="stat-card" data-tab="rejected">
-        <div class="text-3xl font-bold text-rose-400" id="statRejected"><%= (rejected||[]).length %></div>
-        <div class="text-xs text-slate-400 mt-1">Rejetés</div>
-      </div>
-      <div class="stat-card" data-tab="archived">
-        <div class="text-3xl font-bold text-slate-400" id="statArchived"><%= (archived||[]).length %></div>
-        <div class="text-xs text-slate-400 mt-1">Archivés</div>
-      </div>
-    </div>
+      .theme-admin-card {
+        position: relative;
+        background: rgb(15 23 42 / 0.5);
+        border: 1px solid rgb(51 65 85);
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.2s;
+      }
 
-    <!-- Search -->
-    <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-4">
-      <div class="flex flex-col md:flex-row gap-4">
-        <div class="flex-1 relative">
-          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-          </svg>
-          <input id="themeSearch" type="search" class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all text-sm" placeholder="Rechercher par nom ou auteur...">
-        </div>
-        <select id="sortOrder" class="px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50">
-          <option value="newest">Plus récents</option>
-          <option value="oldest">Plus anciens</option>
-          <option value="name">Par nom</option>
-        </select>
-      </div>
-    </div>
+      .theme-admin-card:hover {
+        border-color: rgb(71 85 105);
+        box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.3);
+      }
 
-    <!-- Sections -->
-    <% const sections = [
-      { key: 'submitted', title: 'En attente de validation', data: submitted || [], emptyMsg: 'Aucun thème en attente', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
-      { key: 'approved', title: 'Thèmes validés', data: approved || [], emptyMsg: 'Aucun thème validé', icon: 'M5 13l4 4L19 7' },
-      { key: 'rejected', title: 'Thèmes rejetés', data: rejected || [], emptyMsg: 'Aucun thème rejeté', icon: 'M6 18L18 6M6 6l12 12' },
-      { key: 'archived', title: 'Thèmes archivés', data: archived || [], emptyMsg: 'Aucun thème archivé', icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4' }
-    ]; %>
+      .theme-preview-box {
+        width: 100%;
+        aspect-ratio: 4/3;
+        position: relative;
+        overflow: hidden;
+        background: rgb(30 41 59);
+      }
 
-    <% sections.forEach((sec, idx) => { %>
-    <section data-section="<%= sec.key %>" class="<%= idx > 0 ? 'section-hidden' : '' %>">
-      <div class="flex items-center gap-3 mb-4">
-        <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
-          <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= sec.icon %>"/>
-          </svg>
-        </div>
-        <h2 class="text-lg font-semibold text-white"><%= sec.title %></h2>
-        <span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium section-count"><%= sec.data.length %></span>
-      </div>
+      .badge-pending {
+        padding: 2px 8px;
+        border-radius: 9999px;
+        background: rgb(245 158 11 / 0.15);
+        border: 1px solid rgb(245 158 11 / 0.3);
+        color: rgb(251 191 36);
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
 
-      <% if (sec.data.length === 0) { %>
-        <div class="empty-state text-center py-16 bg-slate-900/30 rounded-2xl border border-slate-800/50">
-          <svg class="w-12 h-12 mx-auto text-slate-700 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="<%= sec.icon %>"/>
-          </svg>
-          <p class="text-slate-500"><%= sec.emptyMsg %></p>
-        </div>
-      <% } else { %>
-        <ul id="grid<%= sec.key.charAt(0).toUpperCase() + sec.key.slice(1) %>" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <% sec.data.forEach(t => { %>
-            <li class="themeCard theme-admin-card animate-slide-in" 
-                data-name="<%- (t.name||'').toLowerCase() %>" 
-                data-author="<%- (t.author?.userName||'').toLowerCase() %>" 
-                data-id="<%= t.id %>" 
-                data-status="<%= sec.key.toUpperCase() %>"
-                data-json='<%- JSON.stringify(t.data||{}) %>'
-                data-updated="<%= new Date(t.updatedAt).getTime() %>">
-              
-              <div class="theme-preview-box themePreview"></div>
-              
-              <div class="p-4">
-                <div class="flex items-start justify-between gap-2">
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-2 flex-wrap">
-                      <h3 class="font-semibold text-white truncate"><%= t.name %></h3>
-                      <% if (t.pendingUpdate) { %><span class="badge-pending">MAJ</span><% } %>
-                      <% const isNew = (Date.now() - new Date(t.createdAt).getTime()) < 24*60*60*1000; %>
-                      <% if (isNew && sec.key === 'submitted') { %><span class="badge-new">Nouveau</span><% } %>
-                    </div>
-                    <div class="text-xs text-slate-400 mt-1">par <span class="text-violet-400">@<%= t.author?.userName %></span></div>
-                  </div>
-                  <div class="text-[10px] text-slate-600"><%= new Date(t.updatedAt).toLocaleDateString('fr-FR') %></div>
-                </div>
-                
-                <% if (t.description) { %><p class="text-xs text-slate-500 mt-2 line-clamp-2"><%= t.description %></p><% } %>
-                <% if (t.pendingUpdateMessage) { %>
-                  <div class="mt-2 px-2 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                    <p class="text-[10px] text-amber-400/80 font-medium">Message MAJ:</p>
-                    <p class="text-xs text-amber-300 mt-0.5"><%= t.pendingUpdateMessage %></p>
-                  </div>
-                <% } %>
+      .badge-new {
+        padding: 2px 8px;
+        border-radius: 9999px;
+        background: rgb(34 197 94 / 0.15);
+        border: 1px solid rgb(34 197 94 / 0.3);
+        color: rgb(74 222 128);
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
 
-                <div class="mt-4 pt-3 border-t border-slate-800/50 flex flex-wrap items-center justify-end gap-2 actions-container">
-                  <% if (sec.key === 'submitted') { %>
-                    <% if (t.pendingUpdate) { %>
-                      <button class="approveUpdateBtn action-btn action-btn-approve">Approuver MAJ</button>
-                      <button class="rejectUpdateBtn action-btn action-btn-reject">Rejeter MAJ</button>
-                    <% } else { %>
-                      <button class="approveBtn action-btn action-btn-approve">Approuver</button>
-                      <button class="rejectBtn action-btn action-btn-reject">Rejeter</button>
-                    <% } %>
-                  <% } else if (sec.key === 'approved') { %>
-                    <% if (t.pendingUpdate) { %>
-                      <button class="approveUpdateBtn action-btn action-btn-approve">Approuver MAJ</button>
-                      <button class="rejectUpdateBtn action-btn action-btn-reject">Rejeter MAJ</button>
-                    <% } %>
-                    <button class="archiveBtn action-btn action-btn-archive">Archiver</button>
-                  <% } else if (sec.key === 'rejected') { %>
-                    <button class="approveBtn action-btn action-btn-approve">Approuver</button>
-                    <button class="deleteBtn action-btn action-btn-delete">Supprimer</button>
-                  <% } else if (sec.key === 'archived') { %>
-                    <button class="unarchiveBtn action-btn action-btn-restore">Republier</button>
-                    <button class="deleteBtn action-btn action-btn-delete">Supprimer</button>
-                  <% } %>
-                  <button class="previewBtn action-btn action-btn-view">Aperçu</button>
-                </div>
+      .action-btn {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .action-btn-approve {
+        background: rgb(5 150 105);
+        color: white;
+      }
+
+      .action-btn-approve:hover {
+        background: rgb(4 120 87);
+      }
+
+      .action-btn-reject {
+        background: rgb(225 29 72);
+        color: white;
+      }
+
+      .action-btn-reject:hover {
+        background: rgb(190 18 60);
+      }
+
+      .action-btn-archive {
+        background: rgb(51 65 85);
+        color: rgb(203 213 225);
+      }
+
+      .action-btn-archive:hover {
+        background: rgb(71 85 105);
+      }
+
+      .action-btn-view {
+        background: rgb(124 58 237);
+        color: white;
+      }
+
+      .action-btn-view:hover {
+        background: rgb(109 40 217);
+      }
+
+      .action-btn-delete {
+        background: rgb(127 29 29 / 0.5);
+        color: rgb(252 165 165);
+        border: 1px solid rgb(127 29 29 / 0.5);
+      }
+
+      .action-btn-delete:hover {
+        background: rgb(127 29 29);
+      }
+
+      .action-btn-restore {
+        background: rgb(5 150 105);
+        color: white;
+      }
+
+      .action-btn-restore:hover {
+        background: rgb(4 120 87);
+      }
+
+      .section-hidden {
+        display: none !important;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-slide-in {
+        animation: slideIn 0.3s ease-out forwards;
+      }
+    </style>
+
+    <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
+      <%- include('partials/admin-nav.ejs', { user: user, active: 'themes' }) %>
+
+        <main class="col-span-12 lg:col-span-10 space-y-6">
+          <!-- Header -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-bold text-white">Gestion des thèmes</h1>
+              <p class="text-sm text-slate-400 mt-1">Validez, archivez et gérez les thèmes de la communauté</p>
+            </div>
+            <a href="/themes"
+              class="inline-flex items-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white text-sm font-medium transition-all shadow-lg shadow-violet-900/30">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Créer un thème
+            </a>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="stat-card active" data-tab="submitted">
+              <div class="text-3xl font-bold text-amber-400" id="statSubmitted">
+                <%= (submitted||[]).length %>
               </div>
-            </li>
-          <% }) %>
-        </ul>
-      <% } %>
-    </section>
-    <% }) %>
-  </main>
-</div>
+              <div class="text-xs text-slate-400 mt-1">En attente</div>
+            </div>
+            <div class="stat-card" data-tab="approved">
+              <div class="text-3xl font-bold text-emerald-400" id="statApproved">
+                <%= (approved||[]).length %>
+              </div>
+              <div class="text-xs text-slate-400 mt-1">Validés</div>
+            </div>
+            <div class="stat-card" data-tab="rejected">
+              <div class="text-3xl font-bold text-rose-400" id="statRejected">
+                <%= (rejected||[]).length %>
+              </div>
+              <div class="text-xs text-slate-400 mt-1">Rejetés</div>
+            </div>
+            <div class="stat-card" data-tab="archived">
+              <div class="text-3xl font-bold text-slate-400" id="statArchived">
+                <%= (archived||[]).length %>
+              </div>
+              <div class="text-xs text-slate-400 mt-1">Archivés</div>
+            </div>
+          </div>
 
-<!-- Modal Preview -->
-<div id="previewModal" class="fixed inset-0 z-50 hidden">
-  <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" id="modalBackdrop"></div>
-  <div class="absolute inset-4 md:inset-8 lg:inset-16 flex items-center justify-center">
-    <div class="w-full max-w-4xl bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden shadow-2xl">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800">
-        <div>
-          <h3 id="modalTitle" class="text-lg font-semibold text-white">Aperçu</h3>
-          <p id="modalAuthor" class="text-sm text-slate-400"></p>
-        </div>
-        <button id="closeModal" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-      <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <div class="text-xs text-slate-400 mb-2 flex items-center gap-2">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
-              Mode clair
+          <!-- Search -->
+          <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-4">
+            <div class="flex flex-col md:flex-row gap-4">
+              <div class="flex-1 relative">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input id="themeSearch" type="search"
+                  class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all text-sm"
+                  placeholder="Rechercher par nom ou auteur...">
+              </div>
+              <select id="sortOrder"
+                class="px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50">
+                <option value="newest">Plus récents</option>
+                <option value="oldest">Plus anciens</option>
+                <option value="name">Par nom</option>
+              </select>
             </div>
-            <div id="modalPreviewLight" class="aspect-[9/16] max-h-[400px] rounded-2xl border border-slate-700 overflow-hidden"></div>
           </div>
-          <div>
-            <div class="text-xs text-slate-400 mb-2 flex items-center gap-2">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
-              Mode sombre
+
+          <!-- Sections -->
+          <% const sections=[ { key: 'submitted' , title: 'En attente de validation' , data: submitted || [],
+            emptyMsg: 'Aucun thème en attente' , icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' }, {
+            key: 'approved' , title: 'Thèmes validés' , data: approved || [], emptyMsg: 'Aucun thème validé' ,
+            icon: 'M5 13l4 4L19 7' }, { key: 'rejected' , title: 'Thèmes rejetés' , data: rejected || [],
+            emptyMsg: 'Aucun thème rejeté' , icon: 'M6 18L18 6M6 6l12 12' }, { key: 'archived' ,
+            title: 'Thèmes archivés' , data: archived || [], emptyMsg: 'Aucun thème archivé' ,
+            icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4' } ]; %>
+
+            <% sections.forEach((sec, idx)=> { %>
+              <section data-section="<%= sec.key %>" class="<%= idx > 0 ? 'section-hidden' : '' %>">
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= sec.icon %>" />
+                    </svg>
+                  </div>
+                  <h2 class="text-lg font-semibold text-white">
+                    <%= sec.title %>
+                  </h2>
+                  <span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 text-xs font-medium section-count">
+                    <%= sec.data.length %>
+                  </span>
+                </div>
+
+                <% if (sec.data.length===0) { %>
+                  <div class="empty-state text-center py-16 bg-slate-900/30 rounded-2xl border border-slate-800/50">
+                    <svg class="w-12 h-12 mx-auto text-slate-700 mb-3" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="<%= sec.icon %>" />
+                    </svg>
+                    <p class="text-slate-500">
+                      <%= sec.emptyMsg %>
+                    </p>
+                  </div>
+                  <% } else { %>
+                    <ul id="grid<%= sec.key.charAt(0).toUpperCase() + sec.key.slice(1) %>"
+                      class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                      <% sec.data.forEach(t=> { %>
+                        <li class="themeCard theme-admin-card animate-slide-in"
+                          data-name="<%- (t.name||'').toLowerCase() %>"
+                          data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>"
+                          data-status="<%= sec.key.toUpperCase() %>" data-json='<%- JSON.stringify(t.data||{}) %>'
+                          data-updated="<%= new Date(t.updatedAt).getTime() %>">
+
+                          <div class="theme-preview-box themePreview"></div>
+
+                          <div class="p-4">
+                            <div class="flex items-start justify-between gap-2">
+                              <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                  <h3 class="font-semibold text-white truncate">
+                                    <%= t.name %>
+                                  </h3>
+                                  <% if (t.pendingUpdate) { %><span class="badge-pending">MAJ</span>
+                                    <% } %>
+                                      <% const isNew=(Date.now() - new Date(t.createdAt).getTime()) < 24*60*60*1000; %>
+                                        <% if (isNew && sec.key==='submitted' ) { %><span
+                                            class="badge-new">Nouveau</span>
+                                          <% } %>
+                                </div>
+                                <div class="text-xs text-slate-400 mt-1">par <span class="text-violet-400">@<%=
+                                      t.author?.userName %></span></div>
+                              </div>
+                              <div class="text-[10px] text-slate-600">
+                                <%= new Date(t.updatedAt).toLocaleDateString('fr-FR') %>
+                              </div>
+                            </div>
+
+                            <% if (t.description) { %>
+                              <p class="text-xs text-slate-500 mt-2 line-clamp-2">
+                                <%= t.description %>
+                              </p>
+                              <% } %>
+                                <% if (t.pendingUpdateMessage) { %>
+                                  <div class="mt-2 px-2 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                                    <p class="text-[10px] text-amber-400/80 font-medium">Message MAJ:</p>
+                                    <p class="text-xs text-amber-300 mt-0.5">
+                                      <%= t.pendingUpdateMessage %>
+                                    </p>
+                                  </div>
+                                  <% } %>
+
+                                    <div
+                                      class="mt-4 pt-3 border-t border-slate-800/50 flex flex-wrap items-center justify-end gap-2 actions-container">
+                                      <% if (sec.key==='submitted' ) { %>
+                                        <% if (t.pendingUpdate) { %>
+                                          <button class="approveUpdateBtn action-btn action-btn-approve">Approuver
+                                            MAJ</button>
+                                          <button class="rejectUpdateBtn action-btn action-btn-reject">Rejeter
+                                            MAJ</button>
+                                          <% } else { %>
+                                            <button class="approveBtn action-btn action-btn-approve">Approuver</button>
+                                            <button class="rejectBtn action-btn action-btn-reject">Rejeter</button>
+                                            <% } %>
+                                              <% } else if (sec.key==='approved' ) { %>
+                                                <% if (t.pendingUpdate) { %>
+                                                  <button
+                                                    class="approveUpdateBtn action-btn action-btn-approve">Approuver
+                                                    MAJ</button>
+                                                  <button class="rejectUpdateBtn action-btn action-btn-reject">Rejeter
+                                                    MAJ</button>
+                                                  <% } %>
+                                                    <button
+                                                      class="archiveBtn action-btn action-btn-archive">Archiver</button>
+                                                    <% } else if (sec.key==='rejected' ) { %>
+                                                      <button
+                                                        class="approveBtn action-btn action-btn-approve">Approuver</button>
+                                                      <button
+                                                        class="deleteBtn action-btn action-btn-delete">Supprimer</button>
+                                                      <% } else if (sec.key==='archived' ) { %>
+                                                        <button
+                                                          class="unarchiveBtn action-btn action-btn-restore">Republier</button>
+                                                        <button
+                                                          class="deleteBtn action-btn action-btn-delete">Supprimer</button>
+                                                        <% } %>
+                                                          <button
+                                                            class="previewBtn action-btn action-btn-view">Aperçu</button>
+                                    </div>
+                          </div>
+                        </li>
+                        <% }) %>
+                    </ul>
+                    <% } %>
+              </section>
+              <% }) %>
+        </main>
+    </div>
+
+    <!-- Modal Preview -->
+    <div id="previewModal" class="fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" id="modalBackdrop"></div>
+      <div class="absolute inset-4 md:inset-8 lg:inset-16 flex items-center justify-center">
+        <div class="w-full max-w-4xl bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden shadow-2xl">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+            <div>
+              <h3 id="modalTitle" class="text-lg font-semibold text-white">Aperçu</h3>
+              <p id="modalAuthor" class="text-sm text-slate-400"></p>
             </div>
-            <div id="modalPreviewDark" class="aspect-[9/16] max-h-[400px] rounded-2xl border border-slate-700 overflow-hidden"></div>
+            <button id="closeModal"
+              class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <div class="text-xs text-slate-400 mb-2 flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                      d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                      clip-rule="evenodd" />
+                  </svg>
+                  Mode clair
+                </div>
+                <div id="modalPreviewLight"
+                  class="aspect-[9/16] max-h-[400px] rounded-2xl border border-slate-700 overflow-hidden"></div>
+              </div>
+              <div>
+                <div class="text-xs text-slate-400 mb-2 flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                  </svg>
+                  Mode sombre
+                </div>
+                <div id="modalPreviewDark"
+                  class="aspect-[9/16] max-h-[400px] rounded-2xl border border-slate-700 overflow-hidden"></div>
+              </div>
+            </div>
+            <div id="modalDescription" class="mt-4 p-3 rounded-xl bg-slate-800/50 text-sm text-slate-300 hidden"></div>
+            <div id="modalActions" class="mt-6 flex items-center justify-end gap-3"></div>
           </div>
         </div>
-        <div id="modalDescription" class="mt-4 p-3 rounded-xl bg-slate-800/50 text-sm text-slate-300 hidden"></div>
-        <div id="modalActions" class="mt-6 flex items-center justify-end gap-3"></div>
       </div>
     </div>
-  </div>
-</div>
 
-<script>
-(function(){
-  function showToast(message, type = 'info', timeout = 3500){
-    let container = document.getElementById('toastContainer');
-    if (!container) { container = document.createElement('div'); container.id = 'toastContainer'; container.className = 'fixed right-6 top-6 z-[99999] flex flex-col gap-3'; document.body.appendChild(container); }
-    const el = document.createElement('div');
-    el.className = 'flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium transform transition-all duration-300 translate-x-8 opacity-0';
-    const colors = { success: 'bg-emerald-950/90 border-emerald-800 text-emerald-200', error: 'bg-rose-950/90 border-rose-800 text-rose-200', info: 'bg-slate-800/90 border-slate-700 text-slate-200' };
-    el.className += ' ' + colors[type];
-    el.innerHTML = '<span>' + message + '</span>';
-    container.appendChild(el);
-    requestAnimationFrame(() => el.classList.remove('translate-x-8', 'opacity-0'));
-    const id = setTimeout(() => { el.classList.add('translate-x-8', 'opacity-0'); setTimeout(() => el.remove(), 300); }, timeout);
-    el.onclick = () => { clearTimeout(id); el.classList.add('translate-x-8', 'opacity-0'); setTimeout(() => el.remove(), 300); };
-  }
+    <script>
+      (function () {
+        function showToast(message, type = 'info', timeout = 3500) {
+          let container = document.getElementById('toastContainer');
+          if (!container) { container = document.createElement('div'); container.id = 'toastContainer'; container.className = 'fixed right-6 top-6 z-[99999] flex flex-col gap-3'; document.body.appendChild(container); }
+          const el = document.createElement('div');
+          el.className = 'flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium transform transition-all duration-300 translate-x-8 opacity-0';
+          const colors = { success: 'bg-emerald-950/90 border-emerald-800 text-emerald-200', error: 'bg-rose-950/90 border-rose-800 text-rose-200', info: 'bg-slate-800/90 border-slate-700 text-slate-200' };
+          el.className += ' ' + colors[type];
+          el.innerHTML = '<span>' + message + '</span>';
+          container.appendChild(el);
+          requestAnimationFrame(() => el.classList.remove('translate-x-8', 'opacity-0'));
+          const id = setTimeout(() => { el.classList.add('translate-x-8', 'opacity-0'); setTimeout(() => el.remove(), 300); }, timeout);
+          el.onclick = () => { clearTimeout(id); el.classList.add('translate-x-8', 'opacity-0'); setTimeout(() => el.remove(), 300); };
+        }
 
-  function showConfirm(message, actionText = 'Supprimer') {
-    return new Promise(resolve => {
-      const overlay = document.createElement('div');
-      overlay.className = 'fixed inset-0 z-[100000] flex items-center justify-center bg-black/70 backdrop-blur-sm';
-      overlay.style.animation = 'fadeIn 0.15s ease-out';
-      overlay.innerHTML = `
+        function showConfirm(message, actionText = 'Supprimer') {
+          return new Promise(resolve => {
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 z-[100000] flex items-center justify-center bg-black/70 backdrop-blur-sm';
+            overlay.style.animation = 'fadeIn 0.15s ease-out';
+            overlay.innerHTML = `
         <div class="w-full max-w-sm mx-4 bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-2xl transform transition-all" style="animation: scaleIn 0.2s ease-out">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-10 h-10 rounded-xl bg-rose-500/20 flex items-center justify-center flex-shrink-0">
@@ -262,222 +431,226 @@
             </div>
             <h3 class="font-semibold text-lg text-white">Confirmation</h3>
           </div>
-          <p class="text-slate-300 mb-6">${message.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>
+          <p class="text-slate-300 mb-6">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
           <div class="flex justify-end gap-3">
             <button class="cancelBtn px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium transition-colors">Annuler</button>
-            <button class="confirmBtn px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-medium transition-colors">${actionText.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</button>
+            <button class="confirmBtn px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-medium transition-colors">${actionText.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</button>
           </div>
         </div>`;
-      const style = document.createElement('style');
-      style.textContent = '@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}';
-      overlay.appendChild(style);
-      function cleanup(result) { overlay.remove(); document.removeEventListener('keydown', onKey); resolve(result); }
-      function onKey(e) { if (e.key === 'Escape') cleanup(false); if (e.key === 'Enter') cleanup(true); }
-      overlay.querySelector('.cancelBtn').addEventListener('click', () => cleanup(false));
-      overlay.querySelector('.confirmBtn').addEventListener('click', () => cleanup(true));
-      overlay.addEventListener('click', e => { if (e.target === overlay) cleanup(false); });
-      document.body.appendChild(overlay);
-      document.addEventListener('keydown', onKey);
-      overlay.querySelector('.cancelBtn').focus();
-    });
-  }
+            const style = document.createElement('style');
+            style.textContent = '@keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}';
+            overlay.appendChild(style);
+            function cleanup(result) { overlay.remove(); document.removeEventListener('keydown', onKey); resolve(result); }
+            function onKey(e) { if (e.key === 'Escape') cleanup(false); if (e.key === 'Enter') cleanup(true); }
+            overlay.querySelector('.cancelBtn').addEventListener('click', () => cleanup(false));
+            overlay.querySelector('.confirmBtn').addEventListener('click', () => cleanup(true));
+            overlay.addEventListener('click', e => { if (e.target === overlay) cleanup(false); });
+            document.body.appendChild(overlay);
+            document.addEventListener('keydown', onKey);
+            overlay.querySelector('.cancelBtn').focus();
+          });
+        }
 
-  function norm(s){ s = String(s||'').trim(); if (!s.startsWith('#')) s = '#'+s; if (/^#[0-9a-fA-F]{3}$/.test(s)) s = '#'+s.slice(1).split('').map(c=>c+c).join(''); return /^#[0-9a-fA-F]{6}$/.test(s) ? s : '#1e293b'; }
+        function norm(s) { s = String(s || '').trim(); if (!s.startsWith('#')) s = '#' + s; if (/^#[0-9a-fA-F]{3}$/.test(s)) s = '#' + s.slice(1).split('').map(c => c + c).join(''); return /^#[0-9a-fA-F]{6}$/.test(s) ? s : '#1e293b'; }
 
-  function extractColors(raw) {
-    try {
-      if (!raw) return { light: { bg:'#f8fafc', button:'#4f46e5', hover:'#22c55e' }, dark: { bg:'#0f172a', button:'#4f46e5', hover:'#22c55e' } };
-      const d = typeof raw === 'string' ? JSON.parse(raw) : raw;
-      let light = { bg:'#f8fafc', button:'#4f46e5', hover:'#22c55e' };
-      let dark = { bg:'#0f172a', button:'#4f46e5', hover:'#22c55e' };
-      if (d.light) light = { bg: norm(d.light.bg), button: norm(d.light.button), hover: norm(d.light.hover) };
-      else if (d.background) light = { bg: norm(d.background), button: norm(d.buttonBackground), hover: norm(d.hoverColor) };
-      if (d.dark) dark = { bg: norm(d.dark.bg), button: norm(d.dark.button), hover: norm(d.dark.hover) };
-      else if (d.opposite) dark = { bg: norm(d.opposite.background), button: norm(d.opposite.buttonBackground), hover: norm(d.opposite.hoverColor) };
-      return { light, dark };
-    } catch(e) { return { light: { bg:'#f8fafc', button:'#4f46e5', hover:'#22c55e' }, dark: { bg:'#0f172a', button:'#4f46e5', hover:'#22c55e' } }; }
-  }
+        function extractColors(raw) {
+          try {
+            if (!raw) return { light: { bg: '#f8fafc', button: '#4f46e5', hover: '#22c55e' }, dark: { bg: '#0f172a', button: '#4f46e5', hover: '#22c55e' } };
+            const d = typeof raw === 'string' ? JSON.parse(raw) : raw;
+            let light = { bg: '#f8fafc', button: '#4f46e5', hover: '#22c55e' };
+            let dark = { bg: '#0f172a', button: '#4f46e5', hover: '#22c55e' };
+            if (d.light) light = { bg: norm(d.light.bg), button: norm(d.light.button), hover: norm(d.light.hover) };
+            else if (d.background) light = { bg: norm(d.background), button: norm(d.buttonBackground), hover: norm(d.hoverColor) };
+            if (d.dark) dark = { bg: norm(d.dark.bg), button: norm(d.dark.button), hover: norm(d.dark.hover) };
+            else if (d.opposite) dark = { bg: norm(d.opposite.background), button: norm(d.opposite.buttonBackground), hover: norm(d.opposite.hoverColor) };
+            return { light, dark };
+          } catch (e) { return { light: { bg: '#f8fafc', button: '#4f46e5', hover: '#22c55e' }, dark: { bg: '#0f172a', button: '#4f46e5', hover: '#22c55e' } }; }
+        }
 
-  function renderPreviewBox(container, colors, isDark) {
-    const c = isDark ? colors.dark : colors.light;
-    container.innerHTML = '<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;background:'+c.bg+'"><div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,0.2),rgba(0,0,0,0.1));border:2px solid rgba(128,128,128,0.2)"></div><div style="width:70%;height:14px;background:'+c.button+';border-radius:8px;margin-top:8px"></div><div style="width:55%;height:12px;background:'+c.hover+';border-radius:6px"></div><div style="width:60%;height:12px;background:rgba(128,128,128,0.2);border-radius:6px"></div></div>';
-  }
+        function renderPreviewBox(container, colors, isDark) {
+          const c = isDark ? colors.dark : colors.light;
+          container.innerHTML = '<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;background:' + c.bg + '"><div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,0.2),rgba(0,0,0,0.1));border:2px solid rgba(128,128,128,0.2)"></div><div style="width:70%;height:14px;background:' + c.button + ';border-radius:8px;margin-top:8px"></div><div style="width:55%;height:12px;background:' + c.hover + ';border-radius:6px"></div><div style="width:60%;height:12px;background:rgba(128,128,128,0.2);border-radius:6px"></div></div>';
+        }
 
-  function renderCardPreview(container, raw) {
-    const colors = extractColors(raw);
-    const c = colors.dark;
-    container.innerHTML = '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;background:'+c.bg+'"><div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(0,0,0,0.1));border:2px solid rgba(128,128,128,0.2)"></div><div style="width:70%;height:12px;background:'+c.button+';border-radius:6px;margin-top:4px"></div><div style="width:55%;height:10px;background:'+c.hover+';border-radius:5px"></div><div style="width:60%;height:10px;background:rgba(128,128,128,0.15);border-radius:5px"></div></div>';
-  }
+        function renderCardPreview(container, raw) {
+          const colors = extractColors(raw);
+          const c = colors.dark;
+          container.innerHTML = '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;background:' + c.bg + '"><div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(0,0,0,0.1));border:2px solid rgba(128,128,128,0.2)"></div><div style="width:70%;height:12px;background:' + c.button + ';border-radius:6px;margin-top:4px"></div><div style="width:55%;height:10px;background:' + c.hover + ';border-radius:5px"></div><div style="width:60%;height:10px;background:rgba(128,128,128,0.15);border-radius:5px"></div></div>';
+        }
 
-  function renderAllPreviews() { document.querySelectorAll('.themeCard').forEach(card => { const preview = card.querySelector('.themePreview'); const raw = card.getAttribute('data-json'); if (preview) renderCardPreview(preview, raw); }); }
+        function renderAllPreviews() { document.querySelectorAll('.themeCard').forEach(card => { const preview = card.querySelector('.themePreview'); const raw = card.getAttribute('data-json'); if (preview) renderCardPreview(preview, raw); }); }
 
-  const statCards = document.querySelectorAll('.stat-card');
-  const sections = document.querySelectorAll('[data-section]');
-  function showSection(key) { statCards.forEach(c => c.classList.toggle('active', c.dataset.tab === key)); sections.forEach(s => s.classList.toggle('section-hidden', s.dataset.section !== key)); }
-  statCards.forEach(card => card.addEventListener('click', () => showSection(card.dataset.tab)));
+        const statCards = document.querySelectorAll('.stat-card');
+        const sections = document.querySelectorAll('[data-section]');
+        function showSection(key) { statCards.forEach(c => c.classList.toggle('active', c.dataset.tab === key)); sections.forEach(s => s.classList.toggle('section-hidden', s.dataset.section !== key)); }
+        statCards.forEach(card => card.addEventListener('click', () => showSection(card.dataset.tab)));
 
-  const searchInput = document.getElementById('themeSearch');
-  const sortSelect = document.getElementById('sortOrder');
+        const searchInput = document.getElementById('themeSearch');
+        const sortSelect = document.getElementById('sortOrder');
 
-  function applyFilters() {
-    const q = (searchInput?.value || '').toLowerCase().trim();
-    const sort = sortSelect?.value || 'newest';
-    document.querySelectorAll('[data-section]').forEach(section => {
-      const grid = section.querySelector('ul');
-      if (!grid) return;
-      const cards = Array.from(grid.querySelectorAll('.themeCard'));
-      cards.forEach(card => { const name = card.dataset.name || ''; const author = card.dataset.author || ''; card.style.display = (!q || name.includes(q) || author.includes(q)) ? '' : 'none'; });
-      const visibleCards = cards.filter(c => c.style.display !== 'none');
-      visibleCards.sort((a, b) => {
-        if (sort === 'newest') return parseInt(b.dataset.updated) - parseInt(a.dataset.updated);
-        if (sort === 'oldest') return parseInt(a.dataset.updated) - parseInt(b.dataset.updated);
-        if (sort === 'name') return (a.dataset.name || '').localeCompare(b.dataset.name || '');
-        return 0;
-      });
-      visibleCards.forEach(card => grid.appendChild(card));
-    });
-    updateCounts();
-  }
-  searchInput?.addEventListener('input', applyFilters);
-  sortSelect?.addEventListener('change', applyFilters);
+        function applyFilters() {
+          const q = (searchInput?.value || '').toLowerCase().trim();
+          const sort = sortSelect?.value || 'newest';
+          document.querySelectorAll('[data-section]').forEach(section => {
+            const grid = section.querySelector('ul');
+            if (!grid) return;
+            const cards = Array.from(grid.querySelectorAll('.themeCard'));
+            cards.forEach(card => { const name = card.dataset.name || ''; const author = card.dataset.author || ''; card.style.display = (!q || name.includes(q) || author.includes(q)) ? '' : 'none'; });
+            const visibleCards = cards.filter(c => c.style.display !== 'none');
+            visibleCards.sort((a, b) => {
+              if (sort === 'newest') return parseInt(b.dataset.updated) - parseInt(a.dataset.updated);
+              if (sort === 'oldest') return parseInt(a.dataset.updated) - parseInt(b.dataset.updated);
+              if (sort === 'name') return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+              return 0;
+            });
+            visibleCards.forEach(card => grid.appendChild(card));
+          });
+          updateCounts();
+        }
+        searchInput?.addEventListener('input', applyFilters);
+        sortSelect?.addEventListener('change', applyFilters);
 
-  function updateCounts() {
-    const counts = { submitted: 0, approved: 0, rejected: 0, archived: 0 };
-    document.querySelectorAll('.themeCard').forEach(card => { if (card.style.display === 'none') return; const status = (card.dataset.status || '').toLowerCase(); if (counts[status] !== undefined) counts[status]++; });
-    document.getElementById('statSubmitted').textContent = counts.submitted;
-    document.getElementById('statApproved').textContent = counts.approved;
-    document.getElementById('statRejected').textContent = counts.rejected;
-    document.getElementById('statArchived').textContent = counts.archived;
-  }
+        function updateCounts() {
+          const counts = { submitted: 0, approved: 0, rejected: 0, archived: 0 };
+          document.querySelectorAll('.themeCard').forEach(card => { if (card.style.display === 'none') return; const status = (card.dataset.status || '').toLowerCase(); if (counts[status] !== undefined) counts[status]++; });
+          document.getElementById('statSubmitted').textContent = counts.submitted;
+          document.getElementById('statApproved').textContent = counts.approved;
+          document.getElementById('statRejected').textContent = counts.rejected;
+          document.getElementById('statArchived').textContent = counts.archived;
+        }
 
-  const modal = document.getElementById('previewModal');
-  const modalBackdrop = document.getElementById('modalBackdrop');
-  const closeModalBtn = document.getElementById('closeModal');
-  let currentModalTheme = null;
+        const modal = document.getElementById('previewModal');
+        const modalBackdrop = document.getElementById('modalBackdrop');
+        const closeModalBtn = document.getElementById('closeModal');
+        let currentModalTheme = null;
 
-  function openModal(card) {
-    currentModalTheme = card;
-    const raw = card.getAttribute('data-json');
-    const name = card.querySelector('h3')?.textContent || 'Thème';
-    const author = card.querySelector('.text-violet-400')?.textContent || '';
-    const desc = card.querySelector('.line-clamp-2')?.textContent || '';
-    const colors = extractColors(raw);
-    const status = card.dataset.status?.toLowerCase();
+        function openModal(card) {
+          currentModalTheme = card;
+          const raw = card.getAttribute('data-json');
+          const name = card.querySelector('h3')?.textContent || 'Thème';
+          const author = card.querySelector('.text-violet-400')?.textContent || '';
+          const desc = card.querySelector('.line-clamp-2')?.textContent || '';
+          const colors = extractColors(raw);
+          const status = card.dataset.status?.toLowerCase();
 
-    document.getElementById('modalTitle').textContent = name;
-    document.getElementById('modalAuthor').textContent = author ? 'par ' + author : '';
-    const descEl = document.getElementById('modalDescription');
-    if (desc) { descEl.textContent = desc; descEl.classList.remove('hidden'); } else descEl.classList.add('hidden');
+          document.getElementById('modalTitle').textContent = name;
+          document.getElementById('modalAuthor').textContent = author ? 'par ' + author : '';
+          const descEl = document.getElementById('modalDescription');
+          if (desc) { descEl.textContent = desc; descEl.classList.remove('hidden'); } else descEl.classList.add('hidden');
 
-    renderPreviewBox(document.getElementById('modalPreviewLight'), colors, false);
-    renderPreviewBox(document.getElementById('modalPreviewDark'), colors, true);
+          renderPreviewBox(document.getElementById('modalPreviewLight'), colors, false);
+          renderPreviewBox(document.getElementById('modalPreviewDark'), colors, true);
 
-    const actionsEl = document.getElementById('modalActions');
-    actionsEl.innerHTML = '';
-    if (status === 'submitted') {
-      const hasPending = card.querySelector('.badge-pending');
-      if (hasPending) { actionsEl.innerHTML = '<button class="modalApproveUpdate px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium">Approuver MAJ</button><button class="modalRejectUpdate px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-medium ml-2">Rejeter MAJ</button>'; }
-      else { actionsEl.innerHTML = '<button class="modalApprove px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium">Approuver</button><button class="modalReject px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-medium ml-2">Rejeter</button>'; }
-    } else if (status === 'approved') { actionsEl.innerHTML = '<button class="modalArchive px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-medium">Archiver</button>'; }
-    else if (status === 'rejected' || status === 'archived') { actionsEl.innerHTML = '<button class="modalRestore px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium">'+(status==='archived'?'Republier':'Approuver')+'</button><button class="modalDelete px-4 py-2 rounded-xl bg-rose-900/50 hover:bg-rose-800 text-rose-200 font-medium border border-rose-800/50 ml-2">Supprimer</button>'; }
+          const actionsEl = document.getElementById('modalActions');
+          while (actionsEl.firstChild) {
+            actionsEl.removeChild(div.firstChild)
+          }
+          if (status === 'submitted') {
+            const hasPending = card.querySelector('.badge-pending');
+            if (hasPending) { actionsEl.innerHTML = '<button class="modalApproveUpdate px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium">Approuver MAJ</button><button class="modalRejectUpdate px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-medium ml-2">Rejeter MAJ</button>'; }
+            else { actionsEl.innerHTML = '<button class="modalApprove px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium">Approuver</button><button class="modalReject px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-medium ml-2">Rejeter</button>'; }
+          } else if (status === 'approved') { actionsEl.innerHTML = '<button class="modalArchive px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-medium">Archiver</button>'; }
+          else if (status === 'rejected' || status === 'archived') { actionsEl.innerHTML = '<button class="modalRestore px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium">' + (status === 'archived' ? 'Republier' : 'Approuver') + '</button><button class="modalDelete px-4 py-2 rounded-xl bg-rose-900/50 hover:bg-rose-800 text-rose-200 font-medium border border-rose-800/50 ml-2">Supprimer</button>'; }
 
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
+          modal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+        }
 
-  function closeModal() { modal.classList.add('hidden'); document.body.style.overflow = ''; currentModalTheme = null; }
-  closeModalBtn?.addEventListener('click', closeModal);
-  modalBackdrop?.addEventListener('click', closeModal);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+        function closeModal() { modal.classList.add('hidden'); document.body.style.overflow = ''; currentModalTheme = null; }
+        closeModalBtn?.addEventListener('click', closeModal);
+        modalBackdrop?.addEventListener('click', closeModal);
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-  async function apiCall(endpoint, method = 'POST') { const res = await fetch(endpoint, { method }); if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); }
+        async function apiCall(endpoint, method = 'POST') { const res = await fetch(endpoint, { method }); if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); }
 
-  function moveCard(card, targetGridId, newStatus) {
-    const targetGrid = document.getElementById(targetGridId);
-    if (!targetGrid) return;
-    card.dataset.status = newStatus;
-    card.style.animation = 'none';
-    targetGrid.appendChild(card);
-    requestAnimationFrame(() => { card.style.animation = ''; });
-    updateCounts();
-  }
+        function moveCard(card, targetGridId, newStatus) {
+          const targetGrid = document.getElementById(targetGridId);
+          if (!targetGrid) return;
+          card.dataset.status = newStatus;
+          card.style.animation = 'none';
+          targetGrid.appendChild(card);
+          requestAnimationFrame(() => { card.style.animation = ''; });
+          updateCounts();
+        }
 
-  function rebuildCardActions(card, status) {
-    const actionsDiv = card.querySelector('.actions-container');
-    if (!actionsDiv) return;
-    actionsDiv.innerHTML = '';
-    if (status === 'submitted') { actionsDiv.innerHTML = '<button class="approveBtn action-btn action-btn-approve">Approuver</button><button class="rejectBtn action-btn action-btn-reject">Rejeter</button><button class="previewBtn action-btn action-btn-view">Aperçu</button>'; }
-    else if (status === 'approved') { actionsDiv.innerHTML = '<button class="archiveBtn action-btn action-btn-archive">Archiver</button><button class="previewBtn action-btn action-btn-view">Aperçu</button>'; }
-    else if (status === 'rejected') { actionsDiv.innerHTML = '<button class="approveBtn action-btn action-btn-approve">Approuver</button><button class="deleteBtn action-btn action-btn-delete">Supprimer</button><button class="previewBtn action-btn action-btn-view">Aperçu</button>'; }
-    else if (status === 'archived') { actionsDiv.innerHTML = '<button class="unarchiveBtn action-btn action-btn-restore">Republier</button><button class="deleteBtn action-btn action-btn-delete">Supprimer</button><button class="previewBtn action-btn action-btn-view">Aperçu</button>'; }
-  }
+        function rebuildCardActions(card, status) {
+          const actionsDiv = card.querySelector('.actions-container');
+          if (!actionsDiv) return;
+          while (actionsDiv.firstChild) {
+            actionsDiv.removeChild(div.firstChild)
+          }
+          if (status === 'submitted') { actionsDiv.innerHTML = '<button class="approveBtn action-btn action-btn-approve">Approuver</button><button class="rejectBtn action-btn action-btn-reject">Rejeter</button><button class="previewBtn action-btn action-btn-view">Aperçu</button>'; }
+          else if (status === 'approved') { actionsDiv.innerHTML = '<button class="archiveBtn action-btn action-btn-archive">Archiver</button><button class="previewBtn action-btn action-btn-view">Aperçu</button>'; }
+          else if (status === 'rejected') { actionsDiv.innerHTML = '<button class="approveBtn action-btn action-btn-approve">Approuver</button><button class="deleteBtn action-btn action-btn-delete">Supprimer</button><button class="previewBtn action-btn action-btn-view">Aperçu</button>'; }
+          else if (status === 'archived') { actionsDiv.innerHTML = '<button class="unarchiveBtn action-btn action-btn-restore">Republier</button><button class="deleteBtn action-btn action-btn-delete">Supprimer</button><button class="previewBtn action-btn action-btn-view">Aperçu</button>'; }
+        }
 
-  async function handleAction(btn, card) {
-    const id = card.dataset.id;
-    if (!id) return;
-    const prevText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '...';
+        async function handleAction(btn, card) {
+          const id = card.dataset.id;
+          if (!id) return;
+          const prevText = btn.innerHTML;
+          btn.disabled = true;
+          btn.innerHTML = '...';
 
-    try {
-      if (btn.classList.contains('approveBtn') || btn.classList.contains('modalApprove')) {
-        await apiCall('/api/themes/' + id + '/approve');
-        moveCard(card, 'gridApproved', 'APPROVED');
-        rebuildCardActions(card, 'approved');
-        showToast('Thème approuvé', 'success');
-      } else if (btn.classList.contains('rejectBtn') || btn.classList.contains('modalReject')) {
-        await apiCall('/api/themes/' + id + '/reject');
-        moveCard(card, 'gridRejected', 'REJECTED');
-        rebuildCardActions(card, 'rejected');
-        showToast('Thème rejeté', 'success');
-      } else if (btn.classList.contains('archiveBtn') || btn.classList.contains('modalArchive')) {
-        await apiCall('/api/themes/' + id + '/archive');
-        moveCard(card, 'gridArchived', 'ARCHIVED');
-        rebuildCardActions(card, 'archived');
-        showToast('Thème archivé', 'success');
-      } else if (btn.classList.contains('unarchiveBtn') || btn.classList.contains('modalRestore')) {
-        const status = card.dataset.status?.toLowerCase();
-        if (status === 'archived') await apiCall('/api/themes/' + id + '/unarchive');
-        else await apiCall('/api/themes/' + id + '/approve');
-        moveCard(card, 'gridApproved', 'APPROVED');
-        rebuildCardActions(card, 'approved');
-        showToast('Thème restauré', 'success');
-      } else if (btn.classList.contains('approveUpdateBtn') || btn.classList.contains('modalApproveUpdate')) {
-        await apiCall('/api/themes/' + id + '/approve-update');
-        card.querySelector('.badge-pending')?.remove();
-        moveCard(card, 'gridApproved', 'APPROVED');
-        rebuildCardActions(card, 'approved');
-        showToast('MAJ approuvée', 'success');
-      } else if (btn.classList.contains('rejectUpdateBtn') || btn.classList.contains('modalRejectUpdate')) {
-        await apiCall('/api/themes/' + id + '/reject-update');
-        card.querySelector('.badge-pending')?.remove();
-        rebuildCardActions(card, card.dataset.status?.toLowerCase() || 'approved');
-        showToast('MAJ rejetée', 'success');
-      } else if (btn.classList.contains('deleteBtn') || btn.classList.contains('modalDelete')) {
-        const ok = await showConfirm('Supprimer définitivement ce thème ? Cette action est irréversible.');
-        if (!ok) { btn.disabled = false; btn.innerHTML = prevText; return; }
-        await apiCall('/api/themes/' + id, 'DELETE');
-        card.remove();
-        showToast('Thème supprimé', 'success');
-      }
-      closeModal();
-    } catch(err) {
-      showToast('Erreur: ' + err.message, 'error');
-      btn.disabled = false;
-      btn.innerHTML = prevText;
-    }
-  }
+          try {
+            if (btn.classList.contains('approveBtn') || btn.classList.contains('modalApprove')) {
+              await apiCall('/api/themes/' + id + '/approve');
+              moveCard(card, 'gridApproved', 'APPROVED');
+              rebuildCardActions(card, 'approved');
+              showToast('Thème approuvé', 'success');
+            } else if (btn.classList.contains('rejectBtn') || btn.classList.contains('modalReject')) {
+              await apiCall('/api/themes/' + id + '/reject');
+              moveCard(card, 'gridRejected', 'REJECTED');
+              rebuildCardActions(card, 'rejected');
+              showToast('Thème rejeté', 'success');
+            } else if (btn.classList.contains('archiveBtn') || btn.classList.contains('modalArchive')) {
+              await apiCall('/api/themes/' + id + '/archive');
+              moveCard(card, 'gridArchived', 'ARCHIVED');
+              rebuildCardActions(card, 'archived');
+              showToast('Thème archivé', 'success');
+            } else if (btn.classList.contains('unarchiveBtn') || btn.classList.contains('modalRestore')) {
+              const status = card.dataset.status?.toLowerCase();
+              if (status === 'archived') await apiCall('/api/themes/' + id + '/unarchive');
+              else await apiCall('/api/themes/' + id + '/approve');
+              moveCard(card, 'gridApproved', 'APPROVED');
+              rebuildCardActions(card, 'approved');
+              showToast('Thème restauré', 'success');
+            } else if (btn.classList.contains('approveUpdateBtn') || btn.classList.contains('modalApproveUpdate')) {
+              await apiCall('/api/themes/' + id + '/approve-update');
+              card.querySelector('.badge-pending')?.remove();
+              moveCard(card, 'gridApproved', 'APPROVED');
+              rebuildCardActions(card, 'approved');
+              showToast('MAJ approuvée', 'success');
+            } else if (btn.classList.contains('rejectUpdateBtn') || btn.classList.contains('modalRejectUpdate')) {
+              await apiCall('/api/themes/' + id + '/reject-update');
+              card.querySelector('.badge-pending')?.remove();
+              rebuildCardActions(card, card.dataset.status?.toLowerCase() || 'approved');
+              showToast('MAJ rejetée', 'success');
+            } else if (btn.classList.contains('deleteBtn') || btn.classList.contains('modalDelete')) {
+              const ok = await showConfirm('Supprimer définitivement ce thème ? Cette action est irréversible.');
+              if (!ok) { btn.disabled = false; btn.innerHTML = prevText; return; }
+              await apiCall('/api/themes/' + id, 'DELETE');
+              card.remove();
+              showToast('Thème supprimé', 'success');
+            }
+            closeModal();
+          } catch (err) {
+            showToast('Erreur: ' + err.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = prevText;
+          }
+        }
 
-  document.addEventListener('click', e => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    if (btn.classList.contains('previewBtn')) { const card = btn.closest('.themeCard'); if (card) openModal(card); return; }
-    const card = btn.closest('.themeCard');
-    if (card && (btn.classList.contains('approveBtn') || btn.classList.contains('rejectBtn') || btn.classList.contains('archiveBtn') || btn.classList.contains('unarchiveBtn') || btn.classList.contains('approveUpdateBtn') || btn.classList.contains('rejectUpdateBtn') || btn.classList.contains('deleteBtn'))) { handleAction(btn, card); return; }
-    if (currentModalTheme && (btn.classList.contains('modalApprove') || btn.classList.contains('modalReject') || btn.classList.contains('modalArchive') || btn.classList.contains('modalRestore') || btn.classList.contains('modalApproveUpdate') || btn.classList.contains('modalRejectUpdate') || btn.classList.contains('modalDelete'))) { handleAction(btn, currentModalTheme); }
-  });
+        document.addEventListener('click', e => {
+          const btn = e.target.closest('button');
+          if (!btn) return;
+          if (btn.classList.contains('previewBtn')) { const card = btn.closest('.themeCard'); if (card) openModal(card); return; }
+          const card = btn.closest('.themeCard');
+          if (card && (btn.classList.contains('approveBtn') || btn.classList.contains('rejectBtn') || btn.classList.contains('archiveBtn') || btn.classList.contains('unarchiveBtn') || btn.classList.contains('approveUpdateBtn') || btn.classList.contains('rejectUpdateBtn') || btn.classList.contains('deleteBtn'))) { handleAction(btn, card); return; }
+          if (currentModalTheme && (btn.classList.contains('modalApprove') || btn.classList.contains('modalReject') || btn.classList.contains('modalArchive') || btn.classList.contains('modalRestore') || btn.classList.contains('modalApproveUpdate') || btn.classList.contains('modalRejectUpdate') || btn.classList.contains('modalDelete'))) { handleAction(btn, currentModalTheme); }
+        });
 
-  renderAllPreviews();
-  updateCounts();
-})();
-</script>
+        renderAllPreviews();
+        updateCounts();
+      })();
+    </script>

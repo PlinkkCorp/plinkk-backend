@@ -433,7 +433,9 @@
                 const globalCheckbox = document.getElementById('maintGlobal');
                 const isGlobalOn = globalCheckbox ? globalCheckbox.checked : state.isGlobal;
 
-                container.innerHTML = '';
+                while (container.firstChild) {
+                    container.removeChild(div.firstChild)
+                }
 
                 // Sort: System first, then Custom (alphabetical)
                 const sortedPages = [...state.allPages].sort((a, b) => {
@@ -557,7 +559,9 @@
             function renderSimpleList(type) {
                 const container = document.getElementById(`list-${type}`);
                 if (!container) return;
-                container.innerHTML = '';
+                while (container.firstChild) {
+                    container.removeChild(div.firstChild)
+                }
 
                 if (state[type].length === 0) {
                     container.innerHTML = '<div class="text-slate-600 italic text-[10px] text-center py-2">Aucune entrée</div>';

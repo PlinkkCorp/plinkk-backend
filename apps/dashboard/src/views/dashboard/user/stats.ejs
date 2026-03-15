@@ -1,11 +1,7 @@
-<%- include('partials/head.ejs', { 
-    title: 'Statistiques',
-    description: 'Statistiques détaillées de votre profil Plinkk : vues, clics, performance et analytics avancés.',
-    metaKeywords: 'statistiques, analytics, vues, clics, performance, données',
-    metaAuthor: 'Plinkk',
-    pageThemeColor: 'success',
-    robots: 'noindex,nofollow'
-}) %>
+<%- include('partials/head.ejs', { title: 'Statistiques' ,
+    description: 'Statistiques détaillées de votre profil Plinkk : vues, clics, performance et analytics avancés.' ,
+    metaKeywords: 'statistiques, analytics, vues, clics, performance, données' , metaAuthor: 'Plinkk' ,
+    pageThemeColor: 'success' , robots: 'noindex,nofollow' }) %>
     <%- include('partials/header-dash.ejs', { user: user }) %>
 
         <div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-6 px-4 py-8">
@@ -97,10 +93,10 @@
                         redirectReturns !=='undefined' ) ? redirectReturns : []; const _qrCodes=(typeof qrCodes
                         !=='undefined' && Array.isArray(qrCodes)) ? qrCodes : []; const _totalQrScans=(typeof
                         totalQrScans !=='undefined' ) ? totalQrScans : 0; const _qrScansDaily=(typeof qrScansDaily30d
-                        !=='undefined' ) ? qrScansDaily30d : []; const _userViews=(typeof user
-                        !=='undefined' && user.views) ? user.views : 0; const _isPremium=(typeof isPremium
-                        !=='undefined' ) ? isPremium : false; const _maxStatsDays=(typeof maxStatsDays !=='undefined' )
-                        ? maxStatsDays : 30; const linkTotalClicks=_links.reduce((a, l)=> a + (l.clicks || 0), 0);
+                        !=='undefined' ) ? qrScansDaily30d : []; const _userViews=(typeof user !=='undefined' &&
+                        user.views) ? user.views : 0; const _isPremium=(typeof isPremium !=='undefined' ) ? isPremium :
+                        false; const _maxStatsDays=(typeof maxStatsDays !=='undefined' ) ? maxStatsDays : 30; const
+                        linkTotalClicks=_links.reduce((a, l)=> a + (l.clicks || 0), 0);
                         const avgPerLink = _links.length ? Math.round(linkTotalClicks / _links.length) : 0;
                         const sortedLinks = [..._links].sort((a, b) => (b.clicks || 0) - (a.clicks || 0));
                         const topLink = sortedLinks[0];
@@ -601,15 +597,21 @@
                         <section id="panel-qrcodes" class="tab-panel hidden space-y-6">
                             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                                    <p class="text-3xl font-bold text-white" id="qrTotalScans"><%= _totalQrScans %></p>
+                                    <p class="text-3xl font-bold text-white" id="qrTotalScans">
+                                        <%= _totalQrScans %>
+                                    </p>
                                     <p class="text-sm text-slate-400 mt-1">Scans QR totaux</p>
                                 </div>
                                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                                    <p class="text-3xl font-bold text-white" id="qrTotalCodes"><%= _qrCodes.length %></p>
+                                    <p class="text-3xl font-bold text-white" id="qrTotalCodes">
+                                        <%= _qrCodes.length %>
+                                    </p>
                                     <p class="text-sm text-slate-400 mt-1">QR codes créés</p>
                                 </div>
                                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-                                    <p class="text-3xl font-bold text-white" id="qrAvgScans"><%= _qrCodes.length ? Math.round(_totalQrScans / _qrCodes.length) : 0 %></p>
+                                    <p class="text-3xl font-bold text-white" id="qrAvgScans">
+                                        <%= _qrCodes.length ? Math.round(_totalQrScans / _qrCodes.length) : 0 %>
+                                    </p>
                                     <p class="text-sm text-slate-400 mt-1">Scans moyens / QR</p>
                                 </div>
                             </div>
@@ -618,12 +620,18 @@
                                 <h2 class="font-bold text-white text-xl mb-6">Créer un QR code</h2>
                                 <form id="qrForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Nom</label>
-                                        <input id="qrName" class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200" placeholder="Ex: QR Instagram bio" maxlength="80" />
+                                        <label
+                                            class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Nom</label>
+                                        <input id="qrName"
+                                            class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200"
+                                            placeholder="Ex: QR Instagram bio" maxlength="80" />
                                     </div>
                                     <div>
-                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Type de destination</label>
-                                        <select id="qrTargetType" class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200">
+                                        <label
+                                            class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Type
+                                            de destination</label>
+                                        <select id="qrTargetType"
+                                            class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200">
                                             <option value="PLINKK_PAGE">Lien de cette page Plinkk</option>
                                             <option value="PROFILE">Page profil Plinkk</option>
                                             <option value="REDIRECT">Lien de redirection</option>
@@ -632,49 +640,72 @@
                                     </div>
 
                                     <div id="qrRedirectWrap" class="hidden">
-                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Redirection</label>
-                                        <select id="qrRedirectId" class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200">
+                                        <label
+                                            class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Redirection</label>
+                                        <select id="qrRedirectId"
+                                            class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200">
                                             <option value="">Choisir une redirection</option>
-                                            <% _redirects.forEach(r => { %>
-                                                <option value="<%= r.id %>">/r/<%= r.slug %> → <%= r.targetUrl %></option>
-                                            <% }) %>
+                                            <% _redirects.forEach(r=> { %>
+                                                <option value="<%= r.id %>">/r/<%= r.slug %> → <%= r.targetUrl %>
+                                                </option>
+                                                <% }) %>
                                         </select>
                                     </div>
 
                                     <div id="qrCustomWrap" class="hidden">
-                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">URL personnalisée</label>
-                                        <input id="qrCustomUrl" class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200" placeholder="https://..." />
+                                        <label
+                                            class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">URL
+                                            personnalisée</label>
+                                        <input id="qrCustomUrl"
+                                            class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200"
+                                            placeholder="https://..." />
                                     </div>
 
                                     <div>
-                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Couleur QR</label>
-                                        <input id="qrForegroundHex" type="color" value="#111827" class="mt-1 w-full h-11 bg-slate-900 border border-slate-800 rounded-xl" />
+                                        <label
+                                            class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Couleur
+                                            QR</label>
+                                        <input id="qrForegroundHex" type="color" value="#111827"
+                                            class="mt-1 w-full h-11 bg-slate-900 border border-slate-800 rounded-xl" />
                                     </div>
                                     <div>
-                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Couleur fond</label>
-                                        <input id="qrBackgroundHex" type="color" value="#ffffff" class="mt-1 w-full h-11 bg-slate-900 border border-slate-800 rounded-xl" />
+                                        <label
+                                            class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Couleur
+                                            fond</label>
+                                        <input id="qrBackgroundHex" type="color" value="#ffffff"
+                                            class="mt-1 w-full h-11 bg-slate-900 border border-slate-800 rounded-xl" />
                                     </div>
                                     <div>
-                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Couleur yeux</label>
-                                        <input id="qrEyeHex" type="color" value="#7c3aed" class="mt-1 w-full h-11 bg-slate-900 border border-slate-800 rounded-xl" />
+                                        <label
+                                            class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Couleur
+                                            yeux</label>
+                                        <input id="qrEyeHex" type="color" value="#7c3aed"
+                                            class="mt-1 w-full h-11 bg-slate-900 border border-slate-800 rounded-xl" />
                                     </div>
                                     <div>
-                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Taille</label>
-                                        <input id="qrSize" type="number" min="192" max="1024" value="384" class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200" />
+                                        <label
+                                            class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Taille</label>
+                                        <input id="qrSize" type="number" min="192" max="1024" value="384"
+                                            class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200" />
                                     </div>
                                     <div>
-                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Marge</label>
-                                        <input id="qrMargin" type="number" min="0" max="8" value="2" class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200" />
+                                        <label
+                                            class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">Marge</label>
+                                        <input id="qrMargin" type="number" min="0" max="8" value="2"
+                                            class="mt-1 w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200" />
                                     </div>
                                     <div class="flex items-end">
                                         <label class="flex items-center gap-2 text-slate-300 text-sm">
-                                            <input id="qrRounded" type="checkbox" class="rounded border-slate-700 bg-slate-900" />
+                                            <input id="qrRounded" type="checkbox"
+                                                class="rounded border-slate-700 bg-slate-900" />
                                             Modules arrondis
                                         </label>
                                     </div>
 
                                     <div class="md:col-span-2 flex items-center gap-3">
-                                        <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-xl font-semibold">Créer le QR</button>
+                                        <button type="submit"
+                                            class="px-5 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-xl font-semibold">Créer
+                                            le QR</button>
                                         <p id="qrFormMsg" class="text-sm text-slate-400"></p>
                                     </div>
                                 </form>
@@ -692,7 +723,8 @@
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-left border-collapse">
                                         <thead>
-                                            <tr class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500 bg-slate-950/50">
+                                            <tr
+                                                class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500 bg-slate-950/50">
                                                 <th class="p-4 font-bold">QR</th>
                                                 <th class="p-4 font-bold">Nom</th>
                                                 <th class="p-4 font-bold">Type</th>
@@ -709,8 +741,8 @@
 
                 </main>
 
-    <!-- Tutorial -->
-    <script src="/public/js/tutorial.js" defer></script>
+                <!-- Tutorial -->
+                <script src="/public/js/tutorial.js" defer></script>
         </div>
 
         <!--  DATA  -->
@@ -1161,7 +1193,9 @@
 
                     const tbody = qs('#tblBody');
                     if (tbody) {
-                        tbody.innerHTML = '';
+                        while (tbody.firstChild) {
+                            tbody.removeChild(div.firstChild)
+                        }
                         rows.forEach(r => {
                             const tr = document.createElement('tr');
                             tr.className = 'hover:bg-slate-800/30 transition-colors group';
@@ -1243,7 +1277,9 @@
                     });
                     const legendEl = qs('#categoriesLegend');
                     if (legendEl) {
-                        legendEl.innerHTML = '';
+                        while (legendEl.firstChild) {
+                            legendEl.removeChild(div.firstChild)
+                        }
                         const total = catEntries.reduce((a, x) => a + x[1], 0);
                         catEntries.forEach((e, i) => {
                             const pct = total ? Math.round(e[1] / total * 100) : 0;
@@ -1287,7 +1323,9 @@
                 function renderQrTable() {
                     const tbody = qs('#qrTableBody');
                     if (!tbody) return;
-                    tbody.innerHTML = '';
+                    while (tbody.firstChild) {
+                        tbody.removeChild(div.firstChild)
+                    }
 
                     if (!qrCodes.length) {
                         tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-500">Aucun QR code pour le moment.</td></tr>';

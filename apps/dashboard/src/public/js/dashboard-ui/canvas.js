@@ -46,7 +46,9 @@ async function renderCanvasInto(container, item) {
     await loadScript(`/public/canvaAnimation/${item?.fileNames}`);
     
     // Clear skeleton and add canvas
-    container.innerHTML = '';
+    while (container.firstChild) {
+      container.removeChild(div.firstChild)
+    }
     container.appendChild(canvas);
     const ro = new ResizeObserver(resize); ro.observe(canvas); resize();
 

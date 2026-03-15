@@ -2775,7 +2775,9 @@
                     } else { targetInfo.classList.add('hidden'); }
 
                     const jsonContainer = document.getElementById('modalJson');
-                    jsonContainer.innerHTML = '';
+                    while (jsonContainer.firstChild) {
+                        jsonContainer.removeChild(div.firstChild)
+                    }
                     const details = log.details || {};
 
                     // Handle explicit "changes" array

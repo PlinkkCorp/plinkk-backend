@@ -242,11 +242,23 @@ export function unlockEgg(eggName) {
 export function showEggUnlockedModal(label, firstTime) {
     const modal = document.createElement("div");
     modal.className = "egg-unlocked-modal";
-    modal.innerHTML = `
-        <span style="font-size:2em;display:block;margin-bottom:8px;">🥚</span>
-        <span style="font-size:1.2em;">${firstTime ? "Easter Egg débloqué !" : "Easter Egg déjà débloqué !"}</span><br>
-        <span style="color:#00ff8f;font-weight:bold;">${label} activé !</span>
-    `;
+    const span1 = document.createElement('span');
+    span1.style.fontSize = '2em';
+    span1.style.display = 'block';
+    span1.style.marginBottom = '8px';
+    span1.textContent = '🥚';
+    const span2 = document.createElement('span');
+    span2.style.fontSize = '1.2em';
+    span2.textContent = firstTime ? 'Easter Egg débloqué !' : 'Easter Egg déjà débloqué !';
+    const br = document.createElement('br');
+    const span3 = document.createElement('span');
+    span3.style.color = '#00ff8f';
+    span3.style.fontWeight = 'bold';
+    span3.textContent = label + ' activé !';
+    modal.appendChild(span1);
+    modal.appendChild(span2);
+    modal.appendChild(br);
+    modal.appendChild(span3);
     Object.assign(modal.style, {
         position: "fixed",
         top: "50%",
@@ -290,7 +302,9 @@ export function createEasterEggGearButton() {
     const btn = document.createElement("button");
     btn.id = "easter-egg-gear-btn";
     btn.title = "Easter Eggs";
-    btn.innerHTML = `<ion-icon name="settings-outline"></ion-icon>`;
+    const icon = document.createElement('ion-icon');
+    icon.name = 'settings-outline';
+    btn.appendChild(icon);
     btn.className = "easter-egg-gear-btn";
     const iconBtn = btn.querySelector("ion-icon");
     btn.addEventListener("click", (e) => {

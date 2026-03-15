@@ -917,7 +917,9 @@
                         document.getElementById('umEditEmail').value = user.email || '';
 
                         const roleSelect = document.getElementById('umRole');
-                        roleSelect.innerHTML = '';
+                        while (roleSelect.firstChild) {
+                            roleSelect.removeChild(div.firstChild)
+                        }
                         const roles = ["USER", "PREMIUM", "PARTNER", "MODERATOR", "DEVELOPER", "ADMIN"];
                         roles.forEach(r => {
                             const opt = document.createElement('option');
@@ -960,8 +962,12 @@
                         const data = await res.json();
                         const plList = document.getElementById('umPlList');
                         const rdList = document.getElementById('umRdList');
-                        plList.innerHTML = '';
-                        rdList.innerHTML = '';
+                        while (plList.firstChild) {
+                            plList.removeChild(div.firstChild)
+                        }
+                        while (rdList.firstChild) {
+                            rdList.removeChild(div.firstChild)
+                        }
                         document.getElementById('umPlCount').textContent = (data.plinkks || []).length;
                         document.getElementById('umRdCount').textContent = (data.redirects || []).length;
 
@@ -1313,18 +1319,20 @@
                 } else { targetInfo.classList.add('hidden'); }
 
                 const jsonContainer = document.getElementById('modalJson');
-                jsonContainer.innerHTML = '';
+                while (jsonContainer.firstChild) {
+                    jsonContainer.removeChild(div.firstChild)
+                }
                 const details = log.details || {};
 
                 // === LOGS HTTP: Format spécial pour les requêtes HTTP ===
                 const isHttpLog = log.action && log.action.startsWith('HTTP_');
                 if (isHttpLog) {
                     const httpPath = details.path || details.route || log.targetId || 'Requête HTTP';
-                    
+
                     // En-tête HTTP
                     const httpHeader = document.createElement('div');
                     httpHeader.className = 'bg-gradient-to-br from-slate-900/60 via-slate-900/40 to-slate-900/20 rounded-2xl p-5 border border-slate-800/50 mb-4 shadow-lg';
-                    
+
                     const methodClass = {
                         'GET': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
                         'POST': 'text-blue-400 bg-blue-500/10 border-blue-500/30',
@@ -1332,11 +1340,11 @@
                         'PATCH': 'text-violet-400 bg-violet-500/10 border-violet-500/30',
                         'DELETE': 'text-rose-400 bg-rose-500/10 border-rose-500/30'
                     }[details.method] || 'text-slate-400 bg-slate-800/20 border-slate-700/50';
-                    
-                    const statusClass = details.statusCode >= 200 && details.statusCode < 300 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 
-                                       details.statusCode >= 400 && details.statusCode < 500 ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' : 
-                                       details.statusCode >= 500 ? 'text-rose-400 bg-rose-500/10 border-rose-500/30' : 'text-slate-400 bg-slate-800/20 border-slate-700/50';
-                    
+
+                    const statusClass = details.statusCode >= 200 && details.statusCode < 300 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' :
+                        details.statusCode >= 400 && details.statusCode < 500 ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' :
+                            details.statusCode >= 500 ? 'text-rose-400 bg-rose-500/10 border-rose-500/30' : 'text-slate-400 bg-slate-800/20 border-slate-700/50';
+
                     httpHeader.innerHTML = `
                         <div class="flex items-center justify-between mb-4">
                             <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest font-mono opacity-80 flex items-center gap-2">
@@ -1356,7 +1364,7 @@
                         ${details.scope ? `<div class="mt-2"><span class="px-2 py-1 rounded-lg text-[9px] font-bold uppercase ${details.scope === 'ADMIN' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30' : 'bg-blue-500/10 text-blue-400 border border-blue-500/30'}">${details.scope}</span></div>` : ''}
                     `;
                     jsonContainer.appendChild(httpHeader);
-                    
+
                     // Fonction helper pour formater les objets
                     const formatValue = (v) => {
                         if (v === null || v === undefined) return '<span class="text-slate-600 italic">null</span>';
@@ -1364,7 +1372,7 @@
                         if (typeof v === 'object') return `<span class="text-slate-400">${JSON.stringify(v)}</span>`;
                         return `<span class="text-slate-300">${v}</span>`;
                     };
-                    
+
                     // Paramètres (params, query, body) formatés proprement
                     if (details.params && Object.keys(details.params).length > 0) {
                         const paramsDiv = document.createElement('div');
@@ -1382,7 +1390,7 @@
                         `;
                         jsonContainer.appendChild(paramsDiv);
                     }
-                    
+
                     if (details.query && Object.keys(details.query).length > 0) {
                         const queryDiv = document.createElement('div');
                         queryDiv.className = 'mb-3';
@@ -1399,7 +1407,7 @@
                         `;
                         jsonContainer.appendChild(queryDiv);
                     }
-                    
+
                     if (details.body && Object.keys(details.body).length > 0) {
                         const bodyDiv = document.createElement('div');
                         bodyDiv.className = 'mb-3';
@@ -1416,7 +1424,7 @@
                         `;
                         jsonContainer.appendChild(bodyDiv);
                     }
-                    
+
                     // Afficher un message si aucune donnée n'est disponible
                     if (!details.params && !details.query && !details.body) {
                         const emptyDiv = document.createElement('div');
@@ -1424,7 +1432,7 @@
                         emptyDiv.textContent = 'Aucun paramètre ou payload pour cette requête';
                         jsonContainer.appendChild(emptyDiv);
                     }
-                    
+
                     // Skip le reste du traitement pour les logs HTTP
                     document.getElementById('logDetailsModal').classList.remove('hidden');
                     document.body.style.overflow = 'hidden';
@@ -1720,10 +1728,10 @@
                             const httpPath = log.details.path || log.details.route || log.targetId;
                             const statusCode = log.details.statusCode || 'XXX';
                             const method = log.details.method || 'GET';
-                            const statusClass = statusCode >= 200 && statusCode < 300 ? 'text-emerald-400' : 
-                                               statusCode >= 400 && statusCode < 500 ? 'text-amber-400' : 
-                                               statusCode >= 500 ? 'text-rose-400' : 'text-slate-400';
-                            
+                            const statusClass = statusCode >= 200 && statusCode < 300 ? 'text-emerald-400' :
+                                statusCode >= 400 && statusCode < 500 ? 'text-amber-400' :
+                                    statusCode >= 500 ? 'text-rose-400' : 'text-slate-400';
+
                             // Si on a un path, l'afficher
                             if (httpPath) {
                                 targetDisplay = `
@@ -1748,7 +1756,7 @@
                                     summary = paramKeys.join(', ');
                                     if (Object.keys(log.details.params).length > 2) summary += '...';
                                 }
-                                
+
                                 targetDisplay = `
                             <div class="flex items-center gap-2">
                                 <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[9px] ${statusClass} font-bold">${statusCode}</span>
