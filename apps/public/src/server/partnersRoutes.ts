@@ -8,7 +8,8 @@ export function partnersRoutes(fastify: FastifyInstance) {
             include: {
                 quests: {
                     where: { isActive: true }
-                }
+                },
+                dailyStats: true
             },
             orderBy: { order: 'asc' }
         });
@@ -54,7 +55,7 @@ export function partnersRoutes(fastify: FastifyInstance) {
             // Attach aggregated stats to partner objects (non-breaking: added field `stats`)
             partners.forEach(p => {
                 const s = statsMap.get(p.id) || { views: 0, clicks: 0 };
-                p.stats = {
+                p.dailyStats = {
                     views: s.views,
                     clicks: s.clicks,
                     gemsAwarded: gemsMap.get(p.id) || 0
