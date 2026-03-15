@@ -424,7 +424,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
       const js = await generateBundle();
 
-      reply.type("application/javascript").send(js);
+      return reply.type("application/javascript").send(js);
     },
   );
 
