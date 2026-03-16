@@ -1,3 +1,7 @@
+/**
+ * Middleware pour les racines réservées
+ * - registerReservedRootsHook
+ */
 import { FastifyInstance } from "fastify";
 
 const RESERVED_ROOTS = new Set([
@@ -11,11 +15,14 @@ const RESERVED_ROOTS = new Set([
   "features"
 ]);
 
+/**
+ * Enregistre le hook pour les racines réservées
+ * @param fastify - L'instance fastify
+ */
 export function registerReservedRootsHook(fastify: FastifyInstance) {
   fastify.addHook("onRequest", async (request, reply) => {
     const url = request.url;
 
-    // Support stripping redundant /dashboard/ prefix
     if (url.startsWith("/dashboard/")) {
       return reply.redirect(url.replace("/dashboard/", "/"));
     }

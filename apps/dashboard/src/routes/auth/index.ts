@@ -1,6 +1,8 @@
 /**
  * Index des routes d'authentification
- * - /auth/login
+ * - authRoutes
+ * 
+ * - /auth/login 
  * - /auth/register
  * - /auth/totp
  * - /auth/google
@@ -19,6 +21,10 @@ import { forgotPasswordRoutes } from "./forgot-password";
 import { joinRoutes } from "./join";
 import { verifyRoutes } from "./verify";
 
+/**
+ * Enregistre les routes d'authentification
+ * @param fastify - L'instance fastify
+ */
 export function authRoutes(fastify: FastifyInstance) {
   fastify.register(async (instance) => {
     instance.register(loginRoutes);

@@ -1,9 +1,17 @@
+/**
+ * Middleware pour la validation de session
+ * - registerSessionValidator
+ */
 import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { updateSessionActivity } from "../services/sessionService";
 
 const ACTIVITY_THROTTLE_MS = 60 * 1000;
 
+/**
+ * Enregistre le hook pour la validation de session
+ * @param fastify - L'instance fastify
+ */
 export function registerSessionValidator(fastify: FastifyInstance) {
   fastify.addHook("preHandler", async (request, _reply) => {
     const userId = request.session.get("data");
@@ -18,7 +26,6 @@ export function registerSessionValidator(fastify: FastifyInstance) {
     if (isImpersonated && impExpires && Date.now() > impExpires) {
       const originalAdmin = request.session.get("original_admin");
       if (originalAdmin) {
-        // Return to admin session
         request.session.set("data", originalAdmin);
         request.session.set("is_impersonated", false);
         request.session.set("impersonation_expires", null);

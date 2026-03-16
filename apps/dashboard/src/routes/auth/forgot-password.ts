@@ -1,5 +1,7 @@
 /**
  * Route pour réinitialiser son mot de passe
+ * - forgotPasswordRoutes
+ * 
  * GET  /auth/forgot-password     → page formulaire email
  * POST /auth/forgot-password     → envoie un email avec un lien de réinitialisation
  * GET  /auth/reset-password      → page de réinitialisation du mot de passe
@@ -13,13 +15,15 @@ import { generateToken } from "../../lib/token";
 import { logUserAction } from "../../lib/userLogger";
 import { EmailService } from "../../services/emailService";
 
+/**
+ * Enregistre les routes pour la réinitialisation du mot de passe
+ * @param fastify - L'instance fastify
+ */
 export function forgotPasswordRoutes(fastify: FastifyInstance) {
-    // GET: Show forgot password request page
     fastify.get("/auth/forgot-password", async (request, reply) => {
         return await replyView(reply, "auth/forgot-password.ejs", null, {});
     });
 
-    // POST: Process forgot password request
     fastify.post("/auth/forgot-password", async (request, reply) => {
         const { email } = request.body as { email?: string };
 
@@ -38,7 +42,6 @@ export function forgotPasswordRoutes(fastify: FastifyInstance) {
             select: { id: true, userName: true },
         });
 
-        // We don't reveal if user exists for security, but we only create ticket if it does
         if (user) {
             const token = generateToken(32);
             const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
@@ -53,7 +56,6 @@ export function forgotPasswordRoutes(fastify: FastifyInstance) {
 
             const resetLink = `${process.env.FRONTEND_URL || "https://dash.plinkk.fr"}/auth/reset-password?token=${token}`;
 
-            // Send password reset email asynchronously
             setImmediate(() => {
                 EmailService.sendPasswordResetEmail(email, user.userName, token).catch((err) => {
                     console.error("[EMAIL ERROR] Failed to send password reset email:", err);
@@ -63,11 +65,9 @@ export function forgotPasswordRoutes(fastify: FastifyInstance) {
             await logUserAction(user.id, "PASSWORD_RESET_REQUESTED", null, { email }, request.ip);
         }
 
-        // Always show success to prevent email enumeration
         return await replyView(reply, "auth/forgot-password.ejs", null, { success: true });
     });
 
-    // GET: Show password reset form
     fastify.get("/auth/reset-password", async (request, reply) => {
         const { token } = request.query as { token?: string };
 
@@ -84,7 +84,6 @@ export function forgotPasswordRoutes(fastify: FastifyInstance) {
         return await replyView(reply, "auth/reset-password.ejs", null, { token });
     });
 
-    // POST: Process password reset
     fastify.post("/auth/reset-password", async (request, reply) => {
         const { token, password, confirmPassword } = request.body as {
             token?: string;

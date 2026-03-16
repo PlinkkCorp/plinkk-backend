@@ -1,8 +1,19 @@
+/**
+ * Middleware de rate limiting par IP
+ * - cleanupExpiredEntries
+ * - createIpRateLimiter
+ * - limitLinkClicks
+ * - limitQrScans
+ * - limitRedirects
+ */
 import { FastifyRequest, FastifyReply } from "fastify";
 
 const ipCache = new Map<string, number>();
 
-
+/**
+ * Nettoie les entrées expirées du cache
+ * @param maxAgeMs - Temps de vie des entrées en millisecondes
+ */
 function cleanupExpiredEntries(maxAgeMs: number) {
   const now = Date.now();
   const expiredKeys: string[] = [];
@@ -18,7 +29,6 @@ function cleanupExpiredEntries(maxAgeMs: number) {
   }
 }
 
-// Nettoyer le cache toutes les 10 minutes
 setInterval(() => cleanupExpiredEntries(60 * 60 * 1000), 10 * 60 * 1000);
 
 /**
@@ -33,7 +43,6 @@ export function createIpRateLimiter(
   cooldownMs: number = 60 * 60 * 1000 // 1 heure par défaut
 ) {
   return async (request: FastifyRequest, reply: FastifyReply) => {
-    // Récupérer l'IP réelle (en tenant compte des proxies)
     const ip = (
       request.headers["x-forwarded-for"] as string ||
       request.headers["x-real-ip"] as string ||
@@ -42,8 +51,6 @@ export function createIpRateLimiter(
     ).split(",")[0].trim();
 
     if (!ip) {
-      // Si on ne peut pas déterminer l'IP, on laisse passer
-      // (mieux vaut permettre l'accès que de bloquer tout le monde)
       return;
     }
 
@@ -66,22 +73,24 @@ export function createIpRateLimiter(
       }
     }
 
-    // Enregistrer le timestamp de cette action
     ipCache.set(cacheKey, now);
   };
 }
 
 /**
  * Middleware pour limiter les clics de liens
+ * @description Limite les clics de liens à 1 par heure par IP
  */
 export const limitLinkClicks = createIpRateLimiter("click", 60 * 60 * 1000); // 1 heure
 
 /**
  * Middleware pour limiter les scans de QR codes
+ * @description Limite les scans de QR codes à 1 par heure par IP
  */
 export const limitQrScans = createIpRateLimiter("qr", 60 * 60 * 1000); // 1 heure
 
 /**
  * Middleware pour limiter les redirections
+ * @description Limite les redirections à 1 par heure par IP
  */
 export const limitRedirects = createIpRateLimiter("redirect", 60 * 60 * 1000); // 1 heure

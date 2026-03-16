@@ -1,5 +1,8 @@
 /**
  * Routes d'inscription par Google
+ * - googleAuthRoutes
+ * 
+ * GET  /auth/google     → page d'inscription par Google
  * POST /auth/google/callback → callback de Google
  */
 

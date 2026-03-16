@@ -1,5 +1,7 @@
 /**
  * Routes de connexion
+ * - loginRoutes
+ * 
  * GET  /login                → page de connexion
  * POST /login                → connexion
  * POST /login/email          → envoie un email avec un code OTP

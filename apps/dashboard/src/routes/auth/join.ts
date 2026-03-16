@@ -1,5 +1,7 @@
 /**
  * Routes d'inscription email-only (OTP + Magic Link)
+ * - joinRoutes
+ * 
  * GET  /join               → page formulaire email
  * POST /join               → demande d'envoi OTP
  * GET  /join/verify        → page saisie du code OTP
@@ -16,6 +18,10 @@ import { logUserAction } from "../../lib/userLogger";
 import { generateNanoId } from "../../utils/generateId";
 import { ensureOnboardingCompletedForLegacyAccount } from "../../lib/onboarding";
 
+/**
+ * Enregistre les routes d'inscription email-only
+ * @param fastify - L'instance fastify
+ */
 export function joinRoutes(fastify: FastifyInstance) {
   async function getCurrentUserForJoin(request: any) {
     const userId = request.session.get("data");
@@ -26,7 +32,6 @@ export function joinRoutes(fastify: FastifyInstance) {
     });
   }
 
-  // ─── GET /join ──────────────────────────────────────────────────────────────
   fastify.get("/join", async (request, reply) => {
     const me = await getCurrentUserForJoin(request);
     if (me && (!me.hasPassword || me.emailVerified)) return reply.redirect("/");
@@ -41,7 +46,6 @@ export function joinRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // ─── POST /join ─────────────────────────────────────────────────────────────
   fastify.post("/join", async (request, reply) => {
     const me = await getCurrentUserForJoin(request);
     if (me && (!me.hasPassword || me.emailVerified)) return reply.redirect("/");
@@ -88,7 +92,6 @@ export function joinRoutes(fastify: FastifyInstance) {
     );
   });
 
-  // ─── GET /join/verify ───────────────────────────────────────────────────────
   fastify.get("/join/verify", async (request, reply) => {
     const me = await getCurrentUserForJoin(request);
     if (me && (!me.hasPassword || me.emailVerified)) return reply.redirect("/");
@@ -103,7 +106,6 @@ export function joinRoutes(fastify: FastifyInstance) {
     });
   });
 
-  // ─── POST /join/verify ──────────────────────────────────────────────────────
   fastify.post("/join/verify", async (request, reply) => {
     const body = request.body as { email?: string; code?: string; otp?: string };
     const email = (body.email || "").trim().toLowerCase();
@@ -160,7 +162,6 @@ export function joinRoutes(fastify: FastifyInstance) {
     return reply.redirect(onboardingCompleted ? "/" : "/onboarding");
   });
 
-  // ─── GET /join/magic/:token ─────────────────────────────────────────────────
   fastify.get("/join/magic/:token", async (request, reply) => {
     const { token } = request.params as { token: string };
     const result = await verifyMagicToken(token);
@@ -187,6 +188,9 @@ export function joinRoutes(fastify: FastifyInstance) {
 
 /**
  * Crée un nouvel utilisateur (sans mot de passe) ou retourne l'existant.
+ * @param email - L'email de l'utilisateur
+ * @param request - La requête
+ * @returns L'utilisateur créé ou existant
  */
 async function createOrLoginUser(email: string, request: any) {
   const existing = await prisma.user.findFirst({
@@ -207,7 +211,6 @@ async function createOrLoginUser(email: string, request: any) {
     };
   }
 
-  // Générer un ID temporaire basé sur l'email (sera utilisé comme slug)
   const base = email.split("@")[0].replace(/[^a-z0-9]/gi, "").slice(0, 20) || "user";
   const uid = `${base}-${generateNanoId(6)}`;
 
@@ -217,7 +220,7 @@ async function createOrLoginUser(email: string, request: any) {
       userName: uid,
       name: uid,
       email,
-      password: "", // pas de mot de passe — inscription email-only
+      password: "",
       hasPassword: false,
       emailVerified: true,
       onboardingCompleted: false,
@@ -232,7 +235,6 @@ async function createOrLoginUser(email: string, request: any) {
     select: { id: true, onboardingCompleted: true, createdAt: true },
   });
 
-  // Tracking funnel
   try {
     const trackingId =
       (request.cookies as Record<string, string>)?.["plinkk_tid"] || user.id;
