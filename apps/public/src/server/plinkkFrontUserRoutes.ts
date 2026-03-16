@@ -1132,7 +1132,7 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
           request.host +
             "https://cdn.plinkk.fr/default_profile.png"; */
 
-      const avatar = await loadImage(image);
+      const avatar = await loadImage(image.replace("webp", "png"));
 
       // Halo néon violet autour de l'avatar
       const glowRadius = avatarSize * 0.65;
