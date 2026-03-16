@@ -1,10 +1,10 @@
 /**
  * Routes d'inscription email-only (OTP + Magic Link)
- * GET  /join             → page formulaire email
- * POST /join             → demande d'envoi OTP
- * GET  /join/verify      → page saisie du code OTP
- * POST /join/verify      → vérification du code OTP
- * GET  /join/magic/:token → connexion instantanée via Magic Link
+ * GET  /join               → page formulaire email
+ * POST /join               → demande d'envoi OTP
+ * GET  /join/verify        → page saisie du code OTP
+ * POST /join/verify        → vérification du code OTP
+ * GET  /join/magic/:token  → connexion instantanée via Magic Link
  */
 import { FastifyInstance } from "fastify";
 import z from "zod";

@@ -1,3 +1,14 @@
+/**
+ * Index des routes d'authentification
+ * - /auth/login
+ * - /auth/register
+ * - /auth/totp
+ * - /auth/google
+ * - /auth/forgot-password
+ * - /auth/join
+ * - /auth/verify
+ */
+
 import { FastifyInstance } from "fastify";
 import { loginRoutes } from "./login";
 import { registerRoutes } from "./register";
@@ -18,7 +29,7 @@ export function authRoutes(fastify: FastifyInstance) {
     instance.register(joinRoutes);
     instance.register(verifyRoutes);
   }, {
-    prefix: "/auth", // Re-evaluating prefix logic
+    prefix: "/auth",
     config: {
       rateLimit: {
         max: 5,

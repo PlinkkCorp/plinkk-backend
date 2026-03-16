@@ -1,3 +1,8 @@
+/**
+ * Routes de vérification
+ * GET  /verify-email?token=... → vérification du mail
+ */
+
 import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { logUserAction } from "../../lib/userLogger";
@@ -5,10 +10,6 @@ import { replyView } from "../../lib/replyView";
 import { UserWithInclude } from "@plinkk/shared";
 
 export function verifyRoutes(fastify: FastifyInstance) {
-  /**
-   * GET /verify-email?token=...
-   * Consumes a verification token to verify a user's email address.
-   */
   fastify.get("/verify-email", async (request, reply) => {
     const { token } = request.query as { token?: string };
 

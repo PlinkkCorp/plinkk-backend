@@ -1,3 +1,10 @@
+/**
+ * Lib Cache
+ * - SimpleCache -> Class
+ * - themeCache -> Instance
+ * - userCache -> Instance
+ */
+
 interface CacheEntry<T> {
   value: T;
   expiry: number;

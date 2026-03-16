@@ -1,3 +1,10 @@
+/**
+ * Route pour réinitialiser son mot de passe
+ * GET  /auth/forgot-password     → page formulaire email
+ * POST /auth/forgot-password     → envoie un email avec un lien de réinitialisation
+ * GET  /auth/reset-password      → page de réinitialisation du mot de passe
+ * POST /auth/reset-password      → réinitialisation du mot de passe
+ */
 import { FastifyInstance } from "fastify";
 import z from "zod";
 import { prisma } from "@plinkk/prisma";

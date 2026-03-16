@@ -1,5 +1,9 @@
+/**
+ * Routes d'inscription par Google
+ * POST /auth/google/callback → callback de Google
+ */
+
 import { FastifyInstance } from "fastify";
-// use global fetch instead of undici
 import { prisma } from "@plinkk/prisma";
 import { slugify } from "@plinkk/shared";
 import { createUserSession } from "../../services/sessionService";

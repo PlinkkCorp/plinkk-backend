@@ -1,3 +1,9 @@
+/**
+ * Routes d'inscription
+ * GET  /register → page d'inscription
+ * POST /register → inscription
+ */
+
 import { FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { createPlinkkForUser } from "@plinkk/shared";

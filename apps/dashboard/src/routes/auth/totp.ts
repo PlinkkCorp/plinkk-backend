@@ -1,3 +1,9 @@
+/**
+ * Routes TOTP
+ * GET  /totp               → page de vérification TOTP
+ * POST /totp               → vérification TOTP
+ */
+
 import { FastifyInstance } from "fastify";
 import { authenticator } from "otplib";
 import { prisma } from "@plinkk/prisma";

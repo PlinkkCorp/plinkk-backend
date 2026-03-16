@@ -1,6 +1,14 @@
+/**
+ * Configuration OAuth2
+ * - getGitHubUserDetails
+ * - getDiscordUserDetails
+ * - registerOAuth2
+ * 
+ * GET /login/github/callback → callback GitHub
+ * GET /login/discord/callback → callback Discord
+ */
+
 import { FastifyInstance } from "fastify";
-// Use the global fetch API (bun/node) instead of undici
-import "../types/index";
 import { GithubUser } from "../types/githubUser";
 import { prisma } from "@plinkk/prisma";
 import { slugify } from "@plinkk/shared";

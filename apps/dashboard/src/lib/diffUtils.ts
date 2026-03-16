@@ -1,3 +1,13 @@
+/**
+ * Lib Diff Utils
+ * - calculateObjectDiff -> ObjectDiff
+ * - calculateArrayDiff  -> ArrayDiff
+ * - isEqual             -> Helper Function
+ * - ArrayDiff           -> Type
+ * - ObjectDiff          -> Type
+ * - Change              -> Type
+ */
+
 type Change<T> = {
     old: T | undefined;
     new: T | undefined;

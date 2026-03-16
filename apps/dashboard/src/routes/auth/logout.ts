@@ -1,3 +1,8 @@
+/**
+ * Routes de déconnexion
+ * GET  /logout → déconnexion
+ */
+
 import { FastifyInstance } from "fastify";
 import { deleteUserSession } from "../../services/sessionService";
 import { logUserAction } from "../../lib/userLogger";

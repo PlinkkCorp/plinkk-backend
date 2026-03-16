@@ -1,3 +1,8 @@
+/**
+ * Configuration Fastify
+ * - registerPlugins
+ */
+
 import fastifyStatic from "@fastify/static";
 import fastifyView from "@fastify/view";
 import fastifyCookie from "@fastify/cookie";
@@ -11,9 +16,7 @@ import fastifyOAuth2 from "@fastify/oauth2";
 import { FastifyInstance } from "fastify";
 import path from "path";
 import ejs from "ejs";
-import { readFileSync } from "fs";
-import fastifyHttpProxy from "@fastify/http-proxy";
-import fastifyWebsocket from "@fastify/websocket";
+import { fastifyWebsocket } from "@fastify/websocket";
 import Redis from "ioredis";
 
 export async function registerPlugins(fastify: FastifyInstance) {

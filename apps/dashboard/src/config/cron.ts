@@ -1,3 +1,8 @@
+/**
+ * Configuration Cron
+ * - registerCronJobs
+ */
+
 import { FastifyInstance } from "fastify";
 import fastifyCron from "fastify-cron";
 import { prisma } from "@plinkk/prisma";

@@ -1,3 +1,9 @@
+/**
+ * Lib Admin Logger
+ * - logAdminAction
+ * - logDetailedAdminAction
+ */
+
 import { prisma, Prisma } from '@plinkk/prisma';
 import { calculateObjectDiff } from './diffUtils';
 

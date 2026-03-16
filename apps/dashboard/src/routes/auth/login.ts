@@ -1,8 +1,17 @@
+/**
+ * Routes de connexion
+ * GET  /login                → page de connexion
+ * POST /login                → connexion
+ * POST /login/email          → envoie un email avec un code OTP
+ * GET  /login/magic          → connexion instantanée via Magic Link
+ * POST /impersonate/:id      → connexion instantanée via Magic Link
+ * POST /impersonate-link/:id → connexion instantanée via Magic Link
+ */
+
 import { FastifyInstance } from "fastify";
 import { randomBytes } from "crypto";
 import z from "zod";
 import { prisma } from "@plinkk/prisma";
-import { slugify } from "@plinkk/shared";
 import { replyView } from "../../lib/replyView";
 import { createUserSession } from "../../services/sessionService";
 import { redirectWithError } from "../../utils/errorRedirect";
