@@ -1,7 +1,7 @@
 node_modules/
 generated/
 dist
-/src/secret-key
+**/secret-key
 .env
 *.db
 /.vscode/
