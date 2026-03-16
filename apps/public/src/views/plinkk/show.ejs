@@ -13,7 +13,7 @@
       const pageTitle = (page && page.title) ? page.title : username;
       const pageDesc = (page && page.description) ? page.description : `Découvre le profil de ${username} sur Plinkk !`;
       const pageUrl = (typeof publicPath !== 'undefined' && publicPath) ? publicPath : ((page && page.slug) ? page.slug : username);
-      const ogImage = `/og/${encodeURIComponent(pageTitle)}`;
+      const ogImage = `https://plinkk.fr/og/${encodeURIComponent(pageTitle)}`;
     %>
     
     <title><%= pageTitle %> — Plinkk</title>
