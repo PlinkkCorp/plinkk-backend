@@ -1,7 +1,21 @@
+/**
+ * Lib User Logger
+ * - logUserAction     -> Promise<void>
+ * - logDetailedAction -> Promise<void>
+ */
+
 import { prisma, Prisma } from '@plinkk/prisma';
 
 import { calculateObjectDiff } from './diffUtils';
 
+/**
+ * Logs a user action
+ * @param userId The ID of the user performing the action
+ * @param action The action name (e.g. "UPDATE_PROFILE")
+ * @param targetId The ID of the object being modified (optional)
+ * @param details Any additional metadata to log
+ * @param ip The user's IP address
+ */
 export async function logUserAction(userId: string, action: string, targetId?: string, details?: any, ip?: string) {
   try {
     return await prisma.userLog.create({
@@ -39,20 +53,17 @@ export async function logDetailedAction<T extends Record<string, any>>(
   extraDetails?: Record<string, any>
 ) {
   try {
-    const diff = calculateObjectDiff(oldData, newData, ['updatedAt', 'password']); // Exclude common noise/sensitive fields
+    const diff = calculateObjectDiff(oldData, newData, ['updatedAt', 'password']);
 
-    // If no changes, skip logging entirely to prevent spam
     if (Object.keys(diff).length === 0) {
       return;
     }
 
-    // Generate human-readable formatted message
     const changesCount = Object.keys(diff).length;
     const fields = Object.keys(diff).slice(0, 3).join(", ");
     const suffix = changesCount > 3 ? ` and ${changesCount - 3} more` : "";
     const formatted = `Updated ${fields}${suffix}`;
 
-    // Improve formatting for Create/Delete actions
     let specificFormatted = formatted;
     if (action.startsWith("CREATE")) {
       specificFormatted = `Created item with ${changesCount} properties`;
@@ -60,7 +71,6 @@ export async function logDetailedAction<T extends Record<string, any>>(
       specificFormatted = `Deleted item`;
     }
 
-    // Infer category from action
     let category = "GENERAL";
     if (action.includes("PLINKK")) category = "PLINKK";
     else if (action.includes("REDIRECT")) category = "REDIRECT";
@@ -68,11 +78,9 @@ export async function logDetailedAction<T extends Record<string, any>>(
     else if (action.includes("PROFILE") || action.includes("USERNAME") || action.includes("COSMETICS") || action.includes("GRAVATAR")) category = "PROFILE";
     else if (action.includes("PREMIUM") || action.includes("BILLING")) category = "BILLING";
 
-    // Generate explicit changes list for UI "Old -> New"
     const changes = Object.entries(diff).map(([key, value]) => {
       const oldVal = JSON.stringify(value.old) || "null";
       const newVal = JSON.stringify(value.new) || "null";
-      // Clean up quotes for strings if simple
       const cleanOld = typeof value.old === 'string' ? value.old : oldVal;
       const cleanNew = typeof value.new === 'string' ? value.new : newVal;
       return `${key}: ${cleanOld} -> ${cleanNew}`;

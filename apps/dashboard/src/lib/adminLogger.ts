@@ -7,6 +7,14 @@
 import { prisma, Prisma } from '@plinkk/prisma';
 import { calculateObjectDiff } from './diffUtils';
 
+/**
+ * Logs an admin action.
+ * @param adminId The ID of the admin performing the action
+ * @param action The action name (e.g. "UPDATE_PROFILE")
+ * @param targetId The ID of the object being modified (optional)
+ * @param details Any additional metadata to log
+ * @param ip The admin's IP address
+ */
 export async function logAdminAction(adminId: string, action: string, targetId?: string, details?: any, ip?: string) {
   try {
     await prisma.adminLog.create({

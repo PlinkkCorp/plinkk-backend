@@ -8,13 +8,24 @@
  * - Change              -> Type
  */
 
+/**
+ * Type for a change in a value
+ * @template T The type of the value
+ */
 type Change<T> = {
     old: T | undefined;
     new: T | undefined;
 };
 
+/**
+ * Type for an object diff
+ */
 type ObjectDiff = Record<string, Change<any>>;
 
+/**
+ * Type for an array diff
+ * @template T The type of the elements in the array
+ */
 type ArrayDiff<T> = {
     added: T[];
     removed: T[];
@@ -26,6 +37,12 @@ type ArrayDiff<T> = {
     reordered: boolean;
 };
 
+/**
+ * Checks if two values are equal
+ * @param a The first value
+ * @param b The second value
+ * @returns True if the values are equal, false otherwise
+ */
 function isEqual(a: any, b: any): boolean {
     if (a === b) return true;
     if (a === null || b === null || typeof a !== "object" || typeof b !== "object") return false;
@@ -46,6 +63,10 @@ function isEqual(a: any, b: any): boolean {
 /**
  * Calculates the difference between two objects.
  * Returns a map of field names to { old, new } values.
+ * @param oldObj The old object
+ * @param newObj The new object
+ * @param ignoredFields Fields to ignore when calculating the diff
+ * @returns An object containing the differences between the two objects
  */
 export function calculateObjectDiff<T extends Record<string, any>>(
     oldObj: T,
@@ -84,6 +105,11 @@ export function calculateObjectDiff<T extends Record<string, any>>(
 /**
  * Calculates the difference between two arrays of objects.
  * Assumes objects have a unique identifier (default "id").
+ * @param oldArr The old array
+ * @param newArr The new array
+ * @param idKey The key to use as the unique identifier
+ * @param ignoredFields Fields to ignore when calculating the diff
+ * @returns An object containing the differences between the two arrays
  */
 export function calculateArrayDiff<T extends Record<string, any>>(
     oldArr: T[],
@@ -123,10 +149,6 @@ export function calculateArrayDiff<T extends Record<string, any>>(
         }
     }
 
-    // Check for reordering
-    // We only check reordering if the set of IDs is roughly the same (ignoring adds/removes for simplicity, 
-    // or checks if the sequence of common IDs changed).
-    // A simple check: get IDs of items present in both. matching request?
     const oldCommonIds = oldArr.map(x => x[idKey]).filter(id => newMap.has(id));
     const newCommonIds = newArr.map(x => x[idKey]).filter(id => oldMap.has(id));
 

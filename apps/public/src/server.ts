@@ -198,13 +198,18 @@ async function getPublicMetrics(request: any): Promise<PublicMetrics> {
   return publicMetricsRefreshPromise;
 }
 
-const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
-
-fastify.register(fastifyRateLimit, {
+const redisUrl = process.env.REDIS_URL;
+const rateLimitOptions: any = {
   max: 500,
   timeWindow: "2 minutes",
-  redis: redis,
-});
+};
+
+if (redisUrl) {
+  const redis = new Redis(redisUrl);
+  rateLimitOptions.redis = redis;
+}
+
+fastify.register(fastifyRateLimit, rateLimitOptions);
 
 fastify.register(fastifyCompress);
 

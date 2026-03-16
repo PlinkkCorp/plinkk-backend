@@ -1,10 +1,28 @@
+/**
+ * Lib Reply View
+ * - replyView                     -> Promise<string>
+ * - getActiveAnnouncementsForUser -> Promise<Announcement[]>
+ * - computeFrontendUrl            -> string
+ * - UserWithInclude               -> Type
+ * - Announcement                  -> Type
+ */
+
 import { FastifyReply } from "fastify";
 import ejs from "ejs";
 import { UserWithInclude, replyView as sharedReplyView } from "@plinkk/shared";
 import "dotenv/config"
 
+/**
+ * Interface for session data
+ * @property id - The ID of the session
+ */
 export { getActiveAnnouncementsForUser } from "@plinkk/shared";
 
+/**
+ * Computes the frontend URL
+ * @param reply The fastify reply
+ * @returns The frontend URL
+ */
 function computeFrontendUrl(reply: FastifyReply) {
   const env = (process.env.FRONTEND_URL || "").trim();
   if (env) return env.replace(/\/$/, "");
@@ -22,6 +40,15 @@ function computeFrontendUrl(reply: FastifyReply) {
   }
 }
 
+/**
+ * Replies to a fastify request with a view
+ * @param reply The fastify reply
+ * @param template The template to use
+ * @param user The user to use
+ * @param data The data to use
+ * @param statusCode The status code to use
+ * @returns A promise that resolves when the reply is sent
+ */
 export async function replyView(
   reply: FastifyReply,
   template: string,

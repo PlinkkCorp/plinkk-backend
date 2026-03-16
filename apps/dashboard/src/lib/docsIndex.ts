@@ -1,5 +1,24 @@
+/**
+ * Lib Docs Index
+ * - docsTree            -> Array<DocNode>
+ * - flattenDocs         -> Array<FlatDoc>
+ * - getDocBySegments    -> FlatDoc
+ * - getPrevNext         -> { prev?: FlatDoc; next?: FlatDoc }
+ * - resolveViewAbsolute -> string
+ * - DocNode             -> Type
+ * - FlatDoc             -> Type
+ */
+
 import path from "path";
 
+/**
+ * Type for a node in the documentation tree
+ * @property slug - The slug of the node
+ * @property title - The title of the node
+ * @property excerpt - The excerpt of the node
+ * @property file - The file of the node
+ * @property children - The children of the node
+ */
 export type DocNode = {
   slug: string;
   title: string;
@@ -8,6 +27,14 @@ export type DocNode = {
   children?: DocNode[];
 };
 
+/**
+ * The documentation tree
+ * @property slug - The slug of the node
+ * @property title - The title of the node
+ * @property excerpt - The excerpt of the node
+ * @property file - The file of the node
+ * @property children - The children of the node
+ */
 export const docsTree: DocNode[] = [
   {
     slug: "",
@@ -130,6 +157,15 @@ export const docsTree: DocNode[] = [
   },
 ];
 
+/**
+ * Type for a flat document
+ * @property path - The path of the document
+ * @property segments - The segments of the document
+ * @property title - The title of the document
+ * @property excerpt - The excerpt of the document
+ * @property file - The file of the document
+ * @property parents - The parents of the document
+ */
 export type FlatDoc = {
   path: string; // e.g. "/docs/themes/layouts"
   segments: string[];
@@ -139,6 +175,12 @@ export type FlatDoc = {
   parents: { title: string; path: string }[]; // for breadcrumbs
 };
 
+/**
+ * Flattens the documentation tree into a flat array of documents
+ * @param tree The documentation tree
+ * @param base The base path for the documents
+ * @returns An array of flat documents
+ */
 export function flattenDocs(tree: DocNode[], base: string = "/docs"): FlatDoc[] {
   const out: FlatDoc[] = [];
   const visit = (
@@ -161,13 +203,32 @@ export function flattenDocs(tree: DocNode[], base: string = "/docs"): FlatDoc[] 
   return out;
 }
 
+/**
+ * The flattened documentation tree
+ * @property path - The path of the document
+ * @property segments - The segments of the document
+ * @property title - The title of the document
+ * @property excerpt - The excerpt of the document
+ * @property file - The file of the document
+ * @property parents - The parents of the document
+ */
 export const flatDocs = flattenDocs(docsTree);
 
+/**
+ * Gets a document by its segments
+ * @param segments The segments of the document
+ * @returns The document or undefined if not found
+ */
 export function getDocBySegments(segments: string[]): FlatDoc | undefined {
   const norm = segments.filter(Boolean).join("/");
   return flatDocs.find((d) => d.segments.join("/") === norm);
 }
 
+/**
+ * Gets the previous and next documents in the documentation tree
+ * @param pathname The path of the current document
+ * @returns An object containing the previous and next documents
+ */
 export function getPrevNext(pathname: string): { prev?: FlatDoc; next?: FlatDoc } {
   const idx = flatDocs.findIndex((d) => d.path === pathname);
   if (idx === -1) return {};
@@ -177,6 +238,12 @@ export function getPrevNext(pathname: string): { prev?: FlatDoc; next?: FlatDoc 
   };
 }
 
+/**
+ * Resolves the absolute path of a view
+ * @param viewRoot The root of the view
+ * @param fileRel The relative path of the file
+ * @returns The absolute path of the view
+ */
 export function resolveViewAbsolute(viewRoot: string, fileRel: string) {
   return path.join(viewRoot, fileRel);
 }

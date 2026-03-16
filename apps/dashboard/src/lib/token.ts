@@ -1,3 +1,10 @@
+/**
+ * Lib Token
+ * - generateToken -> string
+ * - generateUrlSafeToken -> string
+ * - generateNumericCode -> string
+ */
+
 import crypto from 'crypto';
 
 /**

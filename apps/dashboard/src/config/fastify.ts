@@ -20,13 +20,21 @@ import { fastifyWebsocket } from "@fastify/websocket";
 import Redis from "ioredis";
 
 export async function registerPlugins(fastify: FastifyInstance) {
-  const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
-  
-  await fastify.register(fastifyRateLimit, {
+  const redisUrl = process.env.REDIS_URL;
+  const rateLimitOptions: any = {
     max: 500,
     timeWindow: "2 minutes",
-    redis: redis,
-  });
+  };
+
+  if (redisUrl) {
+    const redis = new Redis(redisUrl);
+    rateLimitOptions.redis = redis;
+    fastify.log.info("Redis rate limit store initialized");
+  } else {
+    fastify.log.warn("Redis not configured, using in-memory rate limit store");
+  }
+
+  await fastify.register(fastifyRateLimit, rateLimitOptions);
 
   await fastify.register(fastifyCompress);
 
