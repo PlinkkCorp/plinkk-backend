@@ -193,19 +193,19 @@
                                                     Date(u.premiumUntil).getTime() > Date.now()));
                                                     %>
                                                     <li class="relative rounded-2xl border border-slate-800 p-3.5 bg-slate-950/50 hover:border-violet-500/30 transition-all group"
-                                                        data-name="<%- (u.userName||'').toLowerCase() %>"
-                                                        data-username="<%- u.userName %>"
-                                                        data-id="<%- (u.id||'').toLowerCase() %>"
-                                                        data-role="<%- (u.role && (u.role.id || u.role.name)) ? (u.role.id || u.role.name) : 'USER' %>"
-                                                        data-role-name="<%- (u.role && (u.role.name || u.role.id)) ? (u.role.name || u.role.id) : 'USER' %>"
-                                                        data-visible="<%- u.isPublic ? 'public' : 'private' %>"
-                                                        data-email-public="<%- u.publicEmail ? '1' : '0' %>"
-                                                        data-twofa="<%- u.twoFactorEnabled ? '1' : '0' %>"
-                                                        data-views="<%- uViews %>" data-plinkks-count="<%- plCount %>"
-                                                        data-plinkks-active="<%- plActive %>"
-                                                        data-must-change="<%- mustChange ? '1' : '0' %>"
-                                                        data-created="<%- +new Date(u.createdAt) %>"
-                                                        data-search="<%- (u.userName+' '+u.id+' '+(u.publicEmail||u.email||'')).toLowerCase() %>">
+                                                        data-name="<%= (u.userName||'').toLowerCase() %>"
+                                                        data-username="<%= u.userName %>"
+                                                        data-id="<%= (u.id||'').toLowerCase() %>"
+                                                        data-role="<%= (u.role && (u.role.id || u.role.name)) ? (u.role.id || u.role.name) : 'USER' %>"
+                                                        data-role-name="<%= (u.role && (u.role.name || u.role.id)) ? (u.role.name || u.role.id) : 'USER' %>"
+                                                        data-visible="<%= u.isPublic ? 'public' : 'private' %>"
+                                                        data-email-public="<%= u.publicEmail ? '1' : '0' %>"
+                                                        data-twofa="<%= u.twoFactorEnabled ? '1' : '0' %>"
+                                                        data-views="<%= uViews %>" data-plinkks-count="<%= plCount %>"
+                                                        data-plinkks-active="<%= plActive %>"
+                                                        data-must-change="<%= mustChange ? '1' : '0' %>"
+                                                        data-created="<%= +new Date(u.createdAt) %>"
+                                                        data-search="<%= (u.userName+' '+u.id+' '+(u.publicEmail||u.email||'')).toLowerCase() %>">
 
                                                         <div class="flex items-start gap-4">
                                                             <div

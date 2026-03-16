@@ -228,7 +228,7 @@
                 }
             });
 
-            const affiliateLinks = <%- JSON.stringify(affiliateLinks) %>;
+            const affiliateLinks = <%= JSON.stringify(affiliateLinks) %>;
 
             function showStats(linkId) {
                 const link = affiliateLinks.find(l => l.id === linkId);

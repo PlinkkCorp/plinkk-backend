@@ -64,7 +64,7 @@ fastify.addHook('onSend', async (request, reply, payload) => {
     nonce ? `'nonce-${nonce}'` : null,
   ].filter(Boolean).join(' ');
 
-  const styleSrc = "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com";
+  const styleSrc = "'self' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com";
   const fontSrc = "'self' https://cdn.jsdelivr.net https://fonts.gstatic.com";
   const connectSrc = "'self' https://unpkg.com";
   const frameSrc = "'self' https://accounts.google.com";
@@ -73,7 +73,7 @@ fastify.addHook('onSend', async (request, reply, payload) => {
 
   const csp = `default-src 'self'; script-src ${scriptSrc}; style-src ${styleSrc}; font-src ${fontSrc}; connect-src ${connectSrc}; frame-src ${frameSrc}; frame-ancestors ${frameAncestors}; img-src ${imgSrc}; object-src 'none';`;
 
-  return reply.header('Content-Security-Policy', csp);
+  return reply.header('Content-Security-Policy-Report-Only', csp);
 });
 
 const PORT = 3001;

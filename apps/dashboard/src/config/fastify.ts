@@ -14,11 +14,15 @@ import ejs from "ejs";
 import { readFileSync } from "fs";
 import fastifyHttpProxy from "@fastify/http-proxy";
 import fastifyWebsocket from "@fastify/websocket";
+import Redis from "ioredis";
 
 export async function registerPlugins(fastify: FastifyInstance) {
+  const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
+  
   await fastify.register(fastifyRateLimit, {
     max: 500,
     timeWindow: "2 minutes",
+    redis: redis,
   });
 
   await fastify.register(fastifyCompress);
@@ -68,7 +72,7 @@ export async function registerPlugins(fastify: FastifyInstance) {
   await fastify.register(fastifySecureSession, {
     sessionName: "session",
     cookieName: "plinkk-backend",
-    key: readFileSync(path.join(__dirname, "..", "secret-key")),
+    key: process.env.SESSION_SECRET_KEY || "a".repeat(32),
     expiry: 24 * 60 * 60,
     cookie: cookieConfig,
   });
@@ -109,7 +113,7 @@ export async function registerPlugins(fastify: FastifyInstance) {
         credentials: true,
       }
     : {
-        origin: true, // Permet toutes les origines en dev
+        origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
         credentials: true,
       };
 

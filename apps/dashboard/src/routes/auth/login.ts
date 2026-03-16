@@ -8,6 +8,7 @@ import { createUserSession } from "../../services/sessionService";
 import { redirectWithError } from "../../utils/errorRedirect";
 import { logUserAction } from "../../lib/userLogger";
 import { sendOtp } from "../../services/otpService";
+import { getSafeReturnTo } from "@plinkk/shared";
 
 export function loginRoutes(fastify: FastifyInstance) {
   fastify.get("/login", async (request, reply) => {
@@ -108,7 +109,7 @@ export function loginRoutes(fastify: FastifyInstance) {
       step: "password",
       email: normalizedEmail,
     });
-    if (returnTo) params.set("returnTo", String(returnTo));
+    if (returnTo) params.set("returnTo", getSafeReturnTo(String(returnTo)));
     return reply.redirect(`/login?${params.toString()}`);
   });
 
@@ -192,7 +193,7 @@ export function loginRoutes(fastify: FastifyInstance) {
     await createUserSession(user.id, request);
     await logUserAction(user.id, "LOGIN", null, { method: "PASSWORD" }, request.ip);
 
-    return reply.redirect(returnTo || "/");
+    return reply.redirect(getSafeReturnTo(returnTo));
   });
 
   fastify.post("/impersonate/:id", async (request, reply) => {
@@ -217,12 +218,19 @@ export function loginRoutes(fastify: FastifyInstance) {
 
     if (!target) return reply.code(404).send({ error: "Target not found" });
 
-    // Store original admin ID in session to allow "returning" if needed
+    // Store original admin ID and metadata
     request.session.set("original_admin", meId);
+    request.session.set("is_impersonated", true);
+    request.session.set("impersonation_expires", Date.now() + 15 * 60 * 1000); // 15 minutes limit
 
     // Switch session to target user
     await createUserSession(target.id, request);
-    await logUserAction(meId, "IMPERSONATE", target.id, { targetUsername: target.userName }, request.ip);
+    
+    // Log with clear audit trail
+    await logUserAction(meId, "IMPERSONATE", target.id, { 
+      targetUsername: target.userName,
+    }, request.ip);
+    
     return reply.send({ success: true });
   });
 

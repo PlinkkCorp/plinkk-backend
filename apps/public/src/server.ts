@@ -45,6 +45,7 @@ import { AppError } from "@plinkk/shared";
 import { apiBugReportsRoutes } from "@plinkk/shared";
 import fastifyHelmet from "@fastify/helmet";
 import crypto from "crypto";
+import Redis from "ioredis";
 
 const fastify = Fastify({
   logger: true,
@@ -92,7 +93,7 @@ fastify.addHook('onSend', async (request, reply, payload) => {
     nonce ? `'nonce-${nonce}'` : null,
   ].filter(Boolean).join(' ');
 
-  const styleSrc = "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com";
+  const styleSrc = "'self' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com";
   const fontSrc = "'self' https://cdn.jsdelivr.net https://fonts.gstatic.com";
   const connectSrc = "'self' https://unpkg.com";
   const frameSrc = "'self' https://accounts.google.com";
@@ -101,7 +102,7 @@ fastify.addHook('onSend', async (request, reply, payload) => {
 
   const csp = `default-src 'self'; script-src ${scriptSrc}; style-src ${styleSrc}; font-src ${fontSrc}; connect-src ${connectSrc}; frame-src ${frameSrc}; frame-ancestors ${frameAncestors}; img-src ${imgSrc}; object-src 'none';`;
 
-  reply.header('Content-Security-Policy', csp);
+  reply.header('Content-Security-Policy-Report-Only', csp);
 });
 const PORT = Number(process.env.PORT) || 3002;
 
@@ -197,9 +198,12 @@ async function getPublicMetrics(request: any): Promise<PublicMetrics> {
   return publicMetricsRefreshPromise;
 }
 
+const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
+
 fastify.register(fastifyRateLimit, {
   max: 500,
   timeWindow: "2 minutes",
+  redis: redis,
 });
 
 fastify.register(fastifyCompress);
@@ -251,7 +255,7 @@ const cookieConfig = isProduction
 fastify.register(fastifySecureSession, {
   sessionName: "session",
   cookieName: "plinkk-backend",
-  key: readFileSync(path.join(__dirname, "secret-key")),
+  key: process.env.SESSION_SECRET_KEY || "a".repeat(32), // Should be 32 bytes
   expiry: 24 * 60 * 60,
   cookie: cookieConfig,
 });

@@ -884,7 +884,7 @@
                       </div>
                       <div>
                         <% if (googleConn) { %>
-                          <button onclick="unlinkProvider('google', <%- JSON.stringify(googleConn.email || '') %>)"
+                          <button onclick="unlinkProvider('google', <%= JSON.stringify(googleConn.email || '') %>)"
                             class="px-3 py-2 text-xs font-medium rounded-lg bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20 transition-colors">
                             Déconnecter
                           </button>
@@ -1968,7 +1968,7 @@
       })();
     </script>
 
-    <template id="account-plinkks-data"><%- JSON.stringify((typeof plinkks !=='undefined' ) ? plinkks : ((typeof pages
+    <template id="account-plinkks-data"><%= JSON.stringify((typeof plinkks !=='undefined' ) ? plinkks : ((typeof pages
         !=='undefined' ) ? pages : [])) %></template>
 
     <script nonce="<%= cspNonce %>">

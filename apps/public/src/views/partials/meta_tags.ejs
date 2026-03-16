@@ -1,0 +1,25 @@
+<% 
+  const metaTitle = (typeof title !== 'undefined' && title) ? title + ' — Plinkk' : 'Plinkk — Votre univers en un seul lien';
+  const metaDesc = (typeof description !== 'undefined' && description) ? description : 'L’alternative open-source à Linktree. Créez une page de liens magnifique, rapide et entièrement personnalisable.';
+  const metaRobots = (typeof robots !== 'undefined' && robots) ? robots : 'index,follow';
+  const metaImg = (typeof image !== 'undefined' && image) ? image : 'https://cdn.plinkk.fr/logo.svg';
+  const metaCanon = (typeof canonical !== 'undefined' && canonical) ? canonical : null;
+  const metaKeywords = (typeof keywords !== 'undefined' && keywords) ? keywords : 'Plinkk, page de liens, linktree, bio, profil, réseaux sociaux, portfolio, open source';
+%>
+
+<!-- Basic Meta -->
+<title><%= metaTitle %></title>
+<meta name="description" content="<%= metaDesc %>" />
+<meta name="keywords" content="<%= metaKeywords %>" />
+<meta name="robots" content="<%= metaRobots %>" />
+
+<!-- Open Graph -->
+<meta property="og:title" content="<%= metaTitle %>" />
+<meta property="og:description" content="<%= metaDesc %>" />
+<meta property="og:image" content="<%= metaImg %>" />
+<% if (metaCanon) { %><meta property="og:url" content="<%= metaCanon %>" /><% } %>
+
+<!-- Twitter -->
+<meta name="twitter:title" content="<%= metaTitle %>" />
+<meta name="twitter:description" content="<%= metaDesc %>" />
+<meta name="twitter:image" content="<%= metaImg %>" />

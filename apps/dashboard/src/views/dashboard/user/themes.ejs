@@ -605,7 +605,7 @@
                           <ul id="listDrafts" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                             <% drafts.forEach(t=> { %>
                               <li class="theme-card rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4"
-                                data-id="<%= t.id %>" data-status="DRAFT" data-json='<%- JSON.stringify(t.data||{}) %>'>
+                                data-id="<%= t.id %>" data-status="DRAFT" data-json='<%= JSON.stringify(t.data||{}) %>'>
                                 <div class="flex items-start gap-4">
                                   <div
                                     class="w-20 h-20 rounded-xl border border-slate-700/50 overflow-hidden previewMini flex-shrink-0 shadow-lg">
@@ -633,7 +633,7 @@
                                 </div>
                                 <div class="mt-4 flex items-center justify-end gap-2 pt-3 border-t border-slate-700/30">
                                   <button class="editOne btn-action btn-edit" data-id="<%= t.id %>"
-                                    data-json='<%- JSON.stringify(t.data||{}) %>'>Éditer</button>
+                                    data-json='<%= JSON.stringify(t.data||{}) %>'>Éditer</button>
                                   <button class="submitOne btn-action btn-submit"
                                     data-id="<%= t.id %>">Soumettre</button>
                                   <button class="deleteOne btn-action btn-delete"
@@ -660,7 +660,7 @@
                                   <% submitted.forEach(t=> { %>
                                     <li class="theme-card rounded-2xl border border-slate-700/50 bg-slate-800/30 p-4"
                                       data-id="<%= t.id %>" data-status="SUBMITTED"
-                                      data-json='<%- JSON.stringify(t.data||{}) %>'>
+                                      data-json='<%= JSON.stringify(t.data||{}) %>'>
                                       <div class="flex items-start gap-4">
                                         <div
                                           class="w-20 h-20 rounded-xl border border-slate-700/50 overflow-hidden previewMini flex-shrink-0 shadow-lg">
@@ -717,7 +717,7 @@
                                           <li
                                             class="theme-card rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4"
                                             data-id="<%= t.id %>" data-status="APPROVED"
-                                            data-json='<%- JSON.stringify(t.data||{}) %>'>
+                                            data-json='<%= JSON.stringify(t.data||{}) %>'>
                                             <div class="flex items-start gap-4">
                                               <div
                                                 class="w-20 h-20 rounded-xl border border-slate-700/50 overflow-hidden previewMini flex-shrink-0 shadow-lg">
@@ -756,7 +756,7 @@
                                               <button class="archiveOne btn-action btn-archive"
                                                 data-id="<%= t.id %>">Archiver</button>
                                               <button class="editOne btn-action btn-edit" data-id="<%= t.id %>"
-                                                data-json='<%- JSON.stringify(t.data||{}) %>'>Éditer</button>
+                                                data-json='<%= JSON.stringify(t.data||{}) %>'>Éditer</button>
                                               <button class="deleteOne btn-action btn-delete"
                                                 data-id="<%= t.id %>">Supprimer</button>
                                             </div>
@@ -783,7 +783,7 @@
                                                 <li
                                                   class="theme-card rounded-2xl border border-slate-700/50 bg-slate-800/20 p-4 opacity-60"
                                                   data-id="<%= t.id %>" data-status="ARCHIVED"
-                                                  data-json='<%- JSON.stringify(t.data||{}) %>'>
+                                                  data-json='<%= JSON.stringify(t.data||{}) %>'>
                                                   <div class="flex items-start gap-4">
                                                     <div
                                                       class="w-20 h-20 rounded-xl border border-slate-700/50 overflow-hidden previewMini flex-shrink-0 shadow-lg">
@@ -840,7 +840,7 @@
                                                       <li
                                                         class="theme-card rounded-2xl border border-red-500/20 bg-red-500/5 p-4"
                                                         data-id="<%= t.id %>" data-status="REJECTED"
-                                                        data-json='<%- JSON.stringify(t.data||{}) %>'>
+                                                        data-json='<%= JSON.stringify(t.data||{}) %>'>
                                                         <div class="flex items-start gap-4">
                                                           <div
                                                             class="w-20 h-20 rounded-xl border border-slate-700/50 overflow-hidden previewMini flex-shrink-0 shadow-lg">
@@ -873,7 +873,7 @@
                                                           class="mt-4 flex items-center justify-end gap-2 pt-3 border-t border-slate-700/30">
                                                           <button class="editOne btn-action btn-edit"
                                                             data-id="<%= t.id %>"
-                                                            data-json='<%- JSON.stringify(t.data||{}) %>'>Rééditer</button>
+                                                            data-json='<%= JSON.stringify(t.data||{}) %>'>Rééditer</button>
                                                           <button class="deleteOne btn-action btn-delete"
                                                             data-id="<%= t.id %>">Supprimer</button>
                                                         </div>

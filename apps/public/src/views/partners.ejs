@@ -146,7 +146,7 @@
 
             <script nonce="<%= cspNonce %>">
                 document.addEventListener('DOMContentLoaded', async () => {
-                    const isLoggedReified = <%- JSON.stringify(!!locals.currentUser) %>;
+                    const isLoggedReified = <%= JSON.stringify(!!locals.currentUser) %>;
 
                     try {
                         const res = await fetch('/api/partners');
@@ -283,7 +283,7 @@
 
                 // Action Quête
                 async function completeQuest(event, questId) {
-                    const isLogged = <%- JSON.stringify(!!locals.currentUser) %>;
+                    const isLogged = <%= JSON.stringify(!!locals.currentUser) %>;
                     if (!isLogged) {
                         window.location.href = '/login?alert=Pour gagner des Gems, veuillez vous connecter.';
                         return;

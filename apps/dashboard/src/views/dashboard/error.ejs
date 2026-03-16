@@ -11,7 +11,7 @@
       <div class="flex justify-center gap-4">
         <a href="/" class="px-4 py-2 bg-violet-600 text-white rounded-lg">Retour au tableau de bord</a>
         <button
-          onclick="openGlobalBugReportModal(event, 'Message automatique: Erreur rencontree.', { url: window.location.href, stack: <%- JSON.stringify(message || '') %> })"
+          onclick="openGlobalBugReportModal(event, 'Message automatique: Erreur rencontree.', { url: window.location.href, stack: <%= JSON.stringify(message || '') %> })"
           class="px-4 py-2 border border-slate-700 hover:bg-slate-800 text-slate-300 rounded-lg transition-colors">Signaler
           un bug</button>
       </div>

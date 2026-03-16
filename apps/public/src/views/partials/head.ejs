@@ -4,68 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <% 
-    // Configuration des métadonnées
-    const desc = (typeof description !== 'undefined' && description) ? description : 'Crée ta page de liens élégante et personnalisée avec Plinkk.';
-    const robotsVal = (typeof robots !== 'undefined' && robots) ? robots : 'index,follow';
-    const img = (typeof image !== 'undefined' && image) ? image : 'https://cdn.plinkk.fr/logo.svg';
-    const canon = (typeof canonical !== 'undefined' && canonical) ? canonical : null;
-    const keywords = (typeof metaKeywords !== 'undefined' && metaKeywords) ? metaKeywords : 'Plinkk, page de liens, linktree, bio, profil, réseaux sociaux, portfolio, open source';
-    const author = (typeof metaAuthor !== 'undefined' && metaAuthor) ? metaAuthor : 'Plinkk';
-    
-    // Couleurs de thème dynamiques selon la page
-    const themeColors = {
-      default: '#4338CA',
-      primary: '#A21CAF',
-      secondary: '#E11D48',
-      success: '#34D399',
-      info: '#0EA5E9',
-      dark: '#0B1020'
-    };
-    const themeColor = (typeof pageThemeColor !== 'undefined' && themeColors[pageThemeColor]) 
-      ? themeColors[pageThemeColor] 
-      : themeColors.default;
-  %>
-  
-  <!-- Métadonnées de base -->
-  <title><%= ((typeof title !== 'undefined' && title) ? title + ' — ' : '') %>Plinkk</title>
-  <meta name="description" content="<%= desc %>" />
-  <meta name="keywords" content="<%= keywords %>" />
-  <meta name="author" content="<%= author %>" />
-  <meta name="robots" content="<%= robotsVal %>" />
-  <meta name="language" content="fr-FR" />
-  <meta name="theme-color" content="<%= themeColor %>" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="format-detection" content="telephone=no" />
-  
-  <!-- Favicon et icônes -->
-  <link rel="icon" type="image/svg+xml" href="https://cdn.plinkk.fr/logo.svg" />
-  <link rel="apple-touch-icon" href="https://cdn.plinkk.fr/logo.svg" />
-  
-  <!-- Open Graph / Facebook -->
-  <meta property="og:site_name" content="Plinkk" />
-  <meta property="og:type" content="website" />
-  <meta property="og:locale" content="fr_FR" />
-  <meta property="og:title" content="<%= ((typeof title !== 'undefined' && title) ? title + ' — ' : '') %>Plinkk" />
-  <meta property="og:description" content="<%= desc %>" />
-  <meta property="og:image" content="<%= img %>" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="<%= ((typeof title !== 'undefined' && title) ? title : 'Plinkk') %>" />
-  <% if (canon) { %>
-    <meta property="og:url" content="<%= canon %>" />
-    <link rel="canonical" href="<%= canon %>" />
-  <% } %>
-  
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content="@Plinkk" />
-  <meta name="twitter:creator" content="@Plinkk" />
-  <meta name="twitter:title" content="<%= ((typeof title !== 'undefined' && title) ? title + ' — ' : '') %>Plinkk" />
-  <meta name="twitter:description" content="<%= desc %>" />
-  <meta name="twitter:image" content="<%= img %>" />
-  <meta name="twitter:image:alt" content="<%= ((typeof title !== 'undefined' && title) ? title : 'Plinkk') %>" />
+  <%- include('meta_tags') %>
   
   <!-- Métadonnées structurées JSON-LD -->
   <script type="application/ld+json" nonce="<%= cspNonce %>">
@@ -81,11 +20,6 @@
       "@type": "Offer",
       "price": "0",
       "priceCurrency": "EUR"
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "ratingCount": "250"
     }
   }
   </script>
@@ -370,7 +304,7 @@
                   }
                 }
               </style>
-              <%- (typeof extraHead !=='undefined' ? extraHead : '' ) %>
+              <%= (typeof extraHead !=='undefined' ? extraHead : '' ) %>
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-[#0B1020] via-slate-950 to-[#0b1324] text-slate-100 animate-fade-in">

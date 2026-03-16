@@ -746,7 +746,7 @@
         </div>
 
         <!--  DATA  -->
-        <script type="application/json" nonce="<%= cspNonce %>" id="stats-data"><%- JSON.stringify({
+        <script type="application/json" nonce="<%= cspNonce %>" id="stats-data"><%= JSON.stringify({
     views: _userViews,
     totalViews: _totalViews,
     totalClicks: _totalClicks,

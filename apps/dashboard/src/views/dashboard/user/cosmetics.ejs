@@ -353,7 +353,7 @@
             data.primaryColor || '#4c1d95' , accentColor: data.accentColor || '#0f172a' , gradientType:
             data.gradientType || 'linear' , effect: data.effect || 'none' , frame: cosmetics.frame || 'none' ,
             bannerUrl: cosmetics.bannerUrl || '' , banner: cosmetics.banner || 'none' }; %>
-            <script id="initialData" type="application/json" nonce="<%= cspNonce %>"><%- JSON.stringify(initial) %></script>
+            <script id="initialData" type="application/json" nonce="<%= cspNonce %>"><%= JSON.stringify(initial) %></script>
 
         </main>
 

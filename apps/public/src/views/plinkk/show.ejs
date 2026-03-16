@@ -117,10 +117,10 @@
             </div>
         </article>
     </body>
-    <script type="application/json" id="plinkk-ctx-username" nonce="<%= cspNonce %>"><%- JSON.stringify(username || "") %></script>
+    <script type="application/json" id="plinkk-ctx-username" nonce="<%= cspNonce %>"><%= JSON.stringify(username || "") %></script>
     <script type="application/json" nonce="<%= cspNonce %>"
-        id="plinkk-ctx-identifier"><%- JSON.stringify((page && page.slug) ? page.slug : "") %></script>
-    <script type="application/json" id="plinkk-page-id" nonce="<%= cspNonce %>"><%- JSON.stringify(page?.id || "") %></script>
+        id="plinkk-ctx-identifier"><%= JSON.stringify((page && page.slug) ? page.slug : "") %></script>
+    <script type="application/json" id="plinkk-page-id" nonce="<%= cspNonce %>"><%= JSON.stringify(page?.id || "") %></script>
     <script src="/public/js/plinkk-init.js"></script>
     <script type="module"
         src="/<%= (typeof publicPath !== 'undefined' && publicPath) ? publicPath : ((page && page.slug) ? page.slug : username) %>.js?v=fix-icons"></script>

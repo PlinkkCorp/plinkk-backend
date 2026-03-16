@@ -1,4 +1,4 @@
-﻿export * from "./lib/builtInThemes.js";
+export * from "./lib/builtInThemes.js";
 export * from "./lib/theme.js";
 export * from "./lib/generateTheme.js";
 export * from "./lib/generateConfig.js";
@@ -17,6 +17,7 @@ export * from "./lib/redirectService.js";
 export * from "./lib/premiumService.js";
 export * from "./lib/affiliateService.js";
 export * from "./lib/apiBugReports.js";
+export * from "./lib/security.js";
 export * from "./types/user.js";
 
 export { default as profileData } from "./lib/defaultConfig.js";

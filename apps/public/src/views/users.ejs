@@ -141,11 +141,11 @@
 
                   <li
                     class="group relative flex flex-col h-full rounded-3xl overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:shadow-2xl <%= isBanned ? 'hover:shadow-rose-500/20 ring-1 ring-rose-500/30' : 'hover:shadow-violet-500/20' %> bg-slate-950 border <%= isBanned ? 'border-rose-500/30 hover:border-rose-500/50' : 'border-slate-800/50 hover:border-violet-500/50' %>"
-                    data-name="<%- (u.name||'').toLowerCase() %>" data-id="<%- (u.id||'').toLowerCase() %>"
-                    data-search="<%- (u.name+' '+u.id + (isEmailPublic && publicEmail ? (' '+publicEmail) : '')).toLowerCase() %>">
+                    data-name="<%= (u.name||'').toLowerCase() %>" data-id="<%= (u.id||'').toLowerCase() %>"
+                    data-search="<%= (u.name+' '+u.id + (isEmailPublic && publicEmail ? (' '+publicEmail) : '')).toLowerCase() %>">
 
                     <!-- Dynamic Background Tint (User's Gradient) -->
-                    <div class="absolute inset-0 opacity-20 transition-opacity duration-300 group-hover:opacity-40" <%-
+                    <div class="absolute inset-0 opacity-20 transition-opacity duration-300 group-hover:opacity-40" <%=
                       safeCardBg %>></div>
 
                     <!-- Ban overlay tint -->
@@ -164,7 +164,7 @@
                         <!-- Banner (Faded Top) -->
                         <div
                           class="absolute inset-x-0 top-0 h-32 bg-cover bg-center opacity-50 transition-transform duration-500 ease-out group-hover:scale-110 <%= isBanned ? 'grayscale opacity-30' : '' %>"
-                          <%- safeBanner %>></div>
+                          <%= safeBanner %>></div>
 
                         <!-- Content -->
                         <div class="relative z-10 p-5 flex flex-col h-full">
@@ -180,7 +180,7 @@
                                   className: "w-full h-full object-cover" }) %>
                               </div>
                               <!-- Frame Overlay -->
-                              <div class="absolute inset-0 pointer-events-none z-20 rounded-2xl" <%- safeFrameStyle %>></div>
+                              <div class="absolute inset-0 pointer-events-none z-20 rounded-2xl" <%= safeFrameStyle %>></div>
                             </div>
 
                             <div class="flex flex-col items-end gap-1">

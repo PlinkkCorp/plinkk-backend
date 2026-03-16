@@ -264,9 +264,9 @@
                       class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                       <% sec.data.forEach(t=> { %>
                         <li class="themeCard theme-admin-card animate-slide-in"
-                          data-name="<%- (t.name||'').toLowerCase() %>"
-                          data-author="<%- (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>"
-                          data-status="<%= sec.key.toUpperCase() %>" data-json='<%- JSON.stringify(t.data||{}) %>'
+                          data-name="<%= (t.name||'').toLowerCase() %>"
+                          data-author="<%= (t.author?.userName||'').toLowerCase() %>" data-id="<%= t.id %>"
+                          data-status="<%= sec.key.toUpperCase() %>" data-json='<%= JSON.stringify(t.data||{}) %>'
                           data-updated="<%= new Date(t.updatedAt).getTime() %>">
 
                           <div class="theme-preview-box themePreview"></div>

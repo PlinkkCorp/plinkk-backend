@@ -356,7 +356,7 @@
                         };
                     </script>
 
-                    <script type="application/json" nonce="<%= cspNonce %>" id="pages-data"><%- JSON.stringify(locals.pages || []) %></script>
+                    <script type="application/json" nonce="<%= cspNonce %>" id="pages-data"><%= JSON.stringify(locals.pages || []) %></script>
                     <script type="application/json" nonce="<%= cspNonce %>"
                         id="autoopen-data"><%= (typeof autoOpenPlinkkModal !== 'undefined' && autoOpenPlinkkModal) ? 'true' : 'false' %></script>
 
@@ -476,7 +476,7 @@
                             try {
                                 const dataElement = document.createElement('script');
                                 dataElement.type = 'application/json';
-                                dataElement.textContent = <%- JSON.stringify(JSON.stringify({
+                                dataElement.textContent = <%= JSON.stringify(JSON.stringify({
                                     ...(locals.plinkk || {}),
                                     categories: locals.categories || []
                                 })) %>;

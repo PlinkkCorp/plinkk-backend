@@ -97,7 +97,7 @@
 
 <script nonce="<%= cspNonce %>">
 (function(){
-  const raw = JSON.parse(String.raw`<%- JSON.stringify(JSON.stringify(theme.data)) %>`);
+  const raw = JSON.parse(String.raw`<%= JSON.stringify(JSON.stringify(theme.data)) %>`);
   const id = '<%= theme.id %>';
 
   const previewBoxLight = document.getElementById('previewBoxLight');

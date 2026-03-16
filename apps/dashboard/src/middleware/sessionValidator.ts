@@ -13,6 +13,23 @@ export function registerSessionValidator(fastify: FastifyInstance) {
       return;
     }
 
+    const isImpersonated = request.session.get("is_impersonated");
+    const impExpires = request.session.get("impersonation_expires");
+    if (isImpersonated && impExpires && Date.now() > impExpires) {
+      const originalAdmin = request.session.get("original_admin");
+      if (originalAdmin) {
+        // Return to admin session
+        request.session.set("data", originalAdmin);
+        request.session.set("is_impersonated", false);
+        request.session.set("impersonation_expires", null);
+        request.session.set("original_admin", null);
+        request.log.info({ adminId: originalAdmin }, "Impersonation session expired, reverted to admin.");
+      } else {
+        request.session.delete();
+      }
+      return;
+    }
+
     if (sessionId) {
       try {
         const session = await prisma.session.findUnique({

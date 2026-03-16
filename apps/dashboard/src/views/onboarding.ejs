@@ -192,7 +192,7 @@
                 Nom d'affichage <span class="text-rose-400">*</span>
               </label>
               <input id="displayName" type="text" maxlength="50" placeholder="Ex : Sophie Martin"
-                value="<%- (typeof draft !== 'undefined' && draft.displayName) ? draft.displayName : '' %>"
+                value="<%= (typeof draft !== 'undefined' && draft.displayName) ? draft.displayName : '' %>"
                 class="field-input" autocomplete="name" />
             </div>
 
@@ -204,7 +204,7 @@
               <div class="relative">
                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm select-none pointer-events-none">plinkk.fr/</span>
                 <input id="slugInput" type="text" maxlength="30" placeholder="mon-nom"
-                  value="<%- (typeof draft !== 'undefined' && draft.slug) ? draft.slug : '' %>"
+                  value="<%= (typeof draft !== 'undefined' && draft.slug) ? draft.slug : '' %>"
                   class="field-input pl-[94px] pr-32"
                   style="font-family:'Courier New',monospace;" />
                 <span id="slugIcon" class="absolute right-24 top-1/2 -translate-y-1/2 text-sm leading-none"></span>
@@ -228,13 +228,13 @@
                   { v:'sport',     e:'<i class="bi bi-trophy text-xl"></i>', l:'Sport'     },
                 ].forEach(c => { %>
                 <button type="button" data-cat="<%= c.v %>" onclick="pickCat('<%= c.v %>')"
-                  class="cat-btn text-left <%- (typeof draft !== 'undefined' && draft.category === c.v) ? 'on' : '' %>">
-                  <span class="block leading-none mb-1"><%- c.e %></span>
+                  class="cat-btn text-left <%= (typeof draft !== 'undefined' && draft.category === c.v) ? 'on' : '' %>">
+                  <span class="block leading-none mb-1"><%= c.e %></span>
                   <span class="block text-xs font-medium text-slate-200"><%= c.l %></span>
                 </button>
                 <% }); %>
               </div>
-              <input type="hidden" id="catVal" value="<%- (typeof draft !== 'undefined' && draft.category) ? draft.category : '' %>" />
+              <input type="hidden" id="catVal" value="<%= (typeof draft !== 'undefined' && draft.category) ? draft.category : '' %>" />
             </div>
 
             <button onclick="goStep(2)"
@@ -270,7 +270,7 @@
                     <span id="avatarUploadStatus" class="hidden text-xs text-emerald-400"></span>
                   </div>
                   <input id="avatarUrl" type="url" placeholder="ou colle une URL�"
-                    value="<%- (typeof draft !== 'undefined' && draft.avatarUrl) ? draft.avatarUrl : '' %>"
+                    value="<%= (typeof draft !== 'undefined' && draft.avatarUrl) ? draft.avatarUrl : '' %>"
                     class="field-input text-sm" />
                 </div>
               </div>
@@ -282,7 +282,7 @@
                 Bio <span class="text-slate-600 font-normal">(optionnel)</span>
               </label>
               <textarea id="bioInput" rows="3" maxlength="160" placeholder="Dis quelque chose sur toi�"
-                class="field-input"><%- (typeof draft !== 'undefined' && draft.bio) ? draft.bio : '' %></textarea>
+                class="field-input"><%= (typeof draft !== 'undefined' && draft.bio) ? draft.bio : '' %></textarea>
               <p class="text-right text-xs text-slate-600 mt-1"><span id="bioCount">0</span>/160</p>
             </div>
 
@@ -309,14 +309,14 @@
                 ]; PLINKK_THEMES.forEach((t, i) => { %>
                 <button type="button" data-theme-idx="<%= i %>" data-c="<%= t.btn %>"
                   onclick="pickTheme(<%= i %>, '<%= t.btn %>')"
-                  class="theme-btn flex flex-col items-center gap-1 py-2 px-1 rounded-xl border transition-all <%- (typeof draft !== 'undefined' && draft.themeIndex === i) ? 'border-violet-500 bg-violet-500/10' : 'border-slate-700 hover:border-slate-500' %>">
+                  class="theme-btn flex flex-col items-center gap-1 py-2 px-1 rounded-xl border transition-all <%= (typeof draft !== 'undefined' && draft.themeIndex === i) ? 'border-violet-500 bg-violet-500/10' : 'border-slate-700 hover:border-slate-500' %>">
                   <div class="w-5 h-5 rounded-full" style="background:<%= t.btn %>"></div>
                   <span class="text-[9px] text-slate-400 truncate w-full text-center leading-tight"><%= t.name %></span>
                 </button>
                 <% }); %>
               </div>
-              <input type="hidden" id="accentVal" value="<%- (typeof draft !== 'undefined' && draft.accentColor) ? draft.accentColor : '#7289DA' %>" />
-              <input type="hidden" id="themeIdx" value="<%- (typeof draft !== 'undefined' && draft.themeIndex !== undefined) ? draft.themeIndex : 0 %>" />
+              <input type="hidden" id="accentVal" value="<%= (typeof draft !== 'undefined' && draft.accentColor) ? draft.accentColor : '#7289DA' %>" />
+              <input type="hidden" id="themeIdx" value="<%= (typeof draft !== 'undefined' && draft.themeIndex !== undefined) ? draft.themeIndex : 0 %>" />
             </div>
 
             <div class="flex gap-3">
@@ -344,7 +344,7 @@
                 Titre du lien <span class="text-slate-600 font-normal">(optionnel)</span>
               </label>
               <input id="firstLinkTitle" type="text" maxlength="100" placeholder="Ex : Mon Instagram, Mon Site Web�"
-                value="<%- (typeof draft !== 'undefined' && draft.firstLinkTitle) ? draft.firstLinkTitle : '' %>"
+                value="<%= (typeof draft !== 'undefined' && draft.firstLinkTitle) ? draft.firstLinkTitle : '' %>"
                 class="field-input" />
             </div>
 
@@ -354,7 +354,7 @@
                 URL du lien <span class="text-slate-600 font-normal">(optionnel)</span>
               </label>
               <input id="firstLinkUrl" type="url" placeholder="https://�"
-                value="<%- (typeof draft !== 'undefined' && draft.firstLinkUrl) ? draft.firstLinkUrl : '' %>"
+                value="<%= (typeof draft !== 'undefined' && draft.firstLinkUrl) ? draft.firstLinkUrl : '' %>"
                 class="field-input" />
             </div>
 
@@ -409,7 +409,7 @@
                 <span id="linkIconPreviewName" class="text-xs text-slate-300 flex-1"></span>
               </div>
               
-              <input type="hidden" id="firstLinkIcon" value="<%- (typeof draft !== 'undefined' && draft.firstLinkIcon) ? draft.firstLinkIcon : '' %>" />
+              <input type="hidden" id="firstLinkIcon" value="<%= (typeof draft !== 'undefined' && draft.firstLinkIcon) ? draft.firstLinkIcon : '' %>" />
             </div>
 
             <div class="flex gap-3">
@@ -477,10 +477,10 @@
   // --------------------------------------------------------------------
   //  STATE
   // --------------------------------------------------------------------
-  let currentStep = <%- (typeof step !== 'undefined' && step) ? step : 1 %>;
+  let currentStep = <%= (typeof step !== 'undefined' && step) ? step : 1 %>;
   let saveTimer  = null;
   let slugTimer  = null;
-  let slugOk     = <%- (typeof draft !== 'undefined' && draft && draft.slug && draft.slug.length >= 2) ? 'true' : 'false' %>;
+  let slugOk     = <%= (typeof draft !== 'undefined' && draft && draft.slug && draft.slug.length >= 2) ? 'true' : 'false' %>;
 
   // --------------------------------------------------------------------
   //  STEP NAVIGATION

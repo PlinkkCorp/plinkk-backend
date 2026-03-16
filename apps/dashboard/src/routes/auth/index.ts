@@ -9,12 +9,23 @@ import { joinRoutes } from "./join";
 import { verifyRoutes } from "./verify";
 
 export function authRoutes(fastify: FastifyInstance) {
-  loginRoutes(fastify);
-  registerRoutes(fastify);
-  totpRoutes(fastify);
+  fastify.register(async (instance) => {
+    instance.register(loginRoutes);
+    instance.register(registerRoutes);
+    instance.register(totpRoutes);
+    instance.register(googleAuthRoutes);
+    instance.register(forgotPasswordRoutes);
+    instance.register(joinRoutes);
+    instance.register(verifyRoutes);
+  }, {
+    prefix: "/auth", // Re-evaluating prefix logic
+    config: {
+      rateLimit: {
+        max: 5,
+        timeWindow: "1 minute"
+      }
+    }
+  });
+  
   logoutRoutes(fastify);
-  googleAuthRoutes(fastify);
-  forgotPasswordRoutes(fastify);
-  joinRoutes(fastify);
-  verifyRoutes(fastify);
 }

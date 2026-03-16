@@ -1,4 +1,5 @@
 import { FastifyReply } from "fastify";
+import { getSafeReturnTo } from "@plinkk/shared";
 
 export function redirectWithError(
   reply: FastifyReply,
@@ -10,7 +11,7 @@ export function redirectWithError(
     error: error,
     ...params,
   });
-  reply.redirect(`${path}?${query}`);
+  reply.redirect(`${getSafeReturnTo(path)}?${query}`);
 }
 
 export function redirectWithErrorToLogin(

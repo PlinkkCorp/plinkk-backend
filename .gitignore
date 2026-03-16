@@ -10,3 +10,4 @@ dist
 /.github
 .env_utf8
 /~*
+*.bak
