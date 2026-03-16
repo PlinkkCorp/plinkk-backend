@@ -16,6 +16,11 @@ import { createUserSession } from "../services/sessionService";
 import { createDefaultPlinkk } from "../routes/auth/register";
 import { discordUser } from "../types/discordUser";
 
+/**
+ * Gets the user details from GitHub
+ * @param token The access token from GitHub
+ * @returns A promise that resolves to the user details
+ */
 async function getGitHubUserDetails(token: { access_token: string }) {
   const res = await fetch("https://api.github.com/user", {
     headers: {
@@ -46,6 +51,11 @@ async function getGitHubUserDetails(token: { access_token: string }) {
   return user;
 }
 
+/**
+ * Gets the user details from Discord
+ * @param token The access token from Discord
+ * @returns A promise that resolves to the user details
+ */
 async function getDiscordUserDetails(token: { access_token: string }) {
   const res = await fetch("https://discord.com/api/users/@me", {
     headers: {
@@ -59,6 +69,10 @@ async function getDiscordUserDetails(token: { access_token: string }) {
   return user;
 }
 
+/**
+ * Registers the OAuth2 routes for GitHub and Discord
+ * @param fastify The fastify instance
+ */
 export async function registerOAuth2(fastify: FastifyInstance) {
   fastify.get("/login/github/callback", async function (request, reply) {
     const { token } =
@@ -104,7 +118,6 @@ export async function registerOAuth2(fastify: FastifyInstance) {
     }
     await createUserSession(plinkkUser.id, request);
 
-    // reply.send({ access_token: token.access_token });
     return reply.redirect("/")
   });
 
@@ -152,7 +165,6 @@ export async function registerOAuth2(fastify: FastifyInstance) {
     }
     await createUserSession(plinkkUser.id, request);
 
-    // reply.send({ access_token: token.access_token });
     return reply.redirect("/")
   });
 }

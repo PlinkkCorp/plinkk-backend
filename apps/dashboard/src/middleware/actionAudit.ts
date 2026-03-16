@@ -1,8 +1,22 @@
-import { FastifyInstance, FastifyRequest } from "fastify";
+/**
+ * Middleware to audit user and admin actions
+ * - registerActionAuditHook -> void
+ */
 
+import { FastifyInstance, FastifyRequest } from "fastify";
 import { logAdminAction } from "../lib/adminLogger";
 import { logUserAction } from "../lib/userLogger";
 
+/**
+ * Type for the audit request
+ * @param request The fastify request
+ * @property auditError The error to audit
+ * @property auditError.message The error message
+ * @property auditError.name The error name
+ * @property auditError.code The error code
+ * @property auditError.statusCode The error status code
+ * @returns The audit request
+ */
 type AuditRequest = FastifyRequest & {
   auditError?: {
     message: string;
@@ -36,16 +50,31 @@ const SENSITIVE_KEYS = new Set([
   "code",
 ]);
 
+/**
+ * Function to get the pathname from the request
+ * @param request The fastify request
+ * @returns The pathname of the request
+ */
 function getPathname(request: FastifyRequest): string {
   const rawUrl = request.raw.url || request.url || "";
   const qIndex = rawUrl.indexOf("?");
   return qIndex === -1 ? rawUrl : rawUrl.slice(0, qIndex);
 }
 
+/**
+ * Checks if the pathname should be ignored
+ * @param pathname The pathname to check
+ * @returns True if the pathname should be ignored, false otherwise
+ */
 function isIgnoredPath(pathname: string): boolean {
   return IGNORED_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
+/**
+ * Gets the user ID from the session
+ * @param request The fastify request
+ * @returns The user ID if found, undefined otherwise
+ */
 function getSessionUserId(request: FastifyRequest): string | undefined {
   const sessionData = request.session.get("data");
   if (!sessionData) return undefined;
@@ -61,11 +90,23 @@ function getSessionUserId(request: FastifyRequest): string | undefined {
   return sessionData;
 }
 
+/**
+ * Clips a string to a maximum length
+ * @param value The string to clip
+ * @param max The maximum length
+ * @returns The clipped string
+ */
 function clipString(value: string, max = 500): string {
   if (value.length <= max) return value;
   return `${value.slice(0, max)}...[truncated:${value.length}]`;
 }
 
+/**
+ * Sanitizes a value for logging
+ * @param input The value to sanitize
+ * @param depth The current depth
+ * @returns The sanitized value
+ */
 function sanitizeValue(input: unknown, depth = 0): unknown {
   if (input == null) return input;
   if (depth > 4) return "[depth_limit]";
@@ -101,6 +142,11 @@ function sanitizeValue(input: unknown, depth = 0): unknown {
   return String(input);
 }
 
+/**
+ * Gets the action target ID from the request
+ * @param request The fastify request
+ * @returns The action target ID if found, undefined otherwise
+ */
 function getActionTargetId(request: FastifyRequest): string | undefined {
   const params = (request.params || {}) as Record<string, unknown>;
   const candidateKeys = ["id", "userId", "plinkkId", "redirectId", "linkId", "slug"];
@@ -115,6 +161,11 @@ function getActionTargetId(request: FastifyRequest): string | undefined {
   return undefined;
 }
 
+/**
+ * Checks if the pathname is an admin action
+ * @param pathname The pathname to check
+ * @returns True if the pathname is an admin action, false otherwise
+ */
 function isAdminAction(pathname: string): boolean {
   return (
     pathname.startsWith("/api/admin") ||
@@ -123,6 +174,10 @@ function isAdminAction(pathname: string): boolean {
   );
 }
 
+/**
+ * Registers the action audit hook
+ * @param fastify The fastify instance
+ */
 export function registerActionAuditHook(fastify: FastifyInstance) {
   fastify.addHook("onError", async (request, _reply, error) => {
     const req = request as AuditRequest;

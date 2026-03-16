@@ -257,10 +257,17 @@ const cookieConfig = isProduction
       httpOnly: true,
     };
 
+let sessionKeyEnv = process.env.SESSION_SECRET_KEY;
+if (!sessionKeyEnv || sessionKeyEnv.length < 32) {
+  fastify.log.warn(`SESSION_SECRET_KEY is ${!sessionKeyEnv ? 'missing' : 'too short (' + sessionKeyEnv.length + ' chars)'}. Using fallback 32-byte key.`);
+  sessionKeyEnv = (sessionKeyEnv || "a").padEnd(32, "a").slice(0, 32);
+}
+const sessionKey = Buffer.from(sessionKeyEnv);
+
 fastify.register(fastifySecureSession, {
   sessionName: "session",
   cookieName: "plinkk-backend",
-  key: process.env.SESSION_SECRET_KEY || "a".repeat(32), // Should be 32 bytes
+  key: sessionKey,
   expiry: 24 * 60 * 60,
   cookie: cookieConfig,
 });

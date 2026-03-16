@@ -14,6 +14,7 @@ import { linkTrackingRoutes } from "./server/linkTrackingRoutes";
 import { authRoutes } from "./routes/auth";
 import { onboardingRoutes } from "./routes/onboarding";
 import { registerOAuth2 } from "./config/fastifyOAuth2";
+import { discordService } from "./services/discordService";
 import { AppError, generateTheme } from "@plinkk/shared";
 import fastifyHelmet from "@fastify/helmet";
 import crypto from "crypto";

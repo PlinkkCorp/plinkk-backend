@@ -1,3 +1,13 @@
+/**
+ * Middleware pour l'authentification
+ * - requireAuth
+ * - requireAuthWithUser
+ * - requireAuthRedirect
+ * - requireStaff
+ * - requireStaffRedirect
+ * - requireAdmin
+ * - optionalAuth
+ */
 import { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
 import { prisma } from "@plinkk/prisma";
 import { verifyRoleIsStaff, verifyRoleAdmin } from "@plinkk/shared";
@@ -5,12 +15,21 @@ import { getPublicPath } from "../services/plinkkService";
 import { UnauthorizedError, ForbiddenError } from "@plinkk/shared";
 import { ensureOnboardingCompletedForLegacyAccount } from "../lib/onboarding";
 
+/**
+ * Décore la requête avec les propriétés userId, currentUser et publicPath
+ * @param fastify L'instance fastify
+ */
 export function registerAuthDecorators(fastify: FastifyInstance) {
   fastify.decorateRequest("userId", null);
   fastify.decorateRequest("currentUser", null);
   fastify.decorateRequest("publicPath", null);
 }
 
+/**
+ * Vérifie si l'utilisateur est authentifié
+ * @param request La requête fastify
+ * @param reply La réponse fastify
+ */
 export async function requireAuth(request: FastifyRequest, reply: FastifyReply) {
   const sessionData = request.session.get("data");
   if (!sessionData) throw new UnauthorizedError();
@@ -25,6 +44,11 @@ export async function requireAuth(request: FastifyRequest, reply: FastifyReply) 
   request.userId = userId;
 }
 
+/**
+ * Vérifie si l'utilisateur est authentifié et récupère l'utilisateur
+ * @param request La requête fastify
+ * @param reply La réponse fastify
+ */
 export async function requireAuthWithUser(request: FastifyRequest, reply: FastifyReply) {
   const sessionData = request.session.get("data");
   if (!sessionData) throw new UnauthorizedError();
@@ -51,6 +75,11 @@ export async function requireAuthWithUser(request: FastifyRequest, reply: Fastif
   request.publicPath = await getPublicPath(user.id);
 }
 
+/**
+ * Vérifie si l'utilisateur est authentifié et redirige vers la page de connexion si ce n'est pas le cas
+ * @param request La requête fastify
+ * @param reply La réponse fastify
+ */
 export async function requireAuthRedirect(request: FastifyRequest, reply: FastifyReply) {
   const sessionData = request.session.get("data");
   const returnTo = request.url || "/";
@@ -80,9 +109,6 @@ export async function requireAuthRedirect(request: FastifyRequest, reply: Fastif
 
   const onboardingCompleted = await ensureOnboardingCompletedForLegacyAccount(user);
 
-  // L'onboarding ne se déclenche plus automatiquement ici
-  // Il doit être déclenché uniquement après l'inscription (voir routes auth/join.ts, google.ts, etc.)
-  
   user.onboardingCompleted = onboardingCompleted;
 
   request.userId = userId;
@@ -90,6 +116,11 @@ export async function requireAuthRedirect(request: FastifyRequest, reply: Fastif
   request.publicPath = await getPublicPath(user.id);
 }
 
+/**
+ * Vérifie si l'utilisateur est staff et redirige vers la page de connexion si ce n'est pas le cas
+ * @param request La requête fastify
+ * @param reply La réponse fastify
+ */
 export async function requireStaff(request: FastifyRequest, reply: FastifyReply) {
   const sessionData = request.session.get("data");
   if (!sessionData) throw new UnauthorizedError();
@@ -116,6 +147,11 @@ export async function requireStaff(request: FastifyRequest, reply: FastifyReply)
   request.publicPath = await getPublicPath(user.id);
 }
 
+/**
+ * Vérifie si l'utilisateur est staff et redirige vers la page de connexion si ce n'est pas le cas
+ * @param request La requête fastify
+ * @param reply La réponse fastify
+ */
 export async function requireStaffRedirect(request: FastifyRequest, reply: FastifyReply) {
   const sessionData = request.session.get("data");
   const returnTo = request.url || "/";
@@ -152,6 +188,11 @@ export async function requireStaffRedirect(request: FastifyRequest, reply: Fasti
   request.publicPath = await getPublicPath(user.id);
 }
 
+/**
+ * Vérifie si l'utilisateur est admin et redirige vers la page de connexion si ce n'est pas le cas
+ * @param request La requête fastify
+ * @param reply La réponse fastify
+ */
 export async function requireAdmin(request: FastifyRequest, reply: FastifyReply) {
   const userId = request.session.get("data");
   if (!userId) {
@@ -172,6 +213,11 @@ export async function requireAdmin(request: FastifyRequest, reply: FastifyReply)
   request.publicPath = await getPublicPath(user.id);
 }
 
+/**
+ * Vérifie si l'utilisateur est authentifié et redirige vers la page de connexion si ce n'est pas le cas
+ * @param request La requête fastify
+ * @param reply La réponse fastify
+ */
 export async function optionalAuth(request: FastifyRequest, _reply: FastifyReply) {
   const userId = request.session.get("data");
   if (userId && !String(userId).includes("__totp")) {

@@ -19,6 +19,10 @@ import ejs from "ejs";
 import { fastifyWebsocket } from "@fastify/websocket";
 import Redis from "ioredis";
 
+/**
+ * Registers the plugins for the fastify instance
+ * @param fastify The fastify instance
+ */
 export async function registerPlugins(fastify: FastifyInstance) {
   const redisUrl = process.env.REDIS_URL;
   const rateLimitOptions: any = {
@@ -80,10 +84,17 @@ export async function registerPlugins(fastify: FastifyInstance) {
         httpOnly: true,
       };
 
+  let sessionKeyEnv = process.env.SESSION_SECRET_KEY;
+  if (!sessionKeyEnv || sessionKeyEnv.length < 32) {
+    fastify.log.warn(`SESSION_SECRET_KEY is ${!sessionKeyEnv ? 'missing' : 'too short (' + sessionKeyEnv.length + ' chars)'}. Using fallback 32-byte key.`);
+    sessionKeyEnv = (sessionKeyEnv || "a").padEnd(32, "a").slice(0, 32);
+  }
+  const sessionKey = Buffer.from(sessionKeyEnv);
+
   await fastify.register(fastifySecureSession, {
     sessionName: "session",
     cookieName: "plinkk-backend",
-    key: process.env.SESSION_SECRET_KEY || "a".repeat(32),
+    key: sessionKey,
     expiry: 24 * 60 * 60,
     cookie: cookieConfig,
   });

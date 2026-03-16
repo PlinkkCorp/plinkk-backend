@@ -1,14 +1,8 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 
-/**
- * Cache en mémoire pour le rate limiting par IP  
- * Clé: `${type}:${ip}` - Valeur: timestamp de la dernière action
- */
 const ipCache = new Map<string, number>();
 
-/**
- * Nettoie les entrées expirées du cache (exécuté périodiquement)
- */
+
 function cleanupExpiredEntries(maxAgeMs: number) {
   const now = Date.now();
   const expiredKeys: string[] = [];

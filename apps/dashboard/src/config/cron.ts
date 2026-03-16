@@ -9,6 +9,10 @@ import { prisma } from "@plinkk/prisma";
 import { cleanExpiredSessions } from "../services/sessionService";
 import { emailQueueService } from "../services/emailQueueService";
 
+/**
+ * Registers the cron jobs for the fastify instance
+ * @param fastify The fastify instance
+ */
 export async function registerCronJobs(fastify: FastifyInstance) {
   await fastify.register(fastifyCron, {
     jobs: [
