@@ -21,7 +21,25 @@ import { logUserAction } from "../../lib/userLogger";
 import { sendOtp } from "../../services/otpService";
 import { getSafeReturnTo } from "@plinkk/shared";
 
+/**
+ * Enregistre les routes de connexion
+ * @param fastify - L'instance fastify
+ */
 export function loginRoutes(fastify: FastifyInstance) {
+  /**
+   * Récupère l'utilisateur courant pour les routes de connexion
+   * @param request - La requête
+   * @returns L'utilisateur courant ou null
+   */
+  async function getCurrentUserForLogin(request: any) {
+    const userId = request.session.get("data");
+    if (!userId || String(userId).includes("__totp")) return null;
+    return await prisma.user.findUnique({
+      where: { id: String(userId) },
+      include: { role: true },
+    });
+  }
+
   fastify.get("/login", async (request, reply) => {
     const currentUserId = request.session.get("data");
 

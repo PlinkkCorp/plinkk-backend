@@ -209,15 +209,17 @@ export function dashboardStatsRoutes(fastify: FastifyInstance) {
             })).map(r => ({ date: r.date, count: Number(r.count) }));
           }
         } else {
-          await prisma.$executeRawUnsafe(
-            'CREATE TABLE IF NOT EXISTS "UserViewDaily" ("userId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("userId","date"))'
-          );
-          rows = await prisma.$queryRaw<Array<{ date: string; count: number }>>`
-            SELECT "date", "count"
-            FROM "UserViewDaily"
-            WHERE "userId" = ${userId} AND "date" BETWEEN ${s} AND ${e}
-            ORDER BY "date" ASC
-          `;
+          rows = (await prisma.userViewDaily.findMany({
+            where: {
+              userId,
+              date: {
+                gte: new Date(s),
+                lte: new Date(e + 'T23:59:59.999Z')
+              }
+            },
+            select: { date: true, count: true },
+            orderBy: { date: "asc" }
+          })).map(r => ({ date: r.date, count: Number(r.count) }));
         }
       } else {
         // Find raw events for finer granularity

@@ -1015,19 +1015,14 @@ export function plinkkFrontUserRoutes(fastify: FastifyInstance) {
 
       // Enregistrer le clic daté (agrégation quotidienne)
       try {
-        await prisma.$executeRawUnsafe(
-          'CREATE TABLE IF NOT EXISTS "LinkClickDaily" ("linkId" TEXT NOT NULL, "date" TEXT NOT NULL, "count" INTEGER NOT NULL DEFAULT 0, PRIMARY KEY ("linkId","date"))',
-        );
         const now = new Date();
-        const y = now.getUTCFullYear();
-        const m = String(now.getUTCMonth() + 1).padStart(2, "0");
-        const d = String(now.getUTCDate()).padStart(2, "0");
-        const dateStr = `${y}-${m}-${d}`;
-        await prisma.$executeRawUnsafe(
-          'INSERT INTO "LinkClickDaily" ("linkId","date","count") VALUES (?,?,1) ON CONFLICT("linkId","date") DO UPDATE SET "count" = "count" + 1',
-          linkId,
-          dateStr,
-        );
+        const dateObj = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+        
+        await prisma.linkClickDaily.upsert({
+          where: { linkId_date: { linkId: linkId, date: dateObj } },
+          create: { linkId: linkId, date: dateObj, count: 1 },
+          update: { count: { increment: 1 } },
+        });
       } catch (e) { }
 
       try {

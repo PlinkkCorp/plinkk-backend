@@ -9,6 +9,9 @@ import { prisma } from "@plinkk/prisma";
 import { createPlinkkForUser } from "@plinkk/shared";
 import { profileData as profileConfig } from "@plinkk/shared";
 
+/**
+ * 
+ */
 export function registerRoutes(fastify: FastifyInstance) {
   fastify.get("/register", async (request, reply) => {
     const currentUserId = request.session.get("data");
