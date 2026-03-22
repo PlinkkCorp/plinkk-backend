@@ -253,6 +253,12 @@ function applyFilters(allLinks) {
   return { rows: list, top };
 }
 
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 function renderTable(rows, isLoading = false) {
   const tbody = qs('#tblBody');
   while (tbody.firstChild) {
@@ -278,9 +284,9 @@ function renderTable(rows, isLoading = false) {
     const tr = document.createElement('tr');
     tr.className = 'border-t border-slate-800 hover:bg-slate-800/40';
     tr.innerHTML = `
-      <td class="px-3 py-2 text-xs text-slate-400">${r.id}</td>
-      <td class="px-3 py-2">${r.label}</td>
-      <td class="px-3 py-2 text-indigo-300 truncate"><a class="hover:underline" href="${r.url}" target="_blank" rel="noopener">${r.url}</a></td>
+      <td class="px-3 py-2 text-xs text-slate-400">${escapeHtml(r.id)}</td>
+      <td class="px-3 py-2">${escapeHtml(r.label)}</td>
+      <td class="px-3 py-2 text-indigo-300 truncate"><a class="hover:underline" href="${escapeHtml(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.url)}</a></td>
       <td class="px-3 py-2 text-right">${formatNumber(r.clicks)}</td>
     `;
     tbody.appendChild(tr);
