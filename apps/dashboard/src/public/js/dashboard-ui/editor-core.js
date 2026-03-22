@@ -1447,6 +1447,8 @@ function openLinkPopover(linkId, target) {
     Math.min(rect.bottom + 8, window.innerHeight - 300) + "px";
   popover.style.left = Math.min(rect.left, window.innerWidth - 320) + "px";
 
+  const escapeHtml = (unsafe) => (unsafe || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+
   popover.innerHTML = `
         <div class="popover-header">
             <span class="popover-title">
@@ -1458,11 +1460,11 @@ function openLinkPopover(linkId, target) {
         <div class="popover-body">
             <div class="popover-row">
                 <span class="popover-label">URL</span>
-                <input type="url" class="popover-input" id="popoverLinkUrl" value="${link.url || ""}" placeholder="https://...">
+                <input type="url" class="popover-input" id="popoverLinkUrl" value="${escapeHtml(link.url || "")}" placeholder="https://...">
             </div>
             <div class="popover-row">
                 <span class="popover-label">Icône URL</span>
-                <input type="url" class="popover-input" id="popoverLinkIcon" value="${link.icon || ""}" placeholder="URL de l'icône...">
+                <input type="url" class="popover-input" id="popoverLinkIcon" value="${escapeHtml(link.icon || "")}" placeholder="URL de l'icône...">
             </div>
             <div class="popover-actions">
                 <button class="popover-btn delete" id="popoverLinkDelete">
@@ -1587,6 +1589,8 @@ function openSocialPopover(index, target) {
     Math.min(rect.bottom + 8, window.innerHeight - 280) + "px";
   popover.style.left = Math.min(rect.left, window.innerWidth - 320) + "px";
 
+  const escapeHtml = (unsafe) => (unsafe || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+
   popover.innerHTML = `
         <div class="popover-header">
             <span class="popover-title">
@@ -1598,11 +1602,11 @@ function openSocialPopover(index, target) {
         <div class="popover-body">
             <div class="popover-row">
                 <span class="popover-label">URL</span>
-                <input type="url" class="popover-input" id="popoverSocialUrl" value="${social.url || ""}" placeholder="https://...">
+                <input type="url" class="popover-input" id="popoverSocialUrl" value="${escapeHtml(social.url || "")}" placeholder="https://...">
             </div>
             <div class="popover-row">
                 <span class="popover-label">Icône URL</span>
-                <input type="url" class="popover-input" id="popoverSocialIcon" value="${social.icon || ""}" placeholder="URL de l'icône...">
+                <input type="url" class="popover-input" id="popoverSocialIcon" value="${escapeHtml(social.icon || "")}" placeholder="URL de l'icône...">
             </div>
             <div class="popover-actions">
                 <button class="popover-btn delete" id="popoverSocialDelete">Supprimer</button>
@@ -1653,6 +1657,8 @@ function openStatusPopover(target) {
     Math.min(rect.bottom + 8, window.innerHeight - 280) + "px";
   popover.style.left = Math.min(rect.left, window.innerWidth - 320) + "px";
 
+  const escapeHtml = (unsafe) => (unsafe || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+
   popover.innerHTML = `
         <div class="popover-header">
             <span class="popover-title">Modifier le statut</span>
@@ -1661,7 +1667,7 @@ function openStatusPopover(target) {
         <div class="popover-body">
             <div class="popover-row">
                 <span class="popover-label">Texte</span>
-                <input type="text" class="popover-input" id="popoverStatusText" value="${statusbar.text || "Disponible"}" placeholder="Votre statut...">
+                <input type="text" class="popover-input" id="popoverStatusText" value="${escapeHtml(statusbar.text || "Disponible")}" placeholder="Votre statut...">
             </div>
             <div class="popover-row">
                 <span class="popover-label">Indicateur</span>
@@ -1673,7 +1679,7 @@ function openStatusPopover(target) {
             </div>
             <div class="popover-row">
                 <span class="popover-label">Couleur fond</span>
-                <input type="color" class="popover-color" id="popoverStatusBg" value="${statusbar.colorBg || "#1f2937"}">
+                <input type="color" class="popover-color" id="popoverStatusBg" value="${escapeHtml(statusbar.colorBg || "#1f2937")}">
             </div>
             <div class="popover-actions">
                 <div></div>

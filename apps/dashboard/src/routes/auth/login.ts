@@ -142,7 +142,7 @@ export function loginRoutes(fastify: FastifyInstance) {
     return reply.redirect(`/login?${params.toString()}`);
   });
 
-  fastify.post("/login", async (request, reply) => {
+  fastify.post("/login", { config: { rateLimit: { max: 5, timeWindow: "1 minute" } } }, async (request, reply) => {
     const currentUserId = request.session.get("data");
     if (currentUserId && !String(currentUserId).includes("__totp")) {
       return reply.redirect("/");

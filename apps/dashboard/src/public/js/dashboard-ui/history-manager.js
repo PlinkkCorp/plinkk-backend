@@ -85,14 +85,15 @@ export class HistoryManager {
                    </div>`
             : '';
 
-        const expandBtn = '';
+        const escapeHtml = (unsafe) => (unsafe || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        const safeLabel = escapeHtml(v.label) || (this.currentTab === 'auto' ? 'Modification' : 'Sauvegarde');
 
         return `
             <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition-all group">
                 <div class="flex items-start justify-between mb-2">
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center">
-                            <div class="font-medium text-slate-200 truncate">${v.label || (this.currentTab === 'auto' ? 'Modification' : 'Sauvegarde')}</div>
+                            <div class="font-medium text-slate-200 truncate">${safeLabel}</div>
                             ${expandBtn}
                         </div>
                         <div class="text-xs text-slate-500">${dateStr}</div>
@@ -112,10 +113,11 @@ export class HistoryManager {
         const keyLabel = c.key.replace('.', ' ').replace(/([A-Z])/g, ' $1').toLowerCase();
 
         let diffHtml = '';
-        if (c.type === 'added') diffHtml = `<span class="text-emerald-400 font-medium">Nouveau:</span> <span class="text-slate-200">${c.new}</span>`;
-        else if (c.type === 'removed') diffHtml = `<span class="text-rose-400 font-medium">Supprimé:</span> <span class="text-slate-400 line-through">${c.old}</span>`;
+        const escapeHtml = (unsafe) => String(unsafe).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        if (c.type === 'added') diffHtml = `<span class="text-emerald-400 font-medium">Nouveau:</span> <span class="text-slate-200">${escapeHtml(c.new)}</span>`;
+        else if (c.type === 'removed') diffHtml = `<span class="text-rose-400 font-medium">Supprimé:</span> <span class="text-slate-400 line-through">${escapeHtml(c.old)}</span>`;
         else if (c.type === 'reordered') diffHtml = `<span class="text-violet-400 font-medium">Réorganisé</span>`;
-        else diffHtml = `<span class="text-slate-400 line-through">${typeof c.old === 'object' ? '...' : c.old}</span> <span class="mx-1">→</span> <span class="text-emerald-400">${typeof c.new === 'object' ? '...' : c.new}</span>`;
+        else diffHtml = `<span class="text-slate-400 line-through">${typeof c.old === 'object' ? '...' : escapeHtml(c.old)}</span> <span class="mx-1">→</span> <span class="text-emerald-400">${typeof c.new === 'object' ? '...' : escapeHtml(c.new)}</span>`;
 
         return `<div class="flex flex-col mb-1 last:mb-0">
                 <div class="flex items-center gap-2">

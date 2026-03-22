@@ -186,7 +186,7 @@ export function apiMeRoutes(fastify: FastifyInstance) {
     return reply.send(updated);
   });
 
-  fastify.post("/password", async (request, reply) => {
+  fastify.post("/password", { config: { rateLimit: { max: 5, timeWindow: "1 minute" } } }, async (request, reply) => {
     const sessionData = request.session.get("data");
     const userId = (typeof sessionData === "object" ? sessionData?.id : sessionData) as string | undefined;
     if (!userId) throw new UnauthorizedError();

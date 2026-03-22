@@ -46,7 +46,7 @@ export function joinRoutes(fastify: FastifyInstance) {
     });
   });
 
-  fastify.post("/join", async (request, reply) => {
+  fastify.post("/join", { config: { rateLimit: { max: 5, timeWindow: "1 minute" } } }, async (request, reply) => {
     const me = await getCurrentUserForJoin(request);
     if (me && (!me.hasPassword || me.emailVerified)) return reply.redirect("/");
 
@@ -106,7 +106,7 @@ export function joinRoutes(fastify: FastifyInstance) {
     });
   });
 
-  fastify.post("/join/verify", async (request, reply) => {
+  fastify.post("/join/verify", { config: { rateLimit: { max: 5, timeWindow: "1 minute" } } }, async (request, reply) => {
     const body = request.body as { email?: string; code?: string; otp?: string };
     const email = (body.email || "").trim().toLowerCase();
     const rawCode = String(body.code || body.otp || "").replace(/\D/g, "").trim();

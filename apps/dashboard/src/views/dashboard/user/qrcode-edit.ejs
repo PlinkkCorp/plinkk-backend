@@ -639,7 +639,7 @@ window.addEventListener('load', () => {
       return;
     }
     const fileName = (fieldName.value || 'QR Code').replace(/[^a-z0-9_-]/gi, '_');
-    const url = `/api/me/plinkks/${plinkkId}/qrcodes/${qrId}/image.png`;
+    const url = `/api/me/plinkks/${encodeURIComponent(plinkkId)}/qrcodes/${encodeURIComponent(qrId)}/image.png`;
     const link = document.createElement('a');
     link.href = url;
     link.download = `${fileName}.png`;

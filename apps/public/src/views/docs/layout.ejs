@@ -552,7 +552,8 @@
             if (miniToc && miniWrap) {
                 const h2s = items.filter(i => i.level === 'h2').slice(0, 6);
                 if (h2s.length) {
-                    miniWrap.innerHTML = h2s.map(i => `<a href="#${i.id}" class="doc-chip">${i.text}</a>`).join('');
+                    const escapeHtml = (unsafe) => (unsafe || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+                    miniWrap.innerHTML = h2s.map(i => `<a href="#${i.id}" class="doc-chip">${escapeHtml(i.text)}</a>`).join('');
                     miniToc.classList.remove('hidden');
                     miniWrap.addEventListener('click', (e) => {
                         const a = e.target.closest('a');

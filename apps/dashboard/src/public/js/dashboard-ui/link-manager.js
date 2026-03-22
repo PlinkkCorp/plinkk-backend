@@ -890,7 +890,7 @@ export class LinkManager {
     }
     const themeBadge =
       link.buttonTheme && link.buttonTheme !== "system"
-        ? `<span class="px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 text-[10px] font-medium border border-violet-500/20">${link.buttonTheme.replace("button-", "")}</span>`
+        ? `<span class="px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 text-[10px] font-medium border border-violet-500/20">${this.escapeHtml(link.buttonTheme).replace("button-", "")}</span>`
         : "";
 
     return `

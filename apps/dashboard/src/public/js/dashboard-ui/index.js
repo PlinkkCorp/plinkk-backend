@@ -530,6 +530,7 @@ class DashboardUI {
       const canvases = canvaData || [];
       const currentIdx = parseInt(document.getElementById('selectedCanvasIndex')?.value || 0);
 
+      const escapeHtml = (unsafe) => (unsafe || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
       list.innerHTML = canvases.map((c, i) => `
         <button type="button" data-canvas-index="${i}" 
           class="canvas-item group relative flex items-center gap-3 p-3 rounded-xl border ${i === currentIdx ? 'border-violet-500 bg-violet-900/10' : 'border-slate-800 bg-slate-950'} hover:border-slate-700 transition-all text-left">
@@ -539,8 +540,8 @@ class DashboardUI {
             </svg>
           </div>
           <div>
-            <div class="text-sm font-medium ${i === currentIdx ? 'text-violet-400' : 'text-slate-200'}">${c.animationName}</div>
-            ${c.author ? `<div class="text-[10px] text-slate-500">par ${c.author}</div>` : ''}
+            <div class="text-sm font-medium ${i === currentIdx ? 'text-violet-400' : 'text-slate-200'}">${escapeHtml(c.animationName)}</div>
+            ${c.author ? `<div class="text-[10px] text-slate-500">par ${escapeHtml(c.author)}</div>` : ''}
           </div>
           ${i === currentIdx ? `
             <div class="ml-auto">

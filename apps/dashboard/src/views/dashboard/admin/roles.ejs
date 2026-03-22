@@ -513,7 +513,8 @@
   function refreshImportSelect(){
     const sel = $('#importRoleSelect'); if(!sel) return;
     const current = selectedRoleId;
-    sel.innerHTML = '<option value="">Importer depuis…</option>' + rolesData.filter(r=>r.id!==current).map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+    const escapeHtml = (unsafe) => (unsafe || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    sel.innerHTML = '<option value="">Importer depuis…</option>' + rolesData.filter(r=>r.id!==current).map(r=>`<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)}</option>`).join('');
   }
 
   // Global enable/disable

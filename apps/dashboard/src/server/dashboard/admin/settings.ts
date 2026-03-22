@@ -12,9 +12,11 @@ function isAllowedWebhookUrl(urlString: string): boolean {
     const url = new URL(urlString);
     if (url.protocol !== "https:") return false;
     const hostname = url.hostname.toLowerCase();
-    return ALLOWED_WEBHOOK_HOSTS.some(
+    const isWebhookHost = ALLOWED_WEBHOOK_HOSTS.some(
       (h) => hostname === h || hostname.endsWith("." + h)
     );
+    const isWebhookPath = url.pathname.startsWith("/api/webhooks/");
+    return isWebhookHost && isWebhookPath;
   } catch {
     return false;
   }
