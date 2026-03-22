@@ -70,10 +70,14 @@ fastify.register(fastifyHelmet, {
 fastify.addHook('onRequest', async (request, reply) => {
   try {
     const nonce = crypto.randomBytes(16).toString('base64');
-    (request as FastifyRequest & { cspNonce?: string }).cspNonce = nonce;
+    (request as any).cspNonce = nonce;
+    if (!(reply as any).locals) (reply as any).locals = {};
+    (reply as any).locals.cspNonce = nonce;
   } catch (err) {
-    // If crypto fails (very unlikely), use a fixed fallback to avoid breaking templates that expect a nonce.
-    (request as FastifyRequest & { cspNonce?: string }).cspNonce = 'fallback';
+    const fallback = 'fallback';
+    (request as any).cspNonce = fallback;
+    if (!(reply as any).locals) (reply as any).locals = {};
+    (reply as any).locals.cspNonce = fallback;
   }
 });
 

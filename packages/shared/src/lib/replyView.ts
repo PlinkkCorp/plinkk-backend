@@ -34,6 +34,7 @@ export async function replyView(
   const frontendUrl = process.env.FRONTEND_URL || process.env.PUBLIC_URL || (process.env.NODE_ENV !== 'production' ? 'http://127.0.0.1:3002' : '');
   const cdnUrl = process.env.CDN_URL || (process.env.NODE_ENV !== 'production' ? 'https://cdn.plinkk.fr' : 'https://cdn.plinkk.fr')
   const cspNonce = (reply.request as any)?.cspNonce || crypto.randomBytes(16).toString('base64');
+  (reply as any).locals = { ...(reply as any).locals, cspNonce };
 
   if (user === null) {
     return reply.code(statusCode).view(template, {

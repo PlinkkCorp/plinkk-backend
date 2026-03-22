@@ -1,4 +1,4 @@
-<%- include('partials/head', { title: 'Utilisateurs' , description: 'Tous les profils hébergés sur Plinkk.' }) %>
+<%- include('partials/head', { title: 'Utilisateurs' , description: 'Tous les profils hébergés sur Plinkk.', cspNonce: (typeof cspNonce !== 'undefined' ? cspNonce : '') }) %>
   <%- include('partials/header', { user: (typeof user !=='undefined' ? user : null) }) %>
 
     <main class="max-w-[1600px] mx-auto p-6 pt-24 space-y-8">
@@ -305,7 +305,7 @@
     </main>
 
     <script src="/public/js/pagination.js"></script>
-    <script nonce="<%= cspNonce %>">
+    <script nonce="<%= (typeof cspNonce !== 'undefined' ? cspNonce : '') %>">
       (function () {
         const $ = (s, r = document) => r.querySelector(s);
         const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
